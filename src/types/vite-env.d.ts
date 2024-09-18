@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 
-interface ImportMetaEnv {
+export interface ImportMetaEnv {
   VITE_KRATOS_URL: string;
   VITE_PLAID_URL: string;
   VITE_FRONTEND: string;

@@ -1,4 +1,4 @@
-import { accessTypes, CitizenTypes, durationTypes, objectivesTypes, riskComfortTypes } from "./helpers/enums/general";
+import { accessTypes, CitizenTypes, durationTypes, objectivesTypes, riskComfortTypes } from "InvestCommon/helpers/enums/general";
 
 export const SELECT_OBJECTIVES = [
     {

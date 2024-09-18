@@ -7,7 +7,6 @@ import BaseButton from 'UiKit/components/BaseButton/BaseButton.vue';
 import { currency } from 'InvestCommon/helpers/currency';
 import { IInvest } from 'InvestCommon/types/api/invest';
 import { PostLinkTypes } from 'InvestCommon/types/api/blog';
-import { ROUTE_CONTACT_US, ROUTE_RESOURCE_CENTER_POST } from 'InvestCommon/helpers/enums/routes';
 import BaseFormTextarea from 'UiKit/components/BaseFormTextarea/BaseFormTextarea.vue';
 import BaseFormGroup from 'UiKit/components/BaseFormGroup/BaseFormGroup.vue';
 import { useUsersStore, useInvestmentsStore, useOfferStore } from 'InvestCommon/store';
@@ -130,19 +129,19 @@ watch(() => model, () => {
           Your funds, {{ currency(Number(investment.amount), 0) }} will be send back to the funding
           source wire of individual profile. In case if you want to get more information, please take a
           look
-          <router-link
-            :to="{ name: ROUTE_RESOURCE_CENTER_POST, params: { slug: PostLinkTypes.cancelInvestment } }"
+          <a
+            :href="`/resource-center/${PostLinkTypes.cancelInvestment}`"
             target="_blank"
             class="is--link-1"
           >
             Can I cancel my investment and get a refund
-          </router-link> article or
-          <router-link
-            :to="{ name: ROUTE_CONTACT_US }"
+        </a> article or
+          <a
+            href="/contact-us"
             class="is--link-1"
           >
             Contact us
-          </router-link>
+          </a>
           with any question.
         </p>
         <BaseFormGroup

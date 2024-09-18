@@ -19,7 +19,7 @@ import {
 } from './utils';
 import {
   accessTypes, durationTypes, objectivesTypes, riskComfortTypes,
-} from 'InvestCommon/helpers/enum/general';
+} from 'InvestCommon/helpers/enums/general';
 import {
   SELECT_DURATION, SELECT_IMPORTANCE,
   SELECT_OBJECTIVES, SELECT_RISK_COMFORT,

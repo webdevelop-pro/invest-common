@@ -5,7 +5,7 @@ import {
   dobRule, emailRule, errorMessageRule, firstNameRule, lastNameRule,
   middleNameRule, phoneRule, relationshipTypeRule, ssnRule, stateRule, zipRule,
 } from 'UiKit/helpers/validation/rules';
-import { EmploymentTypes } from 'InvestCommon/helpers/enum/general';
+import { EmploymentTypes } from 'InvestCommon/helpers/enums/general';
 import { IAccreditedInvestor, IInvestmentObjectives } from 'InvestCommon/types/api/user';
 
 export type FormModelPersonalInformation = {

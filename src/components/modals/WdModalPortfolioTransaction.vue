@@ -3,7 +3,6 @@ import { PropType, computed } from 'vue';
 import BaseModalLayout from 'UiKit/components/BaseModal/BaseModalLayout.vue';
 import BaseButton from 'UiKit/components/BaseButton/BaseButton.vue';
 import { IInvest } from 'InvestCommon/types/api/invest';
-import { ROUTE_CONTACT_US } from 'InvestCommon/helpers/enums/routes';
 import BaseTable from 'UiKit/components/BaseTable/BaseTable.vue';
 import BaseTag from 'UiKit/components/BaseTag/BaseTag.vue';
 import { formatToFullDate } from 'InvestCommon/helpers/formatters/formatToDate';
@@ -97,8 +96,8 @@ const timeFormatted = computed(() => (dateFull.value ? getTimeFormat(String(date
     <template #footer>
       <div class="wd-modal-portfolio-transaction__footer-btns">
         <BaseButton
-          tag="router-link"
-          :to="{ name: ROUTE_CONTACT_US }"
+          tag="a"
+          href="/contact-us"
           variant="outlined"
           data-testid="button"
         >

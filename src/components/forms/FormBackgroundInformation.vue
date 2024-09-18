@@ -18,7 +18,7 @@ import {
   FormModelBackgroundInformation, SELECT_OPTIONS_EMPLOYMENT,
 } from './utils';
 import { filterSchema, scrollToError } from 'UiKit/helpers/validation/general';
-import { EmploymentTypes } from 'InvestCommon/helpers/enum/general';
+import { EmploymentTypes } from 'InvestCommon/helpers/enums/general';
 import BaseFormCheckbox from 'UiKit/components/BaseFormCheckbox/BaseFormCheckbox.vue';
 import {
   address1Rule, address2Rule, cityRule, emailRule, errorMessageRule, zipRule,

@@ -6,8 +6,7 @@ import BaseTag from 'UiKit/components/BaseTag/BaseTag.vue';
 import BaseButton from 'UiKit/components/BaseButton/BaseButton.vue';
 import { useNotificationsStore, useUsersStore } from 'InvestCommon/store';
 import {
-  ROUTE_ACCREDITATION_UPLOAD,
-  ROUTE_CONTACT_US, ROUTE_DASHBOARD_ACCOUNT,
+  ROUTE_ACCREDITATION_UPLOAD, ROUTE_DASHBOARD_ACCOUNT,
   ROUTE_DASHBOARD_WALLET, ROUTE_INVESTMENT_TIMELINE, ROUTE_NOTIFICATIONS,
 } from 'InvestCommon/helpers/enums/routes';
 import { storeToRefs } from 'pinia';
