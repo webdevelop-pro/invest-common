@@ -1,0 +1,54 @@
+name: GitHub Actions
+on:
+  push:
+    branches:
+      - master
+      - dev
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true  # Fetch Hugo themes (true OR recursive)
+          fetch-depth: 0    # Fetch all history for .GitInfo and .Lastmod
+
+      - name: Get branch name
+        id: branch-name
+        uses: tj-actions/branch-names@v8
+
+      - name: Set Node.js 20.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20.6.1
+
+      - name: Build
+        id: build
+        run: |
+          ./make.sh install
+          ./make.sh build
+
+      - name: Deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CF_API_TOKEN }}
+          accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          command: pages deploy "./dist" --project-name=ui-kit --commit-dirty true --branch dev --commit-hash "${{ github.sha }}" --commit-message "${{ github.sha }}"
+
+      - name: Purge cache
+        uses: jakejarvis/cloudflare-purge-action@master
+        env:
+          CLOUDFLARE_ZONE: ${{ secrets.CF_ZONE_ID }}
+          CLOUDFLARE_TOKEN: ${{ secrets.CF_API_TOKEN }}
+
+      - name: Slack Notification
+        if: always() && ( github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/stage')
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          # SLACK_CHANNEL: invest-webdevelop-pro # it's not working, for change channel create another webhook for mew channel https://api.slack.com/apps/A044SB57YLD/incoming-webhooks
+          SLACK_COLOR: ${{ job.status }}
+          SLACK_TITLE: ${{ github.event.repository.name }}
+          SLACK_MESSAGE: ${{ github.event.head_commit.message }}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
