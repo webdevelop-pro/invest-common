@@ -6,23 +6,23 @@ import {
   useHubspotForm, useRedirect,
 } from 'InvestCommon/composable';
 import {
-  useCore, useGlobalLoader, useAuthStore, useUsersStore,
-} from 'InvestCommon/store';
-import {
   ROUTE_DASHBOARD_PORTFOLIO, ROUTE_CHECK_EMAIL, ROUTE_LOGIN, ROUTE_OFFERS, ROUTE_OFFERS_DETAILS,
   ROUTE_INVEST_AMOUNT, ROUTE_INVEST_FUNDING, ROUTE_INVEST_OWNERSHIP, ROUTE_INVEST_REVIEW,
   ROUTE_INVEST_SIGNATURE, ROUTE_INVEST_THANK,
 } from 'InvestCommon/helpers/enums/routes';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
+import {
+  useAccreditationStore, useAuthStore, useFilerStore, useFundingStore, useInvestmentsStore,
+  useNotificationsStore, usePlaidStore,
+  useProfileWalletStore, useProfileWalletTransactionStore, useUserIdentitysStore,
+  useUsersStore, useGlobalLoader,
+} from 'InvestCommon/store';
 
 const loading = ref(false);
 
 // This is the store with general flow logic for auth
 export const useAuthLogicStore = defineStore('authLogic', () => {
   const router = useRouter();
-  const {
-    person, socket, invest, accreditation,
-  } = useCore();
   const { pushTo } = useRedirect();
   const usersStore = useUsersStore();
   const { selectedUserProfileId } = storeToRefs(usersStore);
@@ -66,7 +66,6 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     }
     const { submitFormToHubspot } = useHubspotForm('07463465-7f03-42d2-a85e-40cf8e29969d');
     if (setLoginData.value && setLoginData.value.session) {
-      person.value.updateSession(setLoginData.value.session);
       await usersStore.getUserIdentity();
       void usersStore.updateUserAccountSession(setLoginData.value.session);
       void router.push(pushTo({ name: ROUTE_DASHBOARD_PORTFOLIO, params: { profileId: selectedUserProfileId.value } }));
@@ -120,7 +119,6 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
       return;
     }
     if (setSignupData.value && setSignupData.value.session) {
-      person.value.updateSession(setSignupData.value.session);
       await usersStore.getUserIdentity();
       void usersStore.updateUserAccountSession(setSignupData.value.session);
       void router.push(pushTo({ name: ROUTE_DASHBOARD_PORTFOLIO, params: { profileId: selectedUserProfileId.value } }));
@@ -173,11 +171,26 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     }
   };
 
+  const resetAll = () => {
+    const { userLoggedIn } = storeToRefs(useUsersStore());
+    userLoggedIn.value = null;
+    selectedUserProfileId.value = null;
+    useFundingStore().resetAll();
+    useProfileWalletTransactionStore().resetAll();
+    useProfileWalletStore().resetAll();
+    useUserIdentitysStore().resetAll();
+    useUsersStore().resetAll();
+    usePlaidStore().resetAll();
+    useInvestmentsStore().resetAll();
+    useAccreditationStore().resetAll();
+    useAuthStore().resetAll();
+    useNotificationsStore().resetAll();
+    useFilerStore().resetAll();
+  };
+
 
   const handleAfterLogout = () => {
-    person.value.resetAll();
-    accreditation.value.resetAll();
-    invest.value.resetAll();
+    resetAll();
     let queryParams;
     const { currentRoute } = router;
     if (currentRoute.value.name === ROUTE_OFFERS
@@ -233,15 +246,10 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     if (getSessionData.value && !isGetSessionError.value) {
       // await usersStore.getUserIdentity();
       await nextTick();
-      person.value.updateSession(getSessionData.value);
       void usersStore.updateUserAccountSession(getSessionData.value);
-      if (!person.value.sessionTimerId) person.value.sessionTimer(getSession);
       // await notificationsHandler(); // TODO: check if needed
     } else if (!getSessionData.value || getSessionErrorResponse.value?.status === 401) {
-      person.value.resetAll();
-      accreditation.value.resetAll();
-      invest.value.resetAll();
-      socket.value.disconnect();
+      resetAll();
       if (router.currentRoute.value.meta.auth) {
         void router.push({ name: ROUTE_LOGIN });
       }

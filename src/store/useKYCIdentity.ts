@@ -1,19 +1,18 @@
 import { computed, ref } from 'vue';
-import { useCore } from 'InvestCommon/store';
+import { useUsersStore } from 'InvestCommon/store';
 import { generalErrorHandling } from 'InvestCommon/helpers/generalErrorHandling';
-import { acceptHMRUpdate, defineStore } from 'pinia';
+import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { fetchUpdateIdentities } from 'InvestCommon/services';
 
 const isGetUserBackgroundInfoLoading = ref(false);
 const isGetUserBackgroundInfoError = ref(false);
 
 export const useKYCIdentityStore = defineStore('KYCIdentity', () => {
-  const {
-    person,
-  } = useCore();
+  const usersStore = useUsersStore();
+  const { selectedUserProfileData } = storeToRefs(usersStore);
 
-  const userId = computed(() => (person.value.User?.user_id || 0));
-  const profileId = computed(() => (person.value.User?.profile_id || 0));
+  const userId = computed(() => (selectedUserProfileData.value?.user_id || 0));
+  const profileId = computed(() => (selectedUserProfileData.value?.id || 0));
 
   const updateUserPlaidIdentities = async () => {
     isGetUserBackgroundInfoLoading.value = true;

@@ -14,7 +14,9 @@ import { storeToRefs } from 'pinia';
 import BaseSkeleton from 'UiKit/components/BaseSkeleton/BaseSkeleton.vue';
 
 type MenuItem = {
-  to?: string;
+  to?: {
+    name: string;
+  };
   href?: string;
   text: string;
   children?: MenuItem[];
@@ -122,6 +124,8 @@ watch([router.currentRoute], () => {
 
       <AppMobileMenu
         v-model="isMobileMenuOpen"
+        :menu="menu"
+        :profile-menu="profileMenu"
       />
     </div>
   </div>

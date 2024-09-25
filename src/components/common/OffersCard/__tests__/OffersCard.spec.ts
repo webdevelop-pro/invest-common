@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/vue';
 import OffersCard from '../OffersCard.vue';
-import { offerData } from '@/tests/__mocks__';
+import { offerData } from 'InvestCommon/tests/__mocks__';
 import { createPinia, setActivePinia } from 'pinia';
 import {
   beforeEach, expect, describe, it,

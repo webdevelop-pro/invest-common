@@ -8,7 +8,7 @@ import {
 } from 'vitest';
 import { useInvestmentsStore, useUsersStore } from 'InvestCommon/store';
 import createFetchMock from 'vitest-fetch-mock';
-import { mockOwnershipStepOptions } from '@/tests/__mocks__';
+import { mockOwnershipStepOptions } from 'InvestCommon/tests/__mocks__';
 
 const fetchMocker = createFetchMock(vi);
 fetchMocker.enableMocks();

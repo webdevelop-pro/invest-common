@@ -1,14 +1,14 @@
 
 // eslint-disable-next-line
-import linkedInIcon from '@/assets/images/social/linkedin1.svg?url';
+import linkedInIcon from 'InvestCommon/assets/images/social/linkedin1.svg?url';
 // eslint-disable-next-line
-import facebookIcon from '@/assets/images/social/facebook1.svg?url';
+import facebookIcon from 'InvestCommon/assets/images/social/facebook1.svg?url';
 // eslint-disable-next-line
-import instagramIcon from '@/assets/images/social/instagram1.svg?url';
+import instagramIcon from 'InvestCommon/assets/images/social/instagram1.svg?url';
 // eslint-disable-next-line
-import githubIcon from '@/assets/images/social/github1.svg?url';
+import githubIcon from 'InvestCommon/assets/images/social/github1.svg?url';
 // eslint-disable-next-line
-import twitterIcon from '@/assets/images/social/x-twitter.svg?url';
+import twitterIcon from 'InvestCommon/assets/images/social/x-twitter.svg?url';
 
 export const LINKEDIN = {
   icon: linkedInIcon,

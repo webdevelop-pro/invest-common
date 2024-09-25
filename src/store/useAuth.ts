@@ -1,7 +1,7 @@
 import { ref, toRaw, watch } from 'vue';
 import {
   errorHandling422, errorHandlingRecovery, errorHandlingSettings, generalErrorHandling,
-} from '@/views/Auth/utils';
+} from 'InvestCommon/helpers/generalErrorHandling';
 import {
   IGetAuthFlow, IGetLogoutURL, IGetSettingsOk, IRecovery, ISession, ISetLoginOk, ISetSignUpOK,
   IAuthError422, IGetSignup, ISchema, IRecovery422,

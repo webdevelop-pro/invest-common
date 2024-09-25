@@ -10,6 +10,8 @@ export const ROUTE_DASHBOARD_PERSONAL_DETAILS = 'ROUTE_DASHBOARD_PERSONAL_DETAIL
 export const ROUTE_DASHBOARD_BACKGROUND_INFORMATION = 'ROUTE_DASHBOARD_BACKGROUND_INFORMATION';
 export const ROUTE_DASHBOARD_TRUSTED_CONTACT = 'ROUTE_DASHBOARD_TRUSTED_CONTACT';
 export const ROUTE_DASHBOARD_FINANCIAL_AND_INVESTMENT_INFO = 'ROUTE_DASHBOARD_FINANCIAL_AND_INVESTMENT_INFO';
+export const ROUTE_DASHBOARD_DISTRIBUTIONS = 'ROUTE_DASHBOARD_DISTRIBUTIONS';
+
 
 export const ROUTE_NOTIFICATIONS = 'ROUTE_NOTIFICATIONS';
 
@@ -83,6 +85,7 @@ export const PAGE_TITLES = {
 
   [ROUTE_DASHBOARD_PORTFOLIO]: `Portfolio | ${DEFAULT_PAGE_TITLE}`,
   [ROUTE_DASHBOARD_ACCOUNT]: `Account details | ${DEFAULT_PAGE_TITLE}`,
+  [ROUTE_DASHBOARD_DISTRIBUTIONS]: `Distributions | ${DEFAULT_PAGE_TITLE}`,
   [ROUTE_DASHBOARD_WALLET]: `Funding | ${DEFAULT_PAGE_TITLE}`,
   [ROUTE_DASHBOARD_PERSONAL_DETAILS]: `Personal Details | ${DEFAULT_PAGE_TITLE}`,
   [ROUTE_DASHBOARD_BACKGROUND_INFORMATION]: `Background Information | ${DEFAULT_PAGE_TITLE}`,
@@ -131,6 +134,7 @@ export const PAGE_DESCRIPTIONS = {
 
   [ROUTE_DASHBOARD_PORTFOLIO]: 'Track your investments. Monitor your portfolio performance and make informed decisions.',
   [ROUTE_DASHBOARD_ACCOUNT]: 'View your account details. Access information about your investments and account settings.',
+  [ROUTE_DASHBOARD_DISTRIBUTIONS]: 'Track your distributions. Control your funds.',
   [ROUTE_DASHBOARD_WALLET]: 'Manage your wallet. Control your funds and transactions securely.',
   [ROUTE_DASHBOARD_PERSONAL_DETAILS]: 'Update personal info. Keep your profile current for seamless transactions.',
   [ROUTE_DASHBOARD_BACKGROUND_INFORMATION]: 'Complete background info. Provide necessary details for investment compliance.',

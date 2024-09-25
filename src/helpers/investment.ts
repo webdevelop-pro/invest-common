@@ -1,5 +1,5 @@
 import { IInvest, InvestFundingStatuses, InvestmentStatuses } from 'InvestCommon/types/api/invest';
-import defaultImage from '@/assets/images/default.svg?url';
+import defaultImage from 'InvestCommon/assets/images/default.svg?url';
 
 export const getInvestmentTagBackground = (status: string | undefined): string => {
   if (status === 'legally_confirmed') return '#D9FFEE';
@@ -53,3 +53,8 @@ export const getInvestmentOfferImage = (
   return defaultImage;
 };
 
+export const getDistributionTagBackground = (status: string | undefined): string => {
+  if (status === 'success') return '#D9FFEE';
+  if (status === 'failed') return '#FF7070';
+  return '#FFF7E8';
+};

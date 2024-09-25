@@ -9,3 +9,4 @@ export * from './blog';
 export * from './accreditation';
 export * from './funding';
 export * from './filer';
+export * from './distributions';

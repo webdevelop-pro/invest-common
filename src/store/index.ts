@@ -1,4 +1,4 @@
-export * from './core';
+
 export * from './useGlobalLoader';
 export * from './useAuth';
 export * from './useAuthLogic';
@@ -16,3 +16,4 @@ export * from './useNotifications';
 export * from './useProfileWallet/useProfileWallet';
 export * from './useProfileWallet/useProfileWalletTransaction';
 export * from './useFiler';
+export * from './useDistributions';

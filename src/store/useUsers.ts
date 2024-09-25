@@ -1,9 +1,9 @@
 import { computed, ref, watch } from 'vue';
-import { IUserIdentityResponse, IProfile } from 'InvestCommon/types/api/invest';
+import { IUserIdentityResponse } from 'InvestCommon/types/api/invest';
 import { fetchGetUserIdentity } from 'InvestCommon/services';
 import { generalErrorHandling } from 'InvestCommon/helpers/generalErrorHandling';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
-import { useAuthStore, useCore, useUserIdentitysStore } from 'InvestCommon/store';
+import { useAuthStore, useUserIdentitysStore } from 'InvestCommon/store';
 import { useStorage } from '@vueuse/core';
 import { ISession } from 'InvestCommon/types/api/auth';
 import { INotification } from 'InvestCommon/types/api/notifications';
@@ -20,34 +20,12 @@ import { RouteLocationNormalized, useRoute, useRouter } from 'vue-router';
 
 
 export const useUsersStore = defineStore('user', () => {
-  const { person } = useCore();
   const router = useRouter();
   const route = useRoute();
   const authStore = useAuthStore();
   const { isGetSessionLoading } = storeToRefs(authStore);
   const userIdentitysStore = useUserIdentitysStore();
   const { getUserIndividualProfileData, setUserIdentityOptionsData } = storeToRefs(userIdentitysStore);
-
-  const switchUserProfile = (profiles: IProfile[], id: number) => {
-    if (!profiles) return;
-    const p = profiles.find((profile) => profile.id === id) || profiles[0];
-    if (!p) return;
-    person.value.setUserData({
-      ...p.data,
-      profile_id: p.id,
-      profile_type: p.type,
-      user_id: p.user_id,
-      escrow_id: p.escrow_id,
-      kyc_status: p.kyc_status,
-      kyc_data: p.kyc_data,
-      accreditation_status: p.accreditation_status,
-      accreditation_data: p.accreditation_data,
-      total_distributions: p.total_distributions,
-      total_investments: p.total_investments,
-      total_investments_12_months: p.total_investments_12_months,
-      wallet_id: p.wallet_id,
-    });
-  };
 
   const isGetUserIdentityLoading = ref(false);
   const isGetUserIdentityError = ref(false);
@@ -61,8 +39,6 @@ export const useUsersStore = defineStore('user', () => {
     });
     if (response) {
       getUserIdentityData.value = response;
-      switchUserProfile(getUserIdentityData.value.profiles, getUserIdentityData.value.id);
-      // person.value.setUserData({ ...getUserIdentityData.value.data });
     }
     isGetUserIdentityLoading.value = false;
   };
@@ -185,9 +161,7 @@ export const useUsersStore = defineStore('user', () => {
   }, { immediate: true });
 
   watch(() => userAccountSession.value?.active, () => {
-    if (!userAccountSession.value?.active) {
-      userLoggedIn.value = null;
-    } else {
+    if (userAccountSession.value?.active) {
       userLoggedIn.value = userAccountSession.value?.active;
       void getUserIdentity();
     }

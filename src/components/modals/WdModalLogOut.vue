@@ -7,7 +7,7 @@
     <template #default>
       <div class="wd-modal-log-out__img">
         <img
-          src="@/assets/images/icons/logout-modal.svg?url"
+          src="InvestCommon/assets/images/icons/logout-modal.svg?url"
           alt=""
         >
       </div>

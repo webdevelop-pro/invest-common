@@ -4,8 +4,9 @@ import {
 } from 'InvestCommon/types/api/invest';
 import { requiredFetchParams } from 'InvestCommon/helpers/requiredFetchParams';
 import env from 'InvestCommon/global';
-import { useCore } from 'InvestCommon/store';
+import { useUsersStore } from 'InvestCommon/store';
 import { v4 as uuidv4 } from 'uuid';
+import { storeToRefs } from 'pinia';
 
 
 const { INVESTMENT_URL, ESIGN_URL } = env;
@@ -130,13 +131,15 @@ export const fetchSetSignature = (
   profileId: string,
   signUrlId: string,
 ) => {
-  const { person } = useCore();
+  const usersStore = useUsersStore();
+  const { userAccountSession } = storeToRefs(usersStore);
+
   const path = `${INVESTMENT_URL}/invest/${slug}/signature/${id}/${profileId}`;
 
   const body = JSON.stringify({
     signature_id: signUrlId,
-    user_browser: person.value.session?.devices[0].user_agent || '',
-    ip_address: person.value.session?.devices[0].ip_address || '',
+    user_browser: userAccountSession.value?.devices[0].user_agent || '',
+    ip_address: userAccountSession.value?.devices[0].ip_address || '',
   });
 
   const data = {

@@ -8,7 +8,7 @@ import {
 } from 'vitest';
 import { useUserIdentitysStore, useUsersStore } from 'InvestCommon/store';
 import createFetchMock from 'vitest-fetch-mock';
-import { userIndividualOptionsMock } from '@/tests/__mocks__';
+import { userIndividualOptionsMock } from 'InvestCommon/tests/__mocks__';
 
 const fetchMocker = createFetchMock(vi);
 fetchMocker.enableMocks();

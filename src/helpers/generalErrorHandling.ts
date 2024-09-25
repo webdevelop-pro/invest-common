@@ -1,4 +1,4 @@
-import { useCore } from 'InvestCommon/store';
+
 import { notify } from '@kyvg/vue3-notification';
 import {
   IAuthGenericError, IAuthError422, IAuthError400, IRecovery, ISettingsError400, IRecovery422,
@@ -6,7 +6,6 @@ import {
 import { IOfferSharesError } from '../types/api/offers';
 import { toRaw } from 'vue';
 
-const statusCodes = [500, 501, 502, 503, 504, 505, 506, 507, 508, 510, 511];
 const NOTIFY_OPTIONS = {
   text: 'Something went wrong',
   data: {
@@ -21,7 +20,6 @@ const NOTIFY_OPTIONS = {
 // eslint-disable @typescript-eslint/no-unsafe-assignment
 
 export const generalErrorHandling = async (error: Response) => {
-
   try {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const errorJson = await error.json();
@@ -31,13 +29,11 @@ export const generalErrorHandling = async (error: Response) => {
       const data:IOfferSharesError = errorJson;
       // eslint-disable-next-line prefer-destructuring
       if (data.number_of_shares.length) NOTIFY_OPTIONS.text = data.number_of_shares[0];
-    }
-    else if (errorJson as IAuthGenericError) {
+    } else if (errorJson as IAuthGenericError) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const data:IAuthGenericError = errorJson;
       if (data.error && data.error.message) NOTIFY_OPTIONS.text = data.error.message;
-    }
-    else if (errorJson) {
+    } else if (errorJson) {
       // eslint-disable-next-line
       NOTIFY_OPTIONS.text = errorJson;
     }

@@ -6,18 +6,15 @@ import {
 } from 'InvestCommon/services';
 import { generalErrorHandling } from 'InvestCommon/helpers/generalErrorHandling';
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { useCore } from 'InvestCommon/store';
 import { IProfileIndividual, ISchema } from 'InvestCommon/types/api/user';
 
 
 export const useUserIdentitysStore = defineStore('userIdentity', () => {
-  const { person } = useCore();
-
   const isSetUserIdentityLoading = ref(false);
   const isSetUserIdentityError = ref(false);
   const setUserIdentityData = ref<IProfileData>();
   const setUserIdentityErrorData = ref();
-  const setUserIdentity = async (data: IProfileData, update = true) => {
+  const setUserIdentity = async (data: IProfileData) => {
     isSetUserIdentityLoading.value = true;
     isSetUserIdentityError.value = false;
     setUserIdentityErrorData.value = undefined;
@@ -28,7 +25,6 @@ export const useUserIdentitysStore = defineStore('userIdentity', () => {
     });
     if (response) {
       setUserIdentityData.value = response;
-      if (update) person.value.setUserData(setUserIdentityData.value);
     }
     isSetUserIdentityLoading.value = false;
   };
@@ -45,21 +41,6 @@ export const useUserIdentitysStore = defineStore('userIdentity', () => {
     });
     if (response) {
       getUserIndividualProfileData.value = response;
-      person.value.setUserData({
-        ...getUserIndividualProfileData.value.data,
-        profile_id: getUserIndividualProfileData.value.id,
-        profile_type: getUserIndividualProfileData.value.type,
-        user_id: getUserIndividualProfileData.value.user_id,
-        escrow_id: getUserIndividualProfileData.value.escrow_id,
-        kyc_status: getUserIndividualProfileData.value.kyc_status,
-        kyc_data: getUserIndividualProfileData.value.kyc_data,
-        accreditation_status: getUserIndividualProfileData.value.accreditation_status,
-        accreditation_data: getUserIndividualProfileData.value.accreditation_data,
-        total_distributions: getUserIndividualProfileData.value.total_distributions,
-        total_investments: getUserIndividualProfileData.value.total_investments,
-        total_investments_12_months: getUserIndividualProfileData.value.total_investments_12_months,
-        wallet_id: getUserIndividualProfileData.value.wallet?.id,
-      });
     }
     isGetUserIndividualProfileLoading.value = false;
   };
@@ -101,7 +82,6 @@ export const useUserIdentitysStore = defineStore('userIdentity', () => {
     });
     if (response) {
       setUserBackgroundInfoData.value = response;
-      person.value.setUserData(setUserBackgroundInfoData.value);
     }
     isSetUserBackgroundInfoLoading.value = false;
   };

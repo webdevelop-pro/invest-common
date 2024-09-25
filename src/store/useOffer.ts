@@ -1,4 +1,4 @@
-import { ref, toRaw } from 'vue';
+import { ref } from 'vue';
 import { generalErrorHandling } from 'InvestCommon/helpers/generalErrorHandling';
 import { IInvest, IInvestData } from 'InvestCommon/types/api/invest';
 import { transformInvestData } from 'InvestCommon/helpers/transformInvestData';
@@ -11,14 +11,11 @@ import {
   fetchSetOfferComment, fetchSetOfferCommentOptions,
 } from 'InvestCommon/services';
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { useCore } from 'InvestCommon/store';
 import { INotification } from 'InvestCommon/types/api/notifications';
 
 const unconfirmedOffersFilter = (unInv: IInvest[], slug: string) => unInv.find((item) => item?.offer?.slug === slug);
 
 export const useOfferStore = defineStore('offers', () => {
-  const { invest } = useCore();
-
   const isGetOffersLoading = ref(false);
   const isGetOffersError = ref(false);
   const getOffersData = ref<IOfferData>();
@@ -45,7 +42,6 @@ export const useOfferStore = defineStore('offers', () => {
     });
     if (response) {
       getOfferOneData.value = response;
-      invest.value.updateOfferData(getOfferOneData.value);
     }
     isGetOfferOneLoading.value = false;
   };
@@ -64,7 +60,6 @@ export const useOfferStore = defineStore('offers', () => {
       await getOffers();
       if (getOffersData.value) {
         getUnconfirmedOffersData.value = transformInvestData(response.data, getOffersData.value.data);
-        invest.value.updateUnconfirmedOffers(getUnconfirmedOffersData.value);
       }
     }
     isGetUnconfirmedOffersLoading.value = false;
@@ -86,10 +81,7 @@ export const useOfferStore = defineStore('offers', () => {
       if (response.data.length && getOffersData.value) {
         const transformedData = transformInvestData(response.data, getOffersData.value.data);
         getUnconfirmedOfferData.value = unconfirmedOffersFilter(transformedData, slug);
-        if (getUnconfirmedOfferData.value) invest.value.updateUnconfirmedOffer(getUnconfirmedOfferData.value);
-        else invest.value.updateUnconfirmedOffer(null);
       } else {
-        invest.value.updateUnconfirmedOffer(null);
         getUnconfirmedOfferData.value = null;
       }
     }
@@ -107,12 +99,7 @@ export const useOfferStore = defineStore('offers', () => {
       void generalErrorHandling(error);
     });
     if (response) {
-      await getOffers();
-      if (getOffersData.value) {
-        const transformedData = transformInvestData(response.data, toRaw(getOffersData.value.data));
-        invest.value.updateConfirmedOffers(transformedData);
-        getInvestmentsData.value = response;
-      }
+      getInvestmentsData.value = response;
     }
     isGetInvestmentsLoading.value = false;
   };

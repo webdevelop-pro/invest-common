@@ -1,29 +1,39 @@
 <script setup lang="ts">
 import {
   watch, onMounted, onUnmounted, onBeforeUnmount, computed,
+  PropType,
 } from 'vue';
 import { useBreakpointsStore, useUsersStore } from 'InvestCommon/store';
 import { blockedBody } from 'InvestCommon/helpers/blocked-body';
-import { MENU_HEADER_RIGHT } from '@/global/menu';
 import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
 import {
-  ROUTE_FORGOT, ROUTE_LOGIN, ROUTE_SIGNUP, ROUTE_DASHBOARD_PORTFOLIO,
-  ROUTE_SETTINGS,
+  ROUTE_FORGOT, ROUTE_LOGIN, ROUTE_SIGNUP
 } from 'InvestCommon/helpers/enums/routes';
 import BaseButton from 'UiKit/components/BaseButton/BaseButton.vue';
 import AppMobileMenuBurger from './AppMobileMenuBurger.vue';
 import { useLogoutModal } from 'InvestCommon/components/modals/modals';
 
+type MenuItem = {
+  to?: {
+    name: string;
+  };
+  href?: string;
+  text: string;
+  children?: MenuItem[];
+}
+
 const props = defineProps({
   modelValue: Boolean,
+  menu: Array as PropType<MenuItem[]>,
+  profileMenu: Array as PropType<MenuItem[]>,
 });
 
 const emit = defineEmits(['update:modelValue']);
 
 const router = useRouter();
 const usersStore = useUsersStore();
-const { userLoggedIn, selectedUserProfileId, isGetUserIdentityLoading } = storeToRefs(usersStore);
+const { userLoggedIn, isGetUserIdentityLoading } = storeToRefs(usersStore);
 const isSignUpPage = computed(() => router.currentRoute.value.name === ROUTE_SIGNUP);
 const isSignInPage = computed(() => router.currentRoute.value.name === ROUTE_LOGIN);
 const isRecoveryPage = computed(() => router.currentRoute.value.name === ROUTE_FORGOT);
@@ -121,16 +131,24 @@ const onLogout = () => {
   >
     <div class="wd-mobile-menu__list">
       <div
-        v-for="menuItem in MENU_HEADER_RIGHT"
+        v-for="menuItem in menu"
         :key="menuItem.text"
         class="wd-mobile-menu__item-wrap"
       >
         <router-link
-          :to="{ name: menuItem.name }"
+          v-if="menuItem.to"
+          :to="menuItem.to"
           class="wd-mobile-menu__item is--h5__title"
         >
           {{ menuItem.text }}
         </router-link>
+        <a
+          v-if="menuItem.href"
+          :to="menuItem.href"
+          class="wd-mobile-menu__item is--h5__title"
+        >
+          {{ menuItem.text }}
+        </a>
         <div
           v-if="menuItem.children && menuItem.children.length > 0"
           class="wd-mobile-menu__children"
@@ -141,13 +159,21 @@ const onLogout = () => {
             :key="childItem.text"
           >
             <router-link
-              v-if="childItem.name"
-              :to="{ name: childItem.name }"
-              :class="getActive(childItem.name)"
+              v-if="childItem.to"
+              :to="childItem.to"
+              :class="getActive(childItem.to.name)"
               class="wd-mobile-menu__item is--h6__title"
             >
               {{ childItem.text }}
             </router-link>
+            <a
+              v-if="childItem.href"
+              :to="childItem.href"
+              :class="getActive(childItem.href)"
+              class="wd-mobile-menu__item is--h6__title"
+            >
+              {{ childItem.text }}
+            </a>
           </template>
         </div>
       </div>
@@ -180,19 +206,25 @@ const onLogout = () => {
         v-if="userLoggedIn && !isGetUserIdentityLoading"
         class="wd-mobile-menu__item-wrap"
       >
-        <router-link
-          v-if="selectedUserProfileId"
-          :to="{ name: ROUTE_DASHBOARD_PORTFOLIO, params: { profileId: selectedUserProfileId } }"
-          class="wd-mobile-menu__item is--h5__title"
+        <template
+          v-for="menuItem in profileMenu"
+          :key="menuItem.text"
         >
-          Dashboard
-        </router-link>
-        <router-link
-          :to="{ name: ROUTE_SETTINGS }"
-          class="wd-mobile-menu__item is--h5__title"
-        >
-          Settings
-        </router-link>
+          <router-link
+            v-if="menuItem.to"
+            :to="menuItem.to"
+            class="wd-mobile-menu__item is--h5__title"
+          >
+            {{ menuItem.text }}
+          </router-link>
+          <a
+            v-if="menuItem.href"
+            :href="menuItem.href"
+            class="wd-mobile-menu__item is--h5__title"
+          >
+          {{ menuItem.text }}
+          </a>
+        </template>
         <div
           class="wd-mobile-menu__item is--h5__title"
           data-testid="header-profile-logout"
