@@ -19,7 +19,7 @@ defineProps({
 })
 
 const usersStore = useUsersStore();
-const { userAccountData, selectedUserProfileId } = storeToRefs(usersStore);
+const { userAccountData } = storeToRefs(usersStore);
 const notificationsStore = useNotificationsStore();
 const { notificationLength, notificationUnreadLength } = storeToRefs(notificationsStore);
 const logoutModal = useLogoutModal();
@@ -128,7 +128,7 @@ const onSidebarOpen = () => {
   }
 
   &__value {
-    margin-right: 9px;
+    margin-right: 9px !important;
     color: $black;
   }
 
@@ -136,7 +136,7 @@ const onSidebarOpen = () => {
     width: fit-content;
   }
 
-  &__item {
+   & &__item {
     display: block;
     color: $black;
     width: 100%;

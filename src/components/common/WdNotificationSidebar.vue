@@ -59,6 +59,7 @@ onBeforeUnmount(() => unBlockedBody());
       <WdNotificationTable
         small
         class="wd-notification-sidebar__table"
+        :external="external"
       />
     </div>
     <div class="wd-notification-sidebar__bottom">

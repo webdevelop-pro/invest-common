@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, PropType, ref } from 'vue';
 import SocialLinks from 'UiKit/components/common/SocialLinks/SocialLinks.vue';
-import { useHubspotForm } from 'InvestCommon/composable';
+import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import AppLayoutDefaultFooterMenu from './AppLayoutDefaultFooterMenu.vue';
 import AppLayoutDefaultFooterText from './AppLayoutDefaultFooterText.vue';
 import FooterSubscribeForm from 'UiKit/components/common/FooterSubscribeForm/FooterSubscribeForm.vue';

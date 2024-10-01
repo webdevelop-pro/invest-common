@@ -71,3 +71,17 @@ export function urlize(input: string): string {
 
   return urlFriendlyString;
 }
+
+
+export function navigateWithQueryParams(url: string, params?: Record<string, string>): void {
+  const urlObj = new URL(url, window.location.origin); // Create a URL object
+
+  if (params) {
+    // Add each query parameter to the URL using forEach
+    Object.entries(params).forEach(([key, value]) => {
+      urlObj.searchParams.set(key, value);
+    });
+  }
+
+  window.location.href = urlObj.toString(); // Navigate to the new URL
+}

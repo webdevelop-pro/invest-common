@@ -14,6 +14,7 @@ import FilterPagination from 'InvestCommon/components/common/FilterPagination.vu
 
 const props = defineProps({
   small: Boolean,
+  external: Boolean, // is the component external and nee links instead of router
 });
 
 const filterNotifications = ref([
@@ -272,6 +273,7 @@ watch(() => filterNotifications.value[1].model.length, () => {
             :key="item.id"
             :data="item"
             :search="search"
+            :external="external"
           />
         </tbody>
       </BaseTable>

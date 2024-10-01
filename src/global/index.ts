@@ -1,4 +1,7 @@
+
+
 const env = {
+  EXTERNAL: import.meta.env.VITE_EXTERNAL,
   KRATOS_URL: import.meta.env.VITE_KRATOS_URL,
   PLAID_URL: import.meta.env.VITE_PLAID_URL,
   FRONTEND_URL: import.meta.env.VITE_FRONTEND,

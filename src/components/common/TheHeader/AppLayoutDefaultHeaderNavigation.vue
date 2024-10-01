@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
 import { PropType } from 'vue';
+import env from 'InvestCommon/global';
+
+const { EXTERNAL } = env;
 
 const router = useRouter();
 
@@ -15,8 +18,14 @@ defineProps({
   menu: Array as PropType<MenuItem[]>,
 })
 const getActive = (to: { name: string }) => {
-  if (router.currentRoute.value.name === to.name) {
-    return 'is--active';
+  if ( EXTERNAL ) {
+    if (window?.location?.pathname.includes(to.name)) {
+      return 'is--active';
+    }
+  } else {
+    if (router.currentRoute.value.name === to.name) {
+      return 'is--active';
+    }
   }
   return '';
 };
@@ -37,6 +46,14 @@ const getActive = (to: { name: string }) => {
       >
         {{ menuItem.text }}
       </router-link>
+      <a
+        v-if="menuItem.href"
+        :href="menuItem.href"
+        class="app-layout-default-header-navigation__item is--h6__title"
+        :class="{ 'is--link': menuItem.href }"
+      >
+        {{ menuItem.text }}
+      </a>
       <span
         v-else
         class="app-layout-default-header-navigation__item is--h6__title"

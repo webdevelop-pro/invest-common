@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, PropType, ref, watch } from 'vue';
+import { computed, PropType, ref, watch, watchEffect } from 'vue';
 import { useRouter } from 'vue-router';
 import TheLogo from 'UiKit/components/common/TheLogo/TheLogo.vue';
 import AppMobileMenu from './AppMobileMenu.vue';
@@ -12,6 +12,10 @@ import AppLayoutDefaultHeaderNavigation from './AppLayoutDefaultHeaderNavigation
 import { useAuthLogicStore, useUsersStore } from 'InvestCommon/store';
 import { storeToRefs } from 'pinia';
 import BaseSkeleton from 'UiKit/components/BaseSkeleton/BaseSkeleton.vue';
+import env from 'InvestCommon/global';
+import { navigateWithQueryParams } from 'InvestCommon/helpers/general';
+
+const { EXTERNAL } = env;
 
 type MenuItem = {
   to?: {
@@ -20,11 +24,13 @@ type MenuItem = {
   href?: string;
   text: string;
   children?: MenuItem[];
+  path?: string;
 }
 
-defineProps({
+const props = defineProps({
   profileMenu: Array as PropType<MenuItem[]>,
   menu: Array as PropType<MenuItem[]>,
+  path: String,
 })
 
 const isMobileMenuOpen = ref(false);
@@ -33,21 +39,61 @@ const usersStore = useUsersStore();
 const { userLoggedIn, isGetUserIdentityLoading } = storeToRefs(usersStore);
 const authLogicStore = useAuthLogicStore();
 const { isLoadingSession } = storeToRefs(authLogicStore);
-const isSignUpPage = computed(() => router.currentRoute.value.name === ROUTE_SIGNUP);
-const isSignInPage = computed(() => router.currentRoute.value.name === ROUTE_LOGIN);
-const isRecoveryPage = computed(() => router.currentRoute.value.name === ROUTE_FORGOT);
-
+const path = ref(props.path || '');
+const isSignUpPage = computed(() => {
+  if (EXTERNAL) {
+    return path.value.includes('signup');
+  }
+  return router.currentRoute.value.name === ROUTE_SIGNUP;
+});
+const isSignInPage = computed(() => {
+  if (EXTERNAL) {
+    return path.value.includes('signin');
+  }
+  return router.currentRoute.value.name === ROUTE_LOGIN
+});
+const isRecoveryPage = computed(() => {
+  if (EXTERNAL) {
+    return path.value.includes('forgot');
+  }
+  return router.currentRoute.value.name === ROUTE_FORGOT
+});
+const queryParams = computed(() => {
+  if (EXTERNAL) {
+    return new URLSearchParams(window.location.search);
+  }
+  return router.currentRoute.value.query;
+})
 
 const signInHandler = () => {
-  void router.push({ name: ROUTE_LOGIN, query: router.currentRoute.value.query });
+  if (EXTERNAL) {
+    navigateWithQueryParams('/signin', { query: queryParams.value });
+  } else {
+    void router.push({ name: ROUTE_LOGIN, query: router.currentRoute.value.query });
+  }
 };
 
 const signUpHandler = () => {
-  void router.push({ name: ROUTE_SIGNUP, query: router.currentRoute.value.query });
+  if (EXTERNAL) {
+    navigateWithQueryParams('/signup', { query: queryParams.value });
+  } else {
+    void router.push({ name: ROUTE_SIGNUP, query: router.currentRoute.value.query });
+  }
 };
 
-watch([router.currentRoute], () => {
+const currentRoute = computed(() => {
+  if (EXTERNAL) {
+    return window?.location?.pathname
+  }
+  return router.currentRoute
+})
+
+watch([currentRoute.value], () => {
   isMobileMenuOpen.value = false;
+});
+
+watchEffect(() => {
+  path.value = props.path || '';
 });
 </script>
 

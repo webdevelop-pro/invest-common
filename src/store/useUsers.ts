@@ -17,6 +17,9 @@ import {
   ROUTE_INVEST_SIGNATURE, ROUTE_INVEST_THANK, ROUTE_SUBMIT_KYC,
 } from 'InvestCommon/helpers/enums/routes';
 import { RouteLocationNormalized, useRoute, useRouter } from 'vue-router';
+import env from 'InvestCommon/global';
+
+const { EXTERNAL } = env;
 
 
 export const useUsersStore = defineStore('user', () => {
@@ -171,10 +174,14 @@ export const useUsersStore = defineStore('user', () => {
     setSelectedUserProfileById(userProfiles.value[0]?.id);
   }, { immediate: true });
 
+  const urlProfileId = computed(() => {
+    if (!EXTERNAL) return route.params.profileId;
+    return (window && window?.location?.pathname.split('/')[2]);
+  });
 
-  watch(() => [userProfiles.value, route.params.profileId], () => {
+  watch(() => [userProfiles.value, urlProfileId.value], () => {
     if (!urlChecked.value && userLoggedIn.value
-      && route.params.profileId && (userProfiles.value?.length > 0)) checkInitUrl(route);
+      && urlProfileId.value && (userProfiles.value?.length > 0) && !EXTERNAL) checkInitUrl(route);
   }, { immediate: true, deep: true });
 
   const resetAll = () => {

@@ -2,9 +2,8 @@ import {
   computed, nextTick, ref,
 } from 'vue';
 import { useRouter } from 'vue-router';
-import {
-  useHubspotForm, useRedirect,
-} from 'InvestCommon/composable';
+import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
+import { useRedirect } from 'InvestCommon/composable/useRedirect';
 import {
   ROUTE_DASHBOARD_PORTFOLIO, ROUTE_CHECK_EMAIL, ROUTE_LOGIN, ROUTE_OFFERS, ROUTE_OFFERS_DETAILS,
   ROUTE_INVEST_AMOUNT, ROUTE_INVEST_FUNDING, ROUTE_INVEST_OWNERSHIP, ROUTE_INVEST_REVIEW,
@@ -17,6 +16,10 @@ import {
   useProfileWalletStore, useProfileWalletTransactionStore, useUserIdentitysStore,
   useUsersStore, useGlobalLoader,
 } from 'InvestCommon/store';
+import env from 'InvestCommon/global';
+import { navigateWithQueryParams } from 'InvestCommon/helpers/general';
+
+const { EXTERNAL } = env;
 
 const loading = ref(false);
 
@@ -68,7 +71,14 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     if (setLoginData.value && setLoginData.value.session) {
       await usersStore.getUserIdentity();
       void usersStore.updateUserAccountSession(setLoginData.value.session);
-      void router.push(pushTo({ name: ROUTE_DASHBOARD_PORTFOLIO, params: { profileId: selectedUserProfileId.value } }));
+      if (EXTERNAL) {
+        navigateWithQueryParams(`/profile/${selectedUserProfileId.value}/portfolio`);
+      } else {
+        void router.push(pushTo({
+          name: ROUTE_DASHBOARD_PORTFOLIO,
+          params: { profileId: selectedUserProfileId.value },
+        }));
+      }
 
       void submitFormToHubspot({
         email,
@@ -121,7 +131,14 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     if (setSignupData.value && setSignupData.value.session) {
       await usersStore.getUserIdentity();
       void usersStore.updateUserAccountSession(setSignupData.value.session);
-      void router.push(pushTo({ name: ROUTE_DASHBOARD_PORTFOLIO, params: { profileId: selectedUserProfileId.value } }));
+      if (EXTERNAL) {
+        navigateWithQueryParams(`/profile/${selectedUserProfileId.value}/portfolio`);
+      } else {
+        void router.push(pushTo({
+          name: ROUTE_DASHBOARD_PORTFOLIO,
+          params: { profileId: selectedUserProfileId.value },
+        }));
+      }
 
       void submitFormToHubspot({
         email,
@@ -146,7 +163,14 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
       return;
     }
     if (setPasswordData.value) {
-      void router.push(pushTo({ name: ROUTE_DASHBOARD_PORTFOLIO, params: { profileId: selectedUserProfileId.value } }));
+      if (EXTERNAL) {
+        navigateWithQueryParams(`/profile/${selectedUserProfileId.value}/portfolio`);
+      } else {
+        void router.push(pushTo({
+          name: ROUTE_DASHBOARD_PORTFOLIO,
+          params: { profileId: selectedUserProfileId.value },
+        }));
+      }
     }
   };
 
@@ -192,20 +216,31 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
   const handleAfterLogout = () => {
     resetAll();
     let queryParams;
-    const { currentRoute } = router;
-    if (currentRoute.value.name === ROUTE_OFFERS
-          || currentRoute.value.name === ROUTE_OFFERS_DETAILS) {
-      queryParams = { redirect: currentRoute.value.fullPath };
+    if (EXTERNAL) {
+      if (window?.location?.pathname?.includes('offer')) {
+        queryParams = window?.location?.pathname;
+      }
+      if (window?.location?.pathname?.includes('/invest')) {
+        queryParams = { redirect: '/offers' };
+      }
+      if (queryParams) navigateWithQueryParams('/signin', { query: queryParams });
+      else navigateWithQueryParams('/signin');
+    } else {
+      const { currentRoute } = router;
+      if (currentRoute.value.name === ROUTE_OFFERS
+            || currentRoute.value.name === ROUTE_OFFERS_DETAILS) {
+        queryParams = { redirect: currentRoute.value.fullPath };
+      }
+      if ((currentRoute.value.name === ROUTE_INVEST_AMOUNT
+          || currentRoute.value.name === ROUTE_INVEST_FUNDING
+          || currentRoute.value.name === ROUTE_INVEST_OWNERSHIP
+          || currentRoute.value.name === ROUTE_INVEST_REVIEW
+          || currentRoute.value.name === ROUTE_INVEST_SIGNATURE
+          || currentRoute.value.name === ROUTE_INVEST_THANK) && currentRoute.value.params?.slug) {
+        queryParams = { redirect: '/offers' };
+      }
+      void router.push({ name: ROUTE_LOGIN, query: queryParams });
     }
-    if ((currentRoute.value.name === ROUTE_INVEST_AMOUNT
-        || currentRoute.value.name === ROUTE_INVEST_FUNDING
-        || currentRoute.value.name === ROUTE_INVEST_OWNERSHIP
-        || currentRoute.value.name === ROUTE_INVEST_REVIEW
-        || currentRoute.value.name === ROUTE_INVEST_SIGNATURE
-        || currentRoute.value.name === ROUTE_INVEST_THANK) && currentRoute.value.params?.slug) {
-      queryParams = { redirect: '/offers' };
-    }
-    void router.push({ name: ROUTE_LOGIN, query: queryParams });
   };
 
   // LOGOUT
@@ -250,7 +285,9 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
       // await notificationsHandler(); // TODO: check if needed
     } else if (!getSessionData.value || getSessionErrorResponse.value?.status === 401) {
       resetAll();
-      if (router.currentRoute.value.meta.auth) {
+      if (EXTERNAL) {
+        isLoadingSession.value = false;
+      } else if (router.currentRoute.value.meta.auth) {
         void router.push({ name: ROUTE_LOGIN });
       }
     }

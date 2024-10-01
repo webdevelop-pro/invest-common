@@ -2,6 +2,7 @@
 import {
   watch, onMounted, onUnmounted, onBeforeUnmount, computed,
   PropType,
+  ref,
 } from 'vue';
 import { useBreakpointsStore, useUsersStore } from 'InvestCommon/store';
 import { blockedBody } from 'InvestCommon/helpers/blocked-body';
@@ -13,6 +14,10 @@ import {
 import BaseButton from 'UiKit/components/BaseButton/BaseButton.vue';
 import AppMobileMenuBurger from './AppMobileMenuBurger.vue';
 import { useLogoutModal } from 'InvestCommon/components/modals/modals';
+import { navigateWithQueryParams } from 'InvestCommon/helpers/general';
+import env from 'InvestCommon/global';
+
+const { EXTERNAL } = env;
 
 type MenuItem = {
   to?: {
@@ -34,9 +39,33 @@ const emit = defineEmits(['update:modelValue']);
 const router = useRouter();
 const usersStore = useUsersStore();
 const { userLoggedIn, isGetUserIdentityLoading } = storeToRefs(usersStore);
-const isSignUpPage = computed(() => router.currentRoute.value.name === ROUTE_SIGNUP);
-const isSignInPage = computed(() => router.currentRoute.value.name === ROUTE_LOGIN);
-const isRecoveryPage = computed(() => router.currentRoute.value.name === ROUTE_FORGOT);
+const path = ref(window?.location?.pathname);
+
+const isSignUpPage = computed(() => {
+  if (EXTERNAL) {
+    return path.value.includes('signup');
+  }
+  return router.currentRoute.value.name === ROUTE_SIGNUP;
+});
+const isSignInPage = computed(() => {
+  if (EXTERNAL) {
+    return path.value.includes('signin');
+  }
+  return router.currentRoute.value.name === ROUTE_LOGIN
+});
+const isRecoveryPage = computed(() => {
+  if (EXTERNAL) {
+    return path.value.includes('forgot');
+  }
+  return router.currentRoute.value.name === ROUTE_FORGOT
+});
+const queryParams = computed(() => {
+  if (EXTERNAL) {
+    return new URLSearchParams(window?.location?.search);
+  }
+  return router.currentRoute.value.query;
+})
+
 const logoutModal = useLogoutModal();
 
 const useVhHeight = () => {
@@ -91,24 +120,46 @@ const close = () => emit('update:modelValue', false);
 void useBlockedBody(close);
 void useVhHeight();
 
-const getActive = (name: string) => {
-  if (router.currentRoute.value.name === name) {
-    return 'is--active';
+const getActive = (to: { name: string }) => {
+  if ( EXTERNAL ) {
+    if (window?.location?.pathname.includes(to.name)) {
+      return 'is--active';
+    }
+  } else {
+    if (router.currentRoute.value.name === to.name) {
+      return 'is--active';
+    }
   }
   return '';
 };
 
+
+
 const signInHandler = () => {
-  void router.push({ name: ROUTE_LOGIN, query: router.currentRoute.value.query });
+  if (EXTERNAL) {
+    navigateWithQueryParams('/signin', { query: queryParams.value });
+  } else {
+    void router.push({ name: ROUTE_LOGIN, query: router.currentRoute.value.query });
+  }
 };
 
 const signUpHandler = () => {
-  void router.push({ name: ROUTE_SIGNUP, query: router.currentRoute.value.query });
+  if (EXTERNAL) {
+    navigateWithQueryParams('/signup', { query: queryParams.value });
+  } else {
+    void router.push({ name: ROUTE_SIGNUP, query: router.currentRoute.value.query });
+  }
 };
 const onLogout = () => {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
   void logoutModal.show({});
 };
+
+if (window) {
+  watch(() => window?.location?.pathname, () => {
+    path.value = window?.location?.pathname;
+  })
+}
 </script>
 
 <template>

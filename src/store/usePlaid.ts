@@ -6,9 +6,13 @@ import { IPlaidTokenResponse } from 'InvestCommon/types/api/plaid';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { useUsersStore } from './useUsers';
 import { ROUTE_DASHBOARD_PORTFOLIO } from 'InvestCommon/helpers/enums/routes';
-import { useRedirect } from 'InvestCommon/composable';
+import { useRedirect } from 'InvestCommon/composable/useRedirect';
 import { useRouter } from 'vue-router';
 // import { useKYCIdentityStore } from './useKYCIdentity';
+import { navigateWithQueryParams } from 'InvestCommon/helpers/general';
+import env from 'InvestCommon/global';
+
+const { EXTERNAL } = env;
 
 const isCreateTokenLoading = ref(false);
 const isCreateTokenError = ref(false);
@@ -28,8 +32,6 @@ interface IEventMetadata {
 export const usePlaidStore = defineStore('plaid', () => {
   const usersStore = useUsersStore();
   const { selectedUserProfileData, selectedUserProfileId } = storeToRefs(usersStore);
-  const { pushTo } = useRedirect();
-  const router = useRouter();
   // const kycIdentitiesStore = useKYCIdentityStore();
 
   const createToken = async (profileId: number) => {
@@ -56,17 +58,23 @@ export const usePlaidStore = defineStore('plaid', () => {
       document.head.appendChild(plaidScript);
       plaidScript.onload = () => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-        const handler = window.Plaid.create({
+        const handler = window?.Plaid.create({
           token: createTokenData.value?.link_token,
           onSuccess: (publicToken: string, metadata: unknown) => {
             console.log('plaid success event', publicToken, metadata);
             console.log('update account with new kyc status');
             // await kycIdentitiesStore.updateUserPlaidIdentities();
             void usersStore.updateUserSelectedAccount();
-            void router.push(pushTo({
-              name: ROUTE_DASHBOARD_PORTFOLIO,
-              params: { profileId: selectedUserProfileId.value },
-            }));
+            if (EXTERNAL) {
+              navigateWithQueryParams(`/profile/${selectedUserProfileId.value}/portfolio`);
+            } else {
+              const { pushTo } = useRedirect();
+              const router = useRouter();
+              void router.push(pushTo({
+                name: ROUTE_DASHBOARD_PORTFOLIO,
+                params: { profileId: selectedUserProfileId.value },
+              }));
+            }
           },
           onLoad: () => {
             console.log('plaid own onload even');

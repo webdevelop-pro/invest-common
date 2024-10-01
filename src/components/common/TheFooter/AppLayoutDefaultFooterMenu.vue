@@ -31,8 +31,6 @@ defineProps({
         <a
           v-if="menuItem.href"
           :href="menuItem.href"
-          target="_blank"
-          rel="noopener noreferrer"
           class="app-layout-default-footer-menu__item is--h6__title"
         >
           {{ menuItem.text }}
@@ -62,8 +60,6 @@ defineProps({
             <a
               v-if="childItem.href"
               :href="childItem.href"
-              target="_blank"
-              rel="noopener noreferrer"
               class="app-layout-default-footer-menu__item is--h6__title"
             >
               {{ childItem.text }}

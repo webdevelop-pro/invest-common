@@ -7,7 +7,7 @@ import BaseTable from 'UiKit/components/BaseTable/BaseTable.vue';
 import BaseTag from 'UiKit/components/BaseTag/BaseTag.vue';
 import { formatToFullDate } from 'InvestCommon/helpers/formatters/formatToDate';
 import { currency } from 'InvestCommon/helpers/currency';
-import { InvestTransactionStatuses } from '@/views/Dashboard/utils';
+import { InvestTransactionStatuses } from 'InvestCommon/helpers/enums/invest';
 
 const props = defineProps({
   investment: {

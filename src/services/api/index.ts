@@ -5,7 +5,6 @@ export * from './invest';
 export * from './user';
 export * from './notifications';
 export * from './hubspot';
-export * from './blog';
 export * from './accreditation';
 export * from './funding';
 export * from './filer';
