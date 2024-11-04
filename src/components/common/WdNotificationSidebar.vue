@@ -32,7 +32,7 @@ onBeforeUnmount(() => unBlockedBody());
 <template>
   <aside
     ref="target"
-    class="WdNotificationSidebar wd-notification-sidebar"
+    class="WdNotificationSidebar wd-notification-sidebar is--no-margin"
   >
     <div class="wd-notification-sidebar__header">
       <h4>

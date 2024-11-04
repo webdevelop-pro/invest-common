@@ -40,7 +40,7 @@ const timeFormatted = computed(() => (dateFull.value ? getTimeFormat(String(date
 
 <template>
   <BaseModalLayout
-    class="wd-modal-portfolio-transaction"
+    class="wd-modal-portfolio-transaction is--no-margin"
     @close="$emit('close')"
   >
     <template #default>

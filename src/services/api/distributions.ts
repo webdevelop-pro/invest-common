@@ -7,7 +7,7 @@ const { DISTRIBUTIONS_URL } = env;
 
 
 export const fetchGetDistributions = () => {
-  const path = `${DISTRIBUTIONS_URL}/distribution`;
+  const path = `${DISTRIBUTIONS_URL}/protected/1/distribution`;
 
   const data = {
     method: 'GET',

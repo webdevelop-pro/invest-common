@@ -68,5 +68,13 @@
     list-style-position: inside;
     margin: 16px 3px;
   }
+
+  p, li, ul {
+    color: inherit;
+  }
+
+  li + li {
+    margin-top: 0;
+  }
 }
 </style>

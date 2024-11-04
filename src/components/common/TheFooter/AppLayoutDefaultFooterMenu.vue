@@ -87,6 +87,7 @@ defineProps({
   &__item {
     white-space: nowrap;
     color: $white;
+    text-decoration: none;
     &:hover {
       color: $primary;
     }

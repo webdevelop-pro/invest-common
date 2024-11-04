@@ -1,7 +1,7 @@
 <template>
   <BaseModalLayout
     full-screen
-    class="wd-modal-document"
+    class="wd-modal-document is--no-margin"
     data-testid="document-modal"
     @close="$emit('close')"
   >

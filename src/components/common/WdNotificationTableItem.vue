@@ -200,6 +200,7 @@ const onButtonClick = () => {
 
 <style lang="scss" scoped>
 .wd-notification-table-item {
+  display: table-row;
 
   &.is--unread td {
     background-color: $gray-10;

@@ -1,7 +1,7 @@
 <template>
   <BaseModalLayout
     title="Log Out"
-    class="wd-modal-log-out"
+    class="wd-modal-log-out is--no-margin"
     @close="$emit('close')"
   >
     <template #default>

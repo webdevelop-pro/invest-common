@@ -15,7 +15,7 @@ defineProps({
 
 <template>
   <BaseModalLayout
-    class="WdModalWalletAddTransaction wd-modal-wallet-add-transaction"
+    class="WdModalWalletAddTransaction wd-modal-wallet-add-transaction is--no-margin"
     @close="$emit('close')"
   >
     <template #default>

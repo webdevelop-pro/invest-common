@@ -210,7 +210,7 @@ watch(() => filterNotifications.value[1].model.length, () => {
 });
 </script>
 <template>
-  <aside class="WdNotificationTable wd-notification-table">
+  <aside class="WdNotificationTable wd-notification-table is--no-margin">
     <div class="wd-notification-table__toolbar">
       <div class="wd-notification-table__toolbar-left">
         <BaseContentSwitcher

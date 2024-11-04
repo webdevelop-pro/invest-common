@@ -1,5 +1,4 @@
 import { IInvest } from './invest';
-import { IOffer } from './offers';
 
 export interface IDistributionsDocuments {
     id: number;

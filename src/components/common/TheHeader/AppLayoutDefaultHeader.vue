@@ -98,7 +98,7 @@ watchEffect(() => {
 </script>
 
 <template>
-  <div class="AppLayoutDefaultHeader app-layout-default-header">
+  <div class="AppLayoutDefaultHeader app-layout-default-header is--no-margin">
     <div class="app-layout-default-header__logo-wrap">
       <TheLogo
         link="/"
@@ -185,7 +185,7 @@ watchEffect(() => {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  max-width: 1170px;
+  max-width: 1280px;
   padding: 0 15px;
   margin: 0 auto;
   min-height: $wd-header-height;

@@ -75,7 +75,7 @@ const componentName = computed(() => {
         :src="offerImage"
         :alt="offer.slug"
         itemprop="image"
-        class="offers-card__img"
+        class="offers-card__img is--no-margin"
         :class="{ 'is--default-image': isDefaultImage }"
       >
     </div>
@@ -161,6 +161,7 @@ const componentName = computed(() => {
   transition: all .3s ease;
   width: 100%;
   cursor: pointer;
+  text-decoration: none;
 
   &:hover {
     box-shadow: $box-shadow-large;
@@ -197,7 +198,6 @@ const componentName = computed(() => {
   }
 
   &__title {
-    margin-bottom: 8px;
     text-transform: capitalize;
   }
 
@@ -235,7 +235,7 @@ const componentName = computed(() => {
   }
 
   &__btn {
-    margin-top: 28px;
+    margin-top: 28px !important;
   }
 
   &__tag {

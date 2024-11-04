@@ -31,6 +31,7 @@ export interface IOfferDocuments {
   mime: string;
   bucket_path: string;
   updated_at: string;
+  type: string;
   meta_data: {
     big: string;
     small: string;
@@ -39,12 +40,17 @@ export interface IOfferDocuments {
   };
 }
 
-export interface IOfferWireData {
+export interface IOfferInfoData {
   wire_to: string;
   swift_id: string;
   custodian: string;
   account_number: string;
   routing_number: string;
+  apy: string;
+  distribution_frequency: string;
+  investment_strategy: string;
+  estimated_hold_period: string;
+  video?: string;
 }
 
 export interface IOffer {
@@ -86,7 +92,7 @@ export interface IOffer {
   security_type: string;
   city: string;
   state: string;
-  data?: IOfferWireData;
+  data?: IOfferInfoData;
 }
 
 export interface IOfferSharesError {

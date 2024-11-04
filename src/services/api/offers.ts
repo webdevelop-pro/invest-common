@@ -8,7 +8,7 @@ import env from 'InvestCommon/global';
 const { OFFER_URL } = env;
 
 export const fetchGetOffers = () => {
-  const path = `${OFFER_URL}/public`;
+  const path = `${OFFER_URL}/`;
 
   const data = {
     method: 'GET',
@@ -22,7 +22,7 @@ export const fetchGetOffers = () => {
 };
 
 export const fetchGetOfferOne = (slug: string | number) => {
-  const path = `${OFFER_URL}/public/${slug}`;
+  const path = `${OFFER_URL}/${slug}`;
 
   const data = {
     method: 'GET',
@@ -36,7 +36,7 @@ export const fetchGetOfferOne = (slug: string | number) => {
 };
 
 export const fetchGetOfferComments = (id: number) => {
-  const path = `${OFFER_URL}/public/comment/${id}`;
+  const path = `${OFFER_URL}/comment/${id}`;
 
   const data = {
     method: 'GET',

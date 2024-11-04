@@ -44,7 +44,7 @@ const saveHandler = () => {
 
 <template>
   <BaseModalLayout
-    class="wd-modal-portfolio-wire"
+    class="wd-modal-portfolio-wire is--no-margin"
     @close="$emit('close')"
   >
     <template #default>

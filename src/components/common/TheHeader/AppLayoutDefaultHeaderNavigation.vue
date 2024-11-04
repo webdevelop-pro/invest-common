@@ -97,6 +97,7 @@ const getActive = (to: { name: string }) => {
     color: $black;
     white-space: nowrap;
     cursor: pointer;
+    text-decoration: none;
 
     @include media-lte(desktop-md) {
       display: none;

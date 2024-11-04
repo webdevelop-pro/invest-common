@@ -19,6 +19,14 @@ export const useLogoutModal = () => {
   return useModal(AsyncComponent);
 };
 
+export const useNeedToLogInModal = () => {
+  const AsyncComponent = defineAsyncComponent(() => import(
+    './WdModalNeedToLogIn.vue'
+  ));
+
+  return useModal(AsyncComponent);
+};
+
 export const useDocumentModal = () => {
   const AsyncComponent = defineAsyncComponent(() => import(
     './WdModalDocument.vue'

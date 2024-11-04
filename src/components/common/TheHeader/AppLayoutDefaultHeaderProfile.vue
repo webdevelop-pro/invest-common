@@ -142,6 +142,7 @@ const onSidebarOpen = () => {
     width: 100%;
     padding: 8px 12px;
     cursor: pointer;
+    text-decoration: none;
 
     &:hover {
       background-color: $gray-20;

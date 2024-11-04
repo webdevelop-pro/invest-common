@@ -18,3 +18,17 @@ export const fetchGetFiles = (object_id: number, object_name: string) => {
     return response.json() as Promise<IFilerItem[]>;
   });
 };
+
+
+export const fetchGetPublicFiles = (object_id: number, object_name: string) => {
+  const path = `${FILER_URL}/public/object/${object_name}/${object_id}`;
+
+  const data = {
+    method: 'GET',
+  };
+
+  return fetch(path, data).then((response) => {
+    if (!response.ok) return Promise.reject(response);
+    return response.json() as Promise<IFilerItem[]>;
+  });
+};
