@@ -111,7 +111,7 @@ watch(() => model, () => {
 
 <template>
   <BaseModalLayout
-    class="WdModalPortfolioCancelInvestment wd-modal-cancel-investment"
+    class="WdModalPortfolioCancelInvestment wd-modal-cancel-investment is--no-margin"
     @close="$emit('close')"
   >
     <template #default>
