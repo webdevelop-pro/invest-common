@@ -31,7 +31,7 @@ import { defineComponent } from 'vue';
 import BaseModalLayout from 'UiKit/components/BaseModal/BaseModalLayout.vue';
 import BaseButton from 'UiKit/components/BaseButton/BaseButton.vue';
 import { useRouter } from 'vue-router';
-import { ROUTE_LOGIN } from '@/helpers/enums/routes';
+import { ROUTE_LOGIN } from 'InvestCommon/helpers/enums/routes';
 
 export default defineComponent({
   name: 'WdModalLogOut',
