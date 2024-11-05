@@ -64,7 +64,7 @@ const onSubmit = async (emailLocal: string) => {
 <template>
   <!-- eslint-disable vue/no-multiple-template-root -->
   <div class="AppLayoutDefaultFooter footer-top is--no-margin">
-    <div class="wd-container">
+    <div class="is--container">
       <div class="footer-top__wrap">
         <div class="footer-top__form-wrap">
           <FooterSubscribeForm
@@ -108,7 +108,7 @@ const onSubmit = async (emailLocal: string) => {
   </div>
   <AppLayoutDefaultFooterText />
   <div class="footer-bottom">
-    <div class="wd-container">
+    <div class="is--container">
       <p class="is--small">
         © {{ currentYear }} Webdevelop PRO, Inc.
       </p>

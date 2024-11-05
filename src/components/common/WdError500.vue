@@ -50,12 +50,12 @@ export default defineComponent({
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: $wd-color-white;
+  background-color: $white;
   padding: 150px 0;
 
   &__content {
     width: 100%;
-    color: $wd-color-text-black;
+    color: $black;
     text-align: center;
   }
 

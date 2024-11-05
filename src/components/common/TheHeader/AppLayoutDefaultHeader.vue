@@ -188,7 +188,7 @@ watchEffect(() => {
   max-width: 1280px;
   padding: 0 15px;
   margin: 0 auto;
-  min-height: $wd-header-height;
+  min-height: $header-height;
 
   &__logo-wrap {
     display: flex;

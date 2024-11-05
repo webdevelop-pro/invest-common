@@ -36,7 +36,7 @@ $z-index-menu-burger: $z-index-menu + 1;
 
 .app-mobile-menu-burger {
   z-index: $z-index-menu-burger;
-  color: $wd-color-text-header;
+  color: $black;
   cursor: pointer;
   transition: color 0.3s;
 

@@ -19,7 +19,7 @@ const onBackClick = () => {
 
 <template>
   <div class="LayoutBackButton layout-back-button">
-    <div class="wd-container layout-back-button__container">
+    <div class="is--container layout-back-button__container">
       <div class="layout-back-button__left">
         <BaseButton
           variant="link"
@@ -39,7 +39,7 @@ const onBackClick = () => {
         <slot />
       </div>
     </div>
-    <div class="wd-container layout-back-button__footer">
+    <div class="is--container layout-back-button__footer">
       <BaseBreadcrumbs
         :data="breadcrumbs"
         class="layout-back-button__breadcrumbs"
@@ -52,7 +52,7 @@ const onBackClick = () => {
 <style lang="scss" scoped>
 .layout-back-button {
   width: 100%;
-  padding-top: $wd-header-height;
+  padding-top: $header-height;
   margin-bottom: 60px;
 
   &__container {

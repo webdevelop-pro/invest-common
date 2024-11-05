@@ -3,7 +3,7 @@
 
 <template>
   <div class="AppLayoutDefaultFooterText app-layout-default-footer-text">
-    <div class="wd-container">
+    <div class="is--container">
       <p class="is--small">
         Securities through Invest PRO Member: FINRA/SIPC. Only available in states
         where Invest PRO is registered. For more information on Invest PRO,

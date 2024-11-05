@@ -147,7 +147,7 @@ const getActive = (to: { name: string }) => {
 
   &__item-wrap {
     position: relative;
-    height: $wd-header-height;
+    height: $header-height;
     display: flex;
     align-items: center;
 
