@@ -1,15 +1,13 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router';
 import { PropType } from 'vue';
 import env from 'InvestCommon/global';
 
 const { EXTERNAL } = env;
 
-const router = useRouter();
-
 type MenuItem = {
   to?: string;
   href?: string;
+  active?: boolean;
   text: string;
   children?: MenuItem[];
 }
@@ -17,17 +15,14 @@ type MenuItem = {
 defineProps({
   menu: Array as PropType<MenuItem[]>,
 })
-const getActive = (to: { name: string }) => {
-  if ( EXTERNAL ) {
-    if (window?.location?.pathname.includes(to.name)) {
-      return 'is--active';
-    }
-  } else {
-    if (router.currentRoute.value.name === to.name) {
-      return 'is--active';
-    }
-  }
-  return '';
+const getComponentName = (item: MenuItem) => {
+  if (item.to) return 'router-link';
+  if (item.href) return 'a';
+  return 'div';
+};
+const getComponentClass = (item: MenuItem) => {
+  if (item.to || item.href) return 'app-layout-default-header-navigation__item';
+  return 'app-layout-default-header-navigation__item-not-link';
 };
 </script>
 
@@ -38,28 +33,15 @@ const getActive = (to: { name: string }) => {
       :key="menuItem.text"
       class="app-layout-default-header-navigation__item-wrap"
     >
-      <router-link
-        v-if="menuItem.to"
-        :to="menuItem.to"
-        class="app-layout-default-header-navigation__item is--h6__title"
-        :class="{ 'is--link': menuItem.to }"
-      >
-        {{ menuItem.text }}
-      </router-link>
-      <a
-        v-if="menuItem.href"
+      <component
+        :is="getComponentName(menuItem)"
         :href="menuItem.href"
-        class="app-layout-default-header-navigation__item is--h6__title"
-        :class="{ 'is--link': menuItem.href }"
+        :to="menuItem.to"
+        class="is--h6__title"
+        :class="[getComponentClass(menuItem), { 'is--active': menuItem.active }]"
       >
         {{ menuItem.text }}
-      </a>
-      <span
-        v-else
-        class="app-layout-default-header-navigation__item is--h6__title"
-      >
-        {{ menuItem.text }}
-      </span>
+      </component>
       <div
         v-if="menuItem.children && menuItem.children.length > 0"
         class="app-layout-default-header-navigation__children"
@@ -69,14 +51,15 @@ const getActive = (to: { name: string }) => {
           v-for="childItem in menuItem.children"
           :key="childItem.text"
         >
-          <router-link
-            v-if="childItem.to"
+          <component
+            :is="getComponentName(childItem)"
+            :href="childItem.href"
             :to="childItem.to"
-            :class="[getActive(childItem.to), { 'is--link': childItem.to }]"
-            class="app-layout-default-header-navigation__item is--h6__title"
+            class="is--h6__title"
+            :class="[getComponentClass(childItem), { 'is--active': childItem.active }]"
           >
             {{ childItem.text }}
-          </router-link>
+          </component>
         </template>
       </div>
     </div>
@@ -103,7 +86,7 @@ const getActive = (to: { name: string }) => {
       display: none;
     }
 
-    &.is--link:hover {
+    &:hover {
       color: $primary;
     }
 

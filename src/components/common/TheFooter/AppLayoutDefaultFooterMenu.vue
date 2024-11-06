@@ -1,15 +1,26 @@
 <script setup lang="ts">
-import { PropType } from 'vue';
+import { computed, PropType } from 'vue';
 
 type MenuItem = {
   to?: string;
   href?: string;
   text: string;
+  active?: boolean;
   children?: MenuItem[];
 }
 defineProps({
   menu: Array as PropType<MenuItem[]>,
 })
+
+const getComponentName = (item: MenuItem) => {
+  if (item.to) return 'router-link';
+  if (item.href) return 'a';
+  return 'div';
+};
+const getComponentClass = (item: MenuItem) => {
+  if (item.to || item.href) return 'app-layout-default-footer-menu__item';
+  return 'app-layout-default-footer-menu__item-not-link';
+};
 </script>
 
 <template>
@@ -21,26 +32,15 @@ defineProps({
         :key="menuItem.text"
         class="app-layout-default-footer-menu__menu-item"
       >
-        <router-link
-          v-if="menuItem.to"
-          :to="menuItem.to"
-          class="app-layout-default-footer-menu__item is--h6__title"
-        >
-          {{ menuItem.text }}
-        </router-link>
-        <a
-          v-if="menuItem.href"
+        <component
+          :is="getComponentName(menuItem)"
           :href="menuItem.href"
-          class="app-layout-default-footer-menu__item is--h6__title"
+          :to="menuItem.to"
+          class="is--h6__title"
+          :class="[getComponentClass(menuItem), { 'is--active': menuItem.active }]"
         >
           {{ menuItem.text }}
-        </a>
-        <div
-          v-if="!menuItem.href && !menuItem.to"
-          class="app-layout-default-footer-menu__item-not-link is--h5__title"
-        >
-          {{ menuItem.text }}
-        </div>
+        </component>
         <div
           v-if="menuItem.children && menuItem.children.length > 0"
           class="app-layout-default-footer-menu__children"
@@ -50,20 +50,15 @@ defineProps({
             v-for="childItem in menuItem.children"
             :key="childItem.text"
           >
-            <router-link
-              v-if="childItem.to"
-              :to="childItem.to"
-              class="app-layout-default-footer-menu__item is--h6__title"
-            >
-              {{ childItem.text }}
-            </router-link>
-            <a
-              v-if="childItem.href"
+            <component
+              :is="getComponentName(menuItem)"
               :href="childItem.href"
-              class="app-layout-default-footer-menu__item is--h6__title"
+              :to="childItem.to"
+              class="is--h6__title"
+              :class="[getComponentClass(childItem), { 'is--active': childItem.active }]"
             >
               {{ childItem.text }}
-            </a>
+            </component>
           </template>
         </div>
       </li>
@@ -88,7 +83,8 @@ defineProps({
     white-space: nowrap;
     color: $white;
     text-decoration: none;
-    &:hover {
+    &:hover,
+    &.is--active {
       color: $primary;
     }
   }

@@ -18,6 +18,7 @@ interface ISocial {
 type MenuItem = {
   to?: string;
   href?: string;
+  active?: boolean;
   text: string;
   children?: MenuItem[];
 }

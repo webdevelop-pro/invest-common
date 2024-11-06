@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, PropType, ref, watch, watchEffect } from 'vue';
-import { useRouter } from 'vue-router';
 import TheLogo from 'UiKit/components/common/TheLogo/TheLogo.vue';
 import AppMobileMenu from './AppMobileMenu.vue';
 import AppLayoutDefaultHeaderProfile from './AppLayoutDefaultHeaderProfile.vue';
@@ -22,6 +21,7 @@ type MenuItem = {
     name: string;
   };
   href?: string;
+  active?: boolean;
   text: string;
   children?: MenuItem[];
   path?: string;
@@ -34,42 +34,52 @@ const props = defineProps({
 })
 
 const isMobileMenuOpen = ref(false);
-const router = useRouter();
+let router;
+if (!EXTERNAL) {
+  const { useRouter } = await import('vue-router');
+  router = useRouter();
+}
+
 const usersStore = useUsersStore();
 const { userLoggedIn, isGetUserIdentityLoading } = storeToRefs(usersStore);
 const authLogicStore = useAuthLogicStore();
 const { isLoadingSession } = storeToRefs(authLogicStore);
 const path = ref(props.path || '');
+
 const isSignUpPage = computed(() => {
   if (EXTERNAL) {
     return path.value.includes('signup');
   }
-  return router.currentRoute.value.name === ROUTE_SIGNUP;
+  return router?.currentRoute.value.name === ROUTE_SIGNUP;
 });
+
 const isSignInPage = computed(() => {
   if (EXTERNAL) {
     return path.value.includes('signin');
   }
-  return router.currentRoute.value.name === ROUTE_LOGIN
+  return router?.currentRoute.value.name === ROUTE_LOGIN;
 });
+
 const isRecoveryPage = computed(() => {
   if (EXTERNAL) {
     return path.value.includes('forgot');
   }
-  return router.currentRoute.value.name === ROUTE_FORGOT
+  return router?.currentRoute.value.name === ROUTE_FORGOT;
 });
+
 const queryParams = computed(() => {
   if (EXTERNAL) {
     return new URLSearchParams(window.location.search);
   }
-  return router.currentRoute.value.query;
-})
+  return router?.currentRoute.value.query;
+});
 
 const signInHandler = () => {
+  console.log(router)
   if (EXTERNAL) {
     navigateWithQueryParams('/signin', { query: queryParams.value });
   } else {
-    void router.push({ name: ROUTE_LOGIN, query: router.currentRoute.value.query });
+    void router?.push({ name: ROUTE_LOGIN, query: router?.currentRoute.value.query });
   }
 };
 
@@ -77,18 +87,18 @@ const signUpHandler = () => {
   if (EXTERNAL) {
     navigateWithQueryParams('/signup', { query: queryParams.value });
   } else {
-    void router.push({ name: ROUTE_SIGNUP, query: router.currentRoute.value.query });
+    void router?.push({ name: ROUTE_SIGNUP, query: router?.currentRoute.value.query });
   }
 };
 
 const currentRoute = computed(() => {
   if (EXTERNAL) {
-    return window?.location?.pathname
+    return window?.location?.pathname;
   }
-  return router.currentRoute
-})
+  return router?.currentRoute;
+});
 
-watch([currentRoute.value], () => {
+watch(() => currentRoute.value, () => {
   isMobileMenuOpen.value = false;
 });
 
@@ -128,7 +138,6 @@ watchEffect(() => {
           </span>
         </div>
 
-
         <BaseSkeleton
           v-if="isGetUserIdentityLoading || isLoadingSession"
           height="25px"
@@ -166,7 +175,6 @@ watchEffect(() => {
           class="app-layout-default-header-btns__profile"
         />
       </div>
-
 
       <AppMobileMenu
         v-model="isMobileMenuOpen"

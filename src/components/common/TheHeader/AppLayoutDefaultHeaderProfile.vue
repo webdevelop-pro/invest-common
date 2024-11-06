@@ -11,6 +11,7 @@ type MenuItem = {
   to?: string;
   href?: string;
   text: string;
+  active?: boolean;
   children?: MenuItem[];
 }
 
@@ -32,6 +33,17 @@ const onLogout = () => {
 };
 const onSidebarOpen = () => {
   if (notificationLength.value) notificationsStore.notificationSidebarOpen();
+};
+
+
+const getComponentName = (item: MenuItem) => {
+  if (item.to) return 'router-link';
+  if (item.href) return 'a';
+  return 'div';
+};
+const getComponentClass = (item: MenuItem) => {
+  if (item.to || item.href) return 'app-layout-default-header-profile__item';
+  return 'pp-layout-default-header-profile__item-not-link';
 };
 </script>
 
@@ -69,20 +81,15 @@ const onSidebarOpen = () => {
           v-for="menuItem in menu"
           :key="menuItem.text"
         >
-          <router-link
-            v-if="menuItem.to"
+          <component
+            :is="getComponentName(menuItem)"
+            :href="menuItem.href"
             :to="menuItem.to"
-            class="app-layout-default-header-profile__item is--h6__title"
+            class="is--h6__title"
+            :class="[getComponentClass(menuItem), { 'is--active': menuItem.active }]"
           >
             {{ menuItem.text }}
-          </router-link>
-          <a
-            v-if="menuItem.href"
-            :href="menuItem.href"
-            class="app-layout-default-header-profile__item is--h6__title"
-          >
-          {{ menuItem.text }}
-          </a>
+          </component>
         </template>
         <div
           class="app-layout-default-header-profile__item is--h6__title"

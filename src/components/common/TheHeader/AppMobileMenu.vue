@@ -25,6 +25,7 @@ type MenuItem = {
   };
   href?: string;
   text: string;
+  active?: boolean;
   children?: MenuItem[];
 }
 
@@ -40,6 +41,7 @@ const router = useRouter();
 const usersStore = useUsersStore();
 const { userLoggedIn, isGetUserIdentityLoading } = storeToRefs(usersStore);
 const path = ref(window?.location?.pathname);
+
 
 const isSignUpPage = computed(() => {
   if (EXTERNAL) {
@@ -120,19 +122,6 @@ const close = () => emit('update:modelValue', false);
 void useBlockedBody(close);
 void useVhHeight();
 
-const getActive = (to: { name: string }) => {
-  if ( EXTERNAL ) {
-    if (window?.location?.pathname.includes(to.name)) {
-      return 'is--active';
-    }
-  } else {
-    if (router.currentRoute.value.name === to.name) {
-      return 'is--active';
-    }
-  }
-  return '';
-};
-
 
 
 const signInHandler = () => {
@@ -153,6 +142,17 @@ const signUpHandler = () => {
 const onLogout = () => {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
   void logoutModal.show({});
+};
+
+
+const getComponentName = (item: MenuItem) => {
+  if (item.to) return 'router-link';
+  if (item.href) return 'a';
+  return 'div';
+};
+const getComponentClass = (item: MenuItem) => {
+  if (item.to || item.href) return 'wd-mobile-menu__item';
+  return 'wd-mobile-menu__item-not-link';
 };
 
 if (window) {
@@ -186,20 +186,15 @@ if (window) {
         :key="menuItem.text"
         class="wd-mobile-menu__item-wrap"
       >
-        <router-link
-          v-if="menuItem.to"
+        <component
+          :is="getComponentName(menuItem)"
+          :href="menuItem.href"
           :to="menuItem.to"
-          class="wd-mobile-menu__item is--h5__title"
+          class="is--h5__title"
+          :class="[getComponentClass(menuItem), { 'is--active': menuItem.active }]"
         >
           {{ menuItem.text }}
-        </router-link>
-        <a
-          v-if="menuItem.href"
-          :to="menuItem.href"
-          class="wd-mobile-menu__item is--h5__title"
-        >
-          {{ menuItem.text }}
-        </a>
+        </component>
         <div
           v-if="menuItem.children && menuItem.children.length > 0"
           class="wd-mobile-menu__children"
@@ -209,22 +204,15 @@ if (window) {
             v-for="childItem in menuItem.children"
             :key="childItem.text"
           >
-            <router-link
-              v-if="childItem.to"
+            <component
+              :is="getComponentName(childItem)"
+              :href="childItem.href"
               :to="childItem.to"
-              :class="getActive(childItem.to.name)"
-              class="wd-mobile-menu__item is--h6__title"
+              class="is--h5__title"
+              :class="[getComponentClass(childItem), { 'is--active': childItem.active }]"
             >
               {{ childItem.text }}
-            </router-link>
-            <a
-              v-if="childItem.href"
-              :to="childItem.href"
-              :class="getActive(childItem.href)"
-              class="wd-mobile-menu__item is--h6__title"
-            >
-              {{ childItem.text }}
-            </a>
+            </component>
           </template>
         </div>
       </div>
@@ -261,20 +249,15 @@ if (window) {
           v-for="menuItem in profileMenu"
           :key="menuItem.text"
         >
-          <router-link
-            v-if="menuItem.to"
-            :to="menuItem.to"
-            class="wd-mobile-menu__item is--h5__title"
+          <component
+              :is="getComponentName(menuItem)"
+              :href="menuItem.href"
+              :to="menuItem.to"
+              class="is--h5__title"
+              :class="[getComponentClass(menuItem), { 'is--active': menuItem.active }]"
           >
-            {{ menuItem.text }}
-          </router-link>
-          <a
-            v-if="menuItem.href"
-            :href="menuItem.href"
-            class="wd-mobile-menu__item is--h5__title"
-          >
-          {{ menuItem.text }}
-          </a>
+              {{ menuItem.text }}
+          </component>
         </template>
         <div
           class="wd-mobile-menu__item is--h5__title"
