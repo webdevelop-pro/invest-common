@@ -8,7 +8,7 @@ import env from 'InvestCommon/global';
 const { OFFER_URL } = env;
 
 export const fetchGetOffers = () => {
-  const path = `${OFFER_URL}/`;
+  const path = `${OFFER_URL}/public/offer`;
 
   const data = {
     method: 'GET',
@@ -22,7 +22,7 @@ export const fetchGetOffers = () => {
 };
 
 export const fetchGetOfferOne = (slug: string | number) => {
-  const path = `${OFFER_URL}/${slug}`;
+  const path = `${OFFER_URL}/public/offer/${slug}`;
 
   const data = {
     method: 'GET',
@@ -36,7 +36,7 @@ export const fetchGetOfferOne = (slug: string | number) => {
 };
 
 export const fetchGetOfferComments = (id: number) => {
-  const path = `${OFFER_URL}/comment/${id}`;
+  const path = `${OFFER_URL}/public/comment/${id}`;
 
   const data = {
     method: 'GET',
@@ -50,7 +50,7 @@ export const fetchGetOfferComments = (id: number) => {
 };
 
 export const fetchSetOfferComment = (payload: IOfferCommentPayload) => {
-  const path = `${OFFER_URL}/comment`;
+  const path = `${OFFER_URL}/public/comment`;
 
   const body = JSON.stringify({
     ...payload,
@@ -69,7 +69,7 @@ export const fetchSetOfferComment = (payload: IOfferCommentPayload) => {
 };
 
 export const fetchSetOfferCommentOptions = () => {
-  const path = `${OFFER_URL}/comment`;
+  const path = `${OFFER_URL}/public/comment`;
 
   const data = {
     method: 'OPTIONS',

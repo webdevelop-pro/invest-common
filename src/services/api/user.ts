@@ -6,7 +6,7 @@ import { IProfileIndividual, ISchema } from 'InvestCommon/types/api/user';
 const { USER_URL } = env;
 
 export const fetchGetUserIndividualProfile = () => {
-  const path = `${USER_URL}/profile/individual`;
+  const path = `${USER_URL}/auth/profile/individual`;
 
   const data = {
     method: 'GET',
@@ -20,7 +20,7 @@ export const fetchGetUserIndividualProfile = () => {
 };
 
 export const fetchSetUserIndividualProfile = (userData: object) => {
-  const path = `${USER_URL}/profile/individual`;
+  const path = `${USER_URL}/auth/profile/individual`;
 
   const body = JSON.stringify({
     ...userData,
@@ -40,7 +40,7 @@ export const fetchSetUserIndividualProfile = (userData: object) => {
 
 
 export const fetchSetUserIndividualProfileOptions = () => {
-  const path = `${USER_URL}/profile/individual`;
+  const path = `${USER_URL}/auth/profile/individual`;
   const data = {
     method: 'OPTIONS',
     ...requiredFetchParams(),
@@ -53,7 +53,7 @@ export const fetchSetUserIndividualProfileOptions = () => {
 };
 
 export const fetchGetUserIdentity = () => {
-  const path = `${USER_URL}/user`;
+  const path = `${USER_URL}/auth/user`;
 
   const data = {
     method: 'GET',
@@ -67,7 +67,7 @@ export const fetchGetUserIdentity = () => {
 };
 
 export const fetchSetUserBackgroundInfo = (userData: object) => {
-  const path = `${USER_URL}/user`;
+  const path = `${USER_URL}/auth/user`;
 
   const body = JSON.stringify({
     ...userData,
@@ -86,7 +86,7 @@ export const fetchSetUserBackgroundInfo = (userData: object) => {
 };
 
 export const fetchSetUserBackgroundInfoOptions = () => {
-  const path = `${USER_URL}/user`;
+  const path = `${USER_URL}/auth/user`;
 
   const data = {
     method: 'OPTIONS',
