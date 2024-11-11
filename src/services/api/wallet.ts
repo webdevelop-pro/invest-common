@@ -1,4 +1,3 @@
-
 import env from 'InvestCommon/global';
 import { requiredFetchParams } from 'InvestCommon/helpers/requiredFetchParams';
 import { ITransactionDataResponse, IWalletDataResponse, WalletAddTransactionTypes } from 'InvestCommon/types/api/wallet';
@@ -6,7 +5,7 @@ import { ITransactionDataResponse, IWalletDataResponse, WalletAddTransactionType
 const { WALLET_URL } = env;
 
 export const fetchGetWalletData = (wallet_id: number) => {
-  const path = `${WALLET_URL}/wallet/${wallet_id}`;
+  const path = `${WALLET_URL}/auth/wallet/${wallet_id}`;
 
   const data = {
     method: 'GET',
@@ -20,7 +19,7 @@ export const fetchGetWalletData = (wallet_id: number) => {
 };
 
 export const fetchGetTransactionsData = (wallet_id: number) => {
-  const path = `${WALLET_URL}/wallet/${wallet_id}/transactions`;
+  const path = `${WALLET_URL}/auth/wallet/${wallet_id}/transactions`;
 
   const data = {
     method: 'GET',
@@ -34,7 +33,7 @@ export const fetchGetTransactionsData = (wallet_id: number) => {
 };
 
 export const fetchAddBankAccount = (wallet_id: number) => {
-  const path = `${WALLET_URL}/wallet/${wallet_id}/bank_account`;
+  const path = `${WALLET_URL}/auth/wallet/${wallet_id}/bank_account`;
 
   const data = {
     method: 'PUT',
@@ -48,7 +47,7 @@ export const fetchAddBankAccount = (wallet_id: number) => {
 };
 
 export const fetchAddTransaction = (wallet_id: number, type: WalletAddTransactionTypes, amountNum: number) => {
-  const path = `${WALLET_URL}/wallet/${wallet_id}/transactions`;
+  const path = `${WALLET_URL}/auth/wallet/${wallet_id}/transactions`;
 
   const body = JSON.stringify({
     type,
@@ -68,7 +67,7 @@ export const fetchAddTransaction = (wallet_id: number, type: WalletAddTransactio
 };
 
 export const fetchCancelTransaction = (wallet_id: number, transaction_id: number) => {
-  const path = `${WALLET_URL}/wallet/${wallet_id}/transactions/${transaction_id}`;
+  const path = `${WALLET_URL}/auth/wallet/${wallet_id}/transactions/${transaction_id}`;
 
   const body = JSON.stringify({
     action: 'cancel',

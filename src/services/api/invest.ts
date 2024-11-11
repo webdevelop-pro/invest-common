@@ -13,7 +13,7 @@ const { INVESTMENT_URL, ESIGN_URL } = env;
 
 
 export const fetchGetInvestments = () => {
-  const path = `${INVESTMENT_URL}/investment/confirmed`;
+  const path = `${INVESTMENT_URL}/auth/investment/confirmed`;
 
   const data = {
     method: 'GET',
@@ -27,7 +27,7 @@ export const fetchGetInvestments = () => {
 };
 
 export const fetchGetInvestOne = (id: string) => {
-  const path = `${INVESTMENT_URL}/investment/${id}`;
+  const path = `${INVESTMENT_URL}/auth/investment/${id}`;
 
   const data = {
     method: 'GET',
@@ -41,7 +41,7 @@ export const fetchGetInvestOne = (id: string) => {
 };
 
 export const fetchGetInvestUnconfirmed = () => {
-  const path = `${INVESTMENT_URL}/investment/unconfirmed`;
+  const path = `${INVESTMENT_URL}/auth/investment/unconfirmed`;
 
   const data = {
     method: 'GET',
@@ -58,7 +58,7 @@ export const fetchSetInvest = (
   slug: string,
   sharesCount: number,
 ) => {
-  const path = `${INVESTMENT_URL}/invest/${slug}`;
+  const path = `${INVESTMENT_URL}/auth/invest/${slug}`;
 
   const body = JSON.stringify({
     number_of_shares: sharesCount,
@@ -83,7 +83,7 @@ export const fetchSetAmount = (
   profileId: string,
   shares: number,
 ) => {
-  const path = `${INVESTMENT_URL}/invest/${slug}/amount/${id}/${profileId}`;
+  const path = `${INVESTMENT_URL}/auth/invest/${slug}/amount/${id}/${profileId}`;
 
   const body = JSON.stringify({
     number_of_shares: shares,
@@ -107,7 +107,7 @@ export const fetchSetOwnership = (
   profileId: string,
   userData: object,
 ) => {
-  const path = `${INVESTMENT_URL}/invest/${slug}/ownership/${id}/${profileId}`;
+  const path = `${INVESTMENT_URL}/auth/invest/${slug}/ownership/${id}/${profileId}`;
 
   const body = JSON.stringify({
     ...userData,
@@ -134,7 +134,7 @@ export const fetchSetSignature = (
   const usersStore = useUsersStore();
   const { userAccountSession } = storeToRefs(usersStore);
 
-  const path = `${INVESTMENT_URL}/invest/${slug}/signature/${id}/${profileId}`;
+  const path = `${INVESTMENT_URL}/auth/invest/${slug}/signature/${id}/${profileId}`;
 
   const body = JSON.stringify({
     signature_id: signUrlId,
@@ -159,7 +159,7 @@ export const fetchSetDocument = (
   investId: string,
   profileId: string,
 ) => {
-  const path = `${ESIGN_URL}/create_document/${slug}/esign/${investId}/${profileId}`;
+  const path = `${ESIGN_URL}/auth/create_document/${slug}/esign/${investId}/${profileId}`;
 
   const data = {
     method: 'POST',
@@ -175,7 +175,7 @@ export const fetchSetDocument = (
 export const fetchGetDocument = (
   investId: string,
 ) => {
-  const path = `${ESIGN_URL}/get_document/${investId}`;
+  const path = `${ESIGN_URL}/auth/get_document/${investId}`;
 
   const data = {
     method: 'GET',
@@ -200,7 +200,7 @@ export const fetchSetFunding = (
   profileId: string,
   fundingData: IInvestFunding,
 ) => {
-  const path = `${INVESTMENT_URL}/invest/${slug}/funding/${id}/${profileId}`;
+  const path = `${INVESTMENT_URL}/auth/invest/${slug}/funding/${id}/${profileId}`;
 
   const body = JSON.stringify(fundingData);
 
@@ -221,7 +221,7 @@ export const fetchSetReview = (
   id: string,
   profileId: string,
 ) => {
-  const path = `${INVESTMENT_URL}/invest/${slug}/review/${id}/${profileId}`;
+  const path = `${INVESTMENT_URL}/auth/invest/${slug}/review/${id}/${profileId}`;
 
   const body = JSON.stringify({
   });
@@ -239,7 +239,7 @@ export const fetchSetReview = (
 };
 
 export const fetchCancelInvest = (id: string, reason: string) => {
-  const path = `${INVESTMENT_URL}/investment/${id}/cancel`;
+  const path = `${INVESTMENT_URL}/auth/investment/${id}/cancel`;
 
   const body = JSON.stringify({
     cancelation_reason: reason,
@@ -262,7 +262,7 @@ export const fetchSetAmountOptions = (
   id: string,
   profileId: string,
 ) => {
-  const path = `${INVESTMENT_URL}/invest/${slug}/amount/${id}/${profileId}`;
+  const path = `${INVESTMENT_URL}/auth/invest/${slug}/amount/${id}/${profileId}`;
 
   const data = {
     method: 'OPTIONS',
@@ -281,7 +281,7 @@ export const fetchSetOwnershipOptions = (
   id: string,
   profileId: string,
 ) => {
-  const path = `${INVESTMENT_URL}/invest/${slug}/ownership/${id}/${profileId}`;
+  const path = `${INVESTMENT_URL}/auth/invest/${slug}/ownership/${id}/${profileId}`;
 
   const data = {
     method: 'OPTIONS',
@@ -300,7 +300,7 @@ export const fetchSetFundingOptions = (
   id: string,
   profileId: string,
 ) => {
-  const path = `${INVESTMENT_URL}/invest/${slug}/funding/${id}/${profileId}`;
+  const path = `${INVESTMENT_URL}/auth/invest/${slug}/funding/${id}/${profileId}`;
 
   const data = {
     method: 'OPTIONS',
@@ -316,7 +316,7 @@ export const fetchSetFundingOptions = (
 export const fetchSetCancelOptions = (
   id: string,
 ) => {
-  const path = `${INVESTMENT_URL}/investment/${id}/cancel`;
+  const path = `${INVESTMENT_URL}/auth/investment/${id}/cancel`;
 
   const data = {
     method: 'OPTIONS',
