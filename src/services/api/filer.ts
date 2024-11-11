@@ -1,4 +1,3 @@
-
 import env from 'InvestCommon/global';
 import { requiredFetchParams } from 'InvestCommon/helpers/requiredFetchParams';
 import { IFilerItem } from 'InvestCommon/types/api/filer';
@@ -21,7 +20,7 @@ export const fetchGetFiles = (object_id: number, object_name: string) => {
 
 
 export const fetchGetPublicFiles = (object_id: number, object_name: string) => {
-  const path = `${FILER_URL}/public/object/${object_name}/${object_id}`;
+  const path = `${FILER_URL}/object/${object_name}/${object_id}`;
 
   const data = {
     method: 'GET',
