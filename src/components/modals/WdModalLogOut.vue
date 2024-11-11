@@ -7,7 +7,7 @@
     <template #default>
       <div class="wd-modal-log-out__img">
         <img
-          :src="!EXTERNAL ? 'InvestCommon/assets/images/icons/logout-modal.svg?url' : '/images/logout-modal.svg'"
+          :src="!EXTERNAL ? image : '/images/logout-modal.svg'"
           alt=""
         >
       </div>
@@ -52,6 +52,7 @@ import BaseModalLayout from 'UiKit/components/BaseModal/BaseModalLayout.vue';
 import BaseButton from 'UiKit/components/BaseButton/BaseButton.vue';
 import { storeToRefs } from 'pinia';
 import env from 'InvestCommon/global';
+import image from 'InvestCommon/assets/images/icons/logout-modal.svg?url';
 
 export default defineComponent({
   name: 'WdModalLogOut',
@@ -76,6 +77,7 @@ export default defineComponent({
       logoutHandler,
       EXTERNAL,
       isLoadingLogout,
+      image,
     };
   },
 });
