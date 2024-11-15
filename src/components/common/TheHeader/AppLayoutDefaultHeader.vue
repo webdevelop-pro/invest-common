@@ -12,7 +12,8 @@ import { useAuthLogicStore, useUsersStore } from 'InvestCommon/store';
 import { storeToRefs } from 'pinia';
 import BaseSkeleton from 'UiKit/components/BaseSkeleton/BaseSkeleton.vue';
 import env from 'InvestCommon/global';
-import { navigateWithQueryParams } from 'InvestCommon/helpers/general';
+import { navigateWithQueryParams } from 'UiKit/helpers/general';
+import { urlSignin, urlSignup } from 'InvestCommon/global/links';
 
 const { EXTERNAL } = env;
 
@@ -75,9 +76,8 @@ const queryParams = computed(() => {
 });
 
 const signInHandler = () => {
-  console.log(router)
-  if (EXTERNAL) {
-    navigateWithQueryParams('/signin', { query: queryParams.value });
+  if (EXTERNAL && queryParams.value) {
+    navigateWithQueryParams(urlSignin,  queryParams.value);
   } else {
     void router?.push({ name: ROUTE_LOGIN, query: router?.currentRoute.value.query });
   }
@@ -85,7 +85,7 @@ const signInHandler = () => {
 
 const signUpHandler = () => {
   if (EXTERNAL) {
-    navigateWithQueryParams('/signup', { query: queryParams.value });
+    navigateWithQueryParams(urlSignup,  queryParams.value);
   } else {
     void router?.push({ name: ROUTE_SIGNUP, query: router?.currentRoute.value.query });
   }

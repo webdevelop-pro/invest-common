@@ -20,6 +20,8 @@ import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValida
 import { isEmpty } from 'lodash';
 import { BaseSvgIcon } from 'UiKit/components/BaseSvgIcon';
 import { scrollToError } from 'UiKit/helpers/validation/general';
+import { urlContactUs } from 'InvestCommon/global/links';
+
 
 const props = defineProps({
   investment: {
@@ -137,7 +139,7 @@ watch(() => model, () => {
             Can I cancel my investment and get a refund
         </a> article or
           <a
-            href="/contact-us"
+            :href="urlContactUs"
             class="is--link-1"
           >
             Contact us

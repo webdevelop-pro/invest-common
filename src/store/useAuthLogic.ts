@@ -18,6 +18,7 @@ import {
 } from 'InvestCommon/store';
 import env from 'InvestCommon/global';
 import { navigateWithQueryParams } from 'InvestCommon/helpers/general';
+import { urlOffers, urlProfilePortfolio, urlSignin } from 'InvestCommon/global/links';
 
 const { EXTERNAL } = env;
 
@@ -72,7 +73,7 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
       await usersStore.getUserIdentity();
       void usersStore.updateUserAccountSession(setLoginData.value.session);
       if (EXTERNAL) {
-        navigateWithQueryParams(`/profile/${selectedUserProfileId.value}/portfolio`);
+        navigateWithQueryParams(urlProfilePortfolio(selectedUserProfileId.value));
       } else {
         void router.push(pushTo({
           name: ROUTE_DASHBOARD_PORTFOLIO,
@@ -132,7 +133,7 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
       await usersStore.getUserIdentity();
       void usersStore.updateUserAccountSession(setSignupData.value.session);
       if (EXTERNAL) {
-        navigateWithQueryParams(`/profile/${selectedUserProfileId.value}/portfolio`);
+        navigateWithQueryParams(urlProfilePortfolio(selectedUserProfileId.value));
       } else {
         void router.push(pushTo({
           name: ROUTE_DASHBOARD_PORTFOLIO,
@@ -164,7 +165,7 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     }
     if (setPasswordData.value) {
       if (EXTERNAL) {
-        navigateWithQueryParams(`/profile/${selectedUserProfileId.value}/portfolio`);
+        navigateWithQueryParams(urlProfilePortfolio(selectedUserProfileId.value));
       } else {
         void router.push(pushTo({
           name: ROUTE_DASHBOARD_PORTFOLIO,
@@ -221,10 +222,10 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
         queryParams = window?.location?.pathname;
       }
       if (window?.location?.pathname?.includes('/invest')) {
-        queryParams = { redirect: '/offers' };
+        queryParams = { redirect: urlOffers };
       }
-      if (queryParams) navigateWithQueryParams('/signin', { query: queryParams });
-      else navigateWithQueryParams('/signin');
+      if (queryParams) navigateWithQueryParams(urlSignin, queryParams);
+      else navigateWithQueryParams(urlSignin);
     } else {
       const { currentRoute } = router;
       if (currentRoute.value.name === ROUTE_OFFERS
@@ -237,7 +238,7 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
           || currentRoute.value.name === ROUTE_INVEST_REVIEW
           || currentRoute.value.name === ROUTE_INVEST_SIGNATURE
           || currentRoute.value.name === ROUTE_INVEST_THANK) && currentRoute.value.params?.slug) {
-        queryParams = { redirect: '/offers' };
+        queryParams = { redirect: urlOffers };
       }
       void router.push({ name: ROUTE_LOGIN, query: queryParams });
     }

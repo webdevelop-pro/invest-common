@@ -5,6 +5,8 @@ const env = {
   KRATOS_URL: import.meta.env.VITE_KRATOS_URL,
   PLAID_URL: import.meta.env.VITE_PLAID_URL,
   FRONTEND_URL: import.meta.env.VITE_FRONTEND,
+  FRONTEND_URL_DASHBOARD: import.meta.env.VITE_FRONTEND_DASHBOARD,
+  FRONTEND_URL_STATIC: import.meta.env.VITE_FRONTEND_STATIC,
   INVESTMENT_URL: import.meta.env.VITE_INVESTMENT_URL,
   OFFER_URL: import.meta.env.VITE_OFFER_URL,
   ESIGN_URL: import.meta.env.VITE_ESIGN_URL,

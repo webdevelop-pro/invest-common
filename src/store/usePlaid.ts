@@ -11,6 +11,7 @@ import { useRouter } from 'vue-router';
 // import { useKYCIdentityStore } from './useKYCIdentity';
 import { navigateWithQueryParams } from 'InvestCommon/helpers/general';
 import env from 'InvestCommon/global';
+import { urlProfilePortfolio } from 'InvestCommon/global/links';
 
 const { EXTERNAL } = env;
 
@@ -66,7 +67,7 @@ export const usePlaidStore = defineStore('plaid', () => {
             // await kycIdentitiesStore.updateUserPlaidIdentities();
             void usersStore.updateUserSelectedAccount();
             if (EXTERNAL) {
-              navigateWithQueryParams(`/profile/${selectedUserProfileId.value}/portfolio`);
+              navigateWithQueryParams(urlProfilePortfolio(selectedUserProfileId.value));
             } else {
               const { pushTo } = useRedirect();
               const router = useRouter();

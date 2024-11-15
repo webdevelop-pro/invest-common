@@ -16,6 +16,7 @@ import AppMobileMenuBurger from './AppMobileMenuBurger.vue';
 import { useLogoutModal } from 'InvestCommon/components/modals/modals';
 import { navigateWithQueryParams } from 'InvestCommon/helpers/general';
 import env from 'InvestCommon/global';
+import { urlSignin, urlSignup } from 'InvestCommon/global/links';
 
 const { EXTERNAL } = env;
 
@@ -126,7 +127,7 @@ void useVhHeight();
 
 const signInHandler = () => {
   if (EXTERNAL) {
-    navigateWithQueryParams('/signin', { query: queryParams.value });
+    navigateWithQueryParams(urlSignin,  queryParams.value);
   } else {
     void router.push({ name: ROUTE_LOGIN, query: router.currentRoute.value.query });
   }
@@ -134,7 +135,7 @@ const signInHandler = () => {
 
 const signUpHandler = () => {
   if (EXTERNAL) {
-    navigateWithQueryParams('/signup', { query: queryParams.value });
+    navigateWithQueryParams(urlSignup,  queryParams.value);
   } else {
     void router.push({ name: ROUTE_SIGNUP, query: router.currentRoute.value.query });
   }

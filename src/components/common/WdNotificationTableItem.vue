@@ -11,6 +11,10 @@ import {
 } from 'InvestCommon/helpers/enums/routes';
 import { storeToRefs } from 'pinia';
 import { BaseSvgIcon } from 'UiKit/components/BaseSvgIcon';
+import {
+  urlContactUs, urlOffers, urlNotifications, urlProfileAccreditation,
+  urlInvestmentTimeline, urlProfileWallet, urlProfileAccount,
+} from 'InvestCommon/global/links';
 
 const notificationsStore = useNotificationsStore();
 const { isMarkAsReadByIdError } = storeToRefs(notificationsStore);
@@ -59,7 +63,7 @@ const tagText = computed(() => {
 
 const buttonTo = computed(() => {
   if (kycDeclined.value || isFundsFailed.value) {
-    return '/contact-us';
+    return urlContactUs;
   }
   if (accreditationDeclined.value || accreditationExpired.value) {
     return {
@@ -91,7 +95,7 @@ const buttonTo = computed(() => {
     };
   }
   if (isStart.value) {
-    return '/offers';
+    return urlOffers;
   }
   return {
     name: ROUTE_NOTIFICATIONS,
@@ -100,27 +104,27 @@ const buttonTo = computed(() => {
 
 const buttonLink = computed(() => {
   if (kycDeclined.value || isFundsFailed.value) {
-    return '/contact-us';
+    return urlContactUs;
   }
   if (accreditationDeclined.value || accreditationExpired.value) {
-    return `/profile/${objectId.value}/accreditation`;
+    return urlProfileAccreditation(objectId.value);
   }
   if (isNotificationInvestment.value) {
-    return `/profile/${selectedUserProfileId.value}/investment/${objectId.value}/timeline`;
+    return urlInvestmentTimeline(selectedUserProfileId.value, objectId.value);
   }
   if (isNotificationDocument.value) {
-    return '/notifications';
+    return urlNotifications;
   }
   if (isNotificationWallet.value) {
-    return `/profile/${selectedUserProfileId.value}/wallet`;
+    return urlProfileWallet(selectedUserProfileId.value);
   }
   if (isNotificationProfile.value) {
-    return `/profile/${objectId.value}/account`;
+    return urlProfileAccount(objectId.value);
   }
   if (isStart.value) {
-    return '/offers';
+    return urlOffers;
   }
-  return '/notifications';
+  return urlNotifications;
 });
 
 const isUnread = computed(() => (props.data?.status.toLowerCase() === 'unread'));

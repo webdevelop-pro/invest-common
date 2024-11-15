@@ -8,6 +8,7 @@ import BaseTag from 'UiKit/components/BaseTag/BaseTag.vue';
 import { formatToFullDate } from 'InvestCommon/helpers/formatters/formatToDate';
 import { currency } from 'InvestCommon/helpers/currency';
 import { InvestTransactionStatuses } from 'InvestCommon/helpers/enums/invest';
+import { urlContactUs } from 'InvestCommon/global/links';
 
 const props = defineProps({
   investment: {
@@ -97,7 +98,7 @@ const timeFormatted = computed(() => (dateFull.value ? getTimeFormat(String(date
       <div class="wd-modal-portfolio-transaction__footer-btns">
         <BaseButton
           tag="a"
-          href="/contact-us"
+          :href="urlContactUs"
           variant="outlined"
           data-testid="button"
         >
