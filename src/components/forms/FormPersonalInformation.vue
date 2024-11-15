@@ -6,15 +6,15 @@ import {
   useAccreditationStore, useUserIdentitysStore, useUsersStore,
 } from 'InvestCommon/store';
 import { useHubspotForm } from 'InvestCommon/composable';
-import FormRow from 'InvestCommon/components/common/FormRow.vue';
-import FormCol from 'InvestCommon/components/common/FormCol.vue';
-import BaseFormInput from 'UiKit/components/BaseFormInput/BaseFormInput.vue';
-import BaseButton from 'UiKit/components/BaseButton/BaseButton.vue';
-import BaseFormSelect from 'UiKit/components/BaseFormSelect/BaseFormSelect.vue';
+import FormRow from 'InvestCommon/components/VForm/VFormRow.vue';
+import FormCol from 'InvestCommon/components/VForm/VFormCol.vue';
+import VFormInput from 'UiKit/components/VForm/VFormInput.vue';
+import VButton from 'UiKit/components/VButton/VButton.vue';
+import VFormSelect from 'UiKit/components/VForm/VFormSelect.vue';
 import { storeToRefs } from 'pinia';
 import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
 import { isEmpty } from 'InvestCommon/helpers/general';
-import BaseFormGroup from 'UiKit/components/BaseFormGroup/BaseFormGroup.vue';
+import VFormGroup from 'UiKit/components/VForm/VFormGroup.vue';
 import { FormModelPersonalInformation, schemaPersonalInformation } from './utils';
 import { SELECT_CITIZENSHIP_OPTIONS } from 'InvestCommon/utils';
 import { useRouter } from 'vue-router';
@@ -133,8 +133,8 @@ watch(() => setUserIdentityOptionsData.value, () => {
     <div class="form-personal-information__content">
       <FormRow>
         <FormCol col3>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -144,21 +144,21 @@ watch(() => setUserIdentityOptionsData.value, () => {
             label="First Name"
             data-testid="first-name-group"
           >
-            <BaseFormInput
+            <VFormInput
               :model-value="model.first_name"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               placeholder="First Name"
               name="first-name"
               size="large"
               data-testid="first-name"
               @update:model-value="model.first_name = $event"
             />
-          </BaseFormGroup>
+          </VFormGroup>
         </FormCol>
 
         <FormCol col3>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -168,21 +168,21 @@ watch(() => setUserIdentityOptionsData.value, () => {
             label="Middle Name"
             data-testid="middle-name-group"
           >
-            <BaseFormInput
+            <VFormInput
               :model-value="model.middle_name"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               placeholder="Middle Name"
               name="middle-name"
               size="large"
               data-testid="middle-name"
               @update:model-value="model.middle_name = $event"
             />
-          </BaseFormGroup>
+          </VFormGroup>
         </FormCol>
 
         <FormCol col3>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -192,22 +192,22 @@ watch(() => setUserIdentityOptionsData.value, () => {
             label="Last Name"
             data-testid="last-name-group"
           >
-            <BaseFormInput
+            <VFormInput
               :model-value="model.last_name"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               placeholder="Last Name"
               name="last-name"
               size="large"
               data-testid="last-name"
               @update:model-value="model.last_name = $event"
             />
-          </BaseFormGroup>
+          </VFormGroup>
         </FormCol>
       </FormRow>
       <FormRow>
         <FormCol col-2>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -217,9 +217,9 @@ watch(() => setUserIdentityOptionsData.value, () => {
             label="Date of Birth"
             data-testid="dob-group"
           >
-            <BaseFormInput
+            <VFormInput
               :model-value="model.dob"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               placeholder="MM/DD/YYYY"
               name="date-of-birth"
               size="large"
@@ -227,12 +227,12 @@ watch(() => setUserIdentityOptionsData.value, () => {
               type="date"
               @update:model-value="model.dob = $event"
             />
-          </BaseFormGroup>
+          </VFormGroup>
         </FormCol>
 
         <FormCol col-2>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -242,9 +242,9 @@ watch(() => setUserIdentityOptionsData.value, () => {
             label="Phone number"
             data-testid="phone-group"
           >
-            <BaseFormInput
+            <VFormInput
               :model-value="model.phone"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               placeholder="+1 (___) ___ - ____"
               mask="+#(###)###-####"
               disallow-special-chars
@@ -253,13 +253,13 @@ watch(() => setUserIdentityOptionsData.value, () => {
               data-testid="phone"
               @update:model-value="model.phone = $event"
             />
-          </BaseFormGroup>
+          </VFormGroup>
         </FormCol>
       </FormRow>
       <FormRow>
         <FormCol col2>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -269,9 +269,9 @@ watch(() => setUserIdentityOptionsData.value, () => {
             label="Citizenship"
             data-testid="citizenship-group"
           >
-            <BaseFormSelect
+            <VFormSelect
               :model-value="model.citizenship"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               name="citizenship"
               size="large"
               placeholder="Please choose an option"
@@ -282,11 +282,11 @@ watch(() => setUserIdentityOptionsData.value, () => {
               dropdown-absolute
               @update:model-value="model.citizenship = $event"
             />
-          </BaseFormGroup>
+          </VFormGroup>
         </FormCol>
         <FormCol col2>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -296,9 +296,9 @@ watch(() => setUserIdentityOptionsData.value, () => {
             label="SSN"
             data-testid="ssn-group"
           >
-            <BaseFormInput
+            <VFormInput
               :model-value="model.ssn"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               placeholder="XXX-XXX-XXXX"
               name="ssn"
               size="large"
@@ -307,7 +307,7 @@ watch(() => setUserIdentityOptionsData.value, () => {
               disallow-special-chars
               @update:model-value="model.ssn = $event"
             />
-          </BaseFormGroup>
+          </VFormGroup>
         </FormCol>
       </FormRow>
       <div class="form-personal-information__subtitle is--h3__title">
@@ -315,8 +315,8 @@ watch(() => setUserIdentityOptionsData.value, () => {
       </div>
       <FormRow>
         <FormCol col2>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -326,21 +326,21 @@ watch(() => setUserIdentityOptionsData.value, () => {
             label="Address 1"
             data-testid="address-1-group"
           >
-            <BaseFormInput
+            <VFormInput
               :model-value="model.address1"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               placeholder="Address 1"
               name="address-1"
               size="large"
               data-testid="address-1"
               @update:model-value="model.address1 = $event"
             />
-          </BaseFormGroup>
+          </VFormGroup>
         </FormCol>
 
         <FormCol col2>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -350,23 +350,23 @@ watch(() => setUserIdentityOptionsData.value, () => {
             label="Address 2"
             data-testid="address-2-group"
           >
-            <BaseFormInput
+            <VFormInput
               :model-value="model.address2"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               placeholder="Address 2"
               name="address-2"
               size="large"
               data-testid="address-2"
               @update:model-value="model.address2 = $event"
             />
-          </BaseFormGroup>
+          </VFormGroup>
         </FormCol>
       </FormRow>
 
       <FormRow>
         <FormCol col2>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -376,9 +376,9 @@ watch(() => setUserIdentityOptionsData.value, () => {
             label="City"
             data-testid="city-group"
           >
-            <BaseFormInput
+            <VFormInput
               :model-value="model.city"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               name="city"
               size="large"
               placeholder="City"
@@ -387,11 +387,11 @@ watch(() => setUserIdentityOptionsData.value, () => {
               disallow-numbers
               @update:model-value="model.city = $event"
             />
-          </BaseFormGroup>
+          </VFormGroup>
         </FormCol>
         <FormCol col2>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -401,9 +401,9 @@ watch(() => setUserIdentityOptionsData.value, () => {
             label="State"
             data-testid="state-group"
           >
-            <BaseFormSelect
+            <VFormSelect
               :model-value="model.state"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               name="state"
               size="large"
               placeholder="State"
@@ -415,14 +415,14 @@ watch(() => setUserIdentityOptionsData.value, () => {
               data-testid="state"
               @update:model-value="model.state = $event"
             />
-          </BaseFormGroup>
+          </VFormGroup>
         </FormCol>
       </FormRow>
 
       <FormRow>
         <FormCol col2>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -432,9 +432,9 @@ watch(() => setUserIdentityOptionsData.value, () => {
             label="Zip Code"
             data-testid="zip-group"
           >
-            <BaseFormInput
+            <VFormInput
               :model-value="model.zip_code"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               name="zip"
               size="large"
               data-testid="zip"
@@ -444,12 +444,12 @@ watch(() => setUserIdentityOptionsData.value, () => {
               disallow-special-chars
               @update:model-value="model.zip_code = $event"
             />
-          </BaseFormGroup>
+          </VFormGroup>
         </FormCol>
 
         <FormCol col2>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -459,9 +459,9 @@ watch(() => setUserIdentityOptionsData.value, () => {
             label="Country"
             data-testid="country-group"
           >
-            <BaseFormSelect
+            <VFormSelect
               :model-value="model.country"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               name="country"
               size="large"
               placeholder="Country"
@@ -473,19 +473,19 @@ watch(() => setUserIdentityOptionsData.value, () => {
               data-testid="country"
               @update:model-value="model.country = $event"
             />
-          </BaseFormGroup>
+          </VFormGroup>
         </FormCol>
       </FormRow>
     </div>
     <div class="form-personal-information__footer">
-      <BaseButton
+      <VButton
         size="large"
         variant="outlined"
         @click="cancelHandler"
       >
         Cancel
-      </BaseButton>
-      <BaseButton
+      </VButton>
+      <VButton
         size="large"
         :disabled="isDisabledButton"
         :loading="isLoading"
@@ -493,12 +493,12 @@ watch(() => setUserIdentityOptionsData.value, () => {
         @click="saveHandler"
       >
         Save
-      </BaseButton>
+      </VButton>
     </div>
   </div>
 </template>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .form-personal-information {
   display: flex;
   flex-direction: column;

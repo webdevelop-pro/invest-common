@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { IOffer } from 'InvestCommon/types/api/offers';
 import { currency } from 'InvestCommon/helpers/currency';
-import BaseButton from 'UiKit/components/BaseButton/BaseButton.vue';
-import BaseTag from 'UiKit/components/BaseTag/BaseTag.vue';
+import VButton from 'UiKit/components/VButton/VButton.vue';
+import VTag from 'UiKit/components/VTag/VTag.vue';
 import { PropType, computed } from 'vue';
 import defaulImage from 'InvestCommon/assets/images/default.svg?url';
-import InfoSlot from '../InfoSlot.vue';
+import VInfoSlot from 'InvestCommon/components/VInfoSlot/VInfoSlot.vue';
 import { useOfferStore } from 'InvestCommon/store';
 
 const props = defineProps({
@@ -43,116 +43,121 @@ const infoTags = computed(() => ([
   'E-Commerce',
   'Network Security',
 ]));
-const componentName = computed(() => {
-  if (props.routeName) return 'router-link';
-  else if (props.link) return 'a';
-  return 'div';
-})
 </script>
 
 <template>
-  <component
-    :is="componentName"
-    :to="to"
-    :href="link"
+  <article
     itemscope
     itemtype="https://schema.org/Product"
-    class="OffersCard offers-card"
+    class="VOfferCard v-offer-card"
   >
-    <BaseTag
+    <VTag
       v-if="showTag"
       round
       :background="tagBackground"
-      class="offers-card__tag"
+      class="v-offer-card__tag"
     >
       {{ tagText }}
-    </BaseTag>
+    </VTag>
     <div
       v-if="offerImage"
-      class="offers-card__img-wrap"
+      class="v-offer-card__img-wrap"
     >
       <img
         :src="offerImage"
         :alt="offer.slug"
         itemprop="image"
-        class="offers-card__img is--no-margin"
+        class="v-offer-card__img is--no-margin"
         :class="{ 'is--default-image': isDefaultImage }"
       >
     </div>
-    <div class="offers-card__inner">
+    <div class="v-offer-card__inner">
       <h2
-        class="offers-card__title is--h3__title"
+        class="v-offer-card__title is--h3__title"
         data-testid="offer-title"
         itemprop="name"
       >
         {{ offer.name }}
       </h2>
-      <div class="offers-card__inner-bottom">
-        <div class="offers-card__content">
+      <div class="v-offer-card__inner-bottom">
+        <div class="v-offer-card__content">
           <div
             v-if="funded"
-            class="offers-card__funded is--small-2"
+            class="v-offer-card__funded is--small-2"
           >
             Funded
           </div>
           <div
             v-if="offer.seo_description"
             itemprop="description"
-            class="offers-card__description is--small"
+            class="v-offer-card__description is--small"
           >
             {{ offer.seo_description }}
           </div>
-          <InfoSlot
+          <VInfoSlot
             v-if="!funded"
             size="small"
-            class="offers-card__info"
+            class="v-offer-card__info"
           >
-            <div class="offers-card__info-wrap">
-              <div class="offers-card__details is--small-2">
+            <div class="v-offer-card__info-wrap">
+              <div class="v-offer-card__details is--small-2">
                 Min investment:
-                <span class="offers-card__details-number is--h6__title">
+                <span class="v-offer-card__details-number is--h6__title">
                   {{ currency(minInvestment, 0) }}
                 </span>
               </div>
-              <div class="offers-card__details is--small-2">
+              <div class="v-offer-card__details is--small-2">
                 Pre-Money Valuation:
-                <span class="offers-card__details-number is--h6__title">
+                <span class="v-offer-card__details-number is--h6__title">
                   {{ currency(offer.valuation, 0) }}
                 </span>
               </div>
             </div>
-          </InfoSlot>
-          <div class="offers-card__tag-info-wrap">
-            <BaseTag
+          </VInfoSlot>
+          <div class="v-offer-card__tag-info-wrap">
+            <VTag
               v-for="(tagInfo, indexInfo) in infoTags"
               :key="indexInfo"
               round
               size="small"
               background="#DEE2E6"
               itemprop="keywords"
-              class="offers-card__tag-info"
+              class="v-offer-card__tag-info"
             >
               {{ tagInfo }}
-            </BaseTag>
+            </VTag>
           </div>
         </div>
-        <BaseButton
+        <VButton
           v-if="!funded"
           tag="router-link"
           :to="to"
           block
           color="secondary"
-          class="offers-card__btn"
+          class="v-offer-card__btn"
         >
           Invest Now
-        </BaseButton>
+        </VButton>
       </div>
     </div>
-  </component>
+    <a
+      v-if="link"
+      :href="link"
+      :aria-label="offer.name"
+      v-bind="$attrs"
+      class="v-offer-card__link"
+    />
+    <router-link
+      v-if="routeName"
+      :to="to"
+      class="v-offer-card__link"
+      :aria-label="`card ${offer.name} link`"
+    />
+  </article>
 </template>
 
 <style lang="scss">
-.offers-card {
+.v-offer-card {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -259,6 +264,14 @@ const componentName = computed(() => {
     display: flex;
     width: 100%;
     gap: 8px;
+  }
+
+  &__link {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
   }
 }
 </style>

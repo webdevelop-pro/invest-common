@@ -2,13 +2,13 @@
 import {
   PropType, computed, nextTick, onMounted, reactive, ref, watch,
 } from 'vue';
-import BaseModalLayout from 'UiKit/components/BaseModal/BaseModalLayout.vue';
-import BaseButton from 'UiKit/components/BaseButton/BaseButton.vue';
+import VModalLayout from 'UiKit/components/VModal/VModalLayout.vue';
+import VButton from 'UiKit/components/VButton/VButton.vue';
 import { currency } from 'InvestCommon/helpers/currency';
 import { IInvest } from 'InvestCommon/types/api/invest';
 import { PostLinkTypes } from 'InvestCommon/types/api/blog';
-import BaseFormTextarea from 'UiKit/components/BaseFormTextarea/BaseFormTextarea.vue';
-import BaseFormGroup from 'UiKit/components/BaseFormGroup/BaseFormGroup.vue';
+import VFormTextarea from 'UiKit/components/VForm/VFormTextarea.vue';
+import VFormGroup from 'UiKit/components/VForm/VFormGroup.vue';
 import { useUsersStore, useInvestmentsStore, useOfferStore } from 'InvestCommon/store';
 import {
   useHubspotForm,
@@ -18,7 +18,7 @@ import { JSONSchemaType } from 'ajv';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
 import { isEmpty } from 'lodash';
-import { BaseSvgIcon } from 'UiKit/components/BaseSvgIcon';
+import { VSvgIcon } from 'UiKit/components/VSvgIcon';
 import { scrollToError } from 'UiKit/helpers/validation/general';
 import { urlContactUs } from 'InvestCommon/global/links';
 
@@ -112,7 +112,7 @@ watch(() => model, () => {
 </script>
 
 <template>
-  <BaseModalLayout
+  <VModalLayout
     class="WdModalPortfolioCancelInvestment wd-modal-cancel-investment is--no-margin"
     @close="$emit('close')"
   >
@@ -146,8 +146,8 @@ watch(() => model, () => {
           </a>
           with any question.
         </p>
-        <BaseFormGroup
-          v-slot="baseFormGroupProps"
+        <VFormGroup
+          v-slot="VFormGroupProps"
           class="accreditation-file-input__note"
           :model="model"
           :validation="validation"
@@ -156,43 +156,43 @@ watch(() => model, () => {
           path="cancelation_reason"
           label="Please let us know your cancellation reason"
         >
-          <BaseFormTextarea
+          <VFormTextarea
             :model-value="model.cancelation_reason"
             rows="3"
-            :is-error="baseFormGroupProps.isFieldError"
+            :is-error="VFormGroupProps.isFieldError"
             placeholder="Cancellation Reason"
             @update:model-value="model.cancelation_reason = $event"
           />
-        </BaseFormGroup>
+        </VFormGroup>
       </div>
     </template>
 
     <template #footer>
       <div class="wd-modal-cancel-investment__footer-btns">
-        <BaseButton
+        <VButton
           variant="link"
           size="large"
           icon-placement="left"
           @click.stop="onBackClick"
         >
-          <BaseSvgIcon
+          <VSvgIcon
             name="arrow-left"
             alt="arrow left"
             class="wd-modal-cancel-investment__back-icon"
           />
           Back
-        </BaseButton>
-        <BaseButton
+        </VButton>
+        <VButton
           color="danger"
           :loading="isCancelInvestLoading"
           :disabled="isBtnDisabled"
           @click.stop="cancelInvestHandler"
         >
           Cancel Investment
-        </BaseButton>
+        </VButton>
       </div>
     </template>
-  </BaseModalLayout>
+  </VModalLayout>
 </template>
 
 <style lang="scss">

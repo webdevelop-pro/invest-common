@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { PropType, computed } from 'vue';
-import BaseModalLayout from 'UiKit/components/BaseModal/BaseModalLayout.vue';
-import BaseButton from 'UiKit/components/BaseButton/BaseButton.vue';
+import VModalLayout from 'UiKit/components/VModal/VModalLayout.vue';
+import VButton from 'UiKit/components/VButton/VButton.vue';
 import { IInvest } from 'InvestCommon/types/api/invest';
-import BaseTable from 'UiKit/components/BaseTable/BaseTable.vue';
-import BaseTag from 'UiKit/components/BaseTag/BaseTag.vue';
+import VTable from 'UiKit/components/VTable/VTable.vue';
+import VTag from 'UiKit/components/VTag/VTag.vue';
 import { formatToFullDate } from 'InvestCommon/helpers/formatters/formatToDate';
 import { currency } from 'InvestCommon/helpers/currency';
 import { InvestTransactionStatuses } from 'InvestCommon/helpers/enums/invest';
@@ -40,7 +40,7 @@ const timeFormatted = computed(() => (dateFull.value ? getTimeFormat(String(date
 </script>
 
 <template>
-  <BaseModalLayout
+  <VModalLayout
     class="wd-modal-portfolio-transaction is--no-margin"
     @close="$emit('close')"
   >
@@ -53,7 +53,7 @@ const timeFormatted = computed(() => (dateFull.value ? getTimeFormat(String(date
         <div class="wd-modal-portfolio-transaction__title is--h3__title">
           {{ title }}
         </div>
-        <BaseTable
+        <VTable
           size="small"
         >
           <tbody>
@@ -68,14 +68,14 @@ const timeFormatted = computed(() => (dateFull.value ? getTimeFormat(String(date
               </td>
               <td class="wd-modal-portfolio-transaction__type-wrap">
                 <div class="wd-modal-portfolio-transaction__type">
-                  <BaseTag
+                  <VTag
                     round
                     size="small"
                     background="#F8F5FF"
                     class="profile-status-info__tag"
                   >
                     Investment
-                  </BaseTag>
+                  </VTag>
                 </div>
               </td>
               <td class="wd-modal-portfolio-transaction__status-wrap">
@@ -90,23 +90,23 @@ const timeFormatted = computed(() => (dateFull.value ? getTimeFormat(String(date
               </td>
             </tr>
           </tbody>
-        </BaseTable>
+        </VTable>
       </div>
     </template>
 
     <template #footer>
       <div class="wd-modal-portfolio-transaction__footer-btns">
-        <BaseButton
+        <VButton
           tag="a"
           :href="urlContactUs"
           variant="outlined"
           data-testid="button"
         >
           Contact Us
-        </BaseButton>
+        </VButton>
       </div>
     </template>
-  </BaseModalLayout>
+  </VModalLayout>
 </template>
 
 <style lang="scss">

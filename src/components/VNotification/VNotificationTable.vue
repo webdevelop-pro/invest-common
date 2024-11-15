@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { useNotificationsStore } from 'InvestCommon/store';
-import WdNotificationTableItem from './WdNotificationTableItem.vue';
-import BaseTable from 'UiKit/components/BaseTable/BaseTable.vue';
+import VNotificationTableItem from 'InvestCommon/components/VNotification/VNotificationTableItem.vue';
+import VTable from 'UiKit/components/VTable/VTable.vue';
 import { storeToRefs } from 'pinia';
-import BaseFormInputSearch from 'UiKit/components/BaseFormInputSearch/BaseFormInputSearch.vue';
-import BaseContentSwitcher from 'UiKit/components/BaseContentSwitcher/BaseContentSwitcher.vue';
-import BaseFilter, { IBaseFilter } from 'UiKit/components/BaseFilter/BaseFilter.vue';
+import VFormInputSearch from 'UiKit/components/VForm/VFormInputSearch.vue';
+import VContentSwitcher from 'UiKit/components/VContentSwitcher/VContentSwitcher.vue';
+import VFilter, { IVFilter } from 'UiKit/components/VFilter/VFilter.vue';
 import { computed, ref, watch } from 'vue';
-import BaseButton from 'UiKit/components/BaseButton/BaseButton.vue';
-import BaseSkeleton from 'UiKit/components/BaseSkeleton/BaseSkeleton.vue';
-import { BaseSvgIcon } from 'UiKit/components/BaseSvgIcon';
+import VButton from 'UiKit/components/VButton/VButton.vue';
+import VSkeleton from 'UiKit/components/VSkeleton/VSkeleton.vue';
+import { VSvgIcon } from 'UiKit/components/VSvgIcon';
 import FilterPagination from 'InvestCommon/components/common/FilterPagination.vue';
 
 const props = defineProps({
@@ -39,7 +39,7 @@ const filterNotifications = ref([
     ],
     model: [] as string[],
   },
-] as IBaseFilter[]);
+] as IVFilter[]);
 
 const tabs = [
   {
@@ -136,16 +136,16 @@ const showFilterPagination = computed(() => (
   && !props.small && (filterResults.value > 0))));
 const showMarkAll = computed(() => (filterResults.value > 0 && (notificationUnreadLength.value > 0)));
 
-const onApplyFilter = (items: IBaseFilter[]) => {
+const onApplyFilter = (items: IVFilter[]) => {
   filterNotifications.value = items;
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-  const statusObject = items?.filter((item: IBaseFilter) => item.value === 'status')[0];
+  const statusObject = items?.filter((item: IVFilter) => item.value === 'status')[0];
   if (!statusObject) filterStatus.value = [];
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
   else filterStatus.value = statusObject?.model?.map((item: string) => item.toLowerCase());
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-  const typeObject = items?.filter((item: IBaseFilter) => item.value === 'type')[0];
+  const typeObject = items?.filter((item: IVFilter) => item.value === 'type')[0];
   if (!typeObject) filterType.value = [];
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
   else filterType.value = typeObject?.model?.map((item: string) => item.toLowerCase());
@@ -213,20 +213,20 @@ watch(() => filterNotifications.value[1].model.length, () => {
   <aside class="WdNotificationTable wd-notification-table is--no-margin">
     <div class="wd-notification-table__toolbar">
       <div class="wd-notification-table__toolbar-left">
-        <BaseContentSwitcher
+        <VContentSwitcher
           :model-value="currentTab.value"
           :tabs="tabs"
           class="wd-notification-table__tabs"
           @update:model-value="onChangeTab"
         />
-        <BaseFormInputSearch
+        <VFormInputSearch
           v-if="!small"
           v-model="search"
           :disabled="!showSearch"
           size="small"
           class="wd-notification-table__search"
         />
-        <BaseFilter
+        <VFilter
           :items="filterNotifications"
           :disabled="!showFilter"
           class="wd-notification-table__filter"
@@ -238,22 +238,22 @@ watch(() => filterNotifications.value[1].model.length, () => {
           :total-length="notificationUserLength"
         />
       </div>
-      <BaseButton
+      <VButton
         size="small"
         variant="link"
         :disabled="!showMarkAll"
         icon-placement="left"
         @click.stop="onMarkAllAsRead"
       >
-        <BaseSvgIcon
+        <VSvgIcon
           name="check"
           alt="download icon"
           class="wd-notification-table__check-icon"
         />
         Mark All as Read
-      </BaseButton>
+      </VButton>
     </div>
-    <BaseSkeleton
+    <VSkeleton
       v-if="isGetNotificationsLoading"
       height="22px"
       width="100%"
@@ -263,12 +263,12 @@ watch(() => filterNotifications.value[1].model.length, () => {
       v-else
       class="wd-notification-table__content"
     >
-      <BaseTable
+      <VTable
         v-if="searchData.length > 0"
         size="small"
       >
         <tbody>
-          <WdNotificationTableItem
+          <VNotificationTableItem
             v-for="item in searchData"
             :key="item.id"
             :data="item"
@@ -276,7 +276,7 @@ watch(() => filterNotifications.value[1].model.length, () => {
             :external="external"
           />
         </tbody>
-      </BaseTable>
+      </VTable>
       <div
         v-else-if="notificationUserLength === 0"
         class="is--table-not-found is--table-cell is--body"
@@ -293,7 +293,7 @@ watch(() => filterNotifications.value[1].model.length, () => {
   </aside>
 </template>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .wd-notification-table {
 
   &__content {
@@ -332,7 +332,7 @@ watch(() => filterNotifications.value[1].model.length, () => {
   }
 
   &__filter {
-    --base-filter-dropdown--min-width: 250px;
+    --V-filter-dropdown--min-width: 250px;
   }
 
   &__not-found {

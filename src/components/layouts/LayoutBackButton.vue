@@ -49,7 +49,7 @@ const onBackClick = () => {
 </template>
 
 
-<style lang="scss" scoped>
+<style lang="scss">
 .layout-back-button {
   width: 100%;
   padding-top: $header-height;

@@ -4,14 +4,14 @@ import {
 } from 'vue';
 import { useUserIdentitysStore, useUsersStore } from 'InvestCommon/store';
 import { useHubspotForm } from 'InvestCommon/composable';
-import FormRow from 'InvestCommon/components/common/FormRow.vue';
-import FormCol from 'InvestCommon/components/common/FormCol.vue';
-import BaseFormInput from 'UiKit/components/BaseFormInput/BaseFormInput.vue';
-import BaseButton from 'UiKit/components/BaseButton/BaseButton.vue';
+import FormRow from 'InvestCommon/components/VForm/VFormRow.vue';
+import FormCol from 'InvestCommon/components/VForm/VFormCol.vue';
+import VFormInput from 'UiKit/components/VForm/VFormInput.vue';
+import VButton from 'UiKit/components/VButton/VButton.vue';
 import { storeToRefs } from 'pinia';
 import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
 import { isEmpty } from 'InvestCommon/helpers/general';
-import BaseFormGroup from 'UiKit/components/BaseFormGroup/BaseFormGroup.vue';
+import VFormGroup from 'UiKit/components/VForm/VFormGroup.vue';
 import { FormModeTrustedContact, schemaTrustedContact } from './utils';
 import { filterSchema, scrollToError } from 'UiKit/helpers/validation/general';
 import { useRouter } from 'vue-router';
@@ -124,8 +124,8 @@ watch(() => setUserIdentityOptionsData.value, () => {
     <div class="form-personal-information__content">
       <FormRow>
         <FormCol col3>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -135,21 +135,21 @@ watch(() => setUserIdentityOptionsData.value, () => {
             label="Relationship Type"
             data-testid="relationship-type-group"
           >
-            <BaseFormInput
+            <VFormInput
               :model-value="model.beneficiary?.relationship_type"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               placeholder="Relationship Type"
               name="relationship-type"
               size="large"
               data-testid="relationship-type"
               @update:model-value="model.beneficiary.relationship_type = $event"
             />
-          </BaseFormGroup>
+          </VFormGroup>
         </FormCol>
 
         <FormCol col3>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -159,21 +159,21 @@ watch(() => setUserIdentityOptionsData.value, () => {
             label="First Name"
             data-testid="first-name-group"
           >
-            <BaseFormInput
+            <VFormInput
               :model-value="model.beneficiary?.first_name"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               placeholder="First Name"
               name="first-name"
               size="large"
               data-testid="first-name"
               @update:model-value="model.beneficiary.first_name = $event"
             />
-          </BaseFormGroup>
+          </VFormGroup>
         </FormCol>
 
         <FormCol col3>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -183,22 +183,22 @@ watch(() => setUserIdentityOptionsData.value, () => {
             label="Last Name"
             data-testid="last-name-group"
           >
-            <BaseFormInput
+            <VFormInput
               :model-value="model.beneficiary?.last_name"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               placeholder="Last Name"
               name="last-name"
               size="large"
               data-testid="last-name"
               @update:model-value="model.beneficiary.last_name = $event"
             />
-          </BaseFormGroup>
+          </VFormGroup>
         </FormCol>
       </FormRow>
       <FormRow>
         <FormCol col3>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -208,9 +208,9 @@ watch(() => setUserIdentityOptionsData.value, () => {
             label="Date Of Birth"
             data-testid="dob-group"
           >
-            <BaseFormInput
+            <VFormInput
               :model-value="model.beneficiary?.dob"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               placeholder="Date Of Birth"
               name="dob"
               size="large"
@@ -218,11 +218,11 @@ watch(() => setUserIdentityOptionsData.value, () => {
               data-testid="dob"
               @update:model-value="model.beneficiary.dob = $event"
             />
-          </BaseFormGroup>
+          </VFormGroup>
         </FormCol>
         <FormCol col3>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -232,9 +232,9 @@ watch(() => setUserIdentityOptionsData.value, () => {
             label="Phone number"
             data-testid="phone-group"
           >
-            <BaseFormInput
+            <VFormInput
               :model-value="model.beneficiary?.phone"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               placeholder="Phone number"
               name="phone"
               size="large"
@@ -243,12 +243,12 @@ watch(() => setUserIdentityOptionsData.value, () => {
               data-testid="phone"
               @update:model-value="model.beneficiary.phone = $event"
             />
-          </BaseFormGroup>
+          </VFormGroup>
         </FormCol>
 
         <FormCol col3>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -258,28 +258,28 @@ watch(() => setUserIdentityOptionsData.value, () => {
             label="Email address"
             data-testid="email-group"
           >
-            <BaseFormInput
+            <VFormInput
               :model-value="model.beneficiary?.email"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               placeholder="Email address"
               name="email"
               size="large"
               data-testid="email"
               @update:model-value="model.beneficiary.email = $event"
             />
-          </BaseFormGroup>
+          </VFormGroup>
         </FormCol>
       </FormRow>
     </div>
     <div class="form-personal-information__footer">
-      <BaseButton
+      <VButton
         size="large"
         variant="outlined"
         @click="cancelHandler"
       >
         Cancel
-      </BaseButton>
-      <BaseButton
+      </VButton>
+      <VButton
         size="large"
         :disabled="isDisabledButton"
         :loading="isLoading"
@@ -287,12 +287,12 @@ watch(() => setUserIdentityOptionsData.value, () => {
         @click="saveHandler"
       >
         Save
-      </BaseButton>
+      </VButton>
     </div>
   </div>
 </template>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .form-personal-information {
   display: flex;
   flex-direction: column;

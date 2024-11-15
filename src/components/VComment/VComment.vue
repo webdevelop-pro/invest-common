@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import DefaultAvatar from 'InvestCommon/components/common/DefaultAvatar.vue';
-import BaseTag from 'UiKit/components/BaseTag/BaseTag.vue';
+import VTag from 'UiKit/components/VTag/VTag.vue';
 
 defineProps({
   imageSrc: String,
@@ -32,7 +32,7 @@ defineProps({
           >
             {{ title }}
           </span>
-          <BaseTag
+          <VTag
             v-if="tag"
             size="small"
             background="#004FFF"
@@ -40,7 +40,7 @@ defineProps({
             round
           >
             {{ tag[0].toUpperCase() + tag.slice(1) }}
-          </BaseTag>
+          </VTag>
         </div>
         <div
           v-if="date"
@@ -64,7 +64,7 @@ defineProps({
   </div>
 </template>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .the-comment {
   display: flex;
   align-items: flex-end;

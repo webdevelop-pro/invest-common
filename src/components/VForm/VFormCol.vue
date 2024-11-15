@@ -21,7 +21,7 @@ const classes = computed(() => ({
   </div>
 </template>
 
-<style lang="scss" scoped>
+<style lang="scss">
 
 .form-col {
   width: 100%;

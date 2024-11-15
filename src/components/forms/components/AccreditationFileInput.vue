@@ -191,7 +191,7 @@ watch(() => props.validate, () => {
   </div>
 </template>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .accreditation-file-input {
 
   &__field {

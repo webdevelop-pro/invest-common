@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { PropType, ref } from 'vue';
-import BaseModalLayout from 'UiKit/components/BaseModal/BaseModalLayout.vue';
-import BaseButton from 'UiKit/components/BaseButton/BaseButton.vue';
+import VModalLayout from 'UiKit/components/VModal/VModalLayout.vue';
+import VButton from 'UiKit/components/VButton/VButton.vue';
 import { jsPDF } from 'jspdf';
 import { currency } from 'InvestCommon/helpers/currency';
 import { IInvest } from 'InvestCommon/types/api/invest';
-import { BaseSvgIcon } from 'UiKit/components/BaseSvgIcon';
+import { VSvgIcon } from 'UiKit/components/VSvgIcon';
 
 const props = defineProps({
   investment: {
@@ -43,7 +43,7 @@ const saveHandler = () => {
 </script>
 
 <template>
-  <BaseModalLayout
+  <VModalLayout
     class="wd-modal-portfolio-wire is--no-margin"
     @close="$emit('close')"
   >
@@ -142,27 +142,27 @@ const saveHandler = () => {
 
     <template #footer>
       <div class="wd-modal-portfolio-wire__footer-btns">
-        <BaseButton
+        <VButton
           variant="outlined"
           data-testid="cancel-button"
           @click="$emit('close')"
         >
           Cancel
-        </BaseButton>
-        <BaseButton
+        </VButton>
+        <VButton
           icon-placement="left"
           @click="saveHandler"
         >
-          <BaseSvgIcon
+          <VSvgIcon
             name="download"
             alt="download icon"
             class="wd-modal-portfolio-wire__save-icon"
           />
           Save as PDF
-        </BaseButton>
+        </VButton>
       </div>
     </template>
-  </BaseModalLayout>
+  </VModalLayout>
 </template>
 
 <style lang="scss">

@@ -1,5 +1,5 @@
 <template>
-  <BaseModalLayout
+  <VModalLayout
     full-screen
     class="wd-modal-document is--no-margin"
     data-testid="document-modal"
@@ -11,7 +11,7 @@
         class="wd-modal-document__sign"
       />
     </template>
-  </BaseModalLayout>
+  </VModalLayout>
 </template>
 
 <script lang="ts">
@@ -19,12 +19,12 @@ import {
   defineComponent, onMounted, onBeforeUnmount,
 } from 'vue';
 
-import BaseModalLayout from 'UiKit/components/BaseModal/BaseModalLayout.vue';
+import VModalLayout from 'UiKit/components/VModal/VModalLayout.vue';
 
 export default defineComponent({
   name: 'WdModalDocument',
   components: {
-    BaseModalLayout,
+    VModalLayout,
   },
   props: {
     signUrl: {
@@ -53,7 +53,7 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .wd-modal-document {
   width: 100%;
   height: 100%;

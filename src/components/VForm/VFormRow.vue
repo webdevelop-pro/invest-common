@@ -7,7 +7,7 @@
   </div>
 </template>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .form-row {
   width: 100%;
   display: flex;

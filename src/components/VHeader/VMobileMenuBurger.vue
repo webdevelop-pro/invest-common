@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { BaseSvgIcon } from 'UiKit/components/BaseSvgIcon';
+import { VSvgIcon } from 'UiKit/components/VSvgIcon';
 
 const modelValue = defineModel<boolean>();
 defineEmits(['update:modelValue']);
@@ -20,7 +20,7 @@ defineEmits(['update:modelValue']);
       <span />
     </div>
     <span v-if="modelValue">
-      <BaseSvgIcon
+      <VSvgIcon
         name="close"
         class="app-mobile-menu-burger__icon is-close"
         alt="header burger icon is close"
@@ -29,7 +29,7 @@ defineEmits(['update:modelValue']);
   </div>
 </template>
 
-<style lang="scss" scoped>
+<style lang="scss">
 $z-index-menu-bg: 99;
 $z-index-menu: 999;
 $z-index-menu-burger: $z-index-menu + 1;

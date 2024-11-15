@@ -5,15 +5,15 @@ import {
 } from 'vue';
 import { useUserIdentitysStore, useUsersStore } from 'InvestCommon/store';
 import { useHubspotForm } from 'InvestCommon/composable';
-import FormRow from 'InvestCommon/components/common/FormRow.vue';
-import FormCol from 'InvestCommon/components/common/FormCol.vue';
-import BaseFormInput from 'UiKit/components/BaseFormInput/BaseFormInput.vue';
-import BaseButton from 'UiKit/components/BaseButton/BaseButton.vue';
-import BaseFormSelect from 'UiKit/components/BaseFormSelect/BaseFormSelect.vue';
+import FormRow from 'InvestCommon/components/VForm/VFormRow.vue';
+import FormCol from 'InvestCommon/components/VForm/VFormCol.vue';
+import VFormInput from 'UiKit/components/VForm/VFormInput.vue';
+import VButton from 'UiKit/components/VButton/VButton.vue';
+import VFormSelect from 'UiKit/components/VForm/VFormSelect.vue';
 import { storeToRefs } from 'pinia';
 import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
 import { isEmpty } from 'InvestCommon/helpers/general';
-import BaseFormGroup from 'UiKit/components/BaseFormGroup/BaseFormGroup.vue';
+import VFormGroup from 'UiKit/components/VForm/VFormGroup.vue';
 import {
   FormModelInvestmentsLimits, isAccreditedRadioOptions,
 } from './utils';
@@ -25,8 +25,8 @@ import {
   SELECT_OBJECTIVES, SELECT_RISK_COMFORT,
 } from 'InvestCommon/utils';
 import { filterSchema, scrollToError } from 'UiKit/helpers/validation/general';
-import BaseFormCheckbox from 'UiKit/components/BaseFormCheckbox/BaseFormCheckbox.vue';
-import BaseFormRadio from 'UiKit/components/BaseFormRadio/BaseFormRadio.vue';
+import VFormCheckbox from 'UiKit/components/VFormCheckbox/VFormCheckbox.vue';
+import VFormRadio from 'UiKit/components/VFormRadio/VFormRadio.vue';
 import { numberFormatter } from 'InvestCommon/helpers/numberFormatter';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { JSONSchemaType } from 'ajv';
@@ -281,8 +281,8 @@ watch(() => [setUserIdentityOptionsData.value, schemaInvestmentsLimits.value], (
       </div>
       <FormRow class="form-financial-information__row">
         <FormCol>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -301,12 +301,12 @@ watch(() => [setUserIdentityOptionsData.value, schemaInvestmentsLimits.value], (
                 Accredited Investor?
               </router-link>
             </div>
-            <BaseFormRadio
+            <VFormRadio
               v-model="model.accredited_investor.is_accredited"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               :options="isAccreditedRadioOptions"
             />
-          </BaseFormGroup>
+          </VFormGroup>
         </FormCol>
       </FormRow>
 
@@ -315,8 +315,8 @@ watch(() => [setUserIdentityOptionsData.value, schemaInvestmentsLimits.value], (
       </div>
       <FormRow>
         <FormCol>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -325,9 +325,9 @@ watch(() => [setUserIdentityOptionsData.value, schemaInvestmentsLimits.value], (
             path="investment_objectives.objectives"
             label="Investment objectives"
           >
-            <BaseFormSelect
+            <VFormSelect
               v-model="model.investment_objectives.objectives"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               item-label="text"
               item-value="value"
               name="investment-objectives"
@@ -336,13 +336,13 @@ watch(() => [setUserIdentityOptionsData.value, schemaInvestmentsLimits.value], (
               :options="SELECT_OBJECTIVES"
               dropdown-absolute
             />
-          </BaseFormGroup>
+          </VFormGroup>
         </FormCol>
       </FormRow>
       <FormRow>
         <FormCol col2>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -351,21 +351,21 @@ watch(() => [setUserIdentityOptionsData.value, schemaInvestmentsLimits.value], (
             path="investment_objectives.years_experience"
             label="Investment Years Experience"
           >
-            <BaseFormInput
+            <VFormInput
               :model-value="String(model.investment_objectives.years_experience)"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               size="large"
               placeholder="10 years"
               name="years-experience"
               data-testid="years-experience"
               @update:model-value="model.investment_objectives.years_experience = numberFormatter($event)"
             />
-          </BaseFormGroup>
+          </VFormGroup>
         </FormCol>
 
         <FormCol col2>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -374,9 +374,9 @@ watch(() => [setUserIdentityOptionsData.value, schemaInvestmentsLimits.value], (
             path="investment_objectives.duration"
             label="How long do you plan to invest"
           >
-            <BaseFormSelect
+            <VFormSelect
               v-model="model.investment_objectives.duration"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               item-label="text"
               item-value="value"
               name="duration"
@@ -385,13 +385,13 @@ watch(() => [setUserIdentityOptionsData.value, schemaInvestmentsLimits.value], (
               :options="SELECT_DURATION"
               dropdown-absolute
             />
-          </BaseFormGroup>
+          </VFormGroup>
         </FormCol>
       </FormRow>
       <FormRow>
         <FormCol>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -400,9 +400,9 @@ watch(() => [setUserIdentityOptionsData.value, schemaInvestmentsLimits.value], (
             path="investment_objectives.importance_of_access"
             label="How important is it to have immediate access to your invested funds"
           >
-            <BaseFormSelect
+            <VFormSelect
               v-model="model.investment_objectives.importance_of_access"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               item-label="text"
               item-value="value"
               name="importance-of-access"
@@ -411,13 +411,13 @@ watch(() => [setUserIdentityOptionsData.value, schemaInvestmentsLimits.value], (
               :options="SELECT_IMPORTANCE"
               dropdown-absolute
             />
-          </BaseFormGroup>
+          </VFormGroup>
         </FormCol>
       </FormRow>
       <FormRow>
         <FormCol>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -426,9 +426,9 @@ watch(() => [setUserIdentityOptionsData.value, schemaInvestmentsLimits.value], (
             path="investment_objectives.risk_comfort"
             label="How much risk are you comfortable with"
           >
-            <BaseFormSelect
+            <VFormSelect
               v-model="model.investment_objectives.risk_comfort"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               item-label="text"
               item-value="value"
               name="risk-comfort"
@@ -437,7 +437,7 @@ watch(() => [setUserIdentityOptionsData.value, schemaInvestmentsLimits.value], (
               :options="SELECT_RISK_COMFORT"
               dropdown-absolute
             />
-          </BaseFormGroup>
+          </VFormGroup>
         </FormCol>
       </FormRow>
       <div class="form-financial-information__subtitle is--h3__title is--margin-top">
@@ -445,8 +445,8 @@ watch(() => [setUserIdentityOptionsData.value, schemaInvestmentsLimits.value], (
       </div>
       <FormRow>
         <FormCol>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -455,24 +455,24 @@ watch(() => [setUserIdentityOptionsData.value, schemaInvestmentsLimits.value], (
             path="educational_materials"
             data-testid="educational-materials-group"
           >
-            <BaseFormCheckbox
+            <VFormCheckbox
               v-model="model.educational_materials"
               :disabled="selectedUserProfileRiskAcknowledged"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               data-testid="educational-materials"
             >
               <span class="is--body">
                 Market and Liquidity Risk: I acknowledge the potential for market fluctuations and
                 limited liquidity in Regulation A and Regulation D offerings.
               </span>
-            </BaseFormCheckbox>
-          </BaseFormGroup>
+            </VFormCheckbox>
+          </VFormGroup>
         </FormCol>
       </FormRow>
       <FormRow>
         <FormCol>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -481,24 +481,24 @@ watch(() => [setUserIdentityOptionsData.value, schemaInvestmentsLimits.value], (
             path="cancelation_restrictions"
             data-testid="cancelation-restrictions-group"
           >
-            <BaseFormCheckbox
+            <VFormCheckbox
               v-model="model.cancelation_restrictions"
               :disabled="selectedUserProfileRiskAcknowledged"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               data-testid="cancelation-restrictions"
             >
               <span class="is--body">
                 Business and Regulatory Risk: I understand the business challenges and regulatory uncertainties
                 associated with investing in these offerings.
               </span>
-            </BaseFormCheckbox>
-          </BaseFormGroup>
+            </VFormCheckbox>
+          </VFormGroup>
         </FormCol>
       </FormRow>
       <FormRow>
         <FormCol>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -507,24 +507,24 @@ watch(() => [setUserIdentityOptionsData.value, schemaInvestmentsLimits.value], (
             path="resell_difficulties"
             data-testid="resell-difficulties-group"
           >
-            <BaseFormCheckbox
+            <VFormCheckbox
               v-model="model.resell_difficulties"
               :disabled="selectedUserProfileRiskAcknowledged"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               data-testid="resell-difficulties"
             >
               <span class="is--body">
                 Limited Information and Fraud Risk: I'm aware of the limited disclosure and potential for fraudulent
                 schemes in Regulation A and Regulation D investments.
               </span>
-            </BaseFormCheckbox>
-          </BaseFormGroup>
+            </VFormCheckbox>
+          </VFormGroup>
         </FormCol>
       </FormRow>
       <FormRow>
         <FormCol>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -533,24 +533,24 @@ watch(() => [setUserIdentityOptionsData.value, schemaInvestmentsLimits.value], (
             path="risk_involved"
             data-testid="risk-involved-group"
           >
-            <BaseFormCheckbox
+            <VFormCheckbox
               v-model="model.risk_involved"
               :disabled="selectedUserProfileRiskAcknowledged"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               data-testid="risk-involved"
             >
               <span class="is--body">
                 Illiquidity and Capital Loss: I accept the illiquid nature and the risk of partial
                 or total loss of capital in these investments.
               </span>
-            </BaseFormCheckbox>
-          </BaseFormGroup>
+            </VFormCheckbox>
+          </VFormGroup>
         </FormCol>
       </FormRow>
       <FormRow>
         <FormCol>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -559,10 +559,10 @@ watch(() => [setUserIdentityOptionsData.value, schemaInvestmentsLimits.value], (
             path="no_legal_advices_from_company"
             data-testid="no_legal_advices_from_company-group"
           >
-            <BaseFormCheckbox
+            <VFormCheckbox
               v-model="model.no_legal_advices_from_company"
               :disabled="selectedUserProfileRiskAcknowledged"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               data-testid="no_legal_advices_from_company"
             >
               <span class="is--body">
@@ -570,14 +570,14 @@ watch(() => [setUserIdentityOptionsData.value, schemaInvestmentsLimits.value], (
                 market volatility, limited liquidity, regulatory uncertainties, and the possibility of
                 financial loss, in investing in Regulation A and Regulation D offerings.
               </span>
-            </BaseFormCheckbox>
-          </BaseFormGroup>
+            </VFormCheckbox>
+          </VFormGroup>
         </FormCol>
       </FormRow>
       <FormRow>
         <FormCol>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -586,10 +586,10 @@ watch(() => [setUserIdentityOptionsData.value, schemaInvestmentsLimits.value], (
             path="consent_plaid"
             data-testid="consent-plaid-group"
           >
-            <BaseFormCheckbox
+            <VFormCheckbox
               v-model="model.consent_plaid"
               :disabled="selectedUserProfileRiskAcknowledged"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               data-testid="consent-plaid"
             >
               <span class="is--body">
@@ -603,20 +603,20 @@ watch(() => [setUserIdentityOptionsData.value, schemaInvestmentsLimits.value], (
                   Plaid
                 </a>
               </span>
-            </BaseFormCheckbox>
-          </BaseFormGroup>
+            </VFormCheckbox>
+          </VFormGroup>
         </FormCol>
       </FormRow>
     </div>
     <div class="form-financial-information__footer">
-      <BaseButton
+      <VButton
         size="large"
         variant="outlined"
         @click="cancelHandler"
       >
         Cancel
-      </BaseButton>
-      <BaseButton
+      </VButton>
+      <VButton
         size="large"
         :disabled="isDisabledButton"
         :loading="isLoading"
@@ -624,12 +624,12 @@ watch(() => [setUserIdentityOptionsData.value, schemaInvestmentsLimits.value], (
         @click="saveHandler"
       >
         Save
-      </BaseButton>
+      </VButton>
     </div>
   </div>
 </template>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .form-financial-information {
   display: flex;
   flex-direction: column;

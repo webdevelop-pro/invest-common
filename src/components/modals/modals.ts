@@ -3,7 +3,7 @@
 import { defineAsyncComponent } from 'vue';
 
 // eslint-disable-next-line object-curly-newline
-import { useModal } from 'UiKit/components/BaseModal';
+import { useModal } from 'UiKit/components/VModal';
 import { IInvest } from 'InvestCommon/types/api/invest';
 
 

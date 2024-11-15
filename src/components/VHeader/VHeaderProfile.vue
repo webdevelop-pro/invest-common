@@ -2,10 +2,10 @@
 import { computed, PropType } from 'vue';
 import { useNotificationsStore, useUsersStore } from 'InvestCommon/store';
 import { useLogoutModal } from 'InvestCommon/components/modals/modals';
-import BaseDropdown from 'UiKit/components/BaseDropdown/BaseDropdown.vue';
+import VDropdown from 'UiKit/components/VDropdown/VDropdown.vue';
 import { storeToRefs } from 'pinia';
 import DefaultAvatar from 'InvestCommon/components/common/DefaultAvatar.vue';
-import { BaseSvgIcon } from 'UiKit/components/BaseSvgIcon';
+import { VSvgIcon } from 'UiKit/components/VSvgIcon';
 
 type MenuItem = {
   to?: string;
@@ -42,37 +42,37 @@ const getComponentName = (item: MenuItem) => {
   return 'div';
 };
 const getComponentClass = (item: MenuItem) => {
-  if (item.to || item.href) return 'app-layout-default-header-profile__item';
-  return 'pp-layout-default-header-profile__item-not-link';
+  if (item.to || item.href) return 'v-header-profile__item';
+  return 'v-header-profile__item-not-link';
 };
 </script>
 
 <template>
-  <div class="AppLayoutDefaultHeaderProfile app-layout-default-header-profile">
-    <div class="app-layout-default-header-profile__divider" />
+  <div class="VHeaderProfile v-header-profile">
+    <div class="v-header-profile__divider" />
     <div
-      class="app-layout-default-header-profile__notification"
+      class="v-header-profile__notification"
       data-testid="header-profile"
       @click="onSidebarOpen"
     >
-      <BaseSvgIcon
+      <VSvgIcon
         alt="notification icon"
-        class="app-layout-default-header-profile__notification-icon"
+        class="v-header-profile__notification-icon"
         name="message"
       />
       <span
         v-if="notificationUnreadLength && (notificationUnreadLength > 0)"
-        class="app-layout-default-header-profile__notification-dot"
+        class="v-header-profile__notification-dot"
       />
     </div>
-    <BaseDropdown
+    <VDropdown
       hover
-      class="app-layout-default-header-profile__dropdown"
+      class="v-header-profile__dropdown"
     >
-      <div class="app-layout-default-header-profile__icon-wrap">
+      <div class="v-header-profile__icon-wrap">
         <DefaultAvatar />
       </div>
-      <span class="app-layout-default-header-profile__value is--h6__title">
+      <span class="v-header-profile__value is--h6__title">
         {{ userEmail }}
       </span>
 
@@ -92,26 +92,26 @@ const getComponentClass = (item: MenuItem) => {
           </component>
         </template>
         <div
-          class="app-layout-default-header-profile__item is--h6__title"
+          class="v-header-profile__item is--h6__title"
           data-testid="header-profile-logout"
           @click="onLogout"
         >
           Log Out
         </div>
       </template>
-    </BaseDropdown>
+    </VDropdown>
   </div>
 </template>
 
 <style lang="scss">
-.base-dropdown {
+.V-dropdown {
   min-width: 80px;
   &__selected {
     min-width: 100px;
   }
 }
 
-.app-layout-default-header-profile {
+.v-header-profile {
   $root: &;
 
   width: fit-content;

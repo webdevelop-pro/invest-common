@@ -18,19 +18,19 @@ const getComponentName = (item: MenuItem) => {
   return 'div';
 };
 const getComponentClass = (item: MenuItem) => {
-  if (item.to || item.href) return 'app-layout-default-footer-menu__item';
-  return 'app-layout-default-footer-menu__item-not-link';
+  if (item.to || item.href) return 'v-footer-menu__item';
+  return 'v-footer-menu__item-not-link';
 };
 </script>
 
 <template>
   <!-- eslint-disable vue/no-multiple-template-root -->
-  <div class="AppLayoutDefaultFooterMenu app-layout-default-footer-menu">
-    <ul class="app-layout-default-footer-menu__menu-list">
+  <div class="VFooterMenu v-footer-menu">
+    <ul class="v-footer-menu__menu-list">
       <li
         v-for="menuItem in menu"
         :key="menuItem.text"
-        class="app-layout-default-footer-menu__menu-item"
+        class="v-footer-menu__menu-item"
       >
         <component
           :is="getComponentName(menuItem)"
@@ -43,7 +43,7 @@ const getComponentClass = (item: MenuItem) => {
         </component>
         <div
           v-if="menuItem.children && menuItem.children.length > 0"
-          class="app-layout-default-footer-menu__children"
+          class="v-footer-menu__children"
           :class="{ 'is--two-col': menuItem.children.length > 8 }"
         >
           <template
@@ -68,7 +68,7 @@ const getComponentClass = (item: MenuItem) => {
 
 
 <style lang="scss">
-.app-layout-default-footer-menu {
+.v-footer-menu {
   $root: &;
 
   &__menu-item {

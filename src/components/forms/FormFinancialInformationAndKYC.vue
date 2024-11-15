@@ -7,21 +7,21 @@ import {
   usePlaidStore, useUserIdentitysStore, useUsersStore, useAccreditationStore,
 } from 'InvestCommon/store';
 import { useHubspotForm } from 'InvestCommon/composable';
-import FormRow from 'InvestCommon/components/common/FormRow.vue';
-import FormCol from 'InvestCommon/components/common/FormCol.vue';
-import BaseFormInput from 'UiKit/components/BaseFormInput/BaseFormInput.vue';
-import BaseButton from 'UiKit/components/BaseButton/BaseButton.vue';
-import BaseFormSelect from 'UiKit/components/BaseFormSelect/BaseFormSelect.vue';
+import FormRow from 'InvestCommon/components/VForm/VFormRow.vue';
+import FormCol from 'InvestCommon/components/VForm/VFormCol.vue';
+import VFormInput from 'UiKit/components/VForm/VFormInput.vue';
+import VButton from 'UiKit/components/VButton/VButton.vue';
+import VFormSelect from 'UiKit/components/VForm/VFormSelect.vue';
 import { storeToRefs } from 'pinia';
 import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
 import { isEmpty } from 'InvestCommon/helpers/general';
-import BaseFormGroup from 'UiKit/components/BaseFormGroup/BaseFormGroup.vue';
+import VFormGroup from 'UiKit/components/VForm/VFormGroup.vue';
 import {
   FormModelFinancialInformationAndKYC, isAccreditedRadioOptions,
 } from './utils';
 import { filterSchema, scrollToError } from 'UiKit/helpers/validation/general';
-import BaseFormCheckbox from 'UiKit/components/BaseFormCheckbox/BaseFormCheckbox.vue';
-import BaseFormRadio from 'UiKit/components/BaseFormRadio/BaseFormRadio.vue';
+import VFormCheckbox from 'UiKit/components/VForm/VFormCheckbox.vue';
+import VFormRadio from 'UiKit/components/VForm/VFormRadio.vue';
 import { numberFormatter } from 'InvestCommon/helpers/numberFormatter';
 import {
   address1Rule, address2Rule, citizenshipRule, cityRule, countryRule, dobRule, errorMessageRule,
@@ -340,8 +340,8 @@ watch(() => [setUserIdentityOptionsData.value, schemaFinancialInformationAndKYC.
     <div class="form-reg-cf-information__content">
       <FormRow>
         <FormCol>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -350,9 +350,9 @@ watch(() => [setUserIdentityOptionsData.value, schemaFinancialInformationAndKYC.
             path="citizenship"
             label="Citizenship"
           >
-            <BaseFormSelect
+            <VFormSelect
               :model-value="model.citizenship"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               name="citizenship"
               data-testid="citizenship"
               placeholder="Please choose an option"
@@ -362,13 +362,13 @@ watch(() => [setUserIdentityOptionsData.value, schemaFinancialInformationAndKYC.
               dropdown-absolute
               @update:model-value="model.citizenship = $event"
             />
-          </BaseFormGroup>
+          </VFormGroup>
         </FormCol>
       </FormRow>
       <FormRow>
         <FormCol col-2>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -378,9 +378,9 @@ watch(() => [setUserIdentityOptionsData.value, schemaFinancialInformationAndKYC.
             label="Date of Birth"
             data-testid="dob-group"
           >
-            <BaseFormInput
+            <VFormInput
               :model-value="model.dob"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               placeholder="MM/DD/YYYY"
               name="date-of-birth"
               size="large"
@@ -388,12 +388,12 @@ watch(() => [setUserIdentityOptionsData.value, schemaFinancialInformationAndKYC.
               type="date"
               @update:model-value="model.dob = $event"
             />
-          </BaseFormGroup>
+          </VFormGroup>
         </FormCol>
 
         <FormCol col-2>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -403,9 +403,9 @@ watch(() => [setUserIdentityOptionsData.value, schemaFinancialInformationAndKYC.
             label="Phone number"
             data-testid="phone-group"
           >
-            <BaseFormInput
+            <VFormInput
               :model-value="model.phone"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               placeholder="+1 (___) ___ - ____"
               mask="+#(###)###-####"
               disallow-special-chars
@@ -414,7 +414,7 @@ watch(() => [setUserIdentityOptionsData.value, schemaFinancialInformationAndKYC.
               data-testid="phone"
               @update:model-value="model.phone = $event"
             />
-          </BaseFormGroup>
+          </VFormGroup>
         </FormCol>
       </FormRow>
       <div class="form-reg-cf-information__subtitle is--h3__title is--margin-top">
@@ -422,8 +422,8 @@ watch(() => [setUserIdentityOptionsData.value, schemaFinancialInformationAndKYC.
       </div>
       <FormRow>
         <FormCol col2>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -433,21 +433,21 @@ watch(() => [setUserIdentityOptionsData.value, schemaFinancialInformationAndKYC.
             label="Address 1"
             data-testid="address-1-group"
           >
-            <BaseFormInput
+            <VFormInput
               :model-value="model.address1"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               placeholder="Address 1"
               name="address-1"
               size="large"
               data-testid="address-1"
               @update:model-value="model.address1 = $event"
             />
-          </BaseFormGroup>
+          </VFormGroup>
         </FormCol>
 
         <FormCol col2>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -457,23 +457,23 @@ watch(() => [setUserIdentityOptionsData.value, schemaFinancialInformationAndKYC.
             label="Address 2"
             data-testid="address-2-group"
           >
-            <BaseFormInput
+            <VFormInput
               :model-value="model.address2"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               placeholder="Address 2"
               name="address-2"
               size="large"
               data-testid="address-2"
               @update:model-value="model.address2 = $event"
             />
-          </BaseFormGroup>
+          </VFormGroup>
         </FormCol>
       </FormRow>
 
       <FormRow>
         <FormCol col2>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -483,9 +483,9 @@ watch(() => [setUserIdentityOptionsData.value, schemaFinancialInformationAndKYC.
             label="City"
             data-testid="city-group"
           >
-            <BaseFormInput
+            <VFormInput
               :model-value="model.city"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               name="city"
               size="large"
               placeholder="City"
@@ -494,11 +494,11 @@ watch(() => [setUserIdentityOptionsData.value, schemaFinancialInformationAndKYC.
               disallow-numbers
               @update:model-value="model.city = $event"
             />
-          </BaseFormGroup>
+          </VFormGroup>
         </FormCol>
         <FormCol col2>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -508,9 +508,9 @@ watch(() => [setUserIdentityOptionsData.value, schemaFinancialInformationAndKYC.
             label="State"
             data-testid="state-group"
           >
-            <BaseFormSelect
+            <VFormSelect
               :model-value="model.state"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               name="state"
               size="large"
               placeholder="State"
@@ -522,14 +522,14 @@ watch(() => [setUserIdentityOptionsData.value, schemaFinancialInformationAndKYC.
               data-testid="state"
               @update:model-value="model.state = $event"
             />
-          </BaseFormGroup>
+          </VFormGroup>
         </FormCol>
       </FormRow>
 
       <FormRow>
         <FormCol col2>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -539,9 +539,9 @@ watch(() => [setUserIdentityOptionsData.value, schemaFinancialInformationAndKYC.
             label="Zip Code"
             data-testid="zip-group"
           >
-            <BaseFormInput
+            <VFormInput
               :model-value="model.zip_code"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               name="zip"
               size="large"
               data-testid="zip"
@@ -551,12 +551,12 @@ watch(() => [setUserIdentityOptionsData.value, schemaFinancialInformationAndKYC.
               disallow-special-chars
               @update:model-value="model.zip_code = $event"
             />
-          </BaseFormGroup>
+          </VFormGroup>
         </FormCol>
 
         <FormCol col2>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -566,9 +566,9 @@ watch(() => [setUserIdentityOptionsData.value, schemaFinancialInformationAndKYC.
             label="Country"
             data-testid="country-group"
           >
-            <BaseFormSelect
+            <VFormSelect
               :model-value="model.country"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               name="country"
               size="large"
               placeholder="Country"
@@ -580,7 +580,7 @@ watch(() => [setUserIdentityOptionsData.value, schemaFinancialInformationAndKYC.
               data-testid="country"
               @update:model-value="model.country = $event"
             />
-          </BaseFormGroup>
+          </VFormGroup>
         </FormCol>
       </FormRow>
       <div class="form-reg-cf-information__subtitle is--h3__title is--margin-top">
@@ -588,8 +588,8 @@ watch(() => [setUserIdentityOptionsData.value, schemaFinancialInformationAndKYC.
       </div>
       <FormRow>
         <FormCol>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -608,12 +608,12 @@ watch(() => [setUserIdentityOptionsData.value, schemaFinancialInformationAndKYC.
                 Accredited Investor?
               </router-link>
             </div>
-            <BaseFormRadio
+            <VFormRadio
               v-model="model.accredited_investor.is_accredited"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               :options="isAccreditedRadioOptions"
             />
-          </BaseFormGroup>
+          </VFormGroup>
         </FormCol>
       </FormRow>
       <div class="form-reg-cf-information__subtitle is--h3__title is--margin-top">
@@ -621,8 +621,8 @@ watch(() => [setUserIdentityOptionsData.value, schemaFinancialInformationAndKYC.
       </div>
       <FormRow>
         <FormCol>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -631,9 +631,9 @@ watch(() => [setUserIdentityOptionsData.value, schemaFinancialInformationAndKYC.
             path="investment_objectives.objectives"
             label="Investment objectives"
           >
-            <BaseFormSelect
+            <VFormSelect
               v-model="model.investment_objectives.objectives"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               item-label="text"
               item-value="value"
               name="investment-objectives"
@@ -642,13 +642,13 @@ watch(() => [setUserIdentityOptionsData.value, schemaFinancialInformationAndKYC.
               :options="SELECT_OBJECTIVES"
               dropdown-absolute
             />
-          </BaseFormGroup>
+          </VFormGroup>
         </FormCol>
       </FormRow>
       <FormRow>
         <FormCol col2>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -657,21 +657,21 @@ watch(() => [setUserIdentityOptionsData.value, schemaFinancialInformationAndKYC.
             path="investment_objectives.years_experience"
             label="Investment Years Experience"
           >
-            <BaseFormInput
+            <VFormInput
               :model-value="String(model.investment_objectives.years_experience)"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               size="large"
               placeholder="10 years"
               name="years-experience"
               data-testid="years-experience"
               @update:model-value="model.investment_objectives.years_experience = numberFormatter($event)"
             />
-          </BaseFormGroup>
+          </VFormGroup>
         </FormCol>
 
         <FormCol col2>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -680,9 +680,9 @@ watch(() => [setUserIdentityOptionsData.value, schemaFinancialInformationAndKYC.
             path="investment_objectives.duration"
             label="How long do you plan to invest"
           >
-            <BaseFormSelect
+            <VFormSelect
               v-model="model.investment_objectives.duration"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               item-label="text"
               item-value="value"
               name="duration"
@@ -691,13 +691,13 @@ watch(() => [setUserIdentityOptionsData.value, schemaFinancialInformationAndKYC.
               :options="SELECT_DURATION"
               dropdown-absolute
             />
-          </BaseFormGroup>
+          </VFormGroup>
         </FormCol>
       </FormRow>
       <FormRow>
         <FormCol>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -706,9 +706,9 @@ watch(() => [setUserIdentityOptionsData.value, schemaFinancialInformationAndKYC.
             path="investment_objectives.importance_of_access"
             label="How important is it to have immediate access to your invested funds"
           >
-            <BaseFormSelect
+            <VFormSelect
               v-model="model.investment_objectives.importance_of_access"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               item-label="text"
               item-value="value"
               name="importance-of-access"
@@ -717,13 +717,13 @@ watch(() => [setUserIdentityOptionsData.value, schemaFinancialInformationAndKYC.
               :options="SELECT_IMPORTANCE"
               dropdown-absolute
             />
-          </BaseFormGroup>
+          </VFormGroup>
         </FormCol>
       </FormRow>
       <FormRow>
         <FormCol>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -732,9 +732,9 @@ watch(() => [setUserIdentityOptionsData.value, schemaFinancialInformationAndKYC.
             path="investment_objectives.risk_comfort"
             label="How much risk are you comfortable with"
           >
-            <BaseFormSelect
+            <VFormSelect
               v-model="model.investment_objectives.risk_comfort"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               item-label="text"
               item-value="value"
               name="risk-comfort"
@@ -743,7 +743,7 @@ watch(() => [setUserIdentityOptionsData.value, schemaFinancialInformationAndKYC.
               :options="SELECT_RISK_COMFORT"
               dropdown-absolute
             />
-          </BaseFormGroup>
+          </VFormGroup>
         </FormCol>
       </FormRow>
       <div class="form-reg-cf-information__subtitle is--h3__title is--margin-top">
@@ -751,8 +751,8 @@ watch(() => [setUserIdentityOptionsData.value, schemaFinancialInformationAndKYC.
       </div>
       <FormRow>
         <FormCol>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -761,23 +761,23 @@ watch(() => [setUserIdentityOptionsData.value, schemaFinancialInformationAndKYC.
             path="educational_materials"
             data-testid="educational-materials-group"
           >
-            <BaseFormCheckbox
+            <VFormCheckbox
               v-model="model.educational_materials"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               data-testid="educational-materials"
             >
               <span class="is--body">
                 Market and Liquidity Risk: I acknowledge the potential for market fluctuations and
                 limited liquidity in Regulation A and Regulation D offerings.
               </span>
-            </BaseFormCheckbox>
-          </BaseFormGroup>
+            </VFormCheckbox>
+          </VFormGroup>
         </FormCol>
       </FormRow>
       <FormRow>
         <FormCol>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -786,23 +786,23 @@ watch(() => [setUserIdentityOptionsData.value, schemaFinancialInformationAndKYC.
             path="cancelation_restrictions"
             data-testid="cancelation-restrictions-group"
           >
-            <BaseFormCheckbox
+            <VFormCheckbox
               v-model="model.cancelation_restrictions"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               data-testid="cancelation-restrictions"
             >
               <span class="is--body">
                 Business and Regulatory Risk: I understand the business challenges and regulatory uncertainties
                 associated with investing in these offerings.
               </span>
-            </BaseFormCheckbox>
-          </BaseFormGroup>
+            </VFormCheckbox>
+          </VFormGroup>
         </FormCol>
       </FormRow>
       <FormRow>
         <FormCol>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -811,23 +811,23 @@ watch(() => [setUserIdentityOptionsData.value, schemaFinancialInformationAndKYC.
             path="resell_difficulties"
             data-testid="resell-difficulties-group"
           >
-            <BaseFormCheckbox
+            <VFormCheckbox
               v-model="model.resell_difficulties"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               data-testid="resell-difficulties"
             >
               <span class="is--body">
                 Limited Information and Fraud Risk: I'm aware of the limited disclosure and potential for fraudulent
                 schemes in Regulation A and Regulation D investments.
               </span>
-            </BaseFormCheckbox>
-          </BaseFormGroup>
+            </VFormCheckbox>
+          </VFormGroup>
         </FormCol>
       </FormRow>
       <FormRow>
         <FormCol>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -836,23 +836,23 @@ watch(() => [setUserIdentityOptionsData.value, schemaFinancialInformationAndKYC.
             path="risk_involved"
             data-testid="risk-involved-group"
           >
-            <BaseFormCheckbox
+            <VFormCheckbox
               v-model="model.risk_involved"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               data-testid="risk-involved"
             >
               <span class="is--body">
                 Illiquidity and Capital Loss: I accept the illiquid nature and the risk of partial
                 or total loss of capital in these investments.
               </span>
-            </BaseFormCheckbox>
-          </BaseFormGroup>
+            </VFormCheckbox>
+          </VFormGroup>
         </FormCol>
       </FormRow>
       <FormRow>
         <FormCol>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -861,9 +861,9 @@ watch(() => [setUserIdentityOptionsData.value, schemaFinancialInformationAndKYC.
             path="no_legal_advices_from_company"
             data-testid="no_legal_advices_from_company-group"
           >
-            <BaseFormCheckbox
+            <VFormCheckbox
               v-model="model.no_legal_advices_from_company"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               data-testid="no_legal_advices_from_company"
             >
               <span class="is--body">
@@ -871,14 +871,14 @@ watch(() => [setUserIdentityOptionsData.value, schemaFinancialInformationAndKYC.
                 market volatility, limited liquidity, regulatory uncertainties, and the possibility of
                 financial loss, in investing in Regulation A and Regulation D offerings.
               </span>
-            </BaseFormCheckbox>
-          </BaseFormGroup>
+            </VFormCheckbox>
+          </VFormGroup>
         </FormCol>
       </FormRow>
       <FormRow>
         <FormCol>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -887,9 +887,9 @@ watch(() => [setUserIdentityOptionsData.value, schemaFinancialInformationAndKYC.
             path="consent_plaid"
             data-testid="consent-plaid-group"
           >
-            <BaseFormCheckbox
+            <VFormCheckbox
               v-model="model.consent_plaid"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               data-testid="consent-plaid"
             >
               <span class="is--body">
@@ -903,20 +903,20 @@ watch(() => [setUserIdentityOptionsData.value, schemaFinancialInformationAndKYC.
                   Plaid
                 </a>
               </span>
-            </BaseFormCheckbox>
-          </BaseFormGroup>
+            </VFormCheckbox>
+          </VFormGroup>
         </FormCol>
       </FormRow>
     </div>
     <div class="form-reg-cf-information__footer">
-      <BaseButton
+      <VButton
         size="large"
         variant="outlined"
         @click="cancelHandler"
       >
         Cancel
-      </BaseButton>
-      <BaseButton
+      </VButton>
+      <VButton
         size="large"
         :disabled="isDisabledButton"
         :loading="isLoading"
@@ -924,12 +924,12 @@ watch(() => [setUserIdentityOptionsData.value, schemaFinancialInformationAndKYC.
         @click="saveHandler"
       >
         Save
-      </BaseButton>
+      </VButton>
     </div>
   </div>
 </template>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .form-reg-cf-information {
   display: flex;
   flex-direction: column;

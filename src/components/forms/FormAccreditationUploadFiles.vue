@@ -7,7 +7,7 @@ import {
   useAccreditationStore, useUserIdentitysStore, useUsersStore,
 } from 'InvestCommon/store';
 // import { useHubspotForm } from 'InvestCommon/composable';
-import BaseButton from 'UiKit/components/BaseButton/BaseButton.vue';
+import VButton from 'UiKit/components/VButton/VButton.vue';
 import { storeToRefs } from 'pinia';
 import AccreditationFileInput from './components/AccreditationFileInput.vue';
 import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/helpers/enums/routes';
@@ -162,14 +162,14 @@ const onValidChange = (validInner: boolean) => {
       />
     </div>
     <div class="form-accreditation-upload-files__footer">
-      <BaseButton
+      <VButton
         size="large"
         variant="outlined"
         @click="cancelHandler"
       >
         Cancel
-      </BaseButton>
-      <BaseButton
+      </VButton>
+      <VButton
         size="large"
         :disabled="isDisabledButton"
         :loading="isLoading"
@@ -177,12 +177,12 @@ const onValidChange = (validInner: boolean) => {
         @click="saveHandler"
       >
         Save
-      </BaseButton>
+      </VButton>
     </div>
   </div>
 </template>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .form-accreditation-upload-files {
   display: flex;
   flex-direction: column;

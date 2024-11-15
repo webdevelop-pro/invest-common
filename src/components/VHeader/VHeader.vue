@@ -1,16 +1,18 @@
 <script setup lang="ts">
-import { computed, PropType, ref, watch, watchEffect } from 'vue';
-import TheLogo from 'UiKit/components/common/TheLogo/TheLogo.vue';
-import AppMobileMenu from './AppMobileMenu.vue';
-import AppLayoutDefaultHeaderProfile from './AppLayoutDefaultHeaderProfile.vue';
-import BaseButton from 'UiKit/components/BaseButton/BaseButton.vue';
+import {
+  computed, PropType, ref, watch, watchEffect,
+} from 'vue';
+import TheLogo from 'UiKit/components/VLogo/VLogo.vue';
+import VMobileMenu from './VMobileMenu.vue';
+import VHeaderProfile from './VHeaderProfile.vue';
+import VHeaderNavigation from './VHeaderNavigation.vue';
+import VButton from 'UiKit/components/VButton/VButton.vue';
 import {
   ROUTE_FORGOT, ROUTE_LOGIN, ROUTE_SIGNUP,
 } from 'InvestCommon/helpers/enums/routes';
-import AppLayoutDefaultHeaderNavigation from './AppLayoutDefaultHeaderNavigation.vue';
 import { useAuthLogicStore, useUsersStore } from 'InvestCommon/store';
 import { storeToRefs } from 'pinia';
-import BaseSkeleton from 'UiKit/components/BaseSkeleton/BaseSkeleton.vue';
+import VSkeleton from 'UiKit/components/VSkeleton/VSkeleton.vue';
 import env from 'InvestCommon/global';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import { urlSignin, urlSignup } from 'InvestCommon/global/links';
@@ -32,7 +34,7 @@ const props = defineProps({
   profileMenu: Array as PropType<MenuItem[]>,
   menu: Array as PropType<MenuItem[]>,
   path: String,
-})
+});
 
 const isMobileMenuOpen = ref(false);
 let router;
@@ -77,7 +79,7 @@ const queryParams = computed(() => {
 
 const signInHandler = () => {
   if (EXTERNAL && queryParams.value) {
-    navigateWithQueryParams(urlSignin,  queryParams.value);
+    navigateWithQueryParams(urlSignin, queryParams.value);
   } else {
     void router?.push({ name: ROUTE_LOGIN, query: router?.currentRoute.value.query });
   }
@@ -85,7 +87,7 @@ const signInHandler = () => {
 
 const signUpHandler = () => {
   if (EXTERNAL) {
-    navigateWithQueryParams(urlSignup,  queryParams.value);
+    navigateWithQueryParams(urlSignup, queryParams.value);
   } else {
     void router?.push({ name: ROUTE_SIGNUP, query: router?.currentRoute.value.query });
   }
@@ -108,23 +110,23 @@ watchEffect(() => {
 </script>
 
 <template>
-  <div class="AppLayoutDefaultHeader app-layout-default-header is--no-margin">
-    <div class="app-layout-default-header__logo-wrap">
+  <div class="VHeader v-header is--no-margin">
+    <div class="v-header__logo-wrap">
       <TheLogo
         link="/"
-        class="app-layout-default-header__logo"
+        class="v-header__logo"
       />
     </div>
 
-    <div class="app-layout-default-header__right">
-      <div class="app-layout-default-header__nav">
-        <AppLayoutDefaultHeaderNavigation
+    <div class="v-header__right">
+      <div class="v-header__nav">
+        <VHeaderNavigation
           v-if="!isSignInPage && !isSignUpPage && !isRecoveryPage"
           :menu="menu"
         />
         <div
           v-else
-          class="app-layout-default-header__auth-text is--body"
+          class="v-header__auth-text is--body"
         >
           <span
             v-if="!userLoggedIn && !isSignInPage && !isRecoveryPage"
@@ -138,45 +140,45 @@ watchEffect(() => {
           </span>
         </div>
 
-        <BaseSkeleton
+        <VSkeleton
           v-if="isGetUserIdentityLoading || isLoadingSession"
           height="25px"
           width="250px"
-          class="app-layout-default-header-btns__skeleton"
+          class="v-header-btns__skeleton"
         />
         <div
           v-else-if="!userLoggedIn"
-          class="app-layout-default-header-btns"
+          class="v-header-btns"
           :class="{
-            'app-layout-default-header-sign-in': isSignInPage,
-            'app-layout-default-header-sign-up': isSignUpPage,
+            'v-header-sign-in': isSignInPage,
+            'v-header-sign-up': isSignUpPage,
           }"
         >
-          <BaseButton
+          <VButton
             v-if="!userLoggedIn && !isSignInPage && !isRecoveryPage"
-            class="app-layout-default-header-btns__sign-in"
+            class="v-header-btns__sign-in"
             :variant="!isSignUpPage ? 'link' : null"
             @click="signInHandler"
           >
             Log In
-          </BaseButton>
+          </VButton>
 
-          <BaseButton
+          <VButton
             v-if="!userLoggedIn && !isSignUpPage"
-            class="app-layout-default-header-btns__sign-up"
+            class="v-header-btns__sign-up"
             @click="signUpHandler"
           >
             Sign Up
-          </BaseButton>
+          </VButton>
         </div>
-        <AppLayoutDefaultHeaderProfile
+        <VHeaderProfile
           v-else-if="userLoggedIn"
           :menu="profileMenu"
-          class="app-layout-default-header-btns__profile"
+          class="v-header-btns__profile"
         />
       </div>
 
-      <AppMobileMenu
+      <VMobileMenu
         v-model="isMobileMenuOpen"
         :menu="menu"
         :profile-menu="profileMenu"
@@ -185,8 +187,8 @@ watchEffect(() => {
   </div>
 </template>
 
-<style lang="scss" scoped>
-.app-layout-default-header {
+<style lang="scss">
+.v-header {
   position: relative;
   z-index: 9;
   display: flex;

@@ -21,17 +21,17 @@ const getComponentName = (item: MenuItem) => {
   return 'div';
 };
 const getComponentClass = (item: MenuItem) => {
-  if (item.to || item.href) return 'app-layout-default-header-navigation__item';
-  return 'app-layout-default-header-navigation__item-not-link';
+  if (item.to || item.href) return 'v-header-navigation__item';
+  return 'v-header-navigation__item-not-link';
 };
 </script>
 
 <template>
-  <div class="AppLayoutDefaultHeaderNavigation app-layout-default-header-navigation">
+  <div class="VHeaderNavigation v-header-navigation">
     <div
       v-for="menuItem in menu"
       :key="menuItem.text"
-      class="app-layout-default-header-navigation__item-wrap"
+      class="v-header-navigation__item-wrap"
     >
       <component
         :is="getComponentName(menuItem)"
@@ -44,7 +44,7 @@ const getComponentClass = (item: MenuItem) => {
       </component>
       <div
         v-if="menuItem.children && menuItem.children.length > 0"
-        class="app-layout-default-header-navigation__children"
+        class="v-header-navigation__children"
         :class="{ 'is--two-col': menuItem.children.length > 8 }"
       >
         <template
@@ -66,8 +66,8 @@ const getComponentClass = (item: MenuItem) => {
   </div>
 </template>
 
-<style lang="scss" scoped>
-.app-layout-default-header-navigation {
+<style lang="scss">
+.v-header-navigation {
   $root: &;
 
   width: 100%;

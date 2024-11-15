@@ -2,7 +2,7 @@
 </script>
 
 <template>
-  <div class="AppLayoutDefaultFooterText app-layout-default-footer-text">
+  <div class="VFooterText v-footer-text">
     <div class="is--container">
       <p class="is--small">
         Securities through Invest PRO Member: FINRA/SIPC. Only available in states
@@ -13,7 +13,7 @@
       <p class="is--small">
         Listings on this portal:
       </p>
-      <ul class="is--small app-layout-default-footer-text__list">
+      <ul class="is--small v-footer-text__list">
         <li>
           do not constitute an offer of securities
           or a solicitation of an offer to buy securities
@@ -57,7 +57,7 @@
 
 
 <style lang="scss">
-.app-layout-default-footer-text {
+.v-footer-text {
   $root: &;
 
   color: $gray-50;

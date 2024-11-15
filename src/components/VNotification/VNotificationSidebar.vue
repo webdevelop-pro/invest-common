@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import { useNotificationsStore } from 'InvestCommon/store';
 import { ROUTE_NOTIFICATIONS } from 'InvestCommon/helpers/enums/routes';
-import BaseButton from 'UiKit/components/BaseButton/BaseButton.vue';
-import WdNotificationTable from 'InvestCommon/components/common/WdNotificationTable.vue';
+import VButton from 'UiKit/components/VButton/VButton.vue';
+import WdNotificationTable from 'InvestCommon/components/VNotification/VNotificationTable.vue';
 import { storeToRefs } from 'pinia';
 import { onClickOutside } from '@vueuse/core';
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { blockedBody, unBlockedBody } from 'InvestCommon/helpers/blocked-body';
-import { BaseSvgIcon } from 'UiKit/components/BaseSvgIcon';
+import { VSvgIcon } from 'UiKit/components/VSvgIcon';
 
 
-const props = defineProps({
+defineProps({
   external: Boolean, // is the component external and nee links instead of router
 });
 
@@ -32,38 +32,38 @@ onBeforeUnmount(() => unBlockedBody());
 <template>
   <aside
     ref="target"
-    class="WdNotificationSidebar wd-notification-sidebar is--no-margin"
+    class="VNotificationSidebar v-notification-sidebar is--no-margin"
   >
-    <div class="wd-notification-sidebar__header">
+    <div class="v-notification-sidebar__header">
       <h4>
         Notifications
         <span v-if="notificationUnreadLength">
           (+{{ notificationUnreadLength }})
         </span>
       </h4>
-      <BaseButton
+      <VButton
         size="large"
         icon-only
         variant="link"
-        class="wd-notification-sidebar__close-button"
+        class="v-notification-sidebar__close-button"
         @click="onClose"
       >
-        <BaseSvgIcon
+        <VSvgIcon
           name="close"
           alt="notification sidebar close icon"
-          class="wd-notification-sidebar__close-icon"
+          class="v-notification-sidebar__close-icon"
         />
-      </BaseButton>
+      </VButton>
     </div>
-    <div class="wd-notification-sidebar__content">
+    <div class="v-notification-sidebar__content">
       <WdNotificationTable
         small
-        class="wd-notification-sidebar__table"
+        class="v-notification-sidebar__table"
         :external="external"
       />
     </div>
-    <div class="wd-notification-sidebar__bottom">
-      <BaseButton
+    <div class="v-notification-sidebar__bottom">
+      <VButton
         size="large"
         variant="link"
         icon-placement="right"
@@ -73,18 +73,18 @@ onBeforeUnmount(() => unBlockedBody());
         @click="onClose"
       >
         View All
-        <BaseSvgIcon
+        <VSvgIcon
           name="arrow-right"
-          class="wd-notification-sidebar__icon"
+          class="v-notification-sidebar__icon"
           alt="modal layout close icon"
         />
-      </BaseButton>
+      </VButton>
     </div>
   </aside>
 </template>
 
-<style lang="scss" scoped>
-.wd-notification-sidebar {
+<style lang="scss">
+.v-notification-sidebar {
   position: fixed;
   right: 0;
   top: 0;

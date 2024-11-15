@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import BaseModalLayout from 'UiKit/components/BaseModal/BaseModalLayout.vue';
+import VModalLayout from 'UiKit/components/VModal/VModalLayout.vue';
 import FormWalletAddTransaction from 'InvestCommon/components/forms/FormWalletAddTransaction.vue';
 import { WalletAddTransactionTypes } from 'InvestCommon/types/api/wallet';
 import { PropType } from 'vue';
@@ -14,7 +14,7 @@ defineProps({
 </script>
 
 <template>
-  <BaseModalLayout
+  <VModalLayout
     class="WdModalWalletAddTransaction wd-modal-wallet-add-transaction is--no-margin"
     @close="$emit('close')"
   >
@@ -24,7 +24,7 @@ defineProps({
         @cancel="$emit('close')"
       />
     </template>
-  </BaseModalLayout>
+  </VModalLayout>
 </template>
 
 <style lang="scss">

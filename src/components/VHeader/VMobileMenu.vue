@@ -1,18 +1,17 @@
 <script setup lang="ts">
 import {
   watch, onMounted, onUnmounted, onBeforeUnmount, computed,
-  PropType,
-  ref,
+  PropType, ref,
 } from 'vue';
 import { useBreakpointsStore, useUsersStore } from 'InvestCommon/store';
 import { blockedBody } from 'InvestCommon/helpers/blocked-body';
 import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
 import {
-  ROUTE_FORGOT, ROUTE_LOGIN, ROUTE_SIGNUP
+  ROUTE_FORGOT, ROUTE_LOGIN, ROUTE_SIGNUP,
 } from 'InvestCommon/helpers/enums/routes';
-import BaseButton from 'UiKit/components/BaseButton/BaseButton.vue';
-import AppMobileMenuBurger from './AppMobileMenuBurger.vue';
+import VButton from 'UiKit/components/VButton/VButton.vue';
+import VMobileMenuBurger from './VMobileMenuBurger.vue';
 import { useLogoutModal } from 'InvestCommon/components/modals/modals';
 import { navigateWithQueryParams } from 'InvestCommon/helpers/general';
 import env from 'InvestCommon/global';
@@ -171,7 +170,7 @@ if (window) {
     @click="$emit('update:modelValue', false)"
   />
 
-  <AppMobileMenuBurger
+  <VMobileMenuBurger
     :model-value="modelValue"
     class="wd-header-burger"
     @update:model-value="$emit('update:modelValue', !modelValue)"
@@ -225,22 +224,22 @@ if (window) {
           'app-layout-default-header-sign-up': isSignUpPage,
         }"
       >
-        <BaseButton
+        <VButton
           v-if="!userLoggedIn && !isSignInPage && !isRecoveryPage"
           class="app-layout-default-header-btns__sign-in"
           :variant="!isSignUpPage ? 'link' : null"
           @click="signInHandler"
         >
           Log In
-        </BaseButton>
+        </VButton>
 
-        <BaseButton
+        <VButton
           v-if="!userLoggedIn && !isSignUpPage"
           class="app-layout-default-header-btns__sign-up"
           @click="signUpHandler"
         >
           Sign Up
-        </BaseButton>
+        </VButton>
       </div>
       <div
         v-if="userLoggedIn && !isGetUserIdentityLoading"
@@ -273,7 +272,7 @@ if (window) {
   </div>
 </template>
 
-<style lang="scss" scoped>
+<style lang="scss">
 $z-index-menu-bg: 99;
 $z-index-menu: 999;
 $z-index-menu-burger: $z-index-menu + 1;

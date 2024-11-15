@@ -1,5 +1,5 @@
 <template>
-  <BaseModalLayout
+  <VModalLayout
     class="wd-modal-log-out is--no-margin"
     @close="$emit('close')"
   >
@@ -14,30 +14,30 @@
 
     <template #footer>
       <div class="wd-modal-log-out__footer-btns">
-        <BaseButton
+        <VButton
           size="large"
           @click="onClick"
         >
           Create an account
-        </BaseButton>
+        </VButton>
       </div>
     </template>
-  </BaseModalLayout>
+  </VModalLayout>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
 
-import BaseModalLayout from 'UiKit/components/BaseModal/BaseModalLayout.vue';
-import BaseButton from 'UiKit/components/BaseButton/BaseButton.vue';
+import VModalLayout from 'UiKit/components/VModal/VModalLayout.vue';
+import VButton from 'UiKit/components/VButton/VButton.vue';
 import { useRouter } from 'vue-router';
 import { ROUTE_LOGIN } from 'InvestCommon/helpers/enums/routes';
 
 export default defineComponent({
   name: 'WdModalLogOut',
   components: {
-    BaseModalLayout,
-    BaseButton,
+    VModalLayout,
+    VButton,
   },
   emits: ['close'], // close modal
   setup(_, ctx) {

@@ -2,15 +2,15 @@
 import { INotification } from 'InvestCommon/types/api/notifications';
 import { formatToDate } from 'InvestCommon/helpers/formatters/formatToDate';
 import { PropType, computed } from 'vue';
-import BaseTag from 'UiKit/components/BaseTag/BaseTag.vue';
-import BaseButton from 'UiKit/components/BaseButton/BaseButton.vue';
+import VTag from 'UiKit/components/VTag/VTag.vue';
+import VButton from 'UiKit/components/VButton/VButton.vue';
 import { useNotificationsStore, useUsersStore } from 'InvestCommon/store';
 import {
   ROUTE_ACCREDITATION_UPLOAD, ROUTE_DASHBOARD_ACCOUNT,
   ROUTE_DASHBOARD_WALLET, ROUTE_INVESTMENT_TIMELINE, ROUTE_NOTIFICATIONS,
 } from 'InvestCommon/helpers/enums/routes';
 import { storeToRefs } from 'pinia';
-import { BaseSvgIcon } from 'UiKit/components/BaseSvgIcon';
+import VSvgIcon from 'UiKit/components/VSvgIcon/VSvgIcon.vue';
 import {
   urlContactUs, urlOffers, urlNotifications, urlProfileAccreditation,
   urlInvestmentTimeline, urlProfileWallet, urlProfileAccount,
@@ -148,7 +148,7 @@ const onButtonClick = () => {
   >
     <td class="wd-notification-table-item__type-wrap">
       <span class="wd-notification-table-item__type">
-        <BaseTag
+        <VTag
           round
           :background="tagBackground"
           class="wd-notification-table-item__tag"
@@ -156,7 +156,7 @@ const onButtonClick = () => {
           <span class="wd-notification-table-item__tag-text">
             {{ tagText }}
           </span>
-        </BaseTag>
+        </VTag>
       </span>
     </td>
     <td>
@@ -175,7 +175,7 @@ const onButtonClick = () => {
           />
         </div>
 
-        <BaseButton
+        <VButton
           size="small"
           variant="link"
           icon-placement="right"
@@ -186,12 +186,12 @@ const onButtonClick = () => {
           @click="onButtonClick"
         >
           {{ buttonText }}
-          <BaseSvgIcon
+          <VSvgIcon
             name="arrow-right"
             class="wd-notification-table-item__icon"
             alt="modal layout close icon"
           />
-        </BaseButton>
+        </VButton>
       </div>
       <span
         v-if="isUnread"
@@ -202,7 +202,7 @@ const onButtonClick = () => {
   </tr>
 </template>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .wd-notification-table-item {
   display: table-row;
 

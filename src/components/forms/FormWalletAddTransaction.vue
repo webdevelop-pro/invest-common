@@ -10,11 +10,11 @@ import {
 import { ROUTE_DASHBOARD_WALLET } from 'InvestCommon/helpers/enums/routes';
 import { storeToRefs } from 'pinia';
 import { WalletAddTransactionTypes } from 'InvestCommon/types/api/wallet';
-import BaseFormGroup from 'UiKit/components/BaseFormGroup/BaseFormGroup.vue';
-import BaseFormInput from 'UiKit/components/BaseFormInput/BaseFormInput.vue';
-import BaseButton from 'UiKit/components/BaseButton/BaseButton.vue';
-import FormRow from 'InvestCommon/components/common/FormRow.vue';
-import FormCol from 'InvestCommon/components/common/FormCol.vue';
+import VFormGroup from 'UiKit/components/VForm/VFormGroup.vue';
+import VFormInput from 'UiKit/components/VForm/VFormInput.vue';
+import VButton from 'UiKit/components/VButton/VButton.vue';
+import FormRow from 'InvestCommon/components/VForm/VFormRow.vue';
+import FormCol from 'InvestCommon/components/VForm/VFormCol.vue';
 import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
 import { isEmpty } from 'lodash';
 import { FormModelAddTransaction } from './utils';
@@ -128,8 +128,8 @@ watch(() => [schemaAddTransaction.value], () => {
     <div class="form-wallet-add-transaction__content">
       <FormRow>
         <FormCol>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-front="schemaAddTransaction"
@@ -137,14 +137,14 @@ watch(() => [schemaAddTransaction.value], () => {
             path="amount"
             class="form-wallet-add-transaction__input"
           >
-            <BaseFormInput
-              :is-error="baseFormGroupProps.isFieldError"
+            <VFormInput
+              :is-error="VFormGroupProps.isFieldError"
               :model-value="model.amount ? String(model.amount) : null"
               name="amount"
               money-format
               @update:model-value="model.amount = numberFormatter($event)"
             />
-          </BaseFormGroup>
+          </VFormGroup>
           <div class="form-wallet-add-transaction__text is--small">
             Maximum {{ text }}
           </div>
@@ -152,25 +152,25 @@ watch(() => [schemaAddTransaction.value], () => {
       </FormRow>
     </div>
     <div class="form-wallet-add-transaction__footer">
-      <BaseButton
+      <VButton
         variant="outlined"
         @click="cancelHandler"
       >
         Cancel
-      </BaseButton>
-      <BaseButton
+      </VButton>
+      <VButton
         :disabled="isDisabledButton"
         :loading="isSetProfileWalletAddTransactionLoading"
         data-testid="button"
         @click="saveHandler"
       >
         {{ titile }}
-      </BaseButton>
+      </VButton>
     </div>
   </div>
 </template>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .form-wallet-add-transaction {
   display: flex;
   flex-direction: column;

@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, PropType, ref } from 'vue';
-import SocialLinks from 'UiKit/components/common/SocialLinks/SocialLinks.vue';
+import SocialLinks from 'UiKit/components/VSocialLinks/VSocialLinks.vue';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
-import AppLayoutDefaultFooterMenu from './AppLayoutDefaultFooterMenu.vue';
-import AppLayoutDefaultFooterText from './AppLayoutDefaultFooterText.vue';
-import FooterSubscribeForm from 'UiKit/components/common/FooterSubscribeForm/FooterSubscribeForm.vue';
+import VFooterMenu from './VFooterMenu.vue';
+import VFooterText from './VFooterText.vue';
+import VFormFooterSubscribe from 'UiKit/components/Forms/VFormFooterSubscribe.vue';
 import { notify } from '@kyvg/vue3-notification';
 
 
@@ -64,13 +64,13 @@ const onSubmit = async (emailLocal: string) => {
 
 <template>
   <!-- eslint-disable vue/no-multiple-template-root -->
-  <div class="AppLayoutDefaultFooter footer-top is--no-margin">
+  <div class="VFooter v-footer is--no-margin">
     <div class="is--container">
-      <div class="footer-top__wrap">
-        <div class="footer-top__form-wrap">
-          <FooterSubscribeForm
+      <div class="v-footer__wrap">
+        <div class="v-footer__form-wrap">
+          <VFormFooterSubscribe
             :loading="loadingSubmitting"
-            class="footer-top__form"
+            class="v-footer__form"
             @submit="onSubmit"
           />
 
@@ -85,7 +85,7 @@ const onSubmit = async (emailLocal: string) => {
         <div
           v-for="(item, index) in contactList"
           :key="index"
-          class="footer-top__contact"
+          class="v-footer__contact"
         >
           <div class="is--h5__title">
             {{ item.address1 }}
@@ -100,14 +100,14 @@ const onSubmit = async (emailLocal: string) => {
             {{ item.email }}
           </div>
         </div>
-        <AppLayoutDefaultFooterMenu
+        <VFooterMenu
           :menu="menu"
-          class="footer-top__menu"
+          class="v-footer__menu"
         />
       </div>
     </div>
   </div>
-  <AppLayoutDefaultFooterText />
+  <VFooterText />
   <div class="footer-bottom">
     <div class="is--container">
       <p class="is--small">
@@ -119,7 +119,7 @@ const onSubmit = async (emailLocal: string) => {
 
 
 <style lang="scss">
-.footer-top {
+.v-footer {
   $root: &;
 
   background-color: $black;

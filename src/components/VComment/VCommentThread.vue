@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { PropType, computed } from 'vue';
-import TheComment from 'InvestCommon/components/common/TheComment.vue';
+import VComment from 'InvestCommon/components/VComment/VComment.vue';
 import { IOfferComment } from 'InvestCommon/types/api/offers';
 import { formatToDate } from 'InvestCommon/helpers/formatters/formatToDate';
 import logoMob from 'InvestCommon/assets/images/logo-mob.svg?url';
@@ -17,18 +17,18 @@ const showAnswer = computed(() => false);
 </script>
 
 <template>
-  <div class="TheCommentThread the-comment-thread">
-    <TheComment
-      class="the-comment-thread__comment"
+  <div class="VCommentThread v-comment-thread">
+    <VComment
+      class="v-comment-thread__comment"
       :title="`${ comment?.user.first_name } ${ comment?.user.last_name }`"
       :date="formatToDate(new Date(comment.created_at).toISOString())"
       :text="comment?.comment"
       :tag="comment.related"
     />
 
-    <TheComment
+    <VComment
       v-if="showAnswer"
-      class="the-comment-thread__comment is--reply"
+      class="v-comment-thread__comment is--reply"
       :title="`${ comment?.user.first_name } ${ comment?.user.last_name }`"
       :date="formatToDate(new Date(comment.created_at).toISOString())"
       :text="comment?.comment"
@@ -39,8 +39,8 @@ const showAnswer = computed(() => false);
   </div>
 </template>
 
-<style lang="scss" scoped>
-.the-comment-thread {
+<style lang="scss">
+.v-comment-thread {
   .is--reply {
     margin-left: 16px;
     border-left: 1px solid $gray-20;

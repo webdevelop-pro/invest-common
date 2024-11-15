@@ -5,21 +5,21 @@ import {
 } from 'vue';
 import { useUserIdentitysStore, useUsersStore } from 'InvestCommon/store';
 import { useHubspotForm } from 'InvestCommon/composable';
-import FormRow from 'InvestCommon/components/common/FormRow.vue';
-import FormCol from 'InvestCommon/components/common/FormCol.vue';
-import BaseFormInput from 'UiKit/components/BaseFormInput/BaseFormInput.vue';
-import BaseButton from 'UiKit/components/BaseButton/BaseButton.vue';
-import BaseFormSelect from 'UiKit/components/BaseFormSelect/BaseFormSelect.vue';
+import FormRow from 'InvestCommon/components/VForm/VFormRow.vue';
+import FormCol from 'InvestCommon/components/VForm/VFormCol.vue';
+import VFormInput from 'UiKit/components/VForm/VFormInput.vue';
+import VButton from 'UiKit/components/VButton/VButton.vue';
+import VFormSelect from 'UiKit/components/VFormSelect/VFormSelect.vue';
 import { storeToRefs } from 'pinia';
 import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
 import { checkObjectAndDeleteNotRequiredFields, isEmpty } from 'InvestCommon/helpers/general';
-import BaseFormGroup from 'UiKit/components/BaseFormGroup/BaseFormGroup.vue';
+import VFormGroup from 'UiKit/components/VForm/VFormGroup.vue';
 import {
   FormModelBackgroundInformation, SELECT_OPTIONS_EMPLOYMENT,
 } from './utils';
 import { filterSchema, scrollToError } from 'UiKit/helpers/validation/general';
 import { EmploymentTypes } from 'InvestCommon/helpers/enums/general';
-import BaseFormCheckbox from 'UiKit/components/BaseFormCheckbox/BaseFormCheckbox.vue';
+import VFormCheckbox from 'UiKit/components/VForm/VFormCheckbox.vue';
 import {
   address1Rule, address2Rule, cityRule, emailRule, errorMessageRule, zipRule,
 } from 'UiKit/helpers/validation/rules';
@@ -293,8 +293,8 @@ watch(() => [setUserIdentityOptionsData.value, schemaBackgroundInformation.value
     <div class="form-background-information__content">
       <FormRow>
         <FormCol>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -303,24 +303,24 @@ watch(() => [setUserIdentityOptionsData.value, schemaBackgroundInformation.value
             path="employment.type"
             label="Employment"
           >
-            <BaseFormSelect
+            <VFormSelect
               v-model="model.employment.type"
               item-label="text"
               item-value="value"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               name="employment-type"
               size="large"
               dropdown-absolute
               :options="SELECT_OPTIONS_EMPLOYMENT"
             />
-          </BaseFormGroup>
+          </VFormGroup>
         </FormCol>
       </FormRow>
       <template v-if="isAdditionalFields">
         <FormRow v-if="model.employment.type !== EmploymentTypes.self">
           <FormCol col2>
-            <BaseFormGroup
-              v-slot="baseFormGroupProps"
+            <VFormGroup
+              v-slot="VFormGroupProps"
               :model="model"
               :validation="validation"
               :schema-back="setUserIdentityOptionsData"
@@ -329,21 +329,21 @@ watch(() => [setUserIdentityOptionsData.value, schemaBackgroundInformation.value
               path="employment.employer_name"
               label="Employer Name"
             >
-              <BaseFormInput
+              <VFormInput
                 :model-value="model.employment.employer_name"
-                :is-error="baseFormGroupProps.isFieldError"
+                :is-error="VFormGroupProps.isFieldError"
                 placeholder="Employer Name"
                 name="employer-name"
                 size="large"
                 data-testid="employer-name"
                 @update:model-value="model.employment.employer_name = $event"
               />
-            </BaseFormGroup>
+            </VFormGroup>
           </FormCol>
 
           <FormCol col2>
-            <BaseFormGroup
-              v-slot="baseFormGroupProps"
+            <VFormGroup
+              v-slot="VFormGroupProps"
               :model="model"
               :validation="validation"
               :schema-back="setUserIdentityOptionsData"
@@ -352,22 +352,22 @@ watch(() => [setUserIdentityOptionsData.value, schemaBackgroundInformation.value
               path="employment.role"
               label="Your Title/Role"
             >
-              <BaseFormInput
+              <VFormInput
                 :model-value="model.employment.role"
-                :is-error="baseFormGroupProps.isFieldError"
+                :is-error="VFormGroupProps.isFieldError"
                 placeholder="Your Title/Role"
                 name="role"
                 size="large"
                 @update:model-value="model.employment.role = $event"
               />
-            </BaseFormGroup>
+            </VFormGroup>
           </FormCol>
         </FormRow>
 
         <FormRow>
           <FormCol col2>
-            <BaseFormGroup
-              v-slot="baseFormGroupProps"
+            <VFormGroup
+              v-slot="VFormGroupProps"
               :model="model"
               :validation="validation"
               :schema-back="setUserIdentityOptionsData"
@@ -376,20 +376,20 @@ watch(() => [setUserIdentityOptionsData.value, schemaBackgroundInformation.value
               path="employment.address1"
               label="Address 1"
             >
-              <BaseFormInput
+              <VFormInput
                 :model-value="model.employment.address1"
-                :is-error="baseFormGroupProps.isFieldError"
+                :is-error="VFormGroupProps.isFieldError"
                 placeholder="Address 1"
                 name="address-1"
                 size="large"
                 @update:model-value="model.employment.address1 = $event"
               />
-            </BaseFormGroup>
+            </VFormGroup>
           </FormCol>
 
           <FormCol col2>
-            <BaseFormGroup
-              v-slot="baseFormGroupProps"
+            <VFormGroup
+              v-slot="VFormGroupProps"
               :model="model"
               :validation="validation"
               :schema-back="setUserIdentityOptionsData"
@@ -398,22 +398,22 @@ watch(() => [setUserIdentityOptionsData.value, schemaBackgroundInformation.value
               path="employment.address2"
               label="Address 2"
             >
-              <BaseFormInput
+              <VFormInput
                 :model-value="model.employment.address2"
-                :is-error="baseFormGroupProps.isFieldError"
+                :is-error="VFormGroupProps.isFieldError"
                 placeholder="Address 2"
                 name="address-2"
                 size="large"
                 @update:model-value="model.employment.address2 = $event"
               />
-            </BaseFormGroup>
+            </VFormGroup>
           </FormCol>
         </FormRow>
 
         <FormRow>
           <FormCol col2>
-            <BaseFormGroup
-              v-slot="baseFormGroupProps"
+            <VFormGroup
+              v-slot="VFormGroupProps"
               :model="model"
               :validation="validation"
               :schema-back="setUserIdentityOptionsData"
@@ -422,9 +422,9 @@ watch(() => [setUserIdentityOptionsData.value, schemaBackgroundInformation.value
               path="employment.city"
               label="City"
             >
-              <BaseFormInput
+              <VFormInput
                 :model-value="model.employment.city"
-                :is-error="baseFormGroupProps.isFieldError"
+                :is-error="VFormGroupProps.isFieldError"
                 placeholder="City"
                 name="city"
                 size="large"
@@ -432,12 +432,12 @@ watch(() => [setUserIdentityOptionsData.value, schemaBackgroundInformation.value
                 disallow-numbers
                 @update:model-value="model.employment.city = $event"
               />
-            </BaseFormGroup>
+            </VFormGroup>
           </FormCol>
 
           <FormCol col2>
-            <BaseFormGroup
-              v-slot="baseFormGroupProps"
+            <VFormGroup
+              v-slot="VFormGroupProps"
               :model="model"
               :validation="validation"
               :schema-back="setUserIdentityOptionsData"
@@ -446,9 +446,9 @@ watch(() => [setUserIdentityOptionsData.value, schemaBackgroundInformation.value
               path="employment.postal_code"
               label="Zip Code"
             >
-              <BaseFormInput
+              <VFormInput
                 :model-value="model.employment.postal_code"
-                :is-error="baseFormGroupProps.isFieldError"
+                :is-error="VFormGroupProps.isFieldError"
                 placeholder="Zip Code"
                 size="large"
                 name="zip"
@@ -457,14 +457,14 @@ watch(() => [setUserIdentityOptionsData.value, schemaBackgroundInformation.value
                 disallow-special-chars
                 @update:model-value="model.employment.postal_code = $event"
               />
-            </BaseFormGroup>
+            </VFormGroup>
           </FormCol>
         </FormRow>
       </template>
       <FormRow>
         <FormCol>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -473,21 +473,21 @@ watch(() => [setUserIdentityOptionsData.value, schemaBackgroundInformation.value
             path="finra_affiliated.member_association"
             label="FINRA/SEC Affiliated"
           >
-            <BaseFormCheckbox
+            <VFormCheckbox
               v-model="model.finra_affiliated.member_association"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
             >
               Member Association
-            </BaseFormCheckbox>
-          </BaseFormGroup>
+            </VFormCheckbox>
+          </VFormGroup>
         </FormCol>
       </FormRow>
 
       <template v-if="model.finra_affiliated.member_association">
         <FormRow>
           <FormCol>
-            <BaseFormGroup
-              v-slot="baseFormGroupProps"
+            <VFormGroup
+              v-slot="VFormGroupProps"
               :model="model"
               :validation="validation"
               :schema-back="setUserIdentityOptionsData"
@@ -495,19 +495,19 @@ watch(() => [setUserIdentityOptionsData.value, schemaBackgroundInformation.value
               :error-text="setUserIdentityErrorData?.finra_affiliated.correspondence"
               path="finra_affiliated.correspondence"
             >
-              <BaseFormCheckbox
+              <VFormCheckbox
                 v-model="model.finra_affiliated.correspondence"
-                :is-error="baseFormGroupProps.isFieldError"
+                :is-error="VFormGroupProps.isFieldError"
               >
                 Correspondence
-              </BaseFormCheckbox>
-            </BaseFormGroup>
+              </VFormCheckbox>
+            </VFormGroup>
           </FormCol>
         </FormRow>
         <FormRow>
           <FormCol col3>
-            <BaseFormGroup
-              v-slot="baseFormGroupProps"
+            <VFormGroup
+              v-slot="VFormGroupProps"
               :model="model"
               :validation="validation"
               :schema-back="setUserIdentityOptionsData"
@@ -516,20 +516,20 @@ watch(() => [setUserIdentityOptionsData.value, schemaBackgroundInformation.value
               path="finra_affiliated.member_firm_name"
               label="Member Firm Name"
             >
-              <BaseFormInput
+              <VFormInput
                 :model-value="model.finra_affiliated.member_firm_name"
-                :is-error="baseFormGroupProps.isFieldError"
+                :is-error="VFormGroupProps.isFieldError"
                 placeholder="Member Firm Name"
                 size="large"
                 name="firm-name"
                 @update:model-value="model.finra_affiliated.member_firm_name = $event"
               />
-            </BaseFormGroup>
+            </VFormGroup>
           </FormCol>
 
           <FormCol col3>
-            <BaseFormGroup
-              v-slot="baseFormGroupProps"
+            <VFormGroup
+              v-slot="VFormGroupProps"
               :model="model"
               :validation="validation"
               :schema-back="setUserIdentityOptionsData"
@@ -538,20 +538,20 @@ watch(() => [setUserIdentityOptionsData.value, schemaBackgroundInformation.value
               path="finra_affiliated.compliance_contract_name"
               label="Compliance Contact Name"
             >
-              <BaseFormInput
+              <VFormInput
                 :model-value="model.finra_affiliated.compliance_contract_name"
-                :is-error="baseFormGroupProps.isFieldError"
+                :is-error="VFormGroupProps.isFieldError"
                 placeholder="Compliance Contact Name"
                 name="contact-name"
                 size="large"
                 @update:model-value="model.finra_affiliated.compliance_contract_name = $event"
               />
-            </BaseFormGroup>
+            </VFormGroup>
           </FormCol>
 
           <FormCol col3>
-            <BaseFormGroup
-              v-slot="baseFormGroupProps"
+            <VFormGroup
+              v-slot="VFormGroupProps"
               :model="model"
               :validation="validation"
               :schema-back="setUserIdentityOptionsData"
@@ -560,22 +560,22 @@ watch(() => [setUserIdentityOptionsData.value, schemaBackgroundInformation.value
               path="finra_affiliated.compliance_contract_email"
               label="Compliance contact email"
             >
-              <BaseFormInput
+              <VFormInput
                 :model-value="model.finra_affiliated.compliance_contract_email"
-                :is-error="baseFormGroupProps.isFieldError"
+                :is-error="VFormGroupProps.isFieldError"
                 placeholder="Compliance contact email"
                 name="contact-email"
                 size="large"
                 @update:model-value="model.finra_affiliated.compliance_contract_email = $event"
               />
-            </BaseFormGroup>
+            </VFormGroup>
           </FormCol>
         </FormRow>
       </template>
       <FormRow>
         <FormCol>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -584,20 +584,20 @@ watch(() => [setUserIdentityOptionsData.value, schemaBackgroundInformation.value
             path="ten_percent_shareholder.shareholder_association"
             label="10% Shareholder"
           >
-            <BaseFormCheckbox
+            <VFormCheckbox
               v-model="model.ten_percent_shareholder.shareholder_association"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
             >
               Shareholder Association
-            </BaseFormCheckbox>
-          </BaseFormGroup>
+            </VFormCheckbox>
+          </VFormGroup>
         </FormCol>
       </FormRow>
       <template v-if="model.ten_percent_shareholder?.shareholder_association">
         <FormRow>
           <FormCol>
-            <BaseFormGroup
-              v-slot="baseFormGroupProps"
+            <VFormGroup
+              v-slot="VFormGroupProps"
               :model="model"
               :validation="validation"
               :schema-back="setUserIdentityOptionsData"
@@ -606,22 +606,22 @@ watch(() => [setUserIdentityOptionsData.value, schemaBackgroundInformation.value
               path="ten_percent_shareholder.ticker_symbol_list"
               label="Ticker symbol list"
             >
-              <BaseFormInput
+              <VFormInput
                 :model-value="model.ten_percent_shareholder?.ticker_symbol_list"
-                :is-error="baseFormGroupProps.isFieldError"
+                :is-error="VFormGroupProps.isFieldError"
                 placeholder="Ticker symbol list"
                 name="ticker-symbol"
                 size="large"
                 @update:model-value="model.ten_percent_shareholder.ticker_symbol_list = $event"
               />
-            </BaseFormGroup>
+            </VFormGroup>
           </FormCol>
         </FormRow>
       </template>
       <FormRow>
         <FormCol>
-          <BaseFormGroup
-            v-slot="baseFormGroupProps"
+          <VFormGroup
+            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="setUserIdentityOptionsData"
@@ -630,25 +630,25 @@ watch(() => [setUserIdentityOptionsData.value, schemaBackgroundInformation.value
             path="irs_backup_withholding"
             label="IRS Backup Withholding"
           >
-            <BaseFormCheckbox
+            <VFormCheckbox
               v-model="model.irs_backup_withholding"
-              :is-error="baseFormGroupProps.isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
             >
               IRS Backup Withholding
-            </BaseFormCheckbox>
-          </BaseFormGroup>
+            </VFormCheckbox>
+          </VFormGroup>
         </FormCol>
       </FormRow>
     </div>
     <div class="form-background-information__footer">
-      <BaseButton
+      <VButton
         size="large"
         variant="outlined"
         @click="cancelHandler"
       >
         Cancel
-      </BaseButton>
-      <BaseButton
+      </VButton>
+      <VButton
         size="large"
         :disabled="isDisabledButton"
         :loading="isLoading"
@@ -656,12 +656,12 @@ watch(() => [setUserIdentityOptionsData.value, schemaBackgroundInformation.value
         @click="saveHandler"
       >
         Save
-      </BaseButton>
+      </VButton>
     </div>
   </div>
 </template>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .form-background-information {
   display: flex;
   flex-direction: column;
