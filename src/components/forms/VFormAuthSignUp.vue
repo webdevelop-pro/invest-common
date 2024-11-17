@@ -35,10 +35,10 @@ const showStrengthMeter = ref(false);
 const checkbox = ref(false);
 
 const queryParams = computed(() => new URLSearchParams(window.location.search));
-const loginHref = computed(() => {
+const onLogin = () => {
   if (queryParams.value) return navigateWithQueryParams(urlSignin, queryParams.value);
   return navigateWithQueryParams(urlSignin);
-});
+};
 
 const queryFlow = computed(() => (
   (window && window.location.search) ? new URLSearchParams(window.location.search).get('flow') : null));
@@ -368,8 +368,8 @@ const signUpHandler = async () => {
           variant="link"
           size="large"
           tag="a"
-          :href="loginHref"
           class="signup-form__login-btn"
+          @click.prevent="onLogin"
         >
           Log In
         </VButton>

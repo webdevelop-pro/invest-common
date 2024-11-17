@@ -5,7 +5,7 @@ import { useRouter } from 'vue-router';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import { useRedirect } from 'InvestCommon/composable/useRedirect';
 import {
-  ROUTE_DASHBOARD_PORTFOLIO, ROUTE_CHECK_EMAIL, ROUTE_LOGIN, ROUTE_OFFERS, ROUTE_OFFERS_DETAILS,
+  ROUTE_DASHBOARD_PORTFOLIO, ROUTE_OFFERS, ROUTE_OFFERS_DETAILS,
   ROUTE_INVEST_AMOUNT, ROUTE_INVEST_FUNDING, ROUTE_INVEST_OWNERSHIP, ROUTE_INVEST_REVIEW,
   ROUTE_INVEST_SIGNATURE, ROUTE_INVEST_THANK,
 } from 'InvestCommon/helpers/enums/routes';
@@ -18,7 +18,7 @@ import {
 } from 'InvestCommon/store';
 import env from 'InvestCommon/global';
 import { navigateWithQueryParams } from 'InvestCommon/helpers/general';
-import { urlOffers, urlProfilePortfolio, urlSignin } from 'InvestCommon/global/links';
+import { urlOffers, urlProfilePortfolio, urlSignin, urlCheckEmail } from 'InvestCommon/global/links';
 
 const { EXTERNAL } = env;
 
@@ -192,7 +192,7 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
       return;
     }
     if (setRecoveryData.value && setRecoveryData.value.state && (setRecoveryData.value.state === 'sent_email')) {
-      void router.push({ name: ROUTE_CHECK_EMAIL, query: { email, flowId: flowId.value } });
+      navigateWithQueryParams(urlCheckEmail, { email, flowId: flowId.value });
     }
   };
 

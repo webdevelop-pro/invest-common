@@ -1,12 +1,12 @@
 import { JSONSchemaType } from 'ajv';
-import GoogleIcon from '@/assets/images/social-login/google1.svg?component';
-import FacebookIcon from '@/assets/images/social-login/facebook1.svg?component';
-import GithubIcon from '@/assets/images/social-login/github1.svg?component';
-import LinkedinIcon from '@/assets/images/social-login/linkedin1.svg?component';
-import GoogleHoverIcon from '@/assets/images/social-login/google1-hover.svg?component';
-import FacebookHoverIcon from '@/assets/images/social-login/facebook-hover.svg?component';
-import GithubHoverIcon from '@/assets/images/social-login/github1-hover.svg?component';
-import LinkedinHoverIcon from '@/assets/images/social-login/linkedin-hover.svg?component';
+import GoogleIcon from 'InvestCommon/assets/images/social-login/google1.svg?component';
+import FacebookIcon from 'InvestCommon/assets/images/social-login/facebook1.svg?component';
+import GithubIcon from 'InvestCommon/assets/images/social-login/github1.svg?component';
+import LinkedinIcon from 'InvestCommon/assets/images/social-login/linkedin1.svg?component';
+import GoogleHoverIcon from 'InvestCommon/assets/images/social-login/google1-hover.svg?component';
+import FacebookHoverIcon from 'InvestCommon/assets/images/social-login/facebook-hover.svg?component';
+import GithubHoverIcon from 'InvestCommon/assets/images/social-login/github1-hover.svg?component';
+import LinkedinHoverIcon from 'InvestCommon/assets/images/social-login/linkedin-hover.svg?component';
 import {
   codeRule, emailRule, errorMessageRule, firstNameRule, lastNameRule, passwordRule,
 } from 'UiKit/helpers/validation/rules';

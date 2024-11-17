@@ -60,7 +60,7 @@ const recoveryHandler = async () => {
 
 <template>
   <form
-    class="VFormAuthForgot forgot-form is--no-margin"
+    class="VFormAuthForgot forgot-form"
     novalidate
     @submit.prevent="recoveryHandler"
   >

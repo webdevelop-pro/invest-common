@@ -13,14 +13,14 @@ import VFormInput from 'UiKit/components/VForm/VFormInput.vue';
 import VButton from 'UiKit/components/VButton/VButton.vue';
 import VSvgIcon from 'UiKit/components/VSvgIcon/VSvgIcon.vue';
 import { scrollToError } from 'UiKit/helpers/validation/general';
-import { urlSignin, urlForgot } from 'InvestCommon/global/links';
+import { urlForgot, urlSignup } from 'InvestCommon/global/links';
 
 
 const queryParams = computed(() => new URLSearchParams(window.location.search));
-const signupHref = computed(() => {
-  if (queryParams.value) return navigateWithQueryParams(urlSignin, queryParams.value);
-  return navigateWithQueryParams(urlSignin);
-});
+const onSignup = () => {
+  if (queryParams.value) return navigateWithQueryParams(urlSignup, queryParams.value);
+  return navigateWithQueryParams(urlSignup);
+};
 
 const authLogicStore = useAuthLogicStore();
 const { loading } = storeToRefs(authLogicStore);
@@ -172,9 +172,8 @@ watch(() => model, () => {
         <VButton
           variant="link"
           size="large"
-          tag="a"
-          :href="signupHref"
           class="login-form__signup-btn"
+          @click.prevent="onSignup"
         >
           Sign Up
         </VButton>

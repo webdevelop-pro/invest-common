@@ -6,7 +6,6 @@ import {
 import { useBreakpointsStore, useUsersStore } from 'InvestCommon/store';
 import { blockedBody } from 'InvestCommon/helpers/blocked-body';
 import { storeToRefs } from 'pinia';
-import { useRouter } from 'vue-router';
 import {
   ROUTE_FORGOT, ROUTE_LOGIN, ROUTE_SIGNUP,
 } from 'InvestCommon/helpers/enums/routes';
@@ -37,7 +36,11 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue']);
 
-const router = useRouter();
+let router;
+if (!EXTERNAL) {
+  const { useRouter } = await import('vue-router');
+  router = useRouter();
+}
 const usersStore = useUsersStore();
 const { userLoggedIn, isGetUserIdentityLoading } = storeToRefs(usersStore);
 const path = ref(window?.location?.pathname);
