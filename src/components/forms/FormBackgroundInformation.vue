@@ -9,7 +9,7 @@ import FormRow from 'InvestCommon/components/VForm/VFormRow.vue';
 import FormCol from 'InvestCommon/components/VForm/VFormCol.vue';
 import VFormInput from 'UiKit/components/VForm/VFormInput.vue';
 import VButton from 'UiKit/components/VButton/VButton.vue';
-import VFormSelect from 'UiKit/components/VFormSelect/VFormSelect.vue';
+import VFormSelect from 'UiKit/components/VForm/VFormSelect.vue';
 import { storeToRefs } from 'pinia';
 import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
 import { checkObjectAndDeleteNotRequiredFields, isEmpty } from 'InvestCommon/helpers/general';

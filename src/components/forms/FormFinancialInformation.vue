@@ -25,8 +25,8 @@ import {
   SELECT_OBJECTIVES, SELECT_RISK_COMFORT,
 } from 'InvestCommon/utils';
 import { filterSchema, scrollToError } from 'UiKit/helpers/validation/general';
-import VFormCheckbox from 'UiKit/components/VFormCheckbox/VFormCheckbox.vue';
-import VFormRadio from 'UiKit/components/VFormRadio/VFormRadio.vue';
+import VFormCheckbox from 'UiKit/components/VForm/VFormCheckbox.vue';
+import VFormRadio from 'UiKit/components/VForm/VFormRadio.vue';
 import { numberFormatter } from 'InvestCommon/helpers/numberFormatter';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { JSONSchemaType } from 'ajv';

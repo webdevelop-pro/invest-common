@@ -78,19 +78,11 @@ const queryParams = computed(() => {
 });
 
 const signInHandler = () => {
-  if (EXTERNAL && queryParams.value) {
-    navigateWithQueryParams(urlSignin, queryParams.value);
-  } else {
-    void router?.push({ name: ROUTE_LOGIN, query: router?.currentRoute.value.query });
-  }
+  navigateWithQueryParams(urlSignin, queryParams.value);
 };
 
 const signUpHandler = () => {
-  if (EXTERNAL) {
-    navigateWithQueryParams(urlSignup, queryParams.value);
-  } else {
-    void router?.push({ name: ROUTE_SIGNUP, query: router?.currentRoute.value.query });
-  }
+  navigateWithQueryParams(urlSignup, queryParams.value);
 };
 
 const currentRoute = computed(() => {

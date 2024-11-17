@@ -53,13 +53,13 @@ const isSignInPage = computed(() => {
   if (EXTERNAL) {
     return path.value.includes('signin');
   }
-  return router.currentRoute.value.name === ROUTE_LOGIN
+  return router.currentRoute.value.name === ROUTE_LOGIN;
 });
 const isRecoveryPage = computed(() => {
   if (EXTERNAL) {
     return path.value.includes('forgot');
   }
-  return router.currentRoute.value.name === ROUTE_FORGOT
+  return router.currentRoute.value.name === ROUTE_FORGOT;
 });
 const queryParams = computed(() => {
   if (EXTERNAL) {
@@ -122,22 +122,12 @@ const close = () => emit('update:modelValue', false);
 void useBlockedBody(close);
 void useVhHeight();
 
-
-
 const signInHandler = () => {
-  if (EXTERNAL) {
-    navigateWithQueryParams(urlSignin,  queryParams.value);
-  } else {
-    void router.push({ name: ROUTE_LOGIN, query: router.currentRoute.value.query });
-  }
+  navigateWithQueryParams(urlSignin, queryParams.value);
 };
 
 const signUpHandler = () => {
-  if (EXTERNAL) {
-    navigateWithQueryParams(urlSignup,  queryParams.value);
-  } else {
-    void router.push({ name: ROUTE_SIGNUP, query: router.currentRoute.value.query });
-  }
+  navigateWithQueryParams(urlSignup, queryParams.value);
 };
 const onLogout = () => {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access

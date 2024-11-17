@@ -5,10 +5,10 @@ import {
 import { useAccreditationStore } from 'InvestCommon/store';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { FormModelAccreditationFileInput, TFields } from '../utils';
-import BaseFormInput from 'UiKit/components/BaseFormInput/BaseFormInput.vue';
-import BaseFormTextarea from 'UiKit/components/BaseFormTextarea/BaseFormTextarea.vue';
-import BaseUploader from 'UiKit/components/BaseUploader/BaseUploader.vue';
-import BaseFormGroup from 'UiKit/components/BaseFormGroup/BaseFormGroup.vue';
+import VFormInput from 'UiKit/components/VForm/VFormInput.vue';
+import VFormTextarea from 'UiKit/components/VForm/VFormTextarea.vue';
+import VUploader from 'UiKit/components/VUploader/VUploader.vue';
+import VFormGroup from 'UiKit/components/VForm/VFormGroup.vue';
 import { descriptionFileRule, errorMessageRule, noteFileRule } from 'UiKit/helpers/validation/rules';
 import { JSONSchemaType } from 'ajv';
 import { isEmpty } from 'InvestCommon/helpers/general';
@@ -30,13 +30,13 @@ const allFiles = ref<File[]>([]);
 // const allFiles = computed(() => accreditation.value.getFiles);
 
 const requiredValueSchema = computed(() => {
-  const base = ['description1', 'note'] as string[];
-  if (allFiles.value.length >= 2) base.push('description2');
-  if (allFiles.value.length >= 3) base.push('description3');
-  if (allFiles.value.length >= 4) base.push('description4');
-  if (allFiles.value.length >= 5) base.push('description5');
-  if (allFiles.value.length >= 6) base.push('description6');
-  return base;
+  const V = ['description1', 'note'] as string[];
+  if (allFiles.value.length >= 2) V.push('description2');
+  if (allFiles.value.length >= 3) V.push('description3');
+  if (allFiles.value.length >= 4) V.push('description4');
+  if (allFiles.value.length >= 5) V.push('description5');
+  if (allFiles.value.length >= 6) V.push('description6');
+  return V;
 });
 
 
@@ -136,22 +136,22 @@ watch(() => props.validate, () => {
 
 <template>
   <div class="AccreditationFileInput accreditation-file-input">
-    <BaseFormGroup
+    <VFormGroup
       label="Upload Accreditation Documents"
       required
     >
-      <BaseUploader
+      <VUploader
         class="accreditation-file-input__field"
         @update:files="onFileChange"
         @remove="onFileRemove"
       />
-    </BaseFormGroup>
+    </VFormGroup>
 
     <template v-if="allFiles && allFiles.length">
-      <BaseFormGroup
+      <VFormGroup
         v-for="(file, index) in allFiles"
         :key="file.name"
-        v-slot="baseFormGroupProps"
+        v-slot="VFormGroupProps"
         :model="model"
         :validation="validation"
         :schema-front="schemaAccreditationFileInput"
@@ -161,16 +161,16 @@ watch(() => props.validate, () => {
           details or explanations related to ${file.name}`"
         class="accreditation-file-input__description"
       >
-        <BaseFormInput
+        <VFormInput
           :model-value="model[`description${index + 1}` as TFields]"
           :name="`description${index}`"
-          :is-error="baseFormGroupProps.isFieldError"
+          :is-error="VFormGroupProps.isFieldError"
           data-testid="file-description"
           @update:model-value="model[`description${index + 1}` as TFields] = $event"
         />
-      </BaseFormGroup>
-      <BaseFormGroup
-        v-slot="baseFormGroupProps"
+      </VFormGroup>
+      <VFormGroup
+        v-slot="VFormGroupProps"
         class="accreditation-file-input__note"
         :model="model"
         :validation="validation"
@@ -180,13 +180,13 @@ watch(() => props.validate, () => {
         label="To process your request faster, please describe your situation,
           write down all important details we should know about"
       >
-        <BaseFormTextarea
+        <VFormTextarea
           :model-value="model.note"
           rows="3"
-          :is-error="baseFormGroupProps.isFieldError"
+          :is-error="VFormGroupProps.isFieldError"
           @update:model-value="model.note = $event"
         />
-      </BaseFormGroup>
+      </VFormGroup>
     </template>
   </div>
 </template>

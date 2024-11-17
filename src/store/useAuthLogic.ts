@@ -240,7 +240,8 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
           || currentRoute.value.name === ROUTE_INVEST_THANK) && currentRoute.value.params?.slug) {
         queryParams = { redirect: urlOffers };
       }
-      void router.push({ name: ROUTE_LOGIN, query: queryParams });
+      if (queryParams) navigateWithQueryParams(urlSignin, queryParams);
+      else navigateWithQueryParams(urlSignin);
     }
   };
 
@@ -289,7 +290,7 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
       if (EXTERNAL) {
         isLoadingSession.value = false;
       } else if (router.currentRoute.value.meta.auth) {
-        void router.push({ name: ROUTE_LOGIN });
+        navigateWithQueryParams(urlSignin);
       }
     }
     isLoadingSession.value = false;

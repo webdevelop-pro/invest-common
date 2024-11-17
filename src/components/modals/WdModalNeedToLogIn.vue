@@ -31,7 +31,8 @@ import { defineComponent } from 'vue';
 import VModalLayout from 'UiKit/components/VModal/VModalLayout.vue';
 import VButton from 'UiKit/components/VButton/VButton.vue';
 import { useRouter } from 'vue-router';
-import { ROUTE_LOGIN } from 'InvestCommon/helpers/enums/routes';
+import { navigateWithQueryParams } from 'InvestCommon/helpers/general';
+import { urlSignin } from 'InvestCommon/global/links';
 
 export default defineComponent({
   name: 'WdModalLogOut',
@@ -44,7 +45,7 @@ export default defineComponent({
     const router = useRouter();
 
     const onClick = () => {
-      void router.push({ name: ROUTE_LOGIN, query: { redirect: router.currentRoute.value.fullPath } });
+      navigateWithQueryParams(urlSignin, { redirect: router.currentRoute.value.fullPath });
       ctx.emit('close');
     };
 

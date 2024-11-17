@@ -33,7 +33,7 @@ import {
 } from 'InvestCommon/helpers/enums/general';
 import {
   SELECT_DURATION, SELECT_IMPORTANCE,
-  SELECT_OBJECTIVES, SELECT_RISK_COMFORT, SELECT_CITIZENSHIP_OPTIONS
+  SELECT_OBJECTIVES, SELECT_RISK_COMFORT, SELECT_CITIZENSHIP_OPTIONS,
 } from 'InvestCommon/utils';
 import { useRouter } from 'vue-router';
 import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/helpers/enums/routes';

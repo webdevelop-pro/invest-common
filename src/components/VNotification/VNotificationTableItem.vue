@@ -220,7 +220,7 @@ const onButtonClick = () => {
   &__content {
     color: $gray-80;
 
-    :deep(a) {
+    a {
       font-weight: 700;
       font-size: 16px;
       line-height: 26px;

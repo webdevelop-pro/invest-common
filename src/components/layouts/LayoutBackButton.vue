@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import BaseButton from 'UiKit/components/BaseButton/BaseButton.vue';
+import VButton from 'UiKit/components/VButton/VButton.vue';
 import { useRouter } from 'vue-router';
-import BaseBreadcrumbs, { IBreadcrumb } from 'UiKit/components/BaseBreadcrumbs/BaseBreadcrumbs.vue';
+import VBreadcrumbs, { IBreadcrumb } from 'UiKit/components/VBreadcrumbs/VBreadcrumbs.vue';
 import { PropType } from 'vue';
-import { BaseSvgIcon } from 'UiKit/components/BaseSvgIcon';
+import { VSvgIcon } from 'UiKit/components/VSvgIcon';
 
 defineProps({
   buttonText: String,
@@ -21,26 +21,26 @@ const onBackClick = () => {
   <div class="LayoutBackButton layout-back-button">
     <div class="is--container layout-back-button__container">
       <div class="layout-back-button__left">
-        <BaseButton
+        <VButton
           variant="link"
           size="large"
           icon-placement="left"
           @click.stop="onBackClick"
         >
-          <BaseSvgIcon
+          <VSvgIcon
             name="arrow-left"
             alt="arrow left"
             class="layout-back-button__back-icon"
           />
           {{ buttonText }}
-        </BaseButton>
+        </VButton>
       </div>
       <div class="layout-back-button__right">
         <slot />
       </div>
     </div>
     <div class="is--container layout-back-button__footer">
-      <BaseBreadcrumbs
+      <VBreadcrumbs
         :data="breadcrumbs"
         class="layout-back-button__breadcrumbs"
       />
