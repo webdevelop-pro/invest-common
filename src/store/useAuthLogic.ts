@@ -289,7 +289,7 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
       resetAll();
       if (EXTERNAL) {
         isLoadingSession.value = false;
-      } else if (router.currentRoute.value.meta.auth) {
+      } else {
         navigateWithQueryParams(urlSignin);
       }
     }

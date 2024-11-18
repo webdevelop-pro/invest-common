@@ -1,5 +1,5 @@
 
-import env from `InvestCommon/global`;
+import env from 'InvestCommon/global';
 
 export const urlSignin = `${env.FRONTEND_URL_STATIC}/signin`;
 export const urlSignup = `${env.FRONTEND_URL_STATIC}/signup`;
@@ -22,4 +22,4 @@ export const urlProfileWallet = (profileId: number) => `${env.FRONTEND_URL_DASHB
 export const urlProfileAccount = (profileId: number) => `${env.FRONTEND_URL_DASHBOARD}/profile/${profileId}/account`;
 export const urlProfileKYC = (profileId: number) => `${env.FRONTEND_URL_DASHBOARD}/profile/${profileId}/kyc`;
 export const urlProfilePortfolio = (profileId: number) => `${env.FRONTEND_URL_DASHBOARD}/profile/${profileId}/portfolio`;
-export const urlOfferSingle = (slug: string) => `${env.FRONTEND_URL_DASHBOARD}/offers/${slug}`;
+export const urlOfferSingle = (slug: string) => `${env.FRONTEND_URL_STATIC}/offers/${slug}`;
