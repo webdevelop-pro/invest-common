@@ -5,7 +5,7 @@ const { ACCREDITATION_URL } = env;
 
 // START ACCREDITATION FLOW
 export const fetchCreateAccreditation = (profileId: number, note: string) => {
-  const path = `${ACCREDITATION_URL}/accreditation/create/${profileId}`;
+  const path = `${ACCREDITATION_URL}/auth/accreditation/create/${profileId}`;
 
   const body = JSON.stringify({
     ai_method: 'upload',
@@ -26,7 +26,7 @@ export const fetchCreateAccreditation = (profileId: number, note: string) => {
 };
 
 export const fetchUpdateAccreditation = (profileId: number, note: string) => {
-  const path = `${ACCREDITATION_URL}/accreditation/update/${profileId}`;
+  const path = `${ACCREDITATION_URL}/auth/accreditation/update/${profileId}`;
 
   const body = JSON.stringify({
     ai_method: 'upload',
@@ -50,7 +50,7 @@ export const fetchUpdateAccreditation = (profileId: number, note: string) => {
 // UPLOAD ACCREDITATION DOCUMENTS
 // eslint-disable-next-line
 export const fetchUploadAccreditationDocument = (userId: number, profileId: number, formData: FormData) => {
-  const path = `${ACCREDITATION_URL}/accreditation/upload_document/${userId}/${profileId}`;
+  const path = `${ACCREDITATION_URL}/auth/accreditation/upload_document/${userId}/${profileId}`;
 
   const data = {
     method: 'POST',
@@ -65,7 +65,7 @@ export const fetchUploadAccreditationDocument = (userId: number, profileId: numb
 };
 
 export const fetchCreateEscrow = (userId: number, profileId: number) => {
-  const path = `${ACCREDITATION_URL}/escrow/${userId}/${profileId}`;
+  const path = `${ACCREDITATION_URL}/auth/escrow/${userId}/${profileId}`;
 
   const data = {
     method: 'POST',
