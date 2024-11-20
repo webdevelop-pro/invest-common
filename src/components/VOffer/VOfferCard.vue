@@ -6,7 +6,8 @@ import VTag from 'UiKit/components/VTag/VTag.vue';
 import { PropType, computed } from 'vue';
 import defaulImage from 'InvestCommon/assets/images/default.svg?url';
 import VInfoSlot from 'InvestCommon/components/VInfoSlot/VInfoSlot.vue';
-import { useOfferStore } from 'InvestCommon/store';
+import { useOfferStore } from 'InvestCommon/store/useOffer';
+import VImage from 'UiKit/components/VImage/VImage.vue';
 
 const props = defineProps({
   offer: {
@@ -16,6 +17,10 @@ const props = defineProps({
   funded: Boolean,
   routeName: String,
   link: String,
+  loading: {
+    type: String,
+    default: 'eager',
+  },
 });
 const offerStore = useOfferStore();
 
@@ -63,13 +68,14 @@ const infoTags = computed(() => ([
       v-if="offerImage"
       class="v-offer-card__img-wrap"
     >
-      <img
+      <VImage
         :src="offerImage"
         :alt="offer.slug"
         itemprop="image"
+        :loading="loading"
         class="v-offer-card__img is--no-margin"
         :class="{ 'is--default-image': isDefaultImage }"
-      >
+      />
     </div>
     <div class="v-offer-card__inner">
       <h2

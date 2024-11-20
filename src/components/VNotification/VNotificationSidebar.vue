@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useNotificationsStore } from 'InvestCommon/store';
+import { useNotificationsStore } from 'InvestCommon/store/useNotifications';
 import { ROUTE_NOTIFICATIONS } from 'InvestCommon/helpers/enums/routes';
 import VButton from 'UiKit/components/VButton/VButton.vue';
 import WdNotificationTable from 'InvestCommon/components/VNotification/VNotificationTable.vue';

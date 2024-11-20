@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useAuthLogicStore } from 'InvestCommon/store';
+import { useAuthLogicStore } from 'InvestCommon/store/useAuthLogic';
 import { SELFSERVICE } from 'InvestCommon/helpers/enums/auth';
 import { socialSignin } from './utilsAuth';
 import VButton from 'UiKit/components/VButton/VButton.vue';

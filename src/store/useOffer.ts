@@ -6,10 +6,10 @@ import {
   IOffer, IOfferData, IOfferComment, IOfferCommentPayload,
 } from 'InvestCommon/types/api/offers';
 import {
-  fetchGetOfferOne, fetchGetInvestUnconfirmed,
-  fetchGetInvestments, fetchGetOffers, fetchGetOfferComments,
+  fetchGetOfferOne, fetchGetOffers, fetchGetOfferComments,
   fetchSetOfferComment, fetchSetOfferCommentOptions,
-} from 'InvestCommon/services';
+} from 'InvestCommon/services/api/offers';
+import { fetchGetInvestUnconfirmed, fetchGetInvestments } from 'InvestCommon/services/api/invest';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { INotification } from 'InvestCommon/types/api/notifications';
 

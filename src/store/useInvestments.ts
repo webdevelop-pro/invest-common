@@ -7,8 +7,8 @@ import {
   fetchSetOwnershipOptions,
   fetchSetFundingOptions,
   fetchSetCancelOptions,
-} from 'InvestCommon/services';
-import { useOfferStore } from 'InvestCommon/store';
+} from 'InvestCommon/services/api/invest';
+import { useOfferStore } from 'InvestCommon/store/useOffer';
 import {
   IInvest, IInvestConfirm, IInvestDocumentSign, IInvestFunding,
 } from 'InvestCommon/types/api/invest';

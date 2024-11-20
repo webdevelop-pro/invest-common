@@ -3,7 +3,8 @@ import {
   ref, watch, computed, reactive, nextTick,
 } from 'vue';
 import { checkStrength, scorePassword } from 'InvestCommon/helpers/calculatePasswordStrength';
-import { useAuthStore, useAuthLogicStore } from 'InvestCommon/store';
+import { useAuthStore } from 'InvestCommon/store/useAuth';
+import { useAuthLogicStore } from 'InvestCommon/store/useAuthLogic';
 import { SELFSERVICE } from 'InvestCommon/helpers/enums/auth';
 import { storeToRefs } from 'pinia';
 import { FormModelResetPassword, schemaResetPassword } from './utilsResetPassword';

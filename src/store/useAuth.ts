@@ -10,7 +10,7 @@ import {
   fetchGetSession, fetchSetLogin, fetchGetLogout, fetchGetLogoutURL,
   fetchSetSignUp, fetchSetRecovery, fetchSetPassword, fetchAuthFlow,
   fetchSetVerification, fetchSetSocialLogin, fetchGetSignUp, fetchGetAllSession, fetchGetSchema,
-} from 'InvestCommon/services';
+} from 'InvestCommon/services/api/auth';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 
 export const useAuthStore = defineStore('auth', () => {

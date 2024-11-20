@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, PropType } from 'vue';
-import { useNotificationsStore, useUsersStore } from 'InvestCommon/store';
+import { useNotificationsStore } from 'InvestCommon/store/useNotifications';
+import { useUsersStore } from 'InvestCommon/store/useUsers';
 import { useLogoutModal } from 'InvestCommon/components/modals/modals';
 import VDropdown from 'UiKit/components/VDropdown/VDropdown.vue';
 import { storeToRefs } from 'pinia';

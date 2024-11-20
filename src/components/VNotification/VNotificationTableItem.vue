@@ -4,7 +4,8 @@ import { formatToDate } from 'InvestCommon/helpers/formatters/formatToDate';
 import { PropType, computed } from 'vue';
 import VTag from 'UiKit/components/VTag/VTag.vue';
 import VButton from 'UiKit/components/VButton/VButton.vue';
-import { useNotificationsStore, useUsersStore } from 'InvestCommon/store';
+import { useUsersStore } from 'InvestCommon/store/useUsers';
+import { useNotificationsStore } from 'InvestCommon/store/useNotifications';
 import {
   ROUTE_ACCREDITATION_UPLOAD, ROUTE_DASHBOARD_ACCOUNT,
   ROUTE_DASHBOARD_WALLET, ROUTE_INVESTMENT_TIMELINE, ROUTE_NOTIFICATIONS,

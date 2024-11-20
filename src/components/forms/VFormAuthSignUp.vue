@@ -3,11 +3,13 @@ import {
   ref, watch, computed, onMounted, reactive, nextTick,
 } from 'vue';
 import { checkStrength, scorePassword } from 'InvestCommon/helpers/calculatePasswordStrength';
-import { useAuthLogicStore, useAuthStore } from 'InvestCommon/store';
+import { useAuthLogicStore } from 'InvestCommon/store/useAuthLogic';
+import { useAuthStore } from 'InvestCommon/store/useAuth';
 import { SELFSERVICE } from 'InvestCommon/helpers/enums/auth';
 import { storeToRefs } from 'pinia';
 import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
-import { isEmpty, navigateWithQueryParams } from 'InvestCommon/helpers/general';
+import { isEmpty } from 'InvestCommon/helpers/general';
+import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import { FormModelSignUp, schemaSignUp } from './utilsAuth';
 import VFormGroup from 'UiKit/components/VForm/VFormGroup.vue';
 import VFormInput from 'UiKit/components/VForm/VFormInput.vue';

@@ -2,12 +2,14 @@
 import {
   computed, nextTick, reactive, ref, watch,
 } from 'vue';
-import { useAuthLogicStore, useAuthStore } from 'InvestCommon/store';
+import { useAuthLogicStore } from 'InvestCommon/store/useAuthLogic';
+import { useAuthStore } from 'InvestCommon/store/useAuth';
 import { SELFSERVICE } from 'InvestCommon/helpers/enums/auth';
 import { storeToRefs } from 'pinia';
 import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
 import { FormModelSignIn, schemaSignIn } from './utilsAuth';
-import { isEmpty, navigateWithQueryParams } from 'InvestCommon/helpers/general';
+import { isEmpty } from 'InvestCommon/helpers/general';
+import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import VFormGroup from 'UiKit/components/VForm/VFormGroup.vue';
 import VFormInput from 'UiKit/components/VForm/VFormInput.vue';
 import VButton from 'UiKit/components/VButton/VButton.vue';

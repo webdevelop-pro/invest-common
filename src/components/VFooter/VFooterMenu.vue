@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, PropType } from 'vue';
+import { PropType } from 'vue';
 
 type MenuItem = {
   to?: string;

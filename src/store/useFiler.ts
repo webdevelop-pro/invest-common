@@ -1,6 +1,6 @@
 import { computed, ref } from 'vue';
 import { generalErrorHandling } from 'InvestCommon/helpers/generalErrorHandling';
-import { fetchGetFiles, fetchGetPublicFiles } from 'InvestCommon/services';
+import { fetchGetFiles, fetchGetPublicFiles } from 'InvestCommon/services/api/filer';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { IFilerItem } from 'InvestCommon/types/api/filer';
 

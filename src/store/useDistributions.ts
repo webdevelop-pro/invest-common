@@ -1,6 +1,6 @@
 import { computed, ref } from 'vue';
 import { generalErrorHandling } from 'InvestCommon/helpers/generalErrorHandling';
-import { fetchGetDistributions } from 'InvestCommon/services';
+import { fetchGetDistributions } from 'InvestCommon/services/api/distributions';
 import { IDistributionsData, IDistributionsMeta } from 'InvestCommon/types/api/distributions';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { useOfferStore } from './useOffer';

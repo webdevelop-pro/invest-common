@@ -4,7 +4,7 @@ import {
 } from 'InvestCommon/types/api/invest';
 import { requiredFetchParams } from 'InvestCommon/helpers/requiredFetchParams';
 import env from 'InvestCommon/global';
-import { useUsersStore } from 'InvestCommon/store';
+import { useUsersStore } from 'InvestCommon/store/useUsers';
 import { v4 as uuidv4 } from 'uuid';
 import { storeToRefs } from 'pinia';
 

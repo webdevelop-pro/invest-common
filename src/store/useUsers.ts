@@ -1,9 +1,11 @@
 import { computed, ref, watch } from 'vue';
 import { IUserIdentityResponse } from 'InvestCommon/types/api/invest';
-import { fetchGetUserIdentity } from 'InvestCommon/services';
+import { fetchGetUserIdentity } from 'InvestCommon/services/api/user';
 import { generalErrorHandling } from 'InvestCommon/helpers/generalErrorHandling';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
-import { useAuthStore, useUserIdentitysStore } from 'InvestCommon/store';
+import { useUserIdentitysStore } from 'InvestCommon/store/useUserIdentity';
+import { useAuthStore } from 'InvestCommon/store/useAuth';
+import { useNotificationsStore } from 'InvestCommon/store/useNotifications';
 import { useStorage } from '@vueuse/core';
 import { ISession } from 'InvestCommon/types/api/auth';
 import { INotification } from 'InvestCommon/types/api/notifications';
@@ -17,7 +19,7 @@ import {
   ROUTE_INVEST_SIGNATURE, ROUTE_INVEST_THANK, ROUTE_SUBMIT_KYC,
 } from 'InvestCommon/helpers/enums/routes';
 import { RouteLocationNormalized, useRoute, useRouter } from 'vue-router';
-import env from 'InvestCommon/global';
+import env from 'InvestCommon/global/index';
 
 const { EXTERNAL } = env;
 
@@ -29,6 +31,7 @@ export const useUsersStore = defineStore('user', () => {
   const { isGetSessionLoading } = storeToRefs(authStore);
   const userIdentitysStore = useUserIdentitysStore();
   const { getUserIndividualProfileData, setUserIdentityOptionsData } = storeToRefs(userIdentitysStore);
+  const notificationsStore = useNotificationsStore();
 
   const isGetUserIdentityLoading = ref(false);
   const isGetUserIdentityError = ref(false);
@@ -160,15 +163,16 @@ export const useUsersStore = defineStore('user', () => {
     if (selectedUserProfileId.value && selectedUserProfileId.value > 0) {
       if (!getUserIndividualProfileData.value) void userIdentitysStore.getUserIndividualProfile();
       if (!setUserIdentityOptionsData.value) void userIdentitysStore.setUserIdentityOptions();
+      void notificationsStore.notificationsHandler();
     }
-  }, { immediate: true });
+  });
 
   watch(() => userAccountSession.value?.active, () => {
     if (userAccountSession.value?.active) {
-      userLoggedIn.value = userAccountSession.value?.active;
       void getUserIdentity();
+      userLoggedIn.value = userAccountSession.value?.active;
     }
-  }, { immediate: true });
+  });
 
   watch(() => userProfiles.value[0]?.id, () => {
     setSelectedUserProfileById(userProfiles.value[0]?.id);

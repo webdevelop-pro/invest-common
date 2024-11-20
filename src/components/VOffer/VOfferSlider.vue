@@ -4,6 +4,7 @@ import { IOffer } from 'InvestCommon/types/api/offers';
 import VOfferCard from 'InvestCommon/components/VOffer/VOfferCard.vue';
 import SliderSwiper from 'UiKit/components/Sliders/VSliderSwiper.vue';
 import { SwiperSlide } from 'swiper/vue';
+import { urlOfferSingle } from 'InvestCommon/global/links';
 
 defineProps({
   loading: Boolean,
@@ -57,7 +58,7 @@ const breakpoints = {
           <VOfferCard
             :offer="offer"
             funded
-            :link="`/offers/${offer.slug}`"
+            :link="urlOfferSingle(offer.slug)"
             class="v-offer-slider__closed-item"
           />
         </SwiperSlide>

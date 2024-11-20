@@ -1,12 +1,27 @@
 <script setup lang="ts">
-import { PropType } from 'vue';
+import { defineAsyncComponent, hydrateOnVisible, PropType } from 'vue';
 import { IOffer } from 'InvestCommon/types/api/offers';
-import VOfferCard from 'InvestCommon/components/VOffer/VOfferCard.vue';
 import VSkeleton from 'UiKit/components/VSkeleton/VSkeleton.vue';
-import VButton from 'UiKit/components/VButton/VButton.vue';
+import { urlOfferSingle } from 'InvestCommon/global/links';
+
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+const VButton = defineAsyncComponent({
+  loader: () => import('UiKit/components/VButton/VButton.vue'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+  hydrate: hydrateOnVisible(),
+});
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+const VOfferCard = defineAsyncComponent({
+  loader: () => import('InvestCommon/components/VOffer/VOfferCard.vue'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+  hydrate: hydrateOnVisible(),
+});
 
 defineProps({
-  loading: Boolean,
+  loading: {
+    type: Boolean,
+    default: true,
+  },
   items: {
     type: Array as PropType<IOffer[]>,
     required: true,
@@ -34,59 +49,61 @@ defineProps({
           {{ subtitle }}
         </p>
       </div>
-
-      <div
-        v-if="loading"
-        class="v-offer-list__skeleton-wrap"
-      >
-        <VSkeleton
-          v-for="i in 3"
-          :key="i"
-          height="487px"
-          width="calc(33.3333% - 30px)"
-          class="v-offer-list__skeleton"
-          data-testid="v-offer-list-skeleton"
-        />
-        <VSkeleton
-          v-for="i in 3"
-          :key="i"
-          height="487px"
-          width="calc(33.3333% - 30px)"
-          class="v-offer-list__skeleton"
-          data-testid="v-offer-list-skeleton"
-        />
-      </div>
-      <div
-        v-else
-        class="v-offer-list__lists-wrap"
-      >
-        <template v-if="items?.length">
-          <div class="v-offer-list__lists">
-            <VOfferCard
-              v-for="offer in items"
-              :key="offer.slug"
-              :offer="offer"
-              :link="`/offers/${offer.slug}`"
-              class="v-offer-list__list-item"
-            />
-          </div>
-          <VButton
-            tag="a"
-            :href="buttonLink"
-            size="large"
-            variant="link"
-            class="v-offer-list__button"
-          >
-            View More Offerings
-          </VButton>
-        </template>
-        <p
-          v-else
-          class="is--no-data"
+      <ClientOnly>
+        <div
+          v-if="loading"
+          class="v-offer-list__skeleton-wrap"
         >
-          Offers not found
-        </p>
-      </div>
+          <VSkeleton
+            v-for="i in 3"
+            :key="i"
+            height="487px"
+            width="calc(33.3333% - 30px)"
+            class="v-offer-list__skeleton"
+            data-testid="v-offer-list-skeleton"
+          />
+          <VSkeleton
+            v-for="i in 3"
+            :key="i"
+            height="487px"
+            width="calc(33.3333% - 30px)"
+            class="v-offer-list__skeleton"
+            data-testid="v-offer-list-skeleton"
+          />
+        </div>
+        <div
+          v-else
+          class="v-offer-list__lists-wrap"
+        >
+          <template v-if="items?.length">
+            <div class="v-offer-list__lists">
+              <VOfferCard
+                v-for="(offer, index) in items"
+                :key="offer.slug"
+                :offer="offer"
+                :loading="(index < 7) ? 'eager' : 'lazy'"
+                :link="urlOfferSingle(offer.slug)"
+                class="v-offer-list__list-item"
+              />
+            </div>
+            <VButton
+              tag="a"
+              :href="buttonLink"
+              size="large"
+              variant="link"
+              class="v-offer-list__button"
+            >
+              View More Offerings
+            </VButton>
+          </template>
+          <p
+            v-else
+            class="is--no-data"
+          >
+            Offers not found
+          </p>
+        </div>
+      </ClientOnly>
     </div>
   </section>
 </template>

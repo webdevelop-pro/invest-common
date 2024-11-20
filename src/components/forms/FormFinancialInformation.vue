@@ -3,8 +3,9 @@
 import {
   ref, computed, watch, reactive, nextTick,
 } from 'vue';
-import { useUserIdentitysStore, useUsersStore } from 'InvestCommon/store';
-import { useHubspotForm } from 'InvestCommon/composable';
+import { useUserIdentitysStore } from 'InvestCommon/store/useUserIdentity';
+import { useUsersStore } from 'InvestCommon/store/useUsers';
+import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import FormRow from 'InvestCommon/components/VForm/VFormRow.vue';
 import FormCol from 'InvestCommon/components/VForm/VFormCol.vue';
 import VFormInput from 'UiKit/components/VForm/VFormInput.vue';

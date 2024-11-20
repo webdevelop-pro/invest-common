@@ -1,7 +1,8 @@
 import { ref, computed, watch } from 'vue';
 import { INotification } from 'InvestCommon/types/api/notifications';
-
-import { fetchGetNotificationsAll, fetchMarkNotificationReadAll, fetchMarkNotificationReadById } from 'InvestCommon/services';
+import {
+  fetchGetNotificationsAll, fetchMarkNotificationReadAll, fetchMarkNotificationReadById,
+} from 'InvestCommon/services/api/notifications';
 import { generalErrorHandling } from 'InvestCommon/helpers/generalErrorHandling';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { useUsersStore } from './useUsers';
@@ -10,7 +11,7 @@ import { useProfileWalletTransactionStore } from './useProfileWallet/useProfileW
 import { useInvestmentsStore } from './useInvestments';
 import { useOfferStore } from './useOffer';
 import { useWebSocket } from '@vueuse/core';
-import env from 'InvestCommon/global';
+import env from 'InvestCommon/global/index';
 import { notify } from '@kyvg/vue3-notification';
 
 const { NOTIFICATION_URL } = env;

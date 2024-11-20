@@ -1,19 +1,42 @@
 <script setup lang="ts">
-import { computed, PropType, ref } from 'vue';
-import SocialLinks from 'UiKit/components/VSocialLinks/VSocialLinks.vue';
+import {
+  computed, defineAsyncComponent, hydrateOnVisible, PropType, ref,
+} from 'vue';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
-import VFooterMenu from './VFooterMenu.vue';
-import VFooterText from './VFooterText.vue';
-import VFormFooterSubscribe from 'UiKit/components/Forms/VFormFooterSubscribe.vue';
 import { notify } from '@kyvg/vue3-notification';
+
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+const SocialLinks = defineAsyncComponent({
+  loader: () => import('UiKit/components/VSocialLinks/VSocialLinks.vue'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+  hydrate: hydrateOnVisible(),
+});
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+const VFooterText = defineAsyncComponent({
+  loader: () => import('./VFooterText.vue'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+  hydrate: hydrateOnVisible(),
+});
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+const VFooterMenu = defineAsyncComponent({
+  loader: () => import('./VFooterMenu.vue'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+  hydrate: hydrateOnVisible(),
+});
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+const VFormFooterSubscribe = defineAsyncComponent({
+  loader: () => import('UiKit/components/Forms/VFormFooterSubscribe.vue'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+  hydrate: hydrateOnVisible(),
+});
 
 
 interface ISocial {
-  icon: String,
-  iconName: String,
-  href: String,
-  name: String,
-  shareHref?: String,
+  icon: string;
+  iconName: string;
+  href: string;
+  name: string;
+  shareHref?: string;
 }
 type MenuItem = {
   to?: string;

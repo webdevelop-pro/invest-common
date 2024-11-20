@@ -10,7 +10,7 @@ import VFormInput from 'UiKit/components/VForm/VFormInput.vue';
 import VButton from 'UiKit/components/VButton/VButton.vue';
 import VFormTextarea from 'UiKit/components/VForm/VFormTextarea.vue';
 import VFormSelect from 'UiKit/components/VForm/VFormSelect.vue';
-import { useUsersStore } from 'InvestCommon/store';
+import { useUsersStore } from 'InvestCommon/store/useUsers';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import { storeToRefs } from 'pinia';
 import env from 'InvestCommon/global';

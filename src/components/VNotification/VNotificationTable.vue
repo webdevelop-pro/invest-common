@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useNotificationsStore } from 'InvestCommon/store';
+import { useNotificationsStore } from 'InvestCommon/store/useNotifications';
 import VNotificationTableItem from 'InvestCommon/components/VNotification/VNotificationTableItem.vue';
 import VTable from 'UiKit/components/VTable/VTable.vue';
 import { storeToRefs } from 'pinia';

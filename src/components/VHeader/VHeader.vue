@@ -1,21 +1,49 @@
 <script setup lang="ts">
 import {
-  computed, PropType, ref, watch, watchEffect,
+  computed, defineAsyncComponent, hydrateOnVisible, PropType, ref, watch, watchEffect,
 } from 'vue';
-import TheLogo from 'UiKit/components/VLogo/VLogo.vue';
-import VMobileMenu from './VMobileMenu.vue';
-import VHeaderProfile from './VHeaderProfile.vue';
-import VHeaderNavigation from './VHeaderNavigation.vue';
-import VButton from 'UiKit/components/VButton/VButton.vue';
 import {
   ROUTE_FORGOT, ROUTE_LOGIN, ROUTE_SIGNUP,
 } from 'InvestCommon/helpers/enums/routes';
-import { useAuthLogicStore, useUsersStore } from 'InvestCommon/store';
+import { useAuthLogicStore } from 'InvestCommon/store/useAuthLogic';
+import { useUsersStore } from 'InvestCommon/store/useUsers';
 import { storeToRefs } from 'pinia';
 import VSkeleton from 'UiKit/components/VSkeleton/VSkeleton.vue';
 import env from 'InvestCommon/global';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import { urlSignin, urlSignup } from 'InvestCommon/global/links';
+
+
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+const TheLogo = defineAsyncComponent({
+  loader: () => import('UiKit/components/VLogo/VLogo.vue'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+  hydrate: hydrateOnVisible(),
+});
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+const VMobileMenu = defineAsyncComponent({
+  loader: () => import('./VMobileMenu.vue'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+  hydrate: hydrateOnVisible(),
+});
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+const VHeaderProfile = defineAsyncComponent({
+  loader: () => import('./VHeaderProfile.vue'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+  hydrate: hydrateOnVisible(),
+});
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+const VHeaderNavigation = defineAsyncComponent({
+  loader: () => import('./VHeaderNavigation.vue'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+  hydrate: hydrateOnVisible(),
+});
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+const VButton = defineAsyncComponent({
+  loader: () => import('UiKit/components/VButton/VButton.vue'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+  hydrate: hydrateOnVisible(),
+});
 
 const { EXTERNAL } = env;
 

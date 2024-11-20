@@ -2,7 +2,8 @@
 import {
   computed, nextTick, reactive, ref, watch,
 } from 'vue';
-import { useAuthStore, useAuthLogicStore } from 'InvestCommon/store';
+import { useAuthStore } from 'InvestCommon/store/useAuth';
+import { useAuthLogicStore } from 'InvestCommon/store/useAuthLogic';
 import { SELFSERVICE } from 'InvestCommon/helpers/enums/auth';
 import { storeToRefs } from 'pinia';
 import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';

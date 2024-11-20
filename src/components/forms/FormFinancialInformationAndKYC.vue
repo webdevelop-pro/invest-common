@@ -3,10 +3,11 @@
 import {
   ref, computed, watch, reactive, nextTick,
 } from 'vue';
-import {
-  usePlaidStore, useUserIdentitysStore, useUsersStore, useAccreditationStore,
-} from 'InvestCommon/store';
-import { useHubspotForm } from 'InvestCommon/composable';
+import { useUserIdentitysStore } from 'InvestCommon/store/useUserIdentity';
+import { useUsersStore } from 'InvestCommon/store/useUsers';
+import { useAccreditationStore } from 'InvestCommon/store/useAccreditation';
+import { usePlaidStore } from 'InvestCommon/store/usePlaid';
+import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import FormRow from 'InvestCommon/components/VForm/VFormRow.vue';
 import FormCol from 'InvestCommon/components/VForm/VFormCol.vue';
 import VFormInput from 'UiKit/components/VForm/VFormInput.vue';

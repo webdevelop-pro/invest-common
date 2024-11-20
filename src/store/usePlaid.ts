@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import { ref } from 'vue';
-import { fetchCreateToken } from 'InvestCommon/services';
+import { fetchCreateToken } from 'InvestCommon/services/api/plaid';
 import { generalErrorHandling } from 'InvestCommon/helpers/generalErrorHandling';
 import { IPlaidTokenResponse } from 'InvestCommon/types/api/plaid';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
@@ -9,7 +9,7 @@ import { ROUTE_DASHBOARD_PORTFOLIO } from 'InvestCommon/helpers/enums/routes';
 import { useRedirect } from 'InvestCommon/composable/useRedirect';
 import { useRouter } from 'vue-router';
 // import { useKYCIdentityStore } from './useKYCIdentity';
-import { navigateWithQueryParams } from 'InvestCommon/helpers/general';
+import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import env from 'InvestCommon/global';
 import { urlProfilePortfolio } from 'InvestCommon/global/links';
 

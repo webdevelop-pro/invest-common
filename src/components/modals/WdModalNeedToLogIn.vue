@@ -31,7 +31,7 @@ import { defineComponent } from 'vue';
 import VModalLayout from 'UiKit/components/VModal/VModalLayout.vue';
 import VButton from 'UiKit/components/VButton/VButton.vue';
 import { useRouter } from 'vue-router';
-import { navigateWithQueryParams } from 'InvestCommon/helpers/general';
+import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import { urlSignin } from 'InvestCommon/global/links';
 
 export default defineComponent({

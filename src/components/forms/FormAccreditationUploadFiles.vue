@@ -3,10 +3,9 @@
 import {
   ref, computed, nextTick,
 } from 'vue';
-import {
-  useAccreditationStore, useUserIdentitysStore, useUsersStore,
-} from 'InvestCommon/store';
-// import { useHubspotForm } from 'InvestCommon/composable';
+import { useAccreditationStore } from 'InvestCommon/store/useAccreditation';
+import { useUserIdentitysStore } from 'InvestCommon/store/useUserIdentity';
+import { useUsersStore } from 'InvestCommon/store/useUsers';
 import VButton from 'UiKit/components/VButton/VButton.vue';
 import { storeToRefs } from 'pinia';
 import AccreditationFileInput from './components/AccreditationFileInput.vue';

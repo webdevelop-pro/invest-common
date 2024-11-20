@@ -3,7 +3,8 @@ import {
   watch, onMounted, onUnmounted, onBeforeUnmount, computed,
   PropType, ref,
 } from 'vue';
-import { useBreakpointsStore, useUsersStore } from 'InvestCommon/store';
+import { useBreakpointsStore } from 'InvestCommon/store/useBreakpoints';
+import { useUsersStore } from 'InvestCommon/store/useUsers';
 import { blockedBody } from 'InvestCommon/helpers/blocked-body';
 import { storeToRefs } from 'pinia';
 import {
@@ -12,7 +13,7 @@ import {
 import VButton from 'UiKit/components/VButton/VButton.vue';
 import VMobileMenuBurger from './VMobileMenuBurger.vue';
 import { useLogoutModal } from 'InvestCommon/components/modals/modals';
-import { navigateWithQueryParams } from 'InvestCommon/helpers/general';
+import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import env from 'InvestCommon/global';
 import { urlSignin, urlSignup } from 'InvestCommon/global/links';
 

@@ -2,7 +2,7 @@
 import {
   ref, computed, watch, reactive, nextTick,
 } from 'vue';
-import { useAccreditationStore } from 'InvestCommon/store';
+import { useAccreditationStore } from 'InvestCommon/store/useAccreditation';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { FormModelAccreditationFileInput, TFields } from '../utils';
 import VFormInput from 'UiKit/components/VForm/VFormInput.vue';

@@ -9,10 +9,10 @@ import { IInvest } from 'InvestCommon/types/api/invest';
 import { PostLinkTypes } from 'InvestCommon/types/api/blog';
 import VFormTextarea from 'UiKit/components/VForm/VFormTextarea.vue';
 import VFormGroup from 'UiKit/components/VForm/VFormGroup.vue';
-import { useUsersStore, useInvestmentsStore, useOfferStore } from 'InvestCommon/store';
-import {
-  useHubspotForm,
-} from 'InvestCommon/composable';
+import { useUsersStore } from 'InvestCommon/store/useUsers';
+import { useInvestmentsStore } from 'InvestCommon/store/useInvestments';
+import { useOfferStore } from 'InvestCommon/store/useOffer';
+import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import { storeToRefs } from 'pinia';
 import { JSONSchemaType } from 'ajv';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
@@ -20,7 +20,7 @@ import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValida
 import { isEmpty } from 'lodash';
 import { VSvgIcon } from 'UiKit/components/VSvgIcon';
 import { scrollToError } from 'UiKit/helpers/validation/general';
-import { urlContactUs } from 'InvestCommon/global/links';
+import { urlContactUs, urlBlogSingle } from 'InvestCommon/global/links';
 
 
 const props = defineProps({
@@ -132,12 +132,13 @@ watch(() => model, () => {
           source wire of individual profile. In case if you want to get more information, please take a
           look
           <a
-            :href="`/resource-center/${PostLinkTypes.cancelInvestment}`"
+            :href="urlBlogSingle(PostLinkTypes.cancelInvestment)"
             target="_blank"
+            rel="noopener noreferrer"
             class="is--link-1"
           >
             Can I cancel my investment and get a refund
-        </a> article or
+          </a> article or
           <a
             :href="urlContactUs"
             class="is--link-1"

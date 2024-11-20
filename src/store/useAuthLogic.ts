@@ -16,9 +16,11 @@ import {
   useProfileWalletStore, useProfileWalletTransactionStore, useUserIdentitysStore,
   useUsersStore, useGlobalLoader,
 } from 'InvestCommon/store';
-import env from 'InvestCommon/global';
-import { navigateWithQueryParams } from 'InvestCommon/helpers/general';
-import { urlOffers, urlProfilePortfolio, urlSignin, urlCheckEmail } from 'InvestCommon/global/links';
+import env from 'InvestCommon/global/index';
+import { navigateWithQueryParams } from 'UiKit/helpers/general';
+import {
+  urlOffers, urlProfilePortfolio, urlSignin, urlCheckEmail,
+} from 'InvestCommon/global/links';
 
 const { EXTERNAL } = env;
 
@@ -60,20 +62,17 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     }
     await authStore.setLogin(flowId.value, password, email, csrfToken.value);
 
-    loading.value = false;
-  };
-
-  const handleAfterLogin = async (email: string) => {
     if (isSetLoginError.value) {
       loading.value = false;
       return;
     }
     const { submitFormToHubspot } = useHubspotForm('07463465-7f03-42d2-a85e-40cf8e29969d');
     if (setLoginData.value && setLoginData.value.session) {
+      const queryRedirect = computed(() => new URLSearchParams(window.location.search).get('redirect'));
       await usersStore.getUserIdentity();
       void usersStore.updateUserAccountSession(setLoginData.value.session);
       if (EXTERNAL) {
-        navigateWithQueryParams(urlProfilePortfolio(selectedUserProfileId.value));
+        navigateWithQueryParams(queryRedirect.value || urlProfilePortfolio(selectedUserProfileId.value));
       } else {
         void router.push(pushTo({
           name: ROUTE_DASHBOARD_PORTFOLIO,
@@ -85,6 +84,8 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
         email,
       });
     }
+
+    loading.value = false;
   };
 
   // SOCIAL LOGIN
@@ -219,7 +220,7 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     let queryParams;
     if (EXTERNAL) {
       if (window?.location?.pathname?.includes('offer')) {
-        queryParams = window?.location?.pathname;
+        queryParams = { redirect: window?.location?.pathname };
       }
       if (window?.location?.pathname?.includes('/invest')) {
         queryParams = { redirect: urlOffers };
@@ -280,12 +281,11 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
   const getSession = async () => {
     isLoadingSession.value = true;
     await authStore.getSession();
-    if (getSessionData.value && !isGetSessionError.value) {
-      // await usersStore.getUserIdentity();
+    if (getSessionData.value?.active && !isGetSessionError.value) {
       await nextTick();
       void usersStore.updateUserAccountSession(getSessionData.value);
       // await notificationsHandler(); // TODO: check if needed
-    } else if (!getSessionData.value || getSessionErrorResponse.value?.status === 401) {
+    } else if (!getSessionData.value?.active || getSessionErrorResponse.value?.status === 401) {
       resetAll();
       if (EXTERNAL) {
         isLoadingSession.value = false;
@@ -323,26 +323,6 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     }
   };
 
-
-  authStore.$onAction(
-    ({
-      name, // name of the action
-      // eslint-disable-next-line
-      store, // store instance, same as `someStore`
-      args, // array of parameters passed to the action
-      after, // hook after the action returns or resolves
-    }) => {
-      after(() => {
-        switch (name) {
-          case 'setLogin':
-            void handleAfterLogin(args[0]);
-            break;
-          default:
-        }
-      });
-    },
-  );
-
   return {
     loading,
     isLoadingLogout,
@@ -355,6 +335,7 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     onSocialLogin,
     onLogout,
     getSession,
+    resetAll,
   };
 });
 
