@@ -25,7 +25,7 @@ import VFormCheckbox from 'UiKit/components/VForm/VFormCheckbox.vue';
 import VFormRadio from 'UiKit/components/VForm/VFormRadio.vue';
 import { numberFormatter } from 'InvestCommon/helpers/numberFormatter';
 import {
-  address1Rule, address2Rule, citizenshipRule, cityRule, countryRule, dobRule, errorMessageRule,
+  address1Rule, address2Rule, citizenshipRule, cityRule, countryRuleObject, dobRule, errorMessageRule,
   phoneRule, stateRule, zipRule,
 } from 'UiKit/helpers/validation/rules';
 import { JSONSchemaType } from 'ajv';
@@ -149,7 +149,7 @@ const schemaFinancialInformationAndKYC = computed(() => ({
         city: cityRule,
         state: stateRule,
         zip_code: zipRule,
-        country: countryRule,
+        country: countryRuleObject,
         phone: phoneRule,
         consent_plaid: {
           checkboxTrue: true,
@@ -572,6 +572,7 @@ watch(() => [setUserIdentityOptionsData.value, schemaFinancialInformationAndKYC.
               :is-error="VFormGroupProps.isFieldError"
               name="country"
               size="large"
+              return-object
               placeholder="Country"
               item-label="name"
               item-value="code"

@@ -467,6 +467,7 @@ watch(() => setUserIdentityOptionsData.value, () => {
               placeholder="Country"
               item-label="name"
               item-value="code"
+              return-object
               searchable
               :options="countries"
               dropdown-absolute

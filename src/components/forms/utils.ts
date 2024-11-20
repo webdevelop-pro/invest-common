@@ -1,7 +1,7 @@
 
 import { JSONSchemaType } from 'ajv';
 import {
-  address1Rule, address2Rule, citizenshipRule, cityRule, countryRule,
+  address1Rule, address2Rule, citizenshipRule, cityRule, countryRuleObject,
   dobRule, emailRule, errorMessageRule, firstNameRule, lastNameRule,
   middleNameRule, phoneRule, relationshipTypeRule, ssnRule, stateRule, zipRule,
 } from 'UiKit/helpers/validation/rules';
@@ -38,7 +38,7 @@ export const schemaPersonalInformation = {
         city: cityRule,
         state: stateRule,
         zip_code: zipRule,
-        country: countryRule,
+        country: countryRuleObject,
         phone: phoneRule,
         citizenship: citizenshipRule,
         ssn: ssnRule,
