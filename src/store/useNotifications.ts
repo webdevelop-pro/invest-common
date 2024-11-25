@@ -149,8 +149,8 @@ export const useNotificationsStore = defineStore('notifications', () => {
       },
     });
 
-    watch(() => userLoggedIn.value, (value) => {
-      if (!value) {
+    watch(userLoggedIn, () => {
+      if (!userLoggedIn.value) {
         close();
         // eslint-disable-next-line no-console
         console.log(`connection to ${uri} is closed`);

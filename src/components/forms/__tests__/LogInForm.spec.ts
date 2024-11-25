@@ -28,7 +28,7 @@ vi.mock('vue-router', () => ({
 
 
 vi.mock('InvestCommon/store/useUserIdentitys', () => ({
-  useUserIdentitysStore: vi.fn().mockReturnValue({
+  useUserProfilesStore: vi.fn().mockReturnValue({
     getUserIndividualProfile: vi.fn(),
   }),
 }));
@@ -102,8 +102,8 @@ describe('LogInForm', () => {
     expect(authStore.isSetLoginError).toBe(false);
     expect(authStore.isGetFlowError).toBe(false);
     expect(authStore.setLoginData?.session).not.toBeUndefined();
-    expect(usersStore.isGetUserIdentityError).toBe(false);
-    expect(usersStore.isGetUserIdentityLoading).toBe(true);
+    expect(usersStore.isGetUserProfileError).toBe(false);
+    expect(usersStore.isGetUserProfileLoading).toBe(true);
   });
   it('should error variable be true when there is error', async () => {
     renderComponent();
@@ -117,8 +117,8 @@ describe('LogInForm', () => {
     expect(authStore.isGetFlowError).toBe(false);
     expect(authStore.isSetLoginError).toBe(true);
     expect(authStore.setLoginData?.session).toBeUndefined();
-    expect(usersStore.isGetUserIdentityError).toBe(false);
-    expect(usersStore.isGetUserIdentityLoading).toBe(false);
+    expect(usersStore.isGetUserProfileError).toBe(false);
+    expect(usersStore.isGetUserProfileLoading).toBe(false);
     expect(screen.queryByTestId('login-form')).toBeTruthy();
   });
 });

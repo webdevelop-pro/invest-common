@@ -25,7 +25,7 @@ vi.mock('vue-router', () => ({
 
 
 vi.mock('InvestCommon/store/useUserIdentitys', () => ({
-  useUserIdentitysStore: vi.fn().mockReturnValue({
+  useUserProfilesStore: vi.fn().mockReturnValue({
     getUserIndividualProfile: vi.fn(),
   }),
 }));

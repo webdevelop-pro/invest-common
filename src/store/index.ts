@@ -4,7 +4,7 @@ export * from './useAuth';
 export * from './useAuthLogic';
 export * from './useAccreditation';
 export * from './useUsers';
-export * from './useUserIdentity';
+export * from './useUserProfiles';
 export * from './usePlaid';
 export * from './useOffer';
 export * from './useBreakpoints';

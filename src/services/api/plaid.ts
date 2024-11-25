@@ -8,7 +8,7 @@ const { PLAID_URL } = env;
 
 // GET IDENTITIES
 export const fetchUpdateIdentities = (userId: number, profileId: number) => {
-  const path = `${PLAID_URL}/identity/sync/${userId}/${profileId}`;
+  const path = `${PLAID_URL}/auth/identity/sync/${userId}/${profileId}`;
 
   const data = {
     method: 'POST',
@@ -23,7 +23,7 @@ export const fetchUpdateIdentities = (userId: number, profileId: number) => {
 
 // CREATE TOKEN
 export const fetchCreateToken = (profileId: number) => {
-  const path = `${PLAID_URL}/kyc/${profileId}`;
+  const path = `${PLAID_URL}/auth/kyc/${profileId}`;
   const body = JSON.stringify({});
   // ToDo
   // Add 'csrf_token': csrf_token  to cookies

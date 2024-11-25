@@ -5,11 +5,44 @@ import { IProfileIndividual, ISchema } from 'InvestCommon/types/api/user';
 
 const { USER_URL } = env;
 
-export const fetchGetUserIndividualProfile = () => {
-  const path = `${USER_URL}/auth/profile/individual`;
+
+export const fetchProfileOptions = (type: string) => {
+  const path = `${USER_URL}/auth/profile/${type}`;
+  const data = {
+    method: 'OPTIONS',
+    ...requiredFetchParams(),
+  };
+
+  return fetch(path, data).then((response) => {
+    if (!response.ok) return Promise.reject(response);
+    return response.json() as Promise<ISchema>;
+  });
+};
+
+export const fetchSetProfile = (userData: object, type: string) => {
+  const path = `${USER_URL}/auth/profile/${type}`;
+
+  const body = JSON.stringify({
+    ...userData,
+  });
 
   const data = {
-    method: 'GET',
+    method: 'POST',
+    body,
+    ...requiredFetchParams(),
+  };
+
+  return fetch(path, data).then((response) => {
+    if (!response.ok) return Promise.reject(response);
+    return response.json() as Promise<IProfileData>;
+  });
+};
+
+export const fetchProfileByIDOptions = (type: string, id: string | number) => {
+  const path = `${USER_URL}/auth/profile/${type}/${id}`;
+
+  const data = {
+    method: 'OPTIONS',
     ...requiredFetchParams(),
   };
 
@@ -19,8 +52,8 @@ export const fetchGetUserIndividualProfile = () => {
   });
 };
 
-export const fetchSetUserIndividualProfile = (userData: object) => {
-  const path = `${USER_URL}/auth/profile/individual`;
+export const fetchSetProfileByID = (userData: object, type: string, id: string | number) => {
+  const path = `${USER_URL}/auth/profile/${type}/${id}`;
 
   const body = JSON.stringify({
     ...userData,
@@ -34,25 +67,25 @@ export const fetchSetUserIndividualProfile = (userData: object) => {
 
   return fetch(path, data).then((response) => {
     if (!response.ok) return Promise.reject(response);
-    return response.json() as Promise<IProfileData>;
+    return response.json() as Promise<IProfileIndividual>;
   });
 };
 
+export const fetchGetProfileByID = (type: string, id: string | number) => {
+  const path = `${USER_URL}/auth/profile/${type}/${id}`;
 
-export const fetchSetUserIndividualProfileOptions = () => {
-  const path = `${USER_URL}/auth/profile/individual`;
   const data = {
-    method: 'OPTIONS',
+    method: 'GET',
     ...requiredFetchParams(),
   };
 
   return fetch(path, data).then((response) => {
     if (!response.ok) return Promise.reject(response);
-    return response.json() as Promise<ISchema>;
+    return response.json() as Promise<IProfileIndividual>;
   });
 };
 
-export const fetchGetUserIdentity = () => {
+export const fetchGetUser = () => {
   const path = `${USER_URL}/auth/user`;
 
   const data = {
@@ -66,7 +99,7 @@ export const fetchGetUserIdentity = () => {
   });
 };
 
-export const fetchSetUserBackgroundInfo = (userData: object) => {
+export const fetchSetUser = (userData: object) => {
   const path = `${USER_URL}/auth/user`;
 
   const body = JSON.stringify({
@@ -85,7 +118,7 @@ export const fetchSetUserBackgroundInfo = (userData: object) => {
   });
 };
 
-export const fetchSetUserBackgroundInfoOptions = () => {
+export const fetchSetUserOptions = () => {
   const path = `${USER_URL}/auth/user`;
 
   const data = {

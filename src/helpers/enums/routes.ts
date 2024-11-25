@@ -38,6 +38,7 @@ export const ROUTE_STATIC_LISTING_DISCLOSURE = 'ROUTE_STATIC_LISTING_DISCLOSURE'
 export const ROUTE_LOGIN = 'ROUTE_LOGIN';
 export const ROUTE_SIGNUP = 'ROUTE_SIGNUP';
 export const ROUTE_SUBMIT_KYC = 'ROUTE_SUBMIT_KYC';
+export const ROUTE_CREATE_PROFILE = 'ROUTE_CREATE_PROFILE';
 export const ROUTE_FORGOT = 'ROUTE_FORGOT';
 export const ROUTE_SETTINGS = 'ROUTE_SETTINGS';
 export const ROUTE_CHECK_EMAIL = 'ROUTE_CHECK_EMAIL';
@@ -61,8 +62,9 @@ export const PAGE_TITLES = {
   [ROUTE_INVEST_FUNDING]: `Investment funding | ${DEFAULT_PAGE_TITLE}`,
   [ROUTE_INVEST_REVIEW]: `Investment review | ${DEFAULT_PAGE_TITLE}`,
   [ROUTE_INVEST_THANK]: `Thank you for your investment | ${DEFAULT_PAGE_TITLE}`,
-
+  
   [ROUTE_SUBMIT_KYC]: `KYC | ${DEFAULT_PAGE_TITLE}`,
+  [ROUTE_CREATE_PROFILE]: `Create profile | ${DEFAULT_PAGE_TITLE}`,
 
   [ROUTE_ACCREDITATION_UPLOAD]: `Accreditation upload | ${DEFAULT_PAGE_TITLE}`,
 
@@ -112,6 +114,8 @@ export const PAGE_DESCRIPTIONS = {
   [ROUTE_INVEST_THANK]: 'Thank you for investing with us! Your commitment brings you closer to your financial goals. We appreciate your trust and partnership."',
 
   [ROUTE_SUBMIT_KYC]: 'Complete your KYC form to verify your identity. Ensure compliance and unlock access to a world of investment opportunities. Begin your journey securely!',
+
+  [ROUTE_CREATE_PROFILE]: 'Set up your investment profile',
 
   [ROUTE_ACCREDITATION_UPLOAD]: 'Upload your accreditation documents securely. Gain access to exclusive investment opportunities. Start elevating your portfolio today!',
 

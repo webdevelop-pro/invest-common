@@ -22,14 +22,14 @@ export const useProfileWalletTransactionStore = defineStore('walletTransaction',
 
   const isGetProfileWalletTransactionsDataLoading = ref(false);
   const isGetProfileWalletTransactionsDatanError = ref(false);
-  const getProfileWalletTransactionsData = ref<ITransactionDataResponse[]>([]);
-  const getProfileWalletTransactions = async () => {
+  const getProfileByIdWalletTransactionsData = ref<ITransactionDataResponse[]>([]);
+  const getProfileByIdWalletTransactions = async () => {
     isGetProfileWalletTransactionsDataLoading.value = true;
     const response = await fetchGetTransactionsData(walletId.value).catch((error: Response) => {
       isGetProfileWalletTransactionsDatanError.value = true;
       void generalErrorHandling(error);
     });
-    if (response) getProfileWalletTransactionsData.value = response.items;
+    if (response) getProfileByIdWalletTransactionsData.value = response.items;
     isGetProfileWalletTransactionsDataLoading.value = false;
   };
 
@@ -150,7 +150,7 @@ export const useProfileWalletTransactionStore = defineStore('walletTransaction',
 
   // FORMATTED TRANSACTIONS DATA
   const getFormattedProfileWalletTransactionsData = computed(() => {
-    const formattedDataInner = getProfileWalletTransactionsData.value?.map(
+    const formattedDataInner = getProfileByIdWalletTransactionsData.value?.map(
       (item: ITransactionDataResponse) => transactionFormatted(item),
     );
     return formattedDataInner;
@@ -179,23 +179,23 @@ export const useProfileWalletTransactionStore = defineStore('walletTransaction',
   const updateNotificationData = (notification: INotification) => {
     const transactionId = notification.data.fields.object_id;
     const transactionStatus = notification.data.fields.status;
-    const findTransaction = getProfileWalletTransactionsData.value.find((item) => item.id === transactionId);
+    const findTransaction = getProfileByIdWalletTransactionsData.value.find((item) => item.id === transactionId);
     if (findTransaction?.status && transactionStatus) findTransaction.status = transactionStatus;
-    void getProfileWalletTransactions();
+    void getProfileByIdWalletTransactions();
   };
 
   const resetAll = () => {
-    getProfileWalletTransactionsData.value = [];
+    getProfileByIdWalletTransactionsData.value = [];
     setProfileWalletAddTransactionData.value = undefined;
     setProfileWalletCancelTransactionData.value = undefined;
     setProfileWalletAddTransactionErrorData.value = undefined;
   };
 
   return {
-    getProfileWalletTransactions,
+    getProfileByIdWalletTransactions,
     isGetProfileWalletTransactionsDataLoading,
     isGetProfileWalletTransactionsDatanError,
-    getProfileWalletTransactionsData,
+    getProfileByIdWalletTransactionsData,
     getFormattedProfileWalletTransactionsData,
     transactionsCount,
     pendingTransactions,

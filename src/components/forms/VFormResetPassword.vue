@@ -1,15 +1,12 @@
 <script setup lang="ts">
 import {
-  ref, watch, computed, reactive, nextTick,
+  ref, watch, computed, nextTick,
 } from 'vue';
 import { checkStrength, scorePassword } from 'InvestCommon/helpers/calculatePasswordStrength';
 import { useAuthStore } from 'InvestCommon/store/useAuth';
 import { useAuthLogicStore } from 'InvestCommon/store/useAuthLogic';
 import { SELFSERVICE } from 'InvestCommon/helpers/enums/auth';
 import { storeToRefs } from 'pinia';
-import { FormModelResetPassword, schemaResetPassword } from './utilsResetPassword';
-import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
-import { isEmpty } from 'InvestCommon/helpers/general';
 import VFormGroup from 'UiKit/components/VForm/VFormGroup.vue';
 import VFormInput from 'UiKit/components/VForm/VFormInput.vue';
 import VButton from 'UiKit/components/VButton/VButton.vue';
@@ -17,6 +14,10 @@ import FormRow from 'InvestCommon/components/VForm/VFormRow.vue';
 import FormCol from 'InvestCommon/components/VForm/VFormCol.vue';
 import { VSvgIcon } from 'UiKit/components/VSvgIcon';
 import { scrollToError } from 'UiKit/helpers/validation/general';
+import { errorMessageRule, passwordRule } from 'UiKit/helpers/validation/rules';
+import { JSONSchemaType } from 'ajv';
+import { FormModelResetPassword } from 'InvestCommon/types/form';
+import { useFormValidator } from 'InvestCommon/composable/useFormValidation';
 
 const authStore = useAuthStore();
 const { isSetPasswordLoading, setPasswordErrorData } = storeToRefs(authStore);
@@ -28,19 +29,40 @@ const passwordStrength = ref('');
 const passwordScore = ref(0);
 const showStrengthMeter = ref(false);
 
-const model = reactive({
-} as FormModelResetPassword);
 
-const validator = new PrecompiledValidator<FormModelResetPassword>(
-  schemaResetPassword,
+const schema = {
+  $schema: 'http://json-schema.org/draft-07/schema#',
+  definitions: {
+    Auth: {
+      properties: {
+        create_password: passwordRule,
+        repeat_password: {
+          const: {
+            $data: '1/create_password',
+          },
+          ...passwordRule,
+          errorMessage: {
+            const: 'Passwords do not match',
+          },
+        },
+      },
+      type: 'object',
+      required: ['create_password', 'repeat_password'],
+      errorMessage: errorMessageRule,
+    },
+  },
+  $ref: '#/definitions/Auth',
+} as unknown as JSONSchemaType<FormModelResetPassword>;
+
+
+const {
+  model, isValid, validation, onValidate,
+} = useFormValidator(
+  {},
+  schema,
 );
-const validation = ref<unknown>();
-const isValid = computed(() => isEmpty(validation.value || {}));
-const isDisabledButton = computed(() => (!isValid.value || isSetPasswordLoading.value));
 
-const onValidate = () => {
-  validation.value = validator.getFormValidationErrors(model);
-};
+const isDisabledButton = computed(() => (!isValid.value || isSetPasswordLoading.value));
 
 
 watch(() => model.create_password, (pass: string) => {
@@ -50,10 +72,6 @@ watch(() => model.create_password, (pass: string) => {
   passwordScore.value = scorePassword(pass);
   return true;
 });
-
-watch(() => model, () => {
-  if (!isValid.value) onValidate();
-}, { deep: true });
 
 const resetHandler = async () => {
   onValidate();
@@ -82,7 +100,7 @@ const resetHandler = async () => {
             v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
-            :schema-front="schemaResetPassword"
+            :schema-front="schema"
             :error-text="setPasswordErrorData?.create_password"
             path="create_password"
             label="Enter Your New Password"
@@ -144,7 +162,7 @@ const resetHandler = async () => {
             v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
-            :schema-front="schemaResetPassword"
+            :schema-front="schema"
             :error-text="setPasswordErrorData?.repeat_password"
             path="repeat_password"
             label="Confirm Your New Password"

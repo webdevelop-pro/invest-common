@@ -25,7 +25,7 @@ vi.mock('InvestCommonglobal', () => ({
 
 
 vi.mock('InvestCommon/store/useUserIdentitys', () => ({
-  useUserIdentitysStore: vi.fn().mockReturnValue({
+  useUserProfilesStore: vi.fn().mockReturnValue({
     getUserIndividualProfile: vi.fn().mockReturnValue({
       getUserIndividualProfileData: {
         value: UserIdentity,

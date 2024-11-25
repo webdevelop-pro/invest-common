@@ -4,7 +4,7 @@ import {
   ref, computed, nextTick,
 } from 'vue';
 import { useAccreditationStore } from 'InvestCommon/store/useAccreditation';
-import { useUserIdentitysStore } from 'InvestCommon/store/useUserIdentity';
+import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
 import VButton from 'UiKit/components/VButton/VButton.vue';
 import { storeToRefs } from 'pinia';
@@ -15,14 +15,14 @@ import { FormModelAccreditationFileInput } from './utils';
 import { scrollToError } from 'UiKit/helpers/validation/general';
 
 const router = useRouter();
-const userIdentityStore = useUserIdentitysStore();
+const userProfilesStore = useUserProfilesStore();
 const accreditationStore = useAccreditationStore();
 const { createAccreditationData, updateAccreditationData } = storeToRefs(accreditationStore);
 const {
-  isSetUserIdentityLoading,
-} = storeToRefs(userIdentityStore);
+  isSetProfileByIdLoading,
+} = storeToRefs(userProfilesStore);
 const usersStore = useUsersStore();
-const { selectedUserProfileData, selectedUserProfileId } = storeToRefs(usersStore);
+const { selectedUserProfileData, selectedUserProfileId, selectedUserProfileType } = storeToRefs(usersStore);
 
 // const { submitFormToHubspot } = useHubspotForm('4dfe165f-70df-446a-ae60-0185da755bdb');
 
@@ -33,7 +33,7 @@ const accreditationDescriptions = ref<string[]>([]);
 const isFieldsValid = ref(true);
 const validateTrigger = ref(false);
 const isCreateAccreditation = computed(() => selectedUserProfileData.value?.accreditation_status === 'new');
-const isDisabledButton = computed(() => (!isFieldsValid.value || isSetUserIdentityLoading.value));
+const isDisabledButton = computed(() => (!isFieldsValid.value || isSetProfileByIdLoading.value));
 
 const sendFiles = async () => {
   const promises = [] as unknown[];
@@ -71,7 +71,7 @@ const sendFiles = async () => {
 
   if ((createAccreditationData.value && isCreateAccreditation.value)
     || (updateAccreditationData.value && !isCreateAccreditation.value)) {
-    void userIdentityStore.getUserIndividualProfile();
+    void userProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
     void router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
   }
 };

@@ -1,12 +1,12 @@
 import {
   render, fireEvent,
 } from '@testing-library/vue';
-import FormPersonalInformation from '../FormPersonalInformation.vue';
+import VFormPersonalInformation from '../VFormPersonalInformation.vue';
 import { createPinia, setActivePinia, storeToRefs } from 'pinia';
 import {
   beforeEach, expect, describe, it, vi,
 } from 'vitest';
-import { useUserIdentitysStore, useUsersStore } from 'InvestCommon/store';
+import { useUserProfilesStore, useUsersStore } from 'InvestCommon/store';
 import createFetchMock from 'vitest-fetch-mock';
 import { userIndividualOptionsMock } from 'InvestCommon/tests/__mocks__';
 
@@ -29,7 +29,7 @@ vi.mock('vue-router', () => ({
 }));
 
 function renderComponent() {
-  const wrapper = render(FormPersonalInformation);
+  const wrapper = render(VFormPersonalInformation);
 
   const inputFirstName: HTMLInputElement = wrapper.getByTestId('first-name');
   const inputMiddleName: HTMLInputElement = wrapper.getByTestId('middle-name');
@@ -75,12 +75,12 @@ const inputTriggerError = async (el: HTMLInputElement, value: string, isTruthy: 
   }
 };
 
-describe('FormPersonalInformation', () => {
+describe('VFormPersonalInformation', () => {
   beforeEach(async () => {
     setActivePinia(createPinia());
-    const userIdentityStore = useUserIdentitysStore();
+    const userIdentityStore = useUserProfilesStore();
     fetchMocker.mockResponse(JSON.stringify(userIndividualOptionsMock));
-    await userIdentityStore.setUserIdentityOptions();
+    await userIdentityStore.getProfileOptions();
     const usersStore = useUsersStore();
     const { selectedUserProfileId } = storeToRefs(usersStore);
     selectedUserProfileId.value = 1;

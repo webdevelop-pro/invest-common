@@ -2,7 +2,7 @@
 import {
   ref, computed, watch, reactive, nextTick,
 } from 'vue';
-import { useUserIdentitysStore } from 'InvestCommon/store/useUserIdentity';
+import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import FormRow from 'InvestCommon/components/VForm/VFormRow.vue';
@@ -23,12 +23,15 @@ const props = defineProps({
 });
 
 const router = useRouter();
-const userIdentityStore = useUserIdentitysStore();
+const userProfilesStore = useUserProfilesStore();
 const {
-  isSetUserIdentityLoading, setUserIdentityErrorData, setUserIdentityOptionsData,
-} = storeToRefs(userIdentityStore);
+  isSetProfileByIdLoading, setProfileByIdErrorData, getProfileByIdOptionsData,
+} = storeToRefs(userProfilesStore);
 const usersStore = useUsersStore();
-const { selectedUserProfileData, selectedUserProfileId, userAccountData } = storeToRefs(usersStore);
+const {
+  selectedUserProfileData, selectedUserProfileId, userAccountData,
+  selectedUserProfileType,
+} = storeToRefs(usersStore);
 
 const { submitFormToHubspot } = useHubspotForm(props.hubsportFormId);
 
@@ -43,12 +46,12 @@ const model = reactive({
 } as FormModeTrustedContact);
 
 let validator = new PrecompiledValidator<FormModeTrustedContact>(
-  filterSchema(setUserIdentityOptionsData.value, formModel),
+  filterSchema(getProfileByIdOptionsData.value, formModel),
   schemaTrustedContact,
 );
 const validation = ref<unknown>();
 const isValid = computed(() => isEmpty(validation.value || {}));
-const isDisabledButton = computed(() => (!isValid.value || isSetUserIdentityLoading.value));
+const isDisabledButton = computed(() => (!isValid.value || isSetProfileByIdLoading.value));
 
 const onValidate = () => {
   validation.value = validator.getFormValidationErrors(model);
@@ -62,9 +65,13 @@ const saveHandler = async () => {
   }
 
   isLoading.value = true;
-  await userIdentityStore.setUserIdentity({
-    beneficiary: model.beneficiary,
-  });
+  await userProfilesStore.setProfileById(
+    {
+      beneficiary: model.beneficiary,
+    },
+    selectedUserProfileType.value,
+    selectedUserProfileId.value,
+  );
   isLoading.value = false;
   void submitFormToHubspot({
     email: userAccountData.value?.email,
@@ -75,7 +82,7 @@ const saveHandler = async () => {
     trusted_email: model.beneficiary.email,
     date_of_birth: model.beneficiary.dob,
   });
-  void userIdentityStore.getUserIndividualProfile();
+  void userProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
   void router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
 };
 
@@ -109,9 +116,9 @@ watch(() => model, () => {
 }, { deep: true });
 
 // eslint-disable-next-line
-watch(() => setUserIdentityOptionsData.value, () => {
+watch(() => getProfileByIdOptionsData.value, () => {
   validator = new PrecompiledValidator<FormModeTrustedContact>(
-    filterSchema(setUserIdentityOptionsData.value, formModel),
+    filterSchema(getProfileByIdOptionsData.value, formModel),
     schemaTrustedContact,
   );
 });
@@ -129,9 +136,9 @@ watch(() => setUserIdentityOptionsData.value, () => {
             v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
-            :schema-back="setUserIdentityOptionsData"
+            :schema-back="getProfileByIdOptionsData"
             :schema-front="schemaTrustedContact"
-            :error-text="setUserIdentityErrorData?.beneficiary?.relationship_type"
+            :error-text="setProfileByIdErrorData?.beneficiary?.relationship_type"
             path="beneficiary.relationship_type"
             label="Relationship Type"
             data-testid="relationship-type-group"
@@ -153,9 +160,9 @@ watch(() => setUserIdentityOptionsData.value, () => {
             v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
-            :schema-back="setUserIdentityOptionsData"
+            :schema-back="getProfileByIdOptionsData"
             :schema-front="schemaTrustedContact"
-            :error-text="setUserIdentityErrorData?.beneficiary?.first_name"
+            :error-text="setProfileByIdErrorData?.beneficiary?.first_name"
             path="beneficiary.first_name"
             label="First Name"
             data-testid="first-name-group"
@@ -177,9 +184,9 @@ watch(() => setUserIdentityOptionsData.value, () => {
             v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
-            :schema-back="setUserIdentityOptionsData"
+            :schema-back="getProfileByIdOptionsData"
             :schema-front="schemaTrustedContact"
-            :error-text="setUserIdentityErrorData?.beneficiary?.last_name"
+            :error-text="setProfileByIdErrorData?.beneficiary?.last_name"
             path="beneficiary.last_name"
             label="Last Name"
             data-testid="last-name-group"
@@ -202,9 +209,9 @@ watch(() => setUserIdentityOptionsData.value, () => {
             v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
-            :schema-back="setUserIdentityOptionsData"
+            :schema-back="getProfileByIdOptionsData"
             :schema-front="schemaTrustedContact"
-            :error-text="setUserIdentityErrorData?.beneficiary?.dob"
+            :error-text="setProfileByIdErrorData?.beneficiary?.dob"
             path="beneficiary.dob"
             label="Date Of Birth"
             data-testid="dob-group"
@@ -226,9 +233,9 @@ watch(() => setUserIdentityOptionsData.value, () => {
             v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
-            :schema-back="setUserIdentityOptionsData"
+            :schema-back="getProfileByIdOptionsData"
             :schema-front="schemaTrustedContact"
-            :error-text="setUserIdentityErrorData?.beneficiary?.phone"
+            :error-text="setProfileByIdErrorData?.beneficiary?.phone"
             path="beneficiary.phone"
             label="Phone number"
             data-testid="phone-group"
@@ -252,9 +259,9 @@ watch(() => setUserIdentityOptionsData.value, () => {
             v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
-            :schema-back="setUserIdentityOptionsData"
+            :schema-back="getProfileByIdOptionsData"
             :schema-front="schemaTrustedContact"
-            :error-text="setUserIdentityErrorData?.beneficiary?.email"
+            :error-text="setProfileByIdErrorData?.beneficiary?.email"
             path="beneficiary.email"
             label="Email address"
             data-testid="email-group"

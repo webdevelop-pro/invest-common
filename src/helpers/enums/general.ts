@@ -16,28 +16,28 @@ export enum objectivesTypes {
     speculation = 'speculation',
     mitigation = 'mitigation',
   }
-  
-  export enum durationTypes {
+
+export enum durationTypes {
     one = 'one',
     two = 'two',
     three = 'three',
     four = 'four',
   }
-  
-  export enum accessTypes {
+
+export enum accessTypes {
     very = 'very',
     somewhat = 'somewhat',
     not = 'not',
   }
-  
-  export enum riskComfortTypes {
+
+export enum riskComfortTypes {
     very = 'low',
     medium = 'medium',
     high = 'high',
     speculative = 'speculative',
   }
-  
-  export enum AccordionTypes {
+
+export enum AccordionTypes {
     legalName = 'accordion-legal-name',
     dateOfBirth = 'accordion-date-of-birth',
     address = 'accordion-address',
@@ -69,4 +69,10 @@ export enum CitizenTypes {
   us_citizen = 'U.S. Citizen',
   us_resident = 'U.S. Resident',
   us_non_resident = 'Non Resident'
+}
+
+export enum IdentificationTypes {
+  drivers_license = "Driver's license",
+  passport = 'Passport',
+  state_id = 'State ID'
 }

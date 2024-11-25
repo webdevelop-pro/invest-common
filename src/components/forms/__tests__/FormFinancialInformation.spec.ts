@@ -6,7 +6,7 @@ import { createPinia, setActivePinia, storeToRefs } from 'pinia';
 import {
   beforeEach, expect, describe, it, vi,
 } from 'vitest';
-import { useUserIdentitysStore, useUsersStore } from 'InvestCommon/store';
+import { useUserProfilesStore, useUsersStore } from 'InvestCommon/store';
 import createFetchMock from 'vitest-fetch-mock';
 import { userIndividualOptionsMock } from 'InvestCommon/tests/__mocks__';
 
@@ -56,9 +56,9 @@ function renderComponent() {
 describe('FormFinancialInformationAndKYC', () => {
   beforeEach(async () => {
     setActivePinia(createPinia());
-    const userIdentityStore = useUserIdentitysStore();
+    const userIdentityStore = useUserProfilesStore();
     fetchMocker.mockResponse(JSON.stringify(userIndividualOptionsMock));
-    await userIdentityStore.setUserIdentityOptions();
+    await userIdentityStore.getProfileOptions();
     const usersStore = useUsersStore();
     const { selectedUserProfileId } = storeToRefs(usersStore);
     selectedUserProfileId.value = 1;

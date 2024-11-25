@@ -72,7 +72,7 @@ if (!EXTERNAL) {
 }
 
 const usersStore = useUsersStore();
-const { userLoggedIn, isGetUserIdentityLoading } = storeToRefs(usersStore);
+const { userLoggedIn, isGetUserProfileLoading } = storeToRefs(usersStore);
 const authLogicStore = useAuthLogicStore();
 const { isLoadingSession } = storeToRefs(authLogicStore);
 const path = ref(props.path || '');
@@ -161,7 +161,7 @@ watchEffect(() => {
         </div>
 
         <VSkeleton
-          v-if="isGetUserIdentityLoading || isLoadingSession"
+          v-if="isGetUserProfileLoading || isLoadingSession"
           height="25px"
           width="250px"
           class="v-header-btns__skeleton"

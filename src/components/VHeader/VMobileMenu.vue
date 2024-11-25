@@ -43,7 +43,7 @@ if (!EXTERNAL) {
   router = useRouter();
 }
 const usersStore = useUsersStore();
-const { userLoggedIn, isGetUserIdentityLoading } = storeToRefs(usersStore);
+const { userLoggedIn, isGetUserProfileLoading } = storeToRefs(usersStore);
 const path = ref(window?.location?.pathname);
 
 
@@ -236,7 +236,7 @@ if (window) {
         </VButton>
       </div>
       <div
-        v-if="userLoggedIn && !isGetUserIdentityLoading"
+        v-if="userLoggedIn && !isGetUserProfileLoading"
         class="wd-mobile-menu__item-wrap"
       >
         <template
