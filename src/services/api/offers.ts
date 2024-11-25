@@ -50,7 +50,7 @@ export const fetchGetOfferComments = (id: number) => {
 };
 
 export const fetchSetOfferComment = (payload: IOfferCommentPayload) => {
-  const path = `${OFFER_URL}/public/comment`;
+  const path = `${OFFER_URL}/auth/comment`;
 
   const body = JSON.stringify({
     ...payload,
@@ -69,7 +69,7 @@ export const fetchSetOfferComment = (payload: IOfferCommentPayload) => {
 };
 
 export const fetchSetOfferCommentOptions = () => {
-  const path = `${OFFER_URL}/public/comment`;
+  const path = `${OFFER_URL}/auth/comment`;
 
   const data = {
     method: 'OPTIONS',
