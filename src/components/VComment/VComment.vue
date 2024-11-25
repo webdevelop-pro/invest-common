@@ -33,7 +33,7 @@ defineProps({
             {{ title }}
           </span>
           <VTag
-            v-if="tag"
+            v-if="tag && tag != 'none'"
             size="small"
             background="#004FFF"
             white-text-color
