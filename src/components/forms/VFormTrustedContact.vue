@@ -13,10 +13,14 @@ import { storeToRefs } from 'pinia';
 import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
 import { isEmpty } from 'InvestCommon/helpers/general';
 import VFormGroup from 'UiKit/components/VForm/VFormGroup.vue';
-import { FormModeTrustedContact, schemaTrustedContact } from './utils';
 import { filterSchema, scrollToError } from 'UiKit/helpers/validation/general';
 import { useRouter } from 'vue-router';
 import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/helpers/enums/routes';
+import { JSONSchemaType } from 'ajv';
+import {
+  firstNameRule, lastNameRule, relationshipTypeRule, phoneRule, emailRule, dobRule, errorMessageRule,
+} from 'UiKit/helpers/validation/rules';
+import { FormModeTrustedContact } from 'InvestCommon/types/form';
 
 const props = defineProps({
   hubsportFormId: String,
@@ -45,6 +49,33 @@ const model = reactive({
   beneficiary: {},
 } as FormModeTrustedContact);
 
+const schemaTrustedContact = {
+  $schema: 'http://json-schema.org/draft-07/schema#',
+  definitions: {
+    TrustedContact: {
+      properties: {
+        first_name: firstNameRule,
+        last_name: lastNameRule,
+        relationship_type: relationshipTypeRule,
+        phone: phoneRule,
+        email: emailRule,
+        dob: dobRule,
+      },
+      type: 'object',
+      additionalProperties: false,
+      required: ['first_name', 'last_name', 'relationship_type', 'phone', 'email', 'dob'],
+    },
+    Individual: {
+      properties: {
+        beneficiary: { type: 'object', $ref: '#/definitions/TrustedContact' },
+      },
+      type: 'object',
+      errorMessage: errorMessageRule,
+    },
+  },
+  $ref: '#/definitions/Individual',
+} as unknown as JSONSchemaType<FormModeTrustedContact>;
+
 let validator = new PrecompiledValidator<FormModeTrustedContact>(
   filterSchema(getProfileByIdOptionsData.value, formModel),
   schemaTrustedContact,
@@ -60,7 +91,7 @@ const onValidate = () => {
 const saveHandler = async () => {
   onValidate();
   if (!isValid.value || !model.beneficiary) {
-    void nextTick(() => scrollToError('FormTrustedContact'));
+    void nextTick(() => scrollToError('VFormTrustedContact'));
     return;
   }
 
@@ -91,23 +122,8 @@ const cancelHandler = () => {
 };
 
 watch(() => selectedUserProfileData.value?.data?.beneficiary, () => {
-  if (selectedUserProfileData.value?.data?.beneficiary?.first_name) {
-    model.beneficiary.first_name = selectedUserProfileData.value?.data?.beneficiary?.first_name;
-  }
-  if (selectedUserProfileData.value?.data?.beneficiary?.dob) {
-    model.beneficiary.dob = selectedUserProfileData.value?.data?.beneficiary?.dob;
-  }
-  if (selectedUserProfileData.value?.data?.beneficiary?.email) {
-    model.beneficiary.email = selectedUserProfileData.value?.data?.beneficiary?.email;
-  }
-  if (selectedUserProfileData.value?.data?.beneficiary?.last_name) {
-    model.beneficiary.last_name = selectedUserProfileData.value?.data?.beneficiary?.last_name;
-  }
-  if (selectedUserProfileData.value?.data?.beneficiary?.phone) {
-    model.beneficiary.phone = selectedUserProfileData.value?.data?.beneficiary?.phone;
-  }
-  if (selectedUserProfileData.value?.data?.beneficiary?.relationship_type) {
-    model.beneficiary.relationship_type = selectedUserProfileData.value?.data?.beneficiary?.relationship_type;
+  if (selectedUserProfileData.value?.data?.beneficiary) {
+    model.beneficiary = selectedUserProfileData.value?.data?.beneficiary;
   }
 }, { deep: true, immediate: true });
 
@@ -125,7 +141,7 @@ watch(() => getProfileByIdOptionsData.value, () => {
 </script>
 
 <template>
-  <div class="FormTrustedContact form-personal-information">
+  <div class="VFormTrustedContact form-personal-information">
     <div class="form-personal-information__header is--h1__title">
       Trusted Contact
     </div>

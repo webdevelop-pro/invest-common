@@ -58,7 +58,7 @@ const {
 const schemaAddTransaction = computed(() => ({
   $schema: 'http://json-schema.org/draft-07/schema#',
   definitions: {
-    PatchIndividualProfile: {
+    Individual: {
       properties: {
         amount: {
           type: 'number',
@@ -75,7 +75,7 @@ const schemaAddTransaction = computed(() => ({
       errorMessage: errorMessageRule,
     },
   },
-  $ref: '#/definitions/PatchIndividualProfile',
+  $ref: '#/definitions/Individual',
 } as unknown as JSONSchemaType<FormModelAddTransaction>));
 
 const model = reactive({

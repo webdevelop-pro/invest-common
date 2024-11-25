@@ -13,10 +13,9 @@ import { FormModelFinancialSituation } from 'InvestCommon/types/form';
 import { urlBlogSingle } from 'InvestCommon/global/links';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
-import { filterSchema, getFilteredObject } from 'UiKit/helpers/validation/general';
+import { filterSchema } from 'UiKit/helpers/validation/general';
 import { isEmpty } from 'UiKit/helpers/general';
-import { useFormValidator } from 'InvestCommon/composable/useFormValidation';
-import { getOptions } from 'UiKit/helpers/model';
+import { createFormModel } from 'UiKit/helpers/model';
 
 
 const isAccreditedRadioOptions = [
@@ -48,7 +47,7 @@ const schema = {
       },
       type: 'object',
     },
-    PatchIndividualProfile: {
+    Individual: {
       properties: {
         accredited_investor: { type: 'object', $ref: '#/definitions/AccreditedInvestor' },
       },
@@ -56,21 +55,25 @@ const schema = {
       errorMessage: errorMessageRule,
     },
   },
-  $ref: '#/definitions/PatchIndividualProfile',
+  $ref: '#/definitions/Individual',
 } as unknown as JSONSchemaType<FormModelFinancialSituation>;
 
-
-const {
-  model, isValid, validator, validation, onValidate,
-} = useFormValidator<FormModelFinancialSituation>(
-  {
-    accredited_investor: {
-      is_accredited: props.modelData?.accredited_investor?.is_accredited || false,
-    },
+const model = reactive<FormModelFinancialSituation>({
+  accredited_investor: {
+    is_accredited: props.modelData?.accredited_investor?.is_accredited || false,
   },
+});
+const formModel = createFormModel(schema);
+let validator = new PrecompiledValidator<FormModelFinancialSituation>(
+  filterSchema(getProfileByIdOptionsData.value, formModel),
   schema,
-  getProfileByIdOptionsData.value,
 );
+const validation = ref<unknown>();
+const isValid = computed(() => isEmpty(validation.value || {}));
+
+const onValidate = () => {
+  validation.value = validator.getFormValidationErrors(model);
+};
 
 
 defineExpose({
@@ -83,6 +86,18 @@ watch(() => props.modelData?.accredited_investor?.is_accredited, () => {
     model.accredited_investor.is_accredited = props.modelData?.accredited_investor?.is_accredited;
   }
 }, { deep: true });
+
+
+watch(() => model, () => {
+  if (!isValid.value) onValidate();
+}, { deep: true });
+
+watch(() => [getProfileByIdOptionsData.value, schema], () => {
+  validator = new PrecompiledValidator<FormModelFinancialSituation>(
+    filterSchema(getProfileByIdOptionsData.value, formModel),
+    schema,
+  );
+});
 </script>
 
 <template>

@@ -19,8 +19,8 @@ export interface IFinra {
   member_association: boolean;
   correspondence: boolean;
   member_firm_name: string;
-  compliance_contract_name: string;
-  compliance_contract_email: string;
+  compliance_contact_name: string;
+  compliance_contant_email: string;
 }
 
 export interface IAccreditedInvestor {

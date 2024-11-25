@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import { watch, PropType, computed } from 'vue';
+import {
+  watch, PropType, computed, reactive,
+  ref,
+} from 'vue';
 import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import FormRow from 'InvestCommon/components/VForm/VFormRow.vue';
 import FormCol from 'InvestCommon/components/VForm/VFormCol.vue';
@@ -14,9 +17,10 @@ import {
   middleNameRule, phoneRule, ssnRule, stateRule, zipRule,
 } from 'UiKit/helpers/validation/rules';
 import { FormModelPersonalInformation } from 'InvestCommon/types/form';
-import { getFilteredObject } from 'UiKit/helpers/validation/general';
-import { useFormValidator } from 'InvestCommon/composable/useFormValidation';
-import { getOptions } from 'UiKit/helpers/model';
+import { filterSchema, getFilteredObject } from 'UiKit/helpers/validation/general';
+import { createFormModel, getOptions } from 'UiKit/helpers/model';
+import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
+import { isEmpty } from 'UiKit/helpers/general';
 
 const props = defineProps({
   modelData: Object as PropType<FormModelPersonalInformation>,
@@ -30,7 +34,7 @@ const {
 const schema = {
   $schema: 'http://json-schema.org/draft-07/schema#',
   definitions: {
-    PatchIndividualProfile: {
+    Individual: {
       properties: {
         first_name: firstNameRule,
         last_name: lastNameRule,
@@ -51,17 +55,21 @@ const schema = {
       required: ['citizenship', 'address1', 'dob', 'phone', 'city', 'state', 'zip_code', 'country', 'ssn'],
     },
   },
-  $ref: '#/definitions/PatchIndividualProfile',
+  $ref: '#/definitions/Individual',
 } as unknown as JSONSchemaType<FormModelPersonalInformation>;
 
-const {
-  model, formModel, isValid, validator, validation, onValidate,
-} = useFormValidator<FormModelPersonalInformation>(
-  {},
+const model = reactive<FormModelPersonalInformation>({});
+const formModel = createFormModel(schema);
+let validator = new PrecompiledValidator<FormModelPersonalInformation>(
+  filterSchema(getProfileByIdOptionsData.value, formModel),
   schema,
-  getProfileByIdOptionsData.value,
 );
+const validation = ref<unknown>();
+const isValid = computed(() => isEmpty(validation.value || {}));
 
+const onValidate = () => {
+  validation.value = validator.getFormValidationErrors(model);
+};
 
 const schemaObject = computed(() => getFilteredObject(getProfileByIdOptionsData.value, formModel));
 const optionsCountry = computed(() => getOptions('country', schemaObject));
@@ -87,6 +95,17 @@ watch(() => props.modelData, () => {
   if (props.modelData?.ssn) model.ssn = props.modelData?.ssn;
   if (props.modelData?.citizenship) model.citizenship = props.modelData?.citizenship;
 }, { deep: true, immediate: true });
+
+watch(() => model, () => {
+  if (!isValid.value) onValidate();
+}, { deep: true });
+
+watch(() => [getProfileByIdOptionsData.value, schema], () => {
+  validator = new PrecompiledValidator<FormModelPersonalInformation>(
+    filterSchema(getProfileByIdOptionsData.value, formModel),
+    schema,
+  );
+});
 </script>
 
 <template>

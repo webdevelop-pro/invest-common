@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import {
   watch, PropType, computed,
+  ref,
+  reactive,
 } from 'vue';
 import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import FormRow from 'InvestCommon/components/VForm/VFormRow.vue';
@@ -13,10 +15,11 @@ import { JSONSchemaType } from 'ajv';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { FormModelInvestmentObjectives } from 'InvestCommon/types/form';
 import { numberFormatter } from 'InvestCommon/helpers/numberFormatter';
-import { getFilteredObject } from 'UiKit/helpers/validation/general';
+import { filterSchema, getFilteredObject } from 'UiKit/helpers/validation/general';
 import { IInvestmentObjectives } from 'InvestCommon/types/api/user';
-import { populateModel, getOptions } from 'UiKit/helpers/model';
-import { useFormValidator } from 'InvestCommon/composable/useFormValidation';
+import { populateModel, getOptions, createFormModel } from 'UiKit/helpers/model';
+import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
+import { isEmpty } from 'UiKit/helpers/general';
 
 const props = defineProps({
   modelData: Object as PropType<FormModelInvestmentObjectives>,
@@ -42,7 +45,7 @@ const schema = {
       additionalProperties: false,
       required: ['duration', 'importance_of_access', 'objectives', 'risk_comfort', 'years_experience'],
     },
-    PatchIndividualProfile: {
+    Individual: {
       properties: {
         investment_objectives: { type: 'object', $ref: '#/definitions/InvestmentObjectives' },
       },
@@ -50,21 +53,26 @@ const schema = {
       errorMessage: errorMessageRule,
     },
   },
-  $ref: '#/definitions/PatchIndividualProfile',
+  $ref: '#/definitions/Individual',
 } as unknown as JSONSchemaType<FormModelInvestmentObjectives>;
 
-const {
-  model, formModel, isValid, validator, validation, onValidate,
-} = useFormValidator(
-  {
-    investment_objectives: {
-      ...props.modelData?.investment_objectives,
-      years_experience: 0,
-    },
+const model = reactive<FormModelInvestmentObjectives>({
+  investment_objectives: {
+    ...props.modelData?.investment_objectives,
+    years_experience: 0,
   },
+});
+const formModel = createFormModel(schema);
+let validator = new PrecompiledValidator<FormModelInvestmentObjectives>(
+  filterSchema(getProfileByIdOptionsData.value, formModel),
   schema,
-  getProfileByIdOptionsData.value,
 );
+const validation = ref<unknown>();
+const isValid = computed(() => isEmpty(validation.value || {}));
+
+const onValidate = () => {
+  validation.value = validator.getFormValidationErrors(model);
+};
 
 
 const schemaObject = computed(() => getFilteredObject(getProfileByIdOptionsData.value, formModel));
@@ -78,13 +86,33 @@ defineExpose({
 });
 
 watch(() => props.modelData?.investment_objectives, () => {
-  if (props.modelData?.investment_objectives) {
-    model.investment_objectives = populateModel<IInvestmentObjectives>(
-      props.modelData.investment_objectives,
-      formModel.investment_objectives,
-    );
+  if (props.modelData?.investment_objectives?.duration) {
+    model.investment_objectives.duration = props.modelData?.investment_objectives.duration;
   }
+  if (props.modelData?.investment_objectives?.importance_of_access) {
+    model.investment_objectives.importance_of_access = props.modelData?.investment_objectives.importance_of_access;
+  }
+  if (props.modelData?.investment_objectives?.objectives) {
+    model.investment_objectives.objectives = props.modelData?.investment_objectives.objectives;
+  }
+  if (props.modelData?.investment_objectives?.risk_comfort) {
+    model.investment_objectives.risk_comfort = props.modelData?.investment_objectives.risk_comfort;
+  }
+  if (props.modelData?.investment_objectives?.years_experience) {
+    model.investment_objectives.years_experience = props.modelData?.investment_objectives.years_experience;
+  }
+}, { deep: true, immediate: true });
+
+watch(() => model, () => {
+  if (!isValid.value) onValidate();
 }, { deep: true });
+
+watch(() => [getProfileByIdOptionsData.value, schema], () => {
+  validator = new PrecompiledValidator<FormModelInvestmentObjectives>(
+    filterSchema(getProfileByIdOptionsData.value, formModel),
+    schema,
+  );
+});
 </script>
 
 <template>

@@ -27,7 +27,7 @@ export type FormModelPersonalInformation = {
 export const schemaPersonalInformation = {
   $schema: 'http://json-schema.org/draft-07/schema#',
   definitions: {
-    PatchIndividualProfile: {
+    Individual: {
       properties: {
         first_name: firstNameRule,
         last_name: lastNameRule,
@@ -47,7 +47,7 @@ export const schemaPersonalInformation = {
       errorMessage: errorMessageRule,
     },
   },
-  $ref: '#/definitions/PatchIndividualProfile',
+  $ref: '#/definitions/Individual',
 } as unknown as JSONSchemaType<FormModelPersonalInformation>;
 
 export const SELECT_OPTIONS_EMPLOYMENT = [
@@ -92,8 +92,8 @@ export type FormModelBackgroundInformation = {
     member_association: boolean;
     correspondence: boolean;
     member_firm_name: string;
-    compliance_contract_name: string;
-    compliance_contract_email: string;
+    compliance_contact_name: string;
+    compliance_contant_email: string;
   };
   ten_percent_shareholder: {
     shareholder_association: boolean;
@@ -161,7 +161,7 @@ export const schemaTrustedContact = {
       additionalProperties: false,
       required: ['first_name', 'last_name', 'relationship_type', 'phone', 'email', 'dob'],
     },
-    PatchIndividualProfile: {
+    Individual: {
       properties: {
         beneficiary: { type: 'object', $ref: '#/definitions/TrustedContact' },
       },
@@ -169,7 +169,7 @@ export const schemaTrustedContact = {
       errorMessage: errorMessageRule,
     },
   },
-  $ref: '#/definitions/PatchIndividualProfile',
+  $ref: '#/definitions/Individual',
 } as unknown as JSONSchemaType<FormModeTrustedContact>;
 
 

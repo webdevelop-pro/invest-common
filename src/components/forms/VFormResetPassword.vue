@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {
   ref, watch, computed, nextTick,
+  reactive,
 } from 'vue';
 import { checkStrength, scorePassword } from 'InvestCommon/helpers/calculatePasswordStrength';
 import { useAuthStore } from 'InvestCommon/store/useAuth';
@@ -17,7 +18,8 @@ import { scrollToError } from 'UiKit/helpers/validation/general';
 import { errorMessageRule, passwordRule } from 'UiKit/helpers/validation/rules';
 import { JSONSchemaType } from 'ajv';
 import { FormModelResetPassword } from 'InvestCommon/types/form';
-import { useFormValidator } from 'InvestCommon/composable/useFormValidation';
+import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
+import { isEmpty } from 'UiKit/helpers/general';
 
 const authStore = useAuthStore();
 const { isSetPasswordLoading, setPasswordErrorData } = storeToRefs(authStore);
@@ -28,7 +30,6 @@ const showRepeatPassword = ref(true);
 const passwordStrength = ref('');
 const passwordScore = ref(0);
 const showStrengthMeter = ref(false);
-
 
 const schema = {
   $schema: 'http://json-schema.org/draft-07/schema#',
@@ -54,13 +55,14 @@ const schema = {
   $ref: '#/definitions/Auth',
 } as unknown as JSONSchemaType<FormModelResetPassword>;
 
+const model = reactive<FormModelResetPassword>({});
+let validator = new PrecompiledValidator<FormModelResetPassword>(schema);
+const validation = ref<unknown>();
+const isValid = computed(() => isEmpty(validation.value || {}));
 
-const {
-  model, isValid, validation, onValidate,
-} = useFormValidator(
-  {},
-  schema,
-);
+const onValidate = () => {
+  validation.value = validator.getFormValidationErrors(model);
+};
 
 const isDisabledButton = computed(() => (!isValid.value || isSetPasswordLoading.value));
 
@@ -76,12 +78,23 @@ watch(() => model.create_password, (pass: string) => {
 const resetHandler = async () => {
   onValidate();
   if (!isValid.value) {
-    void nextTick(() => scrollToError('ResetPasswordForm'));
+    void nextTick(() => scrollToError('VFormResetPassword'));
     return;
   }
 
   await authLogicStore.onReset(model.create_password, SELFSERVICE.settings);
 };
+
+
+watch(() => model, () => {
+  if (!isValid.value) onValidate();
+}, { deep: true });
+
+watch(() => [schema], () => {
+  validator = new PrecompiledValidator<FormModelResetPassword>(
+    schema,
+  );
+});
 </script>
 
 <template>

@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { watch, PropType } from 'vue';
+import {
+  watch, PropType, reactive, ref, computed,
+} from 'vue';
 import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import FormRow from 'InvestCommon/components/VForm/VFormRow.vue';
 import FormCol from 'InvestCommon/components/VForm/VFormCol.vue';
@@ -9,7 +11,10 @@ import { storeToRefs } from 'pinia';
 import { JSONSchemaType } from 'ajv';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { FormModelUnderstandRisks } from 'InvestCommon/types/form';
-import { useFormValidator } from 'InvestCommon/composable/useFormValidation';
+import { createFormModel } from 'UiKit/helpers/model';
+import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
+import { filterSchema } from 'UiKit/helpers/validation/general';
+import { isEmpty } from 'UiKit/helpers/general';
 
 const props = defineProps({
   modelData: Object as PropType<FormModelUnderstandRisks>,
@@ -24,7 +29,7 @@ const {
 const schema = {
   $schema: 'http://json-schema.org/draft-07/schema#',
   definitions: {
-    PatchIndividualProfile: {
+    Individual: {
       properties: {
         consent_plaid: {
           checkboxTrue: true,
@@ -49,23 +54,28 @@ const schema = {
       errorMessage: errorMessageRule,
     },
   },
-  $ref: '#/definitions/PatchIndividualProfile',
+  $ref: '#/definitions/Individual',
 } as unknown as JSONSchemaType<FormModelUnderstandRisks>;
 
-const {
-  model, formModel, isValid, validator, validation, onValidate,
-} = useFormValidator<FormModelUnderstandRisks>(
-  {
-    risk_involved: props.modelData?.risk_involved || false,
-    no_legal_advices_from_company: props.modelData?.no_legal_advices_from_company || false,
-    educational_materials: props.modelData?.educational_materials || false,
-    cancelation_restrictions: props.modelData?.cancelation_restrictions || false,
-    resell_difficulties: props.modelData?.resell_difficulties || false,
-    consent_plaid: props.consentPlaid,
-  },
+const model = reactive<FormModelUnderstandRisks>({
+  risk_involved: props.modelData?.risk_involved || false,
+  no_legal_advices_from_company: props.modelData?.no_legal_advices_from_company || false,
+  educational_materials: props.modelData?.educational_materials || false,
+  cancelation_restrictions: props.modelData?.cancelation_restrictions || false,
+  resell_difficulties: props.modelData?.resell_difficulties || false,
+  consent_plaid: props.consentPlaid,
+});
+const formModel = createFormModel(schema);
+let validator = new PrecompiledValidator<FormModelUnderstandRisks>(
+  filterSchema(getProfileByIdOptionsData.value, formModel),
   schema,
-  getProfileByIdOptionsData.value,
 );
+const validation = ref<unknown>();
+const isValid = computed(() => isEmpty(validation.value || {}));
+
+const onValidate = () => {
+  validation.value = validator.getFormValidationErrors(model);
+};
 
 
 defineExpose({
@@ -90,6 +100,18 @@ watch(() => props.modelData, () => {
     model.resell_difficulties = props.modelData?.resell_difficulties;
   }
 }, { deep: true, immediate: true });
+
+
+watch(() => model, () => {
+  if (!isValid.value) onValidate();
+}, { deep: true });
+
+watch(() => [getProfileByIdOptionsData.value, schema], () => {
+  validator = new PrecompiledValidator<FormModelUnderstandRisks>(
+    filterSchema(getProfileByIdOptionsData.value, formModel),
+    schema,
+  );
+});
 </script>
 
 <template>

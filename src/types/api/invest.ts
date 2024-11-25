@@ -130,8 +130,8 @@ export interface IProfileData {
     member_association: boolean;
     correspondence: boolean;
     member_firm_name: string;
-    compliance_contract_name: string;
-    compliance_contract_email: string;
+    compliance_contact_name: string;
+    compliance_contant_email: string;
   };
   ten_percent_shareholder?: {
     shareholder_association: boolean;

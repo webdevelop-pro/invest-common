@@ -35,7 +35,7 @@ const emit = defineEmits(['close']);
 const schema = {
   $schema: 'http://json-schema.org/draft-07/schema#',
   definitions: {
-    PatchIndividualProfile: {
+    Individual: {
       properties: {
         cancelation_reason: {},
       },
@@ -43,7 +43,7 @@ const schema = {
       errorMessage: errorMessageRule,
     },
   },
-  $ref: '#/definitions/PatchIndividualProfile',
+  $ref: '#/definitions/Individual',
 } as unknown as JSONSchemaType< FormModel>;
 
 const model = reactive({} as FormModel);

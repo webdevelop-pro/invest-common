@@ -43,7 +43,7 @@ const requiredValueSchema = computed(() => {
 const schemaAccreditationFileInput = computed(() => ({
   $schema: 'http://json-schema.org/draft-07/schema#',
   definitions: {
-    PatchIndividualProfile: {
+    Individual: {
       properties: {
         description1: descriptionFileRule,
         description2: descriptionFileRule,
@@ -58,7 +58,7 @@ const schemaAccreditationFileInput = computed(() => ({
       errorMessage: errorMessageRule,
     },
   },
-  $ref: '#/definitions/PatchIndividualProfile',
+  $ref: '#/definitions/Individual',
 } as unknown as JSONSchemaType<FormModelAccreditationFileInput>));
 
 const model = reactive({

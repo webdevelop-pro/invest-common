@@ -64,22 +64,33 @@ export interface FormModelBackgroundInformation {
   employment: {
     type: string;
     employer_name: string;
-    role: string;
+    title: string;
     address1: string;
     address2: string;
     city: string;
-    postal_code: string;
+    zip_code: string;
   };
   finra_affiliated: {
     member_association: boolean;
     correspondence: boolean;
     member_firm_name: string;
-    compliance_contract_name: string;
-    compliance_contract_email: string;
+    compliance_contact_name: string;
+    compliance_contant_email: string;
   };
   ten_percent_shareholder: {
     shareholder_association: boolean;
     ticker_symbol_list: string;
   };
   irs_backup_withholding: boolean;
+}
+
+export interface FormModeTrustedContact {
+  beneficiary: {
+    first_name: string;
+    last_name: string;
+    relationship_type: string;
+    phone: string;
+    email: string;
+    dob: string;
+  };
 }

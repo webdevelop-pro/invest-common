@@ -98,8 +98,8 @@ export const UserIdentity = {
       correspondence: true,
       member_firm_name: 'sdf',
       member_association: true,
-      compliance_contract_name: 'sdf',
-      compliance_contract_email: '',
+      compliance_contact_name: 'sdf',
+      compliance_contant_email: '',
     },
     accredited_investor: { explanation: '', is_accredited: false },
     resell_difficulties: false,
@@ -259,7 +259,7 @@ export const userIndividualOptionsMock = {
       ],
       additionalProperties: false,
     },
-    PatchIndividualProfile: {
+    Individual: {
       properties: {
         accredited_investor: { type: 'object', $ref: '#/definitions/AccreditedInvestor' },
         address1: { title: 'address1', type: 'string', minLength: 4 },
@@ -316,7 +316,7 @@ export const userIndividualOptionsMock = {
       additionalProperties: false,
     },
   },
-  $ref: '#/definitions/PatchIndividualProfile',
+  $ref: '#/definitions/Individual',
 };
 
 export const mockOwnershipStepOptions = {

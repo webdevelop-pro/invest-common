@@ -22,7 +22,7 @@ import { isEmpty } from 'UiKit/helpers/general';
 const schema = {
   $schema: 'http://json-schema.org/draft-07/schema#',
   definitions: {
-    PatchIndividualProfile: {
+    Individual: {
       properties: {
         identification_type: identificationTypeRule,
         identification_number: identificationNumberRule,
@@ -33,7 +33,7 @@ const schema = {
       required: ['identification_type', 'identification_number', 'identification_state'],
     },
   },
-  $ref: '#/definitions/PatchIndividualProfile',
+  $ref: '#/definitions/Individual',
 } as unknown as JSONSchemaType<FormModelPartialIdentification>;
 
 const props = defineProps({

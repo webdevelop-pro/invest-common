@@ -19,7 +19,7 @@ import { isEmpty } from 'UiKit/helpers/general';
 const schema = {
   $schema: 'http://json-schema.org/draft-07/schema#',
   definitions: {
-    PatchIndividualProfile: {
+    Individual: {
       properties: {
         type_profile: typeProfileRule,
       },
@@ -28,7 +28,7 @@ const schema = {
       required: ['type_profile'],
     },
   },
-  $ref: '#/definitions/PatchIndividualProfile',
+  $ref: '#/definitions/Individual',
 } as unknown as JSONSchemaType<FormModelCreateProfileSelectType>;
 
 const props = defineProps({
