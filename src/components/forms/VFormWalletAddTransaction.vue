@@ -18,11 +18,11 @@ import FormRow from 'InvestCommon/components/VForm/VFormRow.vue';
 import FormCol from 'InvestCommon/components/VForm/VFormCol.vue';
 import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
 import { isEmpty } from 'lodash';
-import { FormModelAddTransaction } from './utils';
 import { numberFormatter } from 'InvestCommon/helpers/numberFormatter';
 import { JSONSchemaType } from 'ajv';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { scrollToError } from 'UiKit/helpers/validation/general';
+import { FormModelAddTransaction } from 'InvestCommon/types/form';
 
 const emit = defineEmits(['cancel']);
 
@@ -95,7 +95,7 @@ const onValidate = () => {
 const saveHandler = async () => {
   onValidate();
   if (!isValid.value) {
-    void nextTick(() => scrollToError('FormWalletAddTransaction'));
+    void nextTick(() => scrollToError('VFormWalletAddTransaction'));
     return;
   }
 
@@ -122,7 +122,7 @@ watch(() => [schemaAddTransaction.value], () => {
 </script>
 
 <template>
-  <div class="FormWalletAddTransaction form-wallet-add-transaction">
+  <div class="VFormWalletAddTransaction form-wallet-add-transaction">
     <div class="form-wallet-add-transaction__header is--h3__title">
       {{ titile }}
     </div>

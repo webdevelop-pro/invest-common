@@ -21,6 +21,7 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  readOnly: Boolean,
 });
 const personalFormRef = useTemplateRef<FormChild>('personalFormChild');
 
@@ -83,6 +84,7 @@ const cancelHandler = () => {
     <div class="form-personal-information__content">
       <VFormPartialPersonalInformation
         ref="personalFormChild"
+        :read-only="readOnly"
         :model-data="selectedUserProfileData?.data"
       />
     </div>
@@ -96,7 +98,7 @@ const cancelHandler = () => {
       </VButton>
       <VButton
         size="large"
-        :disabled="isDisabledButton"
+        :disabled="isDisabledButton || readOnly"
         :loading="isLoading"
         data-testid="button"
         @click="saveHandler"

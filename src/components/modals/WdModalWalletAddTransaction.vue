@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import VModalLayout from 'UiKit/components/VModal/VModalLayout.vue';
-import FormWalletAddTransaction from 'InvestCommon/components/forms/FormWalletAddTransaction.vue';
+import FormWalletAddTransaction from 'InvestCommon/components/forms/VFormWalletAddTransaction.vue';
 import { WalletAddTransactionTypes } from 'InvestCommon/types/api/wallet';
 import { PropType } from 'vue';
 

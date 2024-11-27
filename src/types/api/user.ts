@@ -38,6 +38,26 @@ export interface ITenPercentShareholder {
   shareholder_association: boolean;
   ticker_symbol_list: string;
 }
+export interface ITypeOfId {
+  type?: string;
+  state?: string;
+  id_number?: string;
+  country?: string;
+}
+export interface IBusinessController {
+  first_name?: string;
+  last_name?: string;
+  middle_name?: string;
+  dob?: string;
+  phone?: string;
+  email?: string;
+  address1?: string;
+  address2?: string;
+  city?: string;
+  state?: string;
+  zip_code?: string;
+  country?: string;
+}
 export interface IUserDataIndividual {
   first_name?: string;
   last_name?: string;
@@ -48,6 +68,7 @@ export interface IUserDataIndividual {
   ssn?: string;
   address1?: string;
   address2?: string;
+  type?: string;
   city?: string;
   state?: string;
   zip_code?: string;
@@ -68,6 +89,12 @@ export interface IUserDataIndividual {
   irs_backup_withholding?: boolean;
   ten_percent_shareholder?: ITenPercentShareholder;
   no_legal_advices_from_company?: boolean;
+  name?: string;
+  owner_title?: string;
+  tax_exempts?: string;
+  solely_for_investing?: string;
+  business_controller?: IBusinessController;
+  type_of_identification?: ITypeOfId;
 }
 
 export interface IWallet {
@@ -78,7 +105,7 @@ export interface IWallet {
 export interface IProfileIndividual {
   id: number;
   escrow_id?: string;
-  type?: string;
+  type: string;
   data: IUserDataIndividual;
   kyc_id: number;
   kyc_status?: InvestKycTypes;

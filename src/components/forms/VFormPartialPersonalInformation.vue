@@ -24,6 +24,7 @@ import { isEmpty } from 'UiKit/helpers/general';
 
 const props = defineProps({
   modelData: Object as PropType<FormModelPersonalInformation>,
+  readOnly: Boolean,
 });
 
 const userProfilesStore = useUserProfilesStore();
@@ -130,6 +131,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             name="first-name"
             size="large"
             data-testid="first-name"
+            :readonly="readOnly"
             @update:model-value="model.first_name = $event"
           />
         </VFormGroup>
@@ -154,6 +156,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             name="middle-name"
             size="large"
             data-testid="middle-name"
+            :readonly="readOnly"
             @update:model-value="model.middle_name = $event"
           />
         </VFormGroup>
@@ -178,6 +181,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             name="last-name"
             size="large"
             data-testid="last-name"
+            :readonly="readOnly"
             @update:model-value="model.last_name = $event"
           />
         </VFormGroup>
@@ -204,6 +208,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             size="large"
             data-testid="date-of-birth"
             type="date"
+            :readonly="readOnly"
             @update:model-value="model.dob = $event"
           />
         </VFormGroup>
@@ -230,6 +235,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             name="phone"
             size="large"
             data-testid="phone"
+            :readonly="readOnly"
             @update:model-value="model.phone = $event"
           />
         </VFormGroup>
@@ -259,6 +265,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             item-value="value"
             :options="optionsCitizenship"
             dropdown-absolute
+            :readonly="readOnly"
             @update:model-value="model.citizenship = $event"
           />
         </VFormGroup>
@@ -278,12 +285,13 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
           <VFormInput
             :model-value="model.ssn"
             :is-error="VFormGroupProps.isFieldError"
-            placeholder="XXX-XXX-XXXX"
+            placeholder="XXX-XX-XXXX"
             name="ssn"
             size="large"
             data-testid="ssn"
             mask="###-##-####"
             disallow-special-chars
+            :readonly="readOnly"
             @update:model-value="model.ssn = $event"
           />
         </VFormGroup>
@@ -312,6 +320,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             name="address-1"
             size="large"
             data-testid="address-1"
+            :readonly="readOnly"
             @update:model-value="model.address1 = $event"
           />
         </VFormGroup>
@@ -336,6 +345,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             name="address-2"
             size="large"
             data-testid="address-2"
+            :readonly="readOnly"
             @update:model-value="model.address2 = $event"
           />
         </VFormGroup>
@@ -364,6 +374,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             data-testid="city"
             disallow-special-chars
             disallow-numbers
+            :readonly="readOnly"
             @update:model-value="model.city = $event"
           />
         </VFormGroup>
@@ -392,6 +403,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             :options="optionsState"
             dropdown-absolute
             data-testid="state"
+            :readonly="readOnly"
             @update:model-value="model.state = $event"
           />
         </VFormGroup>
@@ -421,6 +433,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             mask="#####-####"
             return-masked-value
             disallow-special-chars
+            :readonly="readOnly"
             @update:model-value="model.zip_code = $event"
           />
         </VFormGroup>
@@ -450,6 +463,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             :options="optionsCountry"
             dropdown-absolute
             data-testid="country"
+            :readonly="readOnly"
             @update:model-value="model.country = $event"
           />
         </VFormGroup>

@@ -48,15 +48,15 @@ export const useUsersStore = defineStore('user', () => {
   const userProfilesLoading = computed(() => isGetUserLoading.value);
   // SELECTED USER PROFILE
   const selectedUserProfileLoading = computed(() => userProfilesLoading.value);
-  const localSelectedUserProfileId = ref(userProfiles.value[0]?.id || 0);
-  const selectedUserProfileId = useStorage('selectedUserProfileId', localSelectedUserProfileId);
-  const selectedUserProfileType = computed(() => userProfiles.value[0]?.type || '');
+  const selectedUserProfileId = useStorage('selectedUserProfileId', 0);
   // const userProfilesFilteredById = computed(() => (
   //   userProfiles.value.filter((item) => item.id === selectedUserProfileId.value)[0]));
   // const selectedUserProfileData = computed(() => (
   // { ...userProfilesFilteredById.value, ...getUserIndividualProfileData.value }));
   const selectedUserProfileData = computed(() => getProfileByIdData.value);
+  const selectedUserProfileType = computed(() => userProfiles.value.find((item) => item.id === selectedUserProfileId.value)?.type || 'individual');
   const selectedUserProfileOptions = computed(() => getProfileByIdOptionsData.value);
+  const selectedUserIndividualProfile = computed(() => userProfiles.value.find((profile) => profile.type === 'individual'));
 
   const updateData = (notification: INotification) => {
     const profile = userProfiles.value.find((item) => item.id === notification.data.fields?.object_id);
@@ -106,7 +106,7 @@ export const useUsersStore = defineStore('user', () => {
   ));
 
   const setSelectedUserProfileById = (id: number) => {
-    localSelectedUserProfileId.value = id;
+    selectedUserProfileId.value = id;
   };
 
   const updateUserSelectedAccount = () => {
@@ -151,11 +151,17 @@ export const useUsersStore = defineStore('user', () => {
 
   watch(() => selectedUserProfileId.value, () => {
     // load proper data by id on id change
-    if (selectedUserProfileType.value && selectedUserProfileId.value && selectedUserProfileId.value > 0) {
+    if (selectedUserProfileId.value && selectedUserProfileId.value > 0) {
       void userProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
+    }
+  }, { immediate: true });
+
+  watch(() => selectedUserProfileType.value, () => {
+    // options depend on type so important to check
+    if (selectedUserProfileId.value && selectedUserProfileId.value > 0) {
       void userProfilesStore.getProfileByIdOptions(selectedUserProfileType.value, selectedUserProfileId.value);
     }
-  });
+  }, { immediate: true });
 
   watch(() => userAccountSession.value?.active, async () => {
     if (userAccountSession.value?.active) {
@@ -168,7 +174,9 @@ export const useUsersStore = defineStore('user', () => {
   });
 
   watch(() => userProfiles.value[0]?.id, () => {
-    setSelectedUserProfileById(userProfiles.value[0]?.id);
+    if (!selectedUserProfileId.value || selectedUserProfileId.value === 0) {
+      setSelectedUserProfileById(userProfiles.value[0]?.id);
+    }
   }, { immediate: true });
 
   const urlProfileId = computed(() => {
@@ -184,7 +192,6 @@ export const useUsersStore = defineStore('user', () => {
   const resetAll = () => {
     getUserData.value = undefined;
     selectedUserProfileId.value = null;
-    localSelectedUserProfileId.value = 0;
     userAccountSession.value = undefined;
     urlChecked.value = false;
     userLoggedIn.value = null;
@@ -206,6 +213,7 @@ export const useUsersStore = defineStore('user', () => {
     selectedUserProfileId,
     selectedUserProfileType,
     selectedUserProfileOptions,
+    selectedUserIndividualProfile,
     updateUserAccountSession,
     updateUserSelectedAccount,
     userAccountSession,

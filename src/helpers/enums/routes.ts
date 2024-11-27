@@ -9,6 +9,9 @@ export const ROUTE_DASHBOARD_WALLET = 'ROUTE_DASHBOARD_WALLET';
 export const ROUTE_DASHBOARD_PERSONAL_DETAILS = 'ROUTE_DASHBOARD_PERSONAL_DETAILS';
 export const ROUTE_DASHBOARD_BACKGROUND_INFORMATION = 'ROUTE_DASHBOARD_BACKGROUND_INFORMATION';
 export const ROUTE_DASHBOARD_TRUSTED_CONTACT = 'ROUTE_DASHBOARD_TRUSTED_CONTACT';
+export const ROUTE_DASHBOARD_ENTITY_INFORMATION = 'ROUTE_DASHBOARD_ENTITY_INFORMATION';
+export const ROUTE_DASHBOARD_BUSINESS_CONTROLLER = 'ROUTE_DASHBOARD_BUSINESS_CONTROLLER';
+
 export const ROUTE_DASHBOARD_FINANCIAL_AND_INVESTMENT_INFO = 'ROUTE_DASHBOARD_FINANCIAL_AND_INVESTMENT_INFO';
 export const ROUTE_DASHBOARD_DISTRIBUTIONS = 'ROUTE_DASHBOARD_DISTRIBUTIONS';
 
@@ -92,6 +95,8 @@ export const PAGE_TITLES = {
   [ROUTE_DASHBOARD_PERSONAL_DETAILS]: `Personal Details | ${DEFAULT_PAGE_TITLE}`,
   [ROUTE_DASHBOARD_BACKGROUND_INFORMATION]: `Background Information | ${DEFAULT_PAGE_TITLE}`,
   [ROUTE_DASHBOARD_TRUSTED_CONTACT]: `Trusted Contact | ${DEFAULT_PAGE_TITLE}`,
+  [ROUTE_DASHBOARD_ENTITY_INFORMATION]: `Entity information | ${DEFAULT_PAGE_TITLE}`,
+  [ROUTE_DASHBOARD_BUSINESS_CONTROLLER]: `Business Controller | ${DEFAULT_PAGE_TITLE}`,
   [ROUTE_DASHBOARD_FINANCIAL_AND_INVESTMENT_INFO]: `Financial and Investment Information | ${DEFAULT_PAGE_TITLE}`,
 
   [ROUTE_INVESTMENT_DOCUMENTS]: `Investment Documents | ${DEFAULT_PAGE_TITLE}`,
@@ -143,6 +148,8 @@ export const PAGE_DESCRIPTIONS = {
   [ROUTE_DASHBOARD_PERSONAL_DETAILS]: 'Update personal info. Keep your profile current for seamless transactions.',
   [ROUTE_DASHBOARD_BACKGROUND_INFORMATION]: 'Complete background info. Provide necessary details for investment compliance.',
   [ROUTE_DASHBOARD_TRUSTED_CONTACT]: 'Add trusted contact. Designate someone to assist with account matters.',
+  [ROUTE_DASHBOARD_ENTITY_INFORMATION]: 'Manage entity information',
+  [ROUTE_DASHBOARD_BUSINESS_CONTROLLER]: 'Manage business controller',
   [ROUTE_DASHBOARD_FINANCIAL_AND_INVESTMENT_INFO]: 'Submit financial data. Share investment details for tailored recommendations.',
 
   [ROUTE_INVESTMENT_DOCUMENTS]: 'Investment document checklist. Ensure all required documents are submitted for your investment.',

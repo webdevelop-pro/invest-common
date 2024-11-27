@@ -95,21 +95,6 @@ export const SELECT_CITIZENSHIP_OPTIONS = [
   },
 ];
 
-export const SELECT_IDENTIFICATION_OPTIONS = [
-  {
-    value: IdentificationTypes.drivers_license,
-    text: IdentificationTypes.drivers_license,
-  },
-  {
-    value: IdentificationTypes.passport,
-    text: IdentificationTypes.passport,
-  },
-  {
-    value: IdentificationTypes.state_id,
-    text: IdentificationTypes.state_id,
-  },
-];
-
 export const SELECT_PROFILE_TYPES = [
   {
     value: PROFILE_TYPES.ENTITY,

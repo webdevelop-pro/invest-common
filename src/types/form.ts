@@ -21,7 +21,8 @@ export interface FormModelPersonalInformation {
   country: string;
   phone: string;
   citizenship: string;
-  ssn: string;
+  ssn?: string;
+  ein?: string;
 }
 
 export interface FormModelFinancialSituation {
@@ -45,11 +46,6 @@ export interface FormModelCreateProfileSelectType {
   type_profile: string;
 }
 
-export interface FormModelPartialIdentification {
-  identification_type: string;
-  identification_number: string;
-  identification_state: string;
-}
 
 
 export interface FormModelResetPassword {
@@ -93,4 +89,43 @@ export interface FormModeTrustedContact {
     email: string;
     dob: string;
   };
+}
+
+export interface FormModelAddTransaction {
+  amount: number;
+}
+
+export interface IValidationFields {
+  description1: string;
+  description2: string;
+  description3: string;
+  description4: string;
+  description5: string;
+  description6: string;
+  note: string;
+}
+
+export interface IFilesData {
+  files: File[];
+  descriptions: string[];
+}
+
+export type TFields = keyof IValidationFields;
+
+
+export type FormModelAccreditationFileInput = {
+  description1: string;
+  description2: string;
+  description3: string;
+  description4: string;
+  description5: string;
+  description6: string;
+  note: string;
+}
+
+export type FormModelContactUs = {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
 }

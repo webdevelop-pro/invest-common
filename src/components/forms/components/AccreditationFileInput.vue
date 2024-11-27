@@ -3,8 +3,6 @@ import {
   ref, computed, watch, reactive, nextTick,
 } from 'vue';
 import { useAccreditationStore } from 'InvestCommon/store/useAccreditation';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { FormModelAccreditationFileInput, TFields } from '../utils';
 import VFormInput from 'UiKit/components/VForm/VFormInput.vue';
 import VFormTextarea from 'UiKit/components/VForm/VFormTextarea.vue';
 import VUploader from 'UiKit/components/VUploader/VUploader.vue';
@@ -14,6 +12,7 @@ import { JSONSchemaType } from 'ajv';
 import { isEmpty } from 'InvestCommon/helpers/general';
 import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
 import { storeToRefs } from 'pinia';
+import { FormModelAccreditationFileInput, TFields } from 'InvestCommon/types/form';
 
 const emit = defineEmits(['files', 'model', 'valid']);
 
