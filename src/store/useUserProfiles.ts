@@ -117,6 +117,7 @@ export const useUserProfilesStore = defineStore('userProfile', () => {
       getUserData.value = response;
     }
     isGetUserLoading.value = false;
+    return getUserData.value;
   };
 
   const isSetUserLoading = ref(false);

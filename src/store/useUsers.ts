@@ -149,26 +149,15 @@ export const useUsersStore = defineStore('user', () => {
   };
   // END REDIRECT URL AND CHECK PROFILE ID
 
-  watch(() => selectedUserProfileId.value, () => {
-    // load proper data by id on id change
-    if (selectedUserProfileId.value && selectedUserProfileId.value > 0) {
-      void userProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
-    }
-  }, { immediate: true });
-
-  watch(() => selectedUserProfileType.value, () => {
-    // options depend on type so important to check
-    if (selectedUserProfileId.value && selectedUserProfileId.value > 0) {
-      void userProfilesStore.getProfileByIdOptions(selectedUserProfileType.value, selectedUserProfileId.value);
-    }
-  }, { immediate: true });
 
   watch(() => userAccountSession.value?.active, async () => {
     if (userAccountSession.value?.active) {
-      await userProfilesStore.getUser();
+      if (!getUserData.value) await userProfilesStore.getUser();
       userLoggedIn.value = userAccountSession.value?.active;
       void nextTick(() => {
         void notificationsStore.notificationsHandler();
+        void userProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
+        void userProfilesStore.getProfileByIdOptions(selectedUserProfileType.value, selectedUserProfileId.value);
       });
     }
   });

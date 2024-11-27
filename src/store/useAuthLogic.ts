@@ -70,14 +70,15 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     const { submitFormToHubspot } = useHubspotForm('07463465-7f03-42d2-a85e-40cf8e29969d');
     if (setLoginData.value && setLoginData.value.session) {
       const queryRedirect = computed(() => new URLSearchParams(window.location.search).get('redirect'));
-      await userProfilesStore.getUser();
+      const userData = await userProfilesStore.getUser();
+      const id = userData?.profiles[0]?.id;
       void usersStore.updateUserAccountSession(setLoginData.value.session);
       if (EXTERNAL) {
-        navigateWithQueryParams(queryRedirect.value || urlProfilePortfolio(selectedUserProfileId.value));
+        navigateWithQueryParams(queryRedirect.value || urlProfilePortfolio(id));
       } else {
         void router.push(pushTo({
           name: ROUTE_DASHBOARD_PORTFOLIO,
-          params: { profileId: selectedUserProfileId.value },
+          params: { profileId: id },
         }));
       }
 
@@ -132,14 +133,15 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
       return;
     }
     if (setSignupData.value && setSignupData.value.session) {
-      await userProfilesStore.getUser();
+      const userData = await userProfilesStore.getUser();
+      const id = userData?.profiles[0]?.id;
       void usersStore.updateUserAccountSession(setSignupData.value.session);
       if (EXTERNAL) {
-        navigateWithQueryParams(urlProfilePortfolio(selectedUserProfileId.value));
+        navigateWithQueryParams(urlProfilePortfolio(id));
       } else {
         void router.push(pushTo({
           name: ROUTE_DASHBOARD_PORTFOLIO,
-          params: { profileId: selectedUserProfileId.value },
+          params: { profileId: id },
         }));
       }
 
