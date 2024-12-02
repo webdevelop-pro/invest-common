@@ -63,12 +63,13 @@ export function getLocationFullPath(location: Location = window.location): strin
 }
 
 export const isRedirectToProfile = () => {
+  const queryRedirect = new URLSearchParams(window.location.search).get('redirect');
   const usersStore = useUsersStore();
   const { selectedUserProfileId, userLoggedIn } = storeToRefs(usersStore);
   if (!userLoggedIn.value) return;
   const urlToCheck = [urlSignin, urlSignup, urlForgot, urlCheckEmail];
   const url = window?.location.pathname;
-  if (urlToCheck.some((item) => item.includes(url))) {
-    navigateWithQueryParams(urlProfilePortfolio(selectedUserProfileId.value));
+  if (url !== '/' && urlToCheck.some((item) => item.includes(url))) {
+    navigateWithQueryParams(queryRedirect || urlProfilePortfolio(selectedUserProfileId.value));
   }
 };
