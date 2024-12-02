@@ -2,6 +2,8 @@
 import {
   ref, computed, useTemplateRef,
   nextTick,
+  defineAsyncComponent,
+  hydrateOnVisible,
 } from 'vue';
 import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
@@ -12,8 +14,16 @@ import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
 import { ROUTE_ACCREDITATION_UPLOAD, ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/helpers/enums/routes';
 import VFormPartialPersonalInformation from './VFormPartialPersonalInformation.vue';
-import { FormChild, FormModelPersonalInformation } from 'InvestCommon/types/form';
+import { FormChild } from 'InvestCommon/types/form';
 import { scrollToError } from 'UiKit/helpers/validation/general';
+
+
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+const VFormPartialIdentification = defineAsyncComponent({
+  loader: () => import('./VFormPartialIdentification.vue'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+  hydrate: hydrateOnVisible(),
+});
 
 const props = defineProps({
   accreditation: Boolean,
@@ -22,8 +32,10 @@ const props = defineProps({
     required: true,
   },
   readOnly: Boolean,
+  withId: Boolean,
 });
 const personalFormRef = useTemplateRef<FormChild>('personalFormChild');
+const idFormRef = useTemplateRef<FormChild>('idFormChild');
 
 const router = useRouter();
 const userIdentityStore = useUserProfilesStore();
@@ -40,17 +52,19 @@ const {
 const { submitFormToHubspot } = useHubspotForm(props.hubsportFormId);
 
 const isLoading = ref(false);
-const isDisabledButton = computed(() => (!personalFormRef.value?.isValid || isSetUserProfileLoading.value));
+const isValid = computed(() => ((idFormRef.value?.isValid || !props.withId) && personalFormRef.value?.isValid));
+const isDisabledButton = computed(() => (!isValid.value || isSetUserProfileLoading.value));
 
 const saveHandler = async () => {
   personalFormRef.value?.onValidate();
-  if (!personalFormRef.value?.isValid) {
+  if (props.withId) idFormRef.value?.onValidate();
+  if (!isValid.value) {
     void nextTick(() => scrollToError('VFormPersonalInformation'));
     return;
   }
 
   isLoading.value = true;
-  const model = { ...personalFormRef.value?.model } as FormModelPersonalInformation;
+  const model = { ...personalFormRef.value?.model, ...idFormRef.value?.model };
   await userIdentityStore.setProfileById(model, selectedUserProfileType.value, selectedUserProfileId.value);
 
   if (!isSetUserProfileError.value && selectedUserProfileData.value?.user_id && selectedUserProfileData.value?.id
@@ -82,6 +96,11 @@ const cancelHandler = () => {
       Personal Information
     </div>
     <div class="form-personal-information__content">
+      <VFormPartialIdentification
+        v-if="withId"
+        ref="idFormChild"
+        :model-data="selectedUserProfileData?.data"
+      />
       <VFormPartialPersonalInformation
         ref="personalFormChild"
         :read-only="readOnly"

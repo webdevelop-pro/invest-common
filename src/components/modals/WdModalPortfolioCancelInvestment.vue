@@ -54,7 +54,7 @@ const {
   cancelInvestData, isCancelInvestLoading, setCancelOptionsData, setCancelErrorData,
 } = storeToRefs(investmentsStore);
 const usersStore = useUsersStore();
-const { userAccountData } = storeToRefs(usersStore);
+const { userAccountData, selectedUserProfileId } = storeToRefs(usersStore);
 
 type FormModel = {
   cancelation_reason: string;
@@ -89,7 +89,7 @@ const cancelInvestHandler = async () => {
       cancellation_offer_name: props.investment.offer.name,
       cancellation_offer_id: props.investment.id,
     });
-    void useOfferStore().getConfirmedOffers();
+    void useOfferStore().getConfirmedOffers(selectedUserProfileId.value);
     emit('close');
   }
 };

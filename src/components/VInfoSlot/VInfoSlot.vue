@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import VSkeleton from 'UiKit/components/VSkeleton/VSkeleton.vue';
 
 export interface IInfoSlot {
   title: string;
@@ -9,6 +10,7 @@ const props = withDefaults(defineProps<{
   title?: string;
   text?: string;
   size?: 'regular' | 'small';
+  loading?: boolean;
 }>(), {
   size: 'regular',
 });
@@ -28,8 +30,13 @@ const isSizeSmall = computed(() => props.size === 'small');
       >
         {{ title }}
       </span>
+      <VSkeleton
+        v-if="loading"
+        height="26px"
+        width="50%"
+      />
       <span
-        v-if="text"
+        v-if="!loading && text"
         class="info-slot__text"
         :class="{ 'is--small': isSizeSmall, 'is--body': !isSizeSmall }"
       >

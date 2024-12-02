@@ -95,6 +95,9 @@ export interface IUserDataIndividual {
   solely_for_investing?: string;
   business_controller?: IBusinessController;
   type_of_identification?: ITypeOfId;
+  account_number?: string;
+  full_account_name?: string;
+  ein?: string;
 }
 
 export interface IWallet {

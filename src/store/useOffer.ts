@@ -10,12 +10,16 @@ import {
   fetchSetOfferComment, fetchSetOfferCommentOptions,
 } from 'InvestCommon/services/api/offers';
 import { fetchGetInvestUnconfirmed, fetchGetInvestments } from 'InvestCommon/services/api/invest';
-import { acceptHMRUpdate, defineStore } from 'pinia';
+import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { INotification } from 'InvestCommon/types/api/notifications';
+import { useUsersStore } from './useUsers';
 
 const unconfirmedOffersFilter = (unInv: IInvest[], slug: string) => unInv.find((item) => item?.offer?.slug === slug);
 
 export const useOfferStore = defineStore('offers', () => {
+  const usersStore = useUsersStore();
+  const { selectedUserProfileId } = storeToRefs(usersStore);
+
   const isGetOffersLoading = ref(false);
   const isGetOffersError = ref(false);
   const getOffersData = ref<IOfferData>();
@@ -91,10 +95,10 @@ export const useOfferStore = defineStore('offers', () => {
   const isGetInvestmentsLoading = ref(false);
   const isGetInvestmentsError = ref(false);
   const getInvestmentsData = ref<IInvestData>();
-  const getConfirmedOffers = async () => {
+  const getConfirmedOffers = async (profile_id: number) => {
     isGetInvestmentsLoading.value = true;
     isGetInvestmentsError.value = false;
-    const response = await fetchGetInvestments().catch((error: Response) => {
+    const response = await fetchGetInvestments(profile_id).catch((error: Response) => {
       isGetInvestmentsError.value = true;
       void generalErrorHandling(error);
     });
@@ -172,7 +176,7 @@ export const useOfferStore = defineStore('offers', () => {
         getOfferOneData.value.subscribed_shares = SubscribedShares;
       }
     }
-    void getConfirmedOffers();
+    void getConfirmedOffers(selectedUserProfileId.value);
   };
 
   const getOfferFundedPercent = (offer: IOffer) => {

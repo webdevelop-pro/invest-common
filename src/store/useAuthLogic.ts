@@ -72,7 +72,6 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
       const queryRedirect = computed(() => new URLSearchParams(window.location.search).get('redirect'));
       const userData = await userProfilesStore.getUser();
       const id = userData?.profiles[0]?.id;
-      void usersStore.updateUserAccountSession(setLoginData.value.session);
       if (EXTERNAL) {
         navigateWithQueryParams(queryRedirect.value || urlProfilePortfolio(id));
       } else {
@@ -81,6 +80,8 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
           params: { profileId: id },
         }));
       }
+      // commented as auth pages are on static so will reload anyway session
+      // void usersStore.updateUserAccountSession(setLoginData.value.session);
 
       void submitFormToHubspot({
         email,
@@ -290,11 +291,6 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
       // await notificationsHandler(); // TODO: check if needed
     } else if (!getSessionData.value?.active || getSessionErrorResponse.value?.status === 401) {
       resetAll();
-      if (EXTERNAL) {
-        isLoadingSession.value = false;
-      } else {
-        navigateWithQueryParams(urlSignin);
-      }
     }
     isLoadingSession.value = false;
   };

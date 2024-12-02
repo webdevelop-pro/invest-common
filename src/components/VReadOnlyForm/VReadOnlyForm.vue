@@ -12,6 +12,7 @@ export interface IReadOnlyForm {
 defineProps({
   data: Object as PropType<IReadOnlyForm>,
   review: Boolean,
+  loading: Boolean,
 });
 
 const emit = defineEmits(['edit']);
@@ -57,6 +58,7 @@ const onEditClick = () => {
         :key="index"
         :title="item.title"
         :text="item.text"
+        :loading="loading"
       />
     </div>
   </div>

@@ -19,6 +19,7 @@ import {
 } from 'InvestCommon/helpers/enums/routes';
 import { RouteLocationNormalized, useRoute, useRouter } from 'vue-router';
 import env from 'InvestCommon/global/index';
+import { PROFILE_TYPES } from 'InvestCommon/global/investment.json';
 
 const { EXTERNAL } = env;
 
@@ -100,10 +101,13 @@ export const useUsersStore = defineStore('user', () => {
     getProfileByIdData.value?.kyc_status === 'new'
   ));
 
-  const selectedUserProfileShowKycInitForm = computed(() => (
+  const selectedUserProfileShowKycInitFormIndividual = computed(() => ((
     !getProfileByIdData.value?.data.citizenship || !selectedUserProfileRiskAcknowledged.value
     || !selectedUserProfileAccreditationDataOK.value || selectedUserProfielKYCStatusNotStarted.value
-  ));
+  ) && (selectedUserProfileType.value === PROFILE_TYPES.INDIVIDUAL)));
+
+  const selectedUserProfileShowKycInitForm = computed(() => (
+    selectedUserProfileShowKycInitFormIndividual.value));
 
   const setSelectedUserProfileById = (id: number) => {
     selectedUserProfileId.value = id;

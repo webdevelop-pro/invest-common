@@ -11,7 +11,7 @@ import { storeToRefs } from 'pinia';
 import VFormGroup from 'UiKit/components/VForm/VFormGroup.vue';
 import { JSONSchemaType } from 'ajv';
 import {
-  address1Rule, cityRule, dobRule,
+  address1Rule, cityRule, countryRuleObject, dobRule,
   emailRule, errorMessageRule, firstNameRule, lastNameRule,
   phoneRule, ssnRule, stateRule, zipRule,
 } from 'UiKit/helpers/validation/rules';
@@ -36,8 +36,9 @@ const options = [
 
 const requiredDefault = ['address1', 'first_name', 'last_name', 'dob', 'email', 'phone', 'city', 'state', 'zip_code', 'country'];
 
-defineProps({
+const props = defineProps({
   modelData: Object as PropType<FormModelBeneficialOwnership>,
+  trust: Boolean,
 });
 
 const defItem = {
@@ -51,13 +52,13 @@ const {
 } = storeToRefs(userProfilesStore);
 
 const getSchema = (non_us = false) => {
-  const requireBusinessController = [...requiredDefault];
+  // const requireBusinessController = [...requiredDefault];
   const requireIdentification = [];
-  if (!non_us) requireBusinessController.push('ssn');
-  if (non_us) {
-    requireIdentification.push('id_number');
-    requireIdentification.push('country');
-  }
+  // if (!non_us) requireBusinessController.push('ssn');
+  // if (non_us) {
+  //   requireIdentification.push('id_number');
+  //   requireIdentification.push('country');
+  // }
   return ({
     $schema: 'http://json-schema.org/draft-07/schema#',
     definitions: {
@@ -70,20 +71,36 @@ const getSchema = (non_us = false) => {
           city: cityRule,
           state: stateRule,
           zip_code: zipRule,
-          country: {},
+          country: countryRuleObject,
           phone: phoneRule,
           email: emailRule,
-          non_us: {},
+          non_us: { type: 'boolean' },
           ssn: ssnRule,
           type_of_identification: {
             type: 'object',
             $ref: '#/definitions/Identification',
           },
         },
-        required: requireBusinessController,
+        required: requiredDefault,
+        allOf: [
+          {
+            if: { properties: { non_us: { const: true } } },
+            then: { required: ['type_of_identification'] },
+          },
+          {
+            if: { properties: { non_us: { const: false } } },
+            then: { required: ['ssn'] },
+          },
+        ],
       },
       Identification: {
-        required: requireIdentification,
+        allOf: [
+          {
+            if: { properties: { non_us: { const: true } } },
+            then: { required: ['id_number', 'country'] },
+          },
+        ],
+        // required: ['id_number', 'country'],
       },
       Entity: {
         properties: {
@@ -128,13 +145,13 @@ const optionsCountry = computed(() => getOptions('properties.country', schemaObj
 const optionsState = computed(() => getOptions('properties.state', schemaObject));
 
 const modelExpose = computed(() => {
-  const temp = model;
+  const temp = { ...model };
   delete temp.beneficial_owners_number;
   return temp;
 });
 
 defineExpose({
-  modelExpose, validation, validator, isValid, onValidate,
+  model: modelExpose, validation, validator, isValid, onValidate,
 });
 
 // watch(() => props.modelData?.business_controller, () => {
@@ -158,12 +175,15 @@ watch(() => model.beneficial_owners_number, () => {
   }
   model.beneficials = [...items];
 });
+
+const title = props.trust ? 'Trustees/Protectors Information' : 'Beneficial Ownership Information';
+const selectText = props.trust ? 'How many trustees and protectors does your trust have?' : 'How many Beneficial Owners who own 25% or more of this Legal Entity?';
 </script>
 
 <template>
   <div class="VFormPartialBeneficialOwnership v-form-partial-beneficial-ownership">
     <div class="v-form-partial-beneficial-ownership__subtitle is--h3__title">
-      Beneficial Ownership Information
+      {{ title }}
     </div>
     <FormRow>
       <FormCol>
@@ -175,7 +195,7 @@ watch(() => model.beneficial_owners_number, () => {
           :schema-front="getSchema()"
           :error-text="setProfileByIdErrorData?.beneficial_owners_number"
           path="beneficial_owners_number"
-          label="How many Beneficial Owners who own 25% or more of this Legal Entity?"
+          :label="selectText"
           data-testid="beneficial-owners-number-group"
         >
           <VFormSelect
@@ -198,7 +218,6 @@ watch(() => model.beneficial_owners_number, () => {
       v-for="(item, index) in model.beneficial_owners_number"
       :key="index"
     >
-      {{ model.beneficials[index]?.non_us }}
       <VFormPartialBeneficialOwnershipItem
         :ref="`itemChild${index}`"
         v-model="model.beneficials[index]"
@@ -207,6 +226,7 @@ watch(() => model.beneficial_owners_number, () => {
         :schema="getSchema(model.beneficials[index]?.non_us)"
         :options-country="optionsCountry"
         :options-state="optionsState"
+        :trust="trust"
       />
     </template>
   </div>

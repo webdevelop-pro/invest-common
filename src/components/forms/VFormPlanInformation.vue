@@ -13,14 +13,13 @@ import { scrollToError } from 'UiKit/helpers/validation/general';
 import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/helpers/enums/routes';
 import { useRouter } from 'vue-router';
 import { FormChild } from 'InvestCommon/types/form';
-import VFormPartialBusinessController from './VFormPartialBusinessController.vue';
+import VFormPartialPlanInformation from './VFormPartialPlanInformation.vue';
 
 const props = defineProps({
   hubsportFormId: String,
-  trust: Boolean,
 });
 
-const businessControllerRef = useTemplateRef<FormChild>('businessControllerFormChild');
+const planInformationRef = useTemplateRef<FormChild>('planInformationFormChild');
 const router = useRouter();
 const userProfilesStore = useUserProfilesStore();
 const {
@@ -35,20 +34,20 @@ const {
 const { submitFormToHubspot } = useHubspotForm(props.hubsportFormId);
 
 const isLoading = ref(false);
-const isValid = computed(() => businessControllerRef.value?.isValid);
+const isValid = computed(() => planInformationRef.value?.isValid);
 const isDisabledButton = computed(() => (!isValid.value || isSetProfileByIdLoading.value));
 
 
 const saveHandler = async () => {
-  businessControllerRef.value?.onValidate();
+  planInformationRef.value?.onValidate();
   if (!isValid.value) {
-    void nextTick(() => scrollToError('VFormEntityInformation'));
+    void nextTick(() => scrollToError('VFormPlanInformation'));
     return;
   }
 
   isLoading.value = true;
   await userProfilesStore.setProfileById(
-    businessControllerRef.value?.model,
+    planInformationRef.value?.model,
     selectedUserProfileType.value,
     selectedUserProfileId.value,
   );
@@ -56,7 +55,7 @@ const saveHandler = async () => {
   if (props.hubsportFormId && !isSetProfileByIdError.value) {
     void submitFormToHubspot({
       email: userAccountData.value?.email,
-      ...businessControllerRef.value?.model,
+      ...planInformationRef.value?.model,
     });
   }
   void userProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
@@ -66,20 +65,18 @@ const saveHandler = async () => {
 const cancelHandler = () => {
   void router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
 };
-const title = props.trust ? 'Grantor Infotmation' : 'Business Controller Information';
 </script>
 
 <template>
-  <div class="VFormBusinessController form-business-controller">
-    <div class="form-business-controller__header is--h1__title">
-      {{ title }}
+  <div class="VFormPlanInformation v-form-plan-information">
+    <div class="v-form-plan-information__header is--h1__title">
+      Plan Information
     </div>
-    <VFormPartialBusinessController
-      ref="businessControllerFormChild"
-      :trust="trust"
-      :personal-data="selectedUserProfileData?.data.business_controller"
+    <VFormPartialPlanInformation
+      ref="planInformationFormChild"
+      :model-data="selectedUserProfileData?.data"
     />
-    <div class="form-business-controller__footer">
+    <div class="v-form-plan-information__footer">
       <VButton
         size="large"
         variant="outlined"
@@ -101,7 +98,7 @@ const title = props.trust ? 'Grantor Infotmation' : 'Business Controller Informa
 </template>
 
 <style lang="scss">
-.form-business-controller {
+.v-form-plan-information {
   display: flex;
   flex-direction: column;
   margin: 0 auto;

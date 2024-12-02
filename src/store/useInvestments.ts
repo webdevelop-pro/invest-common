@@ -128,12 +128,11 @@ export const useInvestmentsStore = defineStore('investments', () => {
     slug: string,
     id: string,
     profileId: string,
-    userData: object,
   ) => {
     isSetOwnershipLoading.value = true;
     isSetOwnershipError.value = false;
     setOwnershipErrorData.value = undefined;
-    const response = await fetchSetOwnership(slug, id, profileId, userData).catch(async (error: Response) => {
+    const response = await fetchSetOwnership(slug, id, profileId).catch(async (error: Response) => {
       isSetOwnershipError.value = true;
       setOwnershipErrorData.value = JSON.parse(await error.text());
       void generalErrorHandling(error);

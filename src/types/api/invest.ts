@@ -97,6 +97,7 @@ export interface IBackgroundInfo {
 }
 
 export interface IProfileData {
+  id?: number;
   profile_id?: number;
   user_id?: number;
   escrow_id?: string;

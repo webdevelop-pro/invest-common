@@ -43,6 +43,7 @@ interface FormModelBusinessController {
 const props = defineProps({
   modelData: Object as PropType<FormModelBusinessController>,
   personalData: Object as PropType<FormModelPersonalInformation>,
+  trust: Boolean,
 });
 
 const userProfilesStore = useUserProfilesStore();
@@ -138,12 +139,15 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
     schema,
   );
 });
+
+const title = props.trust ? 'Grantor Infotmation' : 'Business Controller Contact Information';
+const checkboxText = props.trust ? 'The Grantor and the Trustee are the same person.' : 'Business Controller contact information is the same as my personal address/phone number.';
 </script>
 
 <template>
   <div class="VFormPartialBusinessController v-form-partial-business-controller">
     <div class="v-form-partial-business-controller__subtitle is--h3__title">
-      Business Controller Contact Information
+      {{ title }}
     </div>
     <FormRow>
       <FormCol>
@@ -152,7 +156,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
           data-testid="V-checkbox"
           class="signup-form__checkbox"
         >
-          Business Controller contact information is the same as my personal address/phone number.
+          {{ checkboxText }}
         </VFormCheckbox>
       </FormCol>
     </FormRow>

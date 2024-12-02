@@ -5,8 +5,12 @@ import { IDistributionsData, IDistributionsMeta } from 'InvestCommon/types/api/d
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { useOfferStore } from './useOffer';
 import { transformDistributionsData } from 'InvestCommon/helpers/transformInvestData';
+import { useUsersStore } from './useUsers';
 
 export const useDistributionsStore = defineStore('distributions', () => {
+  const usersStore = useUsersStore();
+  const { selectedUserProfileId } = storeToRefs(usersStore);
+
   const isGetDistributionsLoading = ref(false);
   const isGetDistributionsError = ref(false);
   const getDistributionsData = ref<IDistributionsData[]>();
@@ -22,7 +26,7 @@ export const useDistributionsStore = defineStore('distributions', () => {
     if (response) {
       const offerStore = useOfferStore();
       const { getInvestmentsData } = storeToRefs(offerStore);
-      await offerStore.getConfirmedOffers();
+      await offerStore.getConfirmedOffers(selectedUserProfileId.value);
       if (getInvestmentsData.value) {
         getDistributionsData.value = transformDistributionsData(response.data, getInvestmentsData.value?.data);
       }

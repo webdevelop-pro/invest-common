@@ -12,8 +12,8 @@ import { storeToRefs } from 'pinia';
 const { INVESTMENT_URL, ESIGN_URL } = env;
 
 
-export const fetchGetInvestments = () => {
-  const path = `${INVESTMENT_URL}/auth/investment/confirmed`;
+export const fetchGetInvestments = (id: string) => {
+  const path = `${INVESTMENT_URL}/auth/investment/${id}/confirmed`;
 
   const data = {
     method: 'GET',
@@ -105,13 +105,10 @@ export const fetchSetOwnership = (
   slug: string,
   id: string,
   profileId: string,
-  userData: object,
 ) => {
   const path = `${INVESTMENT_URL}/auth/invest/${slug}/ownership/${id}/${profileId}`;
 
-  const body = JSON.stringify({
-    ...userData,
-  });
+  const body = JSON.stringify({});
 
   const data = {
     method: 'PUT',

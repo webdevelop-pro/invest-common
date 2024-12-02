@@ -13,17 +13,18 @@ import VFormCheckbox from 'UiKit/components/VForm/VFormCheckbox.vue';
 import { JSONSchemaType } from 'ajv';
 
 const model = defineModel();
-defineProps({
+const props = defineProps({
   itemIndex: Number,
   validation: Object,
   schema: Object as PropType<JSONSchemaType<FormPartialBeneficialOwnershipItem>>,
   optionsCountry: Array,
   optionsState: Array,
+  trust: Boolean,
 });
 
 const userProfilesStore = useUserProfilesStore();
 const {
-  setProfileByIdErrorData, getProfileByIdOptionsData,
+  getProfileByIdOptionsData, setProfileErrorData
 } = storeToRefs(userProfilesStore);
 
 export interface FormPartialBeneficialOwnershipItem {
@@ -44,12 +45,14 @@ export interface FormPartialBeneficialOwnershipItem {
     country: string;
   };
 }
+
+const title = props.trust ? 'Trustee or Protector' : 'Beneficial Owner';
 </script>
 
 <template>
   <div class="VFormPartialBeneficialOwnershipItem v-form-partial-beneficial-ownership-item">
     <div class="v-form-partial-beneficial-ownership-item__subtitle is--h3__title">
-      Beneficial Owner {{ itemIndex + 1 }}
+      {{ title }} {{ itemIndex + 1 }}
     </div>
     <FormRow>
       <FormCol col3>
@@ -59,7 +62,7 @@ export interface FormPartialBeneficialOwnershipItem {
           :validation="validation"
           :schema-back="getProfileByIdOptionsData"
           :schema-front="schema"
-          :error-text="setProfileByIdErrorData?.beneficials[itemIndex].first_name"
+          :error-text="setProfileErrorData?.beneficials[itemIndex].first_name"
           :path="`beneficials.${itemIndex}.first_name`"
           label="First Name"
           data-testid="first-name-group"
@@ -82,7 +85,7 @@ export interface FormPartialBeneficialOwnershipItem {
           :validation="validation"
           :schema-back="getProfileByIdOptionsData"
           :schema-front="schema"
-          :error-text="setProfileByIdErrorData?.beneficials[itemIndex].last_name"
+          :error-text="setProfileErrorData.value?.beneficials[itemIndex].last_name"
           :path="`beneficials.${itemIndex}.last_name`"
           label="Last Name"
           data-testid="last-name-group"
@@ -104,7 +107,7 @@ export interface FormPartialBeneficialOwnershipItem {
           :validation="validation"
           :schema-back="getProfileByIdOptionsData"
           :schema-front="schema"
-          :error-text="setProfileByIdErrorData?.beneficials[itemIndex].dob"
+          :error-text="setProfileErrorData.value?.beneficials[itemIndex].dob"
           :path="`beneficials.${itemIndex}.dob`"
           label="Date of Birth"
           data-testid="dob-group"
@@ -135,9 +138,10 @@ export interface FormPartialBeneficialOwnershipItem {
             :validation="validation"
             :schema-back="getProfileByIdOptionsData"
             :schema-front="schema"
-            :error-text="setProfileByIdErrorData?.beneficials[itemIndex].ssn"
+            :error-text="setProfileErrorData.value?.beneficials[itemIndex].ssn"
             :path="`beneficials.${itemIndex}.ssn`"
             label="SSN"
+            required
             data-testid="ssn-group"
           >
             <VFormInput
@@ -162,9 +166,10 @@ export interface FormPartialBeneficialOwnershipItem {
             :validation="validation"
             :schema-back="getProfileByIdOptionsData"
             :schema-front="schema"
-            :error-text="setProfileByIdErrorData?.beneficials[itemIndex].type_of_identification?.id_number"
+            :error-text="setProfileErrorData.value?.beneficials[itemIndex].type_of_identification?.id_number"
             :path="`beneficials.${itemIndex}.type_of_identification.id_number`"
             label="Passport Series and Number"
+            required
             data-testid="id-number-group"
           >
             <VFormInput
@@ -184,9 +189,10 @@ export interface FormPartialBeneficialOwnershipItem {
             :validation="validation"
             :schema-back="getProfileByIdOptionsData"
             :schema-front="schema"
-            :error-text="setProfileByIdErrorData?.beneficials[itemIndex].type_of_identification?.country"
+            :error-text="setProfileErrorData.value?.beneficials[itemIndex].type_of_identification?.country"
             :path="`beneficials.${itemIndex}.type_of_identification.country`"
             label="Country of Issue"
+            required
             data-testid="passport-country-group"
           >
             <VFormSelect
@@ -214,7 +220,7 @@ export interface FormPartialBeneficialOwnershipItem {
           :validation="validation"
           :schema-back="getProfileByIdOptionsData"
           :schema-front="schema"
-          :error-text="setProfileByIdErrorData?.beneficials[itemIndex].email"
+          :error-text="setProfileErrorData.value?.beneficials[itemIndex].email"
           :path="`beneficials.${itemIndex}.email`"
           label="Email"
           data-testid="email-group"
@@ -238,7 +244,7 @@ export interface FormPartialBeneficialOwnershipItem {
           :validation="validation"
           :schema-back="getProfileByIdOptionsData"
           :schema-front="schema"
-          :error-text="setProfileByIdErrorData?.beneficials[itemIndex].phone"
+          :error-text="setProfileErrorData.value?.beneficials[itemIndex].phone"
           :path="`beneficials.${itemIndex}.phone`"
           label="Phone number"
           data-testid="phone-group"
@@ -264,7 +270,7 @@ export interface FormPartialBeneficialOwnershipItem {
           :validation="validation"
           :schema-back="getProfileByIdOptionsData"
           :schema-front="schema"
-          :error-text="setProfileByIdErrorData?.beneficials[itemIndex].address1"
+          :error-text="setProfileErrorData.value?.beneficials[itemIndex].address1"
           :path="`beneficials.${itemIndex}.address1`"
           label="Address 1"
           data-testid="address-1-group"
@@ -287,7 +293,7 @@ export interface FormPartialBeneficialOwnershipItem {
           :validation="validation"
           :schema-back="getProfileByIdOptionsData"
           :schema-front="schema"
-          :error-text="setProfileByIdErrorData?.beneficials[itemIndex].address2"
+          :error-text="setProfileErrorData.value?.beneficials[itemIndex].address2"
           :path="`beneficials.${itemIndex}.address2`"
           label="Address 2"
           data-testid="address-2-group"
@@ -312,7 +318,7 @@ export interface FormPartialBeneficialOwnershipItem {
           :validation="validation"
           :schema-back="getProfileByIdOptionsData"
           :schema-front="schema"
-          :error-text="setProfileByIdErrorData?.beneficials[itemIndex].city"
+          :error-text="setProfileErrorData.value?.beneficials[itemIndex].city"
           :path="`beneficials.${itemIndex}.city`"
           label="City"
           data-testid="city-group"
@@ -336,7 +342,7 @@ export interface FormPartialBeneficialOwnershipItem {
           :validation="validation"
           :schema-back="getProfileByIdOptionsData"
           :schema-front="schema"
-          :error-text="setProfileByIdErrorData?.beneficials[itemIndex].state"
+          :error-text="setProfileErrorData.value?.beneficials[itemIndex].state"
           :path="`beneficials.${itemIndex}.state`"
           label="State"
           data-testid="state-group"
@@ -366,7 +372,7 @@ export interface FormPartialBeneficialOwnershipItem {
           :validation="validation"
           :schema-back="getProfileByIdOptionsData"
           :schema-front="schema"
-          :error-text="setProfileByIdErrorData?.beneficials[itemIndex].zip_code"
+          :error-text="setProfileErrorData.value?.beneficials[itemIndex].zip_code"
           :path="`beneficials.${itemIndex}.zip_code`"
           label="Zip Code"
           data-testid="zip-group"
@@ -392,7 +398,7 @@ export interface FormPartialBeneficialOwnershipItem {
           :validation="validation"
           :schema-back="getProfileByIdOptionsData"
           :schema-front="schema"
-          :error-text="setProfileByIdErrorData?.beneficials[itemIndex].country"
+          :error-text="setProfileErrorData.value?.beneficials[itemIndex].country"
           :path="`beneficials.${itemIndex}.country`"
           label="Country"
           data-testid="country-group"
