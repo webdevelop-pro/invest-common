@@ -316,9 +316,10 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
       await getSession();
       // eslint-disable-next-line
       const fullUrl = setVerificationErrorData.value.redirect_browser_to;
-      const newUrl = new URL(fullUrl);
-      const relativePath = newUrl.pathname + newUrl.search;
-      void router.replace({ path: relativePath });
+      navigateWithQueryParams(fullUrl);
+      // const newUrl = new URL(fullUrl);
+      // const relativePath = newUrl.pathname + newUrl.search;
+      // void router.replace({ path: relativePath });
     }
   };
 
