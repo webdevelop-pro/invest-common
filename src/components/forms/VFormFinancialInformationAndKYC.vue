@@ -19,22 +19,9 @@ import VFormPartialInvestmentObjectives from './VFormPartialInvestmentObjectives
 import VFormPartialUnderstandingOfRisks from './VFormPartialUnderstandingOfRisks.vue';
 import { FormChild } from 'InvestCommon/types/form';
 import { scrollToError } from 'UiKit/helpers/validation/general';
+import env from 'InvestCommon/global';
 
 
-const props = defineProps({
-  hubsportFormIdKYC: {
-    type: String,
-    required: true,
-  },
-  hubsportFormIdInvestment: {
-    type: String,
-    required: true,
-  },
-  hubsportFormIdPersonal: {
-    type: String,
-    required: true,
-  },
-});
 const personalFormRef = useTemplateRef<FormChild>('personalFormChild');
 const financialInfoFormRef = useTemplateRef<FormChild>('financialInfoFormChild');
 const investmentObjectivesFormRef = useTemplateRef<FormChild>('investmentObjectivesFormChild');
@@ -54,8 +41,6 @@ const plaidStore = usePlaidStore();
 const { isCreateTokenError } = storeToRefs(plaidStore);
 const accreditationStore = useAccreditationStore();
 
-const { submitFormToHubspot } = useHubspotForm(props.hubsportFormIdKYC);
-
 const isLoading = ref(false);
 
 const isValid = computed(() => (personalFormRef.value?.isValid && financialInfoFormRef.value?.isValid
@@ -63,16 +48,19 @@ const isValid = computed(() => (personalFormRef.value?.isValid && financialInfoF
 const isDisabledButton = computed(() => (!isValid.value || isSetProfileByIdLoading.value));
 
 const hubspotHandle = () => {
-  void submitFormToHubspot({
+  void useHubspotForm(env.HUBSPOT_FORM_ID_FINANCIAL_SITUATION).submitFormToHubspot({
     email: userAccountData.value?.email,
-    ...understandingRisksFormRef.value?.model,
     is_accredited: financialInfoFormRef.value?.model.accredited_investor.is_accredited,
   });
-  void useHubspotForm(props.hubsportFormIdInvestment).submitFormToHubspot({
+  void useHubspotForm(env.HUBSPOT_FORM_ID_RISKS).submitFormToHubspot({
+    email: userAccountData.value?.email,
+    ...understandingRisksFormRef.value?.model,
+  });
+  void useHubspotForm(env.HUBSPOT_FORM_ID_INVESTMENT_OBJECTIVES).submitFormToHubspot({
     email: userAccountData.value?.email,
     ...investmentObjectivesFormRef.value?.model,
   });
-  void useHubspotForm(props.hubsportFormIdPersonal).submitFormToHubspot({
+  void useHubspotForm(env.HUBSPOT_FORM_ID_PERSONAL_INFORMATION).submitFormToHubspot({
     email: userAccountData.value?.email,
     ...personalFormRef.value?.model,
     date_of_birth: personalFormRef.value?.model?.dob,
@@ -211,10 +199,6 @@ const cancelHandler = () => {
 
   &__accreditation-number {
     margin-left: 20px;
-  }
-
-  .is--margin-top {
-    margin-top: 22px;
   }
 }
 </style>

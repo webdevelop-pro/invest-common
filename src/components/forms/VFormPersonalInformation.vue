@@ -16,6 +16,7 @@ import { ROUTE_ACCREDITATION_UPLOAD, ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommo
 import VFormPartialPersonalInformation from './VFormPartialPersonalInformation.vue';
 import { FormChild } from 'InvestCommon/types/form';
 import { scrollToError } from 'UiKit/helpers/validation/general';
+import env from 'InvestCommon/global';
 
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -27,10 +28,6 @@ const VFormPartialIdentification = defineAsyncComponent({
 
 const props = defineProps({
   accreditation: Boolean,
-  hubsportFormId: {
-    type: String,
-    required: true,
-  },
   readOnly: Boolean,
   withId: Boolean,
 });
@@ -49,7 +46,7 @@ const {
   selectedUserProfileType,
 } = storeToRefs(usersStore);
 
-const { submitFormToHubspot } = useHubspotForm(props.hubsportFormId);
+const { submitFormToHubspot } = useHubspotForm(env.HUBSPOT_FORM_ID_PERSONAL_INFORMATION);
 
 const isLoading = ref(false);
 const isValid = computed(() => ((idFormRef.value?.isValid || !props.withId) && personalFormRef.value?.isValid));
@@ -74,8 +71,12 @@ const saveHandler = async () => {
   isLoading.value = false;
   void submitFormToHubspot({
     email: userAccountData.value?.email,
-    ...model,
+    ...personalFormRef.value?.model,
     date_of_birth: model?.dob,
+  });
+  void useHubspotForm(env.HUBSPOT_FORM_ID_IDENTIFICATION).submitFormToHubspot({
+    email: userAccountData.value?.email,
+    ...idFormRef.value?.model,
   });
   void userIdentityStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
   if (props.accreditation) {

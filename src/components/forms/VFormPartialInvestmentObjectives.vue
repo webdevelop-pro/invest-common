@@ -117,7 +117,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
 
 <template>
   <div class="VFormPartialInvestmentObjectives v-form-partial-investment-objectives">
-    <div class="v-form-partial-investment-objectives__subtitle is--h3__title is--margin-top">
+    <div class="v-form-partial-investment-objectives__subtitle is--h3__title ">
       Investment Objectives
     </div>
     <FormRow>

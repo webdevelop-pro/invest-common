@@ -14,9 +14,9 @@ import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/helpers/enums/routes';
 import { useRouter } from 'vue-router';
 import { FormChild } from 'InvestCommon/types/form';
 import VFormPartialBusinessController from './VFormPartialBusinessController.vue';
+import env from 'InvestCommon/global';
 
 const props = defineProps({
-  hubsportFormId: String,
   trust: Boolean,
 });
 
@@ -32,7 +32,7 @@ const {
   selectedUserProfileType, userAccountData,
 } = storeToRefs(usersStore);
 
-const { submitFormToHubspot } = useHubspotForm(props.hubsportFormId);
+const { submitFormToHubspot } = useHubspotForm(env.HUBSPOT_FORM_ID_BUSINESS_CONTROLLER);
 
 const isLoading = ref(false);
 const isValid = computed(() => businessControllerRef.value?.isValid);
@@ -53,10 +53,10 @@ const saveHandler = async () => {
     selectedUserProfileId.value,
   );
   isLoading.value = false;
-  if (props.hubsportFormId && !isSetProfileByIdError.value) {
+  if (!isSetProfileByIdError.value) {
     void submitFormToHubspot({
       email: userAccountData.value?.email,
-      ...businessControllerRef.value?.model,
+      business_controller: businessControllerRef.value?.model,
     });
   }
   void userProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);

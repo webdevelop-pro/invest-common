@@ -17,6 +17,7 @@ import { FormChild } from 'InvestCommon/types/form';
 import { scrollToError } from 'UiKit/helpers/validation/general';
 import { PROFILE_TYPES } from 'InvestCommon/global/investment.json';
 import { useAccreditationStore } from 'InvestCommon/store/useAccreditation';
+import env from 'InvestCommon/global';
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const VFormPartialCreateProfileSelectType = defineAsyncComponent({
@@ -49,12 +50,6 @@ const VFormProfileTrust = defineAsyncComponent({
   hydrate: hydrateOnVisible(),
 });
 
-const props = defineProps({
-  hubsportFormId: {
-    type: String,
-    required: true,
-  },
-});
 const selectTypeFormRef = useTemplateRef<FormChild>('selectTypeFormChild');
 const entityTypeFormRef = useTemplateRef<FormChild>('entityFormChild');
 const sdiraTypeFormRef = useTemplateRef<FormChild>('sdiraFormChild');
@@ -72,8 +67,6 @@ const { selectedUserProfileData, selectedUserProfileId, userAccountData } = stor
 const userProfilesStore = useUserProfilesStore();
 const { setProfileData, isSetUserProfileError } = storeToRefs(userProfilesStore);
 const userStore = useUsersStore();
-
-const { submitFormToHubspot } = useHubspotForm(props.hubsportFormId);
 
 const selectedType = computed(() => String(selectTypeFormRef.value?.model?.type_profile));
 
@@ -126,6 +119,80 @@ const isLoading = ref(false);
 const isValid = computed(() => (selectTypeFormRef.value?.isValid && childFormIsValid.value));
 const isDisabledButton = computed(() => (!isValid.value || isSetUserProfileLoading.value));
 
+const handleHubspot = () => {
+  const model = { ...childFormModel.value };
+  void useHubspotForm(env.HUBSPOT_FORM_ID_PERSONAL_INFORMATION).submitFormToHubspot({
+    email: userAccountData.value?.email,
+    firstname: model?.first_name,
+    lastname: model?.last_name,
+    middle_name: model?.middle_name,
+    date_of_birth: model?.dob,
+    phone: model?.phone,
+    citizenship: model?.citizenship,
+    snn: model?.ssn,
+    address_1: model?.address1,
+    address_2: model?.address2,
+    city: model?.city,
+    state: model?.state,
+    zip_code: model?.zip_code,
+    country: model?.country,
+  });
+  void useHubspotForm(env.HUBSPOT_FORM_ID_IDENTIFICATION).submitFormToHubspot({
+    email: userAccountData.value?.email,
+    ...model.type_of_identification,
+  });
+  if (selectedType.value.toLowerCase() === PROFILE_TYPES.ENTITY) {
+    void useHubspotForm(env.HUBSPOT_FORM_ID_ENTITY_INFORMATION).submitFormToHubspot({
+      email: userAccountData.value?.email,
+      type: model.type,
+      name: model.name,
+      owner_title: model.owner_title,
+      solely_for_investing: model.solely_for_investing,
+      tax_exempts: model.tax_exempts,
+    });
+    void useHubspotForm(env.HUBSPOT_FORM_ID_BUSINESS_CONTROLLER).submitFormToHubspot({
+      email: userAccountData.value?.email,
+      business_controller: model.business_controller,
+    });
+    void useHubspotForm(env.HUBSPOT_FORM_ID_BENEFICIAL_OWNERS).submitFormToHubspot({
+      email: userAccountData.value?.email,
+      beneficials: model.beneficials,
+    });
+  }
+  if (selectedType.value.toLowerCase() === PROFILE_TYPES.TRUST) {
+    void useHubspotForm(env.HUBSPOT_FORM_ID_TRUST_INFORMATION).submitFormToHubspot({
+      email: userAccountData.value?.email,
+      type: model.type,
+      name: model.name,
+      owner_title: model.owner_title,
+      ein: model.ein,
+    });
+    void useHubspotForm(env.HUBSPOT_FORM_ID_BUSINESS_CONTROLLER).submitFormToHubspot({
+      email: userAccountData.value?.email,
+      business_controller: model.business_controller,
+    });
+    void useHubspotForm(env.HUBSPOT_FORM_ID_BENEFICIAL_OWNERS).submitFormToHubspot({
+      email: userAccountData.value?.email,
+      beneficials: model.beneficials,
+    });
+  }
+  if (selectedType.value.toLowerCase() === PROFILE_TYPES.SDIRA) {
+    void useHubspotForm(env.HUBSPOT_FORM_ID_CUSTODIAN).submitFormToHubspot({
+      email: userAccountData.value?.email,
+      custodian: model.type,
+      account_number: model.account_number,
+      full_account_name: model.full_account_name,
+    });
+  }
+  if (selectedType.value.toLowerCase() === PROFILE_TYPES.SOLO401K) {
+    void useHubspotForm(env.HUBSPOT_FORM_ID_PLAN_INFO).submitFormToHubspot({
+      email: userAccountData.value?.email,
+      name: model.name,
+      ein: model.ein,
+    });
+  }
+};
+
 const saveHandler = async () => {
   const model = { ...childFormModel.value };
   onValidate();
@@ -147,14 +214,11 @@ const saveHandler = async () => {
   }
   isLoading.value = false;
   if (!isSetUserProfileError.value) {
+    handleHubspot();
     void userProfilesStore.getUser();
     userStore.setSelectedUserProfileById(Number(setProfileData.value?.id));
     void userProfilesStore.getProfileById(selectedType.value, String(setProfileData.value?.id));
     void router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: String(setProfileData.value?.id) } });
-    // void submitFormToHubspot({
-    //   email: userAccountData.value?.email,
-    //   ...model,
-    // });
   }
 };
 

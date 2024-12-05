@@ -14,10 +14,7 @@ import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/helpers/enums/routes';
 import { useRouter } from 'vue-router';
 import { FormChild } from 'InvestCommon/types/form';
 import VFormPartialEntityInformation from './VFormPartialEntityInformation.vue';
-
-const props = defineProps({
-  hubsportFormId: String,
-});
+import env from 'InvestCommon/global';
 
 const entityInformationRef = useTemplateRef<FormChild>('entityInformationFormChild');
 const router = useRouter();
@@ -31,7 +28,7 @@ const {
   selectedUserProfileType, userAccountData,
 } = storeToRefs(usersStore);
 
-const { submitFormToHubspot } = useHubspotForm(props.hubsportFormId);
+const { submitFormToHubspot } = useHubspotForm(env.HUBSPOT_FORM_ID_ENTITY_INFORMATION);
 
 const isLoading = ref(false);
 const isValid = computed(() => entityInformationRef.value?.isValid);
@@ -52,7 +49,7 @@ const saveHandler = async () => {
     selectedUserProfileId.value,
   );
   isLoading.value = false;
-  if (props.hubsportFormId && !isSetProfileByIdError.value) {
+  if (!isSetProfileByIdError.value) {
     void submitFormToHubspot({
       email: userAccountData.value?.email,
       ...entityInformationRef.value?.model,

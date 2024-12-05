@@ -58,7 +58,7 @@ defineExpose({
 
 <template>
   <div class="VFormProfileTrust v-form-profile-trust">
-    <div class="v-form-profile-trust__subtitle is--h3__title is--margin-top">
+    <div class="v-form-profile-trust__subtitle is--h3__title ">
       Trustee Information
     </div>
     <VFormPartialIdentification

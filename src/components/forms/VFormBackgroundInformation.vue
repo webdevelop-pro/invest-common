@@ -25,10 +25,8 @@ import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/helpers/enums/routes';
 import { useRouter } from 'vue-router';
 import { getOptions } from 'UiKit/helpers/model';
 import { FormModelBackgroundInformation } from 'InvestCommon/types/form';
+import env from 'InvestCommon/global';
 
-const props = defineProps({
-  hubsportFormId: String,
-});
 
 const router = useRouter();
 const userProfilesStore = useUserProfilesStore();
@@ -41,7 +39,7 @@ const {
   selectedUserProfileType,
 } = storeToRefs(usersStore);
 
-const { submitFormToHubspot } = useHubspotForm(props.hubsportFormId);
+const { submitFormToHubspot } = useHubspotForm(env.HUBSPOT_FORM_ID_BACKGROUND_INFORMATION);
 
 const isLoading = ref(false);
 const dataEmploymentData = computed(() => selectedUserProfileData.value?.data?.employment);

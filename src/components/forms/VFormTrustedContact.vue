@@ -21,10 +21,8 @@ import {
   firstNameRule, lastNameRule, relationshipTypeRule, phoneRule, emailRule, dobRule, errorMessageRule,
 } from 'UiKit/helpers/validation/rules';
 import { FormModeTrustedContact } from 'InvestCommon/types/form';
+import env from 'InvestCommon/global';
 
-const props = defineProps({
-  hubsportFormId: String,
-});
 
 const router = useRouter();
 const userProfilesStore = useUserProfilesStore();
@@ -37,7 +35,7 @@ const {
   selectedUserProfileType,
 } = storeToRefs(usersStore);
 
-const { submitFormToHubspot } = useHubspotForm(props.hubsportFormId);
+const { submitFormToHubspot } = useHubspotForm(env.HUBSPOT_FORM_ID_TRUSTED_CONTACT);
 
 const isLoading = ref(false);
 

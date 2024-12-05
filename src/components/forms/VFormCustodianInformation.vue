@@ -14,10 +14,8 @@ import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/helpers/enums/routes';
 import { useRouter } from 'vue-router';
 import { FormChild } from 'InvestCommon/types/form';
 import VFormPartialCustodian from './VFormPartialCustodian.vue';
+import env from 'InvestCommon/global';
 
-const props = defineProps({
-  hubsportFormId: String,
-});
 
 const custodianRef = useTemplateRef<FormChild>('custodianInformationFormChild');
 const router = useRouter();
@@ -31,7 +29,7 @@ const {
   selectedUserProfileType, userAccountData,
 } = storeToRefs(usersStore);
 
-const { submitFormToHubspot } = useHubspotForm(props.hubsportFormId);
+const { submitFormToHubspot } = useHubspotForm(env.HUBSPOT_FORM_ID_CUSTODIAN);
 
 const isLoading = ref(false);
 const isValid = computed(() => custodianRef.value?.isValid);
@@ -52,7 +50,7 @@ const saveHandler = async () => {
     selectedUserProfileId.value,
   );
   isLoading.value = false;
-  if (props.hubsportFormId && !isSetProfileByIdError.value) {
+  if (!isSetProfileByIdError.value) {
     void submitFormToHubspot({
       email: userAccountData.value?.email,
       ...custodianRef.value?.model,

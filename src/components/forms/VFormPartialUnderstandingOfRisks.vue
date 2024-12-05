@@ -116,7 +116,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
 
 <template>
   <div class="VFormPartialUnderstandingOfRisks v-form-partial-understanding-of-risks">
-    <div class="form-reg-cf-information__subtitle is--h3__title is--margin-top">
+    <div class="v-form-partial-understanding-of-risks__subtitle is--h3__title ">
       Understanding of Risks
     </div>
     <FormRow>

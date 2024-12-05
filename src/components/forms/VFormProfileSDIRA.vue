@@ -44,7 +44,7 @@ defineExpose({
 
 <template>
   <div class="VFormProfileSDIRA v-form-profile-sdira">
-    <div class="v-form-profile-sdira__subtitle is--h3__title is--margin-top">
+    <div class="v-form-profile-sdira__subtitle is--h3__title ">
       Personal Information
     </div>
     <VFormPartialIdentification

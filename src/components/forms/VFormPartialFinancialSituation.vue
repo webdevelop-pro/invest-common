@@ -102,7 +102,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
 
 <template>
   <div class="VFormPartialFinancialSituation v-form-partial-financial-situation">
-    <div class="v-form-partial-financial-situation__subtitle is--h3__title is--margin-top">
+    <div class="v-form-partial-financial-situation__subtitle is--h3__title">
       Financial Situation
     </div>
     <FormRow>

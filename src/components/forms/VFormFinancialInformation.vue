@@ -15,10 +15,7 @@ import { FormChild } from 'InvestCommon/types/form';
 import VFormPartialFinancialSituation from './VFormPartialFinancialSituation.vue';
 import VFormPartialInvestmentObjectives from './VFormPartialInvestmentObjectives.vue';
 import VFormPartialUnderstandingOfRisks from './VFormPartialUnderstandingOfRisks.vue';
-
-const props = defineProps({
-  hubsportFormId: String,
-});
+import env from 'InvestCommon/global';
 
 const router = useRouter();
 const userProfilesStore = useUserProfilesStore();
@@ -30,8 +27,6 @@ const {
   selectedUserProfileData, selectedUserProfileId,
   userAccountData, selectedUserProfileType,
 } = storeToRefs(usersStore);
-
-const { submitFormToHubspot } = useHubspotForm('2b8bb044-fc29-4d23-9f51-7abb6d590e2f');
 
 const financialInfoFormRef = useTemplateRef<FormChild>('financialInfoFormChild');
 const investmentObjectivesFormRef = useTemplateRef<FormChild>('investmentObjectivesFormChild');
@@ -68,12 +63,15 @@ const saveHandler = async () => {
     selectedUserProfileId.value,
   );
   isLoading.value = false;
-  void submitFormToHubspot({
+  void useHubspotForm(env.HUBSPOT_FORM_ID_FINANCIAL_SITUATION).submitFormToHubspot({
     email: userAccountData.value?.email,
-    ...understandingRisksFormRef.value?.model,
     is_accredited: financialInfoFormRef.value?.model.accredited_investor.is_accredited,
   });
-  void useHubspotForm(props.hubsportFormId).submitFormToHubspot({
+  void useHubspotForm(env.HUBSPOT_FORM_ID_RISKS).submitFormToHubspot({
+    email: userAccountData.value?.email,
+    ...understandingRisksFormRef.value?.model,
+  });
+  void useHubspotForm(env.HUBSPOT_FORM_ID_INVESTMENT_OBJECTIVES).submitFormToHubspot({
     email: userAccountData.value?.email,
     ...investmentObjectivesFormRef.value?.model,
   });
@@ -134,10 +132,6 @@ const cancelHandler = () => {
   margin: 0 auto;
   width: 100%;
 
-  &__header {
-    margin-bottom: 40px;
-  }
-
   &__subtitle {
     margin-top: 12px;
     margin-bottom: 20px;
@@ -161,10 +155,6 @@ const cancelHandler = () => {
 
   &__accreditation-number {
     margin-left: 20px;
-  }
-
-  .is--margin-top {
-    margin-top: 40px;
   }
 }
 </style>
