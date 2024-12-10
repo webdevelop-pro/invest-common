@@ -180,6 +180,12 @@ export const useUsersStore = defineStore('user', () => {
   watch(() => [userProfiles.value, urlProfileId.value], () => {
     if (!urlChecked.value && userLoggedIn.value
       && urlProfileId.value && (userProfiles.value?.length > 0) && !EXTERNAL) checkInitUrl(route);
+    if (userLoggedIn.value && urlProfileId.value && !EXTERNAL) {
+      setSelectedUserProfileById(Number(urlProfileId.value));
+      void userProfilesStore.getProfileById(selectedUserProfileType.value, Number(urlProfileId.value));
+      void router.push({ name: router.currentRoute.value.name, params: { profileId: urlProfileId.value } });
+      void userProfilesStore.getProfileByIdOptions(selectedUserProfileType.value, selectedUserProfileId.value);
+    }
   }, { immediate: true, deep: true });
 
   const resetAll = () => {

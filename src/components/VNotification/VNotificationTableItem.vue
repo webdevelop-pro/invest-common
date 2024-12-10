@@ -34,6 +34,7 @@ const isNotificationSystem = computed(() => props.data?.type.toLowerCase().inclu
 const isNotificationWallet = computed(() => props.data?.type.toLowerCase().includes('wallet'));
 const isNotificationProfile = computed(() => props.data?.type.toLowerCase().includes('profile'));
 const objectId = computed(() => (props.data?.data?.fields?.object_id || 0));
+const profileId = computed(() => (props.data?.data?.fields?.profile?.ID || objectId.value));
 const kycDeclined = computed(() => (props.data?.data?.fields?.kyc_status === 'declined'));
 const accreditationDeclined = computed(() => (props.data?.data?.fields?.accreditation_status === 'declined'));
 const accreditationExpired = computed(() => (props.data?.data?.fields?.accreditation_status === 'expired'));
@@ -69,13 +70,13 @@ const buttonTo = computed(() => {
   if (accreditationDeclined.value || accreditationExpired.value) {
     return {
       name: ROUTE_ACCREDITATION_UPLOAD,
-      params: { profileId: objectId.value },
+      params: { profileId: profileId.value },
     };
   }
   if (isNotificationInvestment.value) {
     return {
       name: ROUTE_INVESTMENT_TIMELINE,
-      params: { profileId: selectedUserProfileId.value, id: objectId.value },
+      params: { profileId: profileId.value, id: objectId.value },
     };
   }
   if (isNotificationDocument.value) {
@@ -86,13 +87,13 @@ const buttonTo = computed(() => {
   if (isNotificationWallet.value) {
     return {
       name: ROUTE_DASHBOARD_WALLET,
-      params: { profileId: selectedUserProfileId.value },
+      params: { profileId: profileId.value },
     };
   }
   if (isNotificationProfile.value) {
     return {
       name: ROUTE_DASHBOARD_ACCOUNT,
-      params: { profileId: objectId.value },
+      params: { profileId: profileId.value },
     };
   }
   if (isStart.value) {
@@ -108,19 +109,19 @@ const buttonLink = computed(() => {
     return urlContactUs;
   }
   if (accreditationDeclined.value || accreditationExpired.value) {
-    return urlProfileAccreditation(objectId.value);
+    return urlProfileAccreditation(profileId.value);
   }
   if (isNotificationInvestment.value) {
-    return urlInvestmentTimeline(selectedUserProfileId.value, objectId.value);
+    return urlInvestmentTimeline(profileId.value, objectId.value);
   }
   if (isNotificationDocument.value) {
     return urlNotifications;
   }
   if (isNotificationWallet.value) {
-    return urlProfileWallet(selectedUserProfileId.value);
+    return urlProfileWallet(profileId.value);
   }
   if (isNotificationProfile.value) {
-    return urlProfileAccount(objectId.value);
+    return urlProfileAccount(profileId.value);
   }
   if (isStart.value) {
     return urlOffers;

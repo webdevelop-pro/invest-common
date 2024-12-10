@@ -208,13 +208,10 @@ const saveHandler = async () => {
     selectedType.value,
   );
 
-  if (!isSetUserProfileError.value && selectedUserProfileData.value?.user_id && setProfileData.value?.id
-    && !selectedUserProfileData.value?.escrow_id) {
-    await accreditationStore.createEscrow(selectedUserProfileData.value?.user_id, setProfileData.value?.id);
-  }
   isLoading.value = false;
   if (!isSetUserProfileError.value) {
     handleHubspot();
+    await accreditationStore.createEscrow(selectedUserProfileData.value?.user_id, setProfileData.value?.id);
     void userProfilesStore.getUser();
     userStore.setSelectedUserProfileById(Number(setProfileData.value?.id));
     void userProfilesStore.getProfileById(selectedType.value, String(setProfileData.value?.id));
