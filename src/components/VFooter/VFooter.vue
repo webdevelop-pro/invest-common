@@ -25,7 +25,7 @@ const VFooterMenu = defineAsyncComponent({
 });
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const VFormFooterSubscribe = defineAsyncComponent({
-  loader: () => import('UiKit/components/Forms/VFormFooterSubscribe.vue'),
+  loader: () => import('UiKit/components/VForms/VFormFooterSubscribe.vue'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
   hydrate: hydrateOnVisible(),
 });

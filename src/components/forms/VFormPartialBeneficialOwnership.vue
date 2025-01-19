@@ -6,9 +6,9 @@ import {
 import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import FormRow from 'InvestCommon/components/VForm/VFormRow.vue';
 import FormCol from 'InvestCommon/components/VForm/VFormCol.vue';
-import VFormSelect from 'UiKit/components/VForm/VFormSelect.vue';
+import VFormSelect from 'UiKit/components/Base/VForm/VFormSelect.vue';
 import { storeToRefs } from 'pinia';
-import VFormGroup from 'UiKit/components/VForm/VFormGroup.vue';
+import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import { JSONSchemaType } from 'ajv';
 import {
   address1Rule, cityRule, countryRuleObject, dobRule,

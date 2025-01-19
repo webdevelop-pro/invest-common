@@ -2,8 +2,8 @@
 import { INotification } from 'InvestCommon/types/api/notifications';
 import { formatToDate } from 'InvestCommon/helpers/formatters/formatToDate';
 import { PropType, computed } from 'vue';
-import VTag from 'UiKit/components/VTag/VTag.vue';
-import VButton from 'UiKit/components/VButton/VButton.vue';
+import VBadge from 'UiKit/components/Base/VBadge/VBadge.vue';
+import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
 import { useNotificationsStore } from 'InvestCommon/store/useNotifications';
 import {
@@ -11,7 +11,7 @@ import {
   ROUTE_DASHBOARD_WALLET, ROUTE_INVESTMENT_TIMELINE, ROUTE_NOTIFICATIONS,
 } from 'InvestCommon/helpers/enums/routes';
 import { storeToRefs } from 'pinia';
-import VSvgIcon from 'UiKit/components/VSvgIcon/VSvgIcon.vue';
+import arrowRight from 'UiKit/assets/images/arrow-right.svg';
 import {
   urlContactUs, urlOffers, urlNotifications, urlProfileAccreditation,
   urlInvestmentTimeline, urlProfileWallet, urlProfileAccount,
@@ -150,7 +150,7 @@ const onButtonClick = () => {
   >
     <td class="wd-notification-table-item__type-wrap">
       <span class="wd-notification-table-item__type">
-        <VTag
+        <VBadge
           round
           :background="tagBackground"
           class="wd-notification-table-item__tag"
@@ -158,7 +158,7 @@ const onButtonClick = () => {
           <span class="wd-notification-table-item__tag-text">
             {{ tagText }}
           </span>
-        </VTag>
+        </VBadge>
       </span>
     </td>
     <td>
@@ -188,8 +188,7 @@ const onButtonClick = () => {
           @click="onButtonClick"
         >
           {{ buttonText }}
-          <VSvgIcon
-            name="arrow-right"
+          <arrowRight
             class="wd-notification-table-item__icon"
             alt="modal layout close icon"
           />

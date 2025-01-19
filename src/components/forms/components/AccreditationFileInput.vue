@@ -3,10 +3,10 @@ import {
   ref, computed, watch, reactive, nextTick,
 } from 'vue';
 import { useAccreditationStore } from 'InvestCommon/store/useAccreditation';
-import VFormInput from 'UiKit/components/VForm/VFormInput.vue';
-import VFormTextarea from 'UiKit/components/VForm/VFormTextarea.vue';
+import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
+import VFormTextarea from 'UiKit/components/Base/VForm/VFormTextarea.vue';
 import VUploader from 'UiKit/components/VUploader/VUploader.vue';
-import VFormGroup from 'UiKit/components/VForm/VFormGroup.vue';
+import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import { descriptionFileRule, errorMessageRule, noteFileRule } from 'UiKit/helpers/validation/rules';
 import { JSONSchemaType } from 'ajv';
 import { isEmpty } from 'InvestCommon/helpers/general';

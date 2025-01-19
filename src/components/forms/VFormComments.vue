@@ -5,16 +5,16 @@ import {
 import { useOfferStore } from 'InvestCommon/store/useOffer';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
 import { IOfferCommentPayload } from 'InvestCommon/types/api/offers';
-import VFormInput from 'UiKit/components/VForm/VFormInput.vue';
-import VButton from 'UiKit/components/VButton/VButton.vue';
-import VFormCheckbox from 'UiKit/components/VForm/VFormCheckbox.vue';
+import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
+import VButton from 'UiKit/components/Base/VButton/VButton.vue';
+import VFormCheckbox from 'UiKit/components/Base/VForm/VFormCheckbox.vue';
 import { storeToRefs } from 'pinia';
 import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
 import { FormModelOfferComment, schemaOfferComment } from './utilsComments';
-import VFormGroup from 'UiKit/components/VForm/VFormGroup.vue';
+import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import { isEmpty } from 'InvestCommon/helpers/general';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
-import VFormRadio from 'UiKit/components/VForm/VFormRadio.vue';
+import VFormRadio from 'UiKit/components/Base/VForm/VFormRadio.vue';
 import { scrollToError } from 'UiKit/helpers/validation/general';
 import { urlSignin } from 'InvestCommon/global/links';
 
@@ -147,6 +147,7 @@ watch(() => model, () => {
 
         <VButton
           v-if="!isAuth"
+          class="is--margin-top-0"
           @click="signInHandler"
         >
           Sign in

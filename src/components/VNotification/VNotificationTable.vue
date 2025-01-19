@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { useNotificationsStore } from 'InvestCommon/store/useNotifications';
 import VNotificationTableItem from 'InvestCommon/components/VNotification/VNotificationTableItem.vue';
-import VTable from 'UiKit/components/VTable/VTable.vue';
+import VTable from 'UiKit/components/Base/VTable/VTable.vue';
 import { storeToRefs } from 'pinia';
-import VFormInputSearch from 'UiKit/components/VForm/VFormInputSearch.vue';
-import VContentSwitcher from 'UiKit/components/VContentSwitcher/VContentSwitcher.vue';
+import VFormInputSearch from 'UiKit/components/Base/VForm/VFormInputSearch.vue';
+import VContentSwitcher from 'UiKit/components/Base/VContentSwitcher/VContentSwitcher.vue';
 import VFilter, { IVFilter } from 'UiKit/components/VFilter/VFilter.vue';
 import { computed, ref, watch } from 'vue';
-import VButton from 'UiKit/components/VButton/VButton.vue';
-import VSkeleton from 'UiKit/components/VSkeleton/VSkeleton.vue';
-import { VSvgIcon } from 'UiKit/components/VSvgIcon';
+import VButton from 'UiKit/components/Base/VButton/VButton.vue';
+import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
+import check from 'UiKit/assets/images/check.svg';
 import FilterPagination from 'InvestCommon/components/common/FilterPagination.vue';
 
 const props = defineProps({
@@ -245,8 +245,7 @@ watch(() => filterNotifications.value[1].model.length, () => {
         icon-placement="left"
         @click.stop="onMarkAllAsRead"
       >
-        <VSvgIcon
-          name="check"
+        <check
           alt="download icon"
           class="wd-notification-table__check-icon"
         />

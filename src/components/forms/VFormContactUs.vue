@@ -5,11 +5,11 @@ import {
 import { schemaContactUs, FormModelContactUs, SELECT_SUBJECT } from './utilsContactUs';
 import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
 import { isEmpty } from 'InvestCommon/helpers/general';
-import VFormGroup from 'UiKit/components/VForm/VFormGroup.vue';
-import VFormInput from 'UiKit/components/VForm/VFormInput.vue';
-import VButton from 'UiKit/components/VButton/VButton.vue';
-import VFormTextarea from 'UiKit/components/VForm/VFormTextarea.vue';
-import VFormSelect from 'UiKit/components/VForm/VFormSelect.vue';
+import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
+import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
+import VButton from 'UiKit/components/Base/VButton/VButton.vue';
+import VFormTextarea from 'UiKit/components/Base/VForm/VFormTextarea.vue';
+import VFormSelect from 'UiKit/components/Base/VForm/VFormSelect.vue';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import { storeToRefs } from 'pinia';

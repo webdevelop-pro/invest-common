@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import VSkeleton from 'UiKit/components/VSkeleton/VSkeleton.vue';
+import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 
 export interface IInfoSlot {
   title: string;

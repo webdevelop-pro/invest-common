@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { PropType, computed } from 'vue';
 import VModalLayout from 'UiKit/components/VModal/VModalLayout.vue';
-import VButton from 'UiKit/components/VButton/VButton.vue';
+import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { IInvest } from 'InvestCommon/types/api/invest';
-import VTable from 'UiKit/components/VTable/VTable.vue';
-import VTag from 'UiKit/components/VTag/VTag.vue';
+import VTable from 'UiKit/components/Base/VTable/VTable.vue';
+import VBadge from 'UiKit/components/Base/VBadge/VBadge.vue';
 import { formatToFullDate } from 'InvestCommon/helpers/formatters/formatToDate';
 import { currency } from 'InvestCommon/helpers/currency';
 import { InvestTransactionStatuses } from 'InvestCommon/helpers/enums/invest';
@@ -68,14 +68,14 @@ const timeFormatted = computed(() => (dateFull.value ? getTimeFormat(String(date
               </td>
               <td class="wd-modal-portfolio-transaction__type-wrap">
                 <div class="wd-modal-portfolio-transaction__type">
-                  <VTag
+                  <VBadge
                     round
                     size="small"
                     background="#F8F5FF"
                     class="profile-status-info__tag"
                   >
                     Investment
-                  </VTag>
+                  </VBadge>
                 </div>
               </td>
               <td class="wd-modal-portfolio-transaction__status-wrap">
