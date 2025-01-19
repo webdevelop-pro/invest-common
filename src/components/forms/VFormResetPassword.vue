@@ -8,18 +8,19 @@ import { useAuthStore } from 'InvestCommon/store/useAuth';
 import { useAuthLogicStore } from 'InvestCommon/store/useAuthLogic';
 import { SELFSERVICE } from 'InvestCommon/helpers/enums/auth';
 import { storeToRefs } from 'pinia';
-import VFormGroup from 'UiKit/components/VForm/VFormGroup.vue';
-import VFormInput from 'UiKit/components/VForm/VFormInput.vue';
-import VButton from 'UiKit/components/VButton/VButton.vue';
+import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
+import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
+import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import FormRow from 'InvestCommon/components/VForm/VFormRow.vue';
 import FormCol from 'InvestCommon/components/VForm/VFormCol.vue';
-import { VSvgIcon } from 'UiKit/components/VSvgIcon';
 import { scrollToError } from 'UiKit/helpers/validation/general';
 import { errorMessageRule, passwordRule } from 'UiKit/helpers/validation/rules';
 import { JSONSchemaType } from 'ajv';
 import { FormModelResetPassword } from 'InvestCommon/types/form';
 import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
 import { isEmpty } from 'UiKit/helpers/general';
+import eyeOff from 'UiKit/assets/images/eye-off.svg';
+import eye from 'UiKit/assets/images/eye.svg';
 
 const authStore = useAuthStore();
 const { isSetPasswordLoading, setPasswordErrorData } = storeToRefs(authStore);
@@ -136,8 +137,7 @@ watch(() => [schema], () => {
                   class="v-form-reset-password__icon-wrap"
                   @click="showCreatePassword = !showCreatePassword"
                 >
-                  <VSvgIcon
-                    name="eye-off"
+                  <eyeOff
                     class="v-form-reset-password__input-icon"
                     alt="reset password form input icon"
                   />
@@ -148,8 +148,7 @@ watch(() => [schema], () => {
                   class="v-form-reset-password__icon-wrap"
                   @click="showCreatePassword = !showCreatePassword"
                 >
-                  <VSvgIcon
-                    name="eye"
+                  <eye
                     class="v-form-reset-password__input-icon"
                     alt="reset password form input icon"
                   />
@@ -198,8 +197,7 @@ watch(() => [schema], () => {
                   class="v-form-reset-password__icon-wrap"
                   @click="showRepeatPassword = !showRepeatPassword"
                 >
-                  <VSvgIcon
-                    name="eye-off"
+                  <eyeOff
                     class="v-form-reset-password__input-icon"
                     alt="reset password form input icon"
                   />
@@ -210,8 +208,7 @@ watch(() => [schema], () => {
                   class="v-form-reset-password__icon-wrap"
                   @click="showRepeatPassword = !showRepeatPassword"
                 >
-                  <VSvgIcon
-                    name="eye"
+                  <eye
                     class="v-form-reset-password__input-icon"
                     alt="reset password form input icon"
                   />

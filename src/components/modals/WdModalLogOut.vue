@@ -49,7 +49,7 @@ import { defineComponent } from 'vue';
 import { useAuthStore } from 'InvestCommon/store/useAuth';
 import { useAuthLogicStore } from 'InvestCommon/store/useAuthLogic';
 import VModalLayout from 'UiKit/components/VModal/VModalLayout.vue';
-import VButton from 'UiKit/components/VButton/VButton.vue';
+import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { storeToRefs } from 'pinia';
 import env from 'InvestCommon/global/index';
 import image from 'InvestCommon/assets/images/icons/logout-modal.svg?url';

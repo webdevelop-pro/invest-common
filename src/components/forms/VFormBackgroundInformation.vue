@@ -8,15 +8,15 @@ import { useUsersStore } from 'InvestCommon/store/useUsers';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import FormRow from 'InvestCommon/components/VForm/VFormRow.vue';
 import FormCol from 'InvestCommon/components/VForm/VFormCol.vue';
-import VFormInput from 'UiKit/components/VForm/VFormInput.vue';
-import VButton from 'UiKit/components/VButton/VButton.vue';
-import VFormSelect from 'UiKit/components/VForm/VFormSelect.vue';
+import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
+import VButton from 'UiKit/components/Base/VButton/VButton.vue';
+import VFormSelect from 'UiKit/components/Base/VForm/VFormSelect.vue';
 import { storeToRefs } from 'pinia';
 import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
 import { checkObjectAndDeleteNotRequiredFields, isEmpty } from 'InvestCommon/helpers/general';
-import VFormGroup from 'UiKit/components/VForm/VFormGroup.vue';
+import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import { filterSchema, getFilteredObject, scrollToError } from 'UiKit/helpers/validation/general';
-import VFormCheckbox from 'UiKit/components/VForm/VFormCheckbox.vue';
+import VFormCheckbox from 'UiKit/components/Base/VForm/VFormCheckbox.vue';
 import {
   address1Rule, address2Rule, cityRule, emailRule, errorMessageRule, zipRule,
 } from 'UiKit/helpers/validation/rules';

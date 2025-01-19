@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { useNotificationsStore } from 'InvestCommon/store/useNotifications';
 import { ROUTE_NOTIFICATIONS } from 'InvestCommon/helpers/enums/routes';
-import VButton from 'UiKit/components/VButton/VButton.vue';
+import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import WdNotificationTable from 'InvestCommon/components/VNotification/VNotificationTable.vue';
 import { storeToRefs } from 'pinia';
 import { onClickOutside } from '@vueuse/core';
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { blockedBody, unBlockedBody } from 'InvestCommon/helpers/blocked-body';
-import { VSvgIcon } from 'UiKit/components/VSvgIcon';
+import arrowRight from 'UiKit/assets/images/arrow-right.svg';
+import close from 'UiKit/assets/images/close.svg';
 
 
 defineProps({
@@ -48,8 +49,7 @@ onBeforeUnmount(() => unBlockedBody());
         class="v-notification-sidebar__close-button"
         @click="onClose"
       >
-        <VSvgIcon
-          name="close"
+        <close
           alt="notification sidebar close icon"
           class="v-notification-sidebar__close-icon"
         />
@@ -73,8 +73,7 @@ onBeforeUnmount(() => unBlockedBody());
         @click="onClose"
       >
         View All
-        <VSvgIcon
-          name="arrow-right"
+        <arrowRight
           class="v-notification-sidebar__icon"
           alt="modal layout close icon"
         />

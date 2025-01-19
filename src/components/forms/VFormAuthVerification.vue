@@ -9,9 +9,9 @@ import { storeToRefs } from 'pinia';
 import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
 import { FormModelCode, schemaCode } from './utilsAuth';
 import { isEmpty } from 'InvestCommon/helpers/general';
-import VFormGroup from 'UiKit/components/VForm/VFormGroup.vue';
-import VFormInput from 'UiKit/components/VForm/VFormInput.vue';
-import VButton from 'UiKit/components/VButton/VButton.vue';
+import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
+import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
+import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { scrollToError } from 'UiKit/helpers/validation/general';
 
 

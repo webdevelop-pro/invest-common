@@ -5,8 +5,8 @@ import {
 import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import FormRow from 'InvestCommon/components/VForm/VFormRow.vue';
 import FormCol from 'InvestCommon/components/VForm/VFormCol.vue';
-import VFormCheckbox from 'UiKit/components/VForm/VFormCheckbox.vue';
-import VFormGroup from 'UiKit/components/VForm/VFormGroup.vue';
+import VFormCheckbox from 'UiKit/components/Base/VForm/VFormCheckbox.vue';
+import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import { storeToRefs } from 'pinia';
 import { JSONSchemaType } from 'ajv';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';

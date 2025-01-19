@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import VButton from 'UiKit/components/VButton/VButton.vue';
+import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { useRouter } from 'vue-router';
 import VBreadcrumbs, { IBreadcrumb } from 'UiKit/components/VBreadcrumbs/VBreadcrumbs.vue';
 import { PropType } from 'vue';
-import { VSvgIcon } from 'UiKit/components/VSvgIcon';
+import arrowLeft from 'UiKit/assets/images/arrow-left.svg';
 
 defineProps({
   buttonText: String,
@@ -27,8 +27,7 @@ const onBackClick = () => {
           icon-placement="left"
           @click.stop="onBackClick"
         >
-          <VSvgIcon
-            name="arrow-left"
+          <arrowLeft
             alt="arrow left"
             class="layout-back-button__back-icon"
           />

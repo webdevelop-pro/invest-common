@@ -2,7 +2,7 @@
 import { useAuthLogicStore } from 'InvestCommon/store/useAuthLogic';
 import { SELFSERVICE } from 'InvestCommon/helpers/enums/auth';
 import { socialSignin } from './utilsAuth';
-import VButton from 'UiKit/components/VButton/VButton.vue';
+import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 
 defineProps({
   signup: Boolean,
@@ -16,13 +16,12 @@ const onSocialLoginHandler = async (provider: string) => {
 </script>
 
 <template>
-  <div class="VFormAuthSocial social-form  is--no-margin">
+  <div class="VFormAuthSocial social-form">
     <VButton
       v-for="item in socialSignin"
       :key="item.provider"
-      color="secondary"
+      variant="tetriary"
       size="large"
-      block
       class="social-form__item"
       :class="item.classes"
       @click.stop.prevent="onSocialLoginHandler(item.provider)"
@@ -62,7 +61,7 @@ const onSocialLoginHandler = async (provider: string) => {
   }
 
   &__item {
-    width: 100%;
+    flex: 1 1 auto;
 
     &:hover {
       .social-form__item-icon {

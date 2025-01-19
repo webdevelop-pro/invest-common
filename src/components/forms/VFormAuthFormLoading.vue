@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import VSkeleton from 'UiKit/components/VSkeleton/VSkeleton.vue';
+import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 </script>
 
 <template>

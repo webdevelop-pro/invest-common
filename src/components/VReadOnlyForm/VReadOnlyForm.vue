@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import InfoSlot, { IInfoSlot } from 'InvestCommon/components/VInfoSlot/VInfoSlot.vue';
 import { PropType } from 'vue';
-import VButton from 'UiKit/components/VButton/VButton.vue';
+import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import pen from 'InvestCommon/assets/images/icons/pen.svg?component';
 
 export interface IReadOnlyForm {

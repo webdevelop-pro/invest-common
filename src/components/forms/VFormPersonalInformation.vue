@@ -9,7 +9,7 @@ import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
 import { useAccreditationStore } from 'InvestCommon/store/useAccreditation';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
-import VButton from 'UiKit/components/VButton/VButton.vue';
+import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
 import { ROUTE_ACCREDITATION_UPLOAD, ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/helpers/enums/routes';

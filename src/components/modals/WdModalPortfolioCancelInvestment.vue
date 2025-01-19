@@ -3,12 +3,12 @@ import {
   PropType, computed, nextTick, onMounted, reactive, ref, watch,
 } from 'vue';
 import VModalLayout from 'UiKit/components/VModal/VModalLayout.vue';
-import VButton from 'UiKit/components/VButton/VButton.vue';
+import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { currency } from 'InvestCommon/helpers/currency';
 import { IInvest } from 'InvestCommon/types/api/invest';
 import { PostLinkTypes } from 'InvestCommon/types/api/blog';
-import VFormTextarea from 'UiKit/components/VForm/VFormTextarea.vue';
-import VFormGroup from 'UiKit/components/VForm/VFormGroup.vue';
+import VFormTextarea from 'UiKit/components/Base/VForm/VFormTextarea.vue';
+import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
 import { useInvestmentsStore } from 'InvestCommon/store/useInvestments';
 import { useOfferStore } from 'InvestCommon/store/useOffer';
@@ -18,7 +18,7 @@ import { JSONSchemaType } from 'ajv';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
 import { isEmpty } from 'lodash';
-import { VSvgIcon } from 'UiKit/components/VSvgIcon';
+import arrowLeft from 'UiKit/assets/images/arrow-left.svg';
 import { scrollToError } from 'UiKit/helpers/validation/general';
 import { urlContactUs, urlBlogSingle } from 'InvestCommon/global/links';
 
@@ -176,8 +176,7 @@ watch(() => model, () => {
           icon-placement="left"
           @click.stop="onBackClick"
         >
-          <VSvgIcon
-            name="arrow-left"
+          <arrowLeft
             alt="arrow left"
             class="wd-modal-cancel-investment__back-icon"
           />

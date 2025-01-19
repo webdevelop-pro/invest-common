@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import VSkeleton from 'UiKit/components/VSkeleton/VSkeleton.vue';
+import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 </script>
 
 <template>
@@ -35,7 +35,7 @@ import VSkeleton from 'UiKit/components/VSkeleton/VSkeleton.vue';
   }
 
   &__item {
-    width: 100%;
+    // width: 100%;
 
     &:hover {
       .social-form__item-icon {

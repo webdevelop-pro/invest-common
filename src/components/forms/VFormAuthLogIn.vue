@@ -10,12 +10,13 @@ import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValida
 import { FormModelSignIn, schemaSignIn } from './utilsAuth';
 import { isEmpty } from 'InvestCommon/helpers/general';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
-import VFormGroup from 'UiKit/components/VForm/VFormGroup.vue';
-import VFormInput from 'UiKit/components/VForm/VFormInput.vue';
-import VButton from 'UiKit/components/VButton/VButton.vue';
-import VSvgIcon from 'UiKit/components/VSvgIcon/VSvgIcon.vue';
+import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
+import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
+import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { scrollToError } from 'UiKit/helpers/validation/general';
 import { urlForgot, urlSignup } from 'InvestCommon/global/links';
+import eyeOff from 'UiKit/assets/images/eye-off.svg';
+import eye from 'UiKit/assets/images/eye.svg';
 
 
 const queryParams = computed(() => new URLSearchParams(window.location.search));
@@ -125,8 +126,7 @@ watch(() => model, () => {
               class="login-form__icon-wrap"
               @click="showCreatePassword = !showCreatePassword"
             >
-              <VSvgIcon
-                name="eye-off"
+              <eyeOff
                 class="login-form__input-icon"
                 alt="signup form input icon eye"
               />
@@ -137,8 +137,7 @@ watch(() => model, () => {
               class="login-form__icon-wrap"
               @click="showCreatePassword = !showCreatePassword"
             >
-              <VSvgIcon
-                name="eye"
+              <eye
                 class="login-form__input-icon"
                 alt="signup form input icon eye"
               />

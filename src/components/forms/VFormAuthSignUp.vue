@@ -11,17 +11,18 @@ import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValida
 import { isEmpty } from 'InvestCommon/helpers/general';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import { FormModelSignUp, schemaSignUp } from './utilsAuth';
-import VFormGroup from 'UiKit/components/VForm/VFormGroup.vue';
-import VFormInput from 'UiKit/components/VForm/VFormInput.vue';
-import VButton from 'UiKit/components/VButton/VButton.vue';
-import VFormCheckbox from 'UiKit/components/VForm/VFormCheckbox.vue';
+import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
+import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
+import VButton from 'UiKit/components/Base/VButton/VButton.vue';
+import VFormCheckbox from 'UiKit/components/Base/VForm/VFormCheckbox.vue';
 import FormRow from 'InvestCommon/components/VForm/VFormRow.vue';
 import FormCol from 'InvestCommon/components/VForm/VFormCol.vue';
-import { VSvgIcon } from 'UiKit/components/VSvgIcon';
 import { scrollToError } from 'UiKit/helpers/validation/general';
 import {
   urlTerms, urlPrivacy, urlBlog, urlSignin,
 } from 'InvestCommon/global/links';
+import eyeOff from 'UiKit/assets/images/eye-off.svg';
+import eye from 'UiKit/assets/images/eye.svg';
 
 
 const authStore = useAuthStore();
@@ -224,8 +225,7 @@ const signUpHandler = async () => {
                 class="signup-form__icon-wrap"
                 @click="showCreatePassword = !showCreatePassword"
               >
-                <VSvgIcon
-                  name="eye-off"
+                <eyeOff
                   class="signup-form__input-icon"
                   alt="signup form input icon eye"
                 />
@@ -236,8 +236,7 @@ const signUpHandler = async () => {
                 class="signup-form__icon-wrap"
                 @click="showCreatePassword = !showCreatePassword"
               >
-                <VSvgIcon
-                  name="eye"
+                <eye
                   class="signup-form__input-icon"
                   alt="signup form input icon eye"
                 />
@@ -288,8 +287,7 @@ const signUpHandler = async () => {
                 class="signup-form__icon-wrap"
                 @click="showRepeatPassword = !showRepeatPassword"
               >
-                <VSvgIcon
-                  name="eye-off"
+                <eyeOff
                   class="signup-form__input-icon"
                   alt="signup form input icon eye"
                 />
@@ -300,8 +298,7 @@ const signUpHandler = async () => {
                 class="signup-form__icon-wrap"
                 @click="showRepeatPassword = !showRepeatPassword"
               >
-                <VSvgIcon
-                  name="eye"
+                <eye
                   class="signup-form__input-icon"
                   alt="signup form input icon eye"
                 />

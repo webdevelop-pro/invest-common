@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { PropType, ref } from 'vue';
 import VModalLayout from 'UiKit/components/VModal/VModalLayout.vue';
-import VButton from 'UiKit/components/VButton/VButton.vue';
+import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { jsPDF } from 'jspdf';
 import { currency } from 'InvestCommon/helpers/currency';
 import { IInvest } from 'InvestCommon/types/api/invest';
-import { VSvgIcon } from 'UiKit/components/VSvgIcon';
+import download from 'UiKit/assets/images/download.svg';
 
 const props = defineProps({
   investment: {
@@ -153,8 +153,7 @@ const saveHandler = () => {
           icon-placement="left"
           @click="saveHandler"
         >
-          <VSvgIcon
-            name="download"
+          <download
             alt="download icon"
             class="wd-modal-portfolio-wire__save-icon"
           />

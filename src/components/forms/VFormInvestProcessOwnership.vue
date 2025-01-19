@@ -11,10 +11,10 @@ import { useHubspotForm } from 'InvestCommon/composable';
 import { ROUTE_INVEST_SIGNATURE, ROUTE_INVEST_AMOUNT } from 'InvestCommon/helpers/enums/routes';
 import FormRow from 'InvestCommon/components/VForm/VFormRow.vue';
 import FormCol from 'InvestCommon/components/VForm/VFormCol.vue';
-import VButton from 'UiKit/components/VButton/VButton.vue';
+import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { storeToRefs } from 'pinia';
 import { navigateWithQueryParams } from 'InvestCommon/helpers/general';
-import { VSvgIcon } from 'UiKit/components/VSvgIcon';
+import arrowLeft from 'UiKit/assets/images/arrow-left.svg';
 import { scrollToError } from 'UiKit/helpers/validation/general';
 import { urlOfferSingle, urlProfileAccount } from 'InvestCommon/global/links';
 import VProfileSelectList from 'InvestCommon/components/VProfileSelectList.vue';
@@ -258,8 +258,7 @@ const onAlertButtonClick = () => {
         tag="router-link"
         :to="{ name: ROUTE_INVEST_AMOUNT, params: { slug, id, profileId } }"
       >
-        <VSvgIcon
-          name="arrow-left"
+        <arrowLeft
           alt="arrow left"
           class="invest-form-funding__back-icon"
         />

@@ -6,11 +6,11 @@ import {
 import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import FormRow from 'InvestCommon/components/VForm/VFormRow.vue';
 import FormCol from 'InvestCommon/components/VForm/VFormCol.vue';
-import VFormInput from 'UiKit/components/VForm/VFormInput.vue';
-import VFormSelect from 'UiKit/components/VForm/VFormSelect.vue';
-import VFormCheckbox from 'UiKit/components/VForm/VFormCheckbox.vue';
+import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
+import VFormSelect from 'UiKit/components/Base/VForm/VFormSelect.vue';
+import VFormCheckbox from 'UiKit/components/Base/VForm/VFormCheckbox.vue';
 import { storeToRefs } from 'pinia';
-import VFormGroup from 'UiKit/components/VForm/VFormGroup.vue';
+import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import { JSONSchemaType } from 'ajv';
 import {
   address1Rule, address2Rule, cityRule, countryRuleObject,

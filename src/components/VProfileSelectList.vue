@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, PropType } from 'vue';
 import { useUserProfilesStore, useUsersStore } from 'InvestCommon/store';
-import VSkeleton from 'UiKit/components/VSkeleton/VSkeleton.vue';
-import VFormSelect from 'UiKit/components/VForm/VFormSelect.vue';
+import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
+import VFormSelect from 'UiKit/components/Base/VForm/VFormSelect.vue';
 import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
 import { ROUTE_CREATE_PROFILE } from 'InvestCommon/helpers/enums/routes';

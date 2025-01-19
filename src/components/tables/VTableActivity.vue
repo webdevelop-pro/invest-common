@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import VTable from 'UiKit/components/VTable/VTable.vue';
-import VTag from 'UiKit/components/VTag/VTag.vue';
+import VTable from 'UiKit/components/Base/VTable/VTable.vue';
+import VBadge from 'UiKit/components/Base/VBadge/VBadge.vue';
 
 const activityHeader = [
   'Date',
@@ -77,12 +77,12 @@ const getTagBackground = (tag:string) => {
         </td>
         <td class="is--tag">
           <div class="v-table-activity__tag">
-            <VTag
+            <VBadge
               :background="getTagBackground(item.status)"
               round
             >
               {{ item.status }}
-            </VTag>
+            </VBadge>
           </div>
         </td>
         <td class="is--ip">

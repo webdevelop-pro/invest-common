@@ -3,10 +3,13 @@ import { computed, PropType } from 'vue';
 import { useNotificationsStore } from 'InvestCommon/store/useNotifications';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
 import { useLogoutModal } from 'InvestCommon/components/modals/modals';
-import VDropdown from 'UiKit/components/VDropdown/VDropdown.vue';
+import VDropdown from 'UiKit/components/VDropdown.vue';
 import { storeToRefs } from 'pinia';
-import DefaultAvatar from 'InvestCommon/components/common/DefaultAvatar.vue';
-import { VSvgIcon } from 'UiKit/components/VSvgIcon';
+import VAvatar from 'UiKit/components/VAvatar.vue';
+import {
+  VDropdownMenu, VDropdownMenuTrigger, VDropdownMenuContent, VDropdownMenuItem,
+} from 'UiKit/components/Base/VDropdownMenu';
+import message from 'UiKit/assets/images/message.svg';
 
 type MenuItem = {
   to?: string;
@@ -18,7 +21,7 @@ type MenuItem = {
 
 defineProps({
   menu: Array as PropType<MenuItem[]>,
-})
+});
 
 const usersStore = useUsersStore();
 const { userAccountData } = storeToRefs(usersStore);
@@ -56,29 +59,30 @@ const getComponentClass = (item: MenuItem) => {
       data-testid="header-profile"
       @click="onSidebarOpen"
     >
-      <VSvgIcon
+      <message
         alt="notification icon"
         class="v-header-profile__notification-icon"
-        name="message"
       />
       <span
         v-if="notificationUnreadLength && (notificationUnreadLength > 0)"
         class="v-header-profile__notification-dot"
       />
     </div>
-    <VDropdown
-      hover
-      class="v-header-profile__dropdown"
-    >
-      <div class="v-header-profile__icon-wrap">
-        <DefaultAvatar />
-      </div>
-      <span class="v-header-profile__value is--h6__title">
-        {{ userEmail }}
-      </span>
+    <VDropdownMenu>
+      <VDropdownMenuTrigger>
+        <VAvatar
+          size="small"
+          src=""
+          alt="avatar image"
+          class="v-header-profile__avatar"
+        />
+        <span class="is--h6__title">
+          {{ userEmail }}
+        </span>
+      </VDropdownMenuTrigger>
 
-      <template #listItem>
-        <template
+      <VDropdownMenuContent>
+        <VDropdownMenuItem
           v-for="menuItem in menu"
           :key="menuItem.text"
         >
@@ -91,57 +95,35 @@ const getComponentClass = (item: MenuItem) => {
           >
             {{ menuItem.text }}
           </component>
-        </template>
-        <div
+        </VDropdownMenuItem>
+        <VDropdownMenuItem
           class="v-header-profile__item is--h6__title"
           data-testid="header-profile-logout"
           @click="onLogout"
         >
           Log Out
-        </div>
-      </template>
-    </VDropdown>
+        </VDropdownMenuItem>
+      </VDropdownMenuContent>
+    </VDropdownMenu>
   </div>
 </template>
 
 <style lang="scss">
-.V-dropdown {
-  min-width: 80px;
-  &__selected {
-    min-width: 100px;
-  }
-}
-
 .v-header-profile {
   $root: &;
 
   width: fit-content;
   display: flex;
   align-items: center;
-  gap: 31px;
+  gap: 28px;
   z-index: 0;
-
-  &__icon {
-    width: 25px;
-  }
-
-  &__icon-wrap {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 25px;
-    height: 25px;
-    margin-right: 7px;
-  }
-
-  &__value {
-    margin-right: 9px !important;
-    color: $black;
-  }
 
   &__dropdown {
     width: fit-content;
+  }
+
+  &__avatar {
+    margin-right: 5px;
   }
 
    & &__item {
