@@ -3,12 +3,12 @@ import {
   watch, PropType, reactive, ref, computed,
 } from 'vue';
 import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
-import FormRow from 'InvestCommon/components/VForm/VFormRow.vue';
-import FormCol from 'InvestCommon/components/VForm/VFormCol.vue';
+import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
+import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import VFormCheckbox from 'UiKit/components/Base/VForm/VFormCheckbox.vue';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import { storeToRefs } from 'pinia';
-import { JSONSchemaType } from 'ajv';
+import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { FormModelUnderstandRisks } from 'InvestCommon/types/form';
 import { createFormModel } from 'UiKit/helpers/model';

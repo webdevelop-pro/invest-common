@@ -28,7 +28,7 @@ export const useUsersStore = defineStore('user', () => {
   const router = useRouter();
   const route = useRoute();
   const authStore = useAuthStore();
-  const { isGetSessionLoading } = storeToRefs(authStore);
+  const { isGetSessionLoading, isGetSessionError, getSessionData } = storeToRefs(authStore);
   const userProfilesStore = useUserProfilesStore();
   const {
     getUserData, isGetUserLoading,
@@ -153,18 +153,28 @@ export const useUsersStore = defineStore('user', () => {
   };
   // END REDIRECT URL AND CHECK PROFILE ID
 
-
-  watch(() => userAccountSession.value?.active, async () => {
-    if (userAccountSession.value?.active) {
-      if (!getUserData.value) await userProfilesStore.getUser();
-      userLoggedIn.value = userAccountSession.value?.active;
-      void nextTick(() => {
-        void notificationsStore.notificationsHandler();
-        void userProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
-        void userProfilesStore.getProfileByIdOptions(selectedUserProfileType.value, selectedUserProfileId.value);
-      });
+  // watch get session result
+  watch(() => getSessionData.value?.active, () => {
+    if (getSessionData.value?.active && !isGetSessionError.value) {
+      void updateUserAccountSession(getSessionData.value);
     }
   });
+
+
+  watch(() => userAccountSession.value?.active, () => {
+    if (userAccountSession.value?.active) {
+      if (!getUserData.value) void userProfilesStore.getUser();
+      userLoggedIn.value = userAccountSession.value?.active;
+    }
+  }, { immediate: true });
+
+  watch(() => selectedUserProfileId.value, () => {
+    if (selectedUserProfileId.value && (selectedUserProfileId.value !== 0)) {
+      void userProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
+      void userProfilesStore.getProfileByIdOptions(selectedUserProfileType.value, selectedUserProfileId.value);
+      void notificationsStore.notificationsHandler();
+    }
+  }, { immediate: true });
 
   watch(() => userProfiles.value[0]?.id, () => {
     if (!selectedUserProfileId.value || selectedUserProfileId.value === 0) {
@@ -180,11 +190,14 @@ export const useUsersStore = defineStore('user', () => {
   watch(() => [userProfiles.value, urlProfileId.value], () => {
     if (!urlChecked.value && userLoggedIn.value
       && urlProfileId.value && (userProfiles.value?.length > 0) && !EXTERNAL) checkInitUrl(route);
-    if (userLoggedIn.value && urlProfileId.value && !EXTERNAL) {
+    if (userLoggedIn.value && urlProfileId.value && !EXTERNAL
+      && (Number(urlProfileId.value) !== selectedUserProfileId.value)) {
       setSelectedUserProfileById(Number(urlProfileId.value));
-      void userProfilesStore.getProfileById(selectedUserProfileType.value, Number(urlProfileId.value));
-      void router.push({ name: router.currentRoute.value.name, params: { profileId: urlProfileId.value } });
-      void userProfilesStore.getProfileByIdOptions(selectedUserProfileType.value, selectedUserProfileId.value);
+      void router.push({
+        name: router.currentRoute.value.name,
+        params: { profileId: urlProfileId.value },
+        query: router.currentRoute.value.query,
+      });
     }
   }, { immediate: true, deep: true });
 

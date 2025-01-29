@@ -1,15 +1,14 @@
 <script setup lang="ts">
-import { computed, PropType } from 'vue';
+import { computed, defineAsyncComponent, hydrateOnVisible, PropType } from 'vue';
 import { useNotificationsStore } from 'InvestCommon/store/useNotifications';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
-import { useLogoutModal } from 'InvestCommon/components/modals/modals';
 import VDropdown from 'UiKit/components/VDropdown.vue';
 import { storeToRefs } from 'pinia';
 import VAvatar from 'UiKit/components/VAvatar.vue';
-import {
-  VDropdownMenu, VDropdownMenuTrigger, VDropdownMenuContent, VDropdownMenuItem,
-} from 'UiKit/components/Base/VDropdownMenu';
+import { VDropdownMenuItem } from 'UiKit/components/Base/VDropdownMenu';
 import message from 'UiKit/assets/images/message.svg';
+import { useDialogs } from 'InvestCommon/store/useDialogs';
+
 
 type MenuItem = {
   to?: string;
@@ -27,33 +26,23 @@ const usersStore = useUsersStore();
 const { userAccountData } = storeToRefs(usersStore);
 const notificationsStore = useNotificationsStore();
 const { notificationLength, notificationUnreadLength } = storeToRefs(notificationsStore);
-const logoutModal = useLogoutModal();
+const useDialogsStore = useDialogs();
+const { isDialogLogoutOpen } = storeToRefs(useDialogsStore);
 
 const userEmail = computed(() => userAccountData.value?.email);
 
+
 const onLogout = () => {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-  void logoutModal.show({});
+  isDialogLogoutOpen.value = true;
 };
 const onSidebarOpen = () => {
   if (notificationLength.value) notificationsStore.notificationSidebarOpen();
-};
-
-
-const getComponentName = (item: MenuItem) => {
-  if (item.to) return 'router-link';
-  if (item.href) return 'a';
-  return 'div';
-};
-const getComponentClass = (item: MenuItem) => {
-  if (item.to || item.href) return 'v-header-profile__item';
-  return 'v-header-profile__item-not-link';
 };
 </script>
 
 <template>
   <div class="VHeaderProfile v-header-profile">
-    <div class="v-header-profile__divider" />
+    <div class="v-header-profile__divider is--gt-tablet-show" />
     <div
       class="v-header-profile__notification"
       data-testid="header-profile"
@@ -68,34 +57,21 @@ const getComponentClass = (item: MenuItem) => {
         class="v-header-profile__notification-dot"
       />
     </div>
-    <VDropdownMenu>
-      <VDropdownMenuTrigger>
-        <VAvatar
-          size="small"
-          src=""
-          alt="avatar image"
-          class="v-header-profile__avatar"
-        />
-        <span class="is--h6__title">
-          {{ userEmail }}
-        </span>
-      </VDropdownMenuTrigger>
-
-      <VDropdownMenuContent>
-        <VDropdownMenuItem
-          v-for="menuItem in menu"
-          :key="menuItem.text"
-        >
-          <component
-            :is="getComponentName(menuItem)"
-            :href="menuItem.href"
-            :to="menuItem.to"
-            class="is--h6__title"
-            :class="[getComponentClass(menuItem), { 'is--active': menuItem.active }]"
-          >
-            {{ menuItem.text }}
-          </component>
-        </VDropdownMenuItem>
+    <VDropdown
+      with-chevron
+      :menu="menu"
+      :content-props="{ sideOffset: 14 }"
+    >
+      <VAvatar
+        size="small"
+        src=""
+        alt="avatar image"
+        class="v-header-profile__avatar"
+      />
+      <span class="is--h6__title">
+        {{ userEmail }}
+      </span>
+      <template #content>
         <VDropdownMenuItem
           class="v-header-profile__item is--h6__title"
           data-testid="header-profile-logout"
@@ -103,12 +79,13 @@ const getComponentClass = (item: MenuItem) => {
         >
           Log Out
         </VDropdownMenuItem>
-      </VDropdownMenuContent>
-    </VDropdownMenu>
+      </template>
+    </VDropdown>
   </div>
 </template>
 
 <style lang="scss">
+@use 'UiKit/styles/_variables.scss' as *;
 .v-header-profile {
   $root: &;
 
@@ -117,6 +94,10 @@ const getComponentClass = (item: MenuItem) => {
   align-items: center;
   gap: 28px;
   z-index: 0;
+
+  @media screen and (max-width: $tablet){
+    flex-direction: column;
+  }
 
   &__dropdown {
     width: fit-content;

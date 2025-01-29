@@ -12,17 +12,15 @@ import { useInvestmentsStore } from './useInvestments';
 import { useOfferStore } from './useOffer';
 import { useWebSocket } from '@vueuse/core';
 import env from 'InvestCommon/global/index';
-import { notify } from '@kyvg/vue3-notification';
+import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 
 const { NOTIFICATION_URL } = env;
-const ERROR_OPTIONS_RETRY = {
-  text: 'Failed to connect WebSocket after 3 retries',
-  data: {
-    status: 3,
-  },
-  type: 'error',
-  group: 'transaction',
-  duration: 10000,
+
+const { toast } = useToast();
+
+const TOAST_OPTIONS = {
+  title: 'Failed to connect WebSocket after 3 retries',
+  variant: 'error',
 };
 
 export const useNotificationsStore = defineStore('notifications', () => {
@@ -88,12 +86,10 @@ export const useNotificationsStore = defineStore('notifications', () => {
   const isNotificationSidebarOpen = ref(false);
   const notificationSidebarOpen = () => {
     isNotificationSidebarOpen.value = true;
-    document.body.classList.add('is-notification-sidebar-open');
   };
 
   const notificationSidebarClose = () => {
     isNotificationSidebarOpen.value = false;
-    document.body.classList.remove('is-notification-sidebar-open');
   };
 
   const handleInternalMessage = (notification: INotification) => {
@@ -139,7 +135,7 @@ export const useNotificationsStore = defineStore('notifications', () => {
         retries: 3,
         delay: 1000,
         onFailed() {
-          notify(ERROR_OPTIONS_RETRY);
+          toast(TOAST_OPTIONS);
         },
       },
       heartbeat: {

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, PropType } from 'vue';
-import { useUserProfilesStore, useUsersStore } from 'InvestCommon/store';
-import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
+import { useUsersStore } from 'InvestCommon/store/useUsers';
+import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import VFormSelect from 'UiKit/components/Base/VForm/VFormSelect.vue';
 import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
@@ -39,10 +39,10 @@ const getName = (profile: IProfileIndividual) => {
 const userListFormatted = computed(() => {
   const userProfilesList: ISelectedProfile[] = [];
   userProfiles.value.forEach((item: IProfileIndividual) => {
-    const text = `${getName(item)} Investment Profile: ${getId(item)}`;
+    const text = `${getId(item)}: ${getName(item)} Investment Profile`;
     userProfilesList.push({
       text: text.charAt(0).toUpperCase() + text.slice(1),
-      id: item.id,
+      id: `${item.id}`,
     });
   });
   userProfilesList.push({
@@ -51,8 +51,6 @@ const userListFormatted = computed(() => {
   });
   return userProfilesList;
 });
-const selectedUserProfileFormatted = computed(() => (
-  userListFormatted.value.filter((item) => item.id === selectedUserProfileId.value)));
 
 const onUpdateSelectedProfile = (id: number | string) => {
   if (!id) return;
@@ -69,23 +67,15 @@ const onUpdateSelectedProfile = (id: number | string) => {
 
 <template>
   <div class="VProfileSelectList v-profile-select-list">
-    <VSkeleton
-      v-if="userAccountLoading"
-      height="30px"
-      width="250px"
-      style="margin-bottom: 67px;"
-      class="v-profile-select-list__skeleton"
-    />
     <VFormSelect
-      v-else
-      :model-value="selectedUserProfileFormatted"
+      :model-value="`${selectedUserProfileId}`"
       name="investmentAccount"
       :size="size"
-      dropdown-absolute
       data-testid="investAccount"
       item-label="text"
       item-value="id"
       :options="userListFormatted"
+      :loading="userAccountLoading || (userListFormatted.length === 0)"
       @update:model-value="onUpdateSelectedProfile"
     />
   </div>
@@ -94,5 +84,11 @@ const onUpdateSelectedProfile = (id: number | string) => {
 <style lang="scss">
 .v-profile-select-list {
   width: 100%;
+
+  .v-select-value {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 </style>

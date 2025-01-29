@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { useRouter } from 'vue-router';
-import VBreadcrumbs, { IBreadcrumb } from 'UiKit/components/VBreadcrumbs/VBreadcrumbs.vue';
+import VBreadcrumbs, { IBreadcrumb } from 'UiKit/components/VBreadcrumb/VBreadcrumbsList.vue';
 import { PropType } from 'vue';
 import arrowLeft from 'UiKit/assets/images/arrow-left.svg';
 
@@ -49,6 +49,7 @@ const onBackClick = () => {
 
 
 <style lang="scss">
+@use 'UiKit/styles/_variables.scss' as *;
 .layout-back-button {
   width: 100%;
   padding-top: $header-height;
@@ -62,6 +63,11 @@ const onBackClick = () => {
     padding-top: 40px;
     gap: 85px;
     margin-bottom: 130px;
+
+    @media screen and (max-width: $desktop){
+      flex-direction: column;
+      gap: 40px;
+    }
   }
 
   &__left {

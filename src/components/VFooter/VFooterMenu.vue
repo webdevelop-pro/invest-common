@@ -3,7 +3,7 @@ import { PropType } from 'vue';
 
 type MenuItem = {
   to?: string;
-  href?: string;
+  link?: string;
   text: string;
   active?: boolean;
   children?: MenuItem[];
@@ -14,11 +14,11 @@ defineProps({
 
 const getComponentName = (item: MenuItem) => {
   if (item.to) return 'router-link';
-  if (item.href) return 'a';
+  if (item.link) return 'a';
   return 'div';
 };
 const getComponentClass = (item: MenuItem) => {
-  if (item.to || item.href) return 'v-footer-menu__item';
+  if (item.to || item.link) return 'v-footer-menu__item';
   return 'v-footer-menu__item-not-link';
 };
 </script>
@@ -34,7 +34,7 @@ const getComponentClass = (item: MenuItem) => {
       >
         <component
           :is="getComponentName(menuItem)"
-          :href="menuItem.href"
+          :href="menuItem.link"
           :to="menuItem.to"
           class="is--h6__title"
           :class="[getComponentClass(menuItem), { 'is--active': menuItem.active }]"
@@ -52,7 +52,7 @@ const getComponentClass = (item: MenuItem) => {
           >
             <component
               :is="getComponentName(menuItem)"
-              :href="childItem.href"
+              :href="childItem.link"
               :to="childItem.to"
               class="is--h6__title"
               :class="[getComponentClass(childItem), { 'is--active': childItem.active }]"

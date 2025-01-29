@@ -3,12 +3,12 @@ import {
   watch, PropType, reactive, ref, computed,
 } from 'vue';
 import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
-import FormRow from 'InvestCommon/components/VForm/VFormRow.vue';
-import FormCol from 'InvestCommon/components/VForm/VFormCol.vue';
+import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
+import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import { storeToRefs } from 'pinia';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import VFormRadio from 'UiKit/components/Base/VForm/VFormRadio.vue';
-import { JSONSchemaType } from 'ajv';
+import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { FormModelFinancialSituation } from 'InvestCommon/types/form';
 import { urlBlogSingle } from 'InvestCommon/global/links';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
@@ -20,11 +20,11 @@ import { createFormModel } from 'UiKit/helpers/model';
 
 const isAccreditedRadioOptions = [
   {
-    value: true,
+    value: 'true',
     text: 'Yes',
   },
   {
-    value: false,
+    value: 'false',
     text: 'No',
   },
 ];
@@ -108,7 +108,6 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
     <FormRow>
       <FormCol>
         <VFormGroup
-          v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
           :schema-back="getProfileByIdOptionsData"
@@ -130,7 +129,6 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
           </div>
           <VFormRadio
             v-model="model.accredited_investor.is_accredited"
-            :is-error="VFormGroupProps.isFieldError"
             :options="isAccreditedRadioOptions"
           />
         </VFormGroup>

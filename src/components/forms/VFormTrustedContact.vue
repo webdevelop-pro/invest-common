@@ -5,8 +5,8 @@ import {
 import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
-import FormRow from 'InvestCommon/components/VForm/VFormRow.vue';
-import FormCol from 'InvestCommon/components/VForm/VFormCol.vue';
+import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
+import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { storeToRefs } from 'pinia';
@@ -16,7 +16,7 @@ import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import { filterSchema, scrollToError } from 'UiKit/helpers/validation/general';
 import { useRouter } from 'vue-router';
 import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/helpers/enums/routes';
-import { JSONSchemaType } from 'ajv';
+import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import {
   firstNameRule, lastNameRule, relationshipTypeRule, phoneRule, emailRule, dobRule, errorMessageRule,
 } from 'UiKit/helpers/validation/rules';
@@ -27,7 +27,7 @@ import env from 'InvestCommon/global';
 const router = useRouter();
 const userProfilesStore = useUserProfilesStore();
 const {
-  isSetProfileByIdLoading, setProfileByIdErrorData, getProfileByIdOptionsData,
+  isSetProfileByIdLoading, setProfileByIdErrorData, getProfileByIdOptionsData, isGetProfileByIdLoading,
 } = storeToRefs(userProfilesStore);
 const usersStore = useUsersStore();
 const {
@@ -163,6 +163,7 @@ watch(() => getProfileByIdOptionsData.value, () => {
               placeholder="Relationship Type"
               name="relationship-type"
               size="large"
+              :loading="isGetProfileByIdLoading"
               data-testid="relationship-type"
               @update:model-value="model.beneficiary.relationship_type = $event"
             />
@@ -188,6 +189,7 @@ watch(() => getProfileByIdOptionsData.value, () => {
               name="first-name"
               size="large"
               data-testid="first-name"
+              :loading="isGetProfileByIdLoading"
               @update:model-value="model.beneficiary.first_name = $event"
             />
           </VFormGroup>
@@ -212,6 +214,7 @@ watch(() => getProfileByIdOptionsData.value, () => {
               name="last-name"
               size="large"
               data-testid="last-name"
+              :loading="isGetProfileByIdLoading"
               @update:model-value="model.beneficiary.last_name = $event"
             />
           </VFormGroup>
@@ -238,6 +241,7 @@ watch(() => getProfileByIdOptionsData.value, () => {
               size="large"
               type="date"
               data-testid="dob"
+              :loading="isGetProfileByIdLoading"
               @update:model-value="model.beneficiary.dob = $event"
             />
           </VFormGroup>
@@ -263,6 +267,7 @@ watch(() => getProfileByIdOptionsData.value, () => {
               mask="+#(###)###-####"
               disallow-special-chars
               data-testid="phone"
+              :loading="isGetProfileByIdLoading"
               @update:model-value="model.beneficiary.phone = $event"
             />
           </VFormGroup>
@@ -287,6 +292,7 @@ watch(() => getProfileByIdOptionsData.value, () => {
               name="email"
               size="large"
               data-testid="email"
+              :loading="isGetProfileByIdLoading"
               @update:model-value="model.beneficiary.email = $event"
             />
           </VFormGroup>

@@ -6,8 +6,8 @@ import {
 import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
-import FormRow from 'InvestCommon/components/VForm/VFormRow.vue';
-import FormCol from 'InvestCommon/components/VForm/VFormCol.vue';
+import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
+import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import VFormSelect from 'UiKit/components/Base/VForm/VFormSelect.vue';
@@ -20,7 +20,7 @@ import VFormCheckbox from 'UiKit/components/Base/VForm/VFormCheckbox.vue';
 import {
   address1Rule, address2Rule, cityRule, emailRule, errorMessageRule, zipRule,
 } from 'UiKit/helpers/validation/rules';
-import { JSONSchemaType } from 'ajv';
+import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/helpers/enums/routes';
 import { useRouter } from 'vue-router';
 import { getOptions } from 'UiKit/helpers/model';
@@ -32,6 +32,7 @@ const router = useRouter();
 const userProfilesStore = useUserProfilesStore();
 const {
   isSetProfileByIdLoading, setProfileByIdErrorData, getProfileByIdOptionsData,
+  isGetProfileByIdLoading,
 } = storeToRefs(userProfilesStore);
 const usersStore = useUsersStore();
 const {
@@ -307,8 +308,8 @@ watch(() => [getProfileByIdOptionsData.value, schemaBackgroundInformation.value]
               :is-error="VFormGroupProps.isFieldError"
               name="employment-type"
               size="large"
-              dropdown-absolute
               :options="optionsEmployment"
+              :loading="isGetProfileByIdLoading || (optionsEmployment.length === 0)"
             />
           </VFormGroup>
         </FormCol>
@@ -333,6 +334,7 @@ watch(() => [getProfileByIdOptionsData.value, schemaBackgroundInformation.value]
                 name="employer-name"
                 size="large"
                 data-testid="employer-name"
+                :loading="isGetProfileByIdLoading"
                 @update:model-value="model.employment.employer_name = $event"
               />
             </VFormGroup>
@@ -355,6 +357,7 @@ watch(() => [getProfileByIdOptionsData.value, schemaBackgroundInformation.value]
                 placeholder="Your Title/Role"
                 name="title"
                 size="large"
+                :loading="isGetProfileByIdLoading"
                 @update:model-value="model.employment.title = $event"
               />
             </VFormGroup>
@@ -379,6 +382,7 @@ watch(() => [getProfileByIdOptionsData.value, schemaBackgroundInformation.value]
                 placeholder="Address 1"
                 name="address-1"
                 size="large"
+                :loading="isGetProfileByIdLoading"
                 @update:model-value="model.employment.address1 = $event"
               />
             </VFormGroup>
@@ -401,6 +405,7 @@ watch(() => [getProfileByIdOptionsData.value, schemaBackgroundInformation.value]
                 placeholder="Address 2"
                 name="address-2"
                 size="large"
+                :loading="isGetProfileByIdLoading"
                 @update:model-value="model.employment.address2 = $event"
               />
             </VFormGroup>
@@ -427,6 +432,7 @@ watch(() => [getProfileByIdOptionsData.value, schemaBackgroundInformation.value]
                 size="large"
                 disallow-special-chars
                 disallow-numbers
+                :loading="isGetProfileByIdLoading"
                 @update:model-value="model.employment.city = $event"
               />
             </VFormGroup>
@@ -452,6 +458,7 @@ watch(() => [getProfileByIdOptionsData.value, schemaBackgroundInformation.value]
                 mask="#####-####"
                 return-masked-value
                 disallow-special-chars
+                :loading="isGetProfileByIdLoading"
                 @update:model-value="model.employment.zip_code = $event"
               />
             </VFormGroup>
@@ -519,6 +526,7 @@ watch(() => [getProfileByIdOptionsData.value, schemaBackgroundInformation.value]
                 placeholder="Member Firm Name"
                 size="large"
                 name="firm-name"
+                :loading="isGetProfileByIdLoading"
                 @update:model-value="model.finra_affiliated.member_firm_name = $event"
               />
             </VFormGroup>
@@ -541,6 +549,7 @@ watch(() => [getProfileByIdOptionsData.value, schemaBackgroundInformation.value]
                 placeholder="Compliance Contact Name"
                 name="contact-name"
                 size="large"
+                :loading="isGetProfileByIdLoading"
                 @update:model-value="model.finra_affiliated.compliance_contact_name = $event"
               />
             </VFormGroup>
@@ -563,6 +572,7 @@ watch(() => [getProfileByIdOptionsData.value, schemaBackgroundInformation.value]
                 placeholder="Compliance contact email"
                 name="contact-email"
                 size="large"
+                :loading="isGetProfileByIdLoading"
                 @update:model-value="model.finra_affiliated.compliance_contant_email = $event"
               />
             </VFormGroup>
@@ -609,6 +619,7 @@ watch(() => [getProfileByIdOptionsData.value, schemaBackgroundInformation.value]
                 placeholder="Ticker symbol list"
                 name="ticker-symbol"
                 size="large"
+                :loading="isGetProfileByIdLoading"
                 @update:model-value="model.ten_percent_shareholder.ticker_symbol_list = $event"
               />
             </VFormGroup>

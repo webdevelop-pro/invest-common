@@ -4,6 +4,6 @@
 <template>
 </template>
 
-<style lang="sass">
-@import 'styles/index.scss'
+<style lang="sCss">
+@import 'styles/index.scss';
 </style>

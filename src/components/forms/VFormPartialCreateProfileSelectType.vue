@@ -3,13 +3,13 @@ import {
   watch, PropType, reactive, ref, computed,
 } from 'vue';
 import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
-import FormRow from 'InvestCommon/components/VForm/VFormRow.vue';
-import FormCol from 'InvestCommon/components/VForm/VFormCol.vue';
+import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
+import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import VFormSelect from 'UiKit/components/Base/VForm/VFormSelect.vue';
 import { storeToRefs } from 'pinia';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import { SELECT_PROFILE_TYPES } from 'InvestCommon/utils';
-import { JSONSchemaType } from 'ajv';
+import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { errorMessageRule, typeProfileRule } from 'UiKit/helpers/validation/rules';
 import { FormModelCreateProfileSelectType } from 'InvestCommon/types/form';
 import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
@@ -95,7 +95,7 @@ watch(() => props.modelData?.type_profile, () => {
           data-testid="type-profile-group"
         >
           <VFormSelect
-            :model-value="model.type_profile"
+            v-model="model.type_profile"
             :is-error="VFormGroupProps.isFieldError"
             name="type_profile"
             size="large"
@@ -104,8 +104,7 @@ watch(() => props.modelData?.type_profile, () => {
             item-label="text"
             item-value="value"
             :options="SELECT_PROFILE_TYPES"
-            dropdown-absolute
-            @update:model-value="model.type_profile = $event"
+            :loading="(SELECT_PROFILE_TYPES?.length === 0)"
           />
         </VFormGroup>
       </FormCol>

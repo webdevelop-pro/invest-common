@@ -1,20 +1,18 @@
 
-import { notify } from '@kyvg/vue3-notification';
+
 import {
   IAuthGenericError, IAuthError422, IAuthError400, IRecovery, ISettingsError400, IRecovery422,
 } from 'InvestCommon/types/api/auth';
 import { IOfferSharesError } from '../types/api/offers';
 import { toRaw } from 'vue';
+import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 
-const NOTIFY_OPTIONS = {
-  text: 'Something went wrong',
-  data: {
-    description: 'Please try again',
-    status: 3,
-  },
-  type: 'error',
-  group: 'transaction',
-  duration: 10000,
+const { toast } = useToast();
+
+const TOAST_OPTIONS = {
+  title: 'Something went wrong',
+  description: 'Please try again',
+  variant: 'error',
 };
 
 // eslint-disable @typescript-eslint/no-unsafe-assignment
@@ -28,19 +26,19 @@ export const generalErrorHandling = async (error: Response) => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const data:IOfferSharesError = errorJson;
       // eslint-disable-next-line prefer-destructuring
-      if (data.number_of_shares.length) NOTIFY_OPTIONS.text = data.number_of_shares[0];
+      if (data.number_of_shares.length) TOAST_OPTIONS.description = data.number_of_shares[0];
     } else if (errorJson as IAuthGenericError) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const data:IAuthGenericError = errorJson;
-      if (data.error && data.error.message) NOTIFY_OPTIONS.text = data.error.message;
+      if (data.error && data.error.message) TOAST_OPTIONS.description = data.error.message;
     } else if (errorJson) {
       // eslint-disable-next-line
-      NOTIFY_OPTIONS.text = errorJson;
+      TOAST_OPTIONS.description = errorJson;
     }
   } catch (errorTry) {
     // ignore
   }
-  notify(NOTIFY_OPTIONS);
+  toast(TOAST_OPTIONS);
 };
 
 
@@ -52,34 +50,34 @@ export const errorHandling422 = async (error: Response) => {
     if (errorJson as IAuthGenericError) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const data:IAuthGenericError = errorJson;
-      if (data.error && data.error.message) NOTIFY_OPTIONS.text = data.error.message;
+      if (data.error && data.error.message) TOAST_OPTIONS.description = data.error.message;
     }
 
     if (errorJson as IAuthError422) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const data:IAuthError422 = errorJson;
-      if (data.message) NOTIFY_OPTIONS.text = data.message;
+      if (data.message) TOAST_OPTIONS.description = data.message;
     }
 
     if (errorJson as IAuthError400) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const data:IAuthError400 = errorJson;
       if (data.ui && data.ui.messages && data.ui.messages[0].text) {
-        NOTIFY_OPTIONS.text = data.ui.messages[0].text;
+        TOAST_OPTIONS.description = data.ui.messages[0].text;
       }
       if (data.ui && data.ui.nodes) {
         data.ui.nodes.map((node) => {
           if (node.messages[0] && node.messages[0].text) {
-            NOTIFY_OPTIONS.text = node.messages[0].text;
+            TOAST_OPTIONS.description = node.messages[0].text;
           }
-          return NOTIFY_OPTIONS;
+          return TOAST_OPTIONS;
         });
       }
     }
   } catch (errorTry) {
     // ignore
   }
-  notify(NOTIFY_OPTIONS);
+  toast(TOAST_OPTIONS);
 };
 
 // eslint-disable-next-line
@@ -91,7 +89,7 @@ export const errorHandlingRecovery = async (error: Response) => {
     if (errorJson as IAuthGenericError) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const data:IAuthGenericError = errorJson;
-      if (data.error && data.error.message) NOTIFY_OPTIONS.text = data.error.message;
+      if (data.error && data.error.message) TOAST_OPTIONS.description = data.error.message;
     }
 
     // eslint-disable-next-line
@@ -100,13 +98,13 @@ export const errorHandlingRecovery = async (error: Response) => {
     if (errorJson as IRecovery) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const data:IRecovery = errorJson;
-      if (data.ui && data.ui.messages && data.ui.messages[0].text) NOTIFY_OPTIONS.text = data.ui.messages[0].text;
+      if (data.ui && data.ui.messages && data.ui.messages[0].text) TOAST_OPTIONS.description = data.ui.messages[0].text;
       if (data.ui && data.ui.nodes) {
         data.ui.nodes.map((node) => {
           if (node.messages[0] && node.messages[0].text) {
-            NOTIFY_OPTIONS.text = node.messages[0].text;
+            TOAST_OPTIONS.description = node.messages[0].text;
           }
-          return NOTIFY_OPTIONS;
+          return TOAST_OPTIONS;
         });
       }
     }
@@ -115,7 +113,7 @@ export const errorHandlingRecovery = async (error: Response) => {
   } catch (errorTry) {
     // ignore
   }
-  notify(NOTIFY_OPTIONS);
+  toast(TOAST_OPTIONS);
 };
 
 
@@ -127,30 +125,30 @@ export const errorHandlingSettings = async (error: Response) => {
     if (errorJson as IAuthGenericError) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const data:IAuthGenericError = errorJson;
-      if (data.error && data.error.message) NOTIFY_OPTIONS.text = data.error.reason || data.error.message;
+      if (data.error && data.error.message) TOAST_OPTIONS.description = data.error.reason || data.error.message;
     }
 
     if (errorJson as IAuthError422) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const data:IAuthError422 = errorJson;
-      if (data.message) NOTIFY_OPTIONS.text = data.message;
+      if (data.message) TOAST_OPTIONS.description = data.message;
     }
 
     if (errorJson as ISettingsError400) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const data:IAuthError400 = errorJson;
-      if (data.ui && data.ui.messages && data.ui.messages[0].text) NOTIFY_OPTIONS.text = data.ui.messages[0].text;
+      if (data.ui && data.ui.messages && data.ui.messages[0].text) TOAST_OPTIONS.description = data.ui.messages[0].text;
       if (data.ui && data.ui.nodes) {
         data.ui.nodes.map((node) => {
           if (node.messages[0] && node.messages[0].text) {
-            NOTIFY_OPTIONS.text = node.messages[0].text;
+            TOAST_OPTIONS.description = node.messages[0].text;
           }
-          return NOTIFY_OPTIONS;
+          return TOAST_OPTIONS;
         });
       }
     }
   } catch (errorTry) {
     // ignore
   }
-  notify(NOTIFY_OPTIONS);
+  toast(TOAST_OPTIONS);
 };

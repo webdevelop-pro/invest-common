@@ -4,14 +4,14 @@ import {
   ref,
 } from 'vue';
 import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
-import FormRow from 'InvestCommon/components/VForm/VFormRow.vue';
-import FormCol from 'InvestCommon/components/VForm/VFormCol.vue';
+import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
+import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
 import VFormSelect from 'UiKit/components/Base/VForm/VFormSelect.vue';
 import VFormCheckbox from 'UiKit/components/Base/VForm/VFormCheckbox.vue';
 import { storeToRefs } from 'pinia';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
-import { JSONSchemaType } from 'ajv';
+import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import {
   address1Rule, address2Rule, cityRule, countryRuleObject,
   dobRule,
@@ -23,6 +23,7 @@ import { createFormModel, getOptions } from 'UiKit/helpers/model';
 import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
 import { isEmpty } from 'UiKit/helpers/general';
 import { FormModelPersonalInformation } from 'InvestCommon/types/form';
+import VFormCombobox from 'UiKit/components/Base/VForm/VFormCombobox.vue';
 
 interface FormModelBusinessController {
   business_controller: {
@@ -48,7 +49,7 @@ const props = defineProps({
 
 const userProfilesStore = useUserProfilesStore();
 const {
-  setProfileByIdErrorData, getProfileByIdOptionsData,
+  setProfileByIdErrorData, getProfileByIdOptionsData, isGetProfileByIdLoading,
 } = storeToRefs(userProfilesStore);
 
 const schema = {
@@ -181,6 +182,7 @@ const checkboxText = props.trust ? 'The Grantor and the Trustee are the same per
               name="first-name"
               size="large"
               data-testid="first-name"
+              :loading="isGetProfileByIdLoading"
               @update:model-value="model.business_controller.first_name = $event"
             />
           </VFormGroup>
@@ -204,6 +206,7 @@ const checkboxText = props.trust ? 'The Grantor and the Trustee are the same per
               placeholder="Last Name"
               name="last-name"
               size="large"
+              :loading="isGetProfileByIdLoading"
               data-testid="last-name"
               @update:model-value="model.business_controller.last_name = $event"
             />
@@ -231,6 +234,7 @@ const checkboxText = props.trust ? 'The Grantor and the Trustee are the same per
               disallow-special-chars
               name="phone"
               size="large"
+              :loading="isGetProfileByIdLoading"
               data-testid="phone"
               @update:model-value="model.business_controller.phone = $event"
             />
@@ -256,6 +260,7 @@ const checkboxText = props.trust ? 'The Grantor and the Trustee are the same per
               size="large"
               data-testid="date-of-birth"
               type="date"
+              :loading="isGetProfileByIdLoading"
               @update:model-value="model.business_controller.dob = $event"
             />
           </VFormGroup>
@@ -281,6 +286,7 @@ const checkboxText = props.trust ? 'The Grantor and the Trustee are the same per
               name="address-1"
               size="large"
               data-testid="address-1"
+              :loading="isGetProfileByIdLoading"
               @update:model-value="model.business_controller.address1 = $event"
             />
           </VFormGroup>
@@ -305,6 +311,7 @@ const checkboxText = props.trust ? 'The Grantor and the Trustee are the same per
               name="address-2"
               size="large"
               data-testid="address-2"
+              :loading="isGetProfileByIdLoading"
               @update:model-value="model.business_controller.address2 = $event"
             />
           </VFormGroup>
@@ -333,6 +340,7 @@ const checkboxText = props.trust ? 'The Grantor and the Trustee are the same per
               data-testid="city"
               disallow-special-chars
               disallow-numbers
+              :loading="isGetProfileByIdLoading"
               @update:model-value="model.business_controller.city = $event"
             />
           </VFormGroup>
@@ -349,8 +357,8 @@ const checkboxText = props.trust ? 'The Grantor and the Trustee are the same per
             label="State"
             data-testid="state-group"
           >
-            <VFormSelect
-              :model-value="model.business_controller.state"
+            <VFormCombobox
+              v-model="model.business_controller.state"
               :is-error="VFormGroupProps.isFieldError"
               name="state"
               size="large"
@@ -359,9 +367,8 @@ const checkboxText = props.trust ? 'The Grantor and the Trustee are the same per
               item-value="value"
               searchable
               :options="optionsState"
-              dropdown-absolute
               data-testid="state"
-              @update:model-value="model.business_controller.state = $event"
+              :loading="isGetProfileByIdLoading || (optionsState.length === 0)"
             />
           </VFormGroup>
         </FormCol>
@@ -390,6 +397,7 @@ const checkboxText = props.trust ? 'The Grantor and the Trustee are the same per
               mask="#####-####"
               return-masked-value
               disallow-special-chars
+              :loading="isGetProfileByIdLoading"
               @update:model-value="model.business_controller.zip_code = $event"
             />
           </VFormGroup>
@@ -407,8 +415,8 @@ const checkboxText = props.trust ? 'The Grantor and the Trustee are the same per
             label="Country"
             data-testid="country-group"
           >
-            <VFormSelect
-              :model-value="model.business_controller.country"
+            <VFormCombobox
+              v-model="model.business_controller.country"
               :is-error="VFormGroupProps.isFieldError"
               name="country"
               size="large"
@@ -417,9 +425,8 @@ const checkboxText = props.trust ? 'The Grantor and the Trustee are the same per
               item-value="value"
               searchable
               :options="optionsCountry"
-              dropdown-absolute
               data-testid="country"
-              @update:model-value="model.business_controller.country = $event"
+              :loading="isGetProfileByIdLoading || (optionsCountry.length === 0)"
             />
           </VFormGroup>
         </FormCol>
@@ -445,6 +452,7 @@ const checkboxText = props.trust ? 'The Grantor and the Trustee are the same per
               text
               type="email"
               size="large"
+              :loading="isGetProfileByIdLoading"
               @update:model-value="model.business_controller.email = $event"
             />
           </VFormGroup>

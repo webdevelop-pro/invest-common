@@ -3,18 +3,19 @@ import {
   watch, PropType, reactive, ref, computed,
 } from 'vue';
 import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
-import FormRow from 'InvestCommon/components/VForm/VFormRow.vue';
-import FormCol from 'InvestCommon/components/VForm/VFormCol.vue';
+import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
+import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
 import VFormSelect from 'UiKit/components/Base/VForm/VFormSelect.vue';
 import { storeToRefs } from 'pinia';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
-import { JSONSchemaType } from 'ajv';
+import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
 import { filterSchema, getFilteredObject } from 'UiKit/helpers/validation/general';
 import { isEmpty } from 'UiKit/helpers/general';
 import { createFormModel, getOptions } from 'UiKit/helpers/model';
+import VFormCombobox from 'UiKit/components/Base/VForm/VFormCombobox.vue';
 
 
 interface FormModelPartialIdentification {
@@ -58,7 +59,7 @@ const props = defineProps({
 
 const userIdentityStore = useUserProfilesStore();
 const {
-  setProfileByIdErrorData, getProfileByIdOptionsData,
+  setProfileByIdErrorData, getProfileByIdOptionsData, isGetProfileByIdLoading,
 } = storeToRefs(userIdentityStore);
 
 // const formModel = {
@@ -142,7 +143,7 @@ watch(() => props.modelData, () => {
             item-label="name"
             item-value="value"
             :options="optionsType"
-            dropdown-absolute
+            :loading="isGetProfileByIdLoading || (optionsType.length === 0)"
             @update:model-value="model.type_of_identification.type = $event"
           />
         </VFormGroup>
@@ -167,6 +168,7 @@ watch(() => props.modelData, () => {
             name="identification-number"
             size="large"
             data-testid="identification-number"
+            :loading="isGetProfileByIdLoading"
             @update:model-value="model.type_of_identification.id_number = $event"
           />
         </VFormGroup>
@@ -184,8 +186,8 @@ watch(() => props.modelData, () => {
           label="State of Issue"
           data-testid="identification-state-group"
         >
-          <VFormSelect
-            :model-value="model.type_of_identification?.state"
+          <VFormCombobox
+            v-model="model.type_of_identification.state"
             :is-error="VFormGroupProps.isFieldError"
             name="identification_state"
             size="large"
@@ -194,8 +196,7 @@ watch(() => props.modelData, () => {
             item-label="name"
             item-value="value"
             :options="optionsState"
-            dropdown-absolute
-            @update:model-value="model.type_of_identification.state = $event"
+            :loading="isGetProfileByIdLoading || (optionsState.length === 0)"
           />
         </VFormGroup>
       </FormCol>

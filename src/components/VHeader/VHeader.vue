@@ -22,6 +22,12 @@ const VHeaderProfile = defineAsyncComponent({
   hydrate: hydrateOnVisible(),
 });
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+const VHeaderProfileMobile = defineAsyncComponent({
+  loader: () => import('./VHeaderProfileMobile.vue'),
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+  hydrate: hydrateOnVisible(),
+});
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const VButton = defineAsyncComponent({
   loader: () => import('UiKit/components/Base/VButton/VButton.vue'),
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
@@ -57,6 +63,7 @@ const { userLoggedIn, isGetUserProfileLoading } = storeToRefs(usersStore);
 const authLogicStore = useAuthLogicStore();
 const { isLoadingSession } = storeToRefs(authLogicStore);
 const path = ref(props.path || '');
+const isMobileSidebarOpen = defineModel<boolean>();
 
 const isSignUpPage = computed(() => {
   if (EXTERNAL) {
@@ -101,6 +108,7 @@ watchEffect(() => {
 
 <template>
   <VHeader
+    v-model="isMobileSidebarOpen"
     :show-navigation="!isSignInPage && !isSignUpPage && !isRecoveryPage"
     class="VHeaderInvest v-header-invest"
   >
@@ -155,7 +163,6 @@ watchEffect(() => {
       <VHeaderProfile
         v-else-if="userLoggedIn"
         :menu="profileMenu"
-        class="v-header-invest-btns__profile"
       />
     </div>
 
@@ -185,10 +192,10 @@ watchEffect(() => {
           Sign Up
         </VButton>
       </div>
-      <VHeaderProfile
+      <VHeaderProfileMobile
         v-else-if="userLoggedIn"
         :menu="profileMenu"
-        class="v-header-invest-btns__profile"
+        @click="isMobileSidebarOpen = false"
       />
     </template>
   </VHeader>
@@ -196,6 +203,10 @@ watchEffect(() => {
 
 <style lang="scss">
 .v-header-invest {
+
+  .is--container {
+    max-width: 1280px;
+  }
 
   &__wrap {
     display: flex;
@@ -236,16 +247,14 @@ watchEffect(() => {
         display: block;
       }
     }
-
-    &__profile {
-      @include media-lte(desktop-md) {
-        display: none;
-      }
-    }
   }
 
   &__auth-text {
     color: $gray-80;
   }
+
 }
+  .v-header-mobile__list {
+    border-top: none !important;
+  }
 </style>

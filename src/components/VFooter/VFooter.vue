@@ -3,7 +3,8 @@ import {
   computed, defineAsyncComponent, hydrateOnVisible, PropType, ref,
 } from 'vue';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
-import { notify } from '@kyvg/vue3-notification';
+import { socials } from 'UiKit/utils/socials';
+import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const SocialLinks = defineAsyncComponent({
@@ -40,7 +41,7 @@ interface ISocial {
 }
 type MenuItem = {
   to?: string;
-  href?: string;
+  link?: string;
   active?: boolean;
   text: string;
   children?: MenuItem[];
@@ -52,14 +53,13 @@ const props = defineProps({
   menu: Array as PropType<MenuItem[]>,
 });
 
-const NOTIFY_OPTIONS = {
-  text: 'Submitted!',
-  type: 'success',
-  data: {
-    status: 1,
-  },
-  group: 'transaction',
-  duration: 10000,
+
+const { toast } = useToast();
+
+const TOAST_OPTIONS = {
+  title: 'Submitted',
+  description: 'Form sent success',
+  variant: 'success',
 };
 
 const currentYear = new Date().getFullYear();
@@ -81,8 +81,16 @@ const onSubmit = async (emailLocal: string) => {
     email: emailLocal,
   });
   loadingSubmitting.value = false;
-  notify(NOTIFY_OPTIONS);
+  toast(TOAST_OPTIONS);
 };
+
+
+const SOCIAL_LIST = [
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  socials?.facebook, socials?.instagram,
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  socials?.linkedin, socials?.github,
+];
 </script>
 
 <template>
@@ -99,7 +107,7 @@ const onSubmit = async (emailLocal: string) => {
 
           <div class="social-links desktop-social">
             <SocialLinks
-              :social-list="socialList"
+              :social-list="SOCIAL_LIST"
               class="wd-layout-default-footer__socials"
             />
           </div>

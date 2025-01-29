@@ -8,7 +8,7 @@ import VFormTextarea from 'UiKit/components/Base/VForm/VFormTextarea.vue';
 import VUploader from 'UiKit/components/VUploader/VUploader.vue';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import { descriptionFileRule, errorMessageRule, noteFileRule } from 'UiKit/helpers/validation/rules';
-import { JSONSchemaType } from 'ajv';
+import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { isEmpty } from 'InvestCommon/helpers/general';
 import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
 import { storeToRefs } from 'pinia';

@@ -96,6 +96,7 @@ export const useOfferStore = defineStore('offers', () => {
   const isGetInvestmentsError = ref(false);
   const getInvestmentsData = ref<IInvestData>();
   const getConfirmedOffers = async (profile_id: number) => {
+    console.log(isGetInvestmentsLoading.value)
     isGetInvestmentsLoading.value = true;
     isGetInvestmentsError.value = false;
     const response = await fetchGetInvestments(profile_id).catch((error: Response) => {

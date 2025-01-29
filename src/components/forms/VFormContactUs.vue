@@ -2,7 +2,6 @@
 import {
   ref, watch, computed, reactive, nextTick,
 } from 'vue';
-import { schemaContactUs, FormModelContactUs, SELECT_SUBJECT } from './utilsContactUs';
 import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
 import { isEmpty } from 'InvestCommon/helpers/general';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
@@ -14,18 +13,66 @@ import { useUsersStore } from 'InvestCommon/store/useUsers';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import { storeToRefs } from 'pinia';
 import env from 'InvestCommon/global';
-import { notify } from '@kyvg/vue3-notification';
 import { scrollToError } from 'UiKit/helpers/validation/general';
+import { emailRule, errorMessageRule, firstNameRule } from 'UiKit/helpers/validation/rules';
+import { JSONSchemaType } from 'ajv/dist/types/json-schema';
+import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 
-const NOTIFY_OPTIONS = {
-  text: 'Sent',
-  type: 'success',
-  data: {
-    status: 1,
-  },
-  group: 'transaction',
-  duration: 10000,
+const { toast } = useToast();
+
+const TOAST_OPTIONS = {
+  title: 'Sent',
+  description: 'Form sent success',
+  variant: 'success',
 };
+
+
+type FormModelContactUs = {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+}
+
+const schemaContactUs = {
+  $schema: 'http://json-schema.org/draft-07/schema#',
+  definitions: {
+    ContactUs: {
+      properties: {
+        name: firstNameRule,
+        email: emailRule,
+        message: {
+          minLength: 10,
+          type: 'string',
+        },
+      },
+      type: 'object',
+      required: ['name', 'subject', 'email', 'message'],
+      errorMessage: errorMessageRule,
+    },
+  },
+  $ref: '#/definitions/ContactUs',
+} as unknown as JSONSchemaType<FormModelContactUs>;
+
+
+const SELECT_SUBJECT = [
+  {
+    value: 'investment',
+    label: 'Investment',
+  },
+  {
+    value: 'report an issue',
+    label: 'Report an issue',
+  },
+  {
+    value: 'i have a question',
+    label: 'I have a question',
+  },
+  {
+    value: 'other',
+    label: 'Other',
+  },
+];
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
 const { submitFormToHubspot } = useHubspotForm(env.HUBSPOT_FORM_ID_CONTACT_US);
@@ -79,7 +126,7 @@ const signUpHandler = async () => {
     message: model.message,
   });
 
-  notify(NOTIFY_OPTIONS);
+  toast(TOAST_OPTIONS);
   model = reactive({} as FormModelContactUs);
 };
 </script>
@@ -150,8 +197,8 @@ const signUpHandler = async () => {
         name="subject"
         data-testid="subject"
         size="large"
-        dropdown-absolute
         :options="SELECT_SUBJECT"
+        :loading="(SELECT_SUBJECT.length === 0)"
       />
     </VFormGroup>
 

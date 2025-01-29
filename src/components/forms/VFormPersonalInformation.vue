@@ -2,8 +2,6 @@
 import {
   ref, computed, useTemplateRef,
   nextTick,
-  defineAsyncComponent,
-  hydrateOnVisible,
 } from 'vue';
 import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
@@ -17,14 +15,8 @@ import VFormPartialPersonalInformation from './VFormPartialPersonalInformation.v
 import { FormChild } from 'InvestCommon/types/form';
 import { scrollToError } from 'UiKit/helpers/validation/general';
 import env from 'InvestCommon/global';
+import VFormPartialIdentification from './VFormPartialIdentification.vue';
 
-
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-const VFormPartialIdentification = defineAsyncComponent({
-  loader: () => import('./VFormPartialIdentification.vue'),
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-  hydrate: hydrateOnVisible(),
-});
 
 const props = defineProps({
   accreditation: Boolean,
@@ -97,11 +89,15 @@ const cancelHandler = () => {
       Personal Information
     </div>
     <div class="form-personal-information__content">
-      <VFormPartialIdentification
+      <div
         v-if="withId"
-        ref="idFormChild"
-        :model-data="selectedUserProfileData?.data"
-      />
+        :style="{ 'min-height': '93px' }"
+      >
+        <VFormPartialIdentification
+          ref="idFormChild"
+          :model-data="selectedUserProfileData?.data"
+        />
+      </div>
       <VFormPartialPersonalInformation
         ref="personalFormChild"
         :read-only="readOnly"
@@ -137,6 +133,7 @@ const cancelHandler = () => {
 
   &__header {
     margin-bottom: 40px;
+    min-height: 75px;
   }
 
   &__footer {

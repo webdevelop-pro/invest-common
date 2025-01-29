@@ -11,11 +11,11 @@ import { storeToRefs } from 'pinia';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
-import FormRow from 'InvestCommon/components/VForm/VFormRow.vue';
-import FormCol from 'InvestCommon/components/VForm/VFormCol.vue';
+import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
+import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import { scrollToError } from 'UiKit/helpers/validation/general';
 import { errorMessageRule, passwordRule } from 'UiKit/helpers/validation/rules';
-import { JSONSchemaType } from 'ajv';
+import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { FormModelResetPassword } from 'InvestCommon/types/form';
 import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
 import { isEmpty } from 'UiKit/helpers/general';
@@ -233,6 +233,7 @@ watch(() => [schema], () => {
 </template>
 
 <style lang="scss">
+@use 'UiKit/styles/_variables.scss' as *;
 .v-form-reset-password {
   $root: &;
 
@@ -245,6 +246,9 @@ watch(() => [schema], () => {
     display: flex;
     align-items: flex-start;
     gap: 20px;
+    @media screen and (max-width: $tablet){
+      flex-direction: column;
+    }
   }
 
   &__input-icon {
@@ -261,6 +265,9 @@ watch(() => [schema], () => {
     margin: 8px auto 40px;
     background: $gray-30;
     border-radius: 2px;
+    @media screen and (max-width: $tablet){
+      margin: 8px auto 20px;
+    }
 
     &::before,
     &::after {
@@ -331,8 +338,11 @@ watch(() => [schema], () => {
   }
 
   &__btn {
-    margin-top: 29px !important;
+    margin-top: 24px;
     flex-shrink: 0;
+    @media screen and (max-width: $tablet){
+      margin-top: 0;
+    }
   }
 }
 </style>

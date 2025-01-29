@@ -3,14 +3,15 @@ import {
   watch, PropType, reactive,
 } from 'vue';
 import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
-import FormRow from 'InvestCommon/components/VForm/VFormRow.vue';
-import FormCol from 'InvestCommon/components/VForm/VFormCol.vue';
+import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
+import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
 import VFormSelect from 'UiKit/components/Base/VForm/VFormSelect.vue';
 import { storeToRefs } from 'pinia';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import VFormCheckbox from 'UiKit/components/Base/VForm/VFormCheckbox.vue';
-import { JSONSchemaType } from 'ajv';
+import { JSONSchemaType } from 'ajv/dist/types/json-schema';
+import VFormCombobox from 'UiKit/components/Base/VForm/VFormCombobox.vue';
 
 const model = defineModel();
 const props = defineProps({
@@ -24,7 +25,7 @@ const props = defineProps({
 
 const userProfilesStore = useUserProfilesStore();
 const {
-  getProfileByIdOptionsData, setProfileErrorData,
+  getProfileByIdOptionsData, setProfileErrorData, isGetProfileByIdLoading,
 } = storeToRefs(userProfilesStore);
 
 export interface FormPartialBeneficialOwnershipItem {
@@ -74,6 +75,7 @@ const title = props.trust ? 'Trustee or Protector' : 'Beneficial Owner';
             name="first-name"
             size="large"
             data-testid="first-name"
+            :loading="isGetProfileByIdLoading"
           />
         </VFormGroup>
       </FormCol>
@@ -97,6 +99,7 @@ const title = props.trust ? 'Trustee or Protector' : 'Beneficial Owner';
             name="last-name"
             size="large"
             data-testid="last-name"
+            :loading="isGetProfileByIdLoading"
           />
         </VFormGroup>
       </FormCol>
@@ -120,6 +123,7 @@ const title = props.trust ? 'Trustee or Protector' : 'Beneficial Owner';
             size="large"
             data-testid="date-of-birth"
             type="date"
+            :loading="isGetProfileByIdLoading"
           />
         </VFormGroup>
       </FormCol>
@@ -153,6 +157,7 @@ const title = props.trust ? 'Trustee or Protector' : 'Beneficial Owner';
               data-testid="ssn"
               mask="###-##-####"
               disallow-special-chars
+            :loading="isGetProfileByIdLoading"
             />
           </VFormGroup>
         </FormCol>
@@ -179,6 +184,7 @@ const title = props.trust ? 'Trustee or Protector' : 'Beneficial Owner';
               name="is_number"
               size="large"
               data-testid="id-number"
+              :loading="isGetProfileByIdLoading"
             />
           </VFormGroup>
         </FormCol>
@@ -195,7 +201,7 @@ const title = props.trust ? 'Trustee or Protector' : 'Beneficial Owner';
             required
             data-testid="passport-country-group"
           >
-            <VFormSelect
+            <VFormCombobox
               v-model="model.type_of_identification.country"
               :is-error="VFormGroupProps.isFieldError"
               name="country"
@@ -207,6 +213,7 @@ const title = props.trust ? 'Trustee or Protector' : 'Beneficial Owner';
               :options="optionsCountry"
               dropdown-absolute
               data-testid="passport-country"
+              :loading="isGetProfileByIdLoading || (optionsCountry.length === 0)"
             />
           </VFormGroup>
         </FormCol>
@@ -233,6 +240,7 @@ const title = props.trust ? 'Trustee or Protector' : 'Beneficial Owner';
             text
             type="email"
             size="large"
+            :loading="isGetProfileByIdLoading"
           />
         </VFormGroup>
       </FormCol>
@@ -258,6 +266,7 @@ const title = props.trust ? 'Trustee or Protector' : 'Beneficial Owner';
             name="phone"
             size="large"
             data-testid="phone"
+            :loading="isGetProfileByIdLoading"
           />
         </VFormGroup>
       </FormCol>
@@ -282,6 +291,7 @@ const title = props.trust ? 'Trustee or Protector' : 'Beneficial Owner';
             name="address-1"
             size="large"
             data-testid="address-1"
+            :loading="isGetProfileByIdLoading"
           />
         </VFormGroup>
       </FormCol>
@@ -305,6 +315,7 @@ const title = props.trust ? 'Trustee or Protector' : 'Beneficial Owner';
             name="address-2"
             size="large"
             data-testid="address-2"
+            :loading="isGetProfileByIdLoading"
           />
         </VFormGroup>
       </FormCol>
@@ -332,6 +343,7 @@ const title = props.trust ? 'Trustee or Protector' : 'Beneficial Owner';
             data-testid="city"
             disallow-special-chars
             disallow-numbers
+            :loading="isGetProfileByIdLoading"
           />
         </VFormGroup>
       </FormCol>
@@ -347,7 +359,7 @@ const title = props.trust ? 'Trustee or Protector' : 'Beneficial Owner';
           label="State"
           data-testid="state-group"
         >
-          <VFormSelect
+          <VFormCombobox
             v-model="model.state"
             :is-error="VFormGroupProps.isFieldError"
             name="state"
@@ -357,7 +369,7 @@ const title = props.trust ? 'Trustee or Protector' : 'Beneficial Owner';
             item-value="value"
             searchable
             :options="optionsState"
-            dropdown-absolute
+            :loading="isGetProfileByIdLoading || (optionsState.length === 0)"
             data-testid="state"
           />
         </VFormGroup>
@@ -387,6 +399,7 @@ const title = props.trust ? 'Trustee or Protector' : 'Beneficial Owner';
             mask="#####-####"
             return-masked-value
             disallow-special-chars
+            :loading="isGetProfileByIdLoading"
           />
         </VFormGroup>
       </FormCol>
@@ -403,7 +416,7 @@ const title = props.trust ? 'Trustee or Protector' : 'Beneficial Owner';
           label="Country"
           data-testid="country-group"
         >
-          <VFormSelect
+          <VFormCombobox
             v-model="model.country"
             :is-error="VFormGroupProps.isFieldError"
             name="country"
@@ -413,7 +426,7 @@ const title = props.trust ? 'Trustee or Protector' : 'Beneficial Owner';
             item-value="value"
             searchable
             :options="optionsCountry"
-            dropdown-absolute
+            :loading="isGetProfileByIdLoading || (optionsCountry?.length === 0)"
             data-testid="country"
           />
         </VFormGroup>

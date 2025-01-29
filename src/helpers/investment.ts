@@ -2,9 +2,9 @@ import { IInvest, InvestFundingStatuses, InvestmentStatuses } from 'InvestCommon
 import defaultImage from 'InvestCommon/assets/images/default.svg?url';
 
 export const getInvestmentTagBackground = (status: string | undefined): string => {
-  if (status === 'legally_confirmed') return '#D9FFEE';
-  if (status === 'failed') return '#FF7070';
-  return '#FFF7E8';
+  if (status === 'legally_confirmed') return 'secondary-light';
+  if (status === 'failed') return 'red';
+  return 'yellow-light';
 };
 
 export const InvestmentStatusesFormated: Record<InvestmentStatuses, { text: string }> = {

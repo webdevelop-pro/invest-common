@@ -14,12 +14,12 @@ import { WalletAddTransactionTypes } from 'InvestCommon/types/api/wallet';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
-import FormRow from 'InvestCommon/components/VForm/VFormRow.vue';
-import FormCol from 'InvestCommon/components/VForm/VFormCol.vue';
+import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
+import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
 import { isEmpty } from 'lodash';
 import { numberFormatter } from 'InvestCommon/helpers/numberFormatter';
-import { JSONSchemaType } from 'ajv';
+import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { scrollToError } from 'UiKit/helpers/validation/general';
 import { FormModelAddTransaction } from 'InvestCommon/types/form';
@@ -123,9 +123,6 @@ watch(() => [schemaAddTransaction.value], () => {
 
 <template>
   <div class="VFormWalletAddTransaction form-wallet-add-transaction">
-    <div class="form-wallet-add-transaction__header is--h3__title">
-      {{ titile }}
-    </div>
     <div class="form-wallet-add-transaction__content">
       <FormRow>
         <FormCol>

@@ -3,14 +3,14 @@ import {
   watch, PropType, reactive, ref, computed,
 } from 'vue';
 import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
-import FormRow from 'InvestCommon/components/VForm/VFormRow.vue';
-import FormCol from 'InvestCommon/components/VForm/VFormCol.vue';
+import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
+import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import { storeToRefs } from 'pinia';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import VFormRadio from 'UiKit/components/Base/VForm/VFormRadio.vue';
 import VFormSelect from 'UiKit/components/Base/VForm/VFormSelect.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
-import { JSONSchemaType } from 'ajv';
+import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
 import { filterSchema, getFilteredObject } from 'UiKit/helpers/validation/general';
@@ -36,7 +36,7 @@ const props = defineProps({
 
 const userIdentityStore = useUserProfilesStore();
 const {
-  setProfileByIdErrorData, getProfileByIdOptionsData,
+  setProfileByIdErrorData, getProfileByIdOptionsData, isGetProfileByIdLoading,
 } = storeToRefs(userIdentityStore);
 
 const model = reactive<FormModelEntityInformation>({
@@ -148,7 +148,7 @@ watch(() => [getProfileByIdOptionsData.value, schema.value], () => {
           data-testid="type-group"
         >
           <VFormSelect
-            :model-value="model.type"
+            v-model="model.type"
             :is-error="VFormGroupProps.isFieldError"
             name="type"
             size="large"
@@ -157,9 +157,8 @@ watch(() => [getProfileByIdOptionsData.value, schema.value], () => {
             item-value="value"
             searchable
             :options="optionsType"
-            dropdown-absolute
+            :loading="isGetProfileByIdLoading || (optionsType?.length === 0)"
             data-testid="type"
-            @update:model-value="model.type = $event"
           />
         </VFormGroup>
       </FormCol>
@@ -182,6 +181,7 @@ watch(() => [getProfileByIdOptionsData.value, schema.value], () => {
             name="name"
             size="large"
             data-testid="name"
+            :loading="isGetProfileByIdLoading"
             @update:model-value="model.name = $event"
           />
         </VFormGroup>
@@ -205,6 +205,7 @@ watch(() => [getProfileByIdOptionsData.value, schema.value], () => {
             name="owner_title"
             size="large"
             data-testid="owner-title"
+            :loading="isGetProfileByIdLoading"
             @update:model-value="model.owner_title = $event"
           />
         </VFormGroup>
@@ -254,6 +255,7 @@ watch(() => [getProfileByIdOptionsData.value, schema.value], () => {
             mask="##-#######"
             disallow-special-chars
             data-testid="ein"
+            :loading="isGetProfileByIdLoading"
             @update:model-value="model.ein = $event"
           />
         </VFormGroup>

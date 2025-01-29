@@ -4,12 +4,12 @@ import {
   ref,
 } from 'vue';
 import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
-import FormRow from 'InvestCommon/components/VForm/VFormRow.vue';
-import FormCol from 'InvestCommon/components/VForm/VFormCol.vue';
+import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
+import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import VFormSelect from 'UiKit/components/Base/VForm/VFormSelect.vue';
 import { storeToRefs } from 'pinia';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
-import { JSONSchemaType } from 'ajv';
+import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import {
   address1Rule, cityRule, countryRuleObject, dobRule,
   emailRule, errorMessageRule, firstNameRule, lastNameRule,
@@ -48,7 +48,7 @@ const defItem = {
 
 const userProfilesStore = useUserProfilesStore();
 const {
-  setProfileByIdErrorData, getProfileByIdOptionsData,
+  setProfileByIdErrorData, getProfileByIdOptionsData, isGetProfileByIdLoading,
 } = storeToRefs(userProfilesStore);
 
 const getSchema = (non_us = false) => {
@@ -199,7 +199,7 @@ const selectText = props.trust ? 'How many trustees and protectors does your tru
           data-testid="beneficial-owners-number-group"
         >
           <VFormSelect
-            :model-value="model.beneficial_owners_number"
+            v-model="model.beneficial_owners_number"
             :is-error="VFormGroupProps.isFieldError"
             name="beneficial_owners_number"
             size="large"
@@ -209,7 +209,7 @@ const selectText = props.trust ? 'How many trustees and protectors does your tru
             :options="options"
             dropdown-absolute
             data-testid="beneficial-owners-number"
-            @update:model-value="model.beneficial_owners_number = $event"
+            :loading="isGetProfileByIdLoading || (options.length === 0)"
           />
         </VFormGroup>
       </FormCol>

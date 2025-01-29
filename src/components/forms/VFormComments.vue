@@ -10,13 +10,14 @@ import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import VFormCheckbox from 'UiKit/components/Base/VForm/VFormCheckbox.vue';
 import { storeToRefs } from 'pinia';
 import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
-import { FormModelOfferComment, schemaOfferComment } from './utilsComments';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import { isEmpty } from 'InvestCommon/helpers/general';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import VFormRadio from 'UiKit/components/Base/VForm/VFormRadio.vue';
 import { scrollToError } from 'UiKit/helpers/validation/general';
 import { urlSignin } from 'InvestCommon/global/links';
+import { errorMessageRule } from 'UiKit/helpers/validation/rules';
+import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 
 const props = defineProps({
   offerId: {
@@ -28,6 +29,28 @@ const props = defineProps({
     required: true,
   },
 });
+
+type FormModelOfferComment = {
+  comment: string;
+  offer_id: number;
+  related: string;
+}
+
+const schemaOfferComment = {
+  $schema: 'http://json-schema.org/draft-07/schema#',
+  definitions: {
+    CommentCreate: {
+      properties: {
+        comment: {},
+        offer_id: {},
+        related: {},
+      },
+      type: 'object',
+      errorMessage: errorMessageRule,
+    },
+  },
+  $ref: '#/definitions/CommentCreate',
+} as unknown as JSONSchemaType<FormModelOfferComment>;
 
 const offerStore = useOfferStore();
 const {

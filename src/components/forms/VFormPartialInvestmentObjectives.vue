@@ -5,13 +5,13 @@ import {
   reactive,
 } from 'vue';
 import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
-import FormRow from 'InvestCommon/components/VForm/VFormRow.vue';
-import FormCol from 'InvestCommon/components/VForm/VFormCol.vue';
+import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
+import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
 import VFormSelect from 'UiKit/components/Base/VForm/VFormSelect.vue';
 import { storeToRefs } from 'pinia';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
-import { JSONSchemaType } from 'ajv';
+import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { FormModelInvestmentObjectives } from 'InvestCommon/types/form';
 import { numberFormatter } from 'InvestCommon/helpers/numberFormatter';
@@ -27,7 +27,7 @@ const props = defineProps({
 
 const userIdentityStore = useUserProfilesStore();
 const {
-  setProfileByIdErrorData, getProfileByIdOptionsData,
+  setProfileByIdErrorData, getProfileByIdOptionsData, isGetProfileByIdLoading,
 } = storeToRefs(userIdentityStore);
 
 const schema = {
@@ -142,7 +142,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             size="large"
             data-testid="investment-objectives"
             :options="optionsObjectives"
-            dropdown-absolute
+            :loading="isGetProfileByIdLoading || (optionsObjectives.length === 0)"
           />
         </VFormGroup>
       </FormCol>
@@ -166,6 +166,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             placeholder="10 years"
             name="years-experience"
             data-testid="years-experience"
+            :loading="isGetProfileByIdLoading"
             @update:model-value="model.investment_objectives.years_experience = numberFormatter($event)"
           />
         </VFormGroup>
@@ -192,7 +193,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             data-testid="duration"
             size="large"
             :options="optionsDuration"
-            dropdown-absolute
+            :loading="isGetProfileByIdLoading || (optionsDuration.length === 0)"
           />
         </VFormGroup>
       </FormCol>
@@ -219,7 +220,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             placeholder="How important is it to have immediate access to your invested funds"
             size="large"
             :options="optionsAccess"
-            dropdown-absolute
+            :loading="isGetProfileByIdLoading || (optionsAccess.length === 0)"
           />
         </VFormGroup>
       </FormCol>
@@ -246,7 +247,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             placeholder="How much risk are you comfortable with"
             size="large"
             :options="optionsRiskComfort"
-            dropdown-absolute
+            :loading="isGetProfileByIdLoading || (optionsRiskComfort.length === 0)"
           />
         </VFormGroup>
       </FormCol>

@@ -4,13 +4,13 @@ import {
   ref,
 } from 'vue';
 import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
-import FormRow from 'InvestCommon/components/VForm/VFormRow.vue';
-import FormCol from 'InvestCommon/components/VForm/VFormCol.vue';
+import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
+import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
 import VFormSelect from 'UiKit/components/Base/VForm/VFormSelect.vue';
 import { storeToRefs } from 'pinia';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
-import { JSONSchemaType } from 'ajv';
+import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import {
   address1Rule, address2Rule, citizenshipRule, cityRule, countryRuleObject,
   dobRule, errorMessageRule, firstNameRule, lastNameRule,
@@ -21,6 +21,7 @@ import { filterSchema, getFilteredObject } from 'UiKit/helpers/validation/genera
 import { createFormModel, getOptions } from 'UiKit/helpers/model';
 import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
 import { isEmpty } from 'UiKit/helpers/general';
+import VFormCombobox from 'UiKit/components/Base/VForm/VFormCombobox.vue';
 
 const props = defineProps({
   modelData: Object as PropType<FormModelPersonalInformation>,
@@ -29,7 +30,7 @@ const props = defineProps({
 
 const userProfilesStore = useUserProfilesStore();
 const {
-  setProfileByIdErrorData, getProfileByIdOptionsData,
+  setProfileByIdErrorData, getProfileByIdOptionsData, isGetProfileByIdLoading,
 } = storeToRefs(userProfilesStore);
 
 const schema = {
@@ -132,6 +133,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             size="large"
             data-testid="first-name"
             :readonly="readOnly"
+            :loading="isGetProfileByIdLoading"
             @update:model-value="model.first_name = $event"
           />
         </VFormGroup>
@@ -157,6 +159,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             size="large"
             data-testid="middle-name"
             :readonly="readOnly"
+            :loading="isGetProfileByIdLoading"
             @update:model-value="model.middle_name = $event"
           />
         </VFormGroup>
@@ -182,6 +185,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             size="large"
             data-testid="last-name"
             :readonly="readOnly"
+            :loading="isGetProfileByIdLoading"
             @update:model-value="model.last_name = $event"
           />
         </VFormGroup>
@@ -209,6 +213,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             data-testid="date-of-birth"
             type="date"
             :readonly="readOnly"
+            :loading="isGetProfileByIdLoading"
             @update:model-value="model.dob = $event"
           />
         </VFormGroup>
@@ -236,6 +241,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             size="large"
             data-testid="phone"
             :readonly="readOnly"
+            :loading="isGetProfileByIdLoading"
             @update:model-value="model.phone = $event"
           />
         </VFormGroup>
@@ -266,6 +272,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             :options="optionsCitizenship"
             dropdown-absolute
             :readonly="readOnly"
+            :loading="isGetProfileByIdLoading || (optionsCitizenship.length === 0)"
             @update:model-value="model.citizenship = $event"
           />
         </VFormGroup>
@@ -292,6 +299,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             mask="###-##-####"
             disallow-special-chars
             :readonly="readOnly"
+            :loading="isGetProfileByIdLoading"
             @update:model-value="model.ssn = $event"
           />
         </VFormGroup>
@@ -321,6 +329,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             size="large"
             data-testid="address-1"
             :readonly="readOnly"
+            :loading="isGetProfileByIdLoading"
             @update:model-value="model.address1 = $event"
           />
         </VFormGroup>
@@ -346,6 +355,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             size="large"
             data-testid="address-2"
             :readonly="readOnly"
+            :loading="isGetProfileByIdLoading"
             @update:model-value="model.address2 = $event"
           />
         </VFormGroup>
@@ -375,6 +385,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             disallow-special-chars
             disallow-numbers
             :readonly="readOnly"
+            :loading="isGetProfileByIdLoading"
             @update:model-value="model.city = $event"
           />
         </VFormGroup>
@@ -391,20 +402,18 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
           label="State"
           data-testid="state-group"
         >
-          <VFormSelect
-            :model-value="model.state"
+          <VFormCombobox
+            v-model="model.state"
             :is-error="VFormGroupProps.isFieldError"
             name="state"
             size="large"
             placeholder="State"
             item-label="name"
             item-value="value"
-            searchable
             :options="optionsState"
-            dropdown-absolute
             data-testid="state"
             :readonly="readOnly"
-            @update:model-value="model.state = $event"
+            :loading="isGetProfileByIdLoading || (optionsState.length === 0)"
           />
         </VFormGroup>
       </FormCol>
@@ -434,6 +443,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             return-masked-value
             disallow-special-chars
             :readonly="readOnly"
+            :loading="isGetProfileByIdLoading"
             @update:model-value="model.zip_code = $event"
           />
         </VFormGroup>
@@ -451,20 +461,18 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
           label="Country"
           data-testid="country-group"
         >
-          <VFormSelect
-            :model-value="model.country"
+          <VFormCombobox
+            v-model="model.country"
             :is-error="VFormGroupProps.isFieldError"
             name="country"
             size="large"
             placeholder="Country"
             item-label="name"
             item-value="value"
-            searchable
             :options="optionsCountry"
-            dropdown-absolute
             data-testid="country"
             :readonly="readOnly"
-            @update:model-value="model.country = $event"
+            :loading="isGetProfileByIdLoading || (optionsCountry?.length === 0)"
           />
         </VFormGroup>
       </FormCol>
