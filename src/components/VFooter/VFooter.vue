@@ -51,6 +51,7 @@ const props = defineProps({
   socialList: Array as PropType<ISocial[]>,
   hubspotFormId: String,
   menu: Array as PropType<MenuItem[]>,
+  path: String,
 });
 
 
@@ -133,6 +134,7 @@ const SOCIAL_LIST = [
         </div>
         <VFooterMenu
           :menu="menu"
+          :path="path"
           class="v-footer__menu"
         />
       </div>
@@ -164,6 +166,10 @@ const SOCIAL_LIST = [
   @include media-lte(tablet) {
     padding-bottom: 5px;
     padding-top: 50px;
+  }
+
+  .v-form-group {
+    width: 100%;
   }
 
   &__wrap {

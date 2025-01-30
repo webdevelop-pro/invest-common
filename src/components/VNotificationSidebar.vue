@@ -2,13 +2,19 @@
 import { useNotificationsStore } from 'InvestCommon/store/useNotifications';
 import { ROUTE_NOTIFICATIONS } from 'InvestCommon/helpers/enums/routes';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
-import WdNotificationTable from 'InvestCommon/components/VNotificationTable.vue';
 import { storeToRefs } from 'pinia';
 import arrowRight from 'UiKit/assets/images/arrow-right.svg';
 import {
   VSheet, VSheetContent, VSheetHeader, VSheetTitle,
   VSheetFooter,
 } from 'UiKit/components/Base/VSheet';
+import { defineAsyncComponent } from 'vue';
+
+
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+const WdNotificationTable = defineAsyncComponent({
+  loader: () => import('InvestCommon/components/VNotificationTable.vue'),
+});
 
 
 defineProps({
@@ -41,6 +47,7 @@ const onClose = () => {
       </VSheetHeader>
       <div class="v-notification-sidebar__text">
         <WdNotificationTable
+          v-if="isNotificationSidebarOpen"
           small
           class="v-notification-sidebar__table"
           :external="external"

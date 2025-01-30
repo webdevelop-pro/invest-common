@@ -110,6 +110,7 @@ watchEffect(() => {
   <VHeader
     v-model="isMobileSidebarOpen"
     :show-navigation="!isSignInPage && !isSignUpPage && !isRecoveryPage"
+    :path="path"
     class="VHeaderInvest v-header-invest"
   >
     <div class="v-header-invest__wrap">

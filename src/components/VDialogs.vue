@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineAsyncComponent, hydrateOnVisible } from 'vue';
+import { defineAsyncComponent } from 'vue';
 import { useDialogs } from 'InvestCommon/store/useDialogs';
 import { storeToRefs } from 'pinia';
 
@@ -7,44 +7,32 @@ import { storeToRefs } from 'pinia';
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const VDialogLogOut = defineAsyncComponent({
   loader: () => import('InvestCommon/components/dialogs/VDialogLogOut.vue'),
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-  hydrate: hydrateOnVisible(),
 });
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const VDialogWalletAddTransaction = defineAsyncComponent({
   loader: () => import('InvestCommon/components/dialogs/VDialogWalletAddTransaction.vue'),
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-  hydrate: hydrateOnVisible(),
 });
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const VDialogPortfolioCancelInvestment = defineAsyncComponent({
   loader: () => import('InvestCommon/components/dialogs/VDialogPortfolioCancelInvestment.vue'),
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-  hydrate: hydrateOnVisible(),
 });
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const VDialogPortfolioTransaction = defineAsyncComponent({
   loader: () => import('InvestCommon/components/dialogs/VDialogPortfolioTransaction.vue'),
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-  hydrate: hydrateOnVisible(),
 });
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const VDialogPortfolioWire = defineAsyncComponent({
   loader: () => import('InvestCommon/components/dialogs/VDialogPortfolioWire.vue'),
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-  hydrate: hydrateOnVisible(),
 });
 
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const VDialogDocument = defineAsyncComponent({
   loader: () => import('InvestCommon/components/dialogs/VDialogDocument.vue'),
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-  hydrate: hydrateOnVisible(),
 });
 
 const useDialogsStore = useDialogs();

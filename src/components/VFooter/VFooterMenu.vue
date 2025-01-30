@@ -10,7 +10,8 @@ type MenuItem = {
 }
 defineProps({
   menu: Array as PropType<MenuItem[]>,
-})
+  path: String,
+});
 
 const getComponentName = (item: MenuItem) => {
   if (item.to) return 'router-link';
@@ -37,7 +38,7 @@ const getComponentClass = (item: MenuItem) => {
           :href="menuItem.link"
           :to="menuItem.to"
           class="is--h6__title"
-          :class="[getComponentClass(menuItem), { 'is--active': menuItem.active }]"
+          :class="[getComponentClass(menuItem), { 'router-link-active': menuItem.link?.includes(path) }]"
         >
           {{ menuItem.text }}
         </component>

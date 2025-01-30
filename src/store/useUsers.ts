@@ -161,20 +161,27 @@ export const useUsersStore = defineStore('user', () => {
   });
 
 
-  watch(() => userAccountSession.value?.active, () => {
+  watch(() => userAccountSession.value?.active, async () => {
     if (userAccountSession.value?.active) {
-      if (!getUserData.value) void userProfilesStore.getUser();
+      if (!getUserData.value) await userProfilesStore.getUser();
       userLoggedIn.value = userAccountSession.value?.active;
+      void nextTick(() => {
+        void notificationsStore.notificationsHandler();
+        void userProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
+        void userProfilesStore.getProfileByIdOptions(selectedUserProfileType.value, selectedUserProfileId.value);
+      });
     }
   }, { immediate: true });
 
-  watch(() => selectedUserProfileId.value, () => {
-    if (selectedUserProfileId.value && (selectedUserProfileId.value !== 0)) {
-      void userProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
-      void userProfilesStore.getProfileByIdOptions(selectedUserProfileType.value, selectedUserProfileId.value);
-      void notificationsStore.notificationsHandler();
-    }
-  }, { immediate: true });
+  // watch(() => selectedUserProfileId.value, () => {
+  //   if (userLoggedIn.value && selectedUserProfileId.value && (selectedUserProfileId.value !== 0)) {
+  //     void nextTick(() => {
+  //       void userProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
+  //       void userProfilesStore.getProfileByIdOptions(selectedUserProfileType.value, selectedUserProfileId.value);
+  //       void notificationsStore.notificationsHandler();
+  //     });
+  //   }
+  // });
 
   watch(() => userProfiles.value[0]?.id, () => {
     if (!selectedUserProfileId.value || selectedUserProfileId.value === 0) {
@@ -193,6 +200,8 @@ export const useUsersStore = defineStore('user', () => {
     if (userLoggedIn.value && urlProfileId.value && !EXTERNAL
       && (Number(urlProfileId.value) !== selectedUserProfileId.value)) {
       setSelectedUserProfileById(Number(urlProfileId.value));
+      void userProfilesStore.getProfileById(selectedUserProfileType.value, Number(urlProfileId.value));
+      void userProfilesStore.getProfileByIdOptions(selectedUserProfileType.value, Number(urlProfileId.value));
       void router.push({
         name: router.currentRoute.value.name,
         params: { profileId: urlProfileId.value },
