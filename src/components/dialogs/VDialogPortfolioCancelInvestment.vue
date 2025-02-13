@@ -144,6 +144,7 @@ watch(() => model, () => {
             <a
               :href="urlContactUs"
               target="_blank"
+              rel="noopener noreferrer"
               class="is--link-1"
             >
               Contact us
