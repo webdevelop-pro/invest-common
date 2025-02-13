@@ -143,6 +143,7 @@ watch(() => model, () => {
             </a> article or
             <a
               :href="urlContactUs"
+              target="_blank"
               class="is--link-1"
             >
               Contact us
