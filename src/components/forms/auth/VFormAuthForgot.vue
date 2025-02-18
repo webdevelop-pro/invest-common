@@ -106,7 +106,7 @@ const recoveryHandler = async () => {
       variant="link"
       size="large"
       block
-      tag="a"
+      as="a"
       :href="urlSignin"
       class="forgot-form__signup-btn"
     >

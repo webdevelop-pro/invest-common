@@ -366,7 +366,7 @@ const signUpHandler = async () => {
         <VButton
           variant="link"
           size="large"
-          tag="a"
+          as="a"
           class="signup-form__login-btn"
           @click.prevent="onLogin"
         >

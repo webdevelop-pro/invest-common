@@ -292,7 +292,7 @@ onMounted(() => {
         <VButton
           variant="outlined"
           size="large"
-          tag="a"
+          as="a"
           :href="urlOfferSingle(route.params.slug)"
         >
           Cancel

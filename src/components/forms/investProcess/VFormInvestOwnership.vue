@@ -269,7 +269,7 @@ const onAlertButtonClick = () => {
         <VButton
           variant="outlined"
           size="large"
-          tag="a"
+          as="a"
           :href="urlOfferSingle(slug)"
         >
           Cancel
