@@ -49,7 +49,6 @@ const saveHandler = async () => {
     selectedUserProfileType.value,
     selectedUserProfileId.value,
   );
-  isLoading.value = false;
   if (!isSetProfileByIdError.value) {
     void submitFormToHubspot({
       email: userAccountData.value?.email,
@@ -57,6 +56,7 @@ const saveHandler = async () => {
     });
   }
   void userProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
+  isLoading.value = false;
   void router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
 };
 

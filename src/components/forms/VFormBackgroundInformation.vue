@@ -195,7 +195,6 @@ const saveHandler = async () => {
     selectedUserProfileType.value,
     selectedUserProfileId.value,
   );
-  isLoading.value = false;
   void submitFormToHubspot({
     email: userAccountData.value?.email,
     employment_type: model.employment.type,
@@ -211,6 +210,7 @@ const saveHandler = async () => {
     compliance_contractemail: model.finra_affiliated.compliance_contant_email,
   });
   void userProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
+  isLoading.value = false;
   void router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
 };
 

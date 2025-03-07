@@ -1,19 +1,16 @@
 <script setup lang="ts">
-import {
-  watch, PropType, reactive,
-} from 'vue';
+import { PropType, watch } from 'vue';
 import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
 import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
-import VFormSelect from 'UiKit/components/Base/VForm/VFormSelect.vue';
 import { storeToRefs } from 'pinia';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import VFormCheckbox from 'UiKit/components/Base/VForm/VFormCheckbox.vue';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import VFormCombobox from 'UiKit/components/Base/VForm/VFormCombobox.vue';
 
-const model = defineModel();
+const model = defineModel<FormPartialBeneficialOwnershipItem>();
 const props = defineProps({
   itemIndex: Number,
   validation: Object,
@@ -48,6 +45,14 @@ export interface FormPartialBeneficialOwnershipItem {
 }
 
 const title = props.trust ? 'Trustee or Protector' : 'Beneficial Owner';
+
+watch(() => model.value?.non_us, () => {
+  if (model.value?.non_us) {
+    model.value.type_of_identification = {};
+  } else {
+    delete model.value?.type_of_identification;
+  }
+});
 </script>
 
 <template>
@@ -145,7 +150,7 @@ const title = props.trust ? 'Trustee or Protector' : 'Beneficial Owner';
             :error-text="setProfileErrorData?.beneficials[itemIndex].ssn"
             :path="`beneficials.${itemIndex}.ssn`"
             label="SSN"
-            required
+            :required="!model.non_us"
             data-testid="ssn-group"
           >
             <VFormInput
@@ -174,7 +179,7 @@ const title = props.trust ? 'Trustee or Protector' : 'Beneficial Owner';
             :error-text="setProfileErrorData?.beneficials[itemIndex].type_of_identification?.id_number"
             :path="`beneficials.${itemIndex}.type_of_identification.id_number`"
             label="Passport Series and Number"
-            required
+            :required="model.non_us"
             data-testid="id-number-group"
           >
             <VFormInput
@@ -198,7 +203,7 @@ const title = props.trust ? 'Trustee or Protector' : 'Beneficial Owner';
             :error-text="setProfileErrorData?.beneficials[itemIndex].type_of_identification?.country"
             :path="`beneficials.${itemIndex}.type_of_identification.country`"
             label="Country of Issue"
-            required
+            :required="model.non_us"
             data-testid="passport-country-group"
           >
             <VFormCombobox

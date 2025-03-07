@@ -208,15 +208,16 @@ const saveHandler = async () => {
     selectedType.value,
   );
 
-  isLoading.value = false;
   if (!isSetUserProfileError.value) {
     handleHubspot();
     await accreditationStore.createEscrow(selectedUserProfileData.value?.user_id, setProfileData.value?.id);
     void userProfilesStore.getUser();
     userStore.setSelectedUserProfileById(Number(setProfileData.value?.id));
     void userProfilesStore.getProfileById(selectedType.value, String(setProfileData.value?.id));
+    isLoading.value = false;
     void router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: String(setProfileData.value?.id) } });
   }
+  isLoading.value = false;
 };
 
 const cancelHandler = () => {

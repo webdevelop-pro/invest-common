@@ -27,11 +27,11 @@ interface FormModelBeneficialOwnership {
   beneficials: FormPartialBeneficialOwnershipItem[];
 }
 const options = [
-  { value: 0, name: '0' },
-  { value: 1, name: '1' },
-  { value: 2, name: '2' },
-  { value: 3, name: '3' },
-  { value: 4, name: '4' },
+  { value: '0', name: '0' },
+  { value: '1', name: '1' },
+  { value: '2', name: '2' },
+  { value: '3', name: '3' },
+  { value: '4', name: '4' },
 ];
 
 const requiredDefault = ['address1', 'first_name', 'last_name', 'dob', 'email', 'phone', 'city', 'state', 'zip_code', 'country'];
@@ -43,7 +43,6 @@ const props = defineProps({
 
 const defItem = {
   non_us: false,
-  type_of_identification: {},
 };
 
 const userProfilesStore = useUserProfilesStore();
@@ -76,22 +75,10 @@ const getSchema = (non_us = false) => {
           email: emailRule,
           non_us: { type: 'boolean' },
           ssn: ssnRule,
-          type_of_identification: {
-            type: 'object',
-            $ref: '#/definitions/Identification',
-          },
         },
         required: requiredDefault,
-        allOf: [
-          {
-            if: { properties: { non_us: { const: true } } },
-            then: { required: ['type_of_identification'] },
-          },
-          {
-            if: { properties: { non_us: { const: false } } },
-            then: { required: ['ssn'] },
-          },
-        ],
+        if: { properties: { non_us: { const: false } } },
+        then: { required: ['ssn'] },
       },
       Identification: {
         allOf: [
@@ -116,8 +103,22 @@ const getSchema = (non_us = false) => {
         errorMessage: errorMessageRule,
         required: ['beneficial_owners_number'],
       },
+      Trust: {
+        properties: {
+          beneficials: {
+            items: {
+              type: 'object',
+              $ref: '#/definitions/BusinessController',
+            },
+          },
+          beneficial_owners_number: {},
+        },
+        type: 'object',
+        errorMessage: errorMessageRule,
+        required: ['beneficial_owners_number'],
+      },
     },
-    $ref: '#/definitions/Entity',
+    $ref: props.trust ? '#/definitions/Trust' : '#/definitions/Entity',
   } as unknown as JSONSchemaType<FormModelBeneficialOwnership>);
 };
 
@@ -134,6 +135,7 @@ const isValid = computed(() => isEmpty(validation.value || {}));
 
 const onValidate = () => {
   validation.value = validator.getFormValidationErrors(model);
+  console.log(validation.value);
 };
 
 const schemaObject = computed(() => getFieldSchema(
@@ -215,7 +217,7 @@ const selectText = props.trust ? 'How many trustees and protectors does your tru
       </FormCol>
     </FormRow>
     <template
-      v-for="(item, index) in model.beneficial_owners_number"
+      v-for="(item, index) in Number(model.beneficial_owners_number || 0)"
       :key="index"
     >
       <VFormPartialBeneficialOwnershipItem

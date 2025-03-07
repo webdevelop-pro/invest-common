@@ -60,7 +60,6 @@ const saveHandler = async () => {
     && !selectedUserProfileData.value?.escrow_id) {
     await accreditationStore.createEscrow(selectedUserProfileData.value?.user_id, selectedUserProfileData.value?.id);
   }
-  isLoading.value = false;
   void submitFormToHubspot({
     email: userAccountData.value?.email,
     ...personalFormRef.value?.model,
@@ -71,6 +70,7 @@ const saveHandler = async () => {
     ...idFormRef.value?.model,
   });
   void userIdentityStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
+  isLoading.value = false;
   if (props.accreditation) {
     void router.push({ name: ROUTE_ACCREDITATION_UPLOAD, params: { profileId: selectedUserProfileId.value } });
   } else {
