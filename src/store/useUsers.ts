@@ -41,7 +41,7 @@ export const useUsersStore = defineStore('user', () => {
   const updateUserAccountSession = (session: ISession) => {
     userAccountSession.value = session;
   };
-  const userLoggedIn = useStorage('loggedIn', false);
+  const userLoggedIn = useStorage('loggedIn', false, sessionStorage);
   const userAccountData = computed(() => userAccountSession.value?.identity.traits);
   const userAccountLoading = computed(() => isGetSessionLoading.value);
   // LIST OF USER PROFILES
@@ -49,7 +49,7 @@ export const useUsersStore = defineStore('user', () => {
   const userProfilesLoading = computed(() => isGetUserLoading.value);
   // SELECTED USER PROFILE
   const selectedUserProfileLoading = computed(() => userProfilesLoading.value);
-  const selectedUserProfileId = useStorage('selectedUserProfileId', 0);
+  const selectedUserProfileId = useStorage('selectedUserProfileId', 0, sessionStorage);
   // const userProfilesFilteredById = computed(() => (
   //   userProfiles.value.filter((item) => item.id === selectedUserProfileId.value)[0]));
   // const selectedUserProfileData = computed(() => (

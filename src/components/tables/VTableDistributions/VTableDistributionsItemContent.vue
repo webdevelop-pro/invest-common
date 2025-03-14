@@ -164,7 +164,7 @@ defineProps({
 
   &__info {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 4px 40px;
   }
 

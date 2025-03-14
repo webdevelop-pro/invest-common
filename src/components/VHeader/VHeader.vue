@@ -219,6 +219,7 @@ watchEffect(() => {
   .v-navigation-menu-link {
     height: $header-height;
     align-content: center;
+    -webkit-align-content: center;
   }
 
   &__button {

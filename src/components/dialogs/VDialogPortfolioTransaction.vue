@@ -81,7 +81,6 @@ const title = computed(() => {
     align-items: flex-start;
     gap: 8px;
     align-self: stretch;
-    margin-left: 12px;
   }
 
   &__footer-btns {
