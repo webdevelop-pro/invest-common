@@ -134,7 +134,7 @@ export const useUsersStore = defineStore('user', () => {
     if (urlChecked.value) return;
     const isRouteToCheckProfileInUrl = computed(() => (
       routesToCheckProfileInUrl.includes(String(to.name))));
-    const urlProfileID = computed(() => Number(to.params.profileId));
+    const urlProfileID = computed(() => Number(to.params?.profileId));
     const profilesIds = computed(() => (userProfiles.value.map((profile) => profile.id)));
     const isHaveProfileID = computed(() => (profilesIds.value.includes(urlProfileID.value)));
     // if route to check profile AND url profile id is NOT in profile list then redirect to DASHBOARD
@@ -190,7 +190,7 @@ export const useUsersStore = defineStore('user', () => {
   }, { immediate: true });
 
   const urlProfileId = computed(() => {
-    if (!EXTERNAL) return route.params.profileId;
+    if (!EXTERNAL) return route.params?.profileId;
     return (window && window?.location?.pathname.split('/')[2]);
   });
 
