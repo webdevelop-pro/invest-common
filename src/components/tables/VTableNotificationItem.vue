@@ -105,7 +105,7 @@ const buttonTo = computed(() => {
   };
 });
 
-const buttonLink = computed(() => {
+const buttonHref = computed(() => {
   if (kycDeclined.value || isFundsFailed.value) {
     return urlContactUs;
   }
@@ -179,7 +179,7 @@ const onButtonClick = () => {
           variant="link"
           :as="external ? 'a' : 'router-link'"
           :to="buttonTo"
-          :href="buttonLink || buttonTo"
+          :href="buttonHref || buttonTo"
           class="v-table-notification-item__button"
           @click="onButtonClick"
         >
