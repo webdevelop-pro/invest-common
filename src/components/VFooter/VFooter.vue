@@ -30,7 +30,11 @@ const VFormFooterSubscribe = defineAsyncComponent({
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
   hydrate: hydrateOnVisible(),
 });
+const VFooterBottom = defineAsyncComponent({
+  loader: () => import('UiKit/components/VFooter/VFooterBottom.vue'),
 
+  hydrate: hydrateOnVisible(),
+});
 
 interface ISocial {
   icon: string;
@@ -101,6 +105,7 @@ const SOCIAL_LIST = [
       <div class="v-footer__wrap">
         <div class="v-footer__form-wrap">
           <VFormFooterSubscribe
+            label="Receive latest news:"
             :loading="loadingSubmitting"
             class="v-footer__form"
             @submit="onSubmit"
@@ -141,13 +146,7 @@ const SOCIAL_LIST = [
     </div>
   </div>
   <VFooterText />
-  <div class="footer-bottom">
-    <div class="is--container">
-      <p class="is--small">
-        © {{ currentYear }} Webdevelop PRO, Inc.
-      </p>
-    </div>
-  </div>
+  <VFooterBottom />
 </template>
 
 

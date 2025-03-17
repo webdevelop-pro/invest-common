@@ -3,7 +3,7 @@ import { PropType } from 'vue';
 
 type MenuItem = {
   to?: string;
-  link?: string;
+  href?: string;
   text: string;
   active?: boolean;
   children?: MenuItem[];
@@ -15,11 +15,11 @@ defineProps({
 
 const getComponentName = (item: MenuItem) => {
   if (item.to) return 'router-link';
-  if (item.link) return 'a';
+  if (item.href) return 'a';
   return 'div';
 };
 const getComponentClass = (item: MenuItem) => {
-  if (item.to || item.link) return 'v-footer-menu__item';
+  if (item.to || item.href) return 'v-footer-menu__item';
   return 'v-footer-menu__item-not-link';
 };
 </script>
@@ -35,10 +35,10 @@ const getComponentClass = (item: MenuItem) => {
       >
         <component
           :is="getComponentName(menuItem)"
-          :href="menuItem.link"
+          :href="menuItem.href"
           :to="menuItem.to"
           class="is--h6__title"
-          :class="[getComponentClass(menuItem), { 'router-link-active': menuItem.link?.includes(path) }]"
+          :class="[getComponentClass(menuItem), { 'router-link-active': menuItem.href?.includes(path) }]"
         >
           {{ menuItem.text }}
         </component>
@@ -53,7 +53,7 @@ const getComponentClass = (item: MenuItem) => {
           >
             <component
               :is="getComponentName(menuItem)"
-              :href="childItem.link"
+              :href="childItem.href"
               :to="childItem.to"
               class="is--h6__title"
               :class="[getComponentClass(childItem), { 'is--active': childItem.active }]"
