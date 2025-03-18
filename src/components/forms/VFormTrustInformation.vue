@@ -34,7 +34,6 @@ const isLoading = ref(false);
 const isValid = computed(() => trustInformationRef.value?.isValid);
 const isDisabledButton = computed(() => (!isValid.value || isSetProfileByIdLoading.value));
 
-
 const saveHandler = async () => {
   trustInformationRef.value?.onValidate();
   if (!isValid.value) {

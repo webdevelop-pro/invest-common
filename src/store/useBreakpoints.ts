@@ -1,13 +1,11 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { ref, onBeforeMount, onBeforeUnmount } from 'vue';
 
-
 const BREAKPOINTS = {
   TABLET: 768,
   DESKTOP: 980,
   DESKTOP_MD: 1024,
 };
-
 
 let count = 0;
 const isTablet = ref(false);

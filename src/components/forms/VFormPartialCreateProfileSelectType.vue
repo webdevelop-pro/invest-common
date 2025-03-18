@@ -45,7 +45,7 @@ const formModel = {
 };
 const model = reactive({} as FormModelCreateProfileSelectType);
 let validator = new PrecompiledValidator<FormModelCreateProfileSelectType>(
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+
   filterSchema({ ...getProfileByIdOptionsData.value }, formModel),
   { ...schema },
 );
@@ -61,14 +61,12 @@ watch(() => model, () => {
 }, { deep: true });
 
 watch(() => getProfileByIdOptionsData.value, () => {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   validator = new PrecompiledValidator<FormModelCreateProfileSelectType>(
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+
     filterSchema({ ...getProfileByIdOptionsData.value }, formModel),
     { ...schema },
   );
 });
-
 
 defineExpose({
   model, validation, isValid, onValidate,

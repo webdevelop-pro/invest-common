@@ -39,7 +39,6 @@ const itemFormatted = computed(() => ({
   tagBackground: getDistributionTagBackground(props.item.status),
 }));
 
-
 const isDefaultImage = computed(() => (
   !props.item?.investment?.offer?.image?.meta_data?.small && !props.item?.investment?.offer?.image?.url));
 

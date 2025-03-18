@@ -16,7 +16,6 @@ const props = defineProps({
   },
 });
 
-
 const dateFull = computed(() => {
   let dateInner = props.investment.payment_data.created_at;
   if (props.investment.payment_data.updated_at) dateInner = props.investment.payment_data.updated_at;

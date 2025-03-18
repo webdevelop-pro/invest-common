@@ -6,28 +6,27 @@ import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import { socials } from 'UiKit/utils/socials';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const SocialLinks = defineAsyncComponent({
   loader: () => import('UiKit/components/VSocialLinks/VSocialLinks.vue'),
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+
   hydrate: hydrateOnVisible(),
 });
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
 const VFooterText = defineAsyncComponent({
   loader: () => import('./VFooterText.vue'),
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+
   hydrate: hydrateOnVisible(),
 });
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
 const VFooterMenu = defineAsyncComponent({
   loader: () => import('./VFooterMenu.vue'),
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+
   hydrate: hydrateOnVisible(),
 });
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
 const VFormFooterSubscribe = defineAsyncComponent({
   loader: () => import('UiKit/components/VForms/VFormFooterSubscribe.vue'),
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+
   hydrate: hydrateOnVisible(),
 });
 const VFooterBottom = defineAsyncComponent({
@@ -57,7 +56,6 @@ const props = defineProps({
   menu: Array as PropType<MenuItem[]>,
   path: String,
 });
-
 
 const { toast } = useToast();
 
@@ -89,11 +87,10 @@ const onSubmit = async (emailLocal: string) => {
   toast(TOAST_OPTIONS);
 };
 
-
 const SOCIAL_LIST = [
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+
   socials?.facebook, socials?.instagram,
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+
   socials?.linkedin, socials?.github,
 ];
 </script>
@@ -149,7 +146,6 @@ const SOCIAL_LIST = [
   <VFooterBottom />
 </template>
 
-
 <style lang="scss">
 .v-footer {
   $root: &;
@@ -191,7 +187,6 @@ const SOCIAL_LIST = [
       flex-wrap: wrap;
     }
   }
-
 
   &__group {
     width: 100%;

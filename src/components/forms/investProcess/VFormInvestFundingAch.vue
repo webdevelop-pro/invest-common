@@ -18,7 +18,6 @@ import {
 } from 'UiKit/helpers/validation/rules';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 
-
 const SELECT_ACCOUNT_TYPE = [
   {
     value: 'checking',
@@ -29,7 +28,6 @@ const SELECT_ACCOUNT_TYPE = [
     text: 'Saving',
   },
 ];
-
 
 type FormModelInvestmentFundingAch = {
   accountHolderName: string;
@@ -54,7 +52,6 @@ const schemaInvestmentFundingAch = {
   },
   $ref: '#/definitions/FundingStep',
 } as unknown as JSONSchemaType<FormModelInvestmentFundingAch>;
-
 
 const props = defineProps({
   modelValue: Object,
@@ -109,7 +106,6 @@ watch(() => model, async () => {
   });
 }, { deep: true });
 
-
 watch(() => props.validate, () => {
   if (props.validate) {
     onValidate();
@@ -118,7 +114,6 @@ watch(() => props.validate, () => {
     }
   }
 });
-
 
 watch(() => getUnconfirmedOfferData.value?.payment_data, () => {
   if (getUnconfirmedOfferData.value?.payment_data.account_holder_name) {

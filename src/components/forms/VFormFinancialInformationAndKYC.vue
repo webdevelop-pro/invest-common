@@ -21,7 +21,6 @@ import { FormChild } from 'InvestCommon/types/form';
 import { scrollToError } from 'UiKit/helpers/validation/general';
 import env from 'InvestCommon/global';
 
-
 const personalFormRef = useTemplateRef<FormChild>('personalFormChild');
 const financialInfoFormRef = useTemplateRef<FormChild>('financialInfoFormChild');
 const investmentObjectivesFormRef = useTemplateRef<FormChild>('investmentObjectivesFormChild');
@@ -78,14 +77,13 @@ const saveHandler = async () => {
     return;
   }
 
-
   const modelLocal = {
     ...personalFormRef.value?.model,
     ...financialInfoFormRef.value?.model,
     ...investmentObjectivesFormRef.value?.model,
     ...understandingRisksFormRef.value?.model,
   };
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   const { consent_plaid, ...fields } = modelLocal;
 
   isLoading.value = true;

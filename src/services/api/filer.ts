@@ -18,7 +18,6 @@ export const fetchGetFiles = (object_id: number, object_name: string) => {
   });
 };
 
-
 export const fetchGetPublicFiles = (object_id: number, object_name: string) => {
   const path = `${FILER_URL}/object/${object_name}/${object_id}`;
 

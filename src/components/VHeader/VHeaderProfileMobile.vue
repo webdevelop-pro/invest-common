@@ -32,7 +32,6 @@ const { isDialogLogoutOpen } = storeToRefs(useDialogsStore);
 
 const userEmail = computed(() => userAccountData.value?.email);
 
-
 const onClick = () => {
   emit('click');
 };

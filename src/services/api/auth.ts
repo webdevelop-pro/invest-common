@@ -22,7 +22,6 @@ export const fetchAuthFlow = (url: string) => {
   });
 };
 
-
 // SET LOGIN
 export const fetchSetLogin = (
   flowId: string,
@@ -91,11 +90,9 @@ export const fetchGetLogout = (token: string) => {
   });
 };
 
-
 // GET LOGOUT URL
 export const fetchGetLogoutURL = () => {
   const path = `${KRATOS_URL}/self-service/logout/browser`;
-
 
   const data = {
     method: 'GET',
@@ -283,7 +280,6 @@ export const fetchSetPassword = (
   });
 };
 
-
 // SET PROFILE
 export const fetchSetProfile = (
   flowId: string,
@@ -309,7 +305,6 @@ export const fetchSetProfile = (
     return response.json() as Promise<IGetSettingsOk>;
   });
 };
-
 
 // GET OPTIONS
 export const fetchGetSchema = () => {

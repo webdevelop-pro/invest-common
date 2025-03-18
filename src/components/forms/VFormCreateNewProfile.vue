@@ -19,34 +19,33 @@ import { PROFILE_TYPES } from 'InvestCommon/global/investment.json';
 import { useAccreditationStore } from 'InvestCommon/store/useAccreditation';
 import env from 'InvestCommon/global';
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const VFormPartialCreateProfileSelectType = defineAsyncComponent({
   loader: () => import('./VFormPartialCreateProfileSelectType.vue'),
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+
   hydrate: hydrateOnVisible(),
 });
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
 const VFormProfileEntity = defineAsyncComponent({
   loader: () => import('./VFormProfileEntity.vue'),
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+
   hydrate: hydrateOnVisible(),
 });
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
 const VFormProfileSDIRA = defineAsyncComponent({
   loader: () => import('./VFormProfileSDIRA.vue'),
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+
   hydrate: hydrateOnVisible(),
 });
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
 const VFormProfileSolo = defineAsyncComponent({
   loader: () => import('./VFormProfileSolo.vue'),
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+
   hydrate: hydrateOnVisible(),
 });
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
 const VFormProfileTrust = defineAsyncComponent({
   loader: () => import('./VFormProfileTrust.vue'),
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+
   hydrate: hydrateOnVisible(),
 });
 

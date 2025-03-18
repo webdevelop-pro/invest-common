@@ -55,7 +55,6 @@
   </div>
 </template>
 
-
 <style lang="scss">
 .v-footer-text {
   $root: &;

@@ -4,9 +4,9 @@ import {
 import {
   vi, it, beforeEach, afterEach, expect, describe,
 } from 'vitest';
-import AccreditationFileInput from '../AccreditationFileInput.vue';
 import { createPinia, setActivePinia } from 'pinia';
 import createFetchMock from 'vitest-fetch-mock';
+import AccreditationFileInput from '../AccreditationFileInput.vue';
 
 vi.mock('InvestCommon/store');
 vi.mock('InvestCommon/store/useAccreditation', () => ({
@@ -39,7 +39,6 @@ async function updateInputFile(el: HTMLInputElement, files: File[]) {
 
   await fireEvent.update(el);
 }
-
 
 describe('ViewAccreditation', () => {
   beforeEach(() => {

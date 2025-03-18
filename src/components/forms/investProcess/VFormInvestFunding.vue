@@ -125,9 +125,7 @@ const selectErrors = computed(() => {
     const message = 'Wallet does not have enough funds';
     return [message];
   }
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   if (isWallet && setFundingErrorData.value?.wallet) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
     return setFundingErrorData.value.wallet;
   }
   return [];
@@ -139,11 +137,8 @@ const isBtnDisabled = computed(() => {
   return false;
 });
 const currentComponent = computed(() => {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   if (model.funding_type === FundingTypes.wallet) return InvestFormFundingWallet;
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   if (model.funding_type === FundingTypes.wire) return InvestFormFundingWire;
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   if (model.funding_type === FundingTypes.ach) return InvestFormFundingAch;
   return null;
 });
@@ -213,7 +208,6 @@ const continueHandler = async () => {
   }
 };
 
-// eslint-disable-next-line
 watch(() => setFundingOptionsData.value, () => {
   validator = new PrecompiledValidator<FormModelInvestmentFunding>(
     setFundingOptionsData.value,

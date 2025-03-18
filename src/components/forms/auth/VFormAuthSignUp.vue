@@ -24,7 +24,6 @@ import {
 import eyeOff from 'UiKit/assets/images/eye-off.svg';
 import eye from 'UiKit/assets/images/eye.svg';
 
-
 const authStore = useAuthStore();
 const { getSignupData, getSchemaSignupData, setSignupErrorData } = storeToRefs(authStore);
 const authLogicStore = useAuthLogicStore();
@@ -45,7 +44,6 @@ const onLogin = () => {
 
 const queryFlow = computed(() => (
   (window && window.location.search) ? new URLSearchParams(window.location.search).get('flow') : null));
-
 
 const model = reactive({
 } as FormModelSignUp);
@@ -70,7 +68,6 @@ watch(() => model.create_password, (pass: string) => {
   return true;
 });
 
-// eslint-disable-next-line
 watch(() => getSchemaSignupData.value, () => {
   validator = new PrecompiledValidator<FormModelSignUp>(
     getSchemaSignupData.value,

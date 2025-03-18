@@ -16,7 +16,6 @@ import { filterSchema } from 'UiKit/helpers/validation/general';
 import { isEmpty } from 'UiKit/helpers/general';
 import { createFormModel } from 'UiKit/helpers/model';
 
-
 const yesNoOptions = [
   { value: 'Yes', text: 'Yes' },
   { value: 'No', text: 'No' },
@@ -87,7 +86,6 @@ defineExpose({
   model: modelExpose, validation, validator, isValid, onValidate,
 });
 
-
 watch(() => props.modelData, () => {
   if (props.modelData?.name) {
     model.name = props.modelData?.name;
@@ -97,7 +95,6 @@ watch(() => props.modelData, () => {
     model.is_use_ein = 'Yes';
   }
 }, { deep: true });
-
 
 watch(() => model, () => {
   if (!isValid.value) onValidate();

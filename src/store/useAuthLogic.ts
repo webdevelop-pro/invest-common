@@ -104,7 +104,7 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
 
     if (setSocialLoginDataError.value && setSocialLoginDataError.value?.redirect_browser_to) {
       window.location.href = setSocialLoginDataError.value.redirect_browser_to;
-      // eslint-disable-next-line no-console
+
       console.log('setSocialLoginData', setSocialLoginDataError.value.redirect_browser_to);
     }
 
@@ -218,7 +218,6 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     useFilerStore().resetAll();
   };
 
-
   const handleAfterLogout = () => {
     resetAll();
     let queryParams;
@@ -270,7 +269,6 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     // using token logout
     await authStore.getLogout(token.value);
 
-    // eslint-disable-next-line max-len
     if (getLogoutResponse.value && (getLogoutResponse.value.status >= 200) && (getLogoutResponse.value.status <= 300)) {
       // if logout request is ok, reset all data and redirect
       useGlobalLoader().show();
@@ -295,7 +293,6 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     isLoadingSession.value = false;
   };
 
-
   // VERIFICATION
   const onVerification = async (flowIdVerification: string, code: string, url: string) => {
     await authStore.fetchAuthHandler(url);
@@ -309,12 +306,11 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
       csrfToken.value,
     );
 
-    // eslint-disable-next-line
     if (setVerificationErrorData.value && setVerificationErrorData.value?.redirect_browser_to
-    // eslint-disable-next-line
+
         && (setVerificationErrorData.value?.error?.code === 422)) {
       await getSession();
-      // eslint-disable-next-line
+
       const fullUrl = setVerificationErrorData.value.redirect_browser_to;
       navigateWithQueryParams(fullUrl);
       // const newUrl = new URL(fullUrl);

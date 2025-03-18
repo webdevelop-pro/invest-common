@@ -1,7 +1,6 @@
 import {
   render, fireEvent,
 } from '@testing-library/vue';
-import FormFinancialInformationAndKYC from '../FormFinancialInformationAndKYC.vue';
 import { createPinia, setActivePinia, storeToRefs } from 'pinia';
 import {
   beforeEach, expect, describe, it, vi,
@@ -9,10 +8,10 @@ import {
 import { useUserProfilesStore, useUsersStore } from 'InvestCommon/store';
 import createFetchMock from 'vitest-fetch-mock';
 import { userIndividualOptionsMock } from 'InvestCommon/tests/__mocks__';
+import FormFinancialInformationAndKYC from '../FormFinancialInformationAndKYC.vue';
 
 const fetchMocker = createFetchMock(vi);
 fetchMocker.enableMocks();
-
 
 vi.mock('vue-router', () => ({
   useRouter: vi.fn().mockReturnValue({
@@ -70,7 +69,6 @@ function renderComponent() {
     consentPlaid,
   };
 }
-
 
 const inputTriggerError = async (el: HTMLInputElement, value: string, isTruthy: boolean) => {
   await fireEvent.update(el, value);
@@ -239,7 +237,6 @@ describe('FormFinancialInformationAndKYC', () => {
     expect(inputStateGroup?.lastChild?.textContent).toBe('v-if'); // means error block did not show
     // we check validation on continueButton click
     await fireEvent.click(continueButton);
-
 
     expect(inputState?.classList.contains('is--error')).toBe(true); // if empty
     expect(inputStateGroup?.lastChild?.textContent).toBe('Please complete'); // error message if empty

@@ -1,7 +1,6 @@
 import {
   render, fireEvent,
 } from '@testing-library/vue';
-import VFormPersonalInformation from '../VFormPersonalInformation.vue';
 import { createPinia, setActivePinia, storeToRefs } from 'pinia';
 import {
   beforeEach, expect, describe, it, vi,
@@ -9,6 +8,7 @@ import {
 import { useUserProfilesStore, useUsersStore } from 'InvestCommon/store';
 import createFetchMock from 'vitest-fetch-mock';
 import { userIndividualOptionsMock } from 'InvestCommon/tests/__mocks__';
+import VFormPersonalInformation from '../VFormPersonalInformation.vue';
 
 const fetchMocker = createFetchMock(vi);
 fetchMocker.enableMocks();
@@ -64,7 +64,6 @@ function renderComponent() {
     wrapper,
   };
 }
-
 
 const inputTriggerError = async (el: HTMLInputElement, value: string, isTruthy: boolean) => {
   await fireEvent.update(el, value);

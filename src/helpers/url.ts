@@ -5,7 +5,6 @@ import { useUsersStore } from 'InvestCommon/store/useUsers';
 import { storeToRefs } from 'pinia';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
 
-
 // Utility functions for file path manipulation
 export function getFileNameByPath(path: string): string {
   return path.split('\\').pop()!.split('/').pop()!;

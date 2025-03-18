@@ -17,7 +17,6 @@ import { filterSchema } from 'UiKit/helpers/validation/general';
 import { isEmpty } from 'UiKit/helpers/general';
 import { createFormModel } from 'UiKit/helpers/model';
 
-
 const isAccreditedRadioOptions = [
   {
     value: 'true',
@@ -75,18 +74,15 @@ const onValidate = () => {
   validation.value = validator.getFormValidationErrors(model);
 };
 
-
 defineExpose({
   model, validation, validator, isValid, onValidate,
 });
-
 
 watch(() => props.modelData?.accredited_investor?.is_accredited, () => {
   if (props.modelData?.accredited_investor?.is_accredited && model.accredited_investor?.is_accredited) {
     model.accredited_investor.is_accredited = props.modelData?.accredited_investor?.is_accredited;
   }
 }, { deep: true });
-
 
 watch(() => model, () => {
   if (!isValid.value) onValidate();

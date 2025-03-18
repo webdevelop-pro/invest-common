@@ -74,7 +74,6 @@ const onValidate = () => {
   validation.value = validator.getFormValidationErrors(model);
 };
 
-
 const schemaObject = computed(() => getFilteredObject(getProfileByIdOptionsData.value, formModel));
 const optionsDuration = computed(() => getOptions('investment_objectives.duration', schemaObject));
 const optionsAccess = computed(() => getOptions('investment_objectives.importance_of_access', schemaObject));

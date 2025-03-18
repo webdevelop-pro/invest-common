@@ -14,7 +14,6 @@ const props = defineProps({
 
 const emit = defineEmits(['filterItems']);
 
-
 const totalResults = computed(() => props.totalResultsLength || 0);
 const isActiveToolbar = computed(() => totalResults.value > 0);
 const filterResults = computed(() => (props.filterResultsLength || 0));
@@ -77,7 +76,6 @@ const onApplyFilter = (items: IVFilter[]) => {
   align-self: stretch;
   justify-content: space-between;
 
-
   @media screen and (max-width: $tablet){
     flex-direction: column;
   }
@@ -132,7 +130,7 @@ const onApplyFilter = (items: IVFilter[]) => {
   }
 
   &__filter {
-    --V-filter-dropdown--min-width: 250px
+    --v-filter-dropdown-min-width: 250px
   }
 
   &__export-icon {

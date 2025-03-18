@@ -3,8 +3,8 @@ import { generalErrorHandling } from 'InvestCommon/helpers/generalErrorHandling'
 import { fetchGetDistributions } from 'InvestCommon/services/api/distributions';
 import { IDistributionsData, IDistributionsMeta } from 'InvestCommon/types/api/distributions';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
-import { useOfferStore } from './useOffer';
 import { transformDistributionsData } from 'InvestCommon/helpers/transformInvestData';
+import { useOfferStore } from './useOffer';
 import { useUsersStore } from './useUsers';
 
 export const useDistributionsStore = defineStore('distributions', () => {
@@ -35,14 +35,12 @@ export const useDistributionsStore = defineStore('distributions', () => {
     isGetDistributionsLoading.value = false;
   };
 
-
   const resetAll = () => {
     getDistributionsData.value = undefined;
   };
 
   const distributionGeograficData = computed(() => getDistributionsMeta.value?.geografic_data || []);
   const distributionGeograficLabels = computed(() => getDistributionsMeta.value?.geografic_labels || []);
-
 
   const distributionPerformanceData = computed(() => (getDistributionsMeta.value?.performance_data || []));
   const distributionPerformanceLabels = computed(() => (getDistributionsMeta.value?.performance_labels || []));

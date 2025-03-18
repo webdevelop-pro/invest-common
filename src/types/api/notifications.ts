@@ -1,4 +1,3 @@
-
 import { AccreditationTypes, InvestKycTypes } from './invest';
 import { IProfileIndividual } from './user';
 

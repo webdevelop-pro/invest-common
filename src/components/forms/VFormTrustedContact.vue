@@ -23,7 +23,6 @@ import {
 import { FormModeTrustedContact } from 'InvestCommon/types/form';
 import env from 'InvestCommon/global';
 
-
 const router = useRouter();
 const userProfilesStore = useUserProfilesStore();
 const {
@@ -129,7 +128,6 @@ watch(() => model, () => {
   if (!isValid.value) onValidate();
 }, { deep: true });
 
-// eslint-disable-next-line
 watch(() => getProfileByIdOptionsData.value, () => {
   validator = new PrecompiledValidator<FormModeTrustedContact>(
     filterSchema(getProfileByIdOptionsData.value, formModel),

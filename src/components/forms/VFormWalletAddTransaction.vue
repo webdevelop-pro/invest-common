@@ -113,7 +113,6 @@ watch(() => model, () => {
   if (!isValid.value) onValidate();
 }, { deep: true });
 
-// eslint-disable-next-line
 watch(() => [schemaAddTransaction.value], () => {
   validator = new PrecompiledValidator<FormModelAddTransaction>(
     schemaAddTransaction.value,

@@ -52,4 +52,3 @@ watch(() => props.item.id, () => {
     :class="{ 'is--open': isOpen }"
   />
 </template>
-

@@ -1,11 +1,10 @@
-
 import { generalErrorHandling } from 'InvestCommon/helpers/generalErrorHandling';
 import { IWalletDataResponse } from 'InvestCommon/types/api/wallet';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { computed, ref, nextTick } from 'vue';
-import { useProfileWalletBankAccountStore } from './useProfileWalletBankAccount';
 import { fetchGetWalletData, fetchAddBankAccount } from 'InvestCommon/services/api/wallet';
 import { INotification } from 'InvestCommon/types/api/notifications';
+import { useProfileWalletBankAccountStore } from './useProfileWalletBankAccount';
 import { useUsersStore } from '../useUsers';
 
 const STATUS_CREATED = 'created';
@@ -36,19 +35,18 @@ export const useProfileWalletStore = defineStore('wallet', () => {
     isGetProfileWalletDataLoading.value = false;
   };
 
-
   const isAddBankAccountLoading = ref(false);
   const isAddBankAccountError = ref(false);
   const addBankAccountData = ref();
 
   const setProfileWalletAddBankAccount = async () => {
     isAddBankAccountLoading.value = true;
-    // eslint-disable-next-line
+
     const response = await fetchAddBankAccount(walletId.value).catch((error: Response) => {
       isAddBankAccountError.value = true;
       void generalErrorHandling(error);
     });
-    // eslint-disable-next-line
+
     if (response) addBankAccountData.value = response;
     isAddBankAccountLoading.value = false;
   };

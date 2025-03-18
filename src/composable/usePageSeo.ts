@@ -15,7 +15,6 @@ interface ITagItem {
 }
 export const usePageSeo = () => {
   function setMetaContent(key: string, meta: ITagItem) {
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     const element: HTMLElement | null = document.head.querySelector(`meta[${key}="${meta.name || meta.property}"]`);
     if (element instanceof HTMLMetaElement) {
       element.content = meta.content;
@@ -33,7 +32,6 @@ export const usePageSeo = () => {
   }
 
   function setRobotsAll() {
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     const element: HTMLElement | null = document.head.querySelector('meta[robots]');
     if (element instanceof HTMLMetaElement) {
       element.content = 'noindex, nofollow';
@@ -73,7 +71,6 @@ export const usePageSeo = () => {
     setMetaContent('property', ogUrl);
   }
 
-
   function setMetaTags(pageData: IPageData) {
     const seoTags = [
       {
@@ -97,7 +94,6 @@ export const usePageSeo = () => {
     setMetaTags(pageData);
     setUrl(pageData);
   }
-
 
   return {
     setMetaContent,

@@ -1,4 +1,3 @@
-
 export const fundingSourceResponseMock = {
   id: 4,
   name: 'Chase Bank',

@@ -1,4 +1,3 @@
-
 export enum WalletTransactionStatusTypes {
   processed = 'processed',
   pending = 'pending',

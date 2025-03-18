@@ -29,7 +29,6 @@ export interface IDistributionsData {
     created_at: string;
 }
 
-
 export interface IDistributionsMeta {
   geografic_data: number[];
   geografic_labels: string[];

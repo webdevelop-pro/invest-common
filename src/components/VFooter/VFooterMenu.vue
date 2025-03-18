@@ -67,7 +67,6 @@ const getComponentClass = (item: MenuItem) => {
   </div>
 </template>
 
-
 <style lang="scss">
 .v-footer-menu {
   $root: &;

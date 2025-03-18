@@ -1,5 +1,4 @@
 import { render, fireEvent } from '@testing-library/vue';
-import SignUpForm from '../SignUpForm.vue';
 import {
   beforeEach, vi, describe, it, expect,
 } from 'vitest';
@@ -7,6 +6,7 @@ import { createPinia, setActivePinia } from 'pinia';
 import { useAuthStore } from 'InvestCommon/store';
 import { mockSchema } from 'InvestCommon/services/api/__tests__/__mocks__/authMock';
 import createFetchMock from 'vitest-fetch-mock';
+import SignUpForm from '../SignUpForm.vue';
 
 vi.mock('vue-router', () => ({
   useRouter: vi.fn().mockReturnValue({
@@ -22,7 +22,6 @@ vi.mock('vue-router', () => ({
     params: { profileId: '1' },
   }),
 }));
-
 
 vi.mock('InvestCommon/store/useUserIdentitys', () => ({
   useUserProfilesStore: vi.fn().mockReturnValue({

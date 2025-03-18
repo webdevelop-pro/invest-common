@@ -11,7 +11,6 @@ import { generalErrorHandling } from 'InvestCommon/helpers/generalErrorHandling'
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { IProfileIndividual, ISchema } from 'InvestCommon/types/api/user';
 
-
 export const useUserProfilesStore = defineStore('userProfile', () => {
   const isGetProfileOptionsLoading = ref(false);
   const isGetProfileOptionsError = ref(false);
@@ -24,10 +23,8 @@ export const useUserProfilesStore = defineStore('userProfile', () => {
       void generalErrorHandling(error);
     });
     if (response) {
-      // eslint-disable-next-line
       getProfileOptionsData.value = response;
       if (getProfileOptionsData.value.definitions?.RegCF) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         delete getProfileOptionsData.value.definitions.RegCF?.required;
       }
     }

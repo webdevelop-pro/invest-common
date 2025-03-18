@@ -1,13 +1,7 @@
-
-// eslint-disable-next-line
 import linkedInIcon from 'InvestCommon/assets/images/social/linkedin1.svg?url';
-// eslint-disable-next-line
 import facebookIcon from 'InvestCommon/assets/images/social/facebook1.svg?url';
-// eslint-disable-next-line
 import instagramIcon from 'InvestCommon/assets/images/social/instagram1.svg?url';
-// eslint-disable-next-line
 import githubIcon from 'InvestCommon/assets/images/social/github1.svg?url';
-// eslint-disable-next-line
 import twitterIcon from 'InvestCommon/assets/images/social/x-twitter.svg?url';
 
 export const LINKEDIN = {
@@ -32,7 +26,6 @@ export const INSTAGRAM = {
   href: 'https://www.instagram.com/webdevelop.pro',
   name: 'Instagram',
 } as const;
-
 
 export const TWITTER = {
   icon: twitterIcon,

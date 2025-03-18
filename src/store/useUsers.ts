@@ -23,7 +23,6 @@ import { PROFILE_TYPES } from 'InvestCommon/global/investment.json';
 
 const { EXTERNAL } = env;
 
-
 export const useUsersStore = defineStore('user', () => {
   const router = useRouter();
   const route = useRoute();
@@ -81,7 +80,6 @@ export const useUsersStore = defineStore('user', () => {
   const updateDataInProfile = (nameOfProperty: string, data: object | string | number) => {
     getProfileByIdData.value[nameOfProperty] = data;
   };
-
 
   const selectedUserProfileRiskAcknowledged = computed(() => {
     const profileData = selectedUserProfileData.value?.data;
@@ -159,7 +157,6 @@ export const useUsersStore = defineStore('user', () => {
       void updateUserAccountSession(getSessionData.value);
     }
   });
-
 
   watch(() => userAccountSession.value?.active, async () => {
     if (userAccountSession.value?.active) {

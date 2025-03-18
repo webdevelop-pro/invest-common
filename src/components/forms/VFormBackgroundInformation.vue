@@ -27,7 +27,6 @@ import { getOptions } from 'UiKit/helpers/model';
 import { FormModelBackgroundInformation } from 'InvestCommon/types/form';
 import env from 'InvestCommon/global';
 
-
 const router = useRouter();
 const userProfilesStore = useUserProfilesStore();
 const {
@@ -54,7 +53,6 @@ const formModel = {
   irs_backup_withholding: {},
 };
 
-
 const schemaObject = computed(() => getFilteredObject(getProfileByIdOptionsData.value, formModel) || {});
 const optionsEmployment = computed(() => getOptions('employment.type', schemaObject));
 
@@ -76,7 +74,6 @@ const model = reactive({
   irs_backup_withholding: selectedUserProfileData.value?.data?.irs_backup_withholding || false,
 } as FormModelBackgroundInformation);
 
-
 const isAdditionalFields = computed(() => (
   model.employment?.type.includes('full-time')
   || model.employment?.type.includes('part-time')
@@ -97,7 +94,6 @@ const requiredEmployment = computed(() => {
   }
   return requiredRules;
 });
-
 
 const EmploymentInformation = computed(() => ({
   properties: {
@@ -123,7 +119,6 @@ const requiredFinra = computed(() => {
   }
   return requiredRules;
 });
-
 
 const FinraInformation = computed(() => ({
   properties: {
@@ -162,7 +157,7 @@ const schemaBackgroundInformation = computed(() => ({
 ));
 
 let validator = new PrecompiledValidator<FormModelBackgroundInformation>(
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+
   filterSchema(getProfileByIdOptionsData.value, formModel),
   schemaBackgroundInformation.value,
 );
@@ -246,7 +241,6 @@ watch(() => selectedUserProfileData.value?.data.finra_affiliated, () => {
   }
 }, { deep: true, immediate: true });
 
-
 watch(() => selectedUserProfileData.value?.data.ten_percent_shareholder, () => {
   if (dataShareholderData.value?.shareholder_association) {
     model.ten_percent_shareholder.shareholder_association = dataShareholderData.value?.shareholder_association;
@@ -273,10 +267,9 @@ watch(() => model.finra_affiliated?.member_association, () => {
   model.finra_affiliated = checkObjectAndDeleteNotRequiredFields(['member_association', 'correspondence'], requiredFinra.value, model.finra_affiliated);
 });
 
-// eslint-disable-next-line
 watch(() => [getProfileByIdOptionsData.value, schemaBackgroundInformation.value], () => {
   validator = new PrecompiledValidator<FormModelBackgroundInformation>(
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+
     filterSchema(getProfileByIdOptionsData.value, formModel),
     schemaBackgroundInformation.value,
   );

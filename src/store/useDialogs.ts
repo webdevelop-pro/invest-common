@@ -1,4 +1,4 @@
-/* eslint-disable no-console */
+/* eslint-disable @typescript-eslint/no-unsafe-function-type */
 import { ref } from 'vue';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { WalletAddTransactionTypes } from 'InvestCommon/types/api/wallet';
@@ -22,7 +22,6 @@ export const useDialogs = defineStore('dialogs', () => {
     cancelInvestmentInvestment.value = investment;
     isDialogCancelInvestmentOpen.value = true;
   };
-
 
   const isDialogTransactionOpen = ref(false);
   const transactionInvestment = ref<IInvest>();

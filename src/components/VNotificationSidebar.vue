@@ -10,12 +10,9 @@ import {
 } from 'UiKit/components/Base/VSheet';
 import { defineAsyncComponent } from 'vue';
 
-
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const WdNotificationTable = defineAsyncComponent({
   loader: () => import('InvestCommon/components/VNotificationTable.vue'),
 });
-
 
 defineProps({
   external: Boolean, // is the component external and nee links instead of router

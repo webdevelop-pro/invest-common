@@ -1,4 +1,3 @@
-
 export enum OfferStatuses {
   new = 'new',
   draft = 'draft',
@@ -11,16 +10,10 @@ export enum OfferStatuses {
   closed_unsuccessfully = 'closed_unsuccessfully',
 }
 
-
 export enum OfferDocumentsObjectTypes {
   company = 'company',
   investment_agreements = 'investment-agreements',
   tax = 'tax',
-}
-
-export interface IOfferData {
-  count: number;
-  data: IOffer[];
 }
 
 export interface IOfferDocuments {
@@ -95,13 +88,13 @@ export interface IOffer {
   data?: IOfferInfoData;
 }
 
-export interface IOfferSharesError {
-  number_of_shares: string[];
+export interface IOfferData {
+  count: number;
+  data: IOffer[];
 }
 
-export interface IOfferCommentsResponse {
-  count: number;
-  data: IOfferComment[];
+export interface IOfferSharesError {
+  number_of_shares: string[];
 }
 
 export interface IOfferComment {
@@ -112,6 +105,11 @@ export interface IOfferComment {
     first_name: string;
     last_name: string;
   };
+}
+
+export interface IOfferCommentsResponse {
+  count: number;
+  data: IOfferComment[];
 }
 
 export interface IOfferCommentPayload {

@@ -125,7 +125,6 @@ const signInHandler = () => {
 watch(() => disclosureCheckbox.value, (value) => {
   if (!value) related.value = '';
 });
-// eslint-disable-next-line
 watch(() => setOfferCommentsOptionsData.value, () => {
   validator = new PrecompiledValidator<FormModelOfferComment>(
     setOfferCommentsOptionsData.value,

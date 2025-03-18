@@ -1,4 +1,3 @@
-
 import env from 'InvestCommon/global';
 
 export const urlSignin = `${env.FRONTEND_URL_STATIC}/signin`;

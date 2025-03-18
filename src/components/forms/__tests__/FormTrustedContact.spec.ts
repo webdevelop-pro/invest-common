@@ -1,7 +1,6 @@
 import {
   render, fireEvent,
 } from '@testing-library/vue';
-import FormTrustedContact from '../FormTrustedContact.vue';
 import { createPinia, setActivePinia, storeToRefs } from 'pinia';
 import {
   beforeEach, expect, describe, it, vi,
@@ -9,6 +8,7 @@ import {
 import { useInvestmentsStore, useUsersStore } from 'InvestCommon/store';
 import createFetchMock from 'vitest-fetch-mock';
 import { mockOwnershipStepOptions } from 'InvestCommon/tests/__mocks__';
+import FormTrustedContact from '../FormTrustedContact.vue';
 
 const fetchMocker = createFetchMock(vi);
 fetchMocker.enableMocks();
@@ -50,7 +50,6 @@ function renderComponent() {
     wrapper,
   };
 }
-
 
 const inputTriggerError = async (el: HTMLInputElement, value: string, isTruthy: boolean) => {
   await fireEvent.update(el, value);

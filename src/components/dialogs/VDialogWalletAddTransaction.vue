@@ -16,7 +16,6 @@ const props = defineProps({
   },
 });
 
-
 const isTypeDeposit = ref((props.transactionType === WalletAddTransactionTypes.deposit));
 const titile = ref((isTypeDeposit.value ? 'Add Funds' : 'Withdraw'));
 </script>

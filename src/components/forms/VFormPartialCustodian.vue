@@ -72,7 +72,6 @@ defineExpose({
   model, validation, validator, isValid, onValidate,
 });
 
-
 watch(() => props.modelData, () => {
   if (props.modelData?.full_account_name) {
     model.full_account_name = props.modelData?.full_account_name;
@@ -84,7 +83,6 @@ watch(() => props.modelData, () => {
     model.account_number = props.modelData?.account_number;
   }
 }, { deep: true });
-
 
 watch(() => model, () => {
   if (!isValid.value) onValidate();

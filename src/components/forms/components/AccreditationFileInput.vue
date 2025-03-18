@@ -38,7 +38,6 @@ const requiredValueSchema = computed(() => {
   return V;
 });
 
-
 const schemaAccreditationFileInput = computed(() => ({
   $schema: 'http://json-schema.org/draft-07/schema#',
   definitions: {
@@ -69,11 +68,9 @@ let validator = new PrecompiledValidator<FormModelAccreditationFileInput>(
 const validation = ref<unknown>();
 const isValid = computed(() => isEmpty(validation.value || {}));
 
-
 const onValidate = () => {
   validation.value = validator.getFormValidationErrors(model);
 };
-
 
 // const setDescriptions = () => {
 //   if (accreditation.value.getDescriptions.length) {
@@ -95,13 +92,10 @@ const onFileChange = (files: File[]) => {
 };
 
 const onFileRemove = (index: number) => {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
   if (model[`description${index + 1}`]) delete model[`description${index + 1}`];
 };
 
-
 const getErrorText = (index: number) => (
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
   uploadAccreditationDocumentErrorData?.value ? uploadAccreditationDocumentErrorData?.value[`description${index}`] : undefined
 );
 
@@ -110,7 +104,6 @@ watch(() => [isValid.value, filesUploadError.value], (value) => {
   emit('valid', !isInvalid);
 });
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 watch(() => model, () => {
   if (!isValid.value) onValidate();
   emit('model', model);

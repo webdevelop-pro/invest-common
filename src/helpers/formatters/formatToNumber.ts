@@ -1,6 +1,5 @@
 import trimEnd from 'lodash/trimEnd';
 
-
 /**
  * when round === Infinity -> 1000.0000123 convert to 1,000.000123
  * when round === true     -> 1000.0000123 convert to 1,000.0001
@@ -17,7 +16,7 @@ export const formatToNumber = (
   // eslint-disable-next-line no-nested-ternary
   let minimumFractionDigits = round === Infinity
     ? numberString.split('.')[1]?.length
-    : round ? 2 : void 0;
+    : round ? 2 : undefined;
 
   if (minimumFractionDigits) {
     minimumFractionDigits = minimumFractionDigits > 18 ? 18 : minimumFractionDigits;
@@ -25,7 +24,7 @@ export const formatToNumber = (
 
   const result = Intl.NumberFormat('en-US', {
     minimumFractionDigits,
-    notation: compact ? 'compact' : void 0,
+    notation: compact ? 'compact' : undefined,
   }).format(+number);
 
   // for round === Infinity do not convert xxx.00000266666666 -> xxx.0000026700000

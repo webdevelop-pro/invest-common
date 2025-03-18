@@ -17,7 +17,6 @@ import { isEmpty } from 'UiKit/helpers/general';
 import { createFormModel, getOptions } from 'UiKit/helpers/model';
 import VFormCombobox from 'UiKit/components/Base/VForm/VFormCombobox.vue';
 
-
 interface FormModelPartialIdentification {
     type_of_identification: {
       type: string | undefined;
@@ -71,7 +70,7 @@ const model = reactive({
   type_of_identification: {},
 } as FormModelPartialIdentification);
 let validator = new PrecompiledValidator<FormModelPartialIdentification>(
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+
   filterSchema(getProfileByIdOptionsData.value, formModel),
   schema,
 );
@@ -91,14 +90,12 @@ watch(() => model, () => {
 }, { deep: true });
 
 watch(() => getProfileByIdOptionsData.value, () => {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   validator = new PrecompiledValidator<FormModelPartialIdentification>(
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+
     filterSchema(getProfileByIdOptionsData.value, formModel),
     schema,
   );
 });
-
 
 defineExpose({
   model, validation, isValid, onValidate,
@@ -109,7 +106,6 @@ watch(() => props.modelData, () => {
     model.type_of_identification.type = props.modelData?.type_of_identification?.type;
   }
   if (props.modelData?.type_of_identification?.id_number) {
-    // eslint-disable-next-line max-len
     model.type_of_identification.id_number = props.modelData?.type_of_identification?.id_number;
   }
   if (props.modelData?.type_of_identification?.state) {

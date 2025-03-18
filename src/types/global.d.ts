@@ -15,7 +15,6 @@ declare global {
     ) => unknown;
   }
   interface Window {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Plaid: any | IPlaid;
   }
   const analytics: IAnalytics;

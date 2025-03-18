@@ -1,4 +1,3 @@
-
 import createFetchMock, { FetchMock } from 'vitest-fetch-mock';
 import {
   beforeEach, vi, describe, it, expect,
@@ -10,9 +9,9 @@ import {
 import { shallowMount } from '@vue/test-utils';
 import { useAuthLogicStore } from 'InvestCommon/store';
 import { SELFSERVICE } from 'InvestCommon/helpers/enums/auth';
+import { createRouter, createWebHistory } from 'vue-router';
 import App from '@/App.vue';
 import { mockLogin, mockRecovery } from './__mocks__/formsMock';
-import { createRouter, createWebHistory } from 'vue-router';
 import { UserIdentity } from '@/tests/__mocks__/userMock';
 
 vi.mock('InvestCommonglobal', () => ({
@@ -22,7 +21,6 @@ vi.mock('InvestCommonglobal', () => ({
     NOTIFICATION_URL: 'https://notification-api.webdevelop.us',
   },
 }));
-
 
 vi.mock('InvestCommon/store/useUserIdentitys', () => ({
   useUserProfilesStore: vi.fn().mockReturnValue({

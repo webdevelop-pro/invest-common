@@ -8,4 +8,3 @@ export interface IInitPlugin {
 }
 
 export type Plaid = unknown;
-

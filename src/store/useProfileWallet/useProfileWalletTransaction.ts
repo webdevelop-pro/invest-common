@@ -1,4 +1,3 @@
-
 import {
   ITransactionDataResponse, WalletAddTransactionTypes, WalletTransactionStatusTypes,
 } from 'InvestCommon/types/api/wallet';
@@ -8,9 +7,9 @@ import { generalErrorHandling } from 'InvestCommon/helpers/generalErrorHandling'
 import {
   fetchGetTransactionsData, fetchAddTransaction, fetchCancelTransaction,
 } from 'InvestCommon/services/api/wallet';
-import { useProfileWalletBankAccountStore } from './useProfileWalletBankAccount';
 import { formatToFullDate } from 'InvestCommon/helpers/formatters/formatToDate';
 import { INotification } from 'InvestCommon/types/api/notifications';
+import { useProfileWalletBankAccountStore } from './useProfileWalletBankAccount';
 import { useUsersStore } from '../useUsers';
 
 // profile wallet transaction handling
@@ -39,13 +38,13 @@ export const useProfileWalletTransactionStore = defineStore('walletTransaction',
   const setProfileWalletAddTransactionErrorData = ref();
   const setProfileWalletAddTransaction = async (type: WalletAddTransactionTypes, amount: number) => {
     isSetProfileWalletAddTransactionLoading.value = true;
-    // eslint-disable-next-line
+
     const response = await fetchAddTransaction(walletId.value, type, amount).catch(async (error: Response) => {
       isSetProfileWalletAddTransactionError.value = true;
       setProfileWalletAddTransactionErrorData.value = JSON.parse(await error.text());
       void generalErrorHandling(error);
     });
-    // eslint-disable-next-line
+
     if (response) setProfileWalletAddTransactionData.value = response.items;
     isSetProfileWalletAddTransactionLoading.value = false;
   };
@@ -57,12 +56,12 @@ export const useProfileWalletTransactionStore = defineStore('walletTransaction',
   const setProfileWalletCancelTransaction = async (transaction_id: number) => {
     isSetProfileWalletCancelTransactionLoading.value = true;
     isSetProfileWalletCancelTransactionLoadingId.value = transaction_id;
-    // eslint-disable-next-line
+
     const response = await fetchCancelTransaction(walletId.value, transaction_id).catch((error: Response) => {
       isSetProfileWalletCancelTransactionError.value = true;
       void generalErrorHandling(error);
     });
-    // eslint-disable-next-line
+
     if (response) setProfileWalletCancelTransactionData.value = response.items;
     isSetProfileWalletCancelTransactionLoading.value = false;
     isSetProfileWalletCancelTransactionLoadingId.value = 0;
@@ -155,7 +154,6 @@ export const useProfileWalletTransactionStore = defineStore('walletTransaction',
     );
     return formattedDataInner;
   });
-
 
   // TRANSACTIONS
   const transactionsCount = computed(() => getFormattedProfileWalletTransactionsData.value?.length || 0);

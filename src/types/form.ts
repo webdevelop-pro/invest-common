@@ -1,4 +1,3 @@
-
 import { IAccreditedInvestor, IInvestmentObjectives } from 'InvestCommon/types/api/user';
 
 export interface FormChild {
@@ -41,12 +40,9 @@ export interface FormModelUnderstandRisks {
   consent_plaid: boolean;
 }
 
-
 export interface FormModelCreateProfileSelectType {
   type_profile: string;
 }
-
-
 
 export interface FormModelResetPassword {
   first_name: string;
@@ -111,7 +107,6 @@ export interface IFilesData {
 }
 
 export type TFields = keyof IValidationFields;
-
 
 export type FormModelAccreditationFileInput = {
   description1: string;

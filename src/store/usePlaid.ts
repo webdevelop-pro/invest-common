@@ -1,10 +1,8 @@
-/* eslint-disable no-console */
 import { ref } from 'vue';
 import { fetchCreateToken } from 'InvestCommon/services/api/plaid';
 import { generalErrorHandling } from 'InvestCommon/helpers/generalErrorHandling';
 import { IPlaidTokenResponse } from 'InvestCommon/types/api/plaid';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
-import { useUsersStore } from './useUsers';
 import { ROUTE_DASHBOARD_PORTFOLIO } from 'InvestCommon/helpers/enums/routes';
 import { useRedirect } from 'InvestCommon/composable/useRedirect';
 import { useRouter } from 'vue-router';
@@ -12,6 +10,7 @@ import { useRouter } from 'vue-router';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import env from 'InvestCommon/global';
 import { urlProfilePortfolio } from 'InvestCommon/global/links';
+import { useUsersStore } from './useUsers';
 
 const { EXTERNAL } = env;
 
@@ -58,7 +57,6 @@ export const usePlaidStore = defineStore('plaid', () => {
       plaidScript.setAttribute('src', 'https://cdn.plaid.com/link/v2/stable/link-initialize.js');
       document.head.appendChild(plaidScript);
       plaidScript.onload = () => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
         const handler = window?.Plaid.create({
           token: createTokenData.value?.link_token,
           onSuccess: (publicToken: string, metadata: unknown) => {

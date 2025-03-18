@@ -16,7 +16,6 @@ import { FormChild } from 'InvestCommon/types/form';
 import VFormPartialCustodian from './VFormPartialCustodian.vue';
 import env from 'InvestCommon/global';
 
-
 const custodianRef = useTemplateRef<FormChild>('custodianInformationFormChild');
 const router = useRouter();
 const userProfilesStore = useUserProfilesStore();
@@ -34,7 +33,6 @@ const { submitFormToHubspot } = useHubspotForm(env.HUBSPOT_FORM_ID_CUSTODIAN);
 const isLoading = ref(false);
 const isValid = computed(() => custodianRef.value?.isValid);
 const isDisabledButton = computed(() => (!isValid.value || isSetProfileByIdLoading.value));
-
 
 const saveHandler = async () => {
   custodianRef.value?.onValidate();

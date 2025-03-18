@@ -7,7 +7,6 @@ export const useHubspotForm = (formId: string) => {
   const setHSFieldsData = (model: object) => {
     const result: object[] = [];
     Object.entries(model).forEach(([name, value]) => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       result.push({ name, value: value || '' });
     });
     return result;
@@ -23,7 +22,6 @@ export const useHubspotForm = (formId: string) => {
 
   const submitFormToHubspot = async (model: object) => {
     await fetchHubspotForm(hubspotFormId.value, getRequestData(model)).catch((error) => {
-      // eslint-disable-next-line no-console
       console.log(error);
     });
   };

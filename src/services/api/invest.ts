@@ -8,9 +8,7 @@ import { useUsersStore } from 'InvestCommon/store/useUsers';
 import { v4 as uuidv4 } from 'uuid';
 import { storeToRefs } from 'pinia';
 
-
 const { INVESTMENT_URL, ESIGN_URL } = env;
-
 
 export const fetchGetInvestments = (id: string) => {
   const path = `${INVESTMENT_URL}/auth/investment/${id}/confirmed`;
@@ -75,7 +73,6 @@ export const fetchSetInvest = (
     return response.json() as Promise<IInvest>;
   });
 };
-
 
 export const fetchSetAmount = (
   slug: string,
@@ -179,7 +176,6 @@ export const fetchGetDocument = (
     headers: {
       'Content-Type': 'application/pdf',
       accept: 'application/pdf',
-      // eslint-disable-next-line
       'X-Request-ID': uuidv4() as string,
     },
     credentials: 'include' as RequestCredentials,
@@ -272,7 +268,6 @@ export const fetchSetAmountOptions = (
   });
 };
 
-
 export const fetchSetOwnershipOptions = (
   slug: string,
   id: string,
@@ -290,7 +285,6 @@ export const fetchSetOwnershipOptions = (
     return response.json();
   });
 };
-
 
 export const fetchSetFundingOptions = (
   slug: string,
@@ -325,4 +319,3 @@ export const fetchSetCancelOptions = (
     return response.json();
   });
 };
-

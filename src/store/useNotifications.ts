@@ -5,14 +5,14 @@ import {
 } from 'InvestCommon/services/api/notifications';
 import { generalErrorHandling } from 'InvestCommon/helpers/generalErrorHandling';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
+import { useWebSocket } from '@vueuse/core';
+import env from 'InvestCommon/global/index';
+import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 import { useUsersStore } from './useUsers';
 import { useProfileWalletStore } from './useProfileWallet/useProfileWallet';
 import { useProfileWalletTransactionStore } from './useProfileWallet/useProfileWalletTransaction';
 import { useInvestmentsStore } from './useInvestments';
 import { useOfferStore } from './useOffer';
-import { useWebSocket } from '@vueuse/core';
-import env from 'InvestCommon/global/index';
-import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 
 const { NOTIFICATION_URL } = env;
 
@@ -128,7 +128,6 @@ export const useNotificationsStore = defineStore('notifications', () => {
     const url = `${NOTIFICATION_URL}/ws`;
     const uri = url.replace('https', 'wss');
 
-    // eslint-disable-next-line no-console
     console.log(`connection to ${uri}`);
     const { data, close } = useWebSocket(uri, {
       autoReconnect: {
@@ -148,14 +147,12 @@ export const useNotificationsStore = defineStore('notifications', () => {
     watch(userLoggedIn, () => {
       if (!userLoggedIn.value) {
         close();
-        // eslint-disable-next-line no-console
+
         console.log(`connection to ${uri} is closed`);
       }
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     watch(() => data.value, () => {
-      // eslint-disable-next-line
       handleMessage(data.value);
     }, { deep: true });
   };

@@ -11,7 +11,6 @@ import {
   codeRule, emailRule, errorMessageRule, firstNameRule, lastNameRule, passwordRule,
 } from 'UiKit/helpers/validation/rules';
 
-
 export type FormModelSignUp = {
   first_name: string;
   last_name: string;
@@ -74,7 +73,6 @@ export const socialSignin = [
   },
 ];
 
-
 export type FormModelSignIn = {
   email: string;
   password: string;
@@ -133,7 +131,6 @@ export const schemaCode = {
   },
   $ref: '#/definitions/Auth',
 } as unknown as JSONSchemaType<FormModelCode>;
-
 
 export type FormModelResetPassword = {
   first_name: string;

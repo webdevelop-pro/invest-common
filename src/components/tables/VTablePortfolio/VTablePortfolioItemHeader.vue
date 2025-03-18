@@ -50,7 +50,6 @@ const itemFormatted = computed(() => ({
   amountPercent: offerStore.getOfferFundedPercent(props.item.offer),
 }));
 
-
 const isDefaultImage = computed(() => (!props.item?.offer?.image?.meta_data?.small && !props.item?.offer?.image?.url));
 const userName = computed(() => `${selectedUserProfileData.value?.data.first_name} ${selectedUserProfileData.value?.data.last_name}`);
 const isFundingLinkWire = computed(() => itemFormatted.value.type === 'wire');
@@ -58,9 +57,7 @@ const isFundingClickable = computed(() => isInvestmentFundingClickable(props.ite
 
 const onFundingType = () => {
   if (!isFundingClickable.value) return;
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
   if (isFundingLinkWire.value) void useDialogsStore.showWire(props.item, userName.value);
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
   else void useDialogsStore.showTransaction(props.item, userName.value);
 };
 

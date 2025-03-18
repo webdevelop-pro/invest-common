@@ -1,6 +1,5 @@
 import merge from 'lodash/merge';
 
-
 export const login = JSON.parse(JSON.stringify(
   {
     session: {

@@ -62,8 +62,8 @@ defineExpose({
       Personal Information
     </div>
     <VFormPartialIdentification
-      :model-data="modelData"
       ref="idFormChild"
+      :model-data="modelData"
     />
     <VFormPartialPersonalInformation
       ref="personalFormChild"
@@ -71,8 +71,8 @@ defineExpose({
       ein
     />
     <VFormPartialEntityInformation
-      :model-data="modelData"
       ref="entityInfoFormChild"
+      :model-data="modelData"
     />
     <VFormPartialBusinessController
       ref="businessControllerFormChild"
@@ -80,8 +80,8 @@ defineExpose({
       :personal-data="controllerData"
     />
     <VFormPartialBeneficialOwnership
-      :model-data="modelData"
       ref="beneficialOwnershipFormChild"
+      :model-data="modelData"
     />
   </div>
 </template>

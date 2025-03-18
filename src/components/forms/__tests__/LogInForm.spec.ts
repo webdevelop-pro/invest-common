@@ -1,5 +1,4 @@
 import { render, screen, fireEvent } from '@testing-library/vue';
-import LogInForm from '../LogInForm.vue';
 import createFetchMock, { FetchMock } from 'vitest-fetch-mock';
 import {
   beforeEach, vi, describe, it, expect,
@@ -8,6 +7,7 @@ import { createPinia, setActivePinia } from 'pinia';
 import { useAuthLogicStore, useAuthStore } from 'InvestCommon/store';
 import { SELFSERVICE } from 'InvestCommon/helpers/enums/auth';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
+import LogInForm from '../LogInForm.vue';
 import { mockLogin } from './__mocks__/formsMock';
 
 vi.mock('vue-router', () => ({
@@ -26,7 +26,6 @@ vi.mock('vue-router', () => ({
   }),
 }));
 
-
 vi.mock('InvestCommon/store/useUserIdentitys', () => ({
   useUserProfilesStore: vi.fn().mockReturnValue({
     getUserIndividualProfile: vi.fn(),
@@ -35,7 +34,6 @@ vi.mock('InvestCommon/store/useUserIdentitys', () => ({
 
 const fetchMocker = createFetchMock(vi);
 fetchMocker.enableMocks();
-
 
 function renderComponent() {
   const wrapper = render(LogInForm);

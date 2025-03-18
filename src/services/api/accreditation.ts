@@ -48,7 +48,6 @@ export const fetchUpdateAccreditation = (profileId: number, note: string) => {
 };
 
 // UPLOAD ACCREDITATION DOCUMENTS
-// eslint-disable-next-line
 export const fetchUploadAccreditationDocument = (userId: number, profileId: number, formData: FormData) => {
   const path = `${ACCREDITATION_URL}/auth/accreditation/upload_document/${userId}/${profileId}`;
 

@@ -23,7 +23,7 @@ const DownloadComp = ref<HTMLElement | null>(null);
 const saveHandler = () => {
   // eslint-disable-next-line new-cap
   const pdf = new jsPDF();
-  // eslint-disable-next-line
+
   void pdf.html(DownloadComp.value, {
     callback(doc) {
       // Save the PDF

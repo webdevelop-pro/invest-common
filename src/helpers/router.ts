@@ -1,4 +1,3 @@
-
 import { RouteLocation } from 'vue-router';
 
 const tablet = 768;

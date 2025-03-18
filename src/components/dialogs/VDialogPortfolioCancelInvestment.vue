@@ -25,7 +25,6 @@ import {
   VDialogHeader,
 } from 'UiKit/components/Base/VDialog';
 
-
 const props = defineProps({
   investment: {
     type: Object as PropType<IInvest>,
@@ -35,6 +34,9 @@ const props = defineProps({
 });
 const open = defineModel<boolean>();
 
+type FormModel = {
+  cancelation_reason: string;
+}
 const schema = {
   $schema: 'http://json-schema.org/draft-07/schema#',
   definitions: {
@@ -59,9 +61,6 @@ const {
 const usersStore = useUsersStore();
 const { userAccountData, selectedUserProfileId } = storeToRefs(usersStore);
 
-type FormModel = {
-  cancelation_reason: string;
-}
 let validator = new PrecompiledValidator<FormModel>(setCancelOptionsData.value, schema.value);
 const validation = ref<unknown>();
 const isValid = computed(() => isEmpty(validation.value || {}));
@@ -104,7 +103,7 @@ const onBackClick = () => {
 onMounted(() => {
   void useInvestmentsStore().setCanceOptions(String(props.investment.id));
 });
-// eslint-disable-next-line
+
 watch(() => setCancelOptionsData.value, () => {
   validator = new PrecompiledValidator<FormModel>(setCancelOptionsData.value, schema.value);
 });

@@ -1,6 +1,5 @@
 import {
   accessTypes, CitizenTypes, durationTypes, objectivesTypes, riskComfortTypes,
-  IdentificationTypes,
 } from 'InvestCommon/helpers/enums/general';
 import { PROFILE_TYPES } from 'InvestCommon/global/investment.json';
 

@@ -17,7 +17,6 @@ import { filterSchema, getFilteredObject } from 'UiKit/helpers/validation/genera
 import { isEmpty } from 'UiKit/helpers/general';
 import { createFormModel, getOptions } from 'UiKit/helpers/model';
 
-
 const yesNoOptions = [
   { value: 'Yes', text: 'Yes' },
   { value: 'No', text: 'No' },
@@ -88,7 +87,6 @@ const onValidate = () => {
 const schemaObject = computed(() => getFilteredObject(getProfileByIdOptionsData.value, formModel));
 const optionsType = computed(() => getOptions('type', schemaObject));
 
-
 const modelExpose = computed(() => {
   const temp = { ...model };
   delete temp.is_use_ein;
@@ -98,7 +96,6 @@ const modelExpose = computed(() => {
 defineExpose({
   model: modelExpose, validation, validator, isValid, onValidate,
 });
-
 
 watch(() => props.modelData, () => {
   if (props.modelData?.ein) {
@@ -115,7 +112,6 @@ watch(() => props.modelData, () => {
     model.name = props.modelData?.name;
   }
 }, { deep: true });
-
 
 watch(() => model, () => {
   if (!isValid.value) onValidate();

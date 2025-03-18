@@ -42,7 +42,9 @@ const router = useRouter();
 const route = useRoute();
 
 // new
-
+type FormModel = {
+  number_of_shares: number;
+}
 const model = reactive({} as FormModel);
 const sharesAmount = computed(() => numberFormatter(model.number_of_shares || 0));
 const price = computed(() => (getUnconfirmedOfferData.value?.offer?.price_per_share || 0));
@@ -73,9 +75,6 @@ const schema = computed(() => ({
   $ref: '#/definitions/AmountStep',
 } as unknown as JSONSchemaType<FormModel>));
 
-type FormModel = {
-  number_of_shares: number;
-}
 let validator = new PrecompiledValidator<FormModel>(setAmountOptionsData.value, schema.value);
 const validation = ref<unknown>();
 const isValid = computed(() => isEmpty(validation.value || {}));
@@ -107,7 +106,6 @@ const continueHandler = async () => {
   const { slug, id, profileId } = route.params;
   await investmentsStore.setAmount(slug as string, id as string, profileId as string, sharesAmount.value);
 
-
   if (isGetAmountError.value) return;
   if (setAmountData.value) {
     void router.push({
@@ -128,7 +126,6 @@ watch(() => selectedUserProfileData.value, (data) => {
   }
 });
 
-// eslint-disable-next-line
 watch(() => setAmountOptionsData.value, () => {
   validator = new PrecompiledValidator<FormModel>(setAmountOptionsData.value, schema.value);
 });

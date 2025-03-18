@@ -1,4 +1,3 @@
-
 export function isEmpty(obj: object) {
   // eslint-disable-next-line
   for (const prop of Object.keys(obj)) {
@@ -29,7 +28,6 @@ export function formatPhoneNumber(phoneNumber: string | undefined): string | und
 
   return formattedPhoneNumber;
 }
-
 
 export function booleanFormatToString(value: boolean | undefined) {
   if (value === undefined) return undefined;
@@ -71,7 +69,6 @@ export function urlize(input: string): string {
 
   return urlFriendlyString;
 }
-
 
 export function navigateWithQueryParams(url: string, params?: Record<string, string>): void {
   const urlObj = new URL(url, window.location.origin); // Create a URL object

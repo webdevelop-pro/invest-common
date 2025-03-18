@@ -54,7 +54,6 @@ const onTimelineClick = () => {
   });
 };
 const onCancelInvestmentClick = () => {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
   void useDialogsStore.showCancelInvestment(props.item);
 };
 

@@ -1,4 +1,3 @@
-
 const BASE_OPTIONS = {
   year: 'numeric',
   month: 'numeric',
@@ -11,16 +10,16 @@ const HOURS_OPTIONS = {
   minute: 'numeric',
 } as const;
 
-export const formatToDate = (ISO_string: string, withHours = false) => (
+export const formatToDate = (ISOString: string, withHours = false) => (
   new Intl.DateTimeFormat('en-US', withHours ? HOURS_OPTIONS : BASE_OPTIONS)
-    .format(new Date(ISO_string))
+    .format(new Date(ISOString))
 );
 
-export const formatToFullDate = (ISO_string: string) => (
+export const formatToFullDate = (ISOString: string) => (
   new Intl.DateTimeFormat('en-US', BASE_OPTIONS)
-    .format(new Date(ISO_string))
+    .format(new Date(ISOString))
 );
 
-export const formatToShortMonth = (ISO_string: string) => (
-  new Intl.DateTimeFormat('en-US', { month: 'short' }).format(new Date(ISO_string))
+export const formatToShortMonth = (ISOString: string) => (
+  new Intl.DateTimeFormat('en-US', { month: 'short' }).format(new Date(ISOString))
 );

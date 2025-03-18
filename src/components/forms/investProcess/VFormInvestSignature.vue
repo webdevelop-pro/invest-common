@@ -244,7 +244,6 @@ const documentHandler = async () => {
     display: flex;
     justify-content: space-between;
 
-
     @media screen and (max-width: $tablet){
       flex-direction: column;
       gap: 12px;

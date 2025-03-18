@@ -1,4 +1,3 @@
-
 export const toFixed = (value: string | number, fixed = -1) => {
   const re = new RegExp(`^-?\\d+(?:.\\d{0,${fixed}})?`);
   const val = value.toString();
@@ -9,7 +8,6 @@ export const toFixed = (value: string | number, fixed = -1) => {
     const fractionDigits = fixed > -1 ? fixed : 0;
     result = (+value).toExponential(fractionDigits);
   } else {
-  // eslint-disable-next-line @typescript-eslint/prefer-regexp-exec
     result = (re.exec(result))?.[0] ?? '';
 
     if (fixed > 0) {

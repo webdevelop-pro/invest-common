@@ -1,4 +1,3 @@
-
 <script setup lang="ts">
 import { useAuthLogicStore } from 'InvestCommon/store/useAuthLogic';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
@@ -19,7 +18,6 @@ const logoutHandler = async () => {
   open.value = false;
 };
 const { EXTERNAL } = env;
-
 
 </script>
 

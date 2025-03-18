@@ -147,7 +147,6 @@ export const UserIdentity = {
   user_id: 125,
 };
 
-
 export const userUserData = {
   id: 151,
   last_login: '0001-01-01T00:00:00',

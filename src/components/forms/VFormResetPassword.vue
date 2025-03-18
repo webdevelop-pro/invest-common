@@ -67,7 +67,6 @@ const onValidate = () => {
 
 const isDisabledButton = computed(() => (!isValid.value || isSetPasswordLoading.value));
 
-
 watch(() => model.create_password, (pass: string) => {
   showStrengthMeter.value = true;
   if (!pass) return null;
@@ -85,7 +84,6 @@ const resetHandler = async () => {
 
   await authLogicStore.onReset(model.create_password, SELFSERVICE.settings);
 };
-
 
 watch(() => model, () => {
   if (!isValid.value) onValidate();
@@ -257,7 +255,6 @@ watch(() => [schema], () => {
     height: 20px;
     display: flex;
   }
-
 
   &__password-strength-bar {
     position: relative;

@@ -53,7 +53,6 @@ const saveHandler = async () => {
     ...investmentObjectivesFormRef.value?.model,
     ...understandingRisksFormRef.value?.model,
   };
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { consent_plaid, ...fields } = modelLocal;
   await userProfilesStore.setProfileById(
     {

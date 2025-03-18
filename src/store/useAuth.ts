@@ -91,10 +91,8 @@ export const useAuthStore = defineStore('auth', () => {
     isSetSocialLoginLoading.value = true;
     isSetSocialLoginError.value = false;
     const response = await fetchSetSocialLogin(flowId, provider, csrf_token).catch(async (error: Response) => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const errorJson = await error.json();
       if (errorJson as IAuthError422) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const data:IAuthError422 = errorJson;
         setSocialLoginDataError.value = data;
       } else {
@@ -143,7 +141,7 @@ export const useAuthStore = defineStore('auth', () => {
     await fetchGetSignUp(flowId)
       .catch(async (error: Response) => {
         isGetSignupError.value = true;
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
         const errorJson = await error.json();
         getSignupData.value = errorJson as IGetSignup;
       });
@@ -252,11 +250,10 @@ export const useAuthStore = defineStore('auth', () => {
         void errorHandlingSettings(error);
       });
     if (response) {
-      // eslint-disable-next-line
       const responseTraits = response[0].schema.properties.traits;
-      // eslint-disable-next-line
+
       delete responseTraits?.properties?.email['ory.sh/kratos'];
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
       getSchemaData.value = { definitions: { Auth: responseTraits } };
     }
     isGetSchemaLoading.value = false;

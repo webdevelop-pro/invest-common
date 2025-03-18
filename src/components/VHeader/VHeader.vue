@@ -14,23 +14,21 @@ import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import { urlSignin, urlSignup } from 'InvestCommon/global/links';
 import VHeader from 'UiKit/components/VHeader/VHeader.vue';
 
-
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const VHeaderProfile = defineAsyncComponent({
   loader: () => import('./VHeaderProfile.vue'),
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+
   hydrate: hydrateOnVisible(),
 });
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
 const VHeaderProfileMobile = defineAsyncComponent({
   loader: () => import('./VHeaderProfileMobile.vue'),
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+
   hydrate: hydrateOnVisible(),
 });
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
 const VButton = defineAsyncComponent({
   loader: () => import('UiKit/components/Base/VButton/VButton.vue'),
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+
   hydrate: hydrateOnVisible(),
 });
 
@@ -215,11 +213,12 @@ watchEffect(() => {
     gap: 28px;
   }
 
-
   .v-navigation-menu-link {
     height: $header-height;
     align-content: center;
     -webkit-align-content: center;
+    display: flex;
+    align-items: center;
   }
 
   &__button {

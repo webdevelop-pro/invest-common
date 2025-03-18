@@ -1,4 +1,3 @@
-
 export enum EmploymentTypes {
     full = 'full',
     part = 'part',
@@ -7,7 +6,6 @@ export enum EmploymentTypes {
     retired = 'retired',
     student = 'student',
 }
-
 
 export enum objectivesTypes {
     growth = 'growth',
@@ -57,7 +55,6 @@ export enum AccordionTypes {
     irsBackupWithholding = 'accordion-irs-backup-withholding',
     trustedContact = 'accordion-trusted-contact',
   }
-
 
 export enum FundingTypes {
   ach = 'ach',

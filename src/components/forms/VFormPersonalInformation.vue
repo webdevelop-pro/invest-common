@@ -17,7 +17,6 @@ import { scrollToError } from 'UiKit/helpers/validation/general';
 import env from 'InvestCommon/global';
 import VFormPartialIdentification from './VFormPartialIdentification.vue';
 
-
 const props = defineProps({
   accreditation: Boolean,
   readOnly: Boolean,

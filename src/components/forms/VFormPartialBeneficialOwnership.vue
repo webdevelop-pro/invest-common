@@ -21,7 +21,6 @@ import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValida
 import { isEmpty } from 'UiKit/helpers/general';
 import VFormPartialBeneficialOwnershipItem, { FormPartialBeneficialOwnershipItem } from './VFormPartialBeneficialOwnershipItem.vue';
 
-
 interface FormModelBeneficialOwnership {
   beneficial_owners_number: number;
   beneficials: FormPartialBeneficialOwnershipItem[];
@@ -172,6 +171,7 @@ watch(() => [getProfileByIdOptionsData.value], () => {
 });
 watch(() => model.beneficial_owners_number, () => {
   const items = [];
+  // eslint-disable-next-line no-plusplus
   for (let i = 0; i < model.beneficial_owners_number; i++) {
     items.push({ ...defItem });
   }

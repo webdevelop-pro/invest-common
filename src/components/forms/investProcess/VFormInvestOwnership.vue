@@ -22,42 +22,29 @@ import { InvestKycTypes } from 'InvestCommon/types/api/invest';
 import { PROFILE_TYPES } from 'InvestCommon/global/investment.json';
 import { FormChild } from 'InvestCommon/types/form';
 
-
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const VFormProfileEntity = defineAsyncComponent({
   loader: () => import('InvestCommon/components/forms/VFormProfileEntity.vue'),
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
   hydrate: hydrateOnVisible(),
 });
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const VFormProfileSDIRA = defineAsyncComponent({
   loader: () => import('InvestCommon/components/forms/VFormProfileSDIRA.vue'),
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
   hydrate: hydrateOnVisible(),
 });
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const VFormProfileSolo = defineAsyncComponent({
   loader: () => import('InvestCommon/components/forms/VFormProfileSolo.vue'),
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
   hydrate: hydrateOnVisible(),
 });
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const VFormProfileTrust = defineAsyncComponent({
   loader: () => import('InvestCommon/components/forms/VFormProfileTrust.vue'),
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
   hydrate: hydrateOnVisible(),
 });
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const VFormPartialPersonalInformation = defineAsyncComponent({
   loader: () => import('InvestCommon/components/forms/VFormPartialPersonalInformation.vue'),
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
   hydrate: hydrateOnVisible(),
 });
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const VAlert = defineAsyncComponent({
   loader: () => import('UiKit/components/VAlert.vue'),
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
   hydrate: hydrateOnVisible(),
 });
 
@@ -75,7 +62,6 @@ const {
   selectedUserProfileData, selectedUserProfileType,
   selectedUserProfileId,
 } = storeToRefs(usersStore);
-
 
 const isAlertShow = computed(() => (selectedUserProfileData.value?.kyc_status !== InvestKycTypes.approved));
 const isAlertText = computed(() => 'You need to pass KYC before you can make investment with this profile.');
@@ -145,7 +131,6 @@ const isDisabledButton = computed(() => (!isValid.value || isAlertShow.value));
 const dataUserData = computed(() => selectedUserProfileData.value?.data);
 
 const { slug, id, profileId } = route.params;
-
 
 const continueHandler = async () => {
   const model = { ...childFormModel.value };

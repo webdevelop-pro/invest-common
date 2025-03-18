@@ -72,7 +72,6 @@ export const mockLogoutBrowser = {
   logout_token: 'ory_lo_09tKYPApm08eNqZpziMp6BXfG4S8dGmd',
 };
 
-
 export const mockSchema = [{
   id: 'default',
   schema: {

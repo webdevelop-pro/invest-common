@@ -43,7 +43,6 @@ export function parseTopOptions(markdown: string): IAuthor | IMarkdownOptions | 
     }
   });
 
-
   metadata.slug = urlize(metadata.title);
 
   return metadata as IAuthor;
@@ -57,7 +56,6 @@ export default function parse(markdown: string) {
   const content = markdown.replace(topOptionsStr, '').replaceAll(separator, '').trim();
 
   const topOptions = parseTopOptions(topOptionsStr);
-
 
   return {
     content,

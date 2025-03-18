@@ -1,4 +1,3 @@
-
 import { IFundingSourceDataResponse } from 'InvestCommon/types/api/wallet';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { computed, ref } from 'vue';

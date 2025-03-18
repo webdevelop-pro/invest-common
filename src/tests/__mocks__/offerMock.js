@@ -176,4 +176,3 @@ export const offerOneMock = {
   amount_raised: 75.0,
   documents: [],
 };
-

@@ -1,5 +1,4 @@
 import { render, fireEvent } from '@testing-library/vue';
-import ForgotForm from '../ForgotForm.vue';
 import {
   beforeEach, vi, describe, it, expect,
 } from 'vitest';
@@ -7,6 +6,7 @@ import { createPinia, setActivePinia } from 'pinia';
 import { useAuthStore } from 'InvestCommon/store';
 import { mockSchema } from 'InvestCommon/services/api/__tests__/__mocks__/authMock';
 import createFetchMock from 'vitest-fetch-mock';
+import ForgotForm from '../ForgotForm.vue';
 
 vi.mock('vue-router', () => ({
   useRouter: vi.fn().mockReturnValue({

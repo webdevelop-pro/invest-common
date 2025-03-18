@@ -15,7 +15,6 @@ import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { scrollToError } from 'UiKit/helpers/validation/general';
 
-
 const authStore = useAuthStore();
 const { isSetRecoveryLoading, getSchemaData, setRecoveryErrorData } = storeToRefs(authStore);
 const authLogicStore = useAuthLogicStore();
@@ -39,7 +38,6 @@ watch(() => model, () => {
   if (!isValid.value) onValidate();
 }, { deep: true });
 
-// eslint-disable-next-line
 watch(() => getSchemaData.value, () => {
   validator = new PrecompiledValidator<FormModelForgot>(
     getSchemaData.value,

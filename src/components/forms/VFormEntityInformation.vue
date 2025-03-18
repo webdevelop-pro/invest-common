@@ -34,7 +34,6 @@ const isLoading = ref(false);
 const isValid = computed(() => entityInformationRef.value?.isValid);
 const isDisabledButton = computed(() => (!isValid.value || isSetProfileByIdLoading.value));
 
-
 const saveHandler = async () => {
   entityInformationRef.value?.onValidate();
   if (!isValid.value) {

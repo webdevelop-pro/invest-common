@@ -77,7 +77,6 @@ const onValidate = () => {
   validation.value = validator.getFormValidationErrors(model);
 };
 
-
 defineExpose({
   model, validation, validator, isValid, onValidate,
 });
@@ -100,7 +99,6 @@ watch(() => props.modelData, () => {
     model.resell_difficulties = props.modelData?.resell_difficulties;
   }
 }, { deep: true, immediate: true });
-
 
 watch(() => model, () => {
   if (!isValid.value) onValidate();

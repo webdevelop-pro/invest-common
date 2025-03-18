@@ -1,7 +1,6 @@
 import {
   render, fireEvent,
 } from '@testing-library/vue';
-import FormFinancialInformation from '../FormFinancialInformation.vue';
 import { createPinia, setActivePinia, storeToRefs } from 'pinia';
 import {
   beforeEach, expect, describe, it, vi,
@@ -9,10 +8,10 @@ import {
 import { useUserProfilesStore, useUsersStore } from 'InvestCommon/store';
 import createFetchMock from 'vitest-fetch-mock';
 import { userIndividualOptionsMock } from 'InvestCommon/tests/__mocks__';
+import FormFinancialInformation from '../FormFinancialInformation.vue';
 
 const fetchMocker = createFetchMock(vi);
 fetchMocker.enableMocks();
-
 
 vi.mock('vue-router', () => ({
   useRouter: vi.fn().mockReturnValue({

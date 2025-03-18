@@ -1,9 +1,9 @@
 import { render, fireEvent } from '@testing-library/vue';
-import ResetPasswordForm from '../VFormResetPassword.vue';
 import {
   beforeEach, vi, describe, it, expect,
 } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
+import ResetPasswordForm from '../VFormResetPassword.vue';
 
 vi.mock('vue-router', () => ({
   useRouter: vi.fn().mockReturnValue({

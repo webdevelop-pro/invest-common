@@ -10,21 +10,6 @@ import VFormCheckbox from 'UiKit/components/Base/VForm/VFormCheckbox.vue';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import VFormCombobox from 'UiKit/components/Base/VForm/VFormCombobox.vue';
 
-const model = defineModel<FormPartialBeneficialOwnershipItem>();
-const props = defineProps({
-  itemIndex: Number,
-  validation: Object,
-  schema: Object as PropType<JSONSchemaType<FormPartialBeneficialOwnershipItem>>,
-  optionsCountry: Array,
-  optionsState: Array,
-  trust: Boolean,
-});
-
-const userProfilesStore = useUserProfilesStore();
-const {
-  getProfileByIdOptionsData, setProfileErrorData, isGetProfileByIdLoading,
-} = storeToRefs(userProfilesStore);
-
 export interface FormPartialBeneficialOwnershipItem {
   first_name: string;
   last_name: string;
@@ -43,6 +28,20 @@ export interface FormPartialBeneficialOwnershipItem {
     country: string;
   };
 }
+const model = defineModel<FormPartialBeneficialOwnershipItem>();
+const props = defineProps({
+  itemIndex: Number,
+  validation: Object,
+  schema: Object as PropType<JSONSchemaType<FormPartialBeneficialOwnershipItem>>,
+  optionsCountry: Array,
+  optionsState: Array,
+  trust: Boolean,
+});
+
+const userProfilesStore = useUserProfilesStore();
+const {
+  getProfileByIdOptionsData, setProfileErrorData, isGetProfileByIdLoading,
+} = storeToRefs(userProfilesStore);
 
 const title = props.trust ? 'Trustee or Protector' : 'Beneficial Owner';
 

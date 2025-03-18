@@ -18,7 +18,6 @@ import { urlForgot, urlSignup } from 'InvestCommon/global/links';
 import eyeOff from 'UiKit/assets/images/eye-off.svg';
 import eye from 'UiKit/assets/images/eye.svg';
 
-
 const queryParams = computed(() => new URLSearchParams(window.location.search));
 const onSignup = () => {
   if (queryParams.value) return navigateWithQueryParams(urlSignup, queryParams.value);
@@ -56,7 +55,6 @@ const loginHandler = async () => {
   await authLogicStore.onLogin(model.email, model.password, SELFSERVICE.login);
 };
 
-// eslint-disable-next-line
 watch(() => getSchemaLoginData.value, () => {
   validator = new PrecompiledValidator<FormModelSignIn>(
     getSchemaLoginData.value,

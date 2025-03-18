@@ -5,7 +5,6 @@ import { IProfileIndividual, ISchema } from 'InvestCommon/types/api/user';
 
 const { USER_URL } = env;
 
-
 export const fetchProfileOptions = (type: string) => {
   const path = `${USER_URL}/auth/profile/${type}`;
   const data = {

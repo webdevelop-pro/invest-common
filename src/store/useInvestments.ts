@@ -110,12 +110,10 @@ export const useInvestmentsStore = defineStore('investments', () => {
     id: string,
     profileId: string,
   ) => {
-    // eslint-disable-next-line
     const response = await fetchSetAmountOptions(slug, id, profileId).catch((error: Response) => {
       void generalErrorHandling(error);
     });
     if (response) {
-      // eslint-disable-next-line
       setAmountOptionsData.value = response;
     }
   };
@@ -167,13 +165,13 @@ export const useInvestmentsStore = defineStore('investments', () => {
   ) => {
     isSetSignatureLoading.value = true;
     isSetSignatureError.value = false;
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
     const response = await fetchSetSignature(slug, id, profileId, signatureId)
       .catch((error: Response) => {
         isSetSignatureError.value = true;
         void generalErrorHandling(error);
       });
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
     if (response) setSignatureData.value = response;
     isSetSignatureLoading.value = false;
   };
@@ -219,17 +217,16 @@ export const useInvestmentsStore = defineStore('investments', () => {
     isSetFundingLoading.value = true;
     isSetFundingError.value = false;
     setFundingErrorData.value = undefined;
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
     const response = await fetchSetFunding(slug, id, profileId, fundingData).catch(async (error: Response) => {
       isSetFundingError.value = true;
       setFundingErrorData.value = JSON.parse(await error.text());
       void generalErrorHandling(error);
     });
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
     if (response) setFundingData.value = response;
     isSetFundingLoading.value = false;
   };
-
 
   const isSetFundingOptionsLoading = ref(false);
   const isSetFundingOptionsError = ref(false);
@@ -241,12 +238,12 @@ export const useInvestmentsStore = defineStore('investments', () => {
   ) => {
     isSetFundingOptionsLoading.value = true;
     isSetFundingOptionsError.value = false;
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
     const response = await fetchSetFundingOptions(slug, id, profileId).catch((error: Response) => {
       isSetFundingOptionsError.value = true;
       void generalErrorHandling(error);
     });
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
     if (response) setFundingOptionsData.value = response;
     isSetFundingOptionsLoading.value = false;
   };
@@ -257,12 +254,12 @@ export const useInvestmentsStore = defineStore('investments', () => {
   const setCanceOptions = async (id: string) => {
     isSetCanceOptionsLoading.value = true;
     isSetCanceOptionsError.value = false;
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
     const response = await fetchSetCancelOptions(id).catch((error: Response) => {
       isSetCanceOptionsError.value = true;
       void generalErrorHandling(error);
     });
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
     if (response) setCancelOptionsData.value = response;
     isSetCanceOptionsLoading.value = false;
   };
@@ -286,13 +283,13 @@ export const useInvestmentsStore = defineStore('investments', () => {
   const cancelInvestment = async (id: string, reason: string) => {
     isCancelInvestLoading.value = true;
     isCancelInvestError.value = false;
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
     const response = await fetchCancelInvest(id, reason).catch(async (error: Response) => {
       isCancelInvestError.value = true;
       setCancelErrorData.value = JSON.parse(await error.text());
       void generalErrorHandling(error);
     });
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
     if (response) cancelInvestData.value = response;
     isCancelInvestLoading.value = false;
   };

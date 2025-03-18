@@ -4,15 +4,15 @@ import {
 import { createPinia, setActivePinia } from 'pinia';
 import createFetchMock, { ErrorOrFunction } from 'vitest-fetch-mock';
 import { useAuthStore } from 'InvestCommon/store';
-import {
-  mockAuthError422, mockGetSignup, mockLogoutUrl, mockRecovery, mockSetLogin,
-  mockSetPassword, mockSetSignup, mockVerification, mockedBrowser, mockedLoggedInSession,
-} from './__mocks__/authMock';
 import env from 'InvestCommon/global';
 import {
   IGetAuthFlow, IGetLogoutURL, IGetSettingsOk, IGetSignup, IRecovery, ISetLoginOk, ISetSignUpOK,
 } from 'InvestCommon/types/api/auth';
 import { SELFSERVICE } from 'InvestCommon/helpers/enums/auth';
+import {
+  mockAuthError422, mockGetSignup, mockLogoutUrl, mockRecovery, mockSetLogin,
+  mockSetPassword, mockSetSignup, mockVerification, mockedBrowser, mockedLoggedInSession,
+} from './__mocks__/authMock';
 
 const { KRATOS_URL, FRONTEND_URL } = env;
 
@@ -60,7 +60,6 @@ describe('useAuth fetch functions', () => {
     const authStore = useAuthStore();
 
     // Mock response data for getAllSession
-    // eslint-disable-next-line
     const mockedAllSessionData: any[] = [];
 
     fetchMocker.mockResponse(JSON.stringify(mockedAllSessionData));

@@ -34,7 +34,6 @@ const isLoading = ref(false);
 const isValid = computed(() => planInformationRef.value?.isValid);
 const isDisabledButton = computed(() => (!isValid.value || isSetProfileByIdLoading.value));
 
-
 const saveHandler = async () => {
   planInformationRef.value?.onValidate();
   if (!isValid.value) {

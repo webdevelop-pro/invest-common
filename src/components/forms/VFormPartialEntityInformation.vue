@@ -17,7 +17,6 @@ import { filterSchema, getFilteredObject } from 'UiKit/helpers/validation/genera
 import { isEmpty } from 'UiKit/helpers/general';
 import { createFormModel, getOptions } from 'UiKit/helpers/model';
 
-
 const yesNoOptions = [
   { value: 'Yes', text: 'Yes' },
   { value: 'No', text: 'No' },
@@ -84,7 +83,6 @@ defineExpose({
   model, validation, validator, isValid, onValidate,
 });
 
-
 watch(() => props.modelData, () => {
   if (props.modelData?.solely_for_investing) {
     model.solely_for_investing = props.modelData?.solely_for_investing;
@@ -102,7 +100,6 @@ watch(() => props.modelData, () => {
     model.name = props.modelData?.name;
   }
 }, { deep: true });
-
 
 watch(() => model, () => {
   if (!isValid.value) onValidate();

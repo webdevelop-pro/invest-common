@@ -1,9 +1,9 @@
+/* eslint-disable no-param-reassign */
 import { computed, ref } from 'vue';
 import { generalErrorHandling } from 'InvestCommon/helpers/generalErrorHandling';
 import { fetchGetFiles, fetchGetPublicFiles } from 'InvestCommon/services/api/filer';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { IFilerItem } from 'InvestCommon/types/api/filer';
-
 
 export const useFilerStore = defineStore('filer', () => {
   const isGetFilesLoading = ref(false);
@@ -39,7 +39,6 @@ export const useFilerStore = defineStore('filer', () => {
     });
   });
 
-
   const isGetFilesPublicLoading = ref(false);
   const isGetFilesPublicError = ref(false);
   const getFilesPublicData = ref<IFilerItem[]>([]);
@@ -55,10 +54,10 @@ export const useFilerStore = defineStore('filer', () => {
     return getFilesPublicData.value;
   };
 
-  const getFilesDataPublicaDocuments = computed(() => getFilesPublicData.value?.filter((item) => item['object-type'] !== 'media'));
+  const getFilesDataPublicaDocuments = computed(() => getFilesPublicData.value?.filter((item: { [x: string]: string; }) => item['object-type'] !== 'media'));
   const getFilesDataPublicMedia = computed(() => {
-    const filtered = getFilesPublicData.value?.filter((item) => item['object-type'] === 'media');
-    return filtered.map((item) => {
+    const filtered = getFilesPublicData.value?.filter((item: { [x: string]: string; }) => item['object-type'] === 'media');
+    return filtered.map((item: { meta_data: { big: string | string[]; medium: string | string[]; small: string | string[]; }; }) => {
       // Ensure that the URLs are properly prefixed if they don't include 'http'
       if (!item.meta_data?.big?.includes('http')) {
         item.meta_data.big = `https://webdevelop-us-media-thumbs.storage.googleapis.com${item.meta_data?.big}`;
@@ -77,7 +76,6 @@ export const useFilerStore = defineStore('filer', () => {
     getFilesData.value = [];
     getFilesPublicData.value = [];
   };
-
 
   return {
     getFiles,

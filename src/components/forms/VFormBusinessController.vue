@@ -38,7 +38,6 @@ const isLoading = ref(false);
 const isValid = computed(() => businessControllerRef.value?.isValid);
 const isDisabledButton = computed(() => (!isValid.value || isSetProfileByIdLoading.value));
 
-
 const saveHandler = async () => {
   businessControllerRef.value?.onValidate();
   if (!isValid.value) {

@@ -1,4 +1,3 @@
-
 import { FundingStatusTypes } from 'InvestCommon/types/api/funding';
 
 export const fundingData = {

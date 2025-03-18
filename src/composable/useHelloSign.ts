@@ -11,7 +11,6 @@ interface IHelloSign {
 }
 
 export const useHelloSign = () => {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   const client = new HelloSign() as IHelloSign;
 
   const openHelloSign = (signUrl: string, domEl: string) => {

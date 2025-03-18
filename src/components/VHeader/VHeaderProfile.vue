@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { computed, defineAsyncComponent, hydrateOnVisible, PropType } from 'vue';
+import {
+  computed, defineAsyncComponent, hydrateOnVisible, PropType,
+} from 'vue';
 import { useNotificationsStore } from 'InvestCommon/store/useNotifications';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
 import VDropdown from 'UiKit/components/VDropdown.vue';
@@ -8,7 +10,6 @@ import VAvatar from 'UiKit/components/VAvatar.vue';
 import { VDropdownMenuItem } from 'UiKit/components/Base/VDropdownMenu';
 import message from 'UiKit/assets/images/message.svg';
 import { useDialogs } from 'InvestCommon/store/useDialogs';
-
 
 type MenuItem = {
   to?: string;
@@ -30,7 +31,6 @@ const useDialogsStore = useDialogs();
 const { isDialogLogoutOpen } = storeToRefs(useDialogsStore);
 
 const userEmail = computed(() => userAccountData.value?.email);
-
 
 const onLogout = () => {
   isDialogLogoutOpen.value = true;
@@ -73,7 +73,7 @@ const onSidebarOpen = () => {
       </span>
       <template #content>
         <VDropdownMenuItem
-          class="v-header-profile__item is--h6__title"
+          class="v-header-profile__item"
           data-testid="header-profile-logout"
           @click="onLogout"
         >
@@ -107,13 +107,8 @@ const onSidebarOpen = () => {
     margin-right: 5px;
   }
 
-   & &__item {
-    display: block;
-    color: $black;
-    width: 100%;
+  &__item {
     padding: 8px 12px;
-    cursor: pointer;
-    text-decoration: none;
 
     &:hover {
       background-color: $gray-20;

@@ -26,7 +26,6 @@ const TOAST_OPTIONS = {
   variant: 'success',
 };
 
-
 type FormModelContactUs = {
   name: string;
   email: string;
@@ -54,7 +53,6 @@ const schemaContactUs = {
   $ref: '#/definitions/ContactUs',
 } as unknown as JSONSchemaType<FormModelContactUs>;
 
-
 const SELECT_SUBJECT = [
   {
     value: 'investment',
@@ -74,7 +72,6 @@ const SELECT_SUBJECT = [
   },
 ];
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
 const { submitFormToHubspot } = useHubspotForm(env.HUBSPOT_FORM_ID_CONTACT_US);
 const usersStore = useUsersStore();
 const { selectedUserProfileData, userAccountData } = storeToRefs(usersStore);
@@ -102,7 +99,6 @@ watch(() => [selectedUserProfileData.value?.data.first_name, selectedUserProfile
     model.name = `${selectedUserProfileData.value?.data?.first_name} ${selectedUserProfileData.value?.data?.last_name}`;
   }
 }, { deep: true, immediate: true });
-
 
 watch(() => userAccountData.value?.email, () => {
   if (userAccountData.value?.email) {

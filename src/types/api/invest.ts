@@ -1,4 +1,3 @@
-
 import { FundingTypes } from 'InvestCommon/helpers/enums/general';
 import { IOffer } from './offers';
 import { IProfileIndividual } from './user';
@@ -42,7 +41,6 @@ export enum InvestFundingStatuses {
   cancelled = 'cancelled',
   error = 'error',
 }
-
 
 export enum InvestmentStatuses {
   confirmed = 'confirmed',

@@ -59,7 +59,6 @@ const tabs = [
   },
 ];
 
-
 const notificationsStore = useNotificationsStore();
 const {
   notificationUserData: notifications, notificationUserLength, isGetNotificationsLoading,
@@ -94,20 +93,19 @@ const filterData = computed(() => {
   let filtered = tabsData.value;
   if (filterStatus.value && (filterStatus.value?.length > 0)) {
     filtered = filtered?.filter((item) => (
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+
       filterStatus.value?.includes(item.status?.toLowerCase())
     ));
   }
   if (filterType.value && (filterType.value?.length > 0)) {
     filtered = filtered?.filter((item) => (
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+
       filterType.value?.includes(item.type?.toLowerCase())
     ));
   }
 
   return filtered;
 });
-
 
 const searchData = computed(() => {
   // Access the value of search
@@ -126,7 +124,6 @@ const searchData = computed(() => {
   return filterData.value;
 });
 
-
 const filterResults = computed(() => searchData.value?.length);
 const showSearch = computed(() => filterResults.value > 0);
 const showFilter = computed(() => filterResults.value > 0);
@@ -137,29 +134,28 @@ const showMarkAll = computed(() => (filterResults.value > 0 && (notificationUnre
 
 const onApplyFilter = (items: IVFilter[]) => {
   filterNotifications.value = items;
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+
   const statusObject = items?.filter((item: IVFilter) => item.value === 'status')[0];
   if (!statusObject) filterStatus.value = [];
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+
   else filterStatus.value = statusObject?.model?.map((item: string) => item.toLowerCase());
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
   const typeObject = items?.filter((item: IVFilter) => item.value === 'type')[0];
   if (!typeObject) filterType.value = [];
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+
   else filterType.value = typeObject?.model?.map((item: string) => item.toLowerCase());
 };
 
 const clearFilterType = () => {
   // clear tab
   filterType.value = [];
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+
   filterNotifications.value[1].model = [];
 };
 const clearFilterStatus = () => {
   // clear tab
   filterStatus.value = [];
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+
   filterNotifications.value[0].model = [];
 };
 const clearTab = () => {
@@ -193,9 +189,7 @@ watch(() => search.value, () => {
   }
 });
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
 watch(() => filterNotifications.value[1].model.length, () => {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   if (filterNotifications.value[1].model.length > 0) {
     clearSearch();
     clearTab();
@@ -342,7 +336,7 @@ watch(() => currentTab.value, () => {
   }
 
   &__filter {
-    --V-filter-dropdown--min-width: 250px;
+    --v-filter-dropdown-min-width: 250px;
   }
   &__mark-all {
     @media screen and (max-width: $tablet){

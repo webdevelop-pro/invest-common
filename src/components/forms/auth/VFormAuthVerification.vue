@@ -14,7 +14,6 @@ import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { scrollToError } from 'UiKit/helpers/validation/general';
 
-
 const authStore = useAuthStore();
 const { isSetVerificationLoading, setVerificationErrorData } = storeToRefs(authStore);
 const authLogicStore = useAuthLogicStore();
@@ -98,7 +97,6 @@ const resendHandler = async () => {
     >
       Recover Email
     </VButton>
-
 
     <div class="verification-form__login-wrap  is--no-margin">
       <span class="verification-form__login-label is--body">
