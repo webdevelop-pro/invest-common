@@ -136,7 +136,8 @@ watch(() => [schemaAddTransaction.value], () => {
           >
             <VFormInput
               :is-error="VFormGroupProps.isFieldError"
-              :model-value="model.amount ? String(model.amount) : null"
+              placeholder="$"
+              :model-value="model.amount ? String(model.amount) : undefined"
               name="amount"
               money-format
               @update:model-value="model.amount = numberFormatter($event)"
