@@ -90,6 +90,12 @@ onMounted(async () => {
         if (name === 'traits.email') model.email = value ?? '';
         else if (name === 'traits.first_name') model.first_name = value ?? '';
         else if (name === 'traits.last_name') model.last_name = value ?? '';
+        else if ((name === 'traits.name') && (model.first_name === '') && (model.last_name === '')) {
+          const nameSplitted = value?.trim().split(/\s+/);
+          // eslint-disable-next-line prefer-destructuring
+          model.first_name = nameSplitted[0];
+          model.last_name = nameSplitted[nameSplitted.length - 1];
+        }
       });
     }
   }
@@ -111,6 +117,8 @@ const signUpHandler = async () => {
     SELFSERVICE.registration,
   );
 };
+
+const isDisabled = (field: string) => queryFlow.value && (field?.length > 1);
 </script>
 
 <template>
@@ -137,6 +145,7 @@ const signUpHandler = async () => {
               placeholder="First Name"
               name="first-name"
               size="large"
+              :disabled="isDisabled(model.first_name)"
               data-testid="first-name"
               class="signup-form__input"
               @update:model-value="model.first_name = $event.trim()"
@@ -161,6 +170,7 @@ const signUpHandler = async () => {
               name="last-name"
               data-testid="last-name"
               size="large"
+              :disabled="isDisabled(model.last_name)"
               class="signup-form__input"
               @update:model-value="model.last_name = $event.trim()"
             />
@@ -186,6 +196,7 @@ const signUpHandler = async () => {
             name="email"
             size="large"
             data-testid="email"
+            :disabled="isDisabled(model.email)"
             type="email"
             class="signup-form__input"
             @update:model-value="model.email = $event.trim()"
@@ -355,7 +366,10 @@ const signUpHandler = async () => {
         Sign Up
       </VButton>
 
-      <div class="signup-form__login-wrap  is--no-margin">
+      <div
+        v-if="!queryFlow"
+        class="signup-form__login-wrap  is--no-margin"
+      >
         <span class="signup-form__login-label is--body">
           Already have an account?
         </span>

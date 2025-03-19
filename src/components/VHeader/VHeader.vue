@@ -91,6 +91,10 @@ const queryParams = computed(() => {
   return router?.currentRoute.value.query;
 });
 
+// if there is flow in url it means it is from sso
+const queryFlow = computed(() => (
+  (window && window.location.search) ? new URLSearchParams(window.location.search).get('flow') : null));
+
 const signInHandler = () => {
   navigateWithQueryParams(urlSignin, queryParams.value);
 };
@@ -113,7 +117,7 @@ watchEffect(() => {
   >
     <div class="v-header-invest__wrap">
       <span
-        v-if="!userLoggedIn && (isSignInPage || isRecoveryPage || isSignUpPage)"
+        v-if="!queryFlow && !userLoggedIn && (isSignInPage || isRecoveryPage || isSignUpPage)"
         class="v-header-invest__auth-text is--body"
       >
         <span
@@ -143,7 +147,7 @@ watchEffect(() => {
         }"
       >
         <VButton
-          v-if="!userLoggedIn && !isSignInPage && !isRecoveryPage"
+          v-if="!queryFlow && !userLoggedIn && !isSignInPage && !isRecoveryPage"
           class="v-header-invest-btns__sign-in"
           :variant="!isSignUpPage ? 'link' : null"
           @click="signInHandler"
@@ -152,7 +156,7 @@ watchEffect(() => {
         </VButton>
 
         <VButton
-          v-if="!userLoggedIn && !isSignUpPage"
+          v-if="!queryFlow && !userLoggedIn && !isSignUpPage"
           class="v-header-invest-btns__sign-up"
           @click="signUpHandler"
         >

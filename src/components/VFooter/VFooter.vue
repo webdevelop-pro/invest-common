@@ -55,6 +55,7 @@ const props = defineProps({
   hubspotFormId: String,
   menu: Array as PropType<MenuItem[]>,
   path: String,
+  legalItems: Array,
 });
 
 const { toast } = useToast();
@@ -143,7 +144,9 @@ const SOCIAL_LIST = [
     </div>
   </div>
   <VFooterText />
-  <VFooterBottom />
+  <VFooterBottom
+    :items="legalItems"
+  />
 </template>
 
 <style lang="scss">

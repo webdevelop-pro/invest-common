@@ -49,7 +49,7 @@ const {
   setProfileByIdErrorData, getProfileByIdOptionsData, isGetProfileByIdLoading,
 } = storeToRefs(userProfilesStore);
 
-const getSchema = (non_us = false) => {
+const getSchema = () => {
   // const requireBusinessController = [...requiredDefault];
   const requireIdentification = [];
   // if (!non_us) requireBusinessController.push('ssn');
