@@ -95,7 +95,7 @@ onMounted(async () => {
           // eslint-disable-next-line prefer-destructuring
           model.first_name = nameSplitted[0];
           model.last_name = nameSplitted[nameSplitted.length - 1];
-        }
+        } else if (name === 'provider') model.provider = value ?? '';
       });
     }
   }
@@ -108,14 +108,28 @@ const signUpHandler = async () => {
     void nextTick(() => scrollToError('SignUpForm'));
     return;
   }
-
-  await authLogicStore.onSignUp(
-    model.first_name,
-    model.last_name,
-    model.email,
-    model.repeat_password,
-    SELFSERVICE.registration,
-  );
+  if (queryFlow.value) {
+    await authLogicStore.onSocialSignup(
+      model.provider,
+      SELFSERVICE.registration,
+      {
+        email: model.email,
+        first_name: model.first_name,
+        last_name: model.last_name,
+        name: `${model.first_name} ${model.last_name}`,
+        password: model.repeat_password,
+      },
+      queryFlow.value,
+    );
+  } else {
+    await authLogicStore.onSignUp(
+      model.first_name,
+      model.last_name,
+      model.email,
+      model.repeat_password,
+      SELFSERVICE.registration,
+    );
+  }
 };
 
 const isDisabled = (field: string) => queryFlow.value && (field?.length > 1);

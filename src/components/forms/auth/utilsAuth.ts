@@ -17,6 +17,7 @@ export type FormModelSignUp = {
   email: string;
   create_password: string;
   repeat_password: string;
+  provider?: string;
 }
 
 export const schemaSignUp = {

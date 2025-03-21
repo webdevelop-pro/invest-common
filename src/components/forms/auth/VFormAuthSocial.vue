@@ -4,14 +4,18 @@ import { SELFSERVICE } from 'InvestCommon/helpers/enums/auth';
 import { socialSignin } from './utilsAuth';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 
-defineProps({
+const props = defineProps({
   signup: Boolean,
 });
 
 const authLogicStore = useAuthLogicStore();
 
 const onSocialLoginHandler = async (provider: string) => {
-  await authLogicStore.onSocialLogin(provider, SELFSERVICE.login);
+  if (props.signup) {
+    await authLogicStore.onSocialSignup(provider, SELFSERVICE.registration);
+  } else {
+    await authLogicStore.onSocialLogin(provider, SELFSERVICE.login);
+  }
 };
 </script>
 

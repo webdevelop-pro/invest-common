@@ -75,6 +75,34 @@ export const fetchSetSocialLogin = (
   });
 };
 
+export const fetchSetSocialSignup = (
+  flowId: string,
+  provider: string,
+  traits: object,
+  csrf_token: string,
+) => {
+  const path = `${KRATOS_URL}/self-service/registration?flow=${flowId}`;
+
+  const body = JSON.stringify({
+    csrf_token,
+    provider,
+    password: traits?.password,
+    traits,
+    method: 'oidc',
+  });
+
+  const data = {
+    method: 'POST',
+    body,
+    ...requiredFetchParams(),
+  };
+
+  return fetch(path, data).then((response) => {
+    if (!response.ok) return Promise.reject(response);
+    return response.json() as Promise<unknown>;
+  });
+};
+
 // GET LOGOUT
 export const fetchGetLogout = (token: string) => {
   const path = `${KRATOS_URL}/self-service/logout?token=${token}`;
@@ -105,7 +133,22 @@ export const fetchGetLogoutURL = () => {
   });
 };
 
-// GET LOGOUT URL
+// GET LOGIN URL
+export const fetchGetLogin = (flowId: string) => {
+  const path = `${KRATOS_URL}/self-service/login?flow=${flowId}`;
+
+  const data = {
+    method: 'GET',
+    ...requiredFetchParams(),
+  };
+
+  return fetch(path, data).then((response) => {
+    if (!response.ok) return Promise.reject(response);
+    return response.json() as Promise<IGetSignup>;
+  });
+};
+
+// GET SIGNUP URL
 export const fetchGetSignUp = (flowId: string) => {
   const path = `${KRATOS_URL}/self-service/registration?flow=${flowId}`;
 

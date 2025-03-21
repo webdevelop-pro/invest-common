@@ -10,6 +10,7 @@ import {
   fetchGetSession, fetchSetLogin, fetchGetLogout, fetchGetLogoutURL,
   fetchSetSignUp, fetchSetRecovery, fetchSetPassword, fetchAuthFlow,
   fetchSetVerification, fetchSetSocialLogin, fetchGetSignUp, fetchGetAllSession, fetchGetSchema,
+  fetchSetSocialSignup, fetchGetLogin,
 } from 'InvestCommon/services/api/auth';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 
@@ -44,10 +45,27 @@ export const useAuthStore = defineStore('auth', () => {
     isGetAllSessionLoading.value = false;
   };
 
+  const isGetSignupLoading = ref(false);
+  const isGetSignupError = ref(false);
+  const getSignupData = ref<IGetSignup>();
+  const getSignup = async (flowId: string) => {
+    isGetSignupLoading.value = true;
+    isGetSignupError.value = false;
+    await fetchGetSignUp(flowId)
+      .catch(async (error: Response) => {
+        isGetSignupError.value = true;
+
+        const errorJson = await error.json();
+        getSignupData.value = errorJson as IGetSignup;
+      });
+    isGetSignupLoading.value = false;
+  };
+
   const isGetFlowLoading = ref(false);
   const isGetFlowError = ref(false);
   const getFlowData = ref<IGetAuthFlow>();
   const fetchAuthHandler = async (url: string) => {
+    getSignupData.value = undefined;
     isGetFlowLoading.value = true;
     isGetFlowError.value = false;
     const response = await fetchAuthFlow(url).catch((error: Response) => {
@@ -104,6 +122,32 @@ export const useAuthStore = defineStore('auth', () => {
     isSetSocialLoginLoading.value = false;
   };
 
+  const isSetSocialSignupLoading = ref(false);
+  const isSetSocialSignupError = ref(false);
+  const setSocialSignupData = ref<unknown>();
+  const setSocialSignupDataError = ref<IAuthError422>();
+  const setSocialSignup = async (
+    flowId: string,
+    provider: string,
+    traits: object,
+    csrf_token: string,
+  ) => {
+    isSetSocialSignupLoading.value = true;
+    isSetSocialSignupError.value = false;
+    const response = await fetchSetSocialSignup(flowId, provider, traits, csrf_token).catch(async (error: Response) => {
+      const errorJson = await error.json();
+      if (errorJson as IAuthError422) {
+        const data:IAuthError422 = errorJson;
+        setSocialSignupDataError.value = data;
+      } else {
+        isSetSocialSignupError.value = true;
+        void generalErrorHandling(error);
+      }
+    });
+    if (response) setSocialSignupData.value = response;
+    isSetSocialSignupLoading.value = false;
+  };
+
   const isGetLogoutLoading = ref(false);
   const isGetLogoutError = ref(false);
   const getLogoutResponse = ref<Response | void>();
@@ -132,22 +176,21 @@ export const useAuthStore = defineStore('auth', () => {
     isGetLogoutURLLoading.value = false;
   };
 
-  const isGetSignupLoading = ref(false);
-  const isGetSignupError = ref(false);
-  const getSignupData = ref<IGetSignup>();
-  const getSignup = async (flowId: string) => {
-    isGetSignupLoading.value = true;
-    isGetSignupError.value = false;
-    await fetchGetSignUp(flowId)
+  const isGetLoginLoading = ref(false);
+  const isGetLoginError = ref(false);
+  const getLoginData = ref<IGetSignup>();
+  const getLogin = async (flowId: string) => {
+    isGetLoginLoading.value = true;
+    isGetLoginError.value = false;
+    await fetchGetLogin(flowId)
       .catch(async (error: Response) => {
-        isGetSignupError.value = true;
+        isGetLoginError.value = true;
 
         const errorJson = await error.json();
-        getSignupData.value = errorJson as IGetSignup;
+        getLoginData.value = errorJson as IGetSignup;
       });
-    isGetSignupLoading.value = false;
+    isGetLoginLoading.value = false;
   };
-
   const isSetSignupLoading = ref(false);
   const isSetSignupError = ref(false);
   const setSignupData = ref<ISetSignUpOK>();
@@ -353,6 +396,15 @@ export const useAuthStore = defineStore('auth', () => {
     getSchemaData,
     getSchemaLoginData,
     getSchemaSignupData,
+    setSocialSignup,
+    isSetSocialSignupLoading,
+    isSetSocialSignupError,
+    setSocialSignupData,
+    setSocialSignupDataError,
+    getLogin,
+    isGetLoginLoading,
+    isGetLoginError,
+    getLoginData,
   };
 });
 

@@ -39,14 +39,16 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     setSignupData, setLoginData, getFlowData, setPasswordData, setRecoveryData,
     setSocialLoginDataError, getLogoutResponse, getLogoutURLData, getSessionData, isGetSessionError,
     getSessionErrorResponse, isSetLoginError, isGetFlowError, isSetSignupError, isSetPasswordError,
-    isSetRecoveryError, isGetLogoutURLError, setVerificationErrorData,
+    isSetRecoveryError, isGetLogoutURLError, setVerificationErrorData, setSocialSignupDataError,
+    getSignupData,
   } = storeToRefs(authStore);
 
-  const flowId = computed(() => getFlowData.value?.id || '');
+  const flowId = computed(() => getSignupData.value?.id || getFlowData.value?.id || '');
 
   const csrfToken = computed(() => {
-    if (getFlowData.value && getFlowData.value.ui) {
-      const tokenItem = getFlowData.value.ui.nodes.find((item) => item.attributes.name === 'csrf_token');
+    const res = getSignupData.value?.ui || getFlowData.value.ui;
+    if (res) {
+      const tokenItem = res.nodes.find((item) => item.attributes.name === 'csrf_token');
       return tokenItem?.attributes.value ?? '';
     }
     return '';
@@ -92,20 +94,48 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
   };
 
   // SOCIAL LOGIN
-  const onSocialLogin = async (provider: string, url: string) => {
+  const onSocialLogin = async (provider: string, url: string, queryFlow?: string) => {
     loading.value = true;
 
-    await authStore.fetchAuthHandler(url);
-    if (isGetFlowError.value) {
-      loading.value = false;
-      return;
+    if (!queryFlow) {
+      await authStore.fetchAuthHandler(url);
+      if (isGetFlowError.value) {
+        loading.value = false;
+        return;
+      }
+      await authStore.setSocialLogin(flowId.value, provider, csrfToken.value);
+    } else {
+      await authStore.setSocialLogin(queryFlow, provider, csrfToken.value);
     }
-    await authStore.setSocialLogin(flowId.value, provider, csrfToken.value);
 
     if (setSocialLoginDataError.value && setSocialLoginDataError.value?.redirect_browser_to) {
       window.location.href = setSocialLoginDataError.value.redirect_browser_to;
 
       console.log('setSocialLoginData', setSocialLoginDataError.value.redirect_browser_to);
+    }
+
+    loading.value = false;
+  };
+
+  // SOCIAL LOGIN
+  const onSocialSignup = async (provider: string, url: string, traits: object, queryFlow?: string) => {
+    loading.value = true;
+
+    if (!queryFlow) {
+      await authStore.fetchAuthHandler(url);
+      if (isGetFlowError.value) {
+        loading.value = false;
+        return;
+      }
+      await authStore.setSocialSignup(flowId.value, provider, traits, csrfToken.value);
+    } else {
+      await authStore.setSocialSignup(queryFlow, provider, traits, csrfToken.value);
+    }
+
+    if (setSocialSignupDataError.value && setSocialSignupDataError.value?.redirect_browser_to) {
+      window.location.href = setSocialSignupDataError.value.redirect_browser_to;
+
+      console.log('setSocialSignupData', setSocialSignupDataError.value.redirect_browser_to);
     }
 
     loading.value = false;
@@ -332,6 +362,7 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     onLogout,
     getSession,
     resetAll,
+    onSocialSignup,
   };
 });
 

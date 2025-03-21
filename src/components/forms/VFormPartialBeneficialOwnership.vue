@@ -134,7 +134,6 @@ const isValid = computed(() => isEmpty(validation.value || {}));
 
 const onValidate = () => {
   validation.value = validator.getFormValidationErrors(model);
-  console.log(validation.value);
 };
 
 const schemaObject = computed(() => getFieldSchema(

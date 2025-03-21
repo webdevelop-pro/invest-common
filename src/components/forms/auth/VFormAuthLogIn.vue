@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {
-  computed, nextTick, reactive, ref, watch,
+  computed, nextTick, onMounted, reactive, ref, watch,
 } from 'vue';
 import { useAuthLogicStore } from 'InvestCommon/store/useAuthLogic';
 import { useAuthStore } from 'InvestCommon/store/useAuth';
@@ -27,8 +27,11 @@ const onSignup = () => {
 const authLogicStore = useAuthLogicStore();
 const { loading } = storeToRefs(authLogicStore);
 const authStore = useAuthStore();
-const { getSchemaLoginData, setLoginErrorData } = storeToRefs(authStore);
+const { getSchemaLoginData, setLoginErrorData, getLoginData } = storeToRefs(authStore);
 const showCreatePassword = ref(true);
+
+const queryFlow = computed(() => (
+  (window && window.location.search) ? new URLSearchParams(window.location.search).get('flow') : null));
 
 const model = reactive({
 } as FormModelSignIn);
@@ -65,6 +68,12 @@ watch(() => getSchemaLoginData.value, () => {
 watch(() => model, () => {
   if (!isValid.value) onValidate();
 }, { deep: true });
+
+onMounted(async () => {
+  if (queryFlow.value) {
+    if (!getLoginData.value) await authStore.getLogin(queryFlow.value);
+  }
+});
 </script>
 
 <template>
