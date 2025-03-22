@@ -47,7 +47,7 @@ const saveHandler = async () => {
   personalFormRef.value?.onValidate();
   if (props.withId) idFormRef.value?.onValidate();
   if (!isValid.value) {
-    void nextTick(() => scrollToError('VFormPersonalInformation'));
+    nextTick(() => scrollToError('VFormPersonalInformation'));
     return;
   }
 
@@ -59,26 +59,26 @@ const saveHandler = async () => {
     && !selectedUserProfileData.value?.escrow_id) {
     await accreditationStore.createEscrow(selectedUserProfileData.value?.user_id, selectedUserProfileData.value?.id);
   }
-  void submitFormToHubspot({
+  submitFormToHubspot({
     email: userAccountData.value?.email,
     ...personalFormRef.value?.model,
     date_of_birth: model?.dob,
   });
-  void useHubspotForm(env.HUBSPOT_FORM_ID_IDENTIFICATION).submitFormToHubspot({
+  useHubspotForm(env.HUBSPOT_FORM_ID_IDENTIFICATION).submitFormToHubspot({
     email: userAccountData.value?.email,
     ...idFormRef.value?.model,
   });
-  void userIdentityStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
+  userIdentityStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
   isLoading.value = false;
   if (props.accreditation) {
-    void router.push({ name: ROUTE_ACCREDITATION_UPLOAD, params: { profileId: selectedUserProfileId.value } });
+    router.push({ name: ROUTE_ACCREDITATION_UPLOAD, params: { profileId: selectedUserProfileId.value } });
   } else {
-    void router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
+    router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
   }
 };
 
 const cancelHandler = () => {
-  void router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
+  router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
 };
 </script>
 

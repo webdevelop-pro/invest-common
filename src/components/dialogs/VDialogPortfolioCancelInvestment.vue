@@ -76,7 +76,7 @@ const onValidate = () => {
 const cancelInvestHandler = async () => {
   onValidate();
   if (!isValid.value) {
-    void nextTick(() => scrollToError('WdModalPortfolioCancelInvestment'));
+    nextTick(() => scrollToError('WdModalPortfolioCancelInvestment'));
     return;
   }
 
@@ -85,13 +85,13 @@ const cancelInvestHandler = async () => {
   }
 
   if (cancelInvestData.value) {
-    void submitFormToHubspot({
+    submitFormToHubspot({
       email: userAccountData.value?.email,
       cancellation_reason: model.cancelation_reason,
       cancellation_offer_name: props.investment.offer.name,
       cancellation_offer_id: props.investment.id,
     });
-    void useOfferStore().getConfirmedOffers(selectedUserProfileId.value);
+    useOfferStore().getConfirmedOffers(selectedUserProfileId.value);
     open.value = false;
   }
 };
@@ -101,7 +101,7 @@ const onBackClick = () => {
 };
 
 onMounted(() => {
-  void useInvestmentsStore().setCanceOptions(String(props.investment.id));
+  useInvestmentsStore().setCanceOptions(String(props.investment.id));
 });
 
 watch(() => setCancelOptionsData.value, () => {

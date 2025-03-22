@@ -24,7 +24,7 @@ const saveHandler = () => {
   // eslint-disable-next-line new-cap
   const pdf = new jsPDF();
 
-  void pdf.html(DownloadComp.value, {
+  pdf.html(DownloadComp.value, {
     callback(doc) {
       // Save the PDF
       doc.save(`WireInformation${props.investment.id}.pdf`);

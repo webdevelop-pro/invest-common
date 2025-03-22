@@ -99,7 +99,7 @@ const onValidate = () => {
 const continueHandler = async () => {
   onValidate();
   if (!isValid.value) {
-    void nextTick(() => scrollToError('InvestFormAmount'));
+    nextTick(() => scrollToError('InvestFormAmount'));
     return;
   }
 
@@ -108,11 +108,11 @@ const continueHandler = async () => {
 
   if (isGetAmountError.value) return;
   if (setAmountData.value) {
-    void router.push({
+    router.push({
       name: ROUTE_INVEST_OWNERSHIP,
     });
 
-    void submitFormToHubspot({
+    submitFormToHubspot({
       email: userAccountData.value?.email,
       shares_amount: sharesAmount.value,
       investment_amount: investmentAmount.value,

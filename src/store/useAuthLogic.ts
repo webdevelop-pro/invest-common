@@ -16,11 +16,12 @@ import {
   useProfileWalletStore, useProfileWalletTransactionStore, useUserProfilesStore,
   useUsersStore, useGlobalLoader,
 } from 'InvestCommon/store';
-import env from 'InvestCommon/global/index';
+import env, { cookiesOptions } from 'InvestCommon/global/index';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import {
-  urlOffers, urlProfilePortfolio, urlSignin, urlCheckEmail,
+  urlOffers, urlProfilePortfolio, urlSignin, urlCheckEmail, urlProfile,
 } from 'InvestCommon/global/links';
+import { useCookies } from '@vueuse/integrations/useCookies';
 
 const { EXTERNAL } = env;
 
@@ -32,7 +33,7 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
   const { pushTo } = useRedirect();
   const usersStore = useUsersStore();
   const { selectedUserProfileId } = storeToRefs(usersStore);
-  const userProfilesStore = useUserProfilesStore();
+  const cookies = useCookies(['session']);
 
   const authStore = useAuthStore();
   const {
@@ -71,21 +72,15 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     }
     const { submitFormToHubspot } = useHubspotForm('07463465-7f03-42d2-a85e-40cf8e29969d');
     if (setLoginData.value && setLoginData.value.session) {
+      usersStore.updateUserAccountSession(setLoginData.value.session);
       const queryRedirect = computed(() => new URLSearchParams(window.location.search).get('redirect'));
-      const userData = await userProfilesStore.getUser();
-      const id = userData?.profiles[0]?.id;
-      if (EXTERNAL) {
-        navigateWithQueryParams(queryRedirect.value || urlProfilePortfolio(id));
-      } else {
-        void router.push(pushTo({
-          name: ROUTE_DASHBOARD_PORTFOLIO,
-          params: { profileId: id },
-        }));
-      }
-      // commented as auth pages are on static so will reload anyway session
-      // void usersStore.updateUserAccountSession(setLoginData.value.session);
+      // const userData = await userProfilesStore.getUser();
+      // const id = userData?.profiles[0]?.id;
+      nextTick(() => {
+        navigateWithQueryParams(queryRedirect.value || urlProfile());
+      });
 
-      void submitFormToHubspot({
+      submitFormToHubspot({
         email,
       });
     }
@@ -164,19 +159,21 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
       return;
     }
     if (setSignupData.value && setSignupData.value.session) {
-      const userData = await userProfilesStore.getUser();
-      const id = userData?.profiles[0]?.id;
-      void usersStore.updateUserAccountSession(setSignupData.value.session);
+      usersStore.updateUserAccountSession(setSignupData.value.session);
+      const queryRedirect = computed(() => new URLSearchParams(window.location.search).get('redirect'));
+      // const userData = await userProfilesStore.getUser();
+      // const id = userData?.profiles[0]?.id;
       if (EXTERNAL) {
-        navigateWithQueryParams(urlProfilePortfolio(id));
-      } else {
-        void router.push(pushTo({
-          name: ROUTE_DASHBOARD_PORTFOLIO,
-          params: { profileId: id },
-        }));
+        navigateWithQueryParams(queryRedirect.value || urlProfile());
       }
+      // } else {
+      //   router.push(pushTo({
+      //     name: ROUTE_DASHBOARD_PORTFOLIO,
+      //     params: { profileId: id },
+      //   }));
+      // }
 
-      void submitFormToHubspot({
+      submitFormToHubspot({
         email,
         firstname: firstName,
         lastname: lastName,
@@ -202,7 +199,7 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
       if (EXTERNAL) {
         navigateWithQueryParams(urlProfilePortfolio(selectedUserProfileId.value));
       } else {
-        void router.push(pushTo({
+        router.push(pushTo({
           name: ROUTE_DASHBOARD_PORTFOLIO,
           params: { profileId: selectedUserProfileId.value },
         }));
@@ -232,9 +229,6 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
   };
 
   const resetAll = () => {
-    const { userLoggedIn } = storeToRefs(useUsersStore());
-    userLoggedIn.value = null;
-    selectedUserProfileId.value = null;
     useFundingStore().resetAll();
     useProfileWalletTransactionStore().resetAll();
     useProfileWalletStore().resetAll();
@@ -249,7 +243,6 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
   };
 
   const handleAfterLogout = () => {
-    resetAll();
     let queryParams;
     if (EXTERNAL) {
       if (window?.location?.pathname?.includes('offer')) {
@@ -277,6 +270,7 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
       if (queryParams) navigateWithQueryParams(urlSignin, queryParams);
       else navigateWithQueryParams(urlSignin);
     }
+    useGlobalLoader().hide();
   };
 
   // LOGOUT
@@ -300,6 +294,7 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     await authStore.getLogout(token.value);
 
     if (getLogoutResponse.value && (getLogoutResponse.value.status >= 200) && (getLogoutResponse.value.status <= 300)) {
+      cookies.remove('session', cookiesOptions);
       // if logout request is ok, reset all data and redirect
       useGlobalLoader().show();
       handleAfterLogout();
@@ -315,7 +310,7 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     await authStore.getSession();
     if (getSessionData.value?.active && !isGetSessionError.value) {
       await nextTick();
-      void usersStore.updateUserAccountSession(getSessionData.value);
+      usersStore.updateUserAccountSession(getSessionData.value);
       // await notificationsHandler(); // TODO: check if needed
     } else if (!getSessionData.value?.active || getSessionErrorResponse.value?.status === 401) {
       resetAll();
@@ -337,16 +332,20 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     );
 
     if (setVerificationErrorData.value && setVerificationErrorData.value?.redirect_browser_to
-
-        && (setVerificationErrorData.value?.error?.code === 422)) {
+      && (setVerificationErrorData.value?.error?.code === 422)) {
       await getSession();
 
       const fullUrl = setVerificationErrorData.value.redirect_browser_to;
       navigateWithQueryParams(fullUrl);
       // const newUrl = new URL(fullUrl);
       // const relativePath = newUrl.pathname + newUrl.search;
-      // void router.replace({ path: relativePath });
+      // router.replace({ path: relativePath });
     }
+  };
+
+  const checkCookie = () => {
+    const session = cookies.get('session');
+    if (!session) resetAll();
   };
 
   return {
@@ -362,6 +361,7 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     onLogout,
     getSession,
     resetAll,
+    checkCookie,
     onSocialSignup,
   };
 });

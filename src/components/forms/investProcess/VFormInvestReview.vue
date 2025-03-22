@@ -62,16 +62,16 @@ investmentsStore.$onAction(
         case 'setReview':
           if (setReviewData.value?.investment) {
             if (isBankExist.value) {
-              void fundingStore.fundTransfer(setReviewData.value.investment.id);
+              fundingStore.fundTransfer(setReviewData.value.investment.id);
             }
-            void router.push({
+            router.push({
               name: ROUTE_INVEST_THANK,
               query: {
                 id: setReviewData.value?.investment.id,
               },
             });
 
-            void submitFormToHubspot({
+            submitFormToHubspot({
               email: userAccountData.value?.email,
               investment_id: setReviewData.value?.investment.id,
               offer_name: getUnconfirmedOfferData.value?.offer?.name,

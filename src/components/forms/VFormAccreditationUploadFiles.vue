@@ -71,24 +71,24 @@ const sendFiles = async () => {
 
   if ((createAccreditationData.value && isCreateAccreditation.value)
     || (updateAccreditationData.value && !isCreateAccreditation.value)) {
-    void userProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
-    void router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
+    userProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
+    router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
   }
 };
 
 const saveHandler = () => {
   validateTrigger.value = true;
-  void nextTick(() => {
+  nextTick(() => {
     if (!isFieldsValid.value) {
-      void nextTick(() => scrollToError('FormAccreditationUploadFiles'));
+      nextTick(() => scrollToError('FormAccreditationUploadFiles'));
       return;
     }
-    void sendFiles();
+    sendFiles();
   });
 };
 
 const cancelHandler = () => {
-  void router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
+  router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
 };
 
 const onFilesChange = (filesInner: File[]) => {

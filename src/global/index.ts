@@ -1,3 +1,5 @@
+import { useCookies } from '@vueuse/integrations/useCookies';
+
 const env = {
   EXTERNAL: import.meta.env.VITE_EXTERNAL,
   KRATOS_URL: import.meta.env.VITE_KRATOS_URL,
@@ -36,3 +38,7 @@ const env = {
 };
 
 export default env;
+
+export const cookiesOptions = (expireDate: Date) => ({
+  domain: '.webdevelop.biz', sameSite: 'lax', path: '/', expires: expireDate,
+});

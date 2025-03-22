@@ -95,13 +95,13 @@ const onValidate = () => {
 const saveHandler = async () => {
   onValidate();
   if (!isValid.value) {
-    void nextTick(() => scrollToError('VFormWalletAddTransaction'));
+    nextTick(() => scrollToError('VFormWalletAddTransaction'));
     return;
   }
 
   await profileWalletTransactionStore.setProfileWalletAddTransaction(props.transactionType, Number(model.amount));
   if (isSetProfileWalletAddTransactionError.value) return;
-  void router.push({ name: ROUTE_DASHBOARD_WALLET, params: { profileId: selectedUserProfileId.value } });
+  router.push({ name: ROUTE_DASHBOARD_WALLET, params: { profileId: selectedUserProfileId.value } });
   emit('cancel');
 };
 

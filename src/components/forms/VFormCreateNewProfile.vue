@@ -120,7 +120,7 @@ const isDisabledButton = computed(() => (!isValid.value || isSetUserProfileLoadi
 
 const handleHubspot = () => {
   const model = { ...childFormModel.value };
-  void useHubspotForm(env.HUBSPOT_FORM_ID_PERSONAL_INFORMATION).submitFormToHubspot({
+  useHubspotForm(env.HUBSPOT_FORM_ID_PERSONAL_INFORMATION).submitFormToHubspot({
     email: userAccountData.value?.email,
     firstname: model?.first_name,
     lastname: model?.last_name,
@@ -136,12 +136,12 @@ const handleHubspot = () => {
     zip_code: model?.zip_code,
     country: model?.country,
   });
-  void useHubspotForm(env.HUBSPOT_FORM_ID_IDENTIFICATION).submitFormToHubspot({
+  useHubspotForm(env.HUBSPOT_FORM_ID_IDENTIFICATION).submitFormToHubspot({
     email: userAccountData.value?.email,
     ...model.type_of_identification,
   });
   if (selectedType.value.toLowerCase() === PROFILE_TYPES.ENTITY) {
-    void useHubspotForm(env.HUBSPOT_FORM_ID_ENTITY_INFORMATION).submitFormToHubspot({
+    useHubspotForm(env.HUBSPOT_FORM_ID_ENTITY_INFORMATION).submitFormToHubspot({
       email: userAccountData.value?.email,
       type: model.type,
       name: model.name,
@@ -149,34 +149,34 @@ const handleHubspot = () => {
       solely_for_investing: model.solely_for_investing,
       tax_exempts: model.tax_exempts,
     });
-    void useHubspotForm(env.HUBSPOT_FORM_ID_BUSINESS_CONTROLLER).submitFormToHubspot({
+    useHubspotForm(env.HUBSPOT_FORM_ID_BUSINESS_CONTROLLER).submitFormToHubspot({
       email: userAccountData.value?.email,
       business_controller: model.business_controller,
     });
-    void useHubspotForm(env.HUBSPOT_FORM_ID_BENEFICIAL_OWNERS).submitFormToHubspot({
+    useHubspotForm(env.HUBSPOT_FORM_ID_BENEFICIAL_OWNERS).submitFormToHubspot({
       email: userAccountData.value?.email,
       beneficials: model.beneficials,
     });
   }
   if (selectedType.value.toLowerCase() === PROFILE_TYPES.TRUST) {
-    void useHubspotForm(env.HUBSPOT_FORM_ID_TRUST_INFORMATION).submitFormToHubspot({
+    useHubspotForm(env.HUBSPOT_FORM_ID_TRUST_INFORMATION).submitFormToHubspot({
       email: userAccountData.value?.email,
       type: model.type,
       name: model.name,
       owner_title: model.owner_title,
       ein: model.ein,
     });
-    void useHubspotForm(env.HUBSPOT_FORM_ID_BUSINESS_CONTROLLER).submitFormToHubspot({
+    useHubspotForm(env.HUBSPOT_FORM_ID_BUSINESS_CONTROLLER).submitFormToHubspot({
       email: userAccountData.value?.email,
       business_controller: model.business_controller,
     });
-    void useHubspotForm(env.HUBSPOT_FORM_ID_BENEFICIAL_OWNERS).submitFormToHubspot({
+    useHubspotForm(env.HUBSPOT_FORM_ID_BENEFICIAL_OWNERS).submitFormToHubspot({
       email: userAccountData.value?.email,
       beneficials: model.beneficials,
     });
   }
   if (selectedType.value.toLowerCase() === PROFILE_TYPES.SDIRA) {
-    void useHubspotForm(env.HUBSPOT_FORM_ID_CUSTODIAN).submitFormToHubspot({
+    useHubspotForm(env.HUBSPOT_FORM_ID_CUSTODIAN).submitFormToHubspot({
       email: userAccountData.value?.email,
       custodian: model.type,
       account_number: model.account_number,
@@ -184,7 +184,7 @@ const handleHubspot = () => {
     });
   }
   if (selectedType.value.toLowerCase() === PROFILE_TYPES.SOLO401K) {
-    void useHubspotForm(env.HUBSPOT_FORM_ID_PLAN_INFO).submitFormToHubspot({
+    useHubspotForm(env.HUBSPOT_FORM_ID_PLAN_INFO).submitFormToHubspot({
       email: userAccountData.value?.email,
       name: model.name,
       ein: model.ein,
@@ -196,7 +196,7 @@ const saveHandler = async () => {
   const model = { ...childFormModel.value };
   onValidate();
   if (!isValid.value) {
-    void nextTick(() => scrollToError('VFormCreateNewProfile'));
+    nextTick(() => scrollToError('VFormCreateNewProfile'));
     return;
   }
 
@@ -210,21 +210,21 @@ const saveHandler = async () => {
   if (!isSetUserProfileError.value) {
     handleHubspot();
     await accreditationStore.createEscrow(selectedUserProfileData.value?.user_id, setProfileData.value?.id);
-    void userProfilesStore.getUser();
+    userProfilesStore.getUser();
     userStore.setSelectedUserProfileById(Number(setProfileData.value?.id));
-    void userProfilesStore.getProfileById(selectedType.value, String(setProfileData.value?.id));
+    userProfilesStore.getProfileById(selectedType.value, String(setProfileData.value?.id));
     isLoading.value = false;
-    void router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: String(setProfileData.value?.id) } });
+    router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: String(setProfileData.value?.id) } });
   }
   isLoading.value = false;
 };
 
 const cancelHandler = () => {
-  void router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
+  router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
 };
 
 watch(() => selectedType.value, () => {
-  void userIdentityStore.getProfileByIdOptions(selectedType.value, selectedUserProfileId.value);
+  userIdentityStore.getProfileByIdOptions(selectedType.value, selectedUserProfileId.value);
 });
 </script>
 

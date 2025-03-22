@@ -48,7 +48,7 @@ watch(() => getSchemaData.value, () => {
 const recoveryHandler = async () => {
   onValidate();
   if (!isValid.value) {
-    void nextTick(() => scrollToError('ForgotForm'));
+    nextTick(() => scrollToError('ForgotForm'));
     return;
   }
 

@@ -88,7 +88,7 @@ const onValidate = () => {
 const saveHandler = async () => {
   onValidate();
   if (!isValid.value || !model.beneficiary) {
-    void nextTick(() => scrollToError('VFormTrustedContact'));
+    nextTick(() => scrollToError('VFormTrustedContact'));
     return;
   }
 
@@ -101,7 +101,7 @@ const saveHandler = async () => {
     selectedUserProfileId.value,
   );
   isLoading.value = false;
-  void submitFormToHubspot({
+  submitFormToHubspot({
     email: userAccountData.value?.email,
     firstname: model.beneficiary.first_name,
     lastname: model.beneficiary.last_name,
@@ -110,12 +110,12 @@ const saveHandler = async () => {
     trusted_email: model.beneficiary.email,
     date_of_birth: model.beneficiary.dob,
   });
-  void userProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
-  void router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
+  userProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
+  router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
 };
 
 const cancelHandler = () => {
-  void router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
+  router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
 };
 
 watch(() => selectedUserProfileData.value?.data?.beneficiary, () => {

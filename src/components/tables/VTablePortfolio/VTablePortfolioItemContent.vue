@@ -48,13 +48,13 @@ const closedAt = computed(() => {
 });
 
 const onTimelineClick = () => {
-  void router.push({
+  router.push({
     name: ROUTE_INVESTMENT_TIMELINE,
     params: { profileId: selectedUserProfileId.value, id: props.item.id },
   });
 };
 const onCancelInvestmentClick = () => {
-  void useDialogsStore.showCancelInvestment(props.item);
+  useDialogsStore.showCancelInvestment(props.item);
 };
 
 onBeforeMount(async () => {

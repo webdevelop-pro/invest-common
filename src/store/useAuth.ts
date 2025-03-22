@@ -39,7 +39,7 @@ export const useAuthStore = defineStore('auth', () => {
     isGetAllSessionError.value = false;
     const response = await fetchGetAllSession().catch((error: Response) => {
       isGetAllSessionError.value = true;
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
     if (response) getAllSessionData.value = response;
     isGetAllSessionLoading.value = false;
@@ -70,7 +70,7 @@ export const useAuthStore = defineStore('auth', () => {
     isGetFlowError.value = false;
     const response = await fetchAuthFlow(url).catch((error: Response) => {
       isGetFlowError.value = true;
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
     if (response) getFlowData.value = response;
     isGetFlowLoading.value = false;
@@ -91,7 +91,7 @@ export const useAuthStore = defineStore('auth', () => {
     isSetLoginError.value = false;
     const response = await fetchSetLogin(flowId, password, email, csrf_token).catch((error: Response) => {
       isSetLoginError.value = true;
-      void errorHandling422(error);
+      errorHandling422(error);
     });
     if (response) setLoginData.value = response;
     isSetLoginLoading.value = false;
@@ -115,7 +115,7 @@ export const useAuthStore = defineStore('auth', () => {
         setSocialLoginDataError.value = data;
       } else {
         isSetSocialLoginError.value = true;
-        void generalErrorHandling(error);
+        generalErrorHandling(error);
       }
     });
     if (response) setSocialLoginData.value = response;
@@ -141,7 +141,7 @@ export const useAuthStore = defineStore('auth', () => {
         setSocialSignupDataError.value = data;
       } else {
         isSetSocialSignupError.value = true;
-        void generalErrorHandling(error);
+        generalErrorHandling(error);
       }
     });
     if (response) setSocialSignupData.value = response;
@@ -157,7 +157,7 @@ export const useAuthStore = defineStore('auth', () => {
     getLogoutResponse.value = await fetchGetLogout(token)
       .catch((error: Response) => {
         isGetLogoutError.value = true;
-        void generalErrorHandling(error);
+        generalErrorHandling(error);
       });
     isGetLogoutLoading.value = false;
   };
@@ -170,7 +170,7 @@ export const useAuthStore = defineStore('auth', () => {
     isGetLogoutURLError.value = false;
     const response = await fetchGetLogoutURL().catch((error: Response) => {
       isGetLogoutURLError.value = true;
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
     if (response) getLogoutURLData.value = response;
     isGetLogoutURLLoading.value = false;
@@ -209,7 +209,7 @@ export const useAuthStore = defineStore('auth', () => {
     const response = await fetchSetSignUp(flowId, password, firstName, lastName, email, csrf_token)
       .catch((error: Response) => {
         isSetSignupError.value = true;
-        void errorHandling422(error);
+        errorHandling422(error);
       });
     if (response) setSignupData.value = response;
     isSetSignupLoading.value = false;
@@ -229,7 +229,7 @@ export const useAuthStore = defineStore('auth', () => {
     const response = await fetchSetRecovery(flowId, email, csrf_token)
       .catch((error: Response) => {
         isSetRecoveryError.value = true;
-        void errorHandlingRecovery(error);
+        errorHandlingRecovery(error);
       });
     if (response) setRecoveryData.value = response;
     isSetRecoveryLoading.value = false;
@@ -273,7 +273,7 @@ export const useAuthStore = defineStore('auth', () => {
     const response = await fetchSetPassword(flowId, password, csrf_token)
       .catch((error: Response) => {
         isSetPasswordError.value = true;
-        void errorHandlingSettings(error);
+        errorHandlingSettings(error);
       });
     if (response) setPasswordData.value = response;
     isSetPasswordLoading.value = false;
@@ -290,7 +290,7 @@ export const useAuthStore = defineStore('auth', () => {
     const response = await fetchGetSchema()
       .catch((error: Response) => {
         isGetSchemaError.value = true;
-        void errorHandlingSettings(error);
+        errorHandlingSettings(error);
       });
     if (response) {
       const responseTraits = response[0].schema.properties.traits;

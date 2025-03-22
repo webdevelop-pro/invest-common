@@ -37,7 +37,7 @@ const isDisabledButton = computed(() => (!isValid.value || isSetProfileByIdLoadi
 const saveHandler = async () => {
   trustInformationRef.value?.onValidate();
   if (!isValid.value) {
-    void nextTick(() => scrollToError('VFormEntityInformation'));
+    nextTick(() => scrollToError('VFormEntityInformation'));
     return;
   }
 
@@ -49,17 +49,17 @@ const saveHandler = async () => {
   );
   isLoading.value = false;
   if (!isSetProfileByIdError.value) {
-    void submitFormToHubspot({
+    submitFormToHubspot({
       email: userAccountData.value?.email,
       ...trustInformationRef.value?.model,
     });
   }
-  void userProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
-  void router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
+  userProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
+  router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
 };
 
 const cancelHandler = () => {
-  void router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
+  router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
 };
 </script>
 

@@ -28,7 +28,7 @@ export const useOfferStore = defineStore('offers', () => {
     isGetOffersError.value = false;
     const response = await fetchGetOffers().catch((error: Response) => {
       isGetOffersError.value = true;
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
     if (response) getOffersData.value = response;
     isGetOffersLoading.value = false;
@@ -42,7 +42,7 @@ export const useOfferStore = defineStore('offers', () => {
     isGetOfferOneError.value = false;
     const response = await fetchGetOfferOne(slug).catch((error: Response) => {
       isGetOfferOneError.value = true;
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
     if (response) {
       getOfferOneData.value = response;
@@ -58,7 +58,7 @@ export const useOfferStore = defineStore('offers', () => {
     isGetUnconfirmedOffersError.value = false;
     const response = await fetchGetInvestUnconfirmed().catch((error: Response) => {
       isGetUnconfirmedOffersError.value = true;
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
     if (response) {
       await getOffers();
@@ -78,7 +78,7 @@ export const useOfferStore = defineStore('offers', () => {
     getUnconfirmedOfferData.value = null;
     const response = await fetchGetInvestUnconfirmed().catch((error: Response) => {
       isGetUnconfirmedOfferOneError.value = true;
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
     if (response) {
       await getOffers();
@@ -100,7 +100,7 @@ export const useOfferStore = defineStore('offers', () => {
     isGetInvestmentsError.value = false;
     const response = await fetchGetInvestments(profile_id).catch((error: Response) => {
       isGetInvestmentsError.value = true;
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
     if (response) {
       getInvestmentsData.value = response;
@@ -116,7 +116,7 @@ export const useOfferStore = defineStore('offers', () => {
     isGetOfferCommentsError.value = false;
     const response = await fetchGetOfferComments(id).catch((error: Response) => {
       isGetOfferCommentsError.value = true;
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
     if (response) {
       getOfferCommentsData.value = response.data;
@@ -135,7 +135,7 @@ export const useOfferStore = defineStore('offers', () => {
     const response = await fetchSetOfferComment(payload).catch(async (error: Response) => {
       isSetOfferCommentError.value = true;
       setOfferCommentsErrorData.value = JSON.parse(await error.text());
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
     if (response) setOfferCommentsData.value = response;
     isSetOfferCommentLoading.value = false;
@@ -149,7 +149,7 @@ export const useOfferStore = defineStore('offers', () => {
     isSetOfferCommentOptionsError.value = false;
     const response = await fetchSetOfferCommentOptions().catch((error: Response) => {
       isSetOfferCommentOptionsError.value = true;
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
     if (response) setOfferCommentsOptionsData.value = response;
     isSetOfferCommentOptionsLoading.value = false;
@@ -176,7 +176,7 @@ export const useOfferStore = defineStore('offers', () => {
         getOfferOneData.value.subscribed_shares = SubscribedShares;
       }
     }
-    void getConfirmedOffers(selectedUserProfileId.value);
+    getConfirmedOffers(selectedUserProfileId.value);
   };
 
   const getOfferFundedPercent = (offer: IOffer) => {

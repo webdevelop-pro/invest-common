@@ -51,7 +51,7 @@ const onValidate = () => {
 const loginHandler = async () => {
   onValidate();
   if (!isValid.value) {
-    void nextTick(() => scrollToError('LogInForm'));
+    nextTick(() => scrollToError('LogInForm'));
     return;
   }
 

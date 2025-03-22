@@ -23,7 +23,7 @@ export const useAccreditationStore = defineStore('accreditation', () => {
     isCreateAccreditationError.value = false;
     const response = await fetchCreateAccreditation(profileId, note).catch((error: Response) => {
       isCreateAccreditationError.value = true;
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
     if (response) createAccreditationData.value = response;
     isCreateAccreditationLoading.value = false;
@@ -37,7 +37,7 @@ export const useAccreditationStore = defineStore('accreditation', () => {
     isUpdateAccreditationError.value = false;
     const response = await fetchUpdateAccreditation(profileId, note).catch((error: Response) => {
       isUpdateAccreditationError.value = true;
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
     if (response) updateAccreditationData.value = response;
     isUpdateAccreditationLoading.value = false;
@@ -51,7 +51,7 @@ export const useAccreditationStore = defineStore('accreditation', () => {
       .catch(async (error: Response) => {
         isUploadAccreditationDocumentError.value = true;
         uploadAccreditationDocumentErrorData.value = JSON.parse(await error.text());
-        void generalErrorHandling(error);
+        generalErrorHandling(error);
       });
     if (response) uploadAccreditationDocumentData.value = response;
     isUploadAccreditationDocumentLoading.value = false;
@@ -63,7 +63,7 @@ export const useAccreditationStore = defineStore('accreditation', () => {
     const response = await fetchCreateEscrow(userId, profileId)
       .catch((error: Response) => {
         isCreateEscrowError.value = true;
-        void generalErrorHandling(error);
+        generalErrorHandling(error);
       });
     if (response) createEscrowData.value = response;
     isCreateEscrowLoading.value = false;

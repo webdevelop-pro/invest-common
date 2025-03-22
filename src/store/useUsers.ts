@@ -1,11 +1,10 @@
 import {
-  computed, nextTick, ref, watch,
+  computed, ref, watch,
 } from 'vue';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import { useAuthStore } from 'InvestCommon/store/useAuth';
 import { useNotificationsStore } from 'InvestCommon/store/useNotifications';
-import { useStorage } from '@vueuse/core';
 import { ISession } from 'InvestCommon/types/api/auth';
 import { INotification } from 'InvestCommon/types/api/notifications';
 import {
@@ -18,8 +17,9 @@ import {
   ROUTE_INVEST_SIGNATURE, ROUTE_INVEST_THANK, ROUTE_SUBMIT_KYC,
 } from 'InvestCommon/helpers/enums/routes';
 import { RouteLocationNormalized, useRoute, useRouter } from 'vue-router';
-import env from 'InvestCommon/global/index';
+import env, { cookiesOptions } from 'InvestCommon/global/index';
 import { PROFILE_TYPES } from 'InvestCommon/global/investment.json';
+import { useCookies } from '@vueuse/integrations/useCookies';
 
 const { EXTERNAL } = env;
 
@@ -27,28 +27,35 @@ export const useUsersStore = defineStore('user', () => {
   const router = useRouter();
   const route = useRoute();
   const authStore = useAuthStore();
-  const { isGetSessionLoading, isGetSessionError, getSessionData } = storeToRefs(authStore);
+  const { isGetSessionLoading } = storeToRefs(authStore);
   const userProfilesStore = useUserProfilesStore();
   const {
     getUserData, isGetUserLoading,
     getProfileByIdData, getProfileByIdOptionsData,
   } = storeToRefs(userProfilesStore);
   const notificationsStore = useNotificationsStore();
+  const cookies = useCookies(['session']);
 
   // general user data like email that we registered, name,...
-  const userAccountSession = ref<ISession>();
+  const userAccountSession = ref(cookies.get('session'));
   const updateUserAccountSession = (session: ISession) => {
     userAccountSession.value = session;
+    cookies.set(
+      'session',
+      session,
+      cookiesOptions(new Date(session?.expires_at)),
+    );
   };
-  const userLoggedIn = useStorage('loggedIn', false, sessionStorage);
-  const userAccountData = computed(() => userAccountSession.value?.identity.traits);
+  const userLoggedIn = computed(() => userAccountSession.value?.active);
+  const userAccountData = computed(() => userAccountSession.value?.identity?.traits);
   const userAccountLoading = computed(() => isGetSessionLoading.value);
   // LIST OF USER PROFILES
   const userProfiles = computed(() => getUserData.value?.profiles || []);
   const userProfilesLoading = computed(() => isGetUserLoading.value);
   // SELECTED USER PROFILE
   const selectedUserProfileLoading = computed(() => userProfilesLoading.value);
-  const selectedUserProfileId = useStorage('selectedUserProfileId', 0, sessionStorage);
+  const selectedUserProfileId = ref(cookies.get('selectedUserProfileId'));
+  // const selectedUserProfileId = useStorage('selectedUserProfileId', 0, sessionStorage);
   // const userProfilesFilteredById = computed(() => (
   //   userProfiles.value.filter((item) => item.id === selectedUserProfileId.value)[0]));
   // const selectedUserProfileData = computed(() => (
@@ -74,7 +81,7 @@ export const useUsersStore = defineStore('user', () => {
         getProfileByIdData.value.accreditation_status = notification.data.fields.accreditation_status;
       }
     }
-    void userProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
+    userProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
   };
 
   const updateDataInProfile = (nameOfProperty: string, data: object | string | number) => {
@@ -109,10 +116,11 @@ export const useUsersStore = defineStore('user', () => {
 
   const setSelectedUserProfileById = (id: number) => {
     selectedUserProfileId.value = id;
+    cookies.set('selectedUserProfileId', id, cookiesOptions());
   };
 
   const updateUserSelectedAccount = () => {
-    void userProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
+    userProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
   };
 
   // REDIRECT URL AND CHECK PROFILE ID
@@ -127,93 +135,81 @@ export const useUsersStore = defineStore('user', () => {
 
   const urlChecked = ref(false);
 
-  // check on url refresh
-  const checkInitUrl = (to: RouteLocationNormalized) => {
-    if (urlChecked.value) return;
-    const isRouteToCheckProfileInUrl = computed(() => (
-      routesToCheckProfileInUrl.includes(String(to.name))));
-    const urlProfileID = computed(() => Number(to.params?.profileId));
-    const profilesIds = computed(() => (userProfiles.value.map((profile) => profile.id)));
-    const isHaveProfileID = computed(() => (profilesIds.value.includes(urlProfileID.value)));
-    // if route to check profile AND url profile id is NOT in profile list then redirect to DASHBOARD
-    // and set selected profile id and first in profile list
-    if (isRouteToCheckProfileInUrl.value && !isHaveProfileID.value) {
-      urlChecked.value = true;
-      // setSelectedUserProfileById(userProfiles.value[0]?.id);
-      void router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
-    }
-    // if route to check profile AND url profile id IS in profile list then url load
-    // and set selected profile id from url
-    if (isRouteToCheckProfileInUrl.value && isHaveProfileID.value) {
-      urlChecked.value = true;
-      setSelectedUserProfileById(urlProfileID.value);
-    }
-  };
-  // END REDIRECT URL AND CHECK PROFILE ID
-
-  // watch get session result
-  watch(() => getSessionData.value?.active, () => {
-    if (getSessionData.value?.active && !isGetSessionError.value) {
-      void updateUserAccountSession(getSessionData.value);
-    }
-  });
-
-  watch(() => userAccountSession.value?.active, async () => {
-    if (userAccountSession.value?.active) {
-      if (!getUserData.value) await userProfilesStore.getUser();
-      userLoggedIn.value = userAccountSession.value?.active;
-      void nextTick(() => {
-        void notificationsStore.notificationsHandler();
-        void userProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
-        void userProfilesStore.getProfileByIdOptions(selectedUserProfileType.value, selectedUserProfileId.value);
-      });
-    }
-  }, { immediate: true });
-
-  // watch(() => selectedUserProfileId.value, () => {
-  //   if (userLoggedIn.value && selectedUserProfileId.value && (selectedUserProfileId.value !== 0)) {
-  //     void nextTick(() => {
-  //       void userProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
-  //       void userProfilesStore.getProfileByIdOptions(selectedUserProfileType.value, selectedUserProfileId.value);
-  //       void notificationsStore.notificationsHandler();
-  //     });
-  //   }
-  // });
-
-  watch(() => userProfiles.value[0]?.id, () => {
-    if (!selectedUserProfileId.value || selectedUserProfileId.value === 0) {
-      setSelectedUserProfileById(userProfiles.value[0]?.id);
-    }
-  }, { immediate: true });
-
   const urlProfileId = computed(() => {
     if (!EXTERNAL) return route.params?.profileId;
     return (window && window?.location?.pathname.split('/')[2]);
   });
 
-  watch(() => [userProfiles.value, urlProfileId.value], () => {
-    if (!urlChecked.value && userLoggedIn.value
-      && urlProfileId.value && (userProfiles.value?.length > 0) && !EXTERNAL) checkInitUrl(route);
-    if (userLoggedIn.value && urlProfileId.value && !EXTERNAL
-      && (Number(urlProfileId.value) !== selectedUserProfileId.value)) {
-      setSelectedUserProfileById(Number(urlProfileId.value));
-      void userProfilesStore.getProfileById(selectedUserProfileType.value, Number(urlProfileId.value));
-      void userProfilesStore.getProfileByIdOptions(selectedUserProfileType.value, Number(urlProfileId.value));
-      void router.push({
-        name: router.currentRoute.value.name,
-        params: { profileId: urlProfileId.value },
-        query: router.currentRoute.value.query,
-      });
+  // check on url refresh
+  const checkInitUrl = (to: RouteLocationNormalized) => {
+    // if (urlChecked.value) return;
+    const isRouteToCheckProfileInUrl = computed(() => (
+      routesToCheckProfileInUrl.includes(String(to.name))));
+    const profilesIds = computed(() => (userProfiles.value.map((profile) => profile.id)));
+    const isHaveProfileID = computed(() => (profilesIds.value.includes(urlProfileId.value)));
+    // if route to check profile AND url profile id is NOT in profile list then redirect to DASHBOARD
+    // and set selected profile id and first in profile list
+    if (isRouteToCheckProfileInUrl.value && !isHaveProfileID.value) {
+      urlChecked.value = true;
+      // setSelectedUserProfileById(userProfiles.value[0]?.id);
+      router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
     }
-  }, { immediate: true, deep: true });
+    // if route to check profile AND url profile id IS in profile list then url load
+    // and set selected profile id from url
+    if (isRouteToCheckProfileInUrl.value && isHaveProfileID.value) {
+      urlChecked.value = true;
+      setSelectedUserProfileById(urlProfileId.value);
+    }
+  };
+  // END REDIRECT URL AND CHECK PROFILE ID
 
   const resetAll = () => {
     getUserData.value = undefined;
-    selectedUserProfileId.value = null;
+    // selectedUserProfileId.value = null;
+    cookies.remove('selectedUserProfileId', cookiesOptions());
     userAccountSession.value = undefined;
     urlChecked.value = false;
-    userLoggedIn.value = null;
   };
+
+  const isRouteToCheckProfileInUrl = computed(() => (routesToCheckProfileInUrl.includes(String(route?.name))));
+  const isUrlProfileSameAsSelected = computed(() => Number(urlProfileId.value) === selectedUserProfileId.value);
+  const isUrlProfileIdInProfiles = computed(() => {
+    if (!isRouteToCheckProfileInUrl.value) return true;
+    return urlProfileId.value && userProfiles.value?.some((profile) => profile.id === Number(urlProfileId.value));
+  });
+
+  watch(() => userLoggedIn.value, async () => {
+    if (userLoggedIn.value && !getUserData.value && !isGetUserLoading.value) {
+      await userProfilesStore.getUser();
+      notificationsStore.notificationsHandler();
+    }
+  }, { immediate: true });
+
+  watch(() => [selectedUserProfileId.value, urlProfileId.value], () => {
+    if (userLoggedIn.value && isUrlProfileSameAsSelected.value && selectedUserProfileId.value
+      && (selectedUserProfileId.value > 0)) {
+      userProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
+      userProfilesStore.getProfileByIdOptions(selectedUserProfileType.value, selectedUserProfileId.value);
+    }
+  }, { immediate: true });
+
+  watch(() => userProfiles.value[0]?.id, () => {
+    if (userLoggedIn.value
+      && (!selectedUserProfileId.value || selectedUserProfileId.value === 0)) {
+      setSelectedUserProfileById(userProfiles.value[0]?.id);
+    }
+  }, { immediate: true });
+
+  watch(() => urlProfileId.value, () => {
+    if (!isUrlProfileIdInProfiles.value) {
+      router.push({
+        name: ROUTE_DASHBOARD_ACCOUNT,
+        params: { profileId: selectedUserProfileId.value || userProfiles.value[0]?.id || 0 },
+      });
+    } else if (!isUrlProfileSameAsSelected.value) {
+      setSelectedUserProfileById(Number(urlProfileId.value));
+    }
+  }, { immediate: true });
 
   return {
     resetAll,

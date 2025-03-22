@@ -55,12 +55,12 @@ const userListFormatted = computed(() => {
 const onUpdateSelectedProfile = (id: number | string) => {
   if (!id) return;
   if (id === 'new') {
-    void router.push({ name: ROUTE_CREATE_PROFILE });
+    router.push({ name: ROUTE_CREATE_PROFILE });
   } else {
     userStore.setSelectedUserProfileById(id);
-    void userProfilesStore.getProfileById(selectedUserProfileType.value, id);
-    void router.push({ name: router.currentRoute.value.name, params: { profileId: id } });
-    void userProfilesStore.getProfileByIdOptions(selectedUserProfileType.value, selectedUserProfileId.value);
+    // userProfilesStore.getProfileById(selectedUserProfileType.value, id);
+    router.push({ name: router.currentRoute.value.name, params: { profileId: id } });
+    // userProfilesStore.getProfileByIdOptions(selectedUserProfileType.value, selectedUserProfileId.value);
   }
 };
 </script>

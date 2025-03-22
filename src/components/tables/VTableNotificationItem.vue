@@ -135,13 +135,13 @@ const isUnread = computed(() => (props.data?.status.toLowerCase() === 'unread'))
 const onMarkAsRead = async () => {
   if (props.data?.id) {
     await notificationsStore.markAsReadById(props.data?.id);
-    if (!isMarkAsReadByIdError.value) void notificationsStore.setNotificationAsRead(props.data?.id);
+    if (!isMarkAsReadByIdError.value) notificationsStore.setNotificationAsRead(props.data?.id);
   }
 };
 
 const onButtonClick = () => {
-  void onMarkAsRead();
-  void notificationsStore.notificationSidebarClose();
+  onMarkAsRead();
+  notificationsStore.notificationSidebarClose();
 };
 </script>
 <template>

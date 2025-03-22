@@ -178,7 +178,7 @@ const handleTabChange = () => {
 
 const onMarkAllAsRead = async () => {
   await notificationsStore.markAllAsRead();
-  void notificationsStore.getNotificationsAll();
+  notificationsStore.getNotificationsAll();
 };
 
 watch(() => search.value, () => {

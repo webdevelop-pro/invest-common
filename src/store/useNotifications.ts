@@ -36,7 +36,7 @@ export const useNotificationsStore = defineStore('notifications', () => {
     isGetNotificationsError.value = false;
     const response = await fetchGetNotificationsAll().catch((error: Response) => {
       isGetNotificationsError.value = true;
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
     if (response) {
       getNotificationsData.value = response;
@@ -53,7 +53,7 @@ export const useNotificationsStore = defineStore('notifications', () => {
     isMarkAllAsReadError.value = false;
     const response = await fetchMarkNotificationReadAll().catch((error: Response) => {
       isMarkAllAsReadError.value = true;
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
     if (response) {
       markAllAsReadData.value = response;
@@ -70,7 +70,7 @@ export const useNotificationsStore = defineStore('notifications', () => {
     isMarkAsReadByIdError.value = false;
     const response = await fetchMarkNotificationReadById(notification_id).catch((error: Response) => {
       isMarkAsReadByIdError.value = true;
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
     if (response) {
       markAsReadByIdData.value = response;

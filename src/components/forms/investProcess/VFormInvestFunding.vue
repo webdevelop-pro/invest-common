@@ -159,7 +159,7 @@ const currentProps = computed(() => {
 });
 
 const fundingAnalytics = (type: FundingTypes, options: object) => {
-  void submitFormToHubspot({
+  submitFormToHubspot({
     email: userAccountData.value?.email,
     funding_type: type,
     ...options,
@@ -169,7 +169,7 @@ const fundingAnalytics = (type: FundingTypes, options: object) => {
 const continueHandler = async () => {
   onValidate();
   if (!isValid.value) {
-    void nextTick(() => scrollToError('InvestFormFunding'));
+    nextTick(() => scrollToError('InvestFormFunding'));
     return;
   }
 
@@ -193,7 +193,7 @@ const continueHandler = async () => {
   await investmentsStore.setFunding(slug, id, profileId, data);
 
   if (setFundingData.value) {
-    void router.push({
+    router.push({
       name: ROUTE_INVEST_REVIEW,
     });
 
@@ -227,7 +227,7 @@ watch(() => model, () => {
 
 onMounted(() => {
   if (selectedUserProfileData.value?.wallet?.id && (selectedUserProfileData.value?.wallet.id > 0)) {
-    void profileWalletStore.getProfileByIdWallet();
+    profileWalletStore.getProfileByIdWallet();
   }
 });
 </script>

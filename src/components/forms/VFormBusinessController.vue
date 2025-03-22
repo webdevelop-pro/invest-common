@@ -41,7 +41,7 @@ const isDisabledButton = computed(() => (!isValid.value || isSetProfileByIdLoadi
 const saveHandler = async () => {
   businessControllerRef.value?.onValidate();
   if (!isValid.value) {
-    void nextTick(() => scrollToError('VFormEntityInformation'));
+    nextTick(() => scrollToError('VFormEntityInformation'));
     return;
   }
 
@@ -52,18 +52,18 @@ const saveHandler = async () => {
     selectedUserProfileId.value,
   );
   if (!isSetProfileByIdError.value) {
-    void submitFormToHubspot({
+    submitFormToHubspot({
       email: userAccountData.value?.email,
       business_controller: businessControllerRef.value?.model,
     });
   }
-  void userProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
+  userProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
   isLoading.value = false;
-  void router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
+  router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
 };
 
 const cancelHandler = () => {
-  void router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
+  router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
 };
 const title = props.trust ? 'Grantor Infotmation' : 'Business Controller Information';
 </script>

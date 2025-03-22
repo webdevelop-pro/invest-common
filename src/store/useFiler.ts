@@ -14,7 +14,7 @@ export const useFilerStore = defineStore('filer', () => {
     isGetFilesError.value = false;
     const response = await fetchGetFiles(object_id, object_name).catch((error: Response) => {
       isGetFilesError.value = true;
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
     if (response) getFilesData.value = response;
     isGetFilesLoading.value = false;
@@ -47,7 +47,7 @@ export const useFilerStore = defineStore('filer', () => {
     isGetFilesPublicError.value = false;
     const response = await fetchGetPublicFiles(object_id, object_name).catch((error: Response) => {
       isGetFilesPublicError.value = true;
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
     if (response) getFilesPublicData.value = response;
     isGetFilesPublicLoading.value = false;

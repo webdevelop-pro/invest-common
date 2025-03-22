@@ -57,8 +57,8 @@ const isFundingClickable = computed(() => isInvestmentFundingClickable(props.ite
 
 const onFundingType = () => {
   if (!isFundingClickable.value) return;
-  if (isFundingLinkWire.value) void useDialogsStore.showWire(props.item, userName.value);
-  else void useDialogsStore.showTransaction(props.item, userName.value);
+  if (isFundingLinkWire.value) useDialogsStore.showWire(props.item, userName.value);
+  else useDialogsStore.showTransaction(props.item, userName.value);
 };
 
 watch(() => [queryPopupWire.value, queryPopupId.value, queryPopupTransaction.value], () => {

@@ -22,7 +22,7 @@ export const useFundingStore = defineStore('funding', () => {
     isGetFundingError.value = false;
     const response = await fetchGetFunding().catch((error: Response) => {
       isGetFundingError.value = true;
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
     if (response) getFundingData.value = response;
     isGetFundingLoading.value = false;
@@ -33,7 +33,7 @@ export const useFundingStore = defineStore('funding', () => {
     isConnectBankError.value = false;
     const response = await fetchConnectBankAccount(userId, profileId, bankData).catch((error: Response) => {
       isConnectBankError.value = true;
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
     if (response) getConnectBankData.value = response;
     isConnectBankLoading.value = false;
@@ -44,7 +44,7 @@ export const useFundingStore = defineStore('funding', () => {
     isFundTransferError.value = false;
     const response = await fetchFundTransfer(investmentId).catch((error: Response) => {
       isFundTransferError.value = true;
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
     if (response) fundTransferData.value = response;
     isFundTransferLoading.value = false;

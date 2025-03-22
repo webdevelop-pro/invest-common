@@ -44,7 +44,7 @@ watch(() => model, () => {
 const verificationHandler = async () => {
   onValidate();
   if (!isValid.value) {
-    void nextTick(() => scrollToError('VerificationForm'));
+    nextTick(() => scrollToError('VerificationForm'));
     return;
   }
 

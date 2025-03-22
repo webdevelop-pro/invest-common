@@ -21,7 +21,7 @@ export const useDistributionsStore = defineStore('distributions', () => {
     isGetDistributionsError.value = false;
     const response = await fetchGetDistributions().catch((error: Response) => {
       isGetDistributionsError.value = true;
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
     if (response) {
       const offerStore = useOfferStore();

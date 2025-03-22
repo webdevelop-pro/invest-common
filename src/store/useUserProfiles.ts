@@ -20,7 +20,7 @@ export const useUserProfilesStore = defineStore('userProfile', () => {
     isGetProfileOptionsError.value = false;
     const response = await fetchProfileOptions(type).catch((error: Response) => {
       isGetProfileOptionsError.value = true;
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
     if (response) {
       getProfileOptionsData.value = response;
@@ -42,7 +42,7 @@ export const useUserProfilesStore = defineStore('userProfile', () => {
     const response = await fetchSetProfile(data, type).catch(async (error: Response) => {
       isSetUserProfileError.value = true;
       setProfileErrorData.value = JSON.parse(await error.text());
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
     if (response) {
       setProfileData.value = response;
@@ -58,7 +58,7 @@ export const useUserProfilesStore = defineStore('userProfile', () => {
     isGetProfileByIdError.value = false;
     const response = await fetchGetProfileByID(type, id).catch((error: Response) => {
       isGetProfileByIdError.value = true;
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
     if (response) {
       getProfileByIdData.value = response;
@@ -74,7 +74,7 @@ export const useUserProfilesStore = defineStore('userProfile', () => {
     isGetProfileByIdOptionsError.value = false;
     const response = await fetchProfileByIDOptions(type, id).catch((error: Response) => {
       isGetProfileByIdOptionsError.value = true;
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
     if (response) {
       getProfileByIdOptionsData.value = response;
@@ -92,7 +92,7 @@ export const useUserProfilesStore = defineStore('userProfile', () => {
     const response = await fetchSetProfileByID(data, type, id).catch(async (error: Response) => {
       isSetProfileByIdError.value = true;
       setProfileErrorData.value = JSON.parse(await error.text());
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
     if (response) {
       setProfileByIdData.value = response;
@@ -108,7 +108,7 @@ export const useUserProfilesStore = defineStore('userProfile', () => {
     isGetUserError.value = false;
     const response = await fetchGetUser().catch((error: Response) => {
       isGetUserError.value = true;
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
     if (response) {
       getUserData.value = response;
@@ -127,7 +127,7 @@ export const useUserProfilesStore = defineStore('userProfile', () => {
     const response = await fetchSetUser(data).catch(async (error: Response) => {
       isSetUserError.value = true;
       setUserErrorData.value = JSON.parse(await error.text());
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
     if (response) {
       setUserData.value = response;
@@ -143,7 +143,7 @@ export const useUserProfilesStore = defineStore('userProfile', () => {
     isSetUserOptionsError.value = false;
     const response = await fetchSetUserOptions().catch((error: Response) => {
       isSetUserOptionsError.value = true;
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
     if (response) {
       setUserOptionsData.value = response;

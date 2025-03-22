@@ -39,7 +39,7 @@ export const usePlaidStore = defineStore('plaid', () => {
     isCreateTokenError.value = false;
     const response = await fetchCreateToken(profileId).catch((error: Response) => {
       isCreateTokenError.value = true;
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
     if (response) createTokenData.value = response;
     isCreateTokenLoading.value = false;
@@ -63,13 +63,13 @@ export const usePlaidStore = defineStore('plaid', () => {
             console.log('plaid success event', publicToken, metadata);
             console.log('update account with new kyc status');
             // await kycIdentitiesStore.updateUserPlaidIdentities();
-            void usersStore.updateUserSelectedAccount();
+            usersStore.updateUserSelectedAccount();
             if (EXTERNAL) {
               navigateWithQueryParams(urlProfilePortfolio(selectedUserProfileId.value));
             } else {
               const { pushTo } = useRedirect();
               const router = useRouter();
-              void router.push(pushTo({
+              router.push(pushTo({
                 name: ROUTE_DASHBOARD_PORTFOLIO,
                 params: { profileId: selectedUserProfileId.value },
               }));

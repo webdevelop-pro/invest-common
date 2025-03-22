@@ -21,6 +21,7 @@ import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValida
 import { isEmpty } from 'UiKit/helpers/general';
 import eyeOff from 'UiKit/assets/images/eye-off.svg';
 import eye from 'UiKit/assets/images/eye.svg';
+import { urlSettings } from 'InvestCommon/global/links';
 
 const authStore = useAuthStore();
 const { isSetPasswordLoading, setPasswordErrorData } = storeToRefs(authStore);
@@ -78,10 +79,11 @@ watch(() => model.create_password, (pass: string) => {
 const resetHandler = async () => {
   onValidate();
   if (!isValid.value) {
-    void nextTick(() => scrollToError('VFormResetPassword'));
+    nextTick(() => scrollToError('VFormResetPassword'));
     return;
   }
 
+  await authStore.fetchAuthHandler(`/self-service/login/browser?refresh=true&return_to=${urlSettings}`);
   await authLogicStore.onReset(model.create_password, SELFSERVICE.settings);
 };
 

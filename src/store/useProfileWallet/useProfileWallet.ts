@@ -29,7 +29,7 @@ export const useProfileWalletStore = defineStore('wallet', () => {
     isGetProfileWalletDataLoading.value = true;
     const response = await fetchGetWalletData(walletId.value).catch((error: Response) => {
       isGetProfileWalletDatanError.value = true;
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
     if (response) getProfileByIdWalletData.value = response;
     isGetProfileWalletDataLoading.value = false;
@@ -44,7 +44,7 @@ export const useProfileWalletStore = defineStore('wallet', () => {
 
     const response = await fetchAddBankAccount(walletId.value).catch((error: Response) => {
       isAddBankAccountError.value = true;
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
 
     if (response) addBankAccountData.value = response;
@@ -117,7 +117,7 @@ export const useProfileWalletStore = defineStore('wallet', () => {
 
   const updateData = () => {
     if (!isGetProfileWalletDataLoading.value) {
-      void getProfileByIdWallet();
+      getProfileByIdWallet();
     }
   };
 
@@ -134,8 +134,8 @@ export const useProfileWalletStore = defineStore('wallet', () => {
         id: notification.data.fields.object_id, status: notification.data.fields.status,
       });
     }
-    void nextTick(() => {
-      void updateData();
+    nextTick(() => {
+      updateData();
     });
   };
 

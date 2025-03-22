@@ -54,7 +54,7 @@ export const useInvestmentsStore = defineStore('investments', () => {
     isGetInvestOneError.value = false;
     const response = await fetchGetInvestOne(id).catch((error: Response) => {
       isGetInvestOneError.value = true;
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
     if (response) {
       getInvestOneData.value = response;
@@ -81,7 +81,7 @@ export const useInvestmentsStore = defineStore('investments', () => {
     isGetInvestError.value = false;
     const response = await fetchSetInvest(slug, sharesCount).catch((error: Response) => {
       isGetInvestError.value = true;
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
     if (response) getInvestData.value = response;
     isGetInvestLoading.value = false;
@@ -99,7 +99,7 @@ export const useInvestmentsStore = defineStore('investments', () => {
     const response = await fetchSetAmount(slug, id, profileId, shares).catch(async (error: Response) => {
       isGetAmountError.value = true;
       setAmountErrorData.value = JSON.parse(await error.text());
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
     if (response) setAmountData.value = response;
     isGetAmountLoading.value = false;
@@ -111,7 +111,7 @@ export const useInvestmentsStore = defineStore('investments', () => {
     profileId: string,
   ) => {
     const response = await fetchSetAmountOptions(slug, id, profileId).catch((error: Response) => {
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
     if (response) {
       setAmountOptionsData.value = response;
@@ -133,7 +133,7 @@ export const useInvestmentsStore = defineStore('investments', () => {
     const response = await fetchSetOwnership(slug, id, profileId).catch(async (error: Response) => {
       isSetOwnershipError.value = true;
       setOwnershipErrorData.value = JSON.parse(await error.text());
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
     if (response) setOwnershipData.value = response;
     isSetOwnershipLoading.value = false;
@@ -151,7 +151,7 @@ export const useInvestmentsStore = defineStore('investments', () => {
     isSetOwnershipOptionsError.value = false;
     const response = await fetchSetOwnershipOptions(slug, id, profileId).catch((error: Response) => {
       isSetOwnershipOptionsError.value = true;
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
     if (response) setOwnershipOptionsData.value = response;
     isSetOwnershipOptionsLoading.value = false;
@@ -169,7 +169,7 @@ export const useInvestmentsStore = defineStore('investments', () => {
     const response = await fetchSetSignature(slug, id, profileId, signatureId)
       .catch((error: Response) => {
         isSetSignatureError.value = true;
-        void generalErrorHandling(error);
+        generalErrorHandling(error);
       });
 
     if (response) setSignatureData.value = response;
@@ -185,7 +185,7 @@ export const useInvestmentsStore = defineStore('investments', () => {
     isSetDocumentError.value = false;
     const response = await fetchSetDocument(slug, investId, profileId).catch((error: Response) => {
       isSetDocumentError.value = true;
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
     if (response) setDocumentData.value = response;
     isSetDocumentLoading.value = false;
@@ -198,7 +198,7 @@ export const useInvestmentsStore = defineStore('investments', () => {
     isGetDocumentError.value = false;
     const response = await fetchGetDocument(investId).catch((error: Response) => {
       isGetDocumentError.value = true;
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
     if (response) getDocumentData.value = URL.createObjectURL(response);
     isGetDocumentLoading.value = false;
@@ -221,7 +221,7 @@ export const useInvestmentsStore = defineStore('investments', () => {
     const response = await fetchSetFunding(slug, id, profileId, fundingData).catch(async (error: Response) => {
       isSetFundingError.value = true;
       setFundingErrorData.value = JSON.parse(await error.text());
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
 
     if (response) setFundingData.value = response;
@@ -241,7 +241,7 @@ export const useInvestmentsStore = defineStore('investments', () => {
 
     const response = await fetchSetFundingOptions(slug, id, profileId).catch((error: Response) => {
       isSetFundingOptionsError.value = true;
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
 
     if (response) setFundingOptionsData.value = response;
@@ -257,7 +257,7 @@ export const useInvestmentsStore = defineStore('investments', () => {
 
     const response = await fetchSetCancelOptions(id).catch((error: Response) => {
       isSetCanceOptionsError.value = true;
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
 
     if (response) setCancelOptionsData.value = response;
@@ -273,7 +273,7 @@ export const useInvestmentsStore = defineStore('investments', () => {
     isSetReviewError.value = false;
     const response = await fetchSetReview(slug, id, profileId).catch((error: Response) => {
       isSetReviewError.value = true;
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
     if (response) setReviewData.value = response;
     isSetReviewLoading.value = false;
@@ -287,7 +287,7 @@ export const useInvestmentsStore = defineStore('investments', () => {
     const response = await fetchCancelInvest(id, reason).catch(async (error: Response) => {
       isCancelInvestError.value = true;
       setCancelErrorData.value = JSON.parse(await error.text());
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
 
     if (response) cancelInvestData.value = response;

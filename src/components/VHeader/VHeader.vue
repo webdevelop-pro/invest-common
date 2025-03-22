@@ -92,8 +92,7 @@ const queryParams = computed(() => {
 });
 
 // if there is flow in url it means it is from sso
-const queryFlow = computed(() => (
-  (window && window.location.search) ? new URLSearchParams(window.location.search).get('flow') : null));
+let queryFlow;
 
 const signInHandler = () => {
   navigateWithQueryParams(urlSignin, queryParams.value);
@@ -105,6 +104,7 @@ const signUpHandler = () => {
 
 watchEffect(() => {
   path.value = props.path || '';
+  queryFlow = (window && window.location.search) ? new URLSearchParams(window.location.search).get('flow') : null;
 });
 </script>
 
@@ -133,7 +133,7 @@ watchEffect(() => {
       </span>
 
       <VSkeleton
-        v-if="isGetUserProfileLoading || isLoadingSession"
+        v-if="isGetUserProfileLoading"
         height="25px"
         width="250px"
         class="v-header-invest-btns__skeleton"

@@ -136,7 +136,7 @@ const continueHandler = async () => {
   const model = { ...childFormModel.value };
   onValidate();
   if (!isValid.value) {
-    void nextTick(() => scrollToError('VFormInvestProcessOwnership'));
+    nextTick(() => scrollToError('VFormInvestProcessOwnership'));
     return;
   }
 
@@ -150,13 +150,13 @@ const continueHandler = async () => {
   }
 
   if (isSetOwnershipError.value) return;
-  void userProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
+  userProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
   if (setOwnershipData.value) {
-    void router.push({
+    router.push({
       name: ROUTE_INVEST_SIGNATURE,
     });
 
-    // void submitFormToHubspot({
+    // submitFormToHubspot({
     //   email: userAccountData.value?.email,
     //   firstname: model.first_name,
     //   lastname: model.last_name,

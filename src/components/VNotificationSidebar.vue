@@ -22,7 +22,7 @@ const notificationsStore = useNotificationsStore();
 const { notificationUnreadLength, isNotificationSidebarOpen } = storeToRefs(notificationsStore);
 
 const onClose = () => {
-  void notificationsStore.notificationSidebarClose();
+  notificationsStore.notificationSidebarClose();
 };
 </script>
 <template>

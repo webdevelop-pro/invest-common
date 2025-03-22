@@ -13,7 +13,7 @@ defineProps({
 const router = useRouter();
 
 const onBackClick = () => {
-  void router.back();
+  router.back();
 };
 </script>
 

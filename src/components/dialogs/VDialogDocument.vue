@@ -22,7 +22,7 @@ const props = defineProps({
 const openValue = defineModel<boolean>();
 
 onMounted(() => {
-  void nextTick(() => {
+  nextTick(() => {
     props.open(props.signUrl, 'e-sign');
   });
 });

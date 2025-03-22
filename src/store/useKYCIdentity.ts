@@ -19,7 +19,7 @@ export const useKYCIdentityStore = defineStore('KYCIdentity', () => {
     isGetUserBackgroundInfoError.value = false;
     await fetchUpdateIdentities(userId.value, profileId.value).catch((error: Response) => {
       isGetUserBackgroundInfoError.value = true;
-      void generalErrorHandling(error);
+      generalErrorHandling(error);
     });
     isGetUserBackgroundInfoLoading.value = false;
   };

@@ -99,7 +99,7 @@ const onValidate = () => {
 const sendQuestion = async () => {
   onValidate();
   if (!isValid.value) {
-    void nextTick(() => scrollToError('OffersCommentsForm'));
+    nextTick(() => scrollToError('OffersCommentsForm'));
     return;
   }
 

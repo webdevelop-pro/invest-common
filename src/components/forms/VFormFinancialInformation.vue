@@ -43,7 +43,7 @@ const saveHandler = async () => {
   understandingRisksFormRef.value?.onValidate();
 
   if (!isValid.value) {
-    void nextTick(() => scrollToError('VFormFinancialInformation'));
+    nextTick(() => scrollToError('VFormFinancialInformation'));
     return;
   }
 
@@ -62,24 +62,24 @@ const saveHandler = async () => {
     selectedUserProfileId.value,
   );
   isLoading.value = false;
-  void useHubspotForm(env.HUBSPOT_FORM_ID_FINANCIAL_SITUATION).submitFormToHubspot({
+  useHubspotForm(env.HUBSPOT_FORM_ID_FINANCIAL_SITUATION).submitFormToHubspot({
     email: userAccountData.value?.email,
     is_accredited: financialInfoFormRef.value?.model.accredited_investor.is_accredited,
   });
-  void useHubspotForm(env.HUBSPOT_FORM_ID_RISKS).submitFormToHubspot({
+  useHubspotForm(env.HUBSPOT_FORM_ID_RISKS).submitFormToHubspot({
     email: userAccountData.value?.email,
     ...understandingRisksFormRef.value?.model,
   });
-  void useHubspotForm(env.HUBSPOT_FORM_ID_INVESTMENT_OBJECTIVES).submitFormToHubspot({
+  useHubspotForm(env.HUBSPOT_FORM_ID_INVESTMENT_OBJECTIVES).submitFormToHubspot({
     email: userAccountData.value?.email,
     ...investmentObjectivesFormRef.value?.model,
   });
-  void userProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
-  void router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
+  userProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
+  router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
 };
 
 const cancelHandler = () => {
-  void router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
+  router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
 };
 </script>
 

@@ -86,7 +86,7 @@ const onValidate = () => {
 const onFileChange = (files: File[]) => {
   allFiles.value = files;
   emit('files', allFiles.value);
-  void nextTick(() => {
+  nextTick(() => {
     if (!isValid.value) onValidate();
   });
 };

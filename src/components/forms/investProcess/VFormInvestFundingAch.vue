@@ -81,7 +81,7 @@ const onValidate = () => {
 watch(() => [props.validate], () => {
   onValidate();
   if (!isValid.value) {
-    void nextTick(() => scrollToError('InvestFormFundingAch'));
+    nextTick(() => scrollToError('InvestFormFundingAch'));
     return;
   }
   emit('update:modelValue', {
@@ -110,7 +110,7 @@ watch(() => props.validate, () => {
   if (props.validate) {
     onValidate();
     if (!isValid.value) {
-      void nextTick(() => scrollToError('InvestFormFundingAch'));
+      nextTick(() => scrollToError('InvestFormFundingAch'));
     }
   }
 });

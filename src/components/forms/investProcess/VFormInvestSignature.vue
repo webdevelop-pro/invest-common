@@ -53,11 +53,11 @@ onSign(async (data: ISignature) => {
 });
 
 const continueHandler = () => {
-  void router.push({
+  router.push({
     name: ROUTE_INVEST_FUNDING,
   });
 
-  void submitFormToHubspot({
+  submitFormToHubspot({
     email: userAccountData.value?.email,
     invest_checkbox_1: checkbox1.value,
     invest_checkbox_2: checkbox2.value,
@@ -75,8 +75,8 @@ const documentHandler = async () => {
   await investmentsStore.setDocument(slug, id, profileId);
 
   if (setDocumentData.value && setDocumentData.value.sign_url) {
-    void useDialogsStore.showDocument(setDocumentData.value.sign_url, openHelloSign, closeHelloSign);
-    onClose(() => void useDialogsStore.hideDocument());
+    useDialogsStore.showDocument(setDocumentData.value.sign_url, openHelloSign, closeHelloSign);
+    onClose(() => useDialogsStore.hideDocument());
   }
 };
 </script>

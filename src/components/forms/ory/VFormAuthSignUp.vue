@@ -105,7 +105,7 @@ const signUpHandler = async () => {
   if (!checkbox.value) return;
   onValidate();
   if (!isValid.value) {
-    void nextTick(() => scrollToError('SignUpForm'));
+    nextTick(() => scrollToError('SignUpForm'));
     return;
   }
   if (queryFlow.value) {

@@ -109,7 +109,7 @@ watch(() => userAccountData.value?.email, () => {
 const signUpHandler = async () => {
   onValidate();
   if (!isValid.value) {
-    void nextTick(() => scrollToError('ContactUsForm'));
+    nextTick(() => scrollToError('ContactUsForm'));
     return;
   }
 
