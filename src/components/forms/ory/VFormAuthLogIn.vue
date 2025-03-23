@@ -14,7 +14,9 @@ import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { scrollToError } from 'UiKit/helpers/validation/general';
-import { urlForgot, urlSignup } from 'InvestCommon/global/links';
+import {
+  urlForgot, urlSignup, urlSettings, urlProfile,
+} from 'InvestCommon/global/links';
 import eyeOff from 'UiKit/assets/images/eye-off.svg';
 import eye from 'UiKit/assets/images/eye.svg';
 
@@ -27,11 +29,17 @@ const onSignup = () => {
 const authLogicStore = useAuthLogicStore();
 const { loading } = storeToRefs(authLogicStore);
 const authStore = useAuthStore();
-const { getSchemaLoginData, setLoginErrorData, getLoginData } = storeToRefs(authStore);
+const {
+  getSchemaLoginData, setLoginErrorData, getLoginData, isGetFlowError,
+} = storeToRefs(authStore);
 const showCreatePassword = ref(true);
 
 const queryFlow = computed(() => (
   (window && window.location.search) ? new URLSearchParams(window.location.search).get('flow') : null));
+const queryRefresh = computed(() => (
+  (window && window.location.search) ? new URLSearchParams(window.location.search).get('refresh') : null));
+const queryRedirect = computed(() => (
+  (window && window.location.search) ? new URLSearchParams(window.location.search).get('redirect') : null));
 
 const model = reactive({
 } as FormModelSignIn);
@@ -55,7 +63,13 @@ const loginHandler = async () => {
     return;
   }
 
-  await authLogicStore.onLogin(model.email, model.password, SELFSERVICE.login);
+  if (queryRefresh.value) {
+    await authStore.fetchAuthHandler(`/self-service/login/browser?refresh=true&return_to=${urlSettings}`);
+    const query = queryRedirect.value ? { refresh: 'done' } : null;
+    if (!isGetFlowError.value) navigateWithQueryParams(queryRedirect.value || urlProfile(), query);
+  } else {
+    await authLogicStore.onLogin(model.email, model.password, SELFSERVICE.login);
+  }
 };
 
 watch(() => getSchemaLoginData.value, () => {
@@ -82,6 +96,9 @@ onMounted(async () => {
     novalidate
     data-testid="login-form"
   >
+    <div v-if="queryRefresh">
+      Please, confirm action by typing your current password
+    </div>
     <div class="login-form__wrap">
       <VFormGroup
         v-slot="VFormGroupProps"

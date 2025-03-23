@@ -1,5 +1,3 @@
-import { useCookies } from '@vueuse/integrations/useCookies';
-
 const env = {
   EXTERNAL: import.meta.env.VITE_EXTERNAL,
   KRATOS_URL: import.meta.env.VITE_KRATOS_URL,

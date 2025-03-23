@@ -2,6 +2,7 @@
 import {
   ref, watch, computed, nextTick,
   reactive,
+  onMounted,
 } from 'vue';
 import { checkStrength, scorePassword } from 'InvestCommon/helpers/calculatePasswordStrength';
 import { useAuthStore } from 'InvestCommon/store/useAuth';
@@ -21,11 +22,11 @@ import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValida
 import { isEmpty } from 'UiKit/helpers/general';
 import eyeOff from 'UiKit/assets/images/eye-off.svg';
 import eye from 'UiKit/assets/images/eye.svg';
-import { urlSettings } from 'InvestCommon/global/links';
 
 const authStore = useAuthStore();
 const { isSetPasswordLoading, setPasswordErrorData } = storeToRefs(authStore);
 const authLogicStore = useAuthLogicStore();
+const { loading } = storeToRefs(authStore);
 
 const showCreatePassword = ref(true);
 const showRepeatPassword = ref(true);
@@ -83,7 +84,6 @@ const resetHandler = async () => {
     return;
   }
 
-  await authStore.fetchAuthHandler(`/self-service/login/browser?refresh=true&return_to=${urlSettings}`);
   await authLogicStore.onReset(model.create_password, SELFSERVICE.settings);
 };
 
@@ -100,7 +100,7 @@ watch(() => [schema], () => {
 
 <template>
   <form
-    class="VFormResetPassword v-form-reset-password "
+    class="VFormSettingsResetPassword v-form-reset-password "
     novalidate
     @submit.prevent="resetHandler"
   >
@@ -222,7 +222,7 @@ watch(() => [schema], () => {
         size="large"
         :uppercase="false"
         data-testid="button"
-        :loading="isSetPasswordLoading"
+        :loading="isSetPasswordLoading || loading"
         :disabled="isDisabledButton"
         class="v-form-reset-password__btn"
       >

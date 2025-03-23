@@ -10,7 +10,7 @@ import {
   fetchGetSession, fetchSetLogin, fetchGetLogout, fetchGetLogoutURL,
   fetchSetSignUp, fetchSetRecovery, fetchSetPassword, fetchAuthFlow,
   fetchSetVerification, fetchSetSocialLogin, fetchGetSignUp, fetchGetAllSession, fetchGetSchema,
-  fetchSetSocialSignup, fetchGetLogin,
+  fetchSetSocialSignup, fetchGetLogin, fetchSetSettings, fetchDeleteAllSession,
 } from 'InvestCommon/services/api/auth';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 
@@ -43,6 +43,20 @@ export const useAuthStore = defineStore('auth', () => {
     });
     if (response) getAllSessionData.value = response;
     isGetAllSessionLoading.value = false;
+  };
+
+  const isDeleteAllSessionLoading = ref(false);
+  const deleteAllSessionData = ref<unknown>();
+  const isDeleteAllSessionError = ref(false);
+  const deleteAllSession = async () => {
+    isDeleteAllSessionLoading.value = true;
+    isDeleteAllSessionError.value = false;
+    const response = await fetchDeleteAllSession().catch((error: Response) => {
+      isDeleteAllSessionError.value = true;
+      generalErrorHandling(error);
+    });
+    if (response) deleteAllSessionData.value = response;
+    isDeleteAllSessionLoading.value = false;
   };
 
   const isGetSignupLoading = ref(false);
@@ -279,6 +293,27 @@ export const useAuthStore = defineStore('auth', () => {
     isSetPasswordLoading.value = false;
   };
 
+  const isSetSettingsLoading = ref(false);
+  const isSetSettingsError = ref(false);
+  const setSettingsData = ref<IGetSettingsOk>();
+  const setSettingsErrorData = ref();
+  const setSettings = async (
+    flowId: string,
+    data: any,
+    csrf_token: string,
+  ) => {
+    isSetSettingsLoading.value = true;
+    isSetSettingsError.value = false;
+    const response = await fetchSetSettings(flowId, data, csrf_token)
+      .catch(async (error: Response) => {
+        isSetSettingsError.value = true;
+        setSettingsErrorData.value = JSON.parse(await error.text());
+        errorHandlingSettings(error);
+      });
+    if (response) setSettingsData.value = response;
+    isSetSettingsLoading.value = false;
+  };
+
   const isGetSchemaLoading = ref(false);
   const isGetSchemaError = ref(false);
   const getSchemaData = ref<ISchema>();
@@ -405,6 +440,15 @@ export const useAuthStore = defineStore('auth', () => {
     isGetLoginLoading,
     isGetLoginError,
     getLoginData,
+    setSettings,
+    isSetSettingsError,
+    setSettingsData,
+    isSetSettingsLoading,
+    setSettingsErrorData,
+    deleteAllSession,
+    isDeleteAllSessionLoading,
+    deleteAllSessionData,
+    isDeleteAllSessionError,
   };
 });
 

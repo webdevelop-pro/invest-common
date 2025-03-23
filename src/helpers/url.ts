@@ -66,7 +66,7 @@ export const isRedirectToProfile = () => {
   const usersStore = useUsersStore();
   const { selectedUserProfileId, userLoggedIn } = storeToRefs(usersStore);
   if (!userLoggedIn.value) return;
-  const urlToCheck = [urlSignin, urlSignup, urlForgot, urlCheckEmail];
+  const urlToCheck = [urlSignup, urlForgot, urlCheckEmail];
   const url = window?.location.pathname;
   if (url !== '/' && urlToCheck.some((item) => item.includes(url))) {
     navigateWithQueryParams(queryRedirect || urlProfilePortfolio(selectedUserProfileId.value));

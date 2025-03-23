@@ -281,6 +281,21 @@ export const fetchGetAllSession = () => {
   });
 };
 
+// GET ALL SESSION
+export const fetchDeleteAllSession = () => {
+  const path = `${KRATOS_URL}/sessions`;
+
+  const data = {
+    method: 'DELETE',
+    ...requiredFetchParams(),
+  };
+
+  return fetch(path, data).then((response) => {
+    if (!response.ok) return Promise.reject(response);
+    return response.json() as Promise<unknown>;
+  });
+};
+
 // GET SETTINGS URL
 export const fetchGetSettingsURL = () => {
   const path = `${KRATOS_URL}/self-service/settings/api`;
@@ -360,5 +375,30 @@ export const fetchGetSchema = () => {
   return fetch(path, data).then((response) => {
     if (!response.ok) return Promise.reject(response);
     return response.json();
+  });
+};
+
+// SET PASSWORD
+export const fetchSetSettings = (
+  flowId: string,
+  dataToSend: any,
+  csrf_token: string,
+) => {
+  const path = `${KRATOS_URL}/self-service/settings?flow=${flowId}`;
+
+  const body = JSON.stringify({
+    csrf_token,
+    ...dataToSend,
+  });
+
+  const data = {
+    method: 'POST',
+    body,
+    ...requiredFetchParams(),
+  };
+
+  return fetch(path, data).then((response) => {
+    if (!response.ok) return Promise.reject(response);
+    return response.json() as Promise<IGetSettingsOk>;
   });
 };

@@ -3,9 +3,8 @@ import {
 } from 'vue';
 import { useRouter } from 'vue-router';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
-import { useRedirect } from 'InvestCommon/composable/useRedirect';
 import {
-  ROUTE_DASHBOARD_PORTFOLIO, ROUTE_OFFERS, ROUTE_OFFERS_DETAILS,
+  ROUTE_OFFERS, ROUTE_OFFERS_DETAILS,
   ROUTE_INVEST_AMOUNT, ROUTE_INVEST_FUNDING, ROUTE_INVEST_OWNERSHIP, ROUTE_INVEST_REVIEW,
   ROUTE_INVEST_SIGNATURE, ROUTE_INVEST_THANK,
 } from 'InvestCommon/helpers/enums/routes';
@@ -19,9 +18,11 @@ import {
 import env, { cookiesOptions } from 'InvestCommon/global/index';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import {
-  urlOffers, urlProfilePortfolio, urlSignin, urlCheckEmail, urlProfile,
+  urlOffers, urlSignin, urlCheckEmail, urlProfile,
+  urlSettings,
 } from 'InvestCommon/global/links';
 import { useCookies } from '@vueuse/integrations/useCookies';
+import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 
 const { EXTERNAL } = env;
 
@@ -30,10 +31,9 @@ const loading = ref(false);
 // This is the store with general flow logic for auth
 export const useAuthLogicStore = defineStore('authLogic', () => {
   const router = useRouter();
-  const { pushTo } = useRedirect();
   const usersStore = useUsersStore();
-  const { selectedUserProfileId } = storeToRefs(usersStore);
   const cookies = useCookies(['session']);
+  const { toast } = useToast();
 
   const authStore = useAuthStore();
   const {
@@ -41,6 +41,7 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     setSocialLoginDataError, getLogoutResponse, getLogoutURLData, getSessionData, isGetSessionError,
     getSessionErrorResponse, isSetLoginError, isGetFlowError, isSetSignupError, isSetPasswordError,
     isSetRecoveryError, isGetLogoutURLError, setVerificationErrorData, setSocialSignupDataError,
+    setSettingsErrorData, isSetSettingsError,
     getSignupData,
   } = storeToRefs(authStore);
 
@@ -183,28 +184,39 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     loading.value = false;
   };
 
+  const onCheckResetSession = () => {
+    if (isSetSettingsError.value && setSettingsErrorData.value?.error?.id === 'session_refresh_required') {
+      const query: Record<string, string> = {
+        refresh: 'true',
+        redirect: urlSettings.toString(),
+      };
+      navigateWithQueryParams(urlSignin, query);
+    }
+  };
+
   // RESET
   const onReset = async (password: string, url: string) => {
+    loading.value = true;
     await authStore.fetchAuthHandler(url);
     if (isGetFlowError.value) {
       loading.value = false;
       return;
     }
     await authStore.setPassword(flowId.value, password, csrfToken.value);
+
+    onCheckResetSession();
     if (isSetPasswordError.value) {
       loading.value = false;
       return;
     }
     if (setPasswordData.value) {
-      if (EXTERNAL) {
-        navigateWithQueryParams(urlProfilePortfolio(selectedUserProfileId.value));
-      } else {
-        router.push(pushTo({
-          name: ROUTE_DASHBOARD_PORTFOLIO,
-          params: { profileId: selectedUserProfileId.value },
-        }));
-      }
+      toast({
+        title: 'Submitted',
+        description: 'Password reset success',
+        variant: 'success',
+      });
     }
+    loading.value = false;
   };
 
   // RECOVERY
@@ -225,6 +237,25 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     }
     if (setRecoveryData.value && setRecoveryData.value.state && (setRecoveryData.value.state === 'sent_email')) {
       navigateWithQueryParams(urlCheckEmail, { email, flowId: flowId.value });
+    }
+  };
+
+  const onSettingsSocial = async (url: string, data: any) => {
+    await authStore.fetchAuthHandler(url);
+    if (isGetFlowError.value) {
+      loading.value = false;
+      return;
+    }
+    await authStore.setSettings(flowId.value, data, csrfToken.value);
+
+    onCheckResetSession();
+    if (setSettingsErrorData.value && setSettingsErrorData.value?.redirect_browser_to) {
+      window.location.href = setSettingsErrorData.value.redirect_browser_to;
+
+      console.log('setSocialSettings', setSettingsErrorData.value.redirect_browser_to);
+    }
+    if (isSetSettingsError.value) {
+      loading.value = false;
     }
   };
 
@@ -294,7 +325,7 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     await authStore.getLogout(token.value);
 
     if (getLogoutResponse.value && (getLogoutResponse.value.status >= 200) && (getLogoutResponse.value.status <= 300)) {
-      cookies.remove('session', cookiesOptions);
+      cookies.remove('session', cookiesOptions());
       // if logout request is ok, reset all data and redirect
       useGlobalLoader().show();
       handleAfterLogout();
@@ -363,6 +394,7 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     resetAll,
     checkCookie,
     onSocialSignup,
+    onSettingsSocial,
   };
 });
 

@@ -28,7 +28,7 @@ const getTagBackground = (tag:string) => {
     <VTableCell>
       {{ data?.date }}
     </VTableCell>
-    <VTableCell>
+    <!-- <VTableCell>
       <div
         v-if="data?.status"
         class="v-table-activity__tag"
@@ -39,7 +39,7 @@ const getTagBackground = (tag:string) => {
           {{ data?.status }}
         </VBadge>
       </div>
-    </VTableCell>
+    </VTableCell> -->
     <VTableCell>
       <a
         href="#"
@@ -48,9 +48,9 @@ const getTagBackground = (tag:string) => {
         {{ data?.ip }}
       </a>
     </VTableCell>
-    <VTableCell>
+    <!-- <VTableCell>
       {{ data?.device }}
-    </VTableCell>
+    </VTableCell> -->
     <VTableCell>
       {{ data?.browser }}
     </VTableCell>
