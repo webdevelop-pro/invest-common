@@ -38,5 +38,9 @@ const env = {
 export default env;
 
 export const cookiesOptions = (expireDate: Date) => ({
-  domain: '.webdevelop.biz', sameSite: 'lax', path: '/', expires: expireDate,
+  domain: '.webdevelop.biz',
+  path: '/',
+  expires: expireDate,
+  sameSite: 'None',
+  secure: true,
 });

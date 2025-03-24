@@ -36,14 +36,19 @@ const passwordScore = ref(0);
 const showStrengthMeter = ref(false);
 const checkbox = ref(false);
 
-const queryParams = computed(() => new URLSearchParams(window.location.search));
+const queryParams = computed(() => {
+  if (import.meta.env.SSR) return null;
+  return new URLSearchParams(window?.location?.search);
+});
 const onLogin = () => {
   if (queryParams.value) return navigateWithQueryParams(urlSignin, queryParams.value);
   return navigateWithQueryParams(urlSignin);
 };
 
-const queryFlow = computed(() => (
-  (window && window.location.search) ? new URLSearchParams(window.location.search).get('flow') : null));
+const queryFlow = computed(() => {
+  if (import.meta.env.SSR) return null;
+  return (window && window?.location?.search) ? new URLSearchParams(window?.location?.search).get('flow') : null;
+});
 
 const model = reactive({
 } as FormModelSignUp);

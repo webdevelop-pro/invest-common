@@ -20,7 +20,7 @@ import {
 import eyeOff from 'UiKit/assets/images/eye-off.svg';
 import eye from 'UiKit/assets/images/eye.svg';
 
-const queryParams = computed(() => new URLSearchParams(window.location.search));
+const queryParams = computed(() => new URLSearchParams(window?.location?.search));
 const onSignup = () => {
   if (queryParams.value) return navigateWithQueryParams(urlSignup, queryParams.value);
   return navigateWithQueryParams(urlSignup);
@@ -34,12 +34,18 @@ const {
 } = storeToRefs(authStore);
 const showCreatePassword = ref(true);
 
-const queryFlow = computed(() => (
-  (window && window.location.search) ? new URLSearchParams(window.location.search).get('flow') : null));
-const queryRefresh = computed(() => (
-  (window && window.location.search) ? new URLSearchParams(window.location.search).get('refresh') : null));
-const queryRedirect = computed(() => (
-  (window && window.location.search) ? new URLSearchParams(window.location.search).get('redirect') : null));
+const queryFlow = computed(() => {
+  if (import.meta.env.SSR) return null;
+  return (window && window?.location?.search) ? new URLSearchParams(window?.location?.search).get('flow') : null;
+});
+const queryRefresh = computed(() => {
+  if (import.meta.env.SSR) return null;
+  return (window && window?.location?.search) ? new URLSearchParams(window?.location?.search).get('refresh') : null;
+});
+const queryRedirect = computed(() => {
+  if (import.meta.env.SSR) return null;
+  return (window && window?.location?.search) ? new URLSearchParams(window?.location?.search).get('redirect') : null;
+});
 
 const model = reactive({
 } as FormModelSignIn);
