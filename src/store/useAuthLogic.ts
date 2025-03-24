@@ -1,5 +1,5 @@
 import {
-  computed, nextTick, ref,
+  computed, ref,
 } from 'vue';
 import { useRouter } from 'vue-router';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
@@ -73,17 +73,16 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     }
     const { submitFormToHubspot } = useHubspotForm('07463465-7f03-42d2-a85e-40cf8e29969d');
     if (setLoginData.value && setLoginData.value.session) {
-      usersStore.updateUserAccountSession(setLoginData.value.session);
+      submitFormToHubspot({ email });
       const queryRedirect = computed(() => new URLSearchParams(window.location.search).get('redirect'));
-      // const userData = await userProfilesStore.getUser();
-      // const id = userData?.profiles[0]?.id;
-      nextTick(() => {
-        navigateWithQueryParams(queryRedirect.value || urlProfile());
-      });
+      navigateWithQueryParams(queryRedirect.value || urlProfile());
 
-      submitFormToHubspot({
-        email,
-      });
+      // just set cookies. if use updateUserAccountSession -> get user will be triggered
+      cookies.set(
+        'session',
+        setLoginData.value.session,
+        cookiesOptions(new Date(setLoginData.value.session?.expires_at)),
+      );
     }
 
     loading.value = false;
@@ -160,25 +159,21 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
       return;
     }
     if (setSignupData.value && setSignupData.value.session) {
-      usersStore.updateUserAccountSession(setSignupData.value.session);
-      const queryRedirect = computed(() => new URLSearchParams(window.location.search).get('redirect'));
-      // const userData = await userProfilesStore.getUser();
-      // const id = userData?.profiles[0]?.id;
-      if (EXTERNAL) {
-        navigateWithQueryParams(queryRedirect.value || urlProfile());
-      }
-      // } else {
-      //   router.push(pushTo({
-      //     name: ROUTE_DASHBOARD_PORTFOLIO,
-      //     params: { profileId: id },
-      //   }));
-      // }
+      cookies.set(
+        'session',
+        setLoginData.value.session,
+        cookiesOptions(new Date(setLoginData.value.session?.expires_at)),
+      );
 
       submitFormToHubspot({
         email,
         firstname: firstName,
         lastname: lastName,
       });
+      const queryRedirect = computed(() => new URLSearchParams(window.location.search).get('redirect'));
+      if (EXTERNAL) {
+        navigateWithQueryParams(queryRedirect.value || urlProfile());
+      }
     }
 
     loading.value = false;
@@ -271,6 +266,7 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     useAuthStore().resetAll();
     useNotificationsStore().resetAll();
     useFilerStore().resetAll();
+    cookies.remove('session', cookiesOptions());
   };
 
   const handleAfterLogout = () => {
@@ -340,7 +336,6 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     isLoadingSession.value = true;
     await authStore.getSession();
     if (getSessionData.value?.active && !isGetSessionError.value) {
-      await nextTick();
       usersStore.updateUserAccountSession(getSessionData.value);
       // await notificationsHandler(); // TODO: check if needed
     } else if (!getSessionData.value?.active || getSessionErrorResponse.value?.status === 401) {

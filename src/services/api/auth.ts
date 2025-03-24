@@ -281,7 +281,7 @@ export const fetchGetAllSession = () => {
   });
 };
 
-// GET ALL SESSION
+// DELETE ALL SESSION
 export const fetchDeleteAllSession = () => {
   const path = `${KRATOS_URL}/sessions`;
 
@@ -293,6 +293,21 @@ export const fetchDeleteAllSession = () => {
   return fetch(path, data).then((response) => {
     if (!response.ok) return Promise.reject(response);
     return response.json() as Promise<unknown>;
+  });
+};
+
+// DELETE ONE SESSION
+export const fetchDeleteOneSession = (id: string) => {
+  const path = `${KRATOS_URL}/sessions/${id}`;
+
+  const data = {
+    method: 'DELETE',
+    ...requiredFetchParams(),
+  };
+
+  // eslint-disable-next-line consistent-return
+  return fetch(path, data).then((response) => {
+    if (!response.ok) return Promise.reject(response);
   });
 };
 

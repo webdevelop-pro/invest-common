@@ -54,7 +54,7 @@ export const useUsersStore = defineStore('user', () => {
   const userProfilesLoading = computed(() => isGetUserLoading.value);
   // SELECTED USER PROFILE
   const selectedUserProfileLoading = computed(() => userProfilesLoading.value);
-  const selectedUserProfileId = ref(cookies.get('selectedUserProfileId'));
+  const selectedUserProfileId = ref(window ? cookies.get('selectedUserProfileId') : null);
   // const selectedUserProfileId = useStorage('selectedUserProfileId', 0, sessionStorage);
   // const userProfilesFilteredById = computed(() => (
   //   userProfiles.value.filter((item) => item.id === selectedUserProfileId.value)[0]));

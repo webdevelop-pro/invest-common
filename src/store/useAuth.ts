@@ -11,6 +11,7 @@ import {
   fetchSetSignUp, fetchSetRecovery, fetchSetPassword, fetchAuthFlow,
   fetchSetVerification, fetchSetSocialLogin, fetchGetSignUp, fetchGetAllSession, fetchGetSchema,
   fetchSetSocialSignup, fetchGetLogin, fetchSetSettings, fetchDeleteAllSession,
+  fetchDeleteOneSession,
 } from 'InvestCommon/services/api/auth';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 
@@ -57,6 +58,20 @@ export const useAuthStore = defineStore('auth', () => {
     });
     if (response) deleteAllSessionData.value = response;
     isDeleteAllSessionLoading.value = false;
+  };
+
+  const isDeleteOneSessionLoading = ref(false);
+  const deleteOneSessionData = ref<unknown>();
+  const isDeleteOneSessionError = ref(false);
+  const deleteOneSession = async (id: string) => {
+    isDeleteOneSessionLoading.value = true;
+    isDeleteOneSessionError.value = false;
+    const response = await fetchDeleteOneSession(id).catch((error: Response) => {
+      isDeleteOneSessionError.value = true;
+      generalErrorHandling(error);
+    });
+    if (response) deleteOneSessionData.value = response;
+    isDeleteOneSessionLoading.value = false;
   };
 
   const isGetSignupLoading = ref(false);
@@ -449,6 +464,10 @@ export const useAuthStore = defineStore('auth', () => {
     isDeleteAllSessionLoading,
     deleteAllSessionData,
     isDeleteAllSessionError,
+    deleteOneSession,
+    isDeleteOneSessionLoading,
+    deleteOneSessionData,
+    isDeleteOneSessionError,
   };
 });
 
