@@ -8,8 +8,13 @@ import env from 'InvestCommon/global';
 const { KRATOS_URL, FRONTEND_URL } = env;
 
 // GET AUTH BROWSER
-export const fetchAuthFlow = (url: string) => {
-  const path = `${KRATOS_URL}/${url}`;
+export const fetchAuthFlow = (url: string, refresh?: boolean) => {
+  let path = '';
+  if (refresh) {
+    path = `${KRATOS_URL}/${url}?refresh=true`;
+  } else {
+    path = `${KRATOS_URL}/${url}`;
+  }
 
   const data = {
     method: 'GET',
@@ -409,6 +414,20 @@ export const fetchSetSettings = (
   const data = {
     method: 'POST',
     body,
+    ...requiredFetchParams(),
+  };
+
+  return fetch(path, data).then((response) => {
+    if (!response.ok) return Promise.reject(response);
+    return response.json() as Promise<IGetSettingsOk>;
+  });
+};
+
+export const fetchGetSettings = (flowId: string) => {
+  const path = `${KRATOS_URL}/self-service/settings?flow=${flowId}`;
+
+  const data = {
+    method: 'GET',
     ...requiredFetchParams(),
   };
 

@@ -41,7 +41,7 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     setSocialLoginDataError, getLogoutResponse, getLogoutURLData, getSessionData, isGetSessionError,
     getSessionErrorResponse, isSetLoginError, isGetFlowError, isSetSignupError, isSetPasswordError,
     isSetRecoveryError, isGetLogoutURLError, setVerificationErrorData, setSocialSignupDataError,
-    setSettingsErrorData, isSetSettingsError,
+    setSettingsErrorData, isSetSettingsError, setPasswordErrorData,
     getSignupData,
   } = storeToRefs(authStore);
 
@@ -57,10 +57,10 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
   });
 
   // LOGIN
-  const onLogin = async (email: string, password: string, url: string) => {
+  const onLogin = async (email: string, password: string, url: string, refresh: boolean) => {
     loading.value = true;
 
-    await authStore.fetchAuthHandler(url);
+    await authStore.fetchAuthHandler(url, refresh);
     if (isGetFlowError.value) {
       loading.value = false;
       return;
@@ -179,14 +179,12 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     loading.value = false;
   };
 
-  const onCheckResetSession = () => {
-    if (isSetSettingsError.value && setSettingsErrorData.value?.error?.id === 'session_refresh_required') {
-      const query: Record<string, string> = {
-        refresh: 'true',
-        redirect: urlSettings.toString(),
-      };
-      navigateWithQueryParams(urlSignin, query);
-    }
+  const refreshRedirect = () => {
+    const query: Record<string, string> = {
+      refresh: 'true',
+      redirect: urlSettings.toString(),
+    };
+    navigateWithQueryParams(urlSignin, query);
   };
 
   // RESET
@@ -199,7 +197,9 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     }
     await authStore.setPassword(flowId.value, password, csrfToken.value);
 
-    onCheckResetSession();
+    if (isSetPasswordError.value && setPasswordErrorData.value?.error?.id === 'session_refresh_required') {
+      refreshRedirect();
+    }
     if (isSetPasswordError.value) {
       loading.value = false;
       return;
@@ -243,7 +243,9 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     }
     await authStore.setSettings(flowId.value, data, csrfToken.value);
 
-    onCheckResetSession();
+    if (setSettingsErrorData.value && setSettingsErrorData.value?.error?.id === 'session_refresh_required') {
+      refreshRedirect();
+    }
     if (setSettingsErrorData.value && setSettingsErrorData.value?.redirect_browser_to) {
       window.location.href = setSettingsErrorData.value.redirect_browser_to;
 
@@ -252,6 +254,25 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     if (isSetSettingsError.value) {
       loading.value = false;
     }
+  };
+
+  const setSettingsTOTP = async (url: string, data: any) => {
+    await authStore.fetchAuthHandler(url);
+    if (isGetFlowError.value) {
+      loading.value = false;
+      return;
+    }
+    await authStore.setSettings(flowId.value, data, csrfToken.value);
+
+    if (setSettingsErrorData.value && setSettingsErrorData.value?.error?.id === 'session_refresh_required') {
+      refreshRedirect();
+    }
+
+    if (isSetSettingsError.value) {
+      loading.value = false;
+    }
+
+    await authStore.getSettings(flowId.value);
   };
 
   const resetAll = () => {
@@ -390,6 +411,7 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     checkCookie,
     onSocialSignup,
     onSettingsSocial,
+    setSettingsTOTP,
   };
 });
 

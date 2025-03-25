@@ -11,7 +11,7 @@ import {
   fetchSetSignUp, fetchSetRecovery, fetchSetPassword, fetchAuthFlow,
   fetchSetVerification, fetchSetSocialLogin, fetchGetSignUp, fetchGetAllSession, fetchGetSchema,
   fetchSetSocialSignup, fetchGetLogin, fetchSetSettings, fetchDeleteAllSession,
-  fetchDeleteOneSession,
+  fetchDeleteOneSession, fetchGetSettings,
 } from 'InvestCommon/services/api/auth';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 
@@ -93,11 +93,11 @@ export const useAuthStore = defineStore('auth', () => {
   const isGetFlowLoading = ref(false);
   const isGetFlowError = ref(false);
   const getFlowData = ref<IGetAuthFlow>();
-  const fetchAuthHandler = async (url: string) => {
+  const fetchAuthHandler = async (url: string, refresh?: boolean) => {
     getSignupData.value = undefined;
     isGetFlowLoading.value = true;
     isGetFlowError.value = false;
-    const response = await fetchAuthFlow(url).catch((error: Response) => {
+    const response = await fetchAuthFlow(url, refresh).catch((error: Response) => {
       isGetFlowError.value = true;
       generalErrorHandling(error);
     });
@@ -300,8 +300,9 @@ export const useAuthStore = defineStore('auth', () => {
     isSetPasswordLoading.value = true;
     isSetPasswordError.value = false;
     const response = await fetchSetPassword(flowId, password, csrf_token)
-      .catch((error: Response) => {
+      .catch(async (error: Response) => {
         isSetPasswordError.value = true;
+        setPasswordErrorData.value = JSON.parse(await error.text());
         errorHandlingSettings(error);
       });
     if (response) setPasswordData.value = response;
@@ -327,6 +328,25 @@ export const useAuthStore = defineStore('auth', () => {
       });
     if (response) setSettingsData.value = response;
     isSetSettingsLoading.value = false;
+  };
+
+  const isGetSettingsLoading = ref(false);
+  const isGetSettingsError = ref(false);
+  const getSettingsData = ref<IGetSettingsOk>();
+  const getSettingsErrorData = ref();
+  const getSettings = async (
+    flowId: string,
+  ) => {
+    isGetSettingsLoading.value = true;
+    isGetSettingsError.value = false;
+    const response = await fetchGetSettings(flowId)
+      .catch(async (error: Response) => {
+        isGetSettingsError.value = true;
+        getSettingsErrorData.value = JSON.parse(await error.text());
+        errorHandlingSettings(error);
+      });
+    if (response) getSettingsData.value = response;
+    isGetSettingsLoading.value = false;
   };
 
   const isGetSchemaLoading = ref(false);
@@ -468,6 +488,11 @@ export const useAuthStore = defineStore('auth', () => {
     isDeleteOneSessionLoading,
     deleteOneSessionData,
     isDeleteOneSessionError,
+    getSettings,
+    isGetSettingsLoading,
+    isGetSettingsError,
+    getSettingsData,
+    getSettingsErrorData,
   };
 });
 

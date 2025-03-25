@@ -70,9 +70,7 @@ const loginHandler = async () => {
   }
 
   if (queryRefresh.value) {
-    await authStore.fetchAuthHandler(`/self-service/login/browser?refresh=true&return_to=${urlSettings}`);
-    const query = queryRedirect.value ? { refresh: 'done' } : null;
-    if (!isGetFlowError.value) navigateWithQueryParams(queryRedirect.value || urlProfile(), query);
+    await authLogicStore.onLogin(model.email, model.password, SELFSERVICE.login, queryRefresh, queryRedirect.value || urlProfile());
   } else {
     await authLogicStore.onLogin(model.email, model.password, SELFSERVICE.login);
   }

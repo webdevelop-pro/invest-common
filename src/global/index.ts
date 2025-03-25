@@ -41,6 +41,6 @@ export const cookiesOptions = (expireDate: Date) => ({
   domain: '.webdevelop.biz',
   path: '/',
   expires: expireDate,
-  sameSite: 'None',
-  secure: true,
+  sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
+  secure: process.env.NODE_ENV === 'production',
 });
