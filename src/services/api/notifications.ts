@@ -1,7 +1,7 @@
 import {
   INotification,
 } from 'InvestCommon/types/api/notifications';
-import { requiredFetchParams } from 'InvestCommon/helpers/requiredFetchParams';
+import { requiredFetchParams } from 'UiKit/helpers/api/requiredFetchParams';
 
 import env from 'InvestCommon/global';
 

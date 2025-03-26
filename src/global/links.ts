@@ -1,6 +1,7 @@
 import env from 'InvestCommon/global';
 
 export const urlSignin = `${env.FRONTEND_URL_STATIC}/signin`;
+export const urlAuthenticator = `${env.FRONTEND_URL_STATIC}/authenticator`;
 export const urlSignup = `${env.FRONTEND_URL_STATIC}/signup`;
 export const urlForgot = `${env.FRONTEND_URL_STATIC}/forgot`;
 export const urlCheckEmail = `${env.FRONTEND_URL_STATIC}/check-email`;

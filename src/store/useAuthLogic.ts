@@ -23,6 +23,7 @@ import {
 } from 'InvestCommon/global/links';
 import { useCookies } from '@vueuse/integrations/useCookies';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
+import { oryErrorHandling } from 'UiKit/helpers/api/oryErrorHandling';
 
 const { EXTERNAL } = env;
 
@@ -38,11 +39,11 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
   const authStore = useAuthStore();
   const {
     setSignupData, setLoginData, getFlowData, setPasswordData, setRecoveryData,
-    setSocialLoginDataError, getLogoutResponse, getLogoutURLData, getSessionData, isGetSessionError,
+    setSocialLoginDataError, getLogoutResponse, getLogoutURLData, getSessionData, getSessionError,
     getSessionErrorResponse, isSetLoginError, isGetFlowError, isSetSignupError, isSetPasswordError,
     isSetRecoveryError, isGetLogoutURLError, setVerificationErrorData, setSocialSignupDataError,
     setSettingsErrorData, isSetSettingsError, setPasswordErrorData,
-    getSignupData,
+    getSignupData, setLoginErrorData,
   } = storeToRefs(authStore);
 
   const flowId = computed(() => getSignupData.value?.id || getFlowData.value?.id || '');
@@ -57,23 +58,31 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
   });
 
   // LOGIN
-  const onLogin = async (email: string, password: string, url: string, refresh: boolean) => {
+  const onLogin = async (data: object, url: string, query?: Record<string, string>, skipFlowId?: boolean) => {
     loading.value = true;
 
-    await authStore.fetchAuthHandler(url, refresh);
-    if (isGetFlowError.value) {
-      loading.value = false;
-      return;
+    if (!skipFlowId) {
+      await authStore.fetchAuthHandler(url, query);
+      if (isGetFlowError.value) {
+        loading.value = false;
+        return;
+      }
     }
-    await authStore.setLogin(flowId.value, password, email, csrfToken.value);
+
+    const body = JSON.stringify({
+      csrf_token: csrfToken.value,
+      ...data,
+    });
+    await authStore.setLogin(flowId.value, body);
 
     if (isSetLoginError.value) {
+      oryErrorHandling(setLoginErrorData.value, url);
       loading.value = false;
       return;
     }
     const { submitFormToHubspot } = useHubspotForm('07463465-7f03-42d2-a85e-40cf8e29969d');
     if (setLoginData.value && setLoginData.value.session) {
-      submitFormToHubspot({ email });
+      if (data?.email) submitFormToHubspot({ email: data?.email });
       const queryRedirect = computed(() => new URLSearchParams(window.location.search).get('redirect'));
       navigateWithQueryParams(queryRedirect.value || urlProfile());
 
@@ -257,22 +266,21 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
   };
 
   const setSettingsTOTP = async (url: string, data: any) => {
-    await authStore.fetchAuthHandler(url);
+    if (!flowId.value) await authStore.fetchAuthHandler(url);
     if (isGetFlowError.value) {
       loading.value = false;
       return;
     }
     await authStore.setSettings(flowId.value, data, csrfToken.value);
 
-    if (setSettingsErrorData.value && setSettingsErrorData.value?.error?.id === 'session_refresh_required') {
-      refreshRedirect();
-    }
+    if (setSettingsErrorData.value) oryErrorHandling(setSettingsErrorData.value, url);
 
-    if (isSetSettingsError.value) {
-      loading.value = false;
+    loading.value = false;
+    if (!setSettingsErrorData.value) {
+      // eslint-disable-next-line no-use-before-define
+      getSession();
+      authStore.fetchAuthHandler(url);
     }
-
-    await authStore.getSettings(flowId.value);
   };
 
   const resetAll = () => {
@@ -356,7 +364,7 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
   const getSession = async () => {
     isLoadingSession.value = true;
     await authStore.getSession();
-    if (getSessionData.value?.active && !isGetSessionError.value) {
+    if (getSessionData.value?.active && !getSessionError.value) {
       usersStore.updateUserAccountSession(getSessionData.value);
       // await notificationsHandler(); // TODO: check if needed
     } else if (!getSessionData.value?.active || getSessionErrorResponse.value?.status === 401) {
@@ -397,6 +405,8 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
 
   return {
     loading,
+    csrfToken,
+    flowId,
     isLoadingLogout,
     isLoadingSession,
     onLogin,
@@ -412,6 +422,7 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     onSocialSignup,
     onSettingsSocial,
     setSettingsTOTP,
+    refreshRedirect,
   };
 });
 

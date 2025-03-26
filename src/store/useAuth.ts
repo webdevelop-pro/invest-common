@@ -93,11 +93,11 @@ export const useAuthStore = defineStore('auth', () => {
   const isGetFlowLoading = ref(false);
   const isGetFlowError = ref(false);
   const getFlowData = ref<IGetAuthFlow>();
-  const fetchAuthHandler = async (url: string, refresh?: boolean) => {
+  const fetchAuthHandler = async (url: string, query?: Record<string, string>) => {
     getSignupData.value = undefined;
     isGetFlowLoading.value = true;
     isGetFlowError.value = false;
-    const response = await fetchAuthFlow(url, refresh).catch((error: Response) => {
+    const response = await fetchAuthFlow(url, query).catch((error: Response) => {
       isGetFlowError.value = true;
       generalErrorHandling(error);
     });
@@ -111,15 +111,14 @@ export const useAuthStore = defineStore('auth', () => {
   const setLoginErrorData = ref();
   const setLogin = async (
     flowId: string,
-    password: string,
-    email: string,
-    csrf_token: string,
+    body: string,
   ) => {
     isSetLoginLoading.value = true;
     setLoginErrorData.value = undefined;
     isSetLoginError.value = false;
-    const response = await fetchSetLogin(flowId, password, email, csrf_token).catch((error: Response) => {
+    const response = await fetchSetLogin(flowId, body).catch(async (error: Response) => {
       isSetLoginError.value = true;
+      setLoginErrorData.value = JSON.parse(await error.text());
       errorHandling422(error);
     });
     if (response) setLoginData.value = response;

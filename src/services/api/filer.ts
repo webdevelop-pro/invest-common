@@ -1,5 +1,5 @@
 import env from 'InvestCommon/global';
-import { requiredFetchParams } from 'InvestCommon/helpers/requiredFetchParams';
+import { requiredFetchParams } from 'UiKit/helpers/api/requiredFetchParams';
 import { IFilerItem } from 'InvestCommon/types/api/filer';
 
 const { FILER_URL } = env;

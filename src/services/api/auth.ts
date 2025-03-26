@@ -2,16 +2,16 @@ import {
   IGetAuthFlow, ISetLoginOk, IGetLogoutURL, ISetSignUpOK, IRecovery,
   ISession, IGetSettingsOk, IGetSignup, IRecovery422,
 } from 'InvestCommon/types/api/auth';
-import { requiredFetchParams } from 'InvestCommon/helpers/requiredFetchParams';
+import { requiredFetchParams } from 'UiKit/helpers/api/requiredFetchParams';
 import env from 'InvestCommon/global';
 
 const { KRATOS_URL, FRONTEND_URL } = env;
 
 // GET AUTH BROWSER
-export const fetchAuthFlow = (url: string, refresh?: boolean) => {
+export const fetchAuthFlow = (url: string, query?: Record<string, string>) => {
   let path = '';
-  if (refresh) {
-    path = `${KRATOS_URL}/${url}?refresh=true`;
+  if (query) {
+    path = `${KRATOS_URL}/${url}?${query}`;
   } else {
     path = `${KRATOS_URL}/${url}`;
   }
@@ -30,18 +30,9 @@ export const fetchAuthFlow = (url: string, refresh?: boolean) => {
 // SET LOGIN
 export const fetchSetLogin = (
   flowId: string,
-  password: string,
-  email: string,
-  csrf_token: string,
+  body: string,
 ) => {
   const path = `${KRATOS_URL}/self-service/login?flow=${flowId}`;
-
-  const body = JSON.stringify({
-    csrf_token,
-    password_identifier: email,
-    password,
-    method: 'password',
-  });
 
   const data = {
     method: 'POST',

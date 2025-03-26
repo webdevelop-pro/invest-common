@@ -1,5 +1,5 @@
 import env from 'InvestCommon/global';
-import { requiredFetchParams } from 'InvestCommon/helpers/requiredFetchParams';
+import { requiredFetchParams } from 'UiKit/helpers/api/requiredFetchParams';
 import { ITransactionDataResponse, IWalletDataResponse, WalletAddTransactionTypes } from 'InvestCommon/types/api/wallet';
 
 const { WALLET_URL } = env;

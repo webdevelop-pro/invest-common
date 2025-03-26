@@ -1,6 +1,6 @@
 import env from 'InvestCommon/global';
 import { IProfileData, IUserIdentityResponse } from 'InvestCommon/types/api/invest';
-import { requiredFetchParams } from 'InvestCommon/helpers/requiredFetchParams';
+import { requiredFetchParams } from 'UiKit/helpers/api/requiredFetchParams';
 import { IProfileIndividual, ISchema } from 'InvestCommon/types/api/user';
 
 const { USER_URL } = env;

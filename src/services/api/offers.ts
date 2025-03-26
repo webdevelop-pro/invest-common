@@ -1,7 +1,7 @@
 import {
   IOffer, IOfferData, IOfferCommentsResponse, IOfferCommentPayload,
 } from 'InvestCommon/types/api/offers';
-import { requiredFetchParams } from 'InvestCommon/helpers/requiredFetchParams';
+import { requiredFetchParams } from 'UiKit/helpers/api/requiredFetchParams';
 
 import env from 'InvestCommon/global';
 

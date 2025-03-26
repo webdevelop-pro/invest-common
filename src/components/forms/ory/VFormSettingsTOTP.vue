@@ -12,20 +12,30 @@ import { useAuthStore } from 'InvestCommon/store/useAuth';
 import { storeToRefs } from 'pinia';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
-import { isEmpty } from 'UiKit/helpers/general';
+import { isEmpty, navigateWithQueryParams } from 'UiKit/helpers/general';
 import { scrollToError } from 'UiKit/helpers/validation/general';
+import { urlSettings, urlSignin } from 'InvestCommon/global/links';
 
 const authLogicStore = useAuthLogicStore();
 const authStore = useAuthStore();
 const { getFlowData } = storeToRefs(authStore);
 
 const totpQR = computed(() => {
-  const tokenItem = getFlowData.value?.ui?.nodes.find((item) => item.attributes.id === 'totp_qr');
-  return tokenItem?.attributes.src ?? '';
+  const tokenItem = getFlowData.value?.ui?.nodes?.find((item) => item.attributes.id === 'totp_qr');
+  return tokenItem?.attributes?.src ?? '';
+});
+const totpUnlink = computed(() => {
+  const tokenItem = getFlowData.value?.ui?.nodes?.find((item) => item.attributes.name === 'totp_unlink');
+  return tokenItem;
 });
 const totpSecret = computed(() => {
-  const tokenItem = getFlowData.value?.ui?.nodes.find((item) => item.attributes.id === 'totp_secret_key');
+  const tokenItem = getFlowData.value?.ui?.nodes?.find((item) => item.attributes.id === 'totp_secret_key');
   return tokenItem?.attributes?.text?.text ?? '';
+});
+
+const queryRefresh = computed(() => {
+  if (import.meta.env.SSR) return null;
+  return (window && window?.location?.search) ? new URLSearchParams(window?.location?.search).get('refresh') : null;
 });
 
 type FormModelTOTP = {
@@ -54,6 +64,10 @@ const onValidate = () => {
   validation.value = validator.getFormValidationErrors(model);
 };
 
+const onUnLink = async () => {
+  await authLogicStore.setSettingsTOTP(SELFSERVICE.settings, { totp_unlink: true });
+};
+
 const onSave = async () => {
   onValidate();
   if (!isValid.value) {
@@ -77,16 +91,33 @@ watch(() => model, () => {
       Manage your authenticator app secret. Add or remove the app for enhanced account security.
     </p>
     <VImage
+      v-if="totpQR"
       :src="totpQR"
       alt="totp qr"
       class="form-settings-totp__qr"
     />
-    Authenticator secret
-    <div>
-      {{ totpSecret }}
+    <div v-if="totpSecret">
+      Authenticator secret
+      <div>
+        {{ totpSecret }}
+      </div>
     </div>
 
+    <VButton
+      v-if="totpUnlink"
+      size="small"
+      color="red"
+      variant="outlined"
+      :uppercase="false"
+      data-testid="button"
+      class="form-settings-totp__btn"
+      @click="onUnLink"
+    >
+      Unlink TOTP Authenticator App
+    </VButton>
+
     <VFormGroup
+      v-if="totpQR"
       v-slot="VFormGroupProps"
       :model="model"
       :validation="validation"
@@ -107,6 +138,7 @@ watch(() => model, () => {
       />
     </VFormGroup>
     <VButton
+      v-if="totpQR"
       size="large"
       :uppercase="false"
       data-testid="button"

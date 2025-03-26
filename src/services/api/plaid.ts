@@ -2,7 +2,7 @@ import {
   IPlaidTokenResponse,
 } from 'InvestCommon/types/api/plaid';
 import env from 'InvestCommon/global';
-import { requiredFetchParams } from 'InvestCommon/helpers/requiredFetchParams';
+import { requiredFetchParams } from 'UiKit/helpers/api/requiredFetchParams';
 
 const { PLAID_URL } = env;
 

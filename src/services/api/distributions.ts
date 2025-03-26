@@ -1,5 +1,5 @@
 import env from 'InvestCommon/global';
-import { requiredFetchParams } from 'InvestCommon/helpers/requiredFetchParams';
+import { requiredFetchParams } from 'UiKit/helpers/api/requiredFetchParams';
 import { IDistributionsData, IDistributionsMeta } from 'InvestCommon/types/api/distributions';
 
 const { DISTRIBUTIONS_URL } = env;

@@ -69,10 +69,16 @@ const loginHandler = async () => {
     return;
   }
 
+  const data = {
+    identifier: model.email,
+    password: model.password,
+    method: 'password',
+  };
+  const query = { refresh: queryRefresh.value, redirect: queryRedirect.value || urlProfile() };
   if (queryRefresh.value) {
-    await authLogicStore.onLogin(model.email, model.password, SELFSERVICE.login, queryRefresh, queryRedirect.value || urlProfile());
+    await authLogicStore.onLogin(data, SELFSERVICE.login, query);
   } else {
-    await authLogicStore.onLogin(model.email, model.password, SELFSERVICE.login);
+    await authLogicStore.onLogin(data, SELFSERVICE.login);
   }
 };
 

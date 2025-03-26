@@ -1,4 +1,4 @@
-import { credentialsIncludeParams, requiredFetchParams } from 'InvestCommon/helpers/requiredFetchParams';
+import { credentialsIncludeParams, requiredFetchParams } from 'UiKit/helpers/api/requiredFetchParams';
 import env from 'InvestCommon/global';
 
 const { ACCREDITATION_URL } = env;

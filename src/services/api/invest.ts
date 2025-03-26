@@ -2,7 +2,7 @@ import {
   IInvest, IInvestData, IInvestUnconfirmed, IInvestConfirm, IInvestDocumentSign,
   IInvestFunding,
 } from 'InvestCommon/types/api/invest';
-import { requiredFetchParams } from 'InvestCommon/helpers/requiredFetchParams';
+import { requiredFetchParams } from 'UiKit/helpers/api/requiredFetchParams';
 import env from 'InvestCommon/global';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
 import { v4 as uuidv4 } from 'uuid';

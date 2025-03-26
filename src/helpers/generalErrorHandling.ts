@@ -37,11 +37,6 @@ export const errorHandling422 = async (error: Response) => {
   try {
     const errorJson = await error.json();
 
-    if (errorJson as IAuthGenericError) {
-      const data:IAuthGenericError = errorJson;
-      if (data.error && data.error.message) TOAST_OPTIONS.description = data.error.message;
-    }
-
     if (errorJson as IAuthError422) {
       const data:IAuthError422 = errorJson;
       if (data.message) TOAST_OPTIONS.description = data.message;
@@ -61,6 +56,11 @@ export const errorHandling422 = async (error: Response) => {
         });
       }
     }
+
+    if (errorJson as IAuthGenericError) {
+      const data:IAuthGenericError = errorJson;
+      if (data.error && data.error.message) TOAST_OPTIONS.description = data.error.message;
+    }
   } catch (errorTry) {
     // ignore
   }
@@ -71,11 +71,6 @@ export const errorHandling422 = async (error: Response) => {
 export const errorHandlingRecovery = async (error: Response) => {
   try {
     const errorJson = await error.json();
-
-    if (errorJson as IAuthGenericError) {
-      const data:IAuthGenericError = errorJson;
-      if (data.error && data.error.message) TOAST_OPTIONS.description = data.error.message;
-    }
 
     if (errorJson as IRecovery422) return structuredClone(toRaw(errorJson));
 
@@ -91,6 +86,11 @@ export const errorHandlingRecovery = async (error: Response) => {
         });
       }
     }
+
+    if (errorJson as IAuthGenericError) {
+      const data:IAuthGenericError = errorJson;
+      if (data.error && data.error.message) TOAST_OPTIONS.description = data.error.message;
+    }
     return structuredClone(toRaw(errorJson));
   } catch (errorTry) {
     // ignore
@@ -99,14 +99,9 @@ export const errorHandlingRecovery = async (error: Response) => {
 };
 
 export const errorHandlingSettings = async (error: Response) => {
+  let errorJson = '';
   try {
-    const errorJson = await error.json();
-
-    if (errorJson as IAuthGenericError) {
-      const data:IAuthGenericError = errorJson;
-      if (data.error && data.error.message) TOAST_OPTIONS.description = data.error.reason || data.error.message;
-    }
-
+    errorJson = await error.json();
     if (errorJson as IAuthError422) {
       const data:IAuthError422 = errorJson;
       if (data.message) TOAST_OPTIONS.description = data.message;
@@ -124,8 +119,14 @@ export const errorHandlingSettings = async (error: Response) => {
         });
       }
     }
+
+    if (errorJson as IAuthGenericError) {
+      const data:IAuthGenericError = errorJson;
+      if (data.error && data.error.message) TOAST_OPTIONS.description = data.error.reason || data.error.message;
+    }
   } catch (errorTry) {
     // ignore
   }
   toast(TOAST_OPTIONS);
+  return errorJson;
 };

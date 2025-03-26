@@ -1,5 +1,5 @@
 import { IFundingData, IBank } from 'InvestCommon/types/api/funding';
-import { requiredFetchParams } from 'InvestCommon/helpers/requiredFetchParams';
+import { requiredFetchParams } from 'UiKit/helpers/api/requiredFetchParams';
 import env from 'InvestCommon/global';
 
 const { INVESTMENT_URL, PAYMENTS_URL } = env;
