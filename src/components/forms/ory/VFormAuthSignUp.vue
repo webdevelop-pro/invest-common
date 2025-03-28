@@ -206,7 +206,7 @@ const isDisabled = (field: string) => queryFlow.value && (field?.length > 1);
           :schema-front="schemaSignUp"
           :error-text="setSignupErrorData?.email"
           path="email"
-          label="Enter Address"
+          label="Email Address"
         >
           <VFormInput
             :model-value="model.email"
@@ -440,7 +440,7 @@ const isDisabled = (field: string) => queryFlow.value && (field?.length > 1);
     position: relative;
 
     & + & {
-      margin-top: 20px;
+      margin-top: 25px;
     }
   }
 

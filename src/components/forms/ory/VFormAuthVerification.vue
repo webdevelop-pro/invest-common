@@ -68,7 +68,7 @@ const resendHandler = async () => {
       :schema-front="schemaCode"
       :error-text="setVerificationErrorData?.code"
       path="code"
-      label="Recovery Code"
+      label="Verification Code"
       class="verification-form__input"
     >
       <VFormInput
@@ -83,7 +83,7 @@ const resendHandler = async () => {
     </VFormGroup>
 
     <div class="verification-form__text is--small">
-      Enter the recover code we just sent you on your email address
+      Enter the verification code we just sent you on your email address
     </div>
 
     <VButton
@@ -95,7 +95,7 @@ const resendHandler = async () => {
       class="verification-form__btn"
       @click.prevent="verificationHandler"
     >
-      Recover Email
+      Varify Code
     </VButton>
 
     <div class="verification-form__login-wrap  is--no-margin">

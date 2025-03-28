@@ -155,6 +155,7 @@ watch(() => model, () => {
         :is-error="VFormGroupProps.isFieldError"
         placeholder="Ask a question"
         name="question"
+        size="large"
         @update:model-value="model.comment = $event"
       />
     </VFormGroup>
@@ -170,6 +171,7 @@ watch(() => model, () => {
         <VButton
           v-if="!isAuth"
           class="is--margin-top-0"
+          size="large"
           @click="signInHandler"
         >
           Sign in
@@ -178,6 +180,7 @@ watch(() => model, () => {
           v-else
           :loading="isSetOfferCommentLoading || isSetOfferCommentOptionsLoading"
           :disabled="isDisabledButton"
+          size="large"
           @click="sendQuestion"
         >
           Post
@@ -197,6 +200,7 @@ watch(() => model, () => {
             row
             :is-error="VFormGroupProps.isFieldError"
             :options="relatedOptions"
+            class="v-form-comments__radio"
           />
         </VFormGroup>
       </div>
@@ -206,7 +210,7 @@ watch(() => model, () => {
 
 <style lang="scss">
 .v-form-comments {
-  padding-bottom: 50px;
+  padding-bottom: 60px;
   border-bottom: 1px solid $gray-40;
 
   &__comment-wrap {
@@ -221,6 +225,14 @@ watch(() => model, () => {
   &__checkbox-wrap {
     display: flex;
     justify-content: space-between;
+  }
+
+  .v-form-radio__item-input {
+    margin: 0;
+  }
+
+  .v-form-group__input {
+    margin: 0;
   }
 }
 

@@ -71,7 +71,7 @@ const recoveryHandler = async () => {
       :schema-front="schemaForgot"
       :error-text="setRecoveryErrorData?.email"
       path="email"
-      label="Enter Address"
+      label="Email Address"
       class="forgot-form__input"
     >
       <VFormInput
@@ -98,7 +98,7 @@ const recoveryHandler = async () => {
       :disabled="isDisabledButton"
       class="forgot-form__btn"
     >
-      Send code
+      Send Code
     </VButton>
     <VButton
       variant="link"
@@ -108,7 +108,7 @@ const recoveryHandler = async () => {
       :href="urlSignin"
       class="forgot-form__signup-btn"
     >
-      Return to Login
+      Back to Login
     </VButton>
   </form>
 </template>

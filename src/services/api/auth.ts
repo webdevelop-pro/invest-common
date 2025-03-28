@@ -11,7 +11,7 @@ const { KRATOS_URL, FRONTEND_URL } = env;
 export const fetchAuthFlow = (url: string, query?: Record<string, string>) => {
   let path = '';
   if (query) {
-    path = `${KRATOS_URL}/${url}?${query}`;
+    path = `${KRATOS_URL}/${url}?${new URLSearchParams(query).toString()}`;
   } else {
     path = `${KRATOS_URL}/${url}`;
   }

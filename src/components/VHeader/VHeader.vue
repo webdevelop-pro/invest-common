@@ -214,7 +214,7 @@ watchEffect(() => {
   &__wrap {
     display: flex;
     align-items: center;
-    gap: 28px;
+    gap: 13px;
   }
 
   .v-navigation-menu-link {

@@ -118,7 +118,7 @@ onMounted(async () => {
         :schema-front="schemaSignIn"
         :error-text="setLoginErrorData?.email"
         path="email"
-        label="Enter Address"
+        label="Email Address"
         class="login-form__input"
       >
         <VFormInput

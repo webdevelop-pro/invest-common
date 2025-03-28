@@ -75,5 +75,9 @@
   li + li {
     margin-top: 0;
   }
+
+  ul {
+    padding-left: 0;
+  }
 }
 </style>
