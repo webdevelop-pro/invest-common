@@ -34,6 +34,8 @@ const isNotificationDocument = computed(() => props.data?.type.toLowerCase().inc
 const isNotificationSystem = computed(() => props.data?.type.toLowerCase().includes('system'));
 const isNotificationWallet = computed(() => props.data?.type.toLowerCase().includes('wallet'));
 const isNotificationProfile = computed(() => props.data?.type.toLowerCase().includes('profile'));
+const isNotificationUser = computed(() => props.data?.type.toLowerCase().includes('user'));
+
 const objectId = computed(() => (props.data?.data?.fields?.object_id || 0));
 const profileId = computed(() => (props.data?.data?.fields?.profile?.ID || objectId.value));
 const kycDeclined = computed(() => (props.data?.data?.fields?.kyc_status === 'declined'));
@@ -45,7 +47,7 @@ const isFundsFailed = computed(() => (props.data?.data?.fields?.funding_status =
 const tagBackground = computed(() => {
   if (isNotificationInvestment.value) return 'secondary-light'; // secondary-light
   if (isNotificationDocument.value) return 'yellow-light'; // yellow-light
-  if (isNotificationSystem.value) return 'default'; // gray-30
+  if (isNotificationSystem.value || isNotificationUser.value) return 'default'; // gray-30
   if (isNotificationWallet.value) return 'secondary'; // secondary
   return 'purple-light'; // purple-light
 });

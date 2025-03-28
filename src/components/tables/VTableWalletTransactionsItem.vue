@@ -32,7 +32,7 @@ defineProps({
       <div>
         {{ data?.date }}
       </div>
-      <div>
+      <div class="is--color-gray-60">
         {{ data?.time }}
       </div>
     </VTableCell>
@@ -70,10 +70,13 @@ defineProps({
 </template>
 
 <style lang="scss">
+@use 'UiKit/styles/_colors.scss' as *;
+
 .v-table-wallet-transactions {
 
   &__table-amount {
     text-align: right;
+    color: $black;
   }
 
   &__table-type {

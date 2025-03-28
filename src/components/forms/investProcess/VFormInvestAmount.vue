@@ -238,7 +238,7 @@ watch(() => numberOfShares.value, () => {
   }
 
   &__info {
-    color: $gray-80;
+    color: $gray-70;
     margin-top: 4px;
   }
 }

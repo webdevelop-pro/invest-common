@@ -39,7 +39,7 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
   const authStore = useAuthStore();
   const {
     setSignupData, setLoginData, getFlowData, setPasswordData, setRecoveryData,
-    setSocialLoginDataError, getLogoutResponse, getLogoutURLData, getSessionData, getSessionError,
+    setSocialLoginDataError, getLogoutResponse, getLogoutURLData, getSessionData,
     getSessionErrorResponse, isSetLoginError, isGetFlowError, isSetSignupError, isSetPasswordError,
     isSetRecoveryError, isGetLogoutURLError, setVerificationErrorData, setSocialSignupDataError,
     setSettingsErrorData, isSetSettingsError, setPasswordErrorData,
@@ -364,7 +364,7 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
   const getSession = async () => {
     isLoadingSession.value = true;
     await authStore.getSession();
-    if (getSessionData.value?.active && !getSessionError.value) {
+    if (getSessionData.value?.active && !getSessionErrorResponse.value) {
       usersStore.updateUserAccountSession(getSessionData.value);
       // await notificationsHandler(); // TODO: check if needed
     } else if (!getSessionData.value?.active || getSessionErrorResponse.value?.status === 401) {

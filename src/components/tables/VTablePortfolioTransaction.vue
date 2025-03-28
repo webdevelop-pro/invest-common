@@ -33,20 +33,21 @@ const timeFormatted = computed(() => (dateFull.value ? getTimeFormat(String(date
 
 <template>
   <VTable
+    size="small"
     class="VTablePortfolioTransaction v-table-portfolio-transaction"
   >
     <VTableBody>
       <VTableRow>
-        <VTableCell size="small">
+        <VTableCell>
           <div>
             {{ dateFormatted }}
           </div>
-          <div class="v-dialog-portfolio-transaction__time">
+          <div class="v-table-portfolio-transaction__time">
             {{ timeFormatted }}
           </div>
         </VTableCell>
-        <VTableCell size="small">
-          <div class="v-dialog-portfolio-transaction__type">
+        <VTableCell>
+          <div class="v-table-portfolio-transaction__type">
             <VBadge
               size="small"
               class="is--background-purple-light"
@@ -55,11 +56,11 @@ const timeFormatted = computed(() => (dateFull.value ? getTimeFormat(String(date
             </VBadge>
           </div>
         </VTableCell>
-        <VTableCell size="small">
+        <VTableCell>
           {{ InvestTransactionStatuses[investment.funding_status]?.text }}
         </VTableCell>
-        <VTableCell size="small">
-          <div class="v-dialog-portfolio-transaction__amount is--h6__title">
+        <VTableCell>
+          <div class="v-table-portfolio-transaction__amount is--h6__title">
             {{ currency(Number(investment.amount), 0) }}
           </div>
         </VTableCell>

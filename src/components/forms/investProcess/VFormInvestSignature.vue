@@ -191,11 +191,11 @@ const documentHandler = async () => {
   $root: &;
 
   &__label {
-    color: $gray-80;
+    color: $gray-70;
   }
 
   &__document {
-    margin-bottom: 35px;
+    margin-bottom: 30px;
     display: flex;
     justify-content: space-between;
     padding: 16px;
@@ -219,8 +219,8 @@ const documentHandler = async () => {
   }
 
   &__checkbox {
-    margin-bottom: 25px;
-    padding: 0 16px;
+    margin-bottom: 20px;
+    padding: 0 14px;
     &:last-child {
       margin-bottom: 0;
     }

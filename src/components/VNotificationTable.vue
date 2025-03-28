@@ -223,10 +223,10 @@ watch(() => currentTab.value, () => {
           </VTabsList>
         </VTabs>
         <div
+          v-if="!small"
           class="wd-notification-table__search"
         >
           <VFormInputSearch
-            v-if="!small"
             v-model="search"
             :disabled="!showSearch"
             size="small"

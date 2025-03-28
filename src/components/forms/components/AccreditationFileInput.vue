@@ -158,6 +158,7 @@ watch(() => props.validate, () => {
           :name="`description${index}`"
           :is-error="VFormGroupProps.isFieldError"
           data-testid="file-description"
+          size="large"
           @update:model-value="model[`description${index + 1}` as TFields] = $event"
         />
       </VFormGroup>

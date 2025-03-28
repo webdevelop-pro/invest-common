@@ -204,7 +204,6 @@ const onValidChange = (validInner: boolean) => {
     align-items: flex-start;
     gap: 12px;
     margin-top: 40px;
-    margin-bottom: 44px;
   }
 
   &__info {
@@ -232,6 +231,10 @@ const onValidChange = (validInner: boolean) => {
     color: $gray-80;
     list-style-type: disc;
     padding-left: 15px;
+  }
+
+  &__info-title {
+    color: $black;
   }
 }
 </style>

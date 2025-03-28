@@ -70,7 +70,7 @@ const title = computed(() => {
     }
 
   &__title {
-    margin-bottom: 10px;
+    margin-bottom: 20px;
   }
 
   &__text {
@@ -85,7 +85,7 @@ const title = computed(() => {
 
   &__footer-btns {
     display: flex;
-    padding-top: 30px;
+    padding-top: 40px;
     justify-content: flex-end;
     align-items: flex-start;
     gap: 12px;
