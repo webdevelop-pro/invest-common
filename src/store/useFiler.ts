@@ -1,15 +1,21 @@
 /* eslint-disable no-param-reassign */
 import { computed, ref } from 'vue';
 import { generalErrorHandling } from 'InvestCommon/helpers/generalErrorHandling';
-import { fetchGetFiles, fetchGetPublicFiles } from 'InvestCommon/services/api/filer';
-import { acceptHMRUpdate, defineStore } from 'pinia';
+import {
+  fetchGetFiles, fetchGetPublicFiles, fetchPostSignurl, uploadFile,
+} from 'InvestCommon/services/api/filer';
+import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { IFilerItem } from 'InvestCommon/types/api/filer';
+import { useUsersStore } from 'InvestCommon/store/useUsers';
 
 export const useFilerStore = defineStore('filer', () => {
+  const usersStore = useUsersStore();
+  const { selectedUserProfileData } = storeToRefs(usersStore);
+
   const isGetFilesLoading = ref(false);
   const isGetFilesError = ref(false);
   const getFilesData = ref<IFilerItem[]>([]);
-  const getFiles = async (object_id: number, object_name: string) => {
+  const getFiles = async (object_id: number | string, object_name: string) => {
     isGetFilesLoading.value = true;
     isGetFilesError.value = false;
     const response = await fetchGetFiles(object_id, object_name).catch((error: Response) => {
@@ -42,7 +48,7 @@ export const useFilerStore = defineStore('filer', () => {
   const isGetFilesPublicLoading = ref(false);
   const isGetFilesPublicError = ref(false);
   const getFilesPublicData = ref<IFilerItem[]>([]);
-  const getFilesPublic = async (object_id: number, object_name: string) => {
+  const getFilesPublic = async (object_id: number | string, object_name: string) => {
     isGetFilesPublicLoading.value = true;
     isGetFilesPublicError.value = false;
     const response = await fetchGetPublicFiles(object_id, object_name).catch((error: Response) => {
@@ -72,9 +78,63 @@ export const useFilerStore = defineStore('filer', () => {
     });
   });
 
+  const isPostSignurlLoading = ref(false);
+  const postSignurlError = ref(false);
+  const postSignurlData = ref<IFilerItem[]>([]);
+  const postSignurl = async (body: object) => {
+    isPostSignurlLoading.value = true;
+    postSignurlError.value = false;
+    const response = await fetchPostSignurl(body).catch(async (error: Response) => {
+      postSignurlError.value = JSON.parse(await error.text());
+      generalErrorHandling(error);
+    });
+    if (response) postSignurlData.value = response;
+    isPostSignurlLoading.value = false;
+    return postSignurlData.value;
+  };
+
+  const isUploadFIleLoading = ref(false);
+  const uploadFIleError = ref(false);
+  const uploadFIleData = ref<IFilerItem[]>([]);
+  const uploadFIle = async (file: File, type: string, uploadData: object) => {
+    isUploadFIleLoading.value = true;
+    uploadFIleError.value = false;
+    const response = await uploadFile(file, type, uploadData).catch(async (error: Response) => {
+      uploadFIleError.value = JSON.parse(await error.text());
+      generalErrorHandling(error);
+    });
+    if (response) uploadFIleData.value = response;
+    isUploadFIleLoading.value = false;
+    return uploadFIleData.value;
+  };
+
+  const uploadHandler = async (file: File, objectId: string | number, objectName: string | number) => {
+    await postSignurl({
+      filename: file.name,
+      mime: file.type,
+      user_id: Number(selectedUserProfileData.value?.user_id),
+      path: `/${objectName}/${objectId}`,
+    });
+    if (postSignurlError.value) {
+      return false;
+    }
+    if (postSignurlData.value?.url) {
+      const uploadData = {
+        objectName,
+        objectId,
+        userId: selectedUserProfileData.value?.user_id,
+        url: postSignurlData.value?.url,
+        fileId: postSignurlData.value?.meta?.id,
+      };
+      await uploadFIle(file, file.type, uploadData);
+    }
+    return true;
+  };
+
   const resetAll = () => {
     getFilesData.value = [];
     getFilesPublicData.value = [];
+    postSignurlData.value = [];
   };
 
   return {
@@ -91,6 +151,15 @@ export const useFilerStore = defineStore('filer', () => {
     getFilesDataPublicaDocuments,
     getFilesDataPublicMedia,
     resetAll,
+    postSignurl,
+    isPostSignurlLoading,
+    postSignurlError,
+    postSignurlData,
+    uploadFIle,
+    isUploadFIleLoading,
+    uploadFIleError,
+    uploadFIleData,
+    uploadHandler,
   };
 });
 
