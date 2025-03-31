@@ -170,8 +170,8 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     if (setSignupData.value && setSignupData.value.session) {
       cookies.set(
         'session',
-        setLoginData.value.session,
-        cookiesOptions(new Date(setLoginData.value.session?.expires_at)),
+        setSignupData.value?.session,
+        cookiesOptions(new Date(setSignupData.value?.session?.expires_at)),
       );
 
       submitFormToHubspot({
