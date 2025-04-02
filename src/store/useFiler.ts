@@ -7,7 +7,6 @@ import {
 } from 'InvestCommon/services/api/filer';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { IFilerItem } from 'InvestCommon/types/api/filer';
-import { isEmpty } from 'lodash';
 import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 
 export const useFilerStore = defineStore('filer', () => {
@@ -24,7 +23,7 @@ export const useFilerStore = defineStore('filer', () => {
       isGetFilesError.value = true;
       generalErrorHandling(error);
     });
-    if (response && !isEmpty(response)) getFilesData.value = response;
+    if (response) getFilesData.value = response;
     isGetFilesLoading.value = false;
     return getFilesData.value;
   };
