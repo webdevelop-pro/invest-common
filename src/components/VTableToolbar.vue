@@ -49,6 +49,7 @@ const onApplyFilter = (items: IVFilter[]) => {
       />
     </div>
     <VButton
+      v-show="false"
       size="small"
       :disabled="!isActiveToolbar"
       variant="outlined"

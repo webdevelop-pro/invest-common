@@ -10,6 +10,10 @@ import VAvatar from 'UiKit/components/VAvatar.vue';
 import { VDropdownMenuItem } from 'UiKit/components/Base/VDropdownMenu';
 import message from 'UiKit/assets/images/message.svg';
 import { useDialogs } from 'InvestCommon/store/useDialogs';
+import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
+import env from 'InvestCommon/global';
+
+const { FILER_URL } = env;
 
 type MenuItem = {
   to?: string;
@@ -29,6 +33,8 @@ const notificationsStore = useNotificationsStore();
 const { notificationLength, notificationUnreadLength } = storeToRefs(notificationsStore);
 const useDialogsStore = useDialogs();
 const { isDialogLogoutOpen } = storeToRefs(useDialogsStore);
+const userProfileStore = useUserProfilesStore();
+const { getUserData } = storeToRefs(userProfileStore);
 
 const userEmail = computed(() => userAccountData.value?.email);
 
@@ -38,6 +44,7 @@ const onLogout = () => {
 const onSidebarOpen = () => {
   if (notificationLength.value) notificationsStore.notificationSidebarOpen();
 };
+const imageID = computed(() => getUserData.value?.image_link_id);
 </script>
 
 <template>
@@ -64,7 +71,7 @@ const onSidebarOpen = () => {
     >
       <VAvatar
         size="small"
-        src=""
+        :src="imageID > 0 ? `${FILER_URL}/auth/files/${imageID}?size=medium` : undefined"
         alt="avatar image"
         class="v-header-profile__avatar"
       />

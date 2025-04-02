@@ -183,7 +183,9 @@ const onAlertButtonClick = () => {
   <div class="VFormInvestProcessOwnership invest-form-ownership-wrap">
     <FormRow>
       <FormCol>
-        <VProfileSelectList />
+        <VProfileSelectList
+          label="Investment Profile"
+        />
       </FormCol>
     </FormRow>
     <FormRow v-if="isAlertShow">

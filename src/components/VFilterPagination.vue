@@ -14,10 +14,6 @@ const showFilterResultsNumber = computed(() => (
   props.showFilterPagination && props.filterResults > 0));
 const showFilterNoResultsMessage = computed(() => (
   props.showFilterPagination && props.filterResults === 0));
-const resultText = computed(() => {
-  if (props.filterResults === 1) return 'result';
-  return 'results';
-});
 </script>
 
 <template>
@@ -29,7 +25,7 @@ const resultText = computed(() => {
       v-if="showFilterResultsNumber"
       class="filter-pagination__filter-pagination is--small"
     >
-      {{ filterResults }} {{ resultText }} of {{ totalLength }}
+      {{ filterResults }} of {{ totalLength }}
     </div>
     <div
       v-if="showFilterNoResultsMessage"

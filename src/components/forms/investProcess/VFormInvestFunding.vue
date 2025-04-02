@@ -107,8 +107,8 @@ const componentData = ref({
   accountNumber: '',
   routingNumber: '',
 });
-const hasWallet = computed(() => (selectedUserProfileData.value?.wallet.id
-  && (selectedUserProfileData.value?.wallet.id > 0) && !isWalletStatusAnyError.value));
+const hasWallet = computed(() => (selectedUserProfileData.value?.wallet?.id
+  && (selectedUserProfileData.value?.wallet?.id > 0) && !isWalletStatusAnyError.value));
 const notEnoughWalletFunds = computed(() => (
   (getUnconfirmedOfferData.value?.amount || 0) > profileWalletStore.totalBalance));
 
@@ -226,7 +226,7 @@ watch(() => model, () => {
 }, { deep: true });
 
 onMounted(() => {
-  if (selectedUserProfileData.value?.wallet?.id && (selectedUserProfileData.value?.wallet.id > 0)) {
+  if (selectedUserProfileData.value?.wallet?.id && (selectedUserProfileData.value?.wallet?.id > 0)) {
     profileWalletStore.getProfileByIdWallet();
   }
 });

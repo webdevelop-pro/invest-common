@@ -7,9 +7,12 @@ import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
 import { ROUTE_CREATE_PROFILE } from 'InvestCommon/helpers/enums/routes';
 import { IProfileIndividual } from 'InvestCommon/types/api/user';
+import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
+import { capitalizeFirstLetter } from 'UiKit/helpers/text';
 
 defineProps({
   size: String as PropType<'large' | 'medium' | 'small'>,
+  label: String,
 });
 
 const router = useRouter();
@@ -32,9 +35,9 @@ const getId = (profile: IProfileIndividual) => {
 
 const getName = (profile: IProfileIndividual) => {
   if (profile.type === 'entity') {
-    return profile.data?.name;
+    return capitalizeFirstLetter(profile.data?.name || '');
   }
-  return profile.type;
+  return capitalizeFirstLetter(profile.type || '');
 };
 const userListFormatted = computed(() => {
   const userProfilesList: ISelectedProfile[] = [];
@@ -67,17 +70,21 @@ const onUpdateSelectedProfile = (id: number | string) => {
 
 <template>
   <div class="VProfileSelectList v-profile-select-list">
-    <VFormSelect
-      :model-value="`${selectedUserProfileId}`"
-      name="investmentAccount"
-      :size="size"
-      data-testid="investAccount"
-      item-label="text"
-      item-value="id"
-      :options="userListFormatted"
-      :loading="userAccountLoading || (userListFormatted.length === 0)"
-      @update:model-value="onUpdateSelectedProfile"
-    />
+    <VFormGroup
+      :label="label"
+    >
+      <VFormSelect
+        :model-value="`${selectedUserProfileId}`"
+        name="investmentAccount"
+        :size="size"
+        data-testid="investAccount"
+        item-label="text"
+        item-value="id"
+        :options="userListFormatted"
+        :loading="userAccountLoading || (userListFormatted.length === 0)"
+        @update:model-value="onUpdateSelectedProfile"
+      />
+    </VFormGroup>
   </div>
 </template>
 

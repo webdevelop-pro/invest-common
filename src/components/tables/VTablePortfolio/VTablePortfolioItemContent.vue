@@ -17,6 +17,7 @@ import { useRoute, useRouter } from 'vue-router';
 import file from 'UiKit/assets/images/file.svg';
 import timeline from 'UiKit/assets/images/timeline.svg';
 import { VTableCell, VTableRow } from 'UiKit/components/Base/VTable';
+import { capitalizeFirstLetter } from 'UiKit/helpers/text';
 
 const useDialogsStore = useDialogs();
 
@@ -158,7 +159,7 @@ watch(() => [queryPopupCancelInvestment.value], () => {
                 v-else
                 class="v-table-item-content__value is--body"
               >
-                {{ investData?.offer.security_type ? item?.offer.security_type : '-' }}
+                {{ investData?.offer.security_type ? capitalizeFirstLetter(item?.offer.security_type || '') : '-' }}
               </span>
               <VSkeleton
                 v-if="isLoading"

@@ -80,3 +80,17 @@ export const uploadFile = (file: File, type: string, uploadData: object) => new 
     reject(new Error('failed'));
   };
 });
+
+export const fetchGetImageByIdLink = (id: number | string) => {
+  const path = `${FILER_URL}/auth/files/${id}?size=small`;
+
+  const data = {
+    method: 'GET',
+    ...requiredFetchParams(),
+  };
+
+  return fetch(path, data).then((response) => {
+    if (!response.ok) return Promise.reject(response);
+    return response.json() as Promise<IFilerItem[]>;
+  });
+};

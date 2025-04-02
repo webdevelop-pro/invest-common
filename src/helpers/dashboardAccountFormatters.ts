@@ -5,7 +5,7 @@ export const getNameFormattedDashboard = (profileData: IUserDataIndividual) => {
     profileData?.first_name,
     profileData?.middle_name,
     profileData?.last_name,
-  ].filter((part) => part !== (undefined && ''));
+  ].filter((part) => ((part !== undefined) && (part !== '')));
 
   return parts.join(' ');
 };
@@ -17,7 +17,7 @@ export const getAddressFormattedDashboard = (profileData: IUserDataIndividual) =
     profileData?.state,
     profileData?.zip_code,
     profileData?.country,
-  ].filter((part) => part !== (undefined && ''));
+  ].filter((part) => ((part !== undefined) && (part !== '')));
 
   return parts.join(', ');
 };
@@ -26,7 +26,7 @@ export const getIdFormattedDashboard = (profileData: IUserDataIndividual) => {
     profileData?.type,
     profileData?.state,
     profileData?.id_number,
-  ].filter((part) => part !== (undefined && ''));
+  ].filter((part) => ((part !== undefined) && (part !== '')));
 
   return parts.join(' ');
 };

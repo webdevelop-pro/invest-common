@@ -17,7 +17,7 @@ import { useUsersStore } from '../useUsers';
 export const useProfileWalletTransactionStore = defineStore('walletTransaction', () => {
   const usersStore = useUsersStore();
   const { selectedUserProfileData } = storeToRefs(usersStore);
-  const walletId = computed(() => selectedUserProfileData.value?.wallet.id || 0);
+  const walletId = computed(() => selectedUserProfileData.value?.wallet?.id || 0);
 
   const isGetProfileWalletTransactionsDataLoading = ref(false);
   const isGetProfileWalletTransactionsDatanError = ref(false);

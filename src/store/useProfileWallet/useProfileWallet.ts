@@ -2,7 +2,7 @@ import { generalErrorHandling } from 'InvestCommon/helpers/generalErrorHandling'
 import { IWalletDataResponse } from 'InvestCommon/types/api/wallet';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { computed, ref, nextTick } from 'vue';
-import { fetchGetWalletData, fetchAddBankAccount } from 'InvestCommon/services/api/wallet';
+import { fetchGetWalletData, fetchAddBankAccount, fetchGetWalletByProfile } from 'InvestCommon/services/api/wallet';
 import { INotification } from 'InvestCommon/types/api/notifications';
 import { useProfileWalletBankAccountStore } from './useProfileWalletBankAccount';
 import { useUsersStore } from '../useUsers';
@@ -19,11 +19,27 @@ const STATUS_ERROR_SUSPENDED = 'error_suspended';
 export const useProfileWalletStore = defineStore('wallet', () => {
   const usersStore = useUsersStore();
   const { selectedUserProfileData } = storeToRefs(usersStore);
-  const walletId = computed(() => selectedUserProfileData.value?.wallet.id || 0);
+  const walletId = computed(() => selectedUserProfileData.value?.wallet?.id || 0);
 
   const isGetProfileWalletDataLoading = ref(false);
   const isGetProfileWalletDatanError = ref(false);
   const getProfileByIdWalletData = ref<IWalletDataResponse>({});
+
+  const isGetWalletByProfileIdLoading = ref(false);
+  const getWalletByProfileIdError = ref();
+  const getWalletByProfileIdData = ref();
+  const getWalletByProfileId = async (profileId: string) => {
+    isGetWalletByProfileIdLoading.value = true;
+    getWalletByProfileIdError.value = null;
+    getWalletByProfileIdData.value = null;
+    const response = await fetchGetWalletByProfile(profileId)
+      .catch(async (error: Response) => {
+        const errorJson = await error.json();
+        getWalletByProfileIdError.value = errorJson;
+      });
+    if (response) getWalletByProfileIdData.value = response;
+    isGetWalletByProfileIdLoading.value = false;
+  };
 
   const getProfileByIdWallet = async () => {
     isGetProfileWalletDataLoading.value = true;
@@ -181,6 +197,10 @@ export const useProfileWalletStore = defineStore('wallet', () => {
     isWalletStatusErrorSuspended,
     isWalletStatusAnyError,
     updateNotificationData,
+    getWalletByProfileId,
+    isGetWalletByProfileIdLoading,
+    getWalletByProfileIdError,
+    getWalletByProfileIdData,
   };
 });
 

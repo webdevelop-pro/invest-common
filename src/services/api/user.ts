@@ -130,3 +130,22 @@ export const fetchSetUserOptions = () => {
     return response.json();
   });
 };
+
+export const fetchSetUserData = (profileId: number, body: string) => {
+  const path = `${USER_URL}/auth/user`;
+
+  const data = {
+    method: 'PATCH',
+    body,
+    ...requiredFetchParams(),
+    headers: {
+      ...requiredFetchParams().headers,
+      'X-Requested-With': 'XMLHttpRequest',
+    },
+  };
+
+  return fetch(path, data).then((response) => {
+    if (!response.ok) return Promise.reject(response);
+    return response.json();
+  });
+};

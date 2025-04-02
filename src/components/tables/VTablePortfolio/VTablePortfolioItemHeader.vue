@@ -17,6 +17,7 @@ import { useRoute } from 'vue-router';
 import { VTableCell, VTableRow } from 'UiKit/components/Base/VTable';
 import chevronDownIcon from 'UiKit/assets/images/chevron-down.svg';
 import VImage from 'UiKit/components/Base/VImage/VImage.vue';
+import { capitalizeFirstLetter } from 'UiKit/helpers/text';
 
 const useDialogsStore = useDialogs();
 const userStore = useUsersStore();
@@ -42,8 +43,8 @@ const itemFormatted = computed(() => ({
   offer: props.item.offer?.name,
   offerLegalName: props.item.offer?.legal_name,
   image: getInvestmentOfferImage(props.item),
-  type: props.item.funding_type,
-  ownership: selectedUserProfileData.value?.type,
+  type: capitalizeFirstLetter(props.item.funding_type || ''),
+  ownership: capitalizeFirstLetter(selectedUserProfileData.value?.type || ''),
   amount: currency(props.item.amount),
   status: getInvestmentStatusFormated(props.item.status),
   tagBackground: getInvestmentTagBackground(props.item.status),

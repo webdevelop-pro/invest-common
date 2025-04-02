@@ -17,6 +17,7 @@ import {
   urlInvestmentTimeline, urlProfileWallet, urlProfileAccount,
 } from 'InvestCommon/global/links';
 import { VTableCell, VTableRow } from 'UiKit/components/Base/VTable';
+import { capitalizeFirstLetter } from 'UiKit/helpers/text';
 
 const notificationsStore = useNotificationsStore();
 const { isMarkAsReadByIdError } = storeToRefs(notificationsStore);
@@ -48,7 +49,7 @@ const tagBackground = computed(() => {
   if (isNotificationInvestment.value) return 'secondary-light'; // secondary-light
   if (isNotificationDocument.value) return 'yellow-light'; // yellow-light
   if (isNotificationSystem.value || isNotificationUser.value) return 'default'; // gray-30
-  if (isNotificationWallet.value) return 'secondary'; // secondary
+  if (isNotificationWallet.value) return 'red-light'; // secondary
   return 'purple-light'; // purple-light
 });
 
@@ -62,8 +63,9 @@ const buttonText = computed(() => {
 });
 
 const tagText = computed(() => {
-  if (isNotificationInvestment.value && (objectId.value > 0)) return `Investment #${objectId.value}`;
-  return props.data?.type;
+  if (isNotificationProfile.value) return 'Investment Profile';
+  if (isNotificationUser.value) return 'System';
+  return capitalizeFirstLetter(props.data?.type || '');
 });
 
 const buttonTo = computed(() => {
@@ -153,6 +155,7 @@ const onButtonClick = () => {
   >
     <VTableCell>
       <VBadge
+        v-highlight="search"
         :color="tagBackground"
       >
         <span class="v-table-notification-item__tag-text">

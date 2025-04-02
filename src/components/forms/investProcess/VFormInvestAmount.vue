@@ -140,6 +140,9 @@ watch(() => model, () => {
 watch(() => numberOfShares.value, () => {
   if (numberOfShares.value) model.number_of_shares = numberOfShares.value;
 }, { immediate: true });
+
+const investmentAmountShow = computed(() => (
+  investmentAmount.value > 0 ? currency(+investmentAmount.value.toFixed(2)) : undefined));
 </script>
 
 <template>
@@ -184,8 +187,8 @@ watch(() => numberOfShares.value, () => {
           label="Investment Amount"
         >
           <VFormInput
-            :model-value="currency(+investmentAmount.toFixed(2))"
-            placeholder="Amount (read only)"
+            :model-value="investmentAmountShow"
+            placeholder="$"
             name="amount-of-investment"
             readonly
             size="large"

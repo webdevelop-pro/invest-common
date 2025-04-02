@@ -3,14 +3,16 @@ import { computed, ref } from 'vue';
 import { generalErrorHandling } from 'InvestCommon/helpers/generalErrorHandling';
 import {
   fetchGetFiles, fetchGetPublicFiles, fetchPostSignurl, uploadFile,
+  fetchGetImageByIdLink,
 } from 'InvestCommon/services/api/filer';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { IFilerItem } from 'InvestCommon/types/api/filer';
-import { useUsersStore } from 'InvestCommon/store/useUsers';
+import { isEmpty } from 'lodash';
+import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 
 export const useFilerStore = defineStore('filer', () => {
-  const usersStore = useUsersStore();
-  const { selectedUserProfileData } = storeToRefs(usersStore);
+  const userProfileStore = useUserProfilesStore();
+  const { getUserData } = storeToRefs(userProfileStore);
 
   const isGetFilesLoading = ref(false);
   const isGetFilesError = ref(false);
@@ -22,7 +24,7 @@ export const useFilerStore = defineStore('filer', () => {
       isGetFilesError.value = true;
       generalErrorHandling(error);
     });
-    if (response) getFilesData.value = response;
+    if (response && !isEmpty(response)) getFilesData.value = response;
     isGetFilesLoading.value = false;
     return getFilesData.value;
   };
@@ -112,7 +114,7 @@ export const useFilerStore = defineStore('filer', () => {
     await postSignurl({
       filename: file.name,
       mime: file.type,
-      user_id: Number(selectedUserProfileData.value?.user_id),
+      user_id: Number(getUserData.value?.id),
       path: `/${objectName}/${objectId}`,
     });
     if (postSignurlError.value) {
@@ -122,13 +124,31 @@ export const useFilerStore = defineStore('filer', () => {
       const uploadData = {
         objectName,
         objectId,
-        userId: selectedUserProfileData.value?.user_id,
+        userId: getUserData.value?.id,
         url: postSignurlData.value?.url,
         fileId: postSignurlData.value?.meta?.id,
       };
       await uploadFIle(file, file.type, uploadData);
     }
+    if (uploadFIleError.value) {
+      return false;
+    }
     return true;
+  };
+
+  const isGetImageByIdLinkLoading = ref(false);
+  const getImageByIdLinkError = ref();
+  const getImageByIdLinkData = ref();
+  const getImageByIdLink = async (id: number | string) => {
+    isGetImageByIdLinkLoading.value = true;
+    getImageByIdLinkError.value = false;
+    const response = await fetchGetImageByIdLink(id).catch((error: Response) => {
+      getImageByIdLinkError.value = error;
+      generalErrorHandling(error);
+    });
+    if (response) getImageByIdLinkData.value = response;
+    isGetImageByIdLinkLoading.value = false;
+    return getImageByIdLinkData.value;
   };
 
   const resetAll = () => {
@@ -160,6 +180,10 @@ export const useFilerStore = defineStore('filer', () => {
     uploadFIleError,
     uploadFIleData,
     uploadHandler,
+    getImageByIdLink,
+    isGetImageByIdLinkLoading,
+    getImageByIdLinkError,
+    getImageByIdLinkData,
   };
 });
 

@@ -5,7 +5,7 @@ import {
   fetchSetUserOptions, fetchGetProfileByID,
   fetchGetUser,
   fetchProfileByIDOptions,
-  fetchSetProfileByID,
+  fetchSetProfileByID, fetchSetUserData,
 } from 'InvestCommon/services/api/user';
 import { generalErrorHandling } from 'InvestCommon/helpers/generalErrorHandling';
 import { acceptHMRUpdate, defineStore } from 'pinia';
@@ -151,6 +151,23 @@ export const useUserProfilesStore = defineStore('userProfile', () => {
     isSetUserOptionsLoading.value = false;
   };
 
+  const isupdateUserDataLoading = ref(false);
+  const updateUserDataError = ref();
+  const updateUserDataData = ref();
+  const updateUserData = async (id: string | number, body: string) => {
+    isupdateUserDataLoading.value = true;
+    updateUserDataData.value = null;
+    updateUserDataError.value = null;
+    const response = await fetchSetUserData(id, body).catch(async (error: Response) => {
+      updateUserDataError.value = error;
+      generalErrorHandling(error);
+    });
+    if (response) {
+      updateUserDataData.value = response;
+    }
+    isupdateUserDataLoading.value = false;
+  };
+
   const resetAll = () => {
     setProfileData.value = undefined;
     setProfileErrorData.value = undefined;
@@ -163,6 +180,7 @@ export const useUserProfilesStore = defineStore('userProfile', () => {
     setProfileByIdErrorData.value = undefined;
     getProfileByIdOptionsData.value = undefined;
     getUserData.value = undefined;
+    updateUserDataData.value = undefined;
   };
 
   return {
@@ -202,6 +220,10 @@ export const useUserProfilesStore = defineStore('userProfile', () => {
     isSetUserError,
     setUserErrorData,
     setUserData,
+    updateUserData,
+    isupdateUserDataLoading,
+    updateUserDataError,
+    updateUserDataData,
   };
 });
 

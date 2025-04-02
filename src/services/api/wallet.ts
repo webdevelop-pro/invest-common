@@ -4,6 +4,20 @@ import { ITransactionDataResponse, IWalletDataResponse, WalletAddTransactionType
 
 const { WALLET_URL } = env;
 
+export const fetchGetWalletByProfile = (profile_id: number) => {
+  const path = `${WALLET_URL}/auth/wallet/${profile_id}`;
+
+  const data = {
+    method: 'GET',
+    ...requiredFetchParams(),
+  };
+
+  return fetch(path, data).then((response) => {
+    if (!response.ok) return Promise.reject(response);
+    return response.json() as Promise<IWalletDataResponse>;
+  });
+};
+
 export const fetchGetWalletData = (wallet_id: number) => {
   const path = `${WALLET_URL}/auth/wallet/${wallet_id}`;
 
