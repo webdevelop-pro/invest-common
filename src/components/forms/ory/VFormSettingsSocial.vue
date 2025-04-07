@@ -2,7 +2,7 @@
 import { SELFSERVICE } from 'InvestCommon/helpers/enums/auth';
 import { socialSignin } from './utilsAuth';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useAuthLogicStore } from 'InvestCommon/store/useAuthLogic';
 import { urlSettings, urlSignin } from 'InvestCommon/global/links';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
@@ -14,24 +14,21 @@ const data = ref(socialSignin.map((item) => ({
   linked: false,
 })));
 
-const queryRefresh = computed(() => {
+const queryType = computed(() => {
   if (import.meta.env.SSR) return null;
-  return (window && window?.location?.search) ? new URLSearchParams(window?.location?.search).get('refresh') : null;
+  return (window && window?.location?.search) ? new URLSearchParams(window?.location?.search).get('type') : null;
 });
 
 const onSocialLoginHandler = async (provider: string, toLink: boolean) => {
-  if (!queryRefresh.value) {
-    const query: Record<string, string> = {
-      refresh: 'true',
-      socials: 'true',
-      redirect: urlSettings.toString(),
-    };
-    navigateWithQueryParams(urlSignin, query);
-  } else {
-    const dataToSend = toLink ? { link: provider } : { unlink: provider };
-    await authLogicStore.onSettingsSocial(SELFSERVICE.settings, dataToSend);
-  }
+  const dataToSend = toLink ? { link: provider } : { unlink: provider };
+  await authLogicStore.onSettingsSocial(SELFSERVICE.settings, dataToSend);
 };
+
+onMounted(() => {
+  if (queryType.value?.includes('link') || queryType.value?.includes('unlink') || queryType.value?.includes('social')) {
+    onSocialLoginHandler(queryType.value, true);
+  }
+});
 </script>
 
 <template>

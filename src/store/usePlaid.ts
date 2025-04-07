@@ -18,11 +18,11 @@ const isCreateTokenLoading = ref(false);
 const isCreateTokenError = ref(false);
 const createTokenData = ref<IPlaidTokenResponse>();
 
-interface IPlaidHandler {
+export interface IPlaidHandler {
   open: () => void;
 }
 
-interface IEventMetadata {
+export interface IEventMetadata {
   link_session_id: string;
   request_id: string;
   timestamp: string;

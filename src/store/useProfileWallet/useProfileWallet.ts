@@ -2,10 +2,13 @@ import { generalErrorHandling } from 'InvestCommon/helpers/generalErrorHandling'
 import { IWalletDataResponse } from 'InvestCommon/types/api/wallet';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { computed, ref, nextTick } from 'vue';
-import { fetchGetWalletData, fetchAddBankAccount, fetchGetWalletByProfile } from 'InvestCommon/services/api/wallet';
+import {
+  fetchGetWalletData, fetchGetWalletByProfile,
+} from 'InvestCommon/services/api/wallet';
 import { INotification } from 'InvestCommon/types/api/notifications';
 import { useProfileWalletBankAccountStore } from './useProfileWalletBankAccount';
 import { useUsersStore } from '../useUsers';
+import { IEventMetadata, IPlaidHandler } from '../usePlaid';
 
 const STATUS_CREATED = 'created';
 const STATUS_ERROR = 'error';
@@ -18,8 +21,12 @@ const STATUS_ERROR_SUSPENDED = 'error_suspended';
 
 export const useProfileWalletStore = defineStore('wallet', () => {
   const usersStore = useUsersStore();
-  const { selectedUserProfileData } = storeToRefs(usersStore);
-  const walletId = computed(() => selectedUserProfileData.value?.wallet?.id || 0);
+  const { selectedUserProfileData, selectedUserProfileId } = storeToRefs(usersStore);
+  const profileWalletBankAccountStore = useProfileWalletBankAccountStore();
+  const {
+    getLinkTokenAddAccountData, getLinkTokenAddAccountError,
+    linkTokenExchangeData, linkTokenExchangeError, linkTokenProcessError,
+  } = storeToRefs(profileWalletBankAccountStore);
 
   const isGetProfileWalletDataLoading = ref(false);
   const isGetProfileWalletDatanError = ref(false);
@@ -41,6 +48,9 @@ export const useProfileWalletStore = defineStore('wallet', () => {
     isGetWalletByProfileIdLoading.value = false;
   };
 
+  const walletId = computed(() => getWalletByProfileIdData.value?.id || 0);
+
+  // check if can delete
   const getProfileByIdWallet = async () => {
     isGetProfileWalletDataLoading.value = true;
     const response = await fetchGetWalletData(walletId.value).catch((error: Response) => {
@@ -51,25 +61,8 @@ export const useProfileWalletStore = defineStore('wallet', () => {
     isGetProfileWalletDataLoading.value = false;
   };
 
-  const isAddBankAccountLoading = ref(false);
-  const isAddBankAccountError = ref(false);
-  const addBankAccountData = ref();
-
-  const setProfileWalletAddBankAccount = async () => {
-    isAddBankAccountLoading.value = true;
-
-    const response = await fetchAddBankAccount(walletId.value).catch((error: Response) => {
-      isAddBankAccountError.value = true;
-      generalErrorHandling(error);
-    });
-
-    if (response) addBankAccountData.value = response;
-    isAddBankAccountLoading.value = false;
-  };
-
   // FORMATTED WALLET DATA
   const getFormattedProfileWalletData = computed(() => {
-    const profileWalletBankAccountStore = useProfileWalletBankAccountStore();
     profileWalletBankAccountStore.$patch({ bankAccount: getProfileByIdWalletData.value?.funding_source });
     const { bankAccountFormatted } = storeToRefs(profileWalletBankAccountStore);
 
@@ -107,6 +100,59 @@ export const useProfileWalletStore = defineStore('wallet', () => {
   ));
 
   // BANK ACCOUNT
+  const isLinkBankAccountLoading = ref(false);
+  const isAddBankAccountError = computed(() => (
+    getLinkTokenAddAccountError.value || linkTokenExchangeError.value || linkTokenProcessError.value));
+  const handleLinkBankAccount = async () => {
+    isLinkBankAccountLoading.value = true;
+    if (!getLinkTokenAddAccountData.value?.link_token) {
+      await profileWalletBankAccountStore.getLinkTokenAddAccount(selectedUserProfileId.value);
+    }
+
+    if (!getLinkTokenAddAccountError.value && getLinkTokenAddAccountData.value?.link_token) {
+      const plaidScript = document.createElement('script');
+      plaidScript.setAttribute('src', 'https://cdn.plaid.com/link/v2/stable/link-initialize.js');
+      document.head.appendChild(plaidScript);
+      plaidScript.onload = () => {
+        const handler = window?.Plaid.create({
+          token: getLinkTokenAddAccountData.value?.link_token,
+          onSuccess: async (publicToken: string, metadata: unknown) => {
+            console.log('plaid success event', publicToken, metadata);
+            const promises = [] as unknown[];
+            await profileWalletBankAccountStore.linkTokenExchange(selectedUserProfileId.value, publicToken);
+
+            if (linkTokenExchangeData.value && !linkTokenExchangeError.value) {
+              linkTokenExchangeData.value?.accounts?.forEach((account) => {
+                const body = JSON.stringify({
+                  access_token: linkTokenExchangeData.value?.access_token,
+                  account_id: account?.account_id,
+                  name: account?.name,
+                });
+                promises.push(profileWalletBankAccountStore.linkTokenProcess(selectedUserProfileId.value, body));
+              });
+            }
+
+            await Promise.all(promises);
+            isLinkBankAccountLoading.value = false;
+          },
+          onLoad: () => {
+            console.log('plaid on onload even');
+          },
+          onExit: (err: unknown, metadata: unknown) => {
+            console.log('plaid on exit event', err, metadata);
+            isLinkBankAccountLoading.value = false;
+          },
+          onEvent: (eventName: string, metadata: IEventMetadata) => {
+            console.log('plaid on event', eventName, metadata);
+          },
+          // required for OAuth; if not using OAuth, set to null or omit:
+          receivedRedirectUri: null, // window.location.href,
+        }) as IPlaidHandler;
+        setTimeout(handler.open, 1000);
+      };
+    }
+    isLinkBankAccountLoading.value = false;
+  };
   const isSomeLinkedBankAccount = computed(() => Boolean(getProfileByIdWalletData.value?.funding_source));
   const linkedBankAccountName = computed(() => getProfileByIdWalletData.value?.funding_source?.name || '');
   const linkedBankAccountBankName = computed(() => getProfileByIdWalletData.value?.funding_source?.bank_name || '');
@@ -157,7 +203,6 @@ export const useProfileWalletStore = defineStore('wallet', () => {
 
   const resetAll = () => {
     getProfileByIdWalletData.value = {};
-    addBankAccountData.value = undefined;
   };
 
   return {
@@ -166,10 +211,6 @@ export const useProfileWalletStore = defineStore('wallet', () => {
     isGetProfileWalletDatanError,
     getProfileByIdWallet,
     getFormattedProfileWalletData,
-    setProfileWalletAddBankAccount,
-    isAddBankAccountLoading,
-    isAddBankAccountError,
-    addBankAccountData,
     resetAll,
     // bank account
     isSomeLinkedBankAccount,
@@ -201,6 +242,9 @@ export const useProfileWalletStore = defineStore('wallet', () => {
     isGetWalletByProfileIdLoading,
     getWalletByProfileIdError,
     getWalletByProfileIdData,
+    handleLinkBankAccount,
+    isLinkBankAccountLoading,
+    isAddBankAccountError,
   };
 });
 

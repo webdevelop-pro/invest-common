@@ -94,3 +94,19 @@ export interface ITransactionDataFormatted {
     isTypeReturn: boolean;
     isTypeMarket: boolean;
 }
+
+export interface IPlaidLinkTokenResponse {
+  expiration: string;
+  link_token: string;
+  request_id: string;
+}
+
+export interface IPlaidLinkExchange {
+  accounts: [];
+  access_token: string;
+}
+
+export interface IPlaidLinkProcess {
+  additional: any;
+  token: string;
+}

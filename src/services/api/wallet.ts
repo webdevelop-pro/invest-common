@@ -1,6 +1,7 @@
 import env from 'InvestCommon/global';
 import { requiredFetchParams } from 'UiKit/helpers/api/requiredFetchParams';
 import { ITransactionDataResponse, IWalletDataResponse, WalletAddTransactionTypes } from 'InvestCommon/types/api/wallet';
+import { IPlaidLinkTokenResponse, IPlaidLinkExchange, IPlaidLinkProcess } from 'InvestCommon/types/api/plaid';
 
 const { WALLET_URL } = env;
 
@@ -96,5 +97,50 @@ export const fetchCancelTransaction = (wallet_id: number, transaction_id: number
   return fetch(path, data).then((response) => {
     if (!response.ok) return Promise.reject(response);
     return response.json();
+  });
+};
+
+export const fetchCreateLinkToken = (profileId: number) => {
+  const path = `${WALLET_URL}/auth/linkaccount/${profileId}/link`;
+  const body = JSON.stringify({});
+  // ToDo
+  // Add 'csrf_token': csrf_token  to cookies
+  const req = {
+    body,
+    method: 'POST',
+    ...requiredFetchParams(),
+  };
+
+  return fetch(path, req).then((response) => {
+    if (!response.ok) return Promise.reject(response);
+    return response.json() as Promise<IPlaidLinkTokenResponse>;
+  });
+};
+
+export const fetchCreateLinkExchange = (profileId: number, body: string) => {
+  const path = `${WALLET_URL}/auth/linkaccount/${profileId}/exchange`;
+  const req = {
+    body,
+    method: 'POST',
+    ...requiredFetchParams(),
+  };
+
+  return fetch(path, req).then((response) => {
+    if (!response.ok) return Promise.reject(response);
+    return response.json() as Promise<IPlaidLinkExchange>;
+  });
+};
+
+export const fetchCreateLinkProcess = (profileId: number, body: string) => {
+  const path = `${WALLET_URL}/auth/linkaccount/${profileId}/process`;
+  const req = {
+    body,
+    method: 'POST',
+    ...requiredFetchParams(),
+  };
+
+  return fetch(path, req).then((response) => {
+    if (!response.ok) return Promise.reject(response);
+    return response.json() as Promise<IPlaidLinkProcess>;
   });
 };

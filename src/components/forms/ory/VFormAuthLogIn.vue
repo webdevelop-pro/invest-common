@@ -46,6 +46,10 @@ const queryRedirect = computed(() => {
   if (import.meta.env.SSR) return null;
   return (window && window?.location?.search) ? new URLSearchParams(window?.location?.search).get('redirect') : null;
 });
+const queryType = computed(() => {
+  if (import.meta.env.SSR) return null;
+  return (window && window?.location?.search) ? new URLSearchParams(window?.location?.search).get('type') : null;
+});
 
 const model = reactive({
 } as FormModelSignIn);
@@ -74,7 +78,7 @@ const loginHandler = async () => {
     password: model.password,
     method: 'password',
   };
-  const query = { refresh: queryRefresh.value, redirect: queryRedirect.value || urlProfile() };
+  const query = { refresh: queryRefresh.value, redirect: queryRedirect.value || urlProfile(), type: queryType.value };
   if (queryRefresh.value) {
     await authLogicStore.onLogin(data, SELFSERVICE.login, query);
   } else {

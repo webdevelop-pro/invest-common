@@ -42,7 +42,7 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     setSocialLoginDataError, getLogoutResponse, getLogoutURLData, getSessionData,
     getSessionErrorResponse, isSetLoginError, isGetFlowError, isSetSignupError, isSetPasswordError,
     isSetRecoveryError, isGetLogoutURLError, setVerificationErrorData, setSocialSignupDataError,
-    setSettingsErrorData, isSetSettingsError, setPasswordErrorData,
+    setSettingsErrorData, setPasswordErrorData,
     getSignupData, setLoginErrorData,
   } = storeToRefs(authStore);
 
@@ -84,7 +84,14 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     if (setLoginData.value && setLoginData.value.session) {
       if (data?.email) submitFormToHubspot({ email: data?.email });
       const queryRedirect = computed(() => new URLSearchParams(window.location.search).get('redirect'));
-      navigateWithQueryParams(queryRedirect.value || urlProfile());
+      let queryParams;
+      if (query?.type) {
+        queryParams = {
+          refresh: 'true',
+          type: query.type,
+        };
+      }
+      navigateWithQueryParams(queryRedirect.value || urlProfile(), queryParams);
 
       // just set cookies. if use updateUserAccountSession -> get user will be triggered
       cookies.set(
@@ -188,11 +195,12 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     loading.value = false;
   };
 
-  const refreshRedirect = () => {
+  const refreshRedirect = (type?: string | undefined) => {
     const query: Record<string, string> = {
       refresh: 'true',
       redirect: urlSettings.toString(),
     };
+    if (type) query.type = type;
     navigateWithQueryParams(urlSignin, query);
   };
 
@@ -206,9 +214,7 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     }
     await authStore.setPassword(flowId.value, password, csrfToken.value);
 
-    if (isSetPasswordError.value && setPasswordErrorData.value?.error?.id === 'session_refresh_required') {
-      refreshRedirect();
-    }
+    if (isSetPasswordError.value && setPasswordErrorData.value) oryErrorHandling(setPasswordErrorData.value, url, 'reset');
     if (isSetPasswordError.value) {
       loading.value = false;
       return;
@@ -252,17 +258,8 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     }
     await authStore.setSettings(flowId.value, data, csrfToken.value);
 
-    if (setSettingsErrorData.value && setSettingsErrorData.value?.error?.id === 'session_refresh_required') {
-      refreshRedirect();
-    }
-    if (setSettingsErrorData.value && setSettingsErrorData.value?.redirect_browser_to) {
-      window.location.href = setSettingsErrorData.value.redirect_browser_to;
-
-      console.log('setSocialSettings', setSettingsErrorData.value.redirect_browser_to);
-    }
-    if (isSetSettingsError.value) {
-      loading.value = false;
-    }
+    if (setSettingsErrorData.value) oryErrorHandling(setSettingsErrorData.value, url, `link:${data.link}` || `unlink:${data.unlink}` || 'social');
+    loading.value = false;
   };
 
   const setSettingsTOTP = async (url: string, data: any) => {
@@ -273,7 +270,7 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     }
     await authStore.setSettings(flowId.value, data, csrfToken.value);
 
-    if (setSettingsErrorData.value) oryErrorHandling(setSettingsErrorData.value, url);
+    if (setSettingsErrorData.value) oryErrorHandling(setSettingsErrorData.value, url, 'totp');
 
     loading.value = false;
     if (!setSettingsErrorData.value) {
