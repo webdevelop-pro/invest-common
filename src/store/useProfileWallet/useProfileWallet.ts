@@ -26,6 +26,7 @@ export const useProfileWalletStore = defineStore('wallet', () => {
   const {
     getLinkTokenAddAccountData, getLinkTokenAddAccountError,
     linkTokenExchangeData, linkTokenExchangeError, linkTokenProcessError,
+    islinkTokenExchangeLoading,
   } = storeToRefs(profileWalletBankAccountStore);
 
   const isGetProfileWalletDataLoading = ref(false);
@@ -38,7 +39,6 @@ export const useProfileWalletStore = defineStore('wallet', () => {
   const getWalletByProfileId = async (profileId: string) => {
     isGetWalletByProfileIdLoading.value = true;
     getWalletByProfileIdError.value = null;
-    getWalletByProfileIdData.value = null;
     const response = await fetchGetWalletByProfile(profileId)
       .catch(async (error: Response) => {
         const errorJson = await error.json();
@@ -63,41 +63,63 @@ export const useProfileWalletStore = defineStore('wallet', () => {
 
   // FORMATTED WALLET DATA
   const getFormattedProfileWalletData = computed(() => {
-    profileWalletBankAccountStore.$patch({ bankAccount: getProfileByIdWalletData.value?.funding_source });
+    profileWalletBankAccountStore.$patch({ bankAccount: getWalletByProfileIdData.value?.funding_source });
     const { bankAccountFormatted } = storeToRefs(profileWalletBankAccountStore);
 
     return {
-      ...getProfileByIdWalletData.value,
+      ...getWalletByProfileIdData.value,
       funding_source: bankAccountFormatted.value,
     };
   });
 
   // WALLET STATUS
   const isWalletStatusCreated = computed(() => (
-    getProfileByIdWalletData.value?.status === STATUS_CREATED
+    getWalletByProfileIdData.value?.status === STATUS_CREATED
   ));
   const isWalletStatusVerified = computed(() => (
-    getProfileByIdWalletData.value?.status === STATUS_VERIFIED
+    getWalletByProfileIdData.value?.status === STATUS_VERIFIED
   ));
   const isWalletStatusError = computed(() => (
-    getProfileByIdWalletData.value?.status === STATUS_ERROR
+    getWalletByProfileIdData.value?.status === STATUS_ERROR
   ));
   const isWalletStatusErrorRetry = computed(() => (
-    getProfileByIdWalletData.value?.status === STATUS_ERROR_RETRY
+    getWalletByProfileIdData.value?.status === STATUS_ERROR_RETRY
   ));
   const isWalletStatusErrorDocument = computed(() => (
-    getProfileByIdWalletData.value?.status === STATUS_ERROR_DOCUMENT
+    getWalletByProfileIdData.value?.status === STATUS_ERROR_DOCUMENT
   ));
   const isWalletStatusErrorPending = computed(() => (
-    getProfileByIdWalletData.value?.status === STATUS_ERROR_PENDING
+    getWalletByProfileIdData.value?.status === STATUS_ERROR_PENDING
   ));
   const isWalletStatusErrorSuspended = computed(() => (
-    getProfileByIdWalletData.value?.status === STATUS_ERROR_SUSPENDED
+    getWalletByProfileIdData.value?.status === STATUS_ERROR_SUSPENDED
   ));
   const isWalletStatusAnyError = computed(() => (
     isWalletStatusError.value || isWalletStatusErrorRetry.value || isWalletStatusErrorDocument.value
     || isWalletStatusErrorPending.value || isWalletStatusErrorSuspended.value
   ));
+
+  const plaidOnLinkSuccess = async (publicToken: string) => {
+    const promises = [] as unknown[];
+    if (!linkTokenExchangeData.value?.access_token && !islinkTokenExchangeLoading.value) {
+      await profileWalletBankAccountStore.linkTokenExchange(selectedUserProfileId.value, publicToken);
+    }
+
+    if (linkTokenExchangeData.value && !linkTokenExchangeError.value && !islinkTokenExchangeLoading.value) {
+      linkTokenExchangeData.value?.accounts?.forEach((account) => {
+        const body = JSON.stringify({
+          access_token: linkTokenExchangeData.value?.access_token,
+          account_id: account?.account_id,
+          name: account?.name,
+          last4: account?.mask,
+        });
+        promises.push(profileWalletBankAccountStore.linkTokenProcess(selectedUserProfileId.value, body));
+      });
+    }
+
+    await Promise.all(promises);
+    getWalletByProfileId(selectedUserProfileId.value);
+  };
 
   // BANK ACCOUNT
   const isLinkBankAccountLoading = ref(false);
@@ -118,21 +140,7 @@ export const useProfileWalletStore = defineStore('wallet', () => {
           token: getLinkTokenAddAccountData.value?.link_token,
           onSuccess: async (publicToken: string, metadata: unknown) => {
             console.log('plaid success event', publicToken, metadata);
-            const promises = [] as unknown[];
-            await profileWalletBankAccountStore.linkTokenExchange(selectedUserProfileId.value, publicToken);
-
-            if (linkTokenExchangeData.value && !linkTokenExchangeError.value) {
-              linkTokenExchangeData.value?.accounts?.forEach((account) => {
-                const body = JSON.stringify({
-                  access_token: linkTokenExchangeData.value?.access_token,
-                  account_id: account?.account_id,
-                  name: account?.name,
-                });
-                promises.push(profileWalletBankAccountStore.linkTokenProcess(selectedUserProfileId.value, body));
-              });
-            }
-
-            await Promise.all(promises);
+            await plaidOnLinkSuccess(publicToken);
             isLinkBankAccountLoading.value = false;
           },
           onLoad: () => {
@@ -151,11 +159,9 @@ export const useProfileWalletStore = defineStore('wallet', () => {
         setTimeout(handler.open, 1000);
       };
     }
-    isLinkBankAccountLoading.value = false;
   };
-  const isSomeLinkedBankAccount = computed(() => Boolean(getProfileByIdWalletData.value?.funding_source));
-  const linkedBankAccountName = computed(() => getProfileByIdWalletData.value?.funding_source?.name || '');
-  const linkedBankAccountBankName = computed(() => getProfileByIdWalletData.value?.funding_source?.bank_name || '');
+  const isSomeLinkedBankAccount = computed(() => (getWalletByProfileIdData.value?.funding_source.length > 0));
+  const fundingSource = computed(() => getWalletByProfileIdData.value?.funding_source || []);
   const isCanAddBankAccount = computed(() => ((walletId.value !== null) && (walletId.value > 0)
     && (selectedUserProfileData.value?.kyc_status === 'approved') && !isWalletStatusAnyError.value));
   const isCanLoadFunds = computed(() => (isSomeLinkedBankAccount.value && !isWalletStatusAnyError.value));
@@ -167,9 +173,9 @@ export const useProfileWalletStore = defineStore('wallet', () => {
   };
 
   // BALANCE
-  const currentBalance = computed(() => getProfileByIdWalletData.value?.balance || 0);
-  const pendingIncomingBalance = computed(() => getProfileByIdWalletData.value?.pending_incoming_balance || 0);
-  const pendingOutcomingBalance = computed(() => getProfileByIdWalletData.value?.pending_outcoming_balance || 0);
+  const currentBalance = computed(() => getWalletByProfileIdData.value?.balance || 0);
+  const pendingIncomingBalance = computed(() => getWalletByProfileIdData.value?.pending_incoming_balance || 0);
+  const pendingOutcomingBalance = computed(() => getWalletByProfileIdData.value?.pending_outcoming_balance || 0);
   const isCurrentBalanceZero = computed(() => (currentBalance.value === 0));
   const totalBalance = computed(() => (
     currentBalance.value + pendingIncomingBalance.value - pendingOutcomingBalance.value));
@@ -184,12 +190,12 @@ export const useProfileWalletStore = defineStore('wallet', () => {
   };
 
   const updateNotificationData = (notification: INotification) => {
-    if (notification.data.fields?.balance) getProfileByIdWalletData.value.balance = notification.data.fields?.balance;
+    if (notification.data.fields?.balance) getWalletByProfileIdData.value.balance = notification.data.fields?.balance;
     if (notification.data.fields?.inc_balance !== undefined) {
-      getProfileByIdWalletData.value.pending_incoming_balance = notification.data.fields.inc_balance;
+      getWalletByProfileIdData.value.pending_incoming_balance = notification.data.fields.inc_balance;
     }
     if (notification.data.fields?.out_balance !== undefined) {
-      getProfileByIdWalletData.value.pending_outcoming_balance = notification.data.fields.out_balance;
+      getWalletByProfileIdData.value.pending_outcoming_balance = notification.data.fields.out_balance;
     }
     if (notification.data?.fields?.status) {
       usersStore.updateDataInProfile('wallet', {
@@ -202,10 +208,11 @@ export const useProfileWalletStore = defineStore('wallet', () => {
   };
 
   const resetAll = () => {
-    getProfileByIdWalletData.value = {};
+    getWalletByProfileIdData.value = {};
   };
 
   return {
+    walletId,
     isGetProfileWalletDataLoading,
     getProfileByIdWalletData,
     isGetProfileWalletDatanError,
@@ -214,8 +221,7 @@ export const useProfileWalletStore = defineStore('wallet', () => {
     resetAll,
     // bank account
     isSomeLinkedBankAccount,
-    linkedBankAccountName,
-    linkedBankAccountBankName,
+    fundingSource,
     isCanAddBankAccount,
     isCanWithdraw,
     deleteLinkedBankAccount,

@@ -66,7 +66,18 @@ export const useProfileWalletBankAccountStore = defineStore('walletBankAccount',
     isBankAccountStatusPending: isBankAccountStatusPending.value,
   }));
 
+  const resetAll = () => {
+    bankAccount.value = null;
+    getLinkTokenAddAccountError.value = null;
+    getLinkTokenAddAccountData.value = null;
+    linkTokenExchangeError.value = null;
+    linkTokenExchangeData.value = null;
+    linkTokenProcessError.value = null;
+    linkTokenProcessData.value = null;
+  };
+
   return {
+    resetAll,
     bankAccount,
     bankAccountFormatted,
     getLinkTokenAddAccount,

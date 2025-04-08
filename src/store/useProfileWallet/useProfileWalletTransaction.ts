@@ -9,15 +9,14 @@ import {
 } from 'InvestCommon/services/api/wallet';
 import { formatToFullDate } from 'InvestCommon/helpers/formatters/formatToDate';
 import { INotification } from 'InvestCommon/types/api/notifications';
+import { useProfileWalletStore } from 'InvestCommon/store/useProfileWallet/useProfileWallet';
 import { useProfileWalletBankAccountStore } from './useProfileWalletBankAccount';
-import { useUsersStore } from '../useUsers';
 
 // profile wallet transaction handling
 
 export const useProfileWalletTransactionStore = defineStore('walletTransaction', () => {
-  const usersStore = useUsersStore();
-  const { selectedUserProfileData } = storeToRefs(usersStore);
-  const walletId = computed(() => selectedUserProfileData.value?.wallet?.id || 0);
+  const profileWalletStore = useProfileWalletStore();
+  const { walletId } = storeToRefs(profileWalletStore);
 
   const isGetProfileWalletTransactionsDataLoading = ref(false);
   const isGetProfileWalletTransactionsDatanError = ref(false);
@@ -36,10 +35,10 @@ export const useProfileWalletTransactionStore = defineStore('walletTransaction',
   const isSetProfileWalletAddTransactionError = ref(false);
   const setProfileWalletAddTransactionData = ref();
   const setProfileWalletAddTransactionErrorData = ref();
-  const setProfileWalletAddTransaction = async (type: WalletAddTransactionTypes, amount: number) => {
+  const setProfileWalletAddTransaction = async (data: object) => {
     isSetProfileWalletAddTransactionLoading.value = true;
 
-    const response = await fetchAddTransaction(walletId.value, type, amount).catch(async (error: Response) => {
+    const response = await fetchAddTransaction(walletId.value, data).catch(async (error: Response) => {
       isSetProfileWalletAddTransactionError.value = true;
       setProfileWalletAddTransactionErrorData.value = JSON.parse(await error.text());
       generalErrorHandling(error);
@@ -129,7 +128,7 @@ export const useProfileWalletTransactionStore = defineStore('walletTransaction',
     amount: { value: item?.amount, currency: 'USD' },
     source: sourceFormatted(item),
     dest: destFormatted(item),
-    submited_at_date: formatToFullDate(new Date(item?.submited_at || '').toISOString()),
+    submited_at_date: formatToFullDate(new Date(item?.submited_at || item?.created_at || '').toISOString()),
     submited_at_time: getTimeFormat(item?.submited_at),
     updated_at_date: formatToFullDate(new Date(item?.updated_at || '').toISOString()),
     updated_at_time: getTimeFormat(item?.updated_at),

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {
   ref, computed, reactive, watch, nextTick, onMounted,
+  onBeforeMount,
 } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useInvestmentsStore } from 'InvestCommon/store/useInvestments';
@@ -64,11 +65,13 @@ const {
 } = storeToRefs(investmentsStore);
 const { submitFormToHubspot } = useHubspotForm('b27d194e-cbab-4c53-9d60-1065be6425be');
 const profileWalletStore = useProfileWalletStore();
-const { isWalletStatusAnyError, isTotalBalanceZero } = storeToRefs(profileWalletStore);
+const { isWalletStatusAnyError, isTotalBalanceZero, walletId } = storeToRefs(profileWalletStore);
 const offerStore = useOfferStore();
 const { getUnconfirmedOfferData } = storeToRefs(offerStore);
 const usersStore = useUsersStore();
-const { selectedUserProfileData, userAccountData } = storeToRefs(usersStore);
+const {
+  selectedUserProfileData, userAccountData, userLoggedIn, selectedUserProfileId,
+} = storeToRefs(usersStore);
 
 const SELECT_OPTIONS_FUNDING_TYPE_WITH_WALLET = computed(() => ([
   {
@@ -107,8 +110,7 @@ const componentData = ref({
   accountNumber: '',
   routingNumber: '',
 });
-const hasWallet = computed(() => (selectedUserProfileData.value?.wallet?.id
-  && (selectedUserProfileData.value?.wallet?.id > 0) && !isWalletStatusAnyError.value));
+const hasWallet = computed(() => ((walletId.value > 0) && !isWalletStatusAnyError.value));
 const notEnoughWalletFunds = computed(() => (
   (getUnconfirmedOfferData.value?.amount || 0) > profileWalletStore.totalBalance));
 
@@ -225,9 +227,9 @@ watch(() => model, () => {
   if (!isValid.value) onValidate();
 }, { deep: true });
 
-onMounted(() => {
-  if (selectedUserProfileData.value?.wallet?.id && (selectedUserProfileData.value?.wallet?.id > 0)) {
-    profileWalletStore.getProfileByIdWallet();
+onBeforeMount(() => {
+  if (userLoggedIn.value) {
+    profileWalletStore.getWalletByProfileId(selectedUserProfileId.value);
   }
 });
 </script>

@@ -201,12 +201,12 @@ export const useUsersStore = defineStore('user', () => {
   }, { immediate: true });
 
   watch(() => urlProfileId.value, () => {
-    if (!isUrlProfileIdInProfiles.value) {
+    if (!isUrlProfileIdInProfiles.value && urlProfileId.value) {
       router.push({
         name: ROUTE_DASHBOARD_ACCOUNT,
         params: { profileId: selectedUserProfileId.value || userProfiles.value[0]?.id || 0 },
       });
-    } else if (!isUrlProfileSameAsSelected.value) {
+    } else if (!isUrlProfileSameAsSelected.value && urlProfileId.value) {
       setSelectedUserProfileById(Number(urlProfileId.value));
     }
   }, { immediate: true });

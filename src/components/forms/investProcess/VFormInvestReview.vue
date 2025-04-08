@@ -66,7 +66,7 @@ investmentsStore.$onAction(
             }
             router.push({
               name: ROUTE_INVEST_THANK,
-              query: {
+              params: {
                 id: setReviewData.value?.investment.id,
               },
             });

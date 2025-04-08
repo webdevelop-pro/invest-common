@@ -89,6 +89,7 @@ export interface FormModeTrustedContact {
 
 export interface FormModelAddTransaction {
   amount: number;
+  funding_source_id: number | string;
 }
 
 export interface IValidationFields {

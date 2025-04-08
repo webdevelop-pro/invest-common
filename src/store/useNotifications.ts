@@ -111,6 +111,7 @@ export const useNotificationsStore = defineStore('notifications', () => {
   };
 
   const handleMessage = (data: string) => {
+    console.log(`ws message: ${data}`);
     if (data === 'pong') return;
     updateNotificationsData(data);
     const notification = JSON.parse(data) as INotification;

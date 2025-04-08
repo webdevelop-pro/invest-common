@@ -23,6 +23,7 @@ import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { scrollToError } from 'UiKit/helpers/validation/general';
 import { FormModelAddTransaction } from 'InvestCommon/types/form';
+import VFormSelect from 'UiKit/components/Base/VForm/VFormSelect.vue';
 
 const emit = defineEmits(['cancel']);
 
@@ -36,7 +37,7 @@ const props = defineProps({
 const usersStore = useUsersStore();
 const { selectedUserProfileId } = storeToRefs(usersStore);
 const profileWalletStore = useProfileWalletStore();
-const { currentBalance, pendingOutcomingBalance } = storeToRefs(profileWalletStore);
+const { currentBalance, pendingOutcomingBalance, fundingSource } = storeToRefs(profileWalletStore);
 
 const isTypeDeposit = ref((props.transactionType === WalletAddTransactionTypes.deposit));
 const titile = ref((isTypeDeposit.value ? 'Add Funds' : 'Withdraw'));
@@ -69,9 +70,13 @@ const schemaAddTransaction = computed(() => ({
             minimum: 'Amount should be at least $1',
           },
         },
+        funding_source_id: {
+          type: 'number',
+          minimum: 1,
+        },
       },
       type: 'object',
-      required: ['amount'],
+      required: ['amount', 'funding_source_id'],
       errorMessage: errorMessageRule,
     },
   },
@@ -99,9 +104,16 @@ const saveHandler = async () => {
     return;
   }
 
-  await profileWalletTransactionStore.setProfileWalletAddTransaction(props.transactionType, Number(model.amount));
+  const data = {
+    type: props.transactionType,
+    amount: Number(model.amount),
+    funding_source_id: Number(model.funding_source_id),
+  };
+
+  await profileWalletTransactionStore.setProfileWalletAddTransaction(data);
   if (isSetProfileWalletAddTransactionError.value) return;
-  router.push({ name: ROUTE_DASHBOARD_WALLET, params: { profileId: selectedUserProfileId.value } });
+  await profileWalletStore.getWalletByProfileId(selectedUserProfileId.value);
+  profileWalletTransactionStore.getProfileByIdWalletTransactions();
   emit('cancel');
 };
 
@@ -118,6 +130,12 @@ watch(() => [schemaAddTransaction.value], () => {
     schemaAddTransaction.value,
   );
 });
+
+const fundingSourceFormatted = computed(() => (
+  fundingSource.value.map((item) => ({
+    text: `${item.bank_name}: ${item.name} **** ${item.last4}`,
+    id: `${item.id}`,
+  }))));
 </script>
 
 <template>
@@ -132,6 +150,7 @@ watch(() => [schemaAddTransaction.value], () => {
             :schema-front="schemaAddTransaction"
             :error-text="setProfileWalletAddTransactionErrorData?.amount"
             path="amount"
+            label="Amount"
             class="form-wallet-add-transaction__input"
           >
             <VFormInput
@@ -146,6 +165,32 @@ watch(() => [schemaAddTransaction.value], () => {
           <div class="form-wallet-add-transaction__text is--small">
             Maximum {{ text }}
           </div>
+        </FormCol>
+      </FormRow>
+      <FormRow>
+        <FormCol>
+          <VFormGroup
+            v-slot="VFormGroupProps"
+            :model="model"
+            :validation="validation"
+            :schema-front="schemaAddTransaction"
+            :error-text="setProfileWalletAddTransactionErrorData?.funding_source_id"
+            path="funding_source_id"
+            label="Funding Source"
+            class="form-wallet-add-transaction__input"
+          >
+            <VFormSelect
+              :model-value="model.funding_source_id ? String(model.funding_source_id) : undefined"
+              :is-error="VFormGroupProps.isFieldError"
+              placeholder="Select funding source"
+              name="funding_source_id"
+              item-label="text"
+              item-value="id"
+              dropdown-absolute
+              :options="fundingSourceFormatted"
+              @update:model-value="model.funding_source_id = numberFormatter($event)"
+            />
+          </VFormGroup>
         </FormCol>
       </FormRow>
     </div>

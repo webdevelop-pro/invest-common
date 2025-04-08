@@ -1,6 +1,6 @@
 import env from 'InvestCommon/global';
 import { requiredFetchParams } from 'UiKit/helpers/api/requiredFetchParams';
-import { ITransactionDataResponse, IWalletDataResponse, WalletAddTransactionTypes } from 'InvestCommon/types/api/wallet';
+import { ITransactionDataResponse, IWalletDataResponse } from 'InvestCommon/types/api/wallet';
 import { IPlaidLinkTokenResponse, IPlaidLinkExchange, IPlaidLinkProcess } from 'InvestCommon/types/api/plaid';
 
 const { WALLET_URL } = env;
@@ -61,13 +61,10 @@ export const fetchAddBankAccount = (wallet_id: number) => {
   });
 };
 
-export const fetchAddTransaction = (wallet_id: number, type: WalletAddTransactionTypes, amountNum: number) => {
+export const fetchAddTransaction = (wallet_id: number, dataToSend: object) => {
   const path = `${WALLET_URL}/auth/wallet/${wallet_id}/transactions`;
 
-  const body = JSON.stringify({
-    type,
-    amount: Number(amountNum),
-  });
+  const body = JSON.stringify(dataToSend);
 
   const data = {
     method: 'POST',

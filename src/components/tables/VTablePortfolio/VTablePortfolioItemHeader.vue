@@ -118,6 +118,7 @@ watch(() => [queryPopupWire.value, queryPopupId.value, queryPopupTransaction.val
     </VTableCell>
     <VTableCell>
       <div
+        class="v-table-item-header__table-funding-type"
         :class="{ 'is--link-regular': isFundingClickable }"
         @click.stop="onFundingType"
       >
@@ -168,6 +169,11 @@ watch(() => [queryPopupWire.value, queryPopupId.value, queryPopupTransaction.val
     display: flex;
     justify-content: center;
     align-items: center;
+  }
+
+  &__table-funding-type {
+    font-size: 14px;
+    line-height: 21px;
   }
 
   &__expand-icon {
