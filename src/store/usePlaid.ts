@@ -1,6 +1,6 @@
 import { ref } from 'vue';
 import { fetchCreateToken } from 'InvestCommon/services/api/plaid';
-import { generalErrorHandling } from 'InvestCommon/helpers/generalErrorHandling';
+import { generalErrorHandling } from 'UiKit/helpers/generalErrorHandling';
 import { IPlaidTokenResponse } from 'InvestCommon/types/api/plaid';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { ROUTE_DASHBOARD_PORTFOLIO } from 'InvestCommon/helpers/enums/routes';

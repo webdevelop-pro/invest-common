@@ -65,7 +65,9 @@ const {
 } = storeToRefs(investmentsStore);
 const { submitFormToHubspot } = useHubspotForm('b27d194e-cbab-4c53-9d60-1065be6425be');
 const profileWalletStore = useProfileWalletStore();
-const { isWalletStatusAnyError, isTotalBalanceZero, walletId } = storeToRefs(profileWalletStore);
+const {
+  isWalletStatusAnyError, isTotalBalanceZero, walletId, fundingSource,
+} = storeToRefs(profileWalletStore);
 const offerStore = useOfferStore();
 const { getUnconfirmedOfferData } = storeToRefs(offerStore);
 const usersStore = useUsersStore();
@@ -73,15 +75,12 @@ const {
   selectedUserProfileData, userAccountData, userLoggedIn, selectedUserProfileId,
 } = storeToRefs(usersStore);
 
+const fundingSourceFormatted = computed(() => fundingSource.value?.map((item) => ({
+  value: String(item.id),
+  text: `${item.bank_name}: ${item.name}`,
+})) || []);
+
 const SELECT_OPTIONS_FUNDING_TYPE_WITH_WALLET = computed(() => ([
-  {
-    value: FundingTypes.ach,
-    text: 'ACH',
-  },
-  {
-    value: FundingTypes.wire,
-    text: 'WIRE',
-  },
   {
     value: FundingTypes.wallet,
     text: `Wallet (${currency(profileWalletStore.totalBalance)})`,
@@ -115,11 +114,15 @@ const notEnoughWalletFunds = computed(() => (
   (getUnconfirmedOfferData.value?.amount || 0) > profileWalletStore.totalBalance));
 
 const selectOptions = computed(() => {
+  let res = SELECT_OPTIONS_FUNDING_TYPE;
   const isWalletExist = SELECT_OPTIONS_FUNDING_TYPE.find((item) => item.value === FundingTypes.wallet);
   if (hasWallet.value && !isWalletExist && !isTotalBalanceZero.value) {
-    return SELECT_OPTIONS_FUNDING_TYPE_WITH_WALLET.value;
+    res = res.concat(SELECT_OPTIONS_FUNDING_TYPE_WITH_WALLET.value);
   }
-  return SELECT_OPTIONS_FUNDING_TYPE;
+  if (fundingSourceFormatted.value.length > 0) {
+    res = res.concat(fundingSourceFormatted.value);
+  }
+  return res;
 });
 const selectErrors = computed(() => {
   const isWallet = model.funding_type === FundingTypes.wallet;
@@ -190,6 +193,13 @@ const continueHandler = async () => {
     data = {
       funding_type: model.funding_type,
       payment_data: paymentData,
+    };
+  }
+  if ((model.funding_type !== FundingTypes.ach) && (model.funding_type !== FundingTypes.wallet)
+    && (model.funding_type !== FundingTypes.wire)) {
+    data = {
+      funding_source_id: Number(model.funding_type),
+      funding_type: FundingTypes.wallet,
     };
   }
   await investmentsStore.setFunding(slug, id, profileId, data);

@@ -3,7 +3,7 @@ import {
 } from 'InvestCommon/types/api/wallet';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { computed, ref } from 'vue';
-import { generalErrorHandling } from 'InvestCommon/helpers/generalErrorHandling';
+import { generalErrorHandling } from 'UiKit/helpers/api/generalErrorHandling';
 import {
   fetchGetTransactionsData, fetchAddTransaction, fetchCancelTransaction,
 } from 'InvestCommon/services/api/wallet';

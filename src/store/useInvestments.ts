@@ -1,5 +1,5 @@
 import { ref } from 'vue';
-import { generalErrorHandling } from 'InvestCommon/helpers/generalErrorHandling';
+import { generalErrorHandling } from 'UiKit/helpers/generalErrorHandling';
 import {
   fetchGetInvestOne, fetchSetInvest, fetchSetAmount, fetchSetOwnership, fetchSetSignature,
   fetchSetDocument, fetchSetFunding, fetchSetReview, fetchCancelInvest, fetchGetDocument,

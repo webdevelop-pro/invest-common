@@ -3,7 +3,7 @@ import { INotification } from 'InvestCommon/types/api/notifications';
 import {
   fetchGetNotificationsAll, fetchMarkNotificationReadAll, fetchMarkNotificationReadById,
 } from 'InvestCommon/services/api/notifications';
-import { generalErrorHandling } from 'InvestCommon/helpers/generalErrorHandling';
+import { generalErrorHandling } from 'UiKit/helpers/generalErrorHandling';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { useWebSocket } from '@vueuse/core';
 import env from 'InvestCommon/global/index';

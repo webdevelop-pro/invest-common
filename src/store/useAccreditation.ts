@@ -2,7 +2,7 @@ import { ref } from 'vue';
 import {
   fetchCreateAccreditation, fetchUploadAccreditationDocument, fetchCreateEscrow, fetchUpdateAccreditation,
 } from 'InvestCommon/services/api/accreditation';
-import { generalErrorHandling } from 'InvestCommon/helpers/generalErrorHandling';
+import { generalErrorHandling } from 'UiKit/helpers/generalErrorHandling';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 
 const isCreateAccreditationLoading = ref(false);

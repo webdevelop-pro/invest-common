@@ -1,8 +1,10 @@
 import { IFundingSourceDataResponse } from 'InvestCommon/types/api/wallet';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { computed, ref } from 'vue';
-import { fetchCreateLinkToken, fetchCreateLinkExchange, fetchCreateLinkProcess } from 'InvestCommon/services/api/wallet';
-import { generalErrorHandling } from 'InvestCommon/helpers/generalErrorHandling';
+import {
+  fetchCreateLinkToken, fetchCreateLinkExchange, fetchCreateLinkProcess, fetchDeleteLinkedAccount,
+} from 'InvestCommon/services/api/wallet';
+import { generalErrorHandling } from 'UiKit/helpers/api/generalErrorHandling';
 
 const STATUS_PENDING = 'pending';
 // profile wallet bank account handling
@@ -54,6 +56,21 @@ export const useProfileWalletBankAccountStore = defineStore('walletBankAccount',
     islinkTokenProcessLoading.value = false;
   };
 
+  const isDeleteAccountLoading = ref(false);
+  const deleteAccountError = ref();
+  const deleteAccountData = ref();
+  const deleteAccount = async (profileId: number, body: string) => {
+    isDeleteAccountLoading.value = true;
+    deleteAccountData.value = null;
+    deleteAccountError.value = null;
+    const response = await fetchDeleteLinkedAccount(profileId, body).catch((error: Response) => {
+      deleteAccountError.value = error;
+      generalErrorHandling(error);
+    });
+    if (response) deleteAccountData.value = response;
+    isDeleteAccountLoading.value = false;
+  };
+
   const bankAccount = ref<IFundingSourceDataResponse>();
 
   // FORMAT transaction
@@ -92,6 +109,10 @@ export const useProfileWalletBankAccountStore = defineStore('walletBankAccount',
     islinkTokenProcessLoading,
     linkTokenProcessError,
     linkTokenProcessData,
+    deleteAccount,
+    isDeleteAccountLoading,
+    deleteAccountError,
+    deleteAccountData,
   };
 });
 

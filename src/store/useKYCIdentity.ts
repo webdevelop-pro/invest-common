@@ -1,6 +1,6 @@
 import { computed, ref } from 'vue';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
-import { generalErrorHandling } from 'InvestCommon/helpers/generalErrorHandling';
+import { generalErrorHandling } from 'UiKit/helpers/generalErrorHandling';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { fetchUpdateIdentities } from 'InvestCommon/services/api/plaid';
 

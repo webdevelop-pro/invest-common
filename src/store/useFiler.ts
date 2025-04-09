@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 import { computed, ref } from 'vue';
-import { generalErrorHandling } from 'InvestCommon/helpers/generalErrorHandling';
+import { generalErrorHandling } from 'UiKit/helpers/generalErrorHandling';
 import {
   fetchGetFiles, fetchGetPublicFiles, fetchPostSignurl, uploadFile,
   fetchGetImageByIdLink,

@@ -1,7 +1,7 @@
 import { ref } from 'vue';
 import { fetchGetFunding, fetchConnectBankAccount, fetchFundTransfer } from 'InvestCommon/services/api/funding';
 import { IFundingData, IBank } from 'InvestCommon/types/api/funding';
-import { generalErrorHandling } from 'InvestCommon/helpers/generalErrorHandling';
+import { generalErrorHandling } from 'UiKit/helpers/generalErrorHandling';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 
 const isGetFundingLoading = ref(false);

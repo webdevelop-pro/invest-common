@@ -19,20 +19,6 @@ export const fetchGetWalletByProfile = (profile_id: number) => {
   });
 };
 
-export const fetchGetWalletData = (wallet_id: number) => {
-  const path = `${WALLET_URL}/auth/wallet/${wallet_id}`;
-
-  const data = {
-    method: 'GET',
-    ...requiredFetchParams(),
-  };
-
-  return fetch(path, data).then((response) => {
-    if (!response.ok) return Promise.reject(response);
-    return response.json() as Promise<IWalletDataResponse>;
-  });
-};
-
 export const fetchGetTransactionsData = (wallet_id: number) => {
   const path = `${WALLET_URL}/auth/wallet/${wallet_id}/transactions`;
 
@@ -139,5 +125,19 @@ export const fetchCreateLinkProcess = (profileId: number, body: string) => {
   return fetch(path, req).then((response) => {
     if (!response.ok) return Promise.reject(response);
     return response.json() as Promise<IPlaidLinkProcess>;
+  });
+};
+
+export const fetchDeleteLinkedAccount = (profileId: number, body: string) => {
+  const path = `${WALLET_URL}/auth/linkaccount/${profileId}`;
+  const req = {
+    body,
+    method: 'DELETE',
+    ...requiredFetchParams(),
+  };
+
+  return fetch(path, req).then((response) => {
+    if (!response.ok) return Promise.reject(response);
+    return response;
   });
 };

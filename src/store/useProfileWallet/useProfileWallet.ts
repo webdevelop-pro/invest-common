@@ -1,10 +1,6 @@
-import { generalErrorHandling } from 'InvestCommon/helpers/generalErrorHandling';
-import { IWalletDataResponse } from 'InvestCommon/types/api/wallet';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { computed, ref, nextTick } from 'vue';
-import {
-  fetchGetWalletData, fetchGetWalletByProfile,
-} from 'InvestCommon/services/api/wallet';
+import { fetchGetWalletByProfile } from 'InvestCommon/services/api/wallet';
 import { INotification } from 'InvestCommon/types/api/notifications';
 import { useProfileWalletBankAccountStore } from './useProfileWalletBankAccount';
 import { useUsersStore } from '../useUsers';
@@ -29,10 +25,6 @@ export const useProfileWalletStore = defineStore('wallet', () => {
     islinkTokenExchangeLoading,
   } = storeToRefs(profileWalletBankAccountStore);
 
-  const isGetProfileWalletDataLoading = ref(false);
-  const isGetProfileWalletDatanError = ref(false);
-  const getProfileByIdWalletData = ref<IWalletDataResponse>({});
-
   const isGetWalletByProfileIdLoading = ref(false);
   const getWalletByProfileIdError = ref();
   const getWalletByProfileIdData = ref();
@@ -49,17 +41,6 @@ export const useProfileWalletStore = defineStore('wallet', () => {
   };
 
   const walletId = computed(() => getWalletByProfileIdData.value?.id || 0);
-
-  // check if can delete
-  const getProfileByIdWallet = async () => {
-    isGetProfileWalletDataLoading.value = true;
-    const response = await fetchGetWalletData(walletId.value).catch((error: Response) => {
-      isGetProfileWalletDatanError.value = true;
-      generalErrorHandling(error);
-    });
-    if (response) getProfileByIdWalletData.value = response;
-    isGetProfileWalletDataLoading.value = false;
-  };
 
   // FORMATTED WALLET DATA
   const getFormattedProfileWalletData = computed(() => {
@@ -101,11 +82,11 @@ export const useProfileWalletStore = defineStore('wallet', () => {
 
   const plaidOnLinkSuccess = async (publicToken: string) => {
     const promises = [] as unknown[];
-    if (!linkTokenExchangeData.value?.access_token && !islinkTokenExchangeLoading.value) {
+    if (!islinkTokenExchangeLoading.value) {
       await profileWalletBankAccountStore.linkTokenExchange(selectedUserProfileId.value, publicToken);
     }
 
-    if (linkTokenExchangeData.value && !linkTokenExchangeError.value && !islinkTokenExchangeLoading.value) {
+    if (!linkTokenExchangeError.value && !islinkTokenExchangeLoading.value) {
       linkTokenExchangeData.value?.accounts?.forEach((account) => {
         const body = JSON.stringify({
           access_token: linkTokenExchangeData.value?.access_token,
@@ -166,10 +147,12 @@ export const useProfileWalletStore = defineStore('wallet', () => {
     && (selectedUserProfileData.value?.kyc_status === 'approved') && !isWalletStatusAnyError.value));
   const isCanLoadFunds = computed(() => (isSomeLinkedBankAccount.value && !isWalletStatusAnyError.value));
 
-  const deleteLinkedBankAccount = () => {
-  };
-
-  const addLinkedBankAccount = () => {
+  const deleteLinkedBankAccount = async (sourceId: string | number) => {
+    const body = JSON.stringify({
+      funding_source_id: sourceId,
+    });
+    await profileWalletBankAccountStore.deleteAccount(selectedUserProfileId.value, body);
+    getWalletByProfileId(selectedUserProfileId.value);
   };
 
   // BALANCE
@@ -184,8 +167,8 @@ export const useProfileWalletStore = defineStore('wallet', () => {
   const isCanWithdraw = computed(() => isSomeLinkedBankAccount.value && !isCurrentBalanceZero.value);
 
   const updateData = () => {
-    if (!isGetProfileWalletDataLoading.value) {
-      getProfileByIdWallet();
+    if (!isGetWalletByProfileIdLoading.value) {
+      getWalletByProfileId(selectedUserProfileId.value);
     }
   };
 
@@ -207,16 +190,17 @@ export const useProfileWalletStore = defineStore('wallet', () => {
     });
   };
 
+  const isDeleteAccountLoading = ref(false);
+  const handleDeleteAccount = () => {
+
+  };
+
   const resetAll = () => {
     getWalletByProfileIdData.value = {};
   };
 
   return {
     walletId,
-    isGetProfileWalletDataLoading,
-    getProfileByIdWalletData,
-    isGetProfileWalletDatanError,
-    getProfileByIdWallet,
     getFormattedProfileWalletData,
     resetAll,
     // bank account
@@ -225,7 +209,6 @@ export const useProfileWalletStore = defineStore('wallet', () => {
     isCanAddBankAccount,
     isCanWithdraw,
     deleteLinkedBankAccount,
-    addLinkedBankAccount,
     // balance
     currentBalance,
     isCurrentBalanceZero,
@@ -251,6 +234,8 @@ export const useProfileWalletStore = defineStore('wallet', () => {
     handleLinkBankAccount,
     isLinkBankAccountLoading,
     isAddBankAccountError,
+    handleDeleteAccount,
+    isDeleteAccountLoading,
   };
 });
 

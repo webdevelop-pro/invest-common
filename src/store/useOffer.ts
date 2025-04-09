@@ -1,5 +1,5 @@
 import { ref } from 'vue';
-import { generalErrorHandling } from 'InvestCommon/helpers/generalErrorHandling';
+import { generalErrorHandling } from 'UiKit/helpers/generalErrorHandling';
 import { IInvest, IInvestData } from 'InvestCommon/types/api/invest';
 import { transformInvestData } from 'InvestCommon/helpers/transformInvestData';
 import {

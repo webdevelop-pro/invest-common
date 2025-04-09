@@ -7,7 +7,7 @@ import {
   fetchProfileByIDOptions,
   fetchSetProfileByID, fetchSetUserData,
 } from 'InvestCommon/services/api/user';
-import { generalErrorHandling } from 'InvestCommon/helpers/generalErrorHandling';
+import { generalErrorHandling } from 'UiKit/helpers/generalErrorHandling';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { IProfileIndividual, ISchema } from 'InvestCommon/types/api/user';
 
