@@ -124,8 +124,9 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             </a>
           </div>
           <VFormRadio
-            v-model="model.accredited_investor.is_accredited"
+            :model-value="model.accredited_investor.is_accredited"
             :options="isAccreditedRadioOptions"
+            @update:modelValue="model.accredited_investor.is_accredited = ($event === 'true')"
           />
         </VFormGroup>
       </FormCol>

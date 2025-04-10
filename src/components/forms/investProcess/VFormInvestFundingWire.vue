@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { useOfferStore } from 'InvestCommon/store/useOffer';
 import { storeToRefs } from 'pinia';
+import { computed } from 'vue';
 
 const offerStore = useOfferStore();
-const { getOfferOneData } = storeToRefs(offerStore);
+const { getUnconfirmedOfferData } = storeToRefs(offerStore);
+
+const data = computed(() => getUnconfirmedOfferData.value?.offer);
 </script>
 
 <template>
@@ -15,37 +18,37 @@ const { getOfferOneData } = storeToRefs(offerStore);
       <span class="form-invest-funding-wire__text-title is--h6__title">
         Wire to:
       </span>
-      {{ getOfferOneData?.data?.wire_to }}
+      {{ data?.data?.wire_to }}
     </div>
     <div class="form-invest-funding-wire__row">
       <span class="form-invest-funding-wire__text-title is--h6__title">
         Routing Number:
       </span>
-      {{ getOfferOneData?.data?.routing_number }}
+      {{ data?.data?.routing_number }}
     </div>
     <div class="form-invest-funding-wire__row">
       <span class="form-invest-funding-wire__text-title is--h6__title">
         Account Number:
       </span>
-      {{ getOfferOneData?.data?.account_number }}
+      {{ data?.data?.account_number }}
     </div>
     <div class="form-invest-funding-wire__row">
       <span class="form-invest-funding-wire__text-title is--h6__title">
         Custodian / Account Name:
       </span>
-      {{ getOfferOneData?.data?.custodian }}
+      {{ data?.data?.custodian }}
     </div>
     <div class="form-invest-funding-wire__row">
       <span class="form-invest-funding-wire__text-title is--h6__title">
         FFCT:
       </span>
-      Offer {{ getOfferOneData?.id }}, {{ getOfferOneData?.legal_name }}
+      Offer {{ data?.id }}, {{ data?.legal_name }}
     </div>
     <div class="form-invest-funding-wire__row">
       <span class="form-invest-funding-wire__text-title is--h6__title">
         SWIFT ID:
       </span>
-      {{ getOfferOneData?.data?.swift_id }}
+      {{ data?.data?.swift_id }}
     </div>
   </div>
 </template>

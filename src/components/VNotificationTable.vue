@@ -263,13 +263,15 @@ watch(() => currentTab.value, () => {
       :data="searchData"
       size="small"
     >
-      <VNotificationTableItem
-        v-for="item in searchData"
-        :key="item.id"
-        :data="item"
-        :search="search"
-        :external="external"
-      />
+      <Suspense>
+        <VNotificationTableItem
+          v-for="item in searchData"
+          :key="item.id"
+          :data="item"
+          :search="search"
+          :external="external"
+        />
+      </Suspense>
       <template #empty>
         <p
           v-if="notificationUserLength === 0"

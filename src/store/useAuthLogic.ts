@@ -91,14 +91,13 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
           type: query.type,
         };
       }
-      navigateWithQueryParams(queryRedirect.value || urlProfile(), queryParams);
-
       // just set cookies. if use updateUserAccountSession -> get user will be triggered
       cookies.set(
         'session',
         setLoginData.value.session,
         cookiesOptions(new Date(setLoginData.value.session?.expires_at)),
       );
+      navigateWithQueryParams(queryRedirect.value || urlProfile(), queryParams);
     }
 
     loading.value = false;

@@ -115,8 +115,10 @@ export const useUsersStore = defineStore('user', () => {
     selectedUserProfileShowKycInitFormIndividual.value));
 
   const setSelectedUserProfileById = (id: number) => {
+    console.log('selectedUserProfileId', id);
+    if (id === 0) return;
     selectedUserProfileId.value = id;
-    cookies.set('selectedUserProfileId', id, cookiesOptions());
+    cookies.set('selectedUserProfileId', id, cookiesOptions((new Date(userAccountSession.value?.expires_at))));
   };
 
   const updateUserSelectedAccount = () => {
@@ -195,18 +197,20 @@ export const useUsersStore = defineStore('user', () => {
 
   watch(() => userProfiles.value[0]?.id, () => {
     if (userLoggedIn.value
-      && (!selectedUserProfileId.value || selectedUserProfileId.value === 0)) {
+      && (!selectedUserProfileId.value || selectedUserProfileId.value === 0) && (userProfiles.value[0]?.id > 0)) {
       setSelectedUserProfileById(userProfiles.value[0]?.id);
     }
   }, { immediate: true });
 
-  watch(() => urlProfileId.value, () => {
-    if (!isUrlProfileIdInProfiles.value && urlProfileId.value) {
+  watch(() => [urlProfileId.value, userProfiles.value[0]?.id], () => {
+    if (!isUrlProfileIdInProfiles.value && urlProfileId.value && userProfiles.value[0]?.id && (userProfiles.value[0]?.id > 0)) {
       router.push({
-        name: ROUTE_DASHBOARD_ACCOUNT,
-        params: { profileId: selectedUserProfileId.value || userProfiles.value[0]?.id || 0 },
+        name: router.currentRoute.value.name,
+        params: { profileId: selectedUserProfileId.value || userProfiles.value[0]?.id },
+        query: { ...router.currentRoute.value.query },
       });
-    } else if (!isUrlProfileSameAsSelected.value && urlProfileId.value) {
+    } else if (!isUrlProfileSameAsSelected.value && urlProfileId.value && isUrlProfileIdInProfiles.value
+        && (Number(urlProfileId.value) > 0)) {
       setSelectedUserProfileById(Number(urlProfileId.value));
     }
   }, { immediate: true });

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { INotification } from 'InvestCommon/types/api/notifications';
 import { formatToDate } from 'InvestCommon/helpers/formatters/formatToDate';
-import { PropType, computed } from 'vue';
+import { PropType, computed, ref } from 'vue';
 import VBadge from 'UiKit/components/Base/VBadge/VBadge.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
@@ -23,6 +23,7 @@ const notificationsStore = useNotificationsStore();
 const { isMarkAsReadByIdError } = storeToRefs(notificationsStore);
 const usersStore = useUsersStore();
 const { selectedUserProfileId } = storeToRefs(usersStore);
+const routerRef = ref<any>(null);
 
 const props = defineProps({
   data: Object as PropType<INotification>,
@@ -136,16 +137,36 @@ const buttonHref = computed(() => {
 
 const isUnread = computed(() => (props.data?.status.toLowerCase() === 'unread'));
 
+const isExternalLink = computed(() => {
+  if (props.external) return true;
+
+  // If buttonHref starts with "http" it's definitely an external URL
+  return typeof buttonTo.value === 'string' && buttonTo.value?.startsWith('http');
+});
+
 const onMarkAsRead = async () => {
   if (props.data?.id) {
     await notificationsStore.markAsReadById(props.data?.id);
     if (!isMarkAsReadByIdError.value) notificationsStore.setNotificationAsRead(props.data?.id);
   }
 };
-
-const onButtonClick = () => {
-  onMarkAsRead();
+if (!isExternalLink.value) {
+  try {
+    const { useRouter } = await import('vue-router');
+    routerRef.value = useRouter();
+  } catch (e) {
+    console.warn('vue-router not available:', e);
+  }
+}
+const onButtonClick = async () => {
+  await onMarkAsRead();
   notificationsStore.notificationSidebarClose();
+
+  if (!isExternalLink.value) {
+    routerRef.value?.push(buttonTo.value);
+  } else {
+    window.location.href = buttonHref.value;
+  }
 };
 </script>
 <template>
@@ -182,11 +203,8 @@ const onButtonClick = () => {
         <VButton
           size="small"
           variant="link"
-          :as="external ? 'a' : 'router-link'"
-          :to="buttonTo"
-          :href="buttonHref || buttonTo"
           class="v-table-notification-item__button"
-          @click="onButtonClick"
+          @click.prevent="onButtonClick"
         >
           {{ buttonText }}
           <arrowRight

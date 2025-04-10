@@ -59,7 +59,6 @@ const schema = {
 const model = reactive<FormModelInvestmentObjectives>({
   investment_objectives: {
     ...props.modelData?.investment_objectives,
-    years_experience: 0,
   },
 });
 const formModel = createFormModel(schema);
@@ -159,10 +158,10 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
           label="Investment Years Experience"
         >
           <VFormInput
-            :model-value="String(model.investment_objectives.years_experience)"
+            :model-value="model.investment_objectives.years_experience ? String(model.investment_objectives.years_experience) : undefined"
             :is-error="VFormGroupProps.isFieldError"
             size="large"
-            placeholder="10 years"
+            placeholder="10"
             name="years-experience"
             data-testid="years-experience"
             :loading="isGetProfileByIdLoading"

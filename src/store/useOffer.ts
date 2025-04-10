@@ -1,7 +1,6 @@
 import { ref } from 'vue';
 import { generalErrorHandling } from 'UiKit/helpers/generalErrorHandling';
 import { IInvest, IInvestData } from 'InvestCommon/types/api/invest';
-import { transformInvestData } from 'InvestCommon/helpers/transformInvestData';
 import {
   IOffer, IOfferData, IOfferComment, IOfferCommentPayload,
 } from 'InvestCommon/types/api/offers';
@@ -14,7 +13,8 @@ import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { INotification } from 'InvestCommon/types/api/notifications';
 import { useUsersStore } from './useUsers';
 
-const unconfirmedOffersFilter = (unInv: IInvest[], slug: string) => unInv.find((item) => item?.offer?.slug === slug);
+const unconfirmedOffersFilter = (unInv: IInvest[], slug: string, profileId: number | string) => (
+  unInv.find((item) => item?.offer?.slug === slug && item?.profile_id === profileId));
 
 export const useOfferStore = defineStore('offers', () => {
   const usersStore = useUsersStore();
@@ -61,10 +61,7 @@ export const useOfferStore = defineStore('offers', () => {
       generalErrorHandling(error);
     });
     if (response) {
-      await getOffers();
-      if (getOffersData.value) {
-        getUnconfirmedOffersData.value = transformInvestData(response.data, getOffersData.value.data);
-      }
+      getUnconfirmedOffersData.value = response?.data;
     }
     isGetUnconfirmedOffersLoading.value = false;
   };
@@ -81,10 +78,8 @@ export const useOfferStore = defineStore('offers', () => {
       generalErrorHandling(error);
     });
     if (response) {
-      await getOffers();
-      if (response.data.length && getOffersData.value) {
-        const transformedData = transformInvestData(response.data, getOffersData.value.data);
-        getUnconfirmedOfferData.value = unconfirmedOffersFilter(transformedData, slug);
+      if (response.data.length) {
+        getUnconfirmedOfferData.value = unconfirmedOffersFilter(response.data, slug, selectedUserProfileId.value);
       } else {
         getUnconfirmedOfferData.value = null;
       }
