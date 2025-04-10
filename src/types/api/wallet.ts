@@ -3,6 +3,7 @@ export enum WalletTransactionStatusTypes {
   pending = 'pending',
   failed = 'failed',
   cancelled = 'cancelled',
+  wait = 'wait',
 }
 
 export enum WalletAddTransactionTypes {
