@@ -1,12 +1,17 @@
 <script setup lang="ts">
 import FormWalletAddTransaction from 'InvestCommon/components/forms/VFormWalletAddTransaction.vue';
 import { WalletAddTransactionTypes } from 'InvestCommon/types/api/wallet';
-import { PropType, ref } from 'vue';
+import { PropType, ref, watch } from 'vue';
 import {
   VDialogContent, VDialog,
   VDialogHeader,
   VDialogTitle,
 } from 'UiKit/components/Base/VDialog';
+import { useDialogs } from 'InvestCommon/store/useDialogs';
+import { storeToRefs } from 'pinia';
+
+const useDialogsStore = useDialogs();
+const { isDialogAddTransactionOpen } = storeToRefs(useDialogsStore);
 
 const open = defineModel<boolean>();
 const props = defineProps({
@@ -18,6 +23,12 @@ const props = defineProps({
 
 const isTypeDeposit = ref((props.transactionType === WalletAddTransactionTypes.deposit));
 const titile = ref((isTypeDeposit.value ? 'Add Funds' : 'Withdraw'));
+
+watch(() => open.value, () => {
+  if (!open.value) {
+    isDialogAddTransactionOpen.value = false;
+  }
+});
 </script>
 
 <template>

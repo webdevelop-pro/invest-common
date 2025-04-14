@@ -26,6 +26,7 @@ const { getUserData } = storeToRefs(userProfileStore);
 const refFiles = ref<HTMLInputElement>();
 const filesUploadError = ref('');
 const imageFile = ref<File>();
+const isLoading = ref(false);
 
 const onUpload = async (file: File) => {
   const res = await filerStore.uploadHandler(file, getUserData.value?.id, 'user');
@@ -41,7 +42,8 @@ const onUpload = async (file: File) => {
 const onClick = () => {
   refFiles.value?.click();
 };
-const onFileChange = () => {
+const onFileChange = async () => {
+  isLoading.value = true;
   const fileList = refFiles.value?.files as FileList;
   const incomingFiles = Array.from(fileList);
   const maxAllowedSize = 10 * 1024 * 1024; // 10MB
@@ -54,7 +56,8 @@ const onFileChange = () => {
   });
   if (filesUploadError.value) return;
   [imageFile.value] = incomingFiles;
-  onUpload(imageFile.value);
+  await onUpload(imageFile.value);
+  isLoading.value = false;
 };
 
 const imageID = computed(() => getUserData.value?.image_link_id);
@@ -65,7 +68,7 @@ const imageID = computed(() => getUserData.value?.image_link_id);
     <h2 class="is--h3__title">
       Account Photo
     </h2>
-    <div class="v-account-photo__content">
+    <div class="v-account-photo__content is--margin-top-20">
       <VAvatar
         size="large"
         :src="imageID > 0 ? `${FILER_URL}/auth/files/${imageID}?size=medium` : undefined"
@@ -84,7 +87,7 @@ const imageID = computed(() => getUserData.value?.image_link_id);
         >
         <VButton
           size="small"
-          :loading="false"
+          :loading="isLoading"
           variant="outlined"
           class="v-account-photo__button"
           @click="onClick"
@@ -110,12 +113,19 @@ const imageID = computed(() => getUserData.value?.image_link_id);
 </template>
 
 <style lang="scss">
+@use 'UiKit/styles/_variables.scss' as *;
+
 .v-account-photo {
   &__content {
     display: flex;
     flex-direction: row;
     gap: 20px;
     align-items: center;
+
+    @media screen and (max-width: $tablet-xs) {
+      flex-direction: column;
+      align-items: flex-start;
+    }
   }
 }
 </style>

@@ -2,37 +2,27 @@
 import {
   computed, defineAsyncComponent, hydrateOnVisible, PropType, ref, watchEffect,
 } from 'vue';
-import {
-  ROUTE_FORGOT, ROUTE_LOGIN, ROUTE_SIGNUP,
-} from 'InvestCommon/helpers/enums/routes';
 import { useAuthLogicStore } from 'InvestCommon/store/useAuthLogic';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
 import { storeToRefs } from 'pinia';
 import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
-import env from 'InvestCommon/global';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import { urlSignin, urlSignup } from 'InvestCommon/global/links';
 import VHeader from 'UiKit/components/VHeader/VHeader.vue';
+import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 
 const VHeaderProfile = defineAsyncComponent({
   loader: () => import('./VHeaderProfile.vue'),
-
   hydrate: hydrateOnVisible(),
 });
-
 const VHeaderProfileMobile = defineAsyncComponent({
   loader: () => import('./VHeaderProfileMobile.vue'),
-
   hydrate: hydrateOnVisible(),
 });
-
 const VButton = defineAsyncComponent({
   loader: () => import('UiKit/components/Base/VButton/VButton.vue'),
-
   hydrate: hydrateOnVisible(),
 });
-
-const { EXTERNAL } = env;
 
 type MenuItem = {
   to?: {
@@ -50,47 +40,18 @@ const props = defineProps({
   path: String,
 });
 
-let router;
-if (!EXTERNAL) {
-  const { useRouter } = await import('vue-router');
-  router = useRouter();
-}
-
 const usersStore = useUsersStore();
-const { userLoggedIn, isGetUserProfileLoading } = storeToRefs(usersStore);
-const authLogicStore = useAuthLogicStore();
-const { isLoadingSession } = storeToRefs(authLogicStore);
+const { userLoggedIn } = storeToRefs(usersStore);
+const userProfilesStore = useUserProfilesStore();
+const { isGetUserLoading } = storeToRefs(userProfilesStore);
 const path = ref(props.path || '');
 const isMobileSidebarOpen = defineModel<boolean>();
 
-const isSignUpPage = computed(() => {
-  if (EXTERNAL) {
-    return path.value.includes('signup');
-  }
-  return router?.currentRoute.value.name === ROUTE_SIGNUP;
-});
-
-const isSignInPage = computed(() => {
-  if (EXTERNAL) {
-    return path.value.includes('signin');
-  }
-  return router?.currentRoute.value.name === ROUTE_LOGIN;
-});
-
-const isRecoveryPage = computed(() => {
-  if (EXTERNAL) {
-    return path.value.includes('forgot');
-  }
-  return router?.currentRoute.value.name === ROUTE_FORGOT;
-});
-
-const queryParams = computed(() => {
-  if (EXTERNAL) {
-    return new URLSearchParams(window.location.search);
-  }
-  return router?.currentRoute.value.query;
-});
-
+const isLoading = computed(() => isGetUserLoading.value);
+const isSignUpPage = computed(() => path.value.includes('signup'));
+const isSignInPage = computed(() => path.value.includes('signin'));
+const isRecoveryPage = computed(() => path.value.includes('forgot'));
+const queryParams = computed(() => new URLSearchParams(window?.location?.search));
 // if there is flow in url it means it is from sso
 let queryFlow;
 
@@ -104,7 +65,7 @@ const signUpHandler = () => {
 
 watchEffect(() => {
   path.value = props.path || '';
-  queryFlow = (window && window.location.search) ? new URLSearchParams(window.location.search).get('flow') : null;
+  queryFlow = (window && window?.location?.search) ? new URLSearchParams(window.location.search).get('flow') : null;
 });
 </script>
 
@@ -133,7 +94,7 @@ watchEffect(() => {
       </span>
 
       <VSkeleton
-        v-if="isGetUserProfileLoading"
+        v-if="isLoading"
         height="25px"
         width="250px"
         class="v-header-invest-btns__skeleton"

@@ -1,13 +1,7 @@
 <script setup lang="ts">
 import { VTableCell, VTableRow } from 'UiKit/components/Base/VTable';
-import VBadge from 'UiKit/components/Base/VBadge/VBadge.vue';
 import { PropType } from 'vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
-import { useAuthStore } from 'InvestCommon/store/useAuth';
-import { storeToRefs } from 'pinia';
-
-const authStore = useAuthStore();
-const { isDeleteOneSessionLoading, isGetAllSessionLoading } = storeToRefs(authStore);
 
 interface IActivityItem {
   date: string;
@@ -19,16 +13,10 @@ interface IActivityItem {
 
 defineProps({
   data: Object as PropType<IActivityItem>,
+  loading: Boolean,
 });
 
 const emit = defineEmits(['delete']);
-
-const getTagBackground = (tag:string) => {
-  if (tag === 'Unsuccessful Login') {
-    return 'red-light';
-  }
-  return 'secondary-light';
-};
 
 const onDeleteSession = () => {
   emit('delete');
@@ -36,22 +24,13 @@ const onDeleteSession = () => {
 </script>
 
 <template>
-  <VTableRow>
+  <VTableRow class="VTableActivityItem v-table-activity-item">
     <VTableCell>
       {{ data?.date }}
-    </VTableCell>
-    <!-- <VTableCell>
-      <div
-        v-if="data?.status"
-        class="v-table-activity__tag"
-      >
-        <VBadge
-          :color="getTagBackground(data?.status)"
-        >
-          {{ data?.status }}
-        </VBadge>
+      <div class="is--small is--color-gray-60">
+        {{ data?.time }}
       </div>
-    </VTableCell> -->
+    </VTableCell>
     <VTableCell>
       <a
         href="#"
@@ -60,9 +39,6 @@ const onDeleteSession = () => {
         {{ data?.ip }}
       </a>
     </VTableCell>
-    <!-- <VTableCell>
-      {{ data?.device }}
-    </VTableCell> -->
     <VTableCell>
       {{ data?.browser }}
     </VTableCell>
@@ -70,20 +46,12 @@ const onDeleteSession = () => {
       <VButton
         size="small"
         color="red"
-        variant="outlined"
-        :loading="isDeleteOneSessionLoading || isGetAllSessionLoading"
+        variant="link"
+        :loading="loading"
         @click="onDeleteSession"
       >
-        Delete Session
+        Finish Session
       </VButton>
     </VTableCell>
   </VTableRow>
 </template>
-
-<style lang="scss">
-.v-table-activity {
-   &__tag {
-     display: flex;
-   }
-}
-</style>

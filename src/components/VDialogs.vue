@@ -27,6 +27,18 @@ const VDialogDocument = defineAsyncComponent({
   loader: () => import('InvestCommon/components/dialogs/VDialogDocument.vue'),
 });
 
+const VDialogContactUs = defineAsyncComponent({
+  loader: () => import('InvestCommon/components/dialogs/VDialogContactUs.vue'),
+});
+
+const VDialogMfa = defineAsyncComponent({
+  loader: () => import('InvestCommon/components/dialogs/VDialogMfa.vue'),
+});
+
+const VDialogRefreshSession = defineAsyncComponent({
+  loader: () => import('InvestCommon/components/dialogs/VDialogRefreshSession.vue'),
+});
+
 const useDialogsStore = useDialogs();
 const {
   isDialogLogoutOpen, isDialogAddTransactionOpen, addTransactiontTransactionType,
@@ -34,6 +46,7 @@ const {
   isDialogTransactionOpen, transactionInvestment, transactionuserName,
   isDialogWireOpen, wireInvestment, wireuserName,
   isDialogDocumentOpen, documentClose, documentOpen, documentSignup,
+  isDialogContactUsOpen, isDialogMfaOpen, isDialogRefreshSessionOpen,
 } = storeToRefs(useDialogsStore);
 </script>
 
@@ -71,6 +84,18 @@ const {
       :sign-url="documentSignup"
       :close="documentClose"
       :open="documentOpen"
+    />
+    <VDialogContactUs
+      v-if="isDialogContactUsOpen"
+      v-model="isDialogContactUsOpen"
+    />
+    <VDialogMfa
+      v-if="isDialogMfaOpen"
+      v-model="isDialogMfaOpen"
+    />
+    <VDialogRefreshSession
+      v-if="isDialogRefreshSessionOpen"
+      v-model="isDialogRefreshSessionOpen"
     />
   </div>
 </template>

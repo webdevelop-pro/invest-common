@@ -55,6 +55,21 @@ export const useDialogs = defineStore('dialogs', () => {
     documentClose.value = close;
   };
 
+  const isDialogContactUsOpen = ref(false);
+  const showContactUs = () => {
+    isDialogContactUsOpen.value = true;
+  };
+
+  const isDialogMfaOpen = ref(false);
+  const showMfa = () => {
+    isDialogMfaOpen.value = true;
+  };
+
+  const isDialogRefreshSessionOpen = ref(false);
+  const showRefreshSession = () => {
+    isDialogRefreshSessionOpen.value = true;
+  };
+
   const hideDocument = () => {
     isDialogDocumentOpen.value = false;
   };
@@ -81,6 +96,12 @@ export const useDialogs = defineStore('dialogs', () => {
     documentOpen,
     documentClose,
     hideDocument,
+    isDialogContactUsOpen,
+    showContactUs,
+    isDialogMfaOpen,
+    showMfa,
+    isDialogRefreshSessionOpen,
+    showRefreshSession,
   };
 });
 

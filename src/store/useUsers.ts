@@ -47,7 +47,10 @@ export const useUsersStore = defineStore('user', () => {
     );
   };
   const userLoggedIn = computed(() => userAccountSession.value?.active);
-  const userAccountData = computed(() => userAccountSession.value?.identity?.traits);
+  const userAccountData = computed(() => ({
+    ...userAccountSession.value?.identity?.traits,
+    ...getUserData.value,
+  }));
   const userAccountLoading = computed(() => isGetSessionLoading.value);
   // LIST OF USER PROFILES
   const userProfiles = computed(() => getUserData.value?.profiles || []);
@@ -182,7 +185,7 @@ export const useUsersStore = defineStore('user', () => {
 
   watch(() => userLoggedIn.value, async () => {
     if (userLoggedIn.value && !getUserData.value && !isGetUserLoading.value) {
-      await userProfilesStore.getUser();
+      userProfilesStore.getUser();
       notificationsStore.notificationsHandler();
     }
   }, { immediate: true });

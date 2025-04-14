@@ -3,7 +3,7 @@ import {
   VTable, VTableBody, VTableCell, VTableRow,
   VTableEmpty, VTableHead, VTableHeader,
 } from 'UiKit/components/Base/VTable';
-import { PropType } from 'vue';
+import { computed, PropType } from 'vue';
 import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 
 interface IHead {
@@ -11,13 +11,16 @@ interface IHead {
   class?: string;
 }
 
-defineProps({
-  header: Array as PropType<IHead[]>,
-  data: Array,
-  loading: Boolean,
-  size: String as PropType<'large' | 'regular' | 'small'>,
-});
+const props = defineProps<{
+  header: IHead[];
+  data: unknown[];
+  loading: boolean;
+  loadingRowLength?: number;
+  size?: 'large' | 'regular' | 'small';
+}>();
 
+const loadingRowLength = computed(() => props.loadingRowLength ?? 1);
+const headerLength = computed(() => props.header?.length || 0);
 </script>
 
 <template>
@@ -25,21 +28,27 @@ defineProps({
     :size="size"
     class="VTableDefault v-table-default"
   >
-    <VTableHeader v-if="header">
+    <VTableHeader v-if="headerLength > 0">
       <VTableRow>
         <VTableHead
           v-for="(head, headInd) in header"
-          :key="headInd"
+          :key="head.text ?? headInd"
           :class="head.class"
+          scope="col"
         >
           {{ head.text }}
         </VTableHead>
       </VTableRow>
     </VTableHeader>
+    <!-- Loading State -->
     <VTableBody v-if="loading">
-      <VTableRow>
+      <VTableRow
+        v-for="index in loadingRowLength"
+        :key="`loading-${index}`"
+      >
         <VTableCell
-          :colspan="header?.length"
+          v-for="skeletonItem in headerLength"
+          :key="`loading-cell-${skeletonItem}`"
         >
           <VSkeleton
             height="26px"
@@ -48,12 +57,16 @@ defineProps({
         </VTableCell>
       </VTableRow>
     </VTableBody>
+    <!-- Data Slot -->
     <VTableBody v-else-if="data && data.length > 0">
-      <slot />
+      <slot name="default" />
     </VTableBody>
+    <!-- Empty State -->
     <VTableBody v-else>
-      <VTableEmpty :colspan="header?.length">
-        <slot name="empty" />
+      <VTableEmpty :colspan="headerLength">
+        <slot name="empty">
+          No data available.
+        </slot>
       </VTableEmpty>
     </VTableBody>
   </VTable>

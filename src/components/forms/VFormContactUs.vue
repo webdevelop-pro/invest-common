@@ -18,6 +18,15 @@ import { emailRule, errorMessageRule, firstNameRule } from 'UiKit/helpers/valida
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 
+defineProps({
+  isInDialog: {
+    type: Boolean,
+    default: false,
+  },
+});
+
+const emit = defineEmits(['close']);
+
 const { toast } = useToast();
 
 const TOAST_OPTIONS = {
@@ -74,7 +83,7 @@ const SELECT_SUBJECT = [
 
 const { submitFormToHubspot } = useHubspotForm(env.HUBSPOT_FORM_ID_CONTACT_US);
 const usersStore = useUsersStore();
-const { selectedUserProfileData, userAccountData } = storeToRefs(usersStore);
+const { userAccountData } = storeToRefs(usersStore);
 
 let model = reactive({
 } as FormModelContactUs);
@@ -94,9 +103,9 @@ watch(() => model, () => {
   if (!isValid.value) onValidate();
 }, { deep: true });
 
-watch(() => [selectedUserProfileData.value?.data.first_name, selectedUserProfileData.value?.data?.last_name], () => {
-  if (selectedUserProfileData.value?.data?.first_name || selectedUserProfileData.value?.data?.last_name) {
-    model.name = `${selectedUserProfileData.value?.data?.first_name} ${selectedUserProfileData.value?.data?.last_name}`;
+watch(() => [userAccountData.value?.first_name, userAccountData.value?.last_name], () => {
+  if (userAccountData.value?.first_name || userAccountData.value?.last_name) {
+    model.name = `${userAccountData.value?.first_name} ${userAccountData.value?.last_name}`;
   }
 }, { deep: true, immediate: true });
 
@@ -106,7 +115,7 @@ watch(() => userAccountData.value?.email, () => {
   }
 }, { deep: true, immediate: true });
 
-const signUpHandler = async () => {
+const onSubmit = async () => {
   onValidate();
   if (!isValid.value) {
     nextTick(() => scrollToError('ContactUsForm'));
@@ -124,14 +133,16 @@ const signUpHandler = async () => {
 
   toast(TOAST_OPTIONS);
   model = reactive({} as FormModelContactUs);
+  emit('close');
 };
 </script>
 
 <template>
   <form
     class="VFormContactUs contact-us-form"
+    :class="{ 'is--in-dialog': isInDialog }"
     novalidate
-    @submit.prevent="signUpHandler"
+    @submit.prevent="onSubmit"
   >
     <VFormGroup
       v-slot="VFormGroupProps"
@@ -215,15 +226,24 @@ const signUpHandler = async () => {
         @update:model-value="model.message = $event"
       />
     </VFormGroup>
-    <VButton
-      size="large"
-      block
-      data-testid="button"
-      :disabled="isDisabledButton"
-      class="contact-us-form__btn"
-    >
-      Submit
-    </VButton>
+    <div class="contact-us-form__buttons is--margin-top-40">
+      <VButton
+        v-if="isInDialog"
+        size="large"
+        variant="outlined"
+        @click="emit('close')"
+      >
+        Cancel
+      </VButton>
+      <VButton
+        size="large"
+        :block="!isInDialog"
+        data-testid="button"
+        :disabled="isDisabledButton"
+      >
+        Submit
+      </VButton>
+    </div>
 
     <div class="contact-us-form__info">
       <div>
@@ -238,12 +258,11 @@ const signUpHandler = async () => {
 
 <style lang="scss">
 .contact-us-form {
-  padding: 40px;
-  background: $white;
-  box-shadow: $box-shadow-medium;
 
-  &__btn {
-    margin-top: 40px;
+  &:not(.is--in-dialog) {
+    padding: 40px;
+    background: $white;
+    box-shadow: $box-shadow-medium;
   }
 
   &__info {
@@ -258,6 +277,22 @@ const signUpHandler = async () => {
   &__input {
     & + & {
       margin-top: 20px;
+    }
+  }
+
+  &__buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+
+    @include media-lt(tablet) {
+      flex-direction: column-reverse;
+      align-items: stretch;
+      justify-content: flex-start;
+    }
+
+    .v-button {
+      flex-grow: 1;
     }
   }
 }

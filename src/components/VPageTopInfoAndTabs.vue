@@ -20,7 +20,7 @@ defineProps({
     type: String,
     required: true,
   },
-  tabs: Array as PropType<ITab[]>,
+  tabs: Object as PropType<{ [key: string]: ITab }>,
 });
 </script>
 
@@ -43,9 +43,6 @@ defineProps({
             :key="tabIndex"
             :value="item.value"
           >
-            <!-- <router-link :to="item.to">
-            {{ item.label }}
-          </router-link> -->
             {{ item.label }}
             <template v-if="item.subTitle" #subtitle>
               {{ item.subTitle }}
@@ -59,14 +56,27 @@ defineProps({
         </div>
       </div>
     </VTabs>
+    <slot name="content" />
   </div>
 </template>
 
 <style lang="scss">
 @use 'UiKit/styles/_variables.scss' as *;
 .v-page-top-info-and-tabs {
+  width: 100%;
+  background-color: $gray-10;
+  position: relative;
+  height: calc($header-height + 100%);
+  padding-top: $header-height;
+  margin-bottom: 90px;
+
   &__top-info {
     margin: 40px 0 45px;
+  }
+
+  &__tabs-content {
+    background: $white;
+    padding-bottom: 40px;
   }
 }
 </style>

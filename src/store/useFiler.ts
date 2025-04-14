@@ -24,6 +24,7 @@ export const useFilerStore = defineStore('filer', () => {
       generalErrorHandling(error);
     });
     if (response) getFilesData.value = response;
+    getFilesData.value.id = Number(String(object_id)?.split('/')?.pop());
     isGetFilesLoading.value = false;
     return getFilesData.value;
   };
@@ -57,6 +58,7 @@ export const useFilerStore = defineStore('filer', () => {
       generalErrorHandling(error);
     });
     if (response) getFilesPublicData.value = response;
+    getFilesPublicData.value.id = Number(String(object_id)?.split('/')?.pop());
     isGetFilesPublicLoading.value = false;
     return getFilesPublicData.value;
   };

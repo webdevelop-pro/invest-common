@@ -8,6 +8,11 @@ import {
   VDialogContent, VDialogFooter, VDialogHeader, VDialogTitle, VDialog,
 } from 'UiKit/components/Base/VDialog';
 import VImage from 'UiKit/components/Base/VImage/VImage.vue';
+import { watch } from 'vue';
+import { useDialogs } from 'InvestCommon/store/useDialogs';
+
+const useDialogsStore = useDialogs();
+const { isDialogLogOutOpen } = storeToRefs(useDialogsStore);
 
 const authLogicStore = useAuthLogicStore();
 const { isLoadingLogout } = storeToRefs(authLogicStore);
@@ -19,6 +24,11 @@ const logoutHandler = async () => {
 };
 const { EXTERNAL } = env;
 
+watch(() => open.value, () => {
+  if (!open.value) {
+    isDialogLogOutOpen.value = false;
+  }
+});
 </script>
 
 <template>

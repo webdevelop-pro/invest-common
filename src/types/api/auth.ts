@@ -217,7 +217,7 @@ interface IAuthMethod {
   organization: string;
   provider: string;
 }
-interface IDevices {
+export interface IDevices {
   id: string;
   ip_address: string;
   user_agent: string;

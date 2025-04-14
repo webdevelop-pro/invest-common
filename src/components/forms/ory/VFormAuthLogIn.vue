@@ -20,6 +20,15 @@ import {
 import eyeOff from 'UiKit/assets/images/eye-off.svg';
 import eye from 'UiKit/assets/images/eye.svg';
 
+const props = defineProps({
+  refresh: {
+    type: Boolean,
+    default: false,
+  },
+});
+
+const emit = defineEmits(['cancel']);
+
 const queryParams = computed(() => new URLSearchParams(window?.location?.search));
 const onSignup = () => {
   if (queryParams.value) return navigateWithQueryParams(urlSignup, queryParams.value);
@@ -31,14 +40,17 @@ const { loading } = storeToRefs(authLogicStore);
 const authStore = useAuthStore();
 const {
   getSchemaLoginData, setLoginErrorData, getLoginData, isGetFlowError,
+  getFlowData,
 } = storeToRefs(authStore);
 const showCreatePassword = ref(true);
 
 const queryFlow = computed(() => {
+  if (getFlowData.value?.id) return getFlowData.value?.id;
   if (import.meta.env.SSR) return null;
   return (window && window?.location?.search) ? new URLSearchParams(window?.location?.search).get('flow') : null;
 });
 const queryRefresh = computed(() => {
+  if (props.refresh) return true;
   if (import.meta.env.SSR) return null;
   return (window && window?.location?.search) ? new URLSearchParams(window?.location?.search).get('refresh') : null;
 });
@@ -78,9 +90,10 @@ const loginHandler = async () => {
     password: model.password,
     method: 'password',
   };
-  const query = { refresh: queryRefresh.value, redirect: queryRedirect.value || urlProfile(), type: queryType.value };
+  const query = { refresh: queryRefresh.value };
   if (queryRefresh.value) {
     await authLogicStore.onLogin(data, SELFSERVICE.login, query);
+    emit('cancel');
   } else {
     await authLogicStore.onLogin(data, SELFSERVICE.login);
   }
@@ -97,11 +110,9 @@ watch(() => model, () => {
   if (!isValid.value) onValidate();
 }, { deep: true });
 
-onMounted(async () => {
-  if (queryFlow.value) {
-    if (!getLoginData.value) await authStore.getLogin(queryFlow.value);
-  }
-});
+// onMounted(async () => {
+//   if (props.refresh && !getLoginData.value && queryFlow.value) authStore.getLogin(queryFlow.value);
+// });
 </script>
 
 <template>
@@ -110,9 +121,6 @@ onMounted(async () => {
     novalidate
     data-testid="login-form"
   >
-    <div v-if="queryRefresh">
-      Please, confirm action by typing your current password
-    </div>
     <div class="login-form__wrap">
       <VFormGroup
         v-slot="VFormGroupProps"
@@ -185,6 +193,7 @@ onMounted(async () => {
       </VFormGroup>
 
       <a
+        v-if="!props.refresh"
         :href="urlForgot"
         class="login-form__forgot is--link-2"
       >
@@ -203,7 +212,10 @@ onMounted(async () => {
         Log In
       </VButton>
 
-      <div class="login-form__signup-wrap  is--no-margin">
+      <div
+        v-if="!props.refresh"
+        class="login-form__signup-wrap  is--no-margin"
+      >
         <span class="login-form__signup-label is--body">
           Don't have an account?
         </span>
@@ -217,6 +229,17 @@ onMounted(async () => {
           Sign Up
         </VButton>
       </div>
+
+      <VButton
+        v-if="props.refresh"
+        block
+        size="large"
+        variant="link"
+        class="is--margin-top-12"
+        @click.stop.prevent="emit('cancel')"
+      >
+        Cancel
+      </VButton>
     </div>
   </form>
 </template>

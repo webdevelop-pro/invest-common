@@ -19,11 +19,12 @@ import env, { cookiesOptions } from 'InvestCommon/global/index';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import {
   urlOffers, urlSignin, urlCheckEmail, urlProfile,
-  urlSettings,
 } from 'InvestCommon/global/links';
 import { useCookies } from '@vueuse/integrations/useCookies';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 import { oryErrorHandling } from 'UiKit/helpers/api/oryErrorHandling';
+import { useDialogs } from 'InvestCommon/store/useDialogs';
+import { SELFSERVICE } from 'InvestCommon/helpers/enums/auth';
 
 const { EXTERNAL } = env;
 
@@ -35,6 +36,7 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
   const usersStore = useUsersStore();
   const cookies = useCookies(['session']);
   const { toast } = useToast();
+  const useDialogsStore = useDialogs();
 
   const authStore = useAuthStore();
   const {
@@ -56,6 +58,8 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     }
     return '';
   });
+
+  const lastSettingsAction = ref();
 
   // LOGIN
   const onLogin = async (data: object, url: string, query?: Record<string, string>, skipFlowId?: boolean) => {
@@ -80,24 +84,25 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
       loading.value = false;
       return;
     }
+    if (query?.refresh) {
+      loading.value = false;
+      if (lastSettingsAction.value) await lastSettingsAction.value();
+      else {
+        authStore.fetchAuthHandler(SELFSERVICE.settings);
+      }
+      return;
+    }
     const { submitFormToHubspot } = useHubspotForm('07463465-7f03-42d2-a85e-40cf8e29969d');
     if (setLoginData.value && setLoginData.value.session) {
       if (data?.email) submitFormToHubspot({ email: data?.email });
       const queryRedirect = computed(() => new URLSearchParams(window.location.search).get('redirect'));
-      let queryParams;
-      if (query?.type) {
-        queryParams = {
-          refresh: 'true',
-          type: query.type,
-        };
-      }
       // just set cookies. if use updateUserAccountSession -> get user will be triggered
       cookies.set(
         'session',
         setLoginData.value.session,
         cookiesOptions(new Date(setLoginData.value.session?.expires_at)),
       );
-      navigateWithQueryParams(queryRedirect.value || urlProfile(), queryParams);
+      navigateWithQueryParams(queryRedirect.value || urlProfile());
     }
 
     loading.value = false;
@@ -194,17 +199,19 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     loading.value = false;
   };
 
-  const refreshRedirect = (type?: string | undefined) => {
-    const query: Record<string, string> = {
-      refresh: 'true',
-      redirect: urlSettings.toString(),
-    };
-    if (type) query.type = type;
-    navigateWithQueryParams(urlSignin, query);
+  const refreshRedirect = async (type?: string | undefined) => {
+    // const query: Record<string, string> = {
+    //   refresh: 'true',
+    //   redirect: urlSettings.toString(),
+    // };
+    // if (type) query.type = type;
+    // navigateWithQueryParams(urlSignin, query);
+    await useDialogsStore.showRefreshSession(type);
   };
 
   // RESET
   const onReset = async (password: string, url: string) => {
+    lastSettingsAction.value = () => onReset(password, url);
     loading.value = true;
     await authStore.fetchAuthHandler(url);
     if (isGetFlowError.value) {
@@ -250,6 +257,7 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
   };
 
   const onSettingsSocial = async (url: string, data: any) => {
+    lastSettingsAction.value = () => onSettingsSocial(url, data);
     await authStore.fetchAuthHandler(url);
     if (isGetFlowError.value) {
       loading.value = false;

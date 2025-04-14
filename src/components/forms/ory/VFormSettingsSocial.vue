@@ -6,72 +6,151 @@ import { computed, onMounted, ref } from 'vue';
 import { useAuthLogicStore } from 'InvestCommon/store/useAuthLogic';
 import { urlSettings, urlSignin } from 'InvestCommon/global/links';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
+import { useAuthStore } from 'InvestCommon/store/useAuth';
+import { storeToRefs } from 'pinia';
+import { capitalizeFirstLetter } from 'UiKit/helpers/text';
+import checkIcon from 'UiKit/assets/images/circle-check.svg';
+import { useUsersStore } from 'InvestCommon/store/useUsers';
 
 const authLogicStore = useAuthLogicStore();
+const usersStore = useUsersStore();
+const authStore = useAuthStore();
+const { getFlowData, setSettingsErrorData } = storeToRefs(authStore);
+const { userAccountSession } = storeToRefs(usersStore);
 
-const data = ref(socialSignin.map((item) => ({
-  ...item,
-  linked: false,
-})));
+const loadingProvider = ref();
 
-const queryType = computed(() => {
-  if (import.meta.env.SSR) return null;
-  return (window && window?.location?.search) ? new URLSearchParams(window?.location?.search).get('type') : null;
+const oidcSocials = computed(() => getFlowData.value?.ui?.nodes?.filter((item) => item.group === 'oidc'));
+const loggedInSocial = computed(() => userAccountSession.value?.authentication_methods?.filter((item) => item?.method === 'oidc'));
+
+const data = computed(() => {
+  const res: any[] = [];
+  oidcSocials.value?.forEach((item) => {
+    res.push({
+      ...socialSignin.find((social) => social?.provider === item?.attributes?.value),
+      linked: item.name === 'link',
+    });
+  });
+  loggedInSocial.value?.forEach((item) => {
+    res.push({
+      ...socialSignin.find((social) => social?.provider === item?.provider),
+      linked: true,
+      disabled: true,
+    });
+  });
+  return res;
 });
 
 const onSocialLoginHandler = async (provider: string, toLink: boolean) => {
+  loadingProvider.value = provider;
   const dataToSend = toLink ? { link: provider } : { unlink: provider };
   await authLogicStore.onSettingsSocial(SELFSERVICE.settings, dataToSend);
+  loadingProvider.value = null;
 };
-
-onMounted(() => {
-  if (queryType.value?.includes('link') || queryType.value?.includes('unlink') || queryType.value?.includes('social')) {
-    onSocialLoginHandler(queryType.value, true);
-  }
-});
 </script>
 
 <template>
-  <div class="VFormSettingsSocial social-form">
-    <VButton
+  <div class="VFormSettingsSocial v-form-setting-social">
+    <div
       v-for="item in data"
-      :key="item.provider"
-      variant="tetriary"
-      size="large"
-      class="social-form__item"
-      :class="item.classes"
-      @click.stop.prevent="onSocialLoginHandler(item.provider, !item.linked)"
+      :key="item?.provider"
+      class="v-form-setting-social__item"
     >
-      {{ item.linked ? 'Unlink ' : 'Link ' }}
-      {{ item.provider }}
-    </VButton>
+      <checkIcon
+        v-if="item?.linked || item?.disabled"
+        class="v-form-setting-social__icon"
+      />
+      <VButton
+        variant="outlined"
+        size="small"
+        :disabled="loadingProvider === item?.provider"
+        :color="item?.linked ? 'secondary' : 'primary'"
+        :class="item?.classes"
+        @click.stop.prevent="onSocialLoginHandler(item?.provider, !item?.linked)"
+      >
+        <component
+          :is="item?.icon"
+          :alt="item?.classes"
+          class="v-form-setting-social__item-icon"
+        />
+        <component
+          :is="item?.iconHover"
+          :alt="item?.classes"
+          class="v-form-setting-social__item-icon-hover"
+        />
+        <span v-if="!item.disabled">
+          {{ item?.linked ? 'Unlink ' : 'Link ' }}
+        </span>
+        {{ capitalizeFirstLetter(item?.provider || '') }}
+      </VButton>
+    </div>
   </div>
 </template>
 
 <style lang="scss">
-.social-form {
+@use 'UiKit/styles/_colors.scss' as colors;
+@use 'UiKit/styles/_variables.scss' as *;
+
+.v-form-setting-social {
   display: flex;
+  flex-direction: column;
   justify-content: center;
-  align-items: flex-start;
-  gap: 40px;
+  align-items: flex-end;
+  gap: 8px;
   align-self: stretch;
-  width: 100%;
+  width: 190px;
+
+  @media screen and (max-width: $desktop) {
+      flex-direction: row;
+      width: 100%;
+      flex-wrap: wrap;
+    }
+
+  &__icon {
+    margin-right: 8px;
+    width: 16px;
+    flex-shrink: 0;
+    color: colors.$secondary;
+  }
+
+  &__item-icon,
+  &__item-icon-hover {
+    width: 16px;
+    height: 16px;
+    transition: all 0.3s ease;
+  }
 
   &__item-icon-hover {
     display: none;
+    transition: all 0.3s ease;
   }
 
   &__item {
     flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    width: 190px;
+    flex-shrink: 0;
+
+    @media screen and (max-width: $desktop) {
+      flex-direction: row-reverse;
+      justify-content: flex-end;
+    }
 
     &:hover {
-      .social-form__item-icon {
+      .v-form-setting-social__item-icon {
         display: none;
+        transition: all 0.3s ease;
       }
-      .social-form__item-icon-hover {
+      .v-form-setting-social__item-icon-hover {
         display: block;
+        transition: all 0.3s ease;
       }
     }
+  }
+
+  .v-button {
+    width: 166px;
   }
 }
 </style>

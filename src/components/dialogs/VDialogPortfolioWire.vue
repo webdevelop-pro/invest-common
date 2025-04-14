@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { PropType, ref } from 'vue';
+import { PropType, ref, watch } from 'vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { jsPDF } from 'jspdf';
 import { currency } from 'InvestCommon/helpers/currency';
@@ -8,6 +8,11 @@ import download from 'UiKit/assets/images/download.svg';
 import {
   VDialogContent, VDialogFooter, VDialogHeader, VDialogTitle, VDialog,
 } from 'UiKit/components/Base/VDialog';
+import { useDialogs } from 'InvestCommon/store/useDialogs';
+import { storeToRefs } from 'pinia';
+
+const useDialogsStore = useDialogs();
+const { isDialogTransactionOpen } = storeToRefs(useDialogsStore);
 
 const props = defineProps({
   investment: {
@@ -42,6 +47,12 @@ const saveHandler = () => {
     windowWidth: 690, // window width in CSS pixels
   });
 };
+
+watch(() => open.value, () => {
+  if (!open.value) {
+    isDialogTransactionOpen.value = false;
+  }
+});
 </script>
 
 <template>

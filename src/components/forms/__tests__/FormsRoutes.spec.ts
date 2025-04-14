@@ -4,7 +4,7 @@ import {
 } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import {
-  ROUTE_CHECK_EMAIL, ROUTE_DASHBOARD_PORTFOLIO, ROUTE_FORGOT, ROUTE_LOGIN, ROUTE_SETTINGS, ROUTE_SIGNUP,
+  ROUTE_CHECK_EMAIL, ROUTE_DASHBOARD_PORTFOLIO, ROUTE_FORGOT, ROUTE_LOGIN, ROUTE_SETTINGS_MFA, ROUTE_SIGNUP,
 } from 'InvestCommon/helpers/enums/routes';
 import { shallowMount } from '@vue/test-utils';
 import { useAuthLogicStore } from 'InvestCommon/store';
@@ -132,20 +132,20 @@ describe('ResetPasswordForm', () => {
     setActivePinia(createPinia());
   });
 
-  it('should router be ROUTE_SETTINGS when there is error', async () => {
+  it('should router be ROUTE_SETTINGS_MFA when there is error', async () => {
     const mockRouter = createRouter({ history: createWebHistory(), routes: [] });
-    mockRouter.currentRoute.value.name = ROUTE_SETTINGS;
+    mockRouter.currentRoute.value.name = ROUTE_SETTINGS_MFA;
     shallowMount(App, { global: { plugins: [mockRouter] } });
     vi.spyOn(mockRouter, 'push').mockResolvedValue();
 
     fetchMocker.mockReject(new Error('Fetch error'));
     await useAuthLogicStore().onReset('pass', SELFSERVICE.settings);
 
-    expect(mockRouter.currentRoute.value.name).toBe(ROUTE_SETTINGS);
+    expect(mockRouter.currentRoute.value.name).toBe(ROUTE_SETTINGS_MFA);
   });
   it('should router be ROUTE_DASHBOARD_PORTFOLIO when there is no error', async () => {
     const mockRouter = createRouter({ history: createWebHistory(), routes: [] });
-    mockRouter.currentRoute.value.name = ROUTE_SETTINGS;
+    mockRouter.currentRoute.value.name = ROUTE_SETTINGS_MFA;
     shallowMount(App, { global: { plugins: [mockRouter] } });
     vi.spyOn(mockRouter, 'push').mockResolvedValue();
 

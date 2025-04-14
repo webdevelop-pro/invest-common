@@ -44,8 +44,11 @@ export const ROUTE_SIGNUP = 'ROUTE_SIGNUP';
 export const ROUTE_SUBMIT_KYC = 'ROUTE_SUBMIT_KYC';
 export const ROUTE_CREATE_PROFILE = 'ROUTE_CREATE_PROFILE';
 export const ROUTE_FORGOT = 'ROUTE_FORGOT';
-export const ROUTE_SETTINGS = 'ROUTE_SETTINGS';
 export const ROUTE_CHECK_EMAIL = 'ROUTE_CHECK_EMAIL';
+
+export const ROUTE_SETTINGS_MFA = 'ROUTE_SETTINGS_MFA';
+export const ROUTE_SETTINGS_SECURITY = 'ROUTE_SETTINGS_SECURITY';
+export const ROUTE_SETTINGS_ACCOUNT_DETAILS = 'ROUTE_SETTINGS_ACCOUNT_DETAILS';
 
 export const ROUTE_ACCREDITATION_UPLOAD = 'ROUTE_ACCREDITATION_UPLOAD';
 
@@ -86,8 +89,11 @@ export const PAGE_TITLES = {
   [ROUTE_LOGIN]: `Login | ${DEFAULT_PAGE_TITLE}`,
   [ROUTE_SIGNUP]: `Signup | ${DEFAULT_PAGE_TITLE}`,
   [ROUTE_FORGOT]: `Recovery | ${DEFAULT_PAGE_TITLE}`,
-  [ROUTE_SETTINGS]: `Settings | ${DEFAULT_PAGE_TITLE}`,
   [ROUTE_CHECK_EMAIL]: `Check Your Email | ${DEFAULT_PAGE_TITLE}`,
+
+  [ROUTE_SETTINGS_MFA]: `Settings MFA | ${DEFAULT_PAGE_TITLE}`,
+  [ROUTE_SETTINGS_SECURITY]: `Settings Security | ${DEFAULT_PAGE_TITLE}`,
+  [ROUTE_SETTINGS_ACCOUNT_DETAILS]: `Settings Account Details | ${DEFAULT_PAGE_TITLE}`,
 
   [ROUTE_DASHBOARD_PORTFOLIO]: `Portfolio | ${DEFAULT_PAGE_TITLE}`,
   [ROUTE_DASHBOARD_ACCOUNT]: `Account details | ${DEFAULT_PAGE_TITLE}`,
@@ -142,7 +148,9 @@ export const PAGE_DESCRIPTIONS = {
   [ROUTE_LOGIN]: 'Access your account. Login securely to manage your investments and explore new opportunities.',
   [ROUTE_SIGNUP]: 'Join us today. Sign up to start your investment journey and unlock exclusive opportunities.',
   [ROUTE_FORGOT]: 'Recover your account. Regain access to your investments securely with our recovery process.',
-  [ROUTE_SETTINGS]: 'Manage your preferences. Customize your investment experience with our settings options.',
+  [ROUTE_SETTINGS_MFA]: 'Manage your preferences. Customize your investment experience with our settings options.',
+  [ROUTE_SETTINGS_SECURITY]: 'Manage your preferences. Customize your investment experience with our settings options.',
+  [ROUTE_SETTINGS_ACCOUNT_DETAILS]: 'Manage your preferences. Customize your investment experience with our settings options.',
   [ROUTE_CHECK_EMAIL]: 'Check your email. Confirm your identity and stay updated on investment opportunities.',
 
   [ROUTE_DASHBOARD_PORTFOLIO]: 'Track your investments. Monitor your portfolio performance and make informed decisions.',

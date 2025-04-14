@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { PropType, computed } from 'vue';
+import { PropType, computed, watch } from 'vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { IInvest } from 'InvestCommon/types/api/invest';
 import { urlContactUs } from 'InvestCommon/global/links';
@@ -8,6 +8,11 @@ import {
   VDialogHeader,
 } from 'UiKit/components/Base/VDialog';
 import VTablePortfolioTransaction from 'InvestCommon/components/tables/VTablePortfolioTransaction.vue';
+import { useDialogs } from 'InvestCommon/store/useDialogs';
+import { storeToRefs } from 'pinia';
+
+const useDialogsStore = useDialogs();
+const { isDialogTransactionOpen } = storeToRefs(useDialogsStore);
 
 const props = defineProps({
   investment: {
@@ -22,6 +27,12 @@ const title = computed(() => {
   if (props.investment.funding_type.toLowerCase() === 'ach') return 'ACH Transaction';
   if (props.investment.funding_type.toLowerCase() === 'wallet') return 'Wallet Transaction';
   return 'Transaction';
+});
+
+watch(() => open.value, () => {
+  if (!open.value) {
+    isDialogTransactionOpen.value = false;
+  }
 });
 </script>
 

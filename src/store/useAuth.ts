@@ -319,6 +319,7 @@ export const useAuthStore = defineStore('auth', () => {
   ) => {
     isSetSettingsLoading.value = true;
     isSetSettingsError.value = false;
+    setSettingsErrorData.value = null;
     const response = await fetchSetSettings(flowId, data, csrf_token)
       .catch(async (error: Response) => {
         isSetSettingsError.value = true;

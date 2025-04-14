@@ -24,6 +24,10 @@ import {
   VDialogContent, VDialogFooter, VDialog, VDialogTitle,
   VDialogHeader,
 } from 'UiKit/components/Base/VDialog';
+import { useDialogs } from 'InvestCommon/store/useDialogs';
+
+const useDialogsStore = useDialogs();
+const { isDialogCancelInvestmentOpen } = storeToRefs(useDialogsStore);
 
 const props = defineProps({
   investment: {
@@ -111,6 +115,12 @@ watch(() => setCancelOptionsData.value, () => {
 watch(() => model, () => {
   if (!isValid.value) onValidate();
 }, { deep: true });
+
+watch(() => open.value, () => {
+  if (!open.value) {
+    isDialogCancelInvestmentOpen.value = false;
+  }
+});
 </script>
 
 <template>

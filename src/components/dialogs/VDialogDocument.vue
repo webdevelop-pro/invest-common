@@ -1,9 +1,16 @@
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount, nextTick } from 'vue';
+import {
+  onMounted, onBeforeUnmount, nextTick, watch,
+} from 'vue';
 
 import {
   VDialogContent, VDialog,
 } from 'UiKit/components/Base/VDialog';
+import { useDialogs } from 'InvestCommon/store/useDialogs';
+import { storeToRefs } from 'pinia';
+
+const useDialogsStore = useDialogs();
+const { isDialogDocumentOpen } = storeToRefs(useDialogsStore);
 
 const props = defineProps({
   signUrl: {
@@ -29,6 +36,12 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   props.close();
+});
+
+watch(() => openValue.value, () => {
+  if (!openValue.value) {
+    isDialogDocumentOpen.value = false;
+  }
 });
 </script>
 
