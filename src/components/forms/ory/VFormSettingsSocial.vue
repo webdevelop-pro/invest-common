@@ -2,10 +2,8 @@
 import { SELFSERVICE } from 'InvestCommon/helpers/enums/auth';
 import { socialSignin } from './utilsAuth';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
-import { computed, onMounted, ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useAuthLogicStore } from 'InvestCommon/store/useAuthLogic';
-import { urlSettings, urlSignin } from 'InvestCommon/global/links';
-import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import { useAuthStore } from 'InvestCommon/store/useAuth';
 import { storeToRefs } from 'pinia';
 import { capitalizeFirstLetter } from 'UiKit/helpers/text';

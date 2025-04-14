@@ -22,11 +22,15 @@ import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValida
 import { isEmpty } from 'UiKit/helpers/general';
 import eyeOff from 'UiKit/assets/images/eye-off.svg';
 import eye from 'UiKit/assets/images/eye.svg';
+import { urlSettings } from 'InvestCommon/global/links';
+import { useUsersStore } from 'InvestCommon/store/useUsers';
 
 const authStore = useAuthStore();
 const { isSetPasswordLoading, setPasswordErrorData } = storeToRefs(authStore);
 const authLogicStore = useAuthLogicStore();
 const { loading } = storeToRefs(authStore);
+const usersStore = useUsersStore();
+const { selectedUserProfileId } = storeToRefs(usersStore);
 
 const showCreatePassword = ref(true);
 const showRepeatPassword = ref(true);
@@ -104,12 +108,8 @@ watch(() => [schema], () => {
     novalidate
     @submit.prevent="resetHandler"
   >
-    <h2 class="v-form-reset-password__title is--h3__title">
-      Reset Your Password
-    </h2>
-    <div class="v-form-reset-password__wrap">
       <FormRow>
-        <FormCol col2>
+        <FormCol>
           <VFormGroup
             v-slot="VFormGroupProps"
             :model="model"
@@ -169,7 +169,9 @@ watch(() => [schema], () => {
             </div>
           </div>
         </FormCol>
-        <FormCol col2>
+      </FormRow>
+        <FormRow>
+        <FormCol>
           <VFormGroup
             v-slot="VFormGroupProps"
             :model="model"
@@ -220,7 +222,7 @@ watch(() => [schema], () => {
       </FormRow>
       <VButton
         size="large"
-        :uppercase="false"
+        block
         data-testid="button"
         :loading="isSetPasswordLoading || loading"
         :disabled="isDisabledButton"
@@ -228,7 +230,16 @@ watch(() => [schema], () => {
       >
         Reset Password
       </VButton>
-    </div>
+      <VButton
+        size="large"
+        as="a"
+        :href="urlSettings(selectedUserProfileId)"
+        block
+        variant="link"
+        class="v-form-reset-password__btn"
+      >
+        Back to Settings
+      </VButton>
   </form>
 </template>
 
@@ -236,6 +247,10 @@ watch(() => [schema], () => {
 @use 'UiKit/styles/_variables.scss' as *;
 .v-form-reset-password {
   $root: &;
+
+  padding: 40px;
+  background: $white;
+  box-shadow: $box-shadow-medium;
 
   &__title {
     color: $black;
@@ -261,7 +276,7 @@ watch(() => [schema], () => {
   &__password-strength-bar {
     position: relative;
     height: 3px;
-    margin: 8px auto 40px;
+    margin: 8px auto 25px;
     background: $gray-30;
     border-radius: 2px;
     @media screen and (max-width: $tablet){
@@ -341,6 +356,10 @@ watch(() => [schema], () => {
     flex-shrink: 0;
     @media screen and (max-width: $tablet){
       margin-top: 0;
+    }
+
+    & + & {
+      margin-top: 16px;
     }
   }
 }
