@@ -11,15 +11,12 @@ import { useUsersStore } from 'InvestCommon/store/useUsers';
 import { useOfferStore } from 'InvestCommon/store/useOffer';
 import { storeToRefs } from 'pinia';
 import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
-import { useDialogs } from 'InvestCommon/store/useDialogs';
 import { ROUTE_INVESTMENT_DOCUMENTS, ROUTE_INVESTMENT_TIMELINE } from 'InvestCommon/helpers/enums/routes';
 import { useRoute, useRouter } from 'vue-router';
 import file from 'UiKit/assets/images/file.svg';
 import timeline from 'UiKit/assets/images/timeline.svg';
 import { VTableCell, VTableRow } from 'UiKit/components/Base/VTable';
 import { capitalizeFirstLetter } from 'UiKit/helpers/text';
-
-const useDialogsStore = useDialogs();
 
 const props = defineProps({
   item: {
@@ -28,6 +25,8 @@ const props = defineProps({
   },
   colspan: Number,
 });
+
+const emit = defineEmits(['onCancelInvestmentClick']);
 
 const investmentsStore = useInvestmentsStore();
 const { isGetInvestOneLoading } = storeToRefs(investmentsStore);
@@ -55,7 +54,7 @@ const onTimelineClick = () => {
   });
 };
 const onCancelInvestmentClick = () => {
-  useDialogsStore.showCancelInvestment(props.item);
+  emit('onCancelInvestmentClick');
 };
 
 onBeforeMount(async () => {

@@ -3,8 +3,7 @@ import { currency } from 'InvestCommon/helpers/currency';
 import { formatToFullDate } from 'InvestCommon/helpers/formatters/formatToDate';
 import { IInvest } from 'InvestCommon/types/api/invest';
 import VBadge from 'UiKit/components/Base/VBadge/VBadge.vue';
-import { PropType, computed, watch } from 'vue';
-import { useDialogs } from 'InvestCommon/store/useDialogs';
+import { PropType, computed } from 'vue';
 import { useOfferStore } from 'InvestCommon/store/useOffer';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
 import { storeToRefs } from 'pinia';
@@ -13,17 +12,14 @@ import {
 } from 'InvestCommon/helpers/investment';
 import { ROUTE_INVESTMENT_DOCUMENTS } from 'InvestCommon/helpers/enums/routes';
 import expand from 'UiKit/assets/images/expand.svg';
-import { useRoute } from 'vue-router';
 import { VTableCell, VTableRow } from 'UiKit/components/Base/VTable';
 import chevronDownIcon from 'UiKit/assets/images/chevron-down.svg';
 import VImage from 'UiKit/components/Base/VImage/VImage.vue';
 import { capitalizeFirstLetter } from 'UiKit/helpers/text';
 
-const useDialogsStore = useDialogs();
 const userStore = useUsersStore();
 const { selectedUserProfileData, selectedUserProfileId } = storeToRefs(userStore);
 const offerStore = useOfferStore();
-const route = useRoute();
 
 const props = defineProps({
   item: {
@@ -33,9 +29,7 @@ const props = defineProps({
   search: String,
 });
 
-const queryPopupWire = computed(() => (route.query.popup === 'wire'));
-const queryPopupTransaction = computed(() => (route.query.popup === 'transaction'));
-const queryPopupId = computed(() => Number(route.query.id));
+const emit = defineEmits(['clickFundingType']);
 
 const itemFormatted = computed(() => ({
   id: props.item.id,
@@ -52,22 +46,7 @@ const itemFormatted = computed(() => ({
 }));
 
 const isDefaultImage = computed(() => (!props.item?.offer?.image?.meta_data?.small && !props.item?.offer?.image?.url));
-const userName = computed(() => `${selectedUserProfileData.value?.data.first_name} ${selectedUserProfileData.value?.data.last_name}`);
-const isFundingLinkWire = computed(() => itemFormatted.value.type === 'wire');
 const isFundingClickable = computed(() => isInvestmentFundingClickable(props.item));
-
-const onFundingType = () => {
-  if (!isFundingClickable.value) return;
-  if (isFundingLinkWire.value) useDialogsStore.showWire(props.item, userName.value);
-  else useDialogsStore.showTransaction(props.item, userName.value);
-};
-
-watch(() => [queryPopupWire.value, queryPopupId.value, queryPopupTransaction.value], () => {
-  if ((queryPopupWire.value || queryPopupTransaction.value)
-    && queryPopupId.value && (queryPopupId.value === props.item.id)) {
-    setTimeout(() => onFundingType(), 400);
-  }
-}, { immediate: true });
 </script>
 
 <template>
@@ -120,7 +99,7 @@ watch(() => [queryPopupWire.value, queryPopupId.value, queryPopupTransaction.val
       <div
         class="v-table-item-header__table-funding-type"
         :class="{ 'is--link-regular': isFundingClickable }"
-        @click.stop="onFundingType"
+        @click.stop="emit('clickFundingType', itemFormatted.id)"
       >
         {{ itemFormatted.type }}
       </div>

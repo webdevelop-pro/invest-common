@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, defineAsyncComponent, ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useInvestmentsStore } from 'InvestCommon/store/useInvestments';
 import { useOfferStore } from 'InvestCommon/store/useOffer';
@@ -9,7 +9,6 @@ import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import {
   ROUTE_INVEST_FUNDING, ROUTE_INVEST_OWNERSHIP,
 } from 'InvestCommon/helpers/enums/routes';
-import { useDialogs } from 'InvestCommon/store/useDialogs';
 import { ISignature } from 'InvestCommon/types/api/invest';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import VFormCheckbox from 'UiKit/components/Base/VForm/VFormCheckbox.vue';
@@ -19,6 +18,10 @@ import arrowLeft from 'UiKit/assets/images/arrow-left.svg?component';
 import file from 'UiKit/assets/images/file.svg';
 import { urlTerms, urlPrivacy, urlOfferSingle } from 'InvestCommon/global/links';
 
+const VDialogDocument = defineAsyncComponent({
+  loader: () => import('InvestCommon/components/dialogs/VDialogDocument.vue'),
+});
+
 const { submitFormToHubspot } = useHubspotForm('745431ff-2fed-4567-91d7-54e1c3385844');
 const offerStore = useOfferStore();
 const { getUnconfirmedOfferData } = storeToRefs(offerStore);
@@ -27,7 +30,7 @@ const { userAccountData } = storeToRefs(usersStore);
 const {
   onClose, onSign, openHelloSign, closeHelloSign,
 } = useHelloSign();
-const useDialogsStore = useDialogs();
+const isDialogDocumentOpen = ref(false);
 const router = useRouter();
 const route = useRoute();
 const checkbox1 = ref(false);
@@ -65,6 +68,8 @@ const continueHandler = () => {
   });
 };
 
+const signUrl = computed(() => (setDocumentData.value?.sign_url || ''));
+
 const documentHandler = async () => {
   if (signId.value) {
     await investmentsStore.getDocument(id);
@@ -75,8 +80,10 @@ const documentHandler = async () => {
   await investmentsStore.setDocument(slug, id, profileId);
 
   if (setDocumentData.value && setDocumentData.value.sign_url) {
-    useDialogsStore.showDocument(setDocumentData.value.sign_url, openHelloSign, closeHelloSign);
-    onClose(() => useDialogsStore.hideDocument());
+    isDialogDocumentOpen.value = true;
+    onClose(() => {
+      isDialogDocumentOpen.value = false;
+    });
   }
 };
 </script>
@@ -182,6 +189,12 @@ const documentHandler = async () => {
         </VButton>
       </div>
     </div>
+    <VDialogDocument
+      v-model="isDialogDocumentOpen"
+      :sign-url="signUrl"
+      :close="closeHelloSign"
+      :open="openHelloSign"
+    />
   </div>
 </template>
 

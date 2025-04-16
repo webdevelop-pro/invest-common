@@ -24,7 +24,11 @@ watch(() => open.value, () => {
 </script>
 
 <template>
-  <VDialog v-model:open="open">
+  <VDialog
+    v-model:open="open"
+    query-key="popup"
+    query-value="security-check"
+  >
     <VDialogContent
       :aria-describedby="undefined"
       class="VDialogRefreshSession v-dialog-refresh-session"

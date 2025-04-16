@@ -12,7 +12,7 @@ import { watch } from 'vue';
 import { useDialogs } from 'InvestCommon/store/useDialogs';
 
 const useDialogsStore = useDialogs();
-const { isDialogLogOutOpen } = storeToRefs(useDialogsStore);
+const { isDialogLogoutOpen } = storeToRefs(useDialogsStore);
 
 const authLogicStore = useAuthLogicStore();
 const { isLoadingLogout } = storeToRefs(authLogicStore);
@@ -26,13 +26,17 @@ const { EXTERNAL } = env;
 
 watch(() => open.value, () => {
   if (!open.value) {
-    isDialogLogOutOpen.value = false;
+    isDialogLogoutOpen.value = false;
   }
 });
 </script>
 
 <template>
-  <VDialog v-model:open="open">
+  <VDialog
+    v-model:open="open"
+    query-key="popup"
+    query-value="log-out"
+  >
     <VDialogContent
       :aria-describedby="undefined"
       class="v-dialog-log-out"

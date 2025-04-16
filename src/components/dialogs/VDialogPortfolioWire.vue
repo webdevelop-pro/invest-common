@@ -8,11 +8,6 @@ import download from 'UiKit/assets/images/download.svg';
 import {
   VDialogContent, VDialogFooter, VDialogHeader, VDialogTitle, VDialog,
 } from 'UiKit/components/Base/VDialog';
-import { useDialogs } from 'InvestCommon/store/useDialogs';
-import { storeToRefs } from 'pinia';
-
-const useDialogsStore = useDialogs();
-const { isDialogTransactionOpen } = storeToRefs(useDialogsStore);
 
 const props = defineProps({
   investment: {
@@ -32,7 +27,7 @@ const saveHandler = () => {
   pdf.html(DownloadComp.value, {
     callback(doc) {
       // Save the PDF
-      doc.save(`WireInformation${props.investment.id}.pdf`);
+      doc.save(`WireInformation${props.investment?.id}.pdf`);
     },
     margin: [10, 10, 10, 10],
     autoPaging: 'text',
@@ -47,16 +42,14 @@ const saveHandler = () => {
     windowWidth: 690, // window width in CSS pixels
   });
 };
-
-watch(() => open.value, () => {
-  if (!open.value) {
-    isDialogTransactionOpen.value = false;
-  }
-});
 </script>
 
 <template>
-  <VDialog v-model:open="open">
+  <VDialog
+    v-model:open="open"
+    :query-key="`popup-${investment?.id}`"
+    query-value="wire"
+  >
     <VDialogContent
       :aria-describedby="undefined"
       class="wd-modal-portfolio-wire"
@@ -77,7 +70,7 @@ watch(() => open.value, () => {
               Investment ID:
             </span>
             <span class="wd-modal-portfolio-wire__text-value">
-              {{ investment.id }}
+              {{ investment?.id }}
             </span>
           </div>
           <div class="wd-modal-portfolio-wire__row">
@@ -85,7 +78,7 @@ watch(() => open.value, () => {
               Amount:
             </span>
             <span class="wd-modal-portfolio-wire__text-value">
-              {{ currency(investment.amount) }}
+              {{ currency(investment?.amount) }}
             </span>
           </div>
           <div class="wd-modal-portfolio-wire__row">
@@ -93,7 +86,7 @@ watch(() => open.value, () => {
               Offer Legal Name:
             </span>
             <span class="wd-modal-portfolio-wire__text-value">
-              {{ investment.offer.legal_name }}
+              {{ investment?.offer?.legal_name }}
             </span>
           </div>
           <div class="wd-modal-portfolio-wire__row">
@@ -101,7 +94,7 @@ watch(() => open.value, () => {
               Offer Name:
             </span>
             <span class="wd-modal-portfolio-wire__text-value">
-              {{ investment.offer.name }}
+              {{ investment?.offer?.name }}
             </span>
           </div>
           <hr class="wd-modal-portfolio-wire__divider" />
@@ -110,7 +103,7 @@ watch(() => open.value, () => {
               Wire to:
             </span>
             <span class="wd-modal-portfolio-wire__text-value">
-              {{ investment.offer.data?.wire_to }}
+              {{ investment?.offer?.data?.wire_to }}
             </span>
           </div>
           <div class="wd-modal-portfolio-wire__row">
@@ -118,7 +111,7 @@ watch(() => open.value, () => {
               Routing Number:
             </span>
             <span class="wd-modal-portfolio-wire__text-value">
-              {{ investment.offer.data?.routing_number }}
+              {{ investment?.offer.data?.routing_number }}
             </span>
           </div>
           <div class="wd-modal-portfolio-wire__row">
@@ -126,7 +119,7 @@ watch(() => open.value, () => {
               Account Number:
             </span>
             <span class="wd-modal-portfolio-wire__text-value">
-              {{ investment.offer.data?.account_number }}
+              {{ investment?.offer.data?.account_number }}
             </span>
           </div>
           <div class="wd-modal-portfolio-wire__row">
@@ -134,7 +127,7 @@ watch(() => open.value, () => {
               Custodian / Account Name:
             </span>
             <span class="wd-modal-portfolio-wire__text-value">
-              {{ investment.offer.data?.custodian }}
+              {{ investment?.offer.data?.custodian }}
             </span>
           </div>
           <div class="wd-modal-portfolio-wire__row">
@@ -142,7 +135,7 @@ watch(() => open.value, () => {
               FFCT:
             </span>
             <span class="wd-modal-portfolio-wire__text-value">
-              Offer {{ investment.offer.id }}, {{ userName }}
+              Offer {{ investment?.offer?.id }}, {{ userName }}
             </span>
           </div>
           <div class="wd-modal-portfolio-wire__row">
@@ -150,7 +143,7 @@ watch(() => open.value, () => {
               SWIFT ID:
             </span>
             <span class="wd-modal-portfolio-wire__text-value">
-              {{ investment.offer.data?.swift_id }}
+              {{ investment?.offer?.data?.swift_id }}
             </span>
           </div>
         </div>

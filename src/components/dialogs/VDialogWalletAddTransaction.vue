@@ -7,11 +7,6 @@ import {
   VDialogHeader,
   VDialogTitle,
 } from 'UiKit/components/Base/VDialog';
-import { useDialogs } from 'InvestCommon/store/useDialogs';
-import { storeToRefs } from 'pinia';
-
-const useDialogsStore = useDialogs();
-const { isDialogAddTransactionOpen } = storeToRefs(useDialogsStore);
 
 const open = defineModel<boolean>();
 const props = defineProps({
@@ -23,16 +18,14 @@ const props = defineProps({
 
 const isTypeDeposit = ref((props.transactionType === WalletAddTransactionTypes.deposit));
 const titile = ref((isTypeDeposit.value ? 'Add Funds' : 'Withdraw'));
-
-watch(() => open.value, () => {
-  if (!open.value) {
-    isDialogAddTransactionOpen.value = false;
-  }
-});
 </script>
 
 <template>
-  <VDialog v-model:open="open">
+  <VDialog
+    v-model:open="open"
+    query-key="popup"
+    query-value="add-transaction"
+  >
     <VDialogContent
       :aria-describedby="undefined"
       class="VDialogWalletAddTransaction v-dialog-wallet-add-transaction"

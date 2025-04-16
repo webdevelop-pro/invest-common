@@ -18,11 +18,12 @@ import { emailRule, errorMessageRule, firstNameRule } from 'UiKit/helpers/valida
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 
-defineProps({
+const props = defineProps({
   isInDialog: {
     type: Boolean,
     default: false,
   },
+  subject: String,
 });
 
 const emit = defineEmits(['close']);
@@ -114,6 +115,12 @@ watch(() => userAccountData.value?.email, () => {
     model.email = userAccountData.value?.email || '';
   }
 }, { deep: true, immediate: true });
+
+watch(() => props.subject, () => {
+  if (props.subject) {
+    model.subject = props.subject;
+  }
+}, { immediate: true });
 
 const onSubmit = async () => {
   onValidate();

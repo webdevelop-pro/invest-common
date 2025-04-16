@@ -3,24 +3,20 @@ import ContactUsForm from 'InvestCommon/components/forms/VFormContactUs.vue';
 import {
   VDialogContent, VDialogHeader, VDialogTitle, VDialog,
 } from 'UiKit/components/Base/VDialog';
-import { watch } from 'vue';
-import { useDialogs } from 'InvestCommon/store/useDialogs';
-import { storeToRefs } from 'pinia';
-
-const useDialogsStore = useDialogs();
-const { isDialogContactUsOpen } = storeToRefs(useDialogsStore);
 
 const open = defineModel<boolean>();
 
-watch(() => open.value, () => {
-  if (!open.value) {
-    isDialogContactUsOpen.value = false;
-  }
+defineProps({
+  subject: String,
 });
 </script>
 
 <template>
-  <VDialog v-model:open="open">
+  <VDialog
+    v-model:open="open"
+    query-key="popup"
+    query-value="contact-us"
+  >
     <VDialogContent
       :aria-describedby="undefined"
       class="v-dialog-contact-us"
@@ -32,6 +28,7 @@ watch(() => open.value, () => {
       </VDialogHeader>
       <ContactUsForm
         is-in-dialog
+        :subject="subject"
         class="is--margin-top-40"
         @close="open = false"
       />

@@ -2,6 +2,7 @@
 import {
   watch, PropType, computed, reactive,
   ref,
+  defineAsyncComponent,
 } from 'vue';
 import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
@@ -18,7 +19,6 @@ import { filterSchema, getFilteredObject } from 'UiKit/helpers/validation/genera
 import { createFormModel, getOptions } from 'UiKit/helpers/model';
 import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
 import { isEmpty } from 'UiKit/helpers/general';
-import { useDialogs } from 'InvestCommon/store/useDialogs';
 
 interface FormModelAccount {
   first_name: string;
@@ -37,8 +37,11 @@ const userProfilesStore = useUserProfilesStore();
 const {
   setUserErrorData, setUserOptionsData, isSetUserLoading,
 } = storeToRefs(userProfilesStore);
-const useDialogsStore = useDialogs();
-const { isDialogContactUsOpen } = storeToRefs(useDialogsStore);
+const isDialogContactUsOpen = ref(false);
+
+const VDialogContactUs = defineAsyncComponent({
+  loader: () => import('InvestCommon/components/dialogs/VDialogContactUs.vue'),
+});
 
 const schema = {
   $schema: 'http://json-schema.org/draft-07/schema#',
@@ -242,6 +245,10 @@ watch(() => [setUserOptionsData.value, schema], () => {
         </VFormGroup>
       </FormCol>
     </FormRow>
+    <VDialogContactUs
+      v-model="isDialogContactUsOpen"
+      subject="other"
+    />
   </div>
 </template>
 

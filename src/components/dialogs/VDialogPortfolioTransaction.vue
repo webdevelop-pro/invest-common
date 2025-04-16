@@ -8,11 +8,6 @@ import {
   VDialogHeader,
 } from 'UiKit/components/Base/VDialog';
 import VTablePortfolioTransaction from 'InvestCommon/components/tables/VTablePortfolioTransaction.vue';
-import { useDialogs } from 'InvestCommon/store/useDialogs';
-import { storeToRefs } from 'pinia';
-
-const useDialogsStore = useDialogs();
-const { isDialogTransactionOpen } = storeToRefs(useDialogsStore);
 
 const props = defineProps({
   investment: {
@@ -24,20 +19,18 @@ const props = defineProps({
 const open = defineModel<boolean>();
 
 const title = computed(() => {
-  if (props.investment.funding_type.toLowerCase() === 'ach') return 'ACH Transaction';
-  if (props.investment.funding_type.toLowerCase() === 'wallet') return 'Wallet Transaction';
+  if (props.investment?.funding_type?.toLowerCase() === 'ach') return 'ACH Transaction';
+  if (props.investment?.funding_type?.toLowerCase() === 'wallet') return 'Wallet Transaction';
   return 'Transaction';
-});
-
-watch(() => open.value, () => {
-  if (!open.value) {
-    isDialogTransactionOpen.value = false;
-  }
 });
 </script>
 
 <template>
-  <VDialog v-model:open="open">
+  <VDialog
+    v-model:open="open"
+    :query-key="`popup-${investment?.id}`"
+    query-value="transaction"
+  >
     <VDialogContent
       :aria-describedby="undefined"
       class="v-dialog-portfolio-transaction"

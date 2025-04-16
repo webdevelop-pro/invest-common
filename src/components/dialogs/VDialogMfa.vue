@@ -4,24 +4,16 @@ import {
   VDialogContent, VDialogHeader, VDialogTitle, VDialog, VDialogFooter,
 } from 'UiKit/components/Base/VDialog';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
-import { onMounted, watch } from 'vue';
-import { useDialogs } from 'InvestCommon/store/useDialogs';
-import { storeToRefs } from 'pinia';
-
-const useDialogsStore = useDialogs();
-const { isDialogMfaOpen } = storeToRefs(useDialogsStore);
 
 const open = defineModel<boolean>();
-
-watch(() => open.value, () => {
-  if (!open.value) {
-    isDialogMfaOpen.value = false;
-  }
-});
 </script>
 
 <template>
-  <VDialog v-model:open="open">
+  <VDialog
+    v-model:open="open"
+    query-key="popup"
+    query-value="mfa"
+  >
     <VDialogContent
       :aria-describedby="undefined"
       class="v-dialog-mfa"

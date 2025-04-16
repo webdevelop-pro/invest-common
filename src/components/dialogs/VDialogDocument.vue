@@ -1,16 +1,12 @@
 <script setup lang="ts">
 import {
-  onMounted, onBeforeUnmount, nextTick, watch,
+  onMounted, onBeforeUnmount, nextTick,
+  watch,
 } from 'vue';
 
 import {
   VDialogContent, VDialog,
 } from 'UiKit/components/Base/VDialog';
-import { useDialogs } from 'InvestCommon/store/useDialogs';
-import { storeToRefs } from 'pinia';
-
-const useDialogsStore = useDialogs();
-const { isDialogDocumentOpen } = storeToRefs(useDialogsStore);
 
 const props = defineProps({
   signUrl: {
@@ -25,28 +21,32 @@ const props = defineProps({
     type: Function,
     required: true,
   },
+  modelValue: {
+    type: Boolean,
+    default: false,
+  },
 });
 const openValue = defineModel<boolean>();
 
-onMounted(() => {
-  nextTick(() => {
-    props.open(props.signUrl, 'e-sign');
-  });
+watch(() => props.modelValue, () => {
+  if (props.modelValue) {
+    nextTick(() => {
+      props.open(props.signUrl, 'e-sign');
+    });
+  }
 });
 
 onBeforeUnmount(() => {
   props.close();
 });
-
-watch(() => openValue.value, () => {
-  if (!openValue.value) {
-    isDialogDocumentOpen.value = false;
-  }
-});
 </script>
 
 <template>
-  <VDialog v-model:open="openValue">
+  <VDialog
+    v-model:open="openValue"
+    query-key="popup"
+    query-value="documents"
+  >
     <VDialogContent
       :aria-describedby="undefined"
       full-screen

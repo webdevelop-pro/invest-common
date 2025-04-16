@@ -24,10 +24,6 @@ import {
   VDialogContent, VDialogFooter, VDialog, VDialogTitle,
   VDialogHeader,
 } from 'UiKit/components/Base/VDialog';
-import { useDialogs } from 'InvestCommon/store/useDialogs';
-
-const useDialogsStore = useDialogs();
-const { isDialogCancelInvestmentOpen } = storeToRefs(useDialogsStore);
 
 const props = defineProps({
   investment: {
@@ -84,16 +80,16 @@ const cancelInvestHandler = async () => {
     return;
   }
 
-  if (props.investment.id) {
-    await investmentsStore.cancelInvestment(String(props.investment.id), model.cancelation_reason);
+  if (props.investment?.id) {
+    await investmentsStore.cancelInvestment(String(props.investment?.id), model.cancelation_reason);
   }
 
   if (cancelInvestData.value) {
     submitFormToHubspot({
       email: userAccountData.value?.email,
       cancellation_reason: model.cancelation_reason,
-      cancellation_offer_name: props.investment.offer.name,
-      cancellation_offer_id: props.investment.id,
+      cancellation_offer_name: props.investment?.offer?.name,
+      cancellation_offer_id: props.investment?.id,
     });
     useOfferStore().getConfirmedOffers(selectedUserProfileId.value);
     open.value = false;
@@ -105,7 +101,7 @@ const onBackClick = () => {
 };
 
 onMounted(() => {
-  useInvestmentsStore().setCanceOptions(String(props.investment.id));
+  useInvestmentsStore().setCanceOptions(String(props.investment?.id));
 });
 
 watch(() => setCancelOptionsData.value, () => {
@@ -115,16 +111,14 @@ watch(() => setCancelOptionsData.value, () => {
 watch(() => model, () => {
   if (!isValid.value) onValidate();
 }, { deep: true });
-
-watch(() => open.value, () => {
-  if (!open.value) {
-    isDialogCancelInvestmentOpen.value = false;
-  }
-});
 </script>
 
 <template>
-  <VDialog v-model:open="open">
+  <VDialog
+    v-model:open="open"
+    :query-key="`popup-${investment?.id}`"
+    query-value="cancel"
+  >
     <VDialogContent
       :aria-describedby="undefined"
       class="VDialogPortfolioCancelInvestment v-dialog-cancel-investment"
@@ -138,8 +132,8 @@ watch(() => open.value, () => {
         <div class="v-dialog-cancel-investment__text">
           <p class="v-dialog-cancel-investment__text is--body">
             You are about to cancel your investment
-            <strong>#{{ investment.id }}</strong> in <strong>{{ investment.offer.name }}</strong>.
-            Your funds, {{ currency(Number(investment.amount), 0) }} will be send back to the funding
+            <strong>#{{ investment?.id }}</strong> in <strong>{{ investment?.offer?.name }}</strong>.
+            Your funds, {{ currency(Number(investment?.amount), 0) }} will be send back to the funding
             source wire of individual profile. In case if you want to get more information, please take a
             look
             <a
