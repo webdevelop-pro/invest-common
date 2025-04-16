@@ -1,5 +1,8 @@
 import { IInvest, InvestFundingStatuses, InvestmentStatuses } from 'InvestCommon/types/api/invest';
 import defaultImage from 'InvestCommon/assets/images/default.svg?url';
+import env from 'InvestCommon/global';
+
+const { FILER_URL } = env;
 
 export const getInvestmentTagBackground = (status: string | undefined): string => {
   if (status === 'legally_confirmed') return 'secondary-light';
@@ -44,12 +47,14 @@ export const getInvestmentOfferImage = (
   investment: IInvest | null,
   metaSize: 'big' | 'small' | 'medium' = 'small',
 ): string => {
+  const imageID = investment?.offer?.image_link_id;
   if (investment?.offer?.image?.meta_data && investment?.offer?.image?.meta_data[metaSize]) {
     return investment.offer.image.meta_data[metaSize];
   }
   if (investment?.offer?.image?.url) {
     return investment.offer.image.url;
   }
+  if (imageID && (imageID > 0)) return `${FILER_URL}/auth/files/${imageID.value}?size=${metaSize}`;
   return defaultImage;
 };
 

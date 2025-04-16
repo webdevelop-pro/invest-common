@@ -132,6 +132,10 @@ const isFundingClickable = computed(() => isInvestmentFundingClickable(props.ite
   &__table-image {
     width: 100%;
     height: 100%;
+    &.is--default-image {
+      max-width: 75%;
+      max-height: 75%;
+    }
   }
 
   &__table-offer {
