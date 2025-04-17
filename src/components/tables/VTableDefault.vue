@@ -12,7 +12,7 @@ interface IHead {
 }
 
 const props = defineProps<{
-  header: IHead[];
+  header?: IHead[];
   data: unknown[];
   loading: boolean;
   loadingRowLength?: number;
