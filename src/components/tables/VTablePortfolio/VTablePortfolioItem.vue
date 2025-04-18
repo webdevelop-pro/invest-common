@@ -5,10 +5,10 @@ import {
 import VTableItemHeader from './VTablePortfolioItemHeader.vue';
 import VTableItemContent from './VTablePortfolioItemContent.vue';
 import { IInvest } from 'InvestCommon/types/api/invest';
-import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
 import { isInvestmentFundingClickable } from 'InvestCommon/helpers/investment';
+import { useSyncWithUrl } from 'UiKit/composables/useSyncWithUrl';
 
 const userStore = useUsersStore();
 const { selectedUserProfileData, selectedUserProfileId } = storeToRefs(userStore);
@@ -23,8 +23,6 @@ const VDialogPortfolioCancelInvestment = defineAsyncComponent({
   loader: () => import('InvestCommon/components/dialogs/VDialogPortfolioCancelInvestment.vue'),
 });
 
-const route = useRoute();
-const queryId = computed(() => Number(route.query.id));
 const props = defineProps({
   item: {
     type: Object as PropType<IInvest>,
@@ -32,8 +30,17 @@ const props = defineProps({
   },
   search: String,
   colspan: Number,
+  activeId: Number,
 });
 const isOpen = defineModel<boolean>();
+const isOpenId = useSyncWithUrl<number>({
+  key: 'id',
+  defaultValue: 0,
+  parse: (val) => {
+    const num = Number(val);
+    return Number.isNaN(num) ? 0 : num;
+  },
+});
 const scrollTarget = computed(() => `scrollTarget${props.item?.id}`);
 const isDialogTransactionOpen = ref(false);
 const isDialogWireOpen = ref(false);
@@ -42,6 +49,7 @@ const isDialogCancelOpen = ref(false);
 const userName = computed(() => `${selectedUserProfileData.value?.data.first_name} ${selectedUserProfileData.value?.data.last_name}`);
 const isFundingLinkWire = computed(() => props.item?.type === 'wire');
 const isFundingClickable = computed(() => isInvestmentFundingClickable(props.item));
+const isActiveId = computed(() => (props.item.id === props.activeId));
 
 const onFundingType = () => {
   if (!isFundingClickable.value) return;
@@ -50,7 +58,7 @@ const onFundingType = () => {
 };
 
 onMounted(() => {
-  if (queryId.value && (props.item.id === queryId.value)) {
+  if (props.activeId && (props.item.id === props.activeId)) {
     const target = document.getElementById(scrollTarget.value);
     // Ensure the element exists before scrolling
     if (target) {
@@ -60,9 +68,22 @@ onMounted(() => {
 });
 
 watch(() => props.item.id, () => {
-  isOpen.value = (props.item.id === queryId.value);
+  isOpen.value = isActiveId.value;
 }, { immediate: true });
 
+watch(() => isOpen.value, () => {
+  if (isOpen.value) {
+    isOpenId.value = props.item.id;
+  } else if (isActiveId.value) {
+    isOpenId.value = 0;
+  }
+});
+
+watch(() => props.activeId, (newId) => {
+  if (!isActiveId.value) {
+    isOpen.value = false;
+  }
+}, { immediate: true });
 </script>
 
 <template>

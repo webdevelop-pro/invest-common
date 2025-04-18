@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {
-  PropType, computed, nextTick, onMounted, reactive, ref, watch,
+  PropType, computed, nextTick, reactive, ref, watch,
 } from 'vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { currency } from 'InvestCommon/helpers/currency';
@@ -100,16 +100,16 @@ const onBackClick = () => {
   open.value = false;
 };
 
-onMounted(() => {
-  useInvestmentsStore().setCanceOptions(String(props.investment?.id));
-});
-
 watch(() => setCancelOptionsData.value, () => {
   validator = new PrecompiledValidator<FormModel>(setCancelOptionsData.value, schema.value);
 });
 
 watch(() => model, () => {
   if (!isValid.value) onValidate();
+}, { deep: true });
+
+watch(() => open.value, () => {
+  if (open.value) useInvestmentsStore().setCanceOptions(String(props.investment?.id));
 }, { deep: true });
 </script>
 

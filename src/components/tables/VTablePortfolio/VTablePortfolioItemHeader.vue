@@ -176,18 +176,7 @@ const isFundingClickable = computed(() => isInvestmentFundingClickable(props.ite
 
   &.is--open {
     position: relative;
-    &::after {
-      box-sizing: border-box;
-      content:'';
-      position:absolute;
-      left:0;
-      right:2px;
-      top: 0;
-      display: block;
-      height: 100%;
-      // box-shadow: variables.$box-shadow-small;
-      box-shadow: 0px 2px 5px -5px rgba(18, 22, 31, 0.03), 0px 2px 3px -3px rgba(18, 22, 31, 0.15);;
-    }
+    box-shadow: 0px 2px 5px -5px rgba(18, 22, 31, 0.03), 0px 2px 3px -3px rgba(18, 22, 31, 0.15);
 
     #{$root}__chevron {
       transform: rotate(180deg);
