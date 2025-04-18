@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useFundingStore } from 'InvestCommon/store/useFunding';
 import { useInvestmentsStore } from 'InvestCommon/store/useInvestments';
@@ -16,6 +16,7 @@ import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import { storeToRefs } from 'pinia';
 import arrowLeft from 'UiKit/assets/images/arrow-left.svg';
 import { urlOfferSingle } from 'InvestCommon/global/links';
+import { useProfileWalletStore } from 'InvestCommon/store/useProfileWallet/useProfileWallet';
 
 const route = useRoute();
 const router = useRouter();
@@ -24,6 +25,10 @@ const { slug, id, profileId } = route.params;
 const investmentsStore = useInvestmentsStore();
 const { setReviewData, isSetReviewLoading } = storeToRefs(investmentsStore);
 const { submitFormToHubspot } = useHubspotForm('23d573ec-3714-4fdb-97c2-a3b688d5008f');
+const profileWalletStore = useProfileWalletStore();
+const {
+  fundingSource,
+} = storeToRefs(profileWalletStore);
 
 const fundingStore = useFundingStore();
 const {
@@ -53,6 +58,12 @@ const fundingTypeFormated = computed(() => {
 const confirmInvest = async () => {
   await investmentsStore.setReview(slug as string, id as string, profileId as string);
 };
+
+const fundingSourceId = computed(() => getUnconfirmedOfferData.value?.payment_data?.funding_source_id);
+const fundingTypeWallet = computed(() => getUnconfirmedOfferData.value?.funding_type?.toLowerCase().includes('wallet'));
+const fundingSourceDataById = computed(() => fundingSource.value?.find((item) => item.id === fundingSourceId.value));
+const fundingSourceDataToShow = computed(() => (
+  (fundingTypeWallet.value && (fundingSourceId.value > 0)) ? `${fundingSourceDataById.value?.bank_name}: ${fundingSourceDataById.value?.name}` : undefined));
 // if on confirmInvest setReview action is ok
 investmentsStore.$onAction(
   // eslint-disable-next-line
@@ -85,6 +96,12 @@ investmentsStore.$onAction(
     });
   },
 );
+
+watch(() => fundingSourceId.value, () => {
+  if (fundingSourceId.value > 0) {
+    profileWalletStore.getWalletByProfileId(profileId);
+  }
+}, { immediate: true });
 </script>
 
 <template>
@@ -205,7 +222,7 @@ investmentsStore.$onAction(
           label="Funding Type"
         >
           <VFormInput
-            :model-value="fundingTypeFormated"
+            :model-value="fundingSourceDataToShow || fundingTypeFormated"
             name="funding-type"
             readonly
             size="large"
