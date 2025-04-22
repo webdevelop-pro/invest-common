@@ -29,12 +29,11 @@ const props = defineProps({
 const emit = defineEmits(['onCancelInvestmentClick']);
 
 const investmentsStore = useInvestmentsStore();
-const { isGetInvestOneLoading } = storeToRefs(investmentsStore);
+const { isGetInvestOneLoading, getInvestOneData } = storeToRefs(investmentsStore);
 const offersStore = useOfferStore();
 const { isGetOfferOneLoading } = storeToRefs(offersStore);
 const userStore = useUsersStore();
 const { selectedUserProfileId } = storeToRefs(userStore);
-const investData = ref<IInvest | null>(null);
 const router = useRouter();
 const route = useRoute();
 
@@ -59,7 +58,7 @@ const onCancelInvestmentClick = () => {
 
 onBeforeMount(async () => {
   if (props.item.id) {
-    investData.value = await investmentsStore.getCombinedInvestAndOfferData(String(props.item.id));
+    investmentsStore.getInvestOne(String(props.item.id));
   }
 });
 
@@ -122,7 +121,7 @@ watch(() => [queryPopupCancelInvestment.value], () => {
                 v-else
                 class="v-table-item-content__value is--body"
               >
-                {{ investData?.number_of_shares.toLocaleString('en-US') }}
+                {{ getInvestOneData?.number_of_shares.toLocaleString('en-US') }}
               </span>
               <VSkeleton
                 v-if="isLoading"
@@ -134,7 +133,7 @@ watch(() => [queryPopupCancelInvestment.value], () => {
                 v-else
                 class="v-table-item-content__value is--body"
               >
-                {{ currency(investData?.price_per_share) }}
+                {{ currency(getInvestOneData?.price_per_share) }}
               </span>
             </div>
           </div>
@@ -158,7 +157,7 @@ watch(() => [queryPopupCancelInvestment.value], () => {
                 v-else
                 class="v-table-item-content__value is--body"
               >
-                {{ investData?.offer.security_type ? capitalizeFirstLetter(item?.offer.security_type || '') : '-' }}
+                {{ getInvestOneData?.offer.security_type ? capitalizeFirstLetter(item?.offer.security_type || '') : '-' }}
               </span>
               <VSkeleton
                 v-if="isLoading"

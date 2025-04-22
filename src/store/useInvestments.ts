@@ -8,11 +8,10 @@ import {
   fetchSetFundingOptions,
   fetchSetCancelOptions,
 } from 'InvestCommon/services/api/invest';
-import { useOfferStore } from 'InvestCommon/store/useOffer';
 import {
   IInvest, IInvestConfirm, IInvestDocumentSign, IInvestFunding,
 } from 'InvestCommon/types/api/invest';
-import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
+import { acceptHMRUpdate, defineStore } from 'pinia';
 import { INotification } from 'InvestCommon/types/api/notifications';
 
 const isGetInvestOneLoading = ref(false);
@@ -45,9 +44,6 @@ const setReviewData = ref<IInvestConfirm>();
 const cancelInvestData = ref();
 
 export const useInvestmentsStore = defineStore('investments', () => {
-  const offerStore = useOfferStore();
-  const { getOfferOneData } = storeToRefs(offerStore);
-
   const getInvestOne = async (id: string) => {
     getInvestOneData.value = undefined;
     isGetInvestOneLoading.value = true;
@@ -60,20 +56,6 @@ export const useInvestmentsStore = defineStore('investments', () => {
       getInvestOneData.value = response;
     }
     isGetInvestOneLoading.value = false;
-  };
-
-  const combinedInvestAndOfferData = ref<IInvest | null>(null);
-  const getCombinedInvestAndOfferData = async (id: string) => {
-    await getInvestOne(id);
-    if (getInvestOneData.value) {
-      await offerStore.getOfferOne(getInvestOneData.value.offer.id);
-      if (getOfferOneData.value) {
-        combinedInvestAndOfferData.value = { ...getInvestOneData.value, offer: getOfferOneData.value };
-        return { ...getInvestOneData.value, offer: getOfferOneData.value };
-      }
-      combinedInvestAndOfferData.value = { ...getInvestOneData.value };
-    }
-    return null;
   };
 
   const setInvest = async (slug: string, sharesCount: number) => {
@@ -321,7 +303,6 @@ export const useInvestmentsStore = defineStore('investments', () => {
     setOwnershipErrorData.value = {};
     setFundingErrorData.value = {};
     setCancelErrorData.value = {};
-    combinedInvestAndOfferData.value = null;
   };
 
   return {
@@ -335,7 +316,6 @@ export const useInvestmentsStore = defineStore('investments', () => {
     setFunding,
     setReview,
     cancelInvestment,
-    getCombinedInvestAndOfferData,
     resetAll,
     getOptionsSetAmount,
 
@@ -391,7 +371,6 @@ export const useInvestmentsStore = defineStore('investments', () => {
     isSetCanceOptionsLoading,
     isSetCanceOptionsError,
     setCancelOptionsData,
-    combinedInvestAndOfferData,
     updateNotificationData,
   };
 });
