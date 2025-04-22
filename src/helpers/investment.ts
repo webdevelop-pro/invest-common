@@ -54,7 +54,7 @@ export const getInvestmentOfferImage = (
   if (investment?.offer?.image?.url) {
     return investment.offer.image.url;
   }
-  if (imageID && (imageID > 0)) return `${FILER_URL}/auth/files/${imageID.value}?size=${metaSize}`;
+  if (imageID && (imageID > 0)) return `${FILER_URL}/public/files/${imageID}?size=${metaSize}`;
   return defaultImage;
 };
 

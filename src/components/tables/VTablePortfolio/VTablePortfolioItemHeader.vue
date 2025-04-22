@@ -45,7 +45,7 @@ const itemFormatted = computed(() => ({
   amountPercent: offerStore.getOfferFundedPercent(props.item.offer),
 }));
 
-const isDefaultImage = computed(() => (!props.item?.offer?.image?.meta_data?.small && !props.item?.offer?.image?.url));
+const isDefaultImage = computed(() => (!props.item?.offer?.image_link_id));
 const isFundingClickable = computed(() => isInvestmentFundingClickable(props.item));
 </script>
 
