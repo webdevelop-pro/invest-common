@@ -5,15 +5,17 @@ import VBreadcrumbs, { IBreadcrumb } from 'UiKit/components/VBreadcrumb/VBreadcr
 import { PropType } from 'vue';
 import arrowLeft from 'UiKit/assets/images/arrow-left.svg';
 
-defineProps({
+const props = defineProps({
   buttonText: String,
+  buttonRoute: String,
   breadcrumbs: Object as PropType<IBreadcrumb[]>,
 });
 
 const router = useRouter();
 
 const onBackClick = () => {
-  router.back();
+  if (props.buttonRoute) router.push(props.buttonRoute);
+  else router.back();
 };
 </script>
 

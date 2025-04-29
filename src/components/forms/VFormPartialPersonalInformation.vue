@@ -54,7 +54,7 @@ const schema = {
       },
       type: 'object',
       errorMessage: errorMessageRule,
-      required: ['citizenship', 'address1', 'dob', 'phone', 'city', 'state', 'zip_code', 'country', 'ssn'],
+      required: ['citizenship', 'address1', 'dob', 'phone', 'city', 'state', 'zip_code', 'country', 'ssn', 'first_name', 'last_name'],
     },
   },
   $ref: '#/definitions/Individual',
