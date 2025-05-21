@@ -17,6 +17,7 @@ import {
   urlInvestmentTimeline, urlProfileWallet, urlProfileAccount,
 } from 'InvestCommon/global/links';
 import { VTableCell, VTableRow } from 'UiKit/components/Base/VTable';
+import env from 'InvestCommon/global/index';
 import { capitalizeFirstLetter } from 'UiKit/helpers/text';
 
 const notificationsStore = useNotificationsStore();
@@ -24,6 +25,7 @@ const { isMarkAsReadByIdError } = storeToRefs(notificationsStore);
 const usersStore = useUsersStore();
 const { selectedUserProfileId } = storeToRefs(usersStore);
 const routerRef = ref<any>(null);
+const { EXTERNAL } = env;
 
 const props = defineProps({
   data: Object as PropType<INotification>,
@@ -138,7 +140,7 @@ const buttonHref = computed(() => {
 const isUnread = computed(() => (props.data?.status.toLowerCase() === 'unread'));
 
 const isExternalLink = computed(() => {
-  if (props.external) return true;
+  if (EXTERNAL) return true;
 
   // If buttonHref starts with "http" it's definitely an external URL
   return typeof buttonTo.value === 'string' && buttonTo.value?.startsWith('http');
