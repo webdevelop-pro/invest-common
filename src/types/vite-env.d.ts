@@ -15,6 +15,7 @@ export interface ImportMetaEnv {
   VITE_ACCREDITATION_URL: string;
   VITE_PAYMENTS_URL: string;
   VITE_WALLET_URL: string;
+  VITE_EVM_URL: string;
   VITE_FILER_URL: string;
   VITE_DISTRIBUTIONS_URL: string;
   VITE_HUBSPOT_FORM_ID_RECEIVE_LATEST_NEWS: string;
