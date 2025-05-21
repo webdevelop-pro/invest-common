@@ -2,6 +2,7 @@
 import { VTableCell, VTableRow } from 'UiKit/components/Base/VTable';
 import { PropType } from 'vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
+import VTooltip from 'UiKit/components/VTooltip.vue';
 
 interface IActivityItem {
   date: string;
@@ -24,7 +25,9 @@ const onDeleteSession = () => {
 </script>
 
 <template>
-  <VTableRow class="VTableActivityItem v-table-activity-item">
+  <VTableRow
+    class="VTableActivityItem v-table-activity-item"
+  >
     <VTableCell>
       {{ data?.date }}
       <div class="is--small is--color-gray-60">
@@ -42,16 +45,34 @@ const onDeleteSession = () => {
     <VTableCell>
       {{ data?.browser }}
     </VTableCell>
-    <VTableCell>
-      <VButton
-        size="small"
-        color="red"
-        variant="link"
-        :loading="loading"
-        @click="onDeleteSession"
-      >
-        Finish Session
-      </VButton>
+    <VTableCell class="v-table-activity-item__cell-button">
+      <VTooltip :disabled="!data.current">
+        <VButton
+          size="small"
+          color="red"
+          variant="link"
+          :disabled="data.current"
+          :loading="loading"
+          class="v-table-activity-item__button"
+          @click="onDeleteSession"
+        >
+          Finish Session
+        </VButton>
+        <template #content>
+          <p>
+            Cannot revoke current session
+          </p>
+        </template>
+      </VTooltip>
     </VTableCell>
   </VTableRow>
 </template>
+
+<style lang="scss">
+.v-table-activity-item {
+  &__cell-button {
+    flex-shrink: 0;
+    min-width: 142px;
+  }
+}
+</style>

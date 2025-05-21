@@ -99,7 +99,7 @@ export const errorHandlingRecovery = async (error: Response) => {
 };
 
 export const errorHandlingSettings = async (error: Response) => {
-  let errorJson = '';
+  let errorJson: any = null;
   try {
     errorJson = await error.json();
     if (errorJson as IAuthError422) {
@@ -125,8 +125,12 @@ export const errorHandlingSettings = async (error: Response) => {
       if (data.error && data.error.message) TOAST_OPTIONS.description = data.error.reason || data.error.message;
     }
   } catch (errorTry) {
-    // ignore
+    console.error('Error parsing JSON:', errorTry);
+    return null;
   }
+
+  // eslint-disable-next-line consistent-return
+  if (errorJson?.error?.id === 'session_refresh_required') return;
   toast(TOAST_OPTIONS);
   return errorJson;
 };

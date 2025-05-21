@@ -287,6 +287,10 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     }
   };
 
+  function clearAllCookies() {
+    Object.keys(cookies.getAll()).forEach((key) => cookies.remove(key));
+  }
+
   const resetAll = () => {
     useFundingStore().resetAll();
     useProfileWalletTransactionStore().resetAll();
@@ -300,6 +304,7 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     useNotificationsStore().resetAll();
     useFilerStore().resetAll();
     cookies.remove('session', cookiesOptions());
+    clearAllCookies();
   };
 
   const handleAfterLogout = () => {

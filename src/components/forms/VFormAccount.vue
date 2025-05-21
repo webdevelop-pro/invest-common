@@ -14,12 +14,20 @@ import { scrollToError } from 'UiKit/helpers/validation/general';
 import env from 'InvestCommon/global';
 import VFormPartialAccount from './VFormPartialAccount.vue';
 import { ROUTE_SETTINGS_MFA } from 'InvestCommon/helpers/enums/routes';
+import { useToast } from 'UiKit/components/Base/VToast/use-toast';
+
+const { toast } = useToast();
+
+const TOAST_OPTIONS = {
+  title: 'Submitted!',
+  variant: 'success',
+};
 
 const personalFormRef = useTemplateRef<FormChild>('personalFormChild');
 
 const router = useRouter();
 const userIdentityStore = useUserProfilesStore();
-const { isSetUserLoading } = storeToRefs(userIdentityStore);
+const { isSetUserLoading, isSetUserError } = storeToRefs(userIdentityStore);
 const usersStore = useUsersStore();
 const { selectedUserProfileId, userAccountData } = storeToRefs(usersStore);
 
@@ -40,12 +48,16 @@ const saveHandler = async () => {
   const model = { ...personalFormRef.value?.model };
   delete model.email;
   await userIdentityStore.setUser(model);
-
+  if (isSetUserError.value) {
+    isLoading.value = false;
+    return;
+  }
+  await userIdentityStore.getUser();
+  isLoading.value = false;
   submitFormToHubspot({
     ...personalFormRef.value?.model,
   });
-  userIdentityStore.getUser();
-  isLoading.value = false;
+  toast(TOAST_OPTIONS);
   router.push({ name: ROUTE_SETTINGS_MFA, params: { profileId: selectedUserProfileId.value } });
 };
 
