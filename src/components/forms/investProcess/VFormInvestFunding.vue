@@ -232,7 +232,7 @@ const continueHandler = async () => {
       funding_type: FundingTypes.wallet,
     };
   }
-  if ((model.funding_type !== FundingTypes.ach) && (model.funding_type !== FundingTypes.wallet)
+  if ((model.funding_type !== FundingTypes.ach) && (model.funding_type === FundingTypes.cryptoWallet)
     && (model.funding_type !== FundingTypes.wire)) {
     data = {
       funding_source_id: Number(model.funding_type),

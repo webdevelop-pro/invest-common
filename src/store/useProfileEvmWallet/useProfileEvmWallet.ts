@@ -15,7 +15,7 @@ const STATUS_ERROR_SUSPENDED = 'error_suspended';
 
 export const useProfileEvmWalletStore = defineStore('Evmwallet', () => {
   const usersStore = useUsersStore();
-  const { selectedUserProfileData, selectedUserProfileId } = storeToRefs(usersStore);
+  const { selectedUserProfileId } = storeToRefs(usersStore);
 
   const isGetEvmWalletByProfileIdLoading = ref(false);
   const getEvmWalletByProfileIdError = ref();
@@ -119,6 +119,7 @@ export const useProfileEvmWalletStore = defineStore('Evmwallet', () => {
     evmPendingIncomingBalance,
     evmTotalBalance,
     evmPendingOutcomingBalance,
+    isEvmCanWithdraw,
     updateData,
     isEvmWalletStatusCreated,
     isEvmWalletStatusVerified,

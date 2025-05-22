@@ -108,138 +108,138 @@ watch(() => [schema], () => {
     novalidate
     @submit.prevent="resetHandler"
   >
-      <FormRow>
-        <FormCol>
-          <VFormGroup
-            v-slot="VFormGroupProps"
-            :model="model"
-            :validation="validation"
-            :schema-front="schema"
-            :error-text="setPasswordErrorData?.create_password"
-            path="create_password"
-            label="Enter Your New Password"
-            class="v-form-reset-password__input"
+    <FormRow>
+      <FormCol>
+        <VFormGroup
+          v-slot="VFormGroupProps"
+          :model="model"
+          :validation="validation"
+          :schema-front="schema"
+          :error-text="setPasswordErrorData?.create_password"
+          path="create_password"
+          label="Enter Your New Password"
+          class="v-form-reset-password__input"
+        >
+          <VFormInput
+            :model-value="model.create_password"
+            :is-error="VFormGroupProps.isFieldError"
+            placeholder="Enter New Password"
+            name="createPassword"
+            prepend
+            size="large"
+            data-testid="create-password"
+            :type="showCreatePassword ? 'password' : 'text'"
+            @update:model-value="model.create_password = $event"
           >
-            <VFormInput
-              :model-value="model.create_password"
-              :is-error="VFormGroupProps.isFieldError"
-              placeholder="Enter New Password"
-              name="createPassword"
-              prepend
-              size="large"
-              data-testid="create-password"
-              :type="showCreatePassword ? 'password' : 'text'"
-              @update:model-value="model.create_password = $event"
-            >
-              <template #prepend>
-                <div
-                  v-show="showCreatePassword"
-                  class="v-form-reset-password__icon-wrap"
-                  @click="showCreatePassword = !showCreatePassword"
-                >
-                  <eyeOff
-                    class="v-form-reset-password__input-icon"
-                    alt="reset password form input icon"
-                  />
-                </div>
+            <template #prepend>
+              <div
+                v-show="showCreatePassword"
+                class="v-form-reset-password__icon-wrap"
+                @click="showCreatePassword = !showCreatePassword"
+              >
+                <eyeOff
+                  class="v-form-reset-password__input-icon"
+                  alt="reset password form input icon"
+                />
+              </div>
 
-                <div
-                  v-show="!showCreatePassword"
-                  class="v-form-reset-password__icon-wrap"
-                  @click="showCreatePassword = !showCreatePassword"
-                >
-                  <eye
-                    class="v-form-reset-password__input-icon"
-                    alt="reset password form input icon"
-                  />
-                </div>
-              </template>
-            </VFormInput>
-          </VFormGroup>
+              <div
+                v-show="!showCreatePassword"
+                class="v-form-reset-password__icon-wrap"
+                @click="showCreatePassword = !showCreatePassword"
+              >
+                <eye
+                  class="v-form-reset-password__input-icon"
+                  alt="reset password form input icon"
+                />
+              </div>
+            </template>
+          </VFormInput>
+        </VFormGroup>
 
+        <div
+          class="v-form-reset-password__password-strength-bar"
+        >
           <div
-            class="v-form-reset-password__password-strength-bar"
-          >
-            <div
-              class="v-form-reset-password__password-strength-bar--fill"
-              :data-score="passwordScore"
-            />
-            <div class="v-form-reset-password__password-strength-bar-name is--small">
-              At least 8 symbols
-            </div>
+            class="v-form-reset-password__password-strength-bar--fill"
+            :data-score="passwordScore"
+          />
+          <div class="v-form-reset-password__password-strength-bar-name is--small">
+            At least 8 symbols
           </div>
-        </FormCol>
-      </FormRow>
-        <FormRow>
-        <FormCol>
-          <VFormGroup
-            v-slot="VFormGroupProps"
-            :model="model"
-            :validation="validation"
-            :schema-front="schema"
-            :error-text="setPasswordErrorData?.repeat_password"
-            path="repeat_password"
-            label="Confirm Your New Password"
-            class="v-form-reset-password__input"
+        </div>
+      </FormCol>
+    </FormRow>
+    <FormRow>
+      <FormCol>
+        <VFormGroup
+          v-slot="VFormGroupProps"
+          :model="model"
+          :validation="validation"
+          :schema-front="schema"
+          :error-text="setPasswordErrorData?.repeat_password"
+          path="repeat_password"
+          label="Confirm Your New Password"
+          class="v-form-reset-password__input"
+        >
+          <VFormInput
+            :model-value="model.repeat_password"
+            :is-error="VFormGroupProps.isFieldError"
+            placeholder="Confirm New Password"
+            name="repeatPassword"
+            prepend
+            data-testid="repeat-password"
+            size="large"
+            :type="showRepeatPassword ? 'password' : 'text'"
+            @update:model-value="model.repeat_password = $event"
           >
-            <VFormInput
-              :model-value="model.repeat_password"
-              :is-error="VFormGroupProps.isFieldError"
-              placeholder="Confirm New Password"
-              name="repeatPassword"
-              prepend
-              data-testid="repeat-password"
-              size="large"
-              :type="showRepeatPassword ? 'password' : 'text'"
-              @update:model-value="model.repeat_password = $event"
-            >
-              <template #prepend>
-                <div
-                  v-show="showRepeatPassword"
-                  class="v-form-reset-password__icon-wrap"
-                  @click="showRepeatPassword = !showRepeatPassword"
-                >
-                  <eyeOff
-                    class="v-form-reset-password__input-icon"
-                    alt="reset password form input icon"
-                  />
-                </div>
+            <template #prepend>
+              <div
+                v-show="showRepeatPassword"
+                class="v-form-reset-password__icon-wrap"
+                @click="showRepeatPassword = !showRepeatPassword"
+              >
+                <eyeOff
+                  class="v-form-reset-password__input-icon"
+                  alt="reset password form input icon"
+                />
+              </div>
 
-                <div
-                  v-show="!showRepeatPassword"
-                  class="v-form-reset-password__icon-wrap"
-                  @click="showRepeatPassword = !showRepeatPassword"
-                >
-                  <eye
-                    class="v-form-reset-password__input-icon"
-                    alt="reset password form input icon"
-                  />
-                </div>
-              </template>
-            </VFormInput>
-          </VFormGroup>
-        </FormCol>
-      </FormRow>
-      <VButton
-        size="large"
-        block
-        data-testid="button"
-        :loading="isSetPasswordLoading || loading"
-        :disabled="isDisabledButton"
-        class="v-form-reset-password__btn"
-      >
-        Reset Password
-      </VButton>
-      <VButton
-        size="large"
-        as="a"
-        :href="urlSettings(selectedUserProfileId)"
-        block
-        variant="link"
-        class="v-form-reset-password__btn"
-      >
-        Back to Settings
-      </VButton>
+              <div
+                v-show="!showRepeatPassword"
+                class="v-form-reset-password__icon-wrap"
+                @click="showRepeatPassword = !showRepeatPassword"
+              >
+                <eye
+                  class="v-form-reset-password__input-icon"
+                  alt="reset password form input icon"
+                />
+              </div>
+            </template>
+          </VFormInput>
+        </VFormGroup>
+      </FormCol>
+    </FormRow>
+    <VButton
+      size="large"
+      block
+      data-testid="button"
+      :loading="isSetPasswordLoading || loading"
+      :disabled="isDisabledButton"
+      class="v-form-reset-password__btn"
+    >
+      Reset Password
+    </VButton>
+    <VButton
+      size="large"
+      as="a"
+      :href="urlSettings(selectedUserProfileId)"
+      block
+      variant="link"
+      class="v-form-reset-password__btn"
+    >
+      Back to Settings
+    </VButton>
   </form>
 </template>
 
