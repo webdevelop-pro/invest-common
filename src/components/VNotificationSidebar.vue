@@ -9,17 +9,16 @@ import {
   VSheetFooter,
 } from 'UiKit/components/Base/VSheet';
 import { defineAsyncComponent } from 'vue';
+import env from 'InvestCommon/global/index';
+import { urlNotifications } from 'InvestCommon/global/links';
 
 const WdNotificationTable = defineAsyncComponent({
   loader: () => import('InvestCommon/components/VNotificationTable.vue'),
 });
 
-defineProps({
-  external: Boolean, // is the component external and nee links instead of router
-});
-
 const notificationsStore = useNotificationsStore();
 const { notificationUnreadLength, isNotificationSidebarOpen } = storeToRefs(notificationsStore);
+const { EXTERNAL } = env;
 
 const onClose = () => {
   notificationsStore.notificationSidebarClose();
@@ -47,16 +46,16 @@ const onClose = () => {
           v-if="isNotificationSidebarOpen"
           small
           class="v-notification-sidebar__table"
-          :external="external"
+          :external="EXTERNAL"
         />
       </div>
       <VSheetFooter class="v-notification-sidebar__bottom">
         <VButton
           size="large"
           variant="link"
-          :as="external ? 'a' : 'router-link'"
+          :as="EXTERNAL ? 'a' : 'router-link'"
           :to="{ name: ROUTE_NOTIFICATIONS }"
-          href="/notifications"
+          :href="urlNotifications"
           @click="onClose"
         >
           View All
