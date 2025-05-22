@@ -170,6 +170,10 @@ const onButtonClick = async () => {
     window.location.href = buttonHref.value;
   }
 };
+
+const onMessageClick = () => {
+  notificationsStore.notificationSidebarClose();
+};
 </script>
 <template>
   <VTableRow
@@ -198,8 +202,8 @@ const onButtonClick = async () => {
           <p
             v-highlight="search"
             class="v-table-notification-item__content is--body"
+            @click="onMessageClick"
             v-html="data?.content"
-            @click="notificationsStore.notificationSidebarClose();"
           />
         </div>
 
