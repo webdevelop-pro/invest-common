@@ -69,6 +69,7 @@ export const useProfileEvmWalletStore = defineStore('Evmwallet', () => {
   // BALANCE
   const evmCurrentBalance = computed(() => Number(getEvmWalletByProfileIdData.value?.balance) * 0.1 || 0);
   const evmBalances = computed(() => getEvmWalletByProfileIdData.value?.balances || []);
+  const evmWalletAddress = computed(() => getEvmWalletByProfileIdData.value?.address || '');
   const evmPendingIncomingBalance = computed(() => getEvmWalletByProfileIdData.value?.pending_incoming_balance || 0);
   const evmPendingOutcomingBalance = computed(() => getEvmWalletByProfileIdData.value?.pending_outcoming_balance || 0);
   const isEvmCurrentBalanceZero = computed(() => (evmCurrentBalance.value === 0));
@@ -120,6 +121,7 @@ export const useProfileEvmWalletStore = defineStore('Evmwallet', () => {
     evmTotalBalance,
     evmPendingOutcomingBalance,
     isEvmCanWithdraw,
+    evmWalletAddress,
     updateData,
     isEvmWalletStatusCreated,
     isEvmWalletStatusVerified,

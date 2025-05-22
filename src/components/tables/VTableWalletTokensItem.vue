@@ -43,7 +43,7 @@ defineProps({
       <div class="v-table-wallet-tokens-item__link">
         <a
           v-if="data?.address"
-          href="https://sepolia.etherscan.io/ "
+          :href="`https://sepolia.etherscan.io/token/${data?.address}`"
           target="_blank"
           rel="noopener noreferrer"
         >
