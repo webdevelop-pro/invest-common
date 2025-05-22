@@ -17,81 +17,81 @@ export const useProfileEvmWalletStore = defineStore('Evmwallet', () => {
   const usersStore = useUsersStore();
   const { selectedUserProfileData, selectedUserProfileId } = storeToRefs(usersStore);
 
-  const isGetWalletByProfileIdLoading = ref(false);
-  const getWalletByProfileIdError = ref();
-  const getWalletByProfileIdData = ref();
-  const getWalletByProfileId = async (profileId: string) => {
-    isGetWalletByProfileIdLoading.value = true;
-    getWalletByProfileIdError.value = null;
+  const isGetEvmWalletByProfileIdLoading = ref(false);
+  const getEvmWalletByProfileIdError = ref();
+  const getEvmWalletByProfileIdData = ref();
+  const getEvmWalletByProfileId = async (profileId: string) => {
+    isGetEvmWalletByProfileIdLoading.value = true;
+    getEvmWalletByProfileIdError.value = null;
     const response = await fetchGetWalletByProfile(profileId)
       .catch(async (error: Response) => {
         const errorJson = await error.json();
-        getWalletByProfileIdError.value = errorJson;
+        getEvmWalletByProfileIdError.value = errorJson;
       });
-    if (response) getWalletByProfileIdData.value = response;
-    isGetWalletByProfileIdLoading.value = false;
+    if (response) getEvmWalletByProfileIdData.value = response;
+    isGetEvmWalletByProfileIdLoading.value = false;
   };
 
-  const walletId = computed(() => getWalletByProfileIdData.value?.id || 0);
+  const evmWalletId = computed(() => getEvmWalletByProfileIdData.value?.id || 0);
 
   // FORMATTED WALLET DATA
-  const getFormattedProfileWalletData = computed(() => ({
-    ...getWalletByProfileIdData.value,
+  const getEvmFormattedProfileWalletData = computed(() => ({
+    ...getEvmWalletByProfileIdData.value,
   }));
 
   // WALLET STATUS
-  const isWalletStatusCreated = computed(() => (
-    getWalletByProfileIdData.value?.status === STATUS_CREATED
+  const isEvmWalletStatusCreated = computed(() => (
+    getEvmWalletByProfileIdData.value?.status === STATUS_CREATED
   ));
-  const isWalletStatusVerified = computed(() => (
-    getWalletByProfileIdData.value?.status === STATUS_VERIFIED
+  const isEvmWalletStatusVerified = computed(() => (
+    getEvmWalletByProfileIdData.value?.status === STATUS_VERIFIED
   ));
-  const isWalletStatusError = computed(() => (
-    getWalletByProfileIdData.value?.status === STATUS_ERROR
+  const isEvmWalletStatusError = computed(() => (
+    getEvmWalletByProfileIdData.value?.status === STATUS_ERROR
   ));
-  const isWalletStatusErrorRetry = computed(() => (
-    getWalletByProfileIdData.value?.status === STATUS_ERROR_RETRY
+  const isEvmWalletStatusErrorRetry = computed(() => (
+    getEvmWalletByProfileIdData.value?.status === STATUS_ERROR_RETRY
   ));
-  const isWalletStatusErrorDocument = computed(() => (
-    getWalletByProfileIdData.value?.status === STATUS_ERROR_DOCUMENT
+  const isEvmWalletStatusErrorDocument = computed(() => (
+    getEvmWalletByProfileIdData.value?.status === STATUS_ERROR_DOCUMENT
   ));
-  const isWalletStatusErrorPending = computed(() => (
-    getWalletByProfileIdData.value?.status === STATUS_ERROR_PENDING
+  const isEvmWalletStatusErrorPending = computed(() => (
+    getEvmWalletByProfileIdData.value?.status === STATUS_ERROR_PENDING
   ));
-  const isWalletStatusErrorSuspended = computed(() => (
-    getWalletByProfileIdData.value?.status === STATUS_ERROR_SUSPENDED
+  const isEvmWalletStatusErrorSuspended = computed(() => (
+    getEvmWalletByProfileIdData.value?.status === STATUS_ERROR_SUSPENDED
   ));
-  const isWalletStatusAnyError = computed(() => (
-    isWalletStatusError.value || isWalletStatusErrorRetry.value || isWalletStatusErrorDocument.value
-    || isWalletStatusErrorPending.value || isWalletStatusErrorSuspended.value
+  const isEvmWalletStatusAnyError = computed(() => (
+    isEvmWalletStatusError.value || isEvmWalletStatusErrorRetry.value || isEvmWalletStatusErrorDocument.value
+    || isEvmWalletStatusErrorPending.value || isEvmWalletStatusErrorSuspended.value
   ));
 
   // BALANCE
-  const currentBalance = computed(() => Number(getWalletByProfileIdData.value?.balance) * 0.10 || 0);
-  const balances = computed(() => getWalletByProfileIdData.value?.balances || [{ TokenA: '50007' }, { TokenB: '5107' }]);
-  const pendingIncomingBalance = computed(() => getWalletByProfileIdData.value?.pending_incoming_balance || 0);
-  const pendingOutcomingBalance = computed(() => getWalletByProfileIdData.value?.pending_outcoming_balance || 0);
-  const isCurrentBalanceZero = computed(() => (currentBalance.value === 0));
-  const totalBalance = computed(() => (
-    currentBalance.value + pendingIncomingBalance.value - pendingOutcomingBalance.value));
-  const isTotalBalanceZero = computed(() => (totalBalance.value === 0));
+  const evmCurrentBalance = computed(() => Number(getEvmWalletByProfileIdData.value?.balance) * 0.10 || 0);
+  const evmBalances = computed(() => getEvmWalletByProfileIdData.value?.balances || []);
+  const evmPendingIncomingBalance = computed(() => getEvmWalletByProfileIdData.value?.pending_incoming_balance || 0);
+  const evmPendingOutcomingBalance = computed(() => getEvmWalletByProfileIdData.value?.pending_outcoming_balance || 0);
+  const isEvmCurrentBalanceZero = computed(() => (evmCurrentBalance.value === 0));
+  const evmTotalBalance = computed(() => (
+    evmCurrentBalance.value + evmPendingIncomingBalance.value - evmPendingOutcomingBalance.value));
+  const isEvmTotalBalanceZero = computed(() => (evmTotalBalance.value === 0));
 
-  const isCanWithdraw = computed(() => !isCurrentBalanceZero.value);
+  const isEvmCanWithdraw = computed(() => !isEvmCurrentBalanceZero.value);
 
   const updateData = () => {
-    if (!isGetWalletByProfileIdLoading.value) {
-      getWalletByProfileId(selectedUserProfileId.value);
+    if (!isGetEvmWalletByProfileIdLoading.value) {
+      getEvmWalletByProfileId(selectedUserProfileId.value);
     }
   };
 
   const updateNotificationData = (notification: INotification) => {
-    if (notification.data.fields?.balance) getWalletByProfileIdData.value.balance = notification.data.fields?.balance;
-    if (notification.data.fields?.balances) getWalletByProfileIdData.value.balances = notification.data.fields?.balances;
+    if (notification.data.fields?.balance) getEvmWalletByProfileIdData.value.balance = notification.data.fields?.balance;
+    if (notification.data.fields?.balances) getEvmWalletByProfileIdData.value.balances = notification.data.fields?.balances;
     if (notification.data.fields?.inc_balance !== undefined) {
-      getWalletByProfileIdData.value.pending_incoming_balance = notification.data.fields.inc_balance;
+      getEvmWalletByProfileIdData.value.pending_incoming_balance = notification.data.fields.inc_balance;
     }
     if (notification.data.fields?.out_balance !== undefined) {
-      getWalletByProfileIdData.value.pending_outcoming_balance = notification.data.fields.out_balance;
+      getEvmWalletByProfileIdData.value.pending_outcoming_balance = notification.data.fields.out_balance;
     }
     if (notification.data?.fields?.status) {
       usersStore.updateDataInProfile('wallet', {
@@ -103,43 +103,36 @@ export const useProfileEvmWalletStore = defineStore('Evmwallet', () => {
     });
   };
 
-  const isDeleteAccountLoading = ref(false);
-  const handleDeleteAccount = () => {
-
-  };
-
   const resetAll = () => {
-    getWalletByProfileIdData.value = {};
+    getEvmWalletByProfileIdData.value = {};
   };
 
   return {
-    walletId,
-    getFormattedProfileWalletData,
+    evmWalletId,
+    getEvmFormattedProfileWalletData,
     resetAll,
     // balance
-    currentBalance,
-    balances,
-    isCurrentBalanceZero,
-    isTotalBalanceZero,
-    pendingIncomingBalance,
-    totalBalance,
-    pendingOutcomingBalance,
+    evmCurrentBalance,
+    evmBalances,
+    isEvmCurrentBalanceZero,
+    isEvmTotalBalanceZero,
+    evmPendingIncomingBalance,
+    evmTotalBalance,
+    evmPendingOutcomingBalance,
     updateData,
-    isWalletStatusCreated,
-    isWalletStatusVerified,
-    isWalletStatusError,
-    isWalletStatusErrorRetry,
-    isWalletStatusErrorDocument,
-    isWalletStatusErrorPending,
-    isWalletStatusErrorSuspended,
-    isWalletStatusAnyError,
+    isEvmWalletStatusCreated,
+    isEvmWalletStatusVerified,
+    isEvmWalletStatusError,
+    isEvmWalletStatusErrorRetry,
+    isEvmWalletStatusErrorDocument,
+    isEvmWalletStatusErrorPending,
+    isEvmWalletStatusErrorSuspended,
+    isEvmWalletStatusAnyError,
     updateNotificationData,
-    getWalletByProfileId,
-    isGetWalletByProfileIdLoading,
-    getWalletByProfileIdError,
-    getWalletByProfileIdData,
-    handleDeleteAccount,
-    isDeleteAccountLoading,
+    getEvmWalletByProfileId,
+    isGetEvmWalletByProfileIdLoading,
+    getEvmWalletByProfileIdError,
+    getEvmWalletByProfileIdData,
   };
 });
 

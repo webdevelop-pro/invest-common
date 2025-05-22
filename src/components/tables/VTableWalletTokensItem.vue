@@ -4,21 +4,13 @@ import { VTableCell, VTableRow } from 'UiKit/components/Base/VTable';
 import { PropType } from 'vue';
 import VTooltip from 'UiKit/components/VTooltip.vue';
 
-interface ITableWalletTransaction {
-  id: number;
-  date: string;
-  time: string;
+interface ITableEvmWalletTransaction {
+  name: string;
   amount: string;
-  type: string;
-  status: {
-    text: string;
-    toolip: string;
-  };
-  tagColor: string;
 }
 
 defineProps({
-  data: Object as PropType<ITableWalletTransaction>,
+  data: Object as PropType<ITableEvmWalletTransaction>,
   loading: Boolean,
 });
 
@@ -26,43 +18,15 @@ defineProps({
 
 <template>
   <VTableRow
-    class="VTableWalletTokens v-table-wallet-tokens"
+    class="VTableWalletTokensItem v-table-wallet-tokens-item"
   >
     <VTableCell>
       <div>
-        {{ data?.date }}
-      </div>
-      <div class="is--color-gray-60">
-        {{ data?.time }}
+        {{ data?.name }}
       </div>
     </VTableCell>
     <VTableCell>
-      <div class="v-table-wallet-tokens__table-type">
-        <VBadge
-          size="small"
-          :color="data?.tagColor"
-          class="profile-status-info__tag"
-        >
-          {{ data?.type[0]?.toUpperCase() + data?.type?.slice(1) }}
-        </VBadge>
-      </div>
-    </VTableCell>
-    <VTableCell>
-      <VTooltip>
-        <span
-          class="is--small"
-        >
-          {{ data?.status?.text }}
-        </span>
-        <template #content>
-          <p>
-            {{ data?.status?.tooltip }}
-          </p>
-        </template>
-      </VTooltip>
-    </VTableCell>
-    <VTableCell>
-      <div class="v-table-wallet-tokens__table-amount is--h6__title">
+      <div class="v-table-wallet-tokens-item__table-amount is--h6__title">
         {{ data?.amount }}
       </div>
     </VTableCell>
@@ -72,7 +36,7 @@ defineProps({
 <style lang="scss">
 @use 'UiKit/styles/_colors.scss' as *;
 
-.v-table-wallet-tokens {
+.v-table-wallet-tokens-item {
 
   &__table-amount {
     text-align: right;

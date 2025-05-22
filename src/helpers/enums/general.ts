@@ -59,7 +59,8 @@ export enum AccordionTypes {
 export enum FundingTypes {
   ach = 'ach',
   wire = 'wire',
-  wallet = 'wallet'
+  wallet = 'wallet',
+  cryptoWallet = 'cryptoWallet'
 }
 
 export enum CitizenTypes {

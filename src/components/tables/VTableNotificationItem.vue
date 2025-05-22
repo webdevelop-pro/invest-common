@@ -199,6 +199,7 @@ const onButtonClick = async () => {
             v-highlight="search"
             class="v-table-notification-item__content is--body"
             v-html="data?.content"
+            @click="notificationsStore.notificationSidebarClose();"
           />
         </div>
 

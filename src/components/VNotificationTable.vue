@@ -125,8 +125,8 @@ const searchData = computed(() => {
 });
 
 const filterResults = computed(() => searchData.value?.length);
-const showSearch = computed(() => filterResults.value > 0);
-const showFilter = computed(() => filterResults.value > 0);
+const showSearch = computed(() => filterResults.value.length > 0);
+const showFilter = computed(() => tabsData.value.length > 0);
 const showFilterPagination = computed(() => (
   Boolean(notificationUserLength.value && (notificationUserLength.value > 0)
   && !props.small && (filterResults.value > 0))));

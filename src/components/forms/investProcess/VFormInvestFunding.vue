@@ -7,6 +7,7 @@ import { useRouter, useRoute } from 'vue-router';
 import { useInvestmentsStore } from 'InvestCommon/store/useInvestments';
 import { useOfferStore } from 'InvestCommon/store/useOffer';
 import { useProfileWalletStore } from 'InvestCommon/store/useProfileWallet/useProfileWallet';
+import { useProfileEvmWalletStore } from 'InvestCommon/store/useProfileEvmWallet/useProfileEvmWallet';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import { ROUTE_INVEST_REVIEW, ROUTE_INVEST_SIGNATURE } from 'InvestCommon/helpers/enums/routes';
@@ -19,6 +20,7 @@ import VFormSelect from 'UiKit/components/Base/VForm/VFormSelect.vue';
 import InvestFormFundingAch from './VFormInvestFundingAch.vue';
 import InvestFormFundingWire from './VFormInvestFundingWire.vue';
 import InvestFormFundingWallet from './VFormInvestFundingWallet.vue';
+import InvestFormFundingCryptoWallet from './VFormInvestFundingCryptoWallet.vue';
 import { storeToRefs } from 'pinia';
 import { currency } from 'InvestCommon/helpers/currency';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
@@ -68,6 +70,11 @@ const profileWalletStore = useProfileWalletStore();
 const {
   isWalletStatusAnyError, isTotalBalanceZero, walletId, fundingSource,
 } = storeToRefs(profileWalletStore);
+const profileEvmWalletStore = useProfileEvmWalletStore();
+const {
+  isEvmWalletStatusAnyError, isEvmTotalBalanceZero, evmWalletId, evmBalances,
+} = storeToRefs(profileEvmWalletStore);
+
 const offerStore = useOfferStore();
 const { getUnconfirmedOfferData } = storeToRefs(offerStore);
 const usersStore = useUsersStore();
@@ -84,6 +91,14 @@ const SELECT_OPTIONS_FUNDING_TYPE_WITH_WALLET = computed(() => ([
   {
     value: FundingTypes.wallet,
     text: `Wallet (${currency(profileWalletStore.totalBalance)})`,
+    disabled: isTotalBalanceZero.value,
+  },
+]));
+const SELECT_OPTIONS_FUNDING_TYPE_WITH_CRYPTO_WALLET = computed(() => ([
+  {
+    value: FundingTypes.cryptoWallet,
+    text: `Crypro Wallet (${currency(profileEvmWalletStore.evmTotalBalance)})`,
+    disabled: isEvmTotalBalanceZero.value,
   },
 ]));
 
@@ -113,11 +128,19 @@ const hasWallet = computed(() => ((walletId.value > 0) && !isWalletStatusAnyErro
 const notEnoughWalletFunds = computed(() => (
   (getUnconfirmedOfferData.value?.amount || 0) > profileWalletStore.totalBalance));
 
+const hasEvmWallet = computed(() => ((evmWalletId.value > 0) && !isEvmWalletStatusAnyError.value));
+const notEnoughEvmWalletFunds = computed(() => (
+  (getUnconfirmedOfferData.value?.amount || 0) > profileEvmWalletStore.evmTotalBalance));
+
 const selectOptions = computed(() => {
   let res = SELECT_OPTIONS_FUNDING_TYPE;
   const isWalletExist = SELECT_OPTIONS_FUNDING_TYPE.find((item) => item.value === FundingTypes.wallet);
-  if (hasWallet.value && !isWalletExist && !isTotalBalanceZero.value) {
+  const isEvmWalletExist = SELECT_OPTIONS_FUNDING_TYPE.find((item) => item.value === FundingTypes.cryptoWallet);
+  if (hasWallet.value && !isWalletExist) { // && !isTotalBalanceZero.value
     res = res.concat(SELECT_OPTIONS_FUNDING_TYPE_WITH_WALLET.value);
+  }
+  if (hasEvmWallet.value && !isEvmWalletExist) { // && !isEvmTotalBalanceZero.value
+    res = res.concat(SELECT_OPTIONS_FUNDING_TYPE_WITH_CRYPTO_WALLET.value);
   }
   if (fundingSourceFormatted.value.length > 0) {
     res = res.concat(fundingSourceFormatted.value);
@@ -125,6 +148,11 @@ const selectOptions = computed(() => {
   return res;
 });
 const selectErrors = computed(() => {
+  const isEvmWallet = model.funding_type === FundingTypes.cryptoWallet;
+  if (isEvmWallet && notEnoughEvmWalletFunds.value) {
+    const message = 'Crypto wallet does not have enough funds';
+    return [message];
+  }
   const isWallet = model.funding_type === FundingTypes.wallet;
   if (isWallet && notEnoughWalletFunds.value) {
     const message = 'Wallet does not have enough funds';
@@ -139,10 +167,12 @@ const userName = computed(() => `${selectedUserProfileData.value?.data?.first_na
 const isBtnDisabled = computed(() => {
   if (model.funding_type === FundingTypes.ach) return componentData.value.isInvalid;
   if (model.funding_type === FundingTypes.wallet) return notEnoughWalletFunds.value;
+  if (model.funding_type === FundingTypes.cryptoWallet) return notEnoughEvmWalletFunds.value;
   return false;
 });
 const currentComponent = computed(() => {
   if (model.funding_type === FundingTypes.wallet) return InvestFormFundingWallet;
+  if (model.funding_type === FundingTypes.cryptoWallet) return InvestFormFundingCryptoWallet;
   if (model.funding_type === FundingTypes.wire) return InvestFormFundingWire;
   if (model.funding_type === FundingTypes.ach) return InvestFormFundingAch;
   return null;
@@ -202,6 +232,13 @@ const continueHandler = async () => {
       funding_type: FundingTypes.wallet,
     };
   }
+  if ((model.funding_type !== FundingTypes.ach) && (model.funding_type !== FundingTypes.wallet)
+    && (model.funding_type !== FundingTypes.wire)) {
+    data = {
+      funding_source_id: Number(model.funding_type),
+      funding_type: FundingTypes.cryptoWallet,
+    };
+  }
   await investmentsStore.setFunding(slug, id, profileId, data);
 
   if (setFundingData.value) {
@@ -240,6 +277,7 @@ watch(() => model, () => {
 onBeforeMount(() => {
   if (userLoggedIn.value) {
     profileWalletStore.getWalletByProfileId(selectedUserProfileId.value);
+    profileEvmWalletStore.getEvmWalletByProfileId(selectedUserProfileId.value);
   }
 });
 </script>
