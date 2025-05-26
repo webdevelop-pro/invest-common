@@ -2,6 +2,7 @@
 import { VTableCell, VTableRow } from 'UiKit/components/Base/VTable';
 import { PropType } from 'vue';
 import externalLink from 'UiKit/assets/images/external-link.svg';
+import env from 'InvestCommon/global';
 
 interface ITableEvmWalletTransaction {
   name: string;
@@ -27,7 +28,7 @@ defineProps({
     <VTableCell>
       <a
         v-if="data?.address"
-        :href="`https://sepolia.etherscan.io/token/${data?.address}`"
+        :href="`${env.CRYPTO_WALLET_SCAN_URL}/token/${data?.address}`"
         target="_blank"
         rel="noopener noreferrer"
       >
@@ -43,7 +44,7 @@ defineProps({
       <div class="v-table-wallet-tokens-item__link">
         <a
           v-if="data?.address"
-          :href="`https://sepolia.etherscan.io/token/${data?.address}`"
+          :href="`${env.CRYPTO_WALLET_SCAN_URL}/token/${data?.address}`"
           target="_blank"
           rel="noopener noreferrer"
         >

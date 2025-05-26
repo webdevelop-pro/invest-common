@@ -25,6 +25,7 @@ import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 import { oryErrorHandling } from 'UiKit/helpers/api/oryErrorHandling';
 import { useDialogs } from 'InvestCommon/store/useDialogs';
 import { SELFSERVICE } from 'InvestCommon/helpers/enums/auth';
+import { useUserSession } from './useUserSession';
 
 const { EXTERNAL } = env;
 
@@ -33,8 +34,8 @@ const loading = ref(false);
 // This is the store with general flow logic for auth
 export const useAuthLogicStore = defineStore('authLogic', () => {
   const router = useRouter();
-  const usersStore = useUsersStore();
-  const cookies = useCookies(['session']);
+  const userSessionStore = useUserSession();
+  const cookies = useCookies();
   const { toast } = useToast();
   const useDialogsStore = useDialogs();
 
@@ -96,12 +97,14 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     if (setLoginData.value && setLoginData.value.session) {
       if (data?.email) submitFormToHubspot({ email: data?.email });
       const queryRedirect = computed(() => new URLSearchParams(window.location.search).get('redirect'));
+
+      userSessionStore.updateSession(setLoginData.value.session);
       // just set cookies. if use updateUserAccountSession -> get user will be triggered
-      cookies.set(
-        'session',
-        setLoginData.value.session,
-        cookiesOptions(new Date(setLoginData.value.session?.expires_at)),
-      );
+      // cookies.set(
+      //   'session',
+      //   setLoginData.value.session,
+      //   cookiesOptions(new Date(setLoginData.value.session?.expires_at)),
+      // );
       navigateWithQueryParams(queryRedirect.value || urlProfile());
     }
 
@@ -179,11 +182,12 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
       return;
     }
     if (setSignupData.value && setSignupData.value.session) {
-      cookies.set(
-        'session',
-        setSignupData.value?.session,
-        cookiesOptions(new Date(setSignupData.value?.session?.expires_at)),
-      );
+      userSessionStore.updateSession(setSignupData.value.session);
+      // cookies.set(
+      //   'session',
+      //   setSignupData.value?.session,
+      //   cookiesOptions(new Date(setSignupData.value?.session?.expires_at)),
+      // );
 
       submitFormToHubspot({
         email,
@@ -305,6 +309,7 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     useFilerStore().resetAll();
     cookies.remove('session', cookiesOptions());
     clearAllCookies();
+    useUserSession().resetAll();
   };
 
   const handleAfterLogout = () => {
@@ -359,7 +364,8 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     await authStore.getLogout(token.value);
 
     if (getLogoutResponse.value && (getLogoutResponse.value.status >= 200) && (getLogoutResponse.value.status <= 300)) {
-      cookies.remove('session', cookiesOptions());
+      // cookies.remove('session', cookiesOptions());
+      useUserSession().resetAll();
       // if logout request is ok, reset all data and redirect
       useGlobalLoader().show();
       handleAfterLogout();
@@ -374,7 +380,8 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     isLoadingSession.value = true;
     await authStore.getSession();
     if (getSessionData.value?.active && !getSessionErrorResponse.value) {
-      usersStore.updateUserAccountSession(getSessionData.value);
+      userSessionStore.updateSession(getSessionData.value);
+      // usersStore.updateUserAccountSession(getSessionData.value);
       // await notificationsHandler(); // TODO: check if needed
     } else if (!getSessionData.value?.active || getSessionErrorResponse.value?.status === 401) {
       resetAll();

@@ -5,7 +5,6 @@ import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import { useAuthStore } from 'InvestCommon/store/useAuth';
 import { useNotificationsStore } from 'InvestCommon/store/useNotifications';
-import { ISession } from 'InvestCommon/types/api/auth';
 import { INotification } from 'InvestCommon/types/api/notifications';
 import {
   ROUTE_ACCREDITATION_UPLOAD, ROUTE_DASHBOARD_ACCOUNT, ROUTE_DASHBOARD_BACKGROUND_INFORMATION,
@@ -16,10 +15,11 @@ import {
   ROUTE_INVEST_AMOUNT, ROUTE_INVEST_FUNDING, ROUTE_INVEST_OWNERSHIP, ROUTE_INVEST_REVIEW,
   ROUTE_INVEST_SIGNATURE, ROUTE_INVEST_THANK, ROUTE_SUBMIT_KYC,
 } from 'InvestCommon/helpers/enums/routes';
-import { RouteLocationNormalized, useRoute, useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import env, { cookiesOptions } from 'InvestCommon/global/index';
 import { PROFILE_TYPES } from 'InvestCommon/global/investment.json';
 import { useCookies } from '@vueuse/integrations/useCookies';
+import { useUserSession } from './useUserSession';
 
 const { EXTERNAL } = env;
 
@@ -28,6 +28,8 @@ export const useUsersStore = defineStore('user', () => {
   const route = useRoute();
   const authStore = useAuthStore();
   const { isGetSessionLoading } = storeToRefs(authStore);
+  const userSessionStore = useUserSession();
+  const { userSession, userLoggedIn } = storeToRefs(userSessionStore);
   const userProfilesStore = useUserProfilesStore();
   const {
     getUserData, isGetUserLoading,
@@ -37,18 +39,9 @@ export const useUsersStore = defineStore('user', () => {
   const cookies = useCookies(['session']);
 
   // general user data like email that we registered, name,...
-  const userAccountSession = ref(cookies.get('session'));
-  const updateUserAccountSession = (session: ISession) => {
-    userAccountSession.value = session;
-    cookies.set(
-      'session',
-      session,
-      cookiesOptions(new Date(session?.expires_at)),
-    );
-  };
-  const userLoggedIn = computed(() => userAccountSession.value?.active);
+  const userAccountSession = computed(() => userSession.value);
   const userAccountData = computed(() => ({
-    ...userAccountSession.value?.identity?.traits,
+    ...userSession.value?.identity?.traits,
     ...getUserData.value,
   }));
   const userAccountLoading = computed(() => isGetSessionLoading.value);
@@ -121,7 +114,7 @@ export const useUsersStore = defineStore('user', () => {
     console.log('selectedUserProfileId', id);
     if (id === 0) return;
     selectedUserProfileId.value = id;
-    cookies.set('selectedUserProfileId', id, cookiesOptions((new Date(userAccountSession.value?.expires_at))));
+    cookies.set('selectedUserProfileId', id, cookiesOptions((new Date(userSession.value?.expires_at))));
   };
 
   const updateUserSelectedAccount = () => {
@@ -145,34 +138,11 @@ export const useUsersStore = defineStore('user', () => {
     return (window && window?.location?.pathname.split('/')[2]);
   });
 
-  // check on url refresh
-  const checkInitUrl = (to: RouteLocationNormalized) => {
-    // if (urlChecked.value) return;
-    const isRouteToCheckProfileInUrl = computed(() => (
-      routesToCheckProfileInUrl.includes(String(to.name))));
-    const profilesIds = computed(() => (userProfiles.value.map((profile) => profile.id)));
-    const isHaveProfileID = computed(() => (profilesIds.value.includes(urlProfileId.value)));
-    // if route to check profile AND url profile id is NOT in profile list then redirect to DASHBOARD
-    // and set selected profile id and first in profile list
-    if (isRouteToCheckProfileInUrl.value && !isHaveProfileID.value) {
-      urlChecked.value = true;
-      // setSelectedUserProfileById(userProfiles.value[0]?.id);
-      router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
-    }
-    // if route to check profile AND url profile id IS in profile list then url load
-    // and set selected profile id from url
-    if (isRouteToCheckProfileInUrl.value && isHaveProfileID.value) {
-      urlChecked.value = true;
-      setSelectedUserProfileById(urlProfileId.value);
-    }
-  };
-  // END REDIRECT URL AND CHECK PROFILE ID
-
   const resetAll = () => {
     getUserData.value = undefined;
     // selectedUserProfileId.value = null;
     cookies.remove('selectedUserProfileId', cookiesOptions());
-    userAccountSession.value = undefined;
+    userSessionStore.resetAll();
     urlChecked.value = false;
   };
 
@@ -235,14 +205,12 @@ export const useUsersStore = defineStore('user', () => {
     selectedUserProfileType,
     selectedUserProfileOptions,
     selectedUserIndividualProfile,
-    updateUserAccountSession,
     updateUserSelectedAccount,
     userAccountSession,
     selectedUserProfileRiskAcknowledged,
     selectedUserProfileShowKycInitForm,
     selectedUserProfileAccreditationDataOK,
     updateData,
-    checkInitUrl,
     urlChecked,
     updateDataInProfile,
   };

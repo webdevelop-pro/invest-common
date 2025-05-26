@@ -3,4 +3,3 @@ export * from './useRedirect';
 export * from './useSegment';
 export * from './useHubspotForm';
 export * from './usePageSeo';
-export * from './useCookiesData';
