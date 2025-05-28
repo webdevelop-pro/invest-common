@@ -135,7 +135,13 @@ const fundingSourceFormatted = computed(() => (
   fundingSource.value.map((item) => ({
     text: `${item.bank_name}: ${item.name} **** ${item.last4}`,
     id: `${item.id}`,
-  }))));
+  }))) || []);
+
+const fundingSourceFormattedLastItem = computed(() => fundingSourceFormatted.value[fundingSourceFormatted.value.length - 1]);
+
+watch(() => fundingSourceFormatted.value, () => {
+  if (!model.funding_source_id) model.funding_source_id = Number(fundingSourceFormattedLastItem.value?.id);
+}, { immediate: true });
 </script>
 
 <template>
