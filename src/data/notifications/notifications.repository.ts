@@ -3,6 +3,7 @@ import { acceptHMRUpdate, defineStore } from 'pinia';
 import { ApiClient } from 'UiKit/helpers/api/apiClient';
 import env from 'InvestCommon/global';
 import { INotification } from 'InvestCommon/types/api/notifications';
+import { toasterErrorHandling } from 'UiKit/helpers/api/toasterErrorHandling';
 import { NotificationFormatter } from './notifications.formatter';
 
 export const useRepositoryNotifications = defineStore('repository-notifications', () => {
@@ -29,7 +30,7 @@ export const useRepositoryNotifications = defineStore('repository-notifications'
       return notifications.value;
     } catch (err) {
       error.value = err as Error;
-      console.error('Failed to fetch notifications:', err);
+      toasterErrorHandling(err, 'Failed to fetch notifications');
       throw err;
     } finally {
       isLoadingGetAll.value = false;
@@ -47,7 +48,7 @@ export const useRepositoryNotifications = defineStore('repository-notifications'
       }));
     } catch (err) {
       error.value = err as Error;
-      console.error('Failed to mark all notifications as read:', err);
+      toasterErrorHandling(err, 'Failed to mark all notifications as read');
       throw err;
     } finally {
       isLoadingMarkAll.value = false;
@@ -64,7 +65,7 @@ export const useRepositoryNotifications = defineStore('repository-notifications'
         : notification));
     } catch (err) {
       error.value = err as Error;
-      console.error(`Failed to mark notification ${id} as read:`, err);
+      toasterErrorHandling(err, 'Failed to mark notification as read');
       throw err;
     } finally {
       isLoadingMarkById.value = false;

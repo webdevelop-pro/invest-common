@@ -23,8 +23,8 @@ export const useNotifications = defineStore('notifications', () => {
     if (newLoading) {
       isLoading.value = true;
     // Stop loading if we have data, empty array, or an error
-    } else if (newNotification !== undefined || newError) {
-      setTimeout(() => { isLoading.value = false; }, 1000);
+    } else if (Array.isArray(newNotification) || newError) {
+      isLoading.value = false;
     }
   });
 
@@ -137,7 +137,7 @@ export const useNotifications = defineStore('notifications', () => {
   });
 
   const filterResults = computed(() => tableData.value?.length);
-  const showSearch = computed(() => filterResults.value.length > 0);
+  const showSearch = computed(() => filterResults.value > 0);
   const showFilter = computed(() => tabsData.value.length > 0);
   const showFilterPagination = computed(() => (
     Boolean(notificationUserLength.value && (notificationUserLength.value > 0) && (filterResults.value > 0))));
@@ -241,6 +241,9 @@ export const useNotifications = defineStore('notifications', () => {
     clearFilterStatus,
     clearSearch,
     clearTab,
+    // Expose state properties for testing
+    filterStatus,
+    filterType,
     // Expose computed properties for testing
     notificationUserData,
     tabsData,

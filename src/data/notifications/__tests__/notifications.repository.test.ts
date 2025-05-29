@@ -3,6 +3,7 @@ import {
 } from 'vitest';
 import { ApiClient } from 'UiKit/helpers/api/apiClient';
 import { setActivePinia, createPinia } from 'pinia';
+import { toasterErrorHandling } from 'UiKit/helpers/api/toasterErrorHandling';
 import { useRepositoryNotifications } from '../notifications.repository';
 
 // Mock ApiClient
@@ -11,6 +12,11 @@ vi.mock('UiKit/helpers/api/apiClient', () => ({
     get: vi.fn().mockImplementation(() => Promise.resolve({ data: [] })),
     put: vi.fn().mockImplementation(() => Promise.resolve({ data: {} })),
   })),
+}));
+
+// Mock toaster error handling
+vi.mock('UiKit/helpers/api/toasterErrorHandling', () => ({
+  toasterErrorHandling: vi.fn(),
 }));
 
 describe('Notifications Repository', () => {
@@ -38,6 +44,7 @@ describe('Notifications Repository', () => {
     expect(store.notifications).toEqual(mockNotifications);
     expect(store.isLoadingGetAll).toBe(false);
     expect(store.error).toBeNull();
+    expect(toasterErrorHandling).not.toHaveBeenCalled();
   });
 
   it('should handle fetch error', async () => {
@@ -53,6 +60,7 @@ describe('Notifications Repository', () => {
     await expect(store.getAll()).rejects.toThrow(mockError);
     expect(store.error).toBe(mockError);
     expect(store.isLoadingGetAll).toBe(false);
+    expect(toasterErrorHandling).toHaveBeenCalledWith(expect.any(Object), 'Failed to fetch notifications');
   });
 
   it('should mark all notifications as read', async () => {
@@ -78,6 +86,23 @@ describe('Notifications Repository', () => {
     ]);
     expect(store.isLoadingMarkAll).toBe(false);
     expect(store.error).toBeNull();
+    expect(toasterErrorHandling).not.toHaveBeenCalled();
+  });
+
+  it('should handle mark all as read error', async () => {
+    const mockError = new Error('Failed to mark all notifications as read');
+    const mockPut = vi.fn().mockImplementation(() => Promise.reject(mockError));
+    vi.mocked(ApiClient).mockImplementation(() => ({
+      get: vi.fn().mockImplementation(() => Promise.resolve({ data: [] })),
+      put: mockPut,
+    }));
+
+    const store = useRepositoryNotifications();
+
+    await expect(store.markAllAsRead()).rejects.toThrow(mockError);
+    expect(store.error).toBe(mockError);
+    expect(store.isLoadingMarkAll).toBe(false);
+    expect(toasterErrorHandling).toHaveBeenCalledWith(expect.any(Object), 'Failed to mark all notifications as read');
   });
 
   it('should mark single notification as read', async () => {
@@ -103,6 +128,23 @@ describe('Notifications Repository', () => {
     ]);
     expect(store.isLoadingMarkById).toBe(false);
     expect(store.error).toBeNull();
+    expect(toasterErrorHandling).not.toHaveBeenCalled();
+  });
+
+  it('should handle mark single notification as read error', async () => {
+    const mockError = new Error('Failed to mark notification as read');
+    const mockPut = vi.fn().mockImplementation(() => Promise.reject(mockError));
+    vi.mocked(ApiClient).mockImplementation(() => ({
+      get: vi.fn().mockImplementation(() => Promise.resolve({ data: [] })),
+      put: mockPut,
+    }));
+
+    const store = useRepositoryNotifications();
+
+    await expect(store.markAsReadById(1)).rejects.toThrow(mockError);
+    expect(store.error).toBe(mockError);
+    expect(store.isLoadingMarkById).toBe(false);
+    expect(toasterErrorHandling).toHaveBeenCalledWith(expect.any(Object), 'Failed to mark notification as read');
   });
 
   it('should format notifications correctly', () => {
