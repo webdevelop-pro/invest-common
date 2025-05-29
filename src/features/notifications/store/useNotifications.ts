@@ -24,7 +24,9 @@ export const useNotifications = defineStore('notifications', () => {
       isLoading.value = true;
     // Stop loading if we have data, empty array, or an error
     } else if (Array.isArray(newNotification) || newError) {
-      isLoading.value = false;
+      setTimeout(() => {
+        isLoading.value = false;
+      }, 500);
     }
   });
 
@@ -121,7 +123,17 @@ export const useNotifications = defineStore('notifications', () => {
   });
 
   const tableData = computed(() => {
-  // Access the value of search
+    // Only show loading state if we're loading AND don't have any existing data
+    // AND we're not just filtering existing data
+    if (isLoading.value && (formattedNotifications.value.length === 0) && (currentTab.value === 'all')) {
+      return Array(10).fill({
+        status: '',
+        type: '',
+        content: '',
+      });
+    }
+
+    // Access the value of search
     const searchValue = search.value ? String(search.value).toLowerCase() : '';
 
     if (searchValue) {
@@ -137,8 +149,8 @@ export const useNotifications = defineStore('notifications', () => {
   });
 
   const filterResults = computed(() => tableData.value?.length);
-  const showSearch = computed(() => filterResults.value > 0);
-  const showFilter = computed(() => tabsData.value.length > 0);
+  const showSearch = computed(() => notificationsFilterTypeAll.value.length > 0);
+  const showFilter = computed(() => notificationsFilterTypeAll.value.length > 0);
   const showFilterPagination = computed(() => (
     Boolean(notificationUserLength.value && (notificationUserLength.value > 0) && (filterResults.value > 0))));
   const showMarkAll = computed(() => (filterResults.value > 0 && (notificationUnreadLength.value > 0)));

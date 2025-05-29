@@ -1,5 +1,13 @@
 import { INotification } from 'InvestCommon/types/api/notifications';
 import { capitalizeFirstLetter } from 'UiKit/helpers/text';
+import {
+  urlContactUs, urlOffers, urlNotifications, urlProfileAccreditation,
+  urlInvestmentTimeline, urlProfileWallet, urlProfileAccount,
+} from 'InvestCommon/global/links';
+import {
+  ROUTE_ACCREDITATION_UPLOAD, ROUTE_DASHBOARD_ACCOUNT,
+  ROUTE_DASHBOARD_WALLET, ROUTE_INVESTMENT_TIMELINE, ROUTE_NOTIFICATIONS,
+} from 'InvestCommon/helpers/enums/routes';
 
 export interface IFormattedNotification extends INotification {
   isNotificationInvestment: boolean;
@@ -19,6 +27,8 @@ export interface IFormattedNotification extends INotification {
   buttonText: string;
   tagText: string;
   isUnread: boolean;
+  buttonTo: string;
+  buttonHref: string;
 }
 
 export class NotificationFormatter {
@@ -107,6 +117,72 @@ export class NotificationFormatter {
     return this.notification?.status.toLowerCase() === 'unread';
   }
 
+  get buttonTo(): string | { name: string; params?: { profileId: number; id?: number } } {
+    if (this.kycDeclined || this.isFundsFailed) {
+      return urlContactUs;
+    }
+    if (this.accreditationDeclined || this.accreditationExpired) {
+      return {
+        name: ROUTE_ACCREDITATION_UPLOAD,
+        params: { profileId: this.profileId },
+      };
+    }
+    if (this.isNotificationInvestment) {
+      return {
+        name: ROUTE_INVESTMENT_TIMELINE,
+        params: { profileId: this.profileId, id: this.objectId },
+      };
+    }
+    if (this.isNotificationDocument) {
+      return {
+        name: ROUTE_NOTIFICATIONS,
+      };
+    }
+    if (this.isNotificationWallet) {
+      return {
+        name: ROUTE_DASHBOARD_WALLET,
+        params: { profileId: this.profileId },
+      };
+    }
+    if (this.isNotificationProfile) {
+      return {
+        name: ROUTE_DASHBOARD_ACCOUNT,
+        params: { profileId: this.profileId },
+      };
+    }
+    if (this.isStart) {
+      return urlOffers;
+    }
+    return {
+      name: ROUTE_NOTIFICATIONS,
+    };
+  }
+
+  get buttonHref() {
+    if (this.kycDeclined || this.isFundsFailed) {
+      return urlContactUs;
+    }
+    if (this.accreditationDeclined || this.accreditationExpired) {
+      return urlProfileAccreditation(this.profileId);
+    }
+    if (this.isNotificationInvestment) {
+      return urlInvestmentTimeline(this.profileId, this.objectId);
+    }
+    if (this.isNotificationDocument) {
+      return urlNotifications;
+    }
+    if (this.isNotificationWallet) {
+      return urlProfileWallet(this.profileId);
+    }
+    if (this.isNotificationProfile) {
+      return urlProfileAccount(this.profileId);
+    }
+    if (this.isStart) {
+      return urlOffers;
+    }
+    return urlNotifications;
+  }
+
   format(): IFormattedNotification {
     return {
       ...this.notification,
@@ -127,6 +203,8 @@ export class NotificationFormatter {
       buttonText: this.buttonText,
       tagText: this.tagText,
       isUnread: this.isUnread,
+      buttonTo: this.buttonTo,
+      buttonHref: this.buttonHref,
     };
   }
 }

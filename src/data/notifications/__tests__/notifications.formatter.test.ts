@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { NotificationFormatter } from '../notifications.formatter';
+import { urlContactUs } from '../../../global/links';
 
 describe('NotificationFormatter', () => {
   const mockNotification = {
@@ -110,6 +111,8 @@ describe('NotificationFormatter', () => {
       buttonText: 'Contact Us',
       tagText: 'Investment_completed',
       isUnread: true,
+      buttonTo: urlContactUs,
+      buttonHref: urlContactUs,
     });
   });
 });

@@ -3,19 +3,11 @@ import { formatToDate } from 'InvestCommon/helpers/formatters/formatToDate';
 import { PropType, computed, ref } from 'vue';
 import VBadge from 'UiKit/components/Base/VBadge/VBadge.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
-import {
-  ROUTE_ACCREDITATION_UPLOAD, ROUTE_DASHBOARD_ACCOUNT,
-  ROUTE_DASHBOARD_WALLET, ROUTE_INVESTMENT_TIMELINE, ROUTE_NOTIFICATIONS,
-} from 'InvestCommon/helpers/enums/routes';
-import { storeToRefs } from 'pinia';
 import arrowRight from 'UiKit/assets/images/arrow-right.svg';
-import {
-  urlContactUs, urlOffers, urlNotifications, urlProfileAccreditation,
-  urlInvestmentTimeline, urlProfileWallet, urlProfileAccount,
-} from 'InvestCommon/global/links';
 import { VTableCell, VTableRow } from 'UiKit/components/Base/VTable';
 import { IFormattedNotification } from 'InvestCommon/data/notifications/notifications.formatter';
 import { useNotifications } from 'InvestCommon/features/notifications/store/useNotifications';
+import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 
 const notificationsStore = useNotifications();
 
@@ -25,79 +17,14 @@ const props = defineProps({
   data: Object as PropType<IFormattedNotification>,
   search: String,
   external: Boolean, // is the component external and nee links instead of router
-});
-
-const buttonTo = computed(() => {
-  if (props.data?.kycDeclined || props.data?.isFundsFailed) {
-    return urlContactUs;
-  }
-  if (props.data?.accreditationDeclined || props.data?.accreditationExpired) {
-    return {
-      name: ROUTE_ACCREDITATION_UPLOAD,
-      params: { profileId: props.data?.profileId },
-    };
-  }
-  if (props.data?.isNotificationInvestment) {
-    return {
-      name: ROUTE_INVESTMENT_TIMELINE,
-      params: { profileId: props.data?.profileId, id: props.data?.objectId },
-    };
-  }
-  if (props.data?.isNotificationDocument) {
-    return {
-      name: ROUTE_NOTIFICATIONS,
-    };
-  }
-  if (props.data?.isNotificationWallet) {
-    return {
-      name: ROUTE_DASHBOARD_WALLET,
-      params: { profileId: props.data?.profileId },
-    };
-  }
-  if (props.data?.isNotificationProfile) {
-    return {
-      name: ROUTE_DASHBOARD_ACCOUNT,
-      params: { profileId: props.data?.profileId },
-    };
-  }
-  if (props.data?.isStart) {
-    return urlOffers;
-  }
-  return {
-    name: ROUTE_NOTIFICATIONS,
-  };
-});
-
-const buttonHref = computed(() => {
-  if (props.data?.kycDeclined || props.data?.isFundsFailed) {
-    return urlContactUs;
-  }
-  if (props.data?.accreditationDeclined || props.data?.accreditationExpired) {
-    return urlProfileAccreditation(props.data?.profileId);
-  }
-  if (props.data?.isNotificationInvestment) {
-    return urlInvestmentTimeline(props.data?.profileId, props.data?.objectId);
-  }
-  if (props.data?.isNotificationDocument) {
-    return urlNotifications;
-  }
-  if (props.data?.isNotificationWallet) {
-    return urlProfileWallet(props.data?.profileId);
-  }
-  if (props.data?.isNotificationProfile) {
-    return urlProfileAccount(props.data?.profileId);
-  }
-  if (props.data?.isStart) {
-    return urlOffers;
-  }
-  return urlNotifications;
+  loading: Boolean,
 });
 
 const isExternalLink = computed(() => {
   if (props.external) return true;
 
   // If buttonHref starts with "http" it's definitely an external URL
-  return typeof buttonTo.value === 'string' && buttonTo.value?.startsWith('http');
+  return typeof props.data?.buttonTo === 'string' && props.data?.buttonTo?.startsWith('http');
 });
 
 const onMarkAsRead = () => {
@@ -116,9 +43,9 @@ const onButtonClick = async () => {
   notificationsStore.onSidebarToggle(false);
 
   if (!isExternalLink.value) {
-    routerRef.value?.push(buttonTo.value);
+    routerRef.value?.push(props.data?.buttonTo);
   } else {
-    window.location.href = buttonHref.value;
+    window.location.href = props.data?.buttonHref;
   }
 };
 
@@ -131,8 +58,15 @@ const onMessageClick = () => {
     class="VTableNotificationItem v-table-notification-item"
     :class="{ 'is--unread': data?.isUnread }"
   >
-    <VTableCell>
+    <VTableCell :class="{ 'v-table-notification-item__badge-loading': loading }">
+      <VSkeleton
+        v-if="loading"
+        height="34px"
+        width="86px"
+      />
       <VBadge
+        v-else
+        :key="data?.tagText"
         v-highlight="search"
         :color="data?.tagBackground"
       >
@@ -141,16 +75,30 @@ const onMessageClick = () => {
         </span>
       </VBadge>
     </VTableCell>
-    <VTableCell>
+    <VTableCell :class="{ 'v-table-notification-item__text-loading': loading }">
       <div class="v-table-notification-item__content-wrap">
-        <div>
+        <div v-if="loading">
+          <VSkeleton
+            height="21px"
+            width="100px"
+            class="v-table-notification-item__date is--h6__title"
+          />
+          <VSkeleton
+            height="25px"
+            width="200px"
+            class="v-table-notification-item__content is--body"
+          />
+        </div>
+        <div v-else>
           <span
             v-if="data?.created_at"
+            :key="data?.created_at"
             class="v-table-notification-item__date is--h6__title"
           >
             {{ formatToDate(new Date(data?.created_at).toISOString(), true) }}
           </span>
           <p
+            :key="data?.content"
             v-highlight="search"
             class="v-table-notification-item__content is--body"
             @click="onMessageClick"
@@ -158,7 +106,14 @@ const onMessageClick = () => {
           />
         </div>
 
+        <VSkeleton
+          v-if="loading"
+          height="32px"
+          width="143px"
+        />
         <VButton
+          v-else
+          :key="data?.buttonText"
           size="small"
           variant="link"
           class="v-table-notification-item__button"
@@ -260,5 +215,17 @@ const onMessageClick = () => {
   &__icon {
     width: 16px;
   }
+
+  &__text-loading {
+    width: calc(100% - 150px);
+  }
+
+  &__badge-loading {
+    width: 150px;
+  }
+}
+
+.v-skeleton {
+  transition: opacity 0.3s ease-in-out;
 }
 </style>

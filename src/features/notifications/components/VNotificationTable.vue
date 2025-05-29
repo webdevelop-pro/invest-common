@@ -46,6 +46,7 @@ const onApplyFilter = (items: IVFilter[]) => {
           v-model="currentTab"
           :default-value="currentTab"
           variant="secondary"
+          tabs-to-url
           class="wd-notification-table__tabs"
         >
           <VTabsList
@@ -98,16 +99,16 @@ const onApplyFilter = (items: IVFilter[]) => {
       </VButton>
     </div>
     <VTableDefault
-      :loading="isLoading"
       :loading-row-length="10"
       :data="data"
       size="small"
     >
       <Suspense>
         <VNotificationTableItem
-          v-for="item in data"
-          :key="item.id"
+          v-for="item, index in data"
+          :key="index"
           :data="item"
+          :loading="isLoading"
           :search="search"
           :external="external"
         />

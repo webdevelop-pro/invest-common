@@ -184,6 +184,14 @@ describe('Notifications Repository', () => {
       buttonText: 'See More Details',
       tagText: 'Investment_completed',
       isUnread: true,
+      buttonTo: {
+        name: 'ROUTE_INVESTMENT_TIMELINE',
+        params: {
+          id: 123,
+          profileId: 456,
+        },
+      },
+      buttonHref: 'undefined/profile/456/investment/123/timeline',
     });
   });
 });

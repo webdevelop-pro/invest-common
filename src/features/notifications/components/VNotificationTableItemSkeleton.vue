@@ -7,13 +7,13 @@ import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
   <VTableRow
     class="VTableNotificationItem v-table-notification-item is--unread"
   >
-    <VTableCell>
+    <VTableCell class="v-table-notification-item__badge-loading">
       <VSkeleton
         height="34px"
         width="86px"
       />
     </VTableCell>
-    <VTableCell>
+    <VTableCell class="v-table-notification-item__text-loading">
       <div class="v-table-notification-item__content-wrap">
         <div>
           <VSkeleton
@@ -30,7 +30,7 @@ import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 
         <VSkeleton
           height="32px"
-          width="143px"
+          width="133px"
         />
       </div>
     </VTableCell>
@@ -116,6 +116,14 @@ import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 
   &__icon {
     width: 16px;
+  }
+
+  &__text-loading {
+    width: calc(100% - 150px);
+  }
+
+  &__badge-loading {
+    width: 150px;
   }
 }
 </style>
