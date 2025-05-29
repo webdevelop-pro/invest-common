@@ -77,7 +77,8 @@ export const useProfileWalletStore = defineStore('wallet', () => {
   ));
   const isWalletStatusAnyError = computed(() => (
     isWalletStatusError.value || isWalletStatusErrorRetry.value || isWalletStatusErrorDocument.value
-    || isWalletStatusErrorPending.value || isWalletStatusErrorSuspended.value
+    || isWalletStatusErrorPending.value || isWalletStatusErrorSuspended.value || isWalletStatusCreated.value
+    || getWalletByProfileIdError.value
   ));
 
   const plaidOnLinkSuccess = async (publicToken: string) => {
