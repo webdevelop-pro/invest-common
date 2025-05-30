@@ -12,7 +12,7 @@ import env from 'InvestCommon/global';
 import { urlProfilePortfolio } from 'InvestCommon/global/links';
 import { useUsersStore } from './useUsers';
 
-const { EXTERNAL } = env;
+const { IS_STATIC_SITE } = env;
 
 const isCreateTokenLoading = ref(false);
 const isCreateTokenError = ref(false);
@@ -64,7 +64,7 @@ export const usePlaidStore = defineStore('plaid', () => {
             console.log('update account with new kyc status');
             // await kycIdentitiesStore.updateUserPlaidIdentities();
             usersStore.updateUserSelectedAccount();
-            if (EXTERNAL) {
+            if (IS_STATIC_SITE) {
               navigateWithQueryParams(urlProfilePortfolio(selectedUserProfileId.value));
             } else {
               const { pushTo } = useRedirect();

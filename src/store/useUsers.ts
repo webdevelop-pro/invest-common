@@ -4,7 +4,7 @@ import {
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import { useAuthStore } from 'InvestCommon/store/useAuth';
-import { useNotificationsStore } from 'InvestCommon/store/useNotifications';
+// import { useNotificationsStore } from 'InvestCommon/store/useNotifications';
 import { INotification } from 'InvestCommon/types/api/notifications';
 import {
   ROUTE_ACCREDITATION_UPLOAD, ROUTE_DASHBOARD_ACCOUNT, ROUTE_DASHBOARD_BACKGROUND_INFORMATION,
@@ -21,7 +21,7 @@ import { PROFILE_TYPES } from 'InvestCommon/global/investment.json';
 import { useCookies } from '@vueuse/integrations/useCookies';
 import { useUserSession } from './useUserSession';
 
-const { EXTERNAL } = env;
+const { IS_STATIC_SITE } = env;
 
 export const useUsersStore = defineStore('user', () => {
   const router = useRouter();
@@ -35,7 +35,7 @@ export const useUsersStore = defineStore('user', () => {
     getUserData, isGetUserLoading,
     getProfileByIdData, getProfileByIdOptionsData,
   } = storeToRefs(userProfilesStore);
-  const notificationsStore = useNotificationsStore();
+  // const notificationsStore = useNotificationsStore();
   const cookies = useCookies(['session']);
 
   // general user data like email that we registered, name,...
@@ -134,7 +134,7 @@ export const useUsersStore = defineStore('user', () => {
   const urlChecked = ref(false);
 
   const urlProfileId = computed(() => {
-    if (!EXTERNAL) return route.params?.profileId;
+    if (!IS_STATIC_SITE) return route.params?.profileId;
     return (window && window?.location?.pathname.split('/')[2]);
   });
 
@@ -156,7 +156,7 @@ export const useUsersStore = defineStore('user', () => {
   watch(() => userLoggedIn.value, async () => {
     if (userLoggedIn.value && !getUserData.value && !isGetUserLoading.value) {
       userProfilesStore.getUser();
-      notificationsStore.notificationsHandler();
+      // notificationsStore.notificationsHandler();
     }
   }, { immediate: true });
 

@@ -1,19 +1,16 @@
 <script setup lang="ts">
-import {
-  computed, defineAsyncComponent, hydrateOnVisible, PropType,
-} from 'vue';
-import { useNotificationsStore } from 'InvestCommon/store/useNotifications';
+import { computed, PropType } from 'vue';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
 import VDropdown from 'UiKit/components/VDropdown.vue';
 import { storeToRefs } from 'pinia';
 import VAvatar from 'UiKit/components/VAvatar.vue';
 import { VDropdownMenuItem } from 'UiKit/components/Base/VDropdownMenu';
-import message from 'UiKit/assets/images/message.svg';
 import { useDialogs } from 'InvestCommon/store/useDialogs';
 import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
+import NotificationsSidebarButton from 'InvestCommon/features/notifications/NotificationsSidebarButton.vue';
 import env from 'InvestCommon/global';
 
-const { FILER_URL } = env;
+const { IS_STATIC_SITE, FILER_URL } = env;
 
 type MenuItem = {
   to?: string;
@@ -29,8 +26,6 @@ defineProps({
 
 const usersStore = useUsersStore();
 const { userAccountData } = storeToRefs(usersStore);
-const notificationsStore = useNotificationsStore();
-const { notificationLength, notificationUnreadLength } = storeToRefs(notificationsStore);
 const useDialogsStore = useDialogs();
 const { isDialogLogoutOpen } = storeToRefs(useDialogsStore);
 const userProfileStore = useUserProfilesStore();
@@ -41,29 +36,15 @@ const userEmail = computed(() => userAccountData.value?.email);
 const onLogout = () => {
   isDialogLogoutOpen.value = true;
 };
-const onSidebarOpen = () => {
-  if (notificationLength.value) notificationsStore.notificationSidebarOpen();
-};
 const imageID = computed(() => getUserData.value?.image_link_id);
 </script>
 
 <template>
   <div class="VHeaderProfile v-header-profile">
     <div class="v-header-profile__divider is--gt-tablet-show" />
-    <div
-      class="v-header-profile__notification"
-      data-testid="header-profile"
-      @click="onSidebarOpen"
-    >
-      <message
-        alt="notification icon"
-        class="v-header-profile__notification-icon"
-      />
-      <span
-        v-if="notificationUnreadLength && (notificationUnreadLength > 0)"
-        class="v-header-profile__notification-dot"
-      />
-    </div>
+    <NotificationsSidebarButton
+      :is-static-site="IS_STATIC_SITE"
+    />
     <VDropdown
       with-chevron
       :menu="menu"

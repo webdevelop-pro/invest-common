@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useNotificationsStore } from 'InvestCommon/store/useNotifications';
+import { useNotifications } from 'InvestCommon/features/notifications/store/useNotifications';
 import { ROUTE_NOTIFICATIONS } from 'InvestCommon/helpers/enums/routes';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { storeToRefs } from 'pinia';
@@ -9,24 +9,26 @@ import {
   VSheetFooter,
 } from 'UiKit/components/Base/VSheet';
 import { defineAsyncComponent } from 'vue';
-import env from 'InvestCommon/global/index';
 import { urlNotifications } from 'InvestCommon/global/links';
 
 const WdNotificationTable = defineAsyncComponent({
-  loader: () => import('InvestCommon/components/VNotificationTable.vue'),
+  loader: () => import('./VNotificationTable.vue'),
 });
 
-const notificationsStore = useNotificationsStore();
-const { notificationUnreadLength, isNotificationSidebarOpen } = storeToRefs(notificationsStore);
-const { EXTERNAL } = env;
+defineProps({
+  isStaticSite: Boolean,
+});
+
+const notificationsStore = useNotifications();
+const { notificationUnreadLength, isSidebarOpen } = storeToRefs(notificationsStore);
 
 const onClose = () => {
-  notificationsStore.notificationSidebarClose();
+  notificationsStore.onSidebarToggle(false);
 };
 </script>
 <template>
   <VSheet
-    v-model:open="isNotificationSidebarOpen"
+    v-model:open="isSidebarOpen"
     class="VNotificationSidebar v-notification-sidebar"
   >
     <VSheetContent
@@ -43,17 +45,17 @@ const onClose = () => {
       </VSheetHeader>
       <div class="v-notification-sidebar__text">
         <WdNotificationTable
-          v-if="isNotificationSidebarOpen"
+          v-if="isSidebarOpen"
           small
           class="v-notification-sidebar__table"
-          :external="EXTERNAL"
+          :is-static-site="isStaticSite"
         />
       </div>
       <VSheetFooter class="v-notification-sidebar__bottom">
         <VButton
           size="large"
           variant="link"
-          :as="EXTERNAL ? 'a' : 'router-link'"
+          :as="isStaticSite ? 'a' : 'router-link'"
           :to="{ name: ROUTE_NOTIFICATIONS }"
           :href="urlNotifications"
           @click="onClose"
