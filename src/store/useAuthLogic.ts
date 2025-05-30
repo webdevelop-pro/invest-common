@@ -27,7 +27,7 @@ import { useDialogs } from 'InvestCommon/store/useDialogs';
 import { SELFSERVICE } from 'InvestCommon/helpers/enums/auth';
 import { useUserSession } from './useUserSession';
 
-const { EXTERNAL } = env;
+const { IS_STATIC_SITE } = env;
 
 const loading = ref(false);
 
@@ -195,7 +195,7 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
         lastname: lastName,
       });
       const queryRedirect = computed(() => new URLSearchParams(window.location.search).get('redirect'));
-      if (EXTERNAL) {
+      if (IS_STATIC_SITE) {
         navigateWithQueryParams(queryRedirect.value || urlProfile());
       }
     }
@@ -314,7 +314,7 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
 
   const handleAfterLogout = () => {
     let queryParams;
-    if (EXTERNAL) {
+    if (IS_STATIC_SITE) {
       if (window?.location?.pathname?.includes('offer')) {
         queryParams = { redirect: window?.location?.pathname };
       }

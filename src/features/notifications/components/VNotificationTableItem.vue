@@ -21,7 +21,9 @@ const props = defineProps({
 });
 
 const isExternalLink = computed(() => {
-  if (props.external) return true;
+  if (props.external) {
+    return true;
+  }
 
   // If buttonHref starts with "http" it's definitely an external URL
   return typeof props.data?.buttonTo === 'string' && props.data?.buttonTo?.startsWith('http');

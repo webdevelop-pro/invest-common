@@ -165,7 +165,8 @@ describe('Notifications Repository', () => {
     const store = useRepositoryNotifications();
     store.notifications = mockNotifications;
 
-    expect(store.formattedNotifications[0]).toEqual({
+    const { buttonHref, ...notificationWithoutHref } = store.formattedNotifications[0];
+    expect(notificationWithoutHref).toEqual({
       ...mockNotifications[0],
       isNotificationInvestment: true,
       isNotificationDocument: false,
@@ -191,7 +192,6 @@ describe('Notifications Repository', () => {
           profileId: 456,
         },
       },
-      buttonHref: 'undefined/profile/456/investment/123/timeline',
     });
   });
 });

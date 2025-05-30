@@ -10,7 +10,7 @@ import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import NotificationsSidebarButton from 'InvestCommon/features/notifications/NotificationsSidebarButton.vue';
 import env from 'InvestCommon/global';
 
-const { EXTERNAL, FILER_URL } = env;
+const { IS_STATIC_SITE, FILER_URL } = env;
 
 type MenuItem = {
   to?: string;
@@ -43,7 +43,7 @@ const imageID = computed(() => getUserData.value?.image_link_id);
   <div class="VHeaderProfile v-header-profile">
     <div class="v-header-profile__divider is--gt-tablet-show" />
     <NotificationsSidebarButton
-      :external="EXTERNAL"
+      :external="IS_STATIC_SITE"
     />
     <VDropdown
       with-chevron

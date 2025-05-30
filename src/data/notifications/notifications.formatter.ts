@@ -91,25 +91,47 @@ export class NotificationFormatter {
   }
 
   get tagBackground(): string {
-    if (this.isNotificationInvestment) return 'secondary-light';
-    if (this.isNotificationDocument) return 'yellow-light';
-    if (this.isNotificationSystem || this.isNotificationUser) return 'default';
-    if (this.isNotificationWallet) return 'red-light';
+    if (this.isNotificationInvestment) {
+      return 'secondary-light';
+    }
+    if (this.isNotificationDocument) {
+      return 'yellow-light';
+    }
+    if (this.isNotificationSystem || this.isNotificationUser) {
+      return 'default';
+    }
+    if (this.isNotificationWallet) {
+      return 'red-light';
+    }
     return 'purple-light';
   }
 
   get buttonText(): string {
-    if (this.kycDeclined || this.isFundsFailed) return 'Contact Us';
-    if (this.accreditationDeclined || this.accreditationExpired) return 'Provide info';
-    if (this.isNotificationInvestment || this.isNotificationProfile || this.isNotificationWallet) return 'See More Details';
-    if (this.isNotificationDocument) return 'Review Document';
-    if (this.isStart) return 'Start Investing';
+    if (this.kycDeclined || this.isFundsFailed) {
+      return 'Contact Us';
+    }
+    if (this.accreditationDeclined || this.accreditationExpired) {
+      return 'Provide info';
+    }
+    if (this.isNotificationInvestment || this.isNotificationProfile || this.isNotificationWallet) {
+      return 'See More Details';
+    }
+    if (this.isNotificationDocument) {
+      return 'Review Document';
+    }
+    if (this.isStart) {
+      return 'Start Investing';
+    }
     return 'More Info';
   }
 
   get tagText(): string {
-    if (this.isNotificationProfile) return 'Investment Profile';
-    if (this.isNotificationUser) return 'System';
+    if (this.isNotificationProfile) {
+      return 'Investment Profile';
+    }
+    if (this.isNotificationUser) {
+      return 'System';
+    }
     return capitalizeFirstLetter(this.notification?.type || '');
   }
 

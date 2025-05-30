@@ -1,5 +1,5 @@
 const env = {
-  EXTERNAL: import.meta.env.VITE_EXTERNAL,
+  IS_STATIC_SITE: import.meta.env.VITE_IS_STATIC_SITE,
   KRATOS_URL: import.meta.env.VITE_KRATOS_URL,
   PLAID_URL: import.meta.env.VITE_PLAID_URL,
   FRONTEND_URL: import.meta.env.VITE_FRONTEND,

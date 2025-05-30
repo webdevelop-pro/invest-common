@@ -21,7 +21,7 @@ import { PROFILE_TYPES } from 'InvestCommon/global/investment.json';
 import { useCookies } from '@vueuse/integrations/useCookies';
 import { useUserSession } from './useUserSession';
 
-const { EXTERNAL } = env;
+const { IS_STATIC_SITE } = env;
 
 export const useUsersStore = defineStore('user', () => {
   const router = useRouter();
@@ -134,7 +134,7 @@ export const useUsersStore = defineStore('user', () => {
   const urlChecked = ref(false);
 
   const urlProfileId = computed(() => {
-    if (!EXTERNAL) return route.params?.profileId;
+    if (!IS_STATIC_SITE) return route.params?.profileId;
     return (window && window?.location?.pathname.split('/')[2]);
   });
 

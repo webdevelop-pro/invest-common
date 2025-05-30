@@ -22,7 +22,7 @@ const logoutHandler = async () => {
   await authLogicStore.onLogout();
   open.value = false;
 };
-const { EXTERNAL } = env;
+const { IS_STATIC_SITE } = env;
 
 watch(() => open.value, () => {
   if (!open.value) {
@@ -49,7 +49,7 @@ watch(() => open.value, () => {
         </VDialogHeader>
         <div class="v-dialog-log-out__img">
           <VImage
-            :src="!EXTERNAL ? image : '/images/logout-modal.svg'"
+            :src="!IS_STATIC_SITE ? image : '/images/logout-modal.svg'"
             alt=""
           />
         </div>

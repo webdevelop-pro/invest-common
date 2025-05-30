@@ -1,36 +1,41 @@
 import { describe, it, expect } from 'vitest';
 import { NotificationFormatter } from '../notifications.formatter';
-import { urlContactUs } from '../../../global/links';
+import { urlInvestmentTimeline } from '../../../global/links';
 
 describe('NotificationFormatter', () => {
   const mockNotification = {
     id: 1,
-    type: 'investment_completed',
+    type: 'investment',
     status: 'unread',
     data: {
       fields: {
+        amount: '2000.00',
+        funding_type: 'wire',
         object_id: 123,
         profile: {
           ID: 456,
-          kyc_status: 'new',
+          type: 'individual',
         },
-        kyc_status: 'declined',
-        accreditation_status: 'declined',
-        funding_status: 'failed',
+        offer: {
+          Name: 'Leaders Highlight the AI Disruptors Fund',
+          Slug: 'leaders-highlight-the-ai-disruptors-fund',
+        },
+        status: 'confirmed',
       },
+      obj: 'investment',
     },
   };
 
   const mockDocumentNotification = {
     id: 2,
-    type: 'document_review',
+    type: 'document',
     status: 'unread',
     data: {
       fields: {
         object_id: 789,
         profile: {
           ID: 101,
-          kyc_status: 'approved',
+          type: 'individual',
         },
       },
     },
@@ -54,11 +59,11 @@ describe('NotificationFormatter', () => {
 
   it('should correctly identify status flags', () => {
     const formatter = new NotificationFormatter(mockNotification);
-    expect(formatter.kycDeclined).toBe(true);
-    expect(formatter.accreditationDeclined).toBe(true);
+    expect(formatter.kycDeclined).toBe(false);
+    expect(formatter.accreditationDeclined).toBe(false);
     expect(formatter.accreditationExpired).toBe(false);
-    expect(formatter.isStart).toBe(true);
-    expect(formatter.isFundsFailed).toBe(true);
+    expect(formatter.isStart).toBe(false);
+    expect(formatter.isFundsFailed).toBe(false);
     expect(formatter.isUnread).toBe(true);
   });
 
@@ -73,7 +78,7 @@ describe('NotificationFormatter', () => {
 
   it('should return correct button text', () => {
     const formatter = new NotificationFormatter(mockNotification);
-    expect(formatter.buttonText).toBe('Contact Us');
+    expect(formatter.buttonText).toBe('See More Details');
 
     const docFormatter = new NotificationFormatter(mockDocumentNotification);
     expect(docFormatter.buttonText).toBe('Review Document');
@@ -81,7 +86,7 @@ describe('NotificationFormatter', () => {
 
   it('should return correct tag text', () => {
     const formatter = new NotificationFormatter(mockNotification);
-    expect(formatter.tagText).toBe('Investment_completed');
+    expect(formatter.tagText).toBe('Investment');
 
     const profileNotification = { ...mockNotification, type: 'profile_update' };
     const profileFormatter = new NotificationFormatter(profileNotification);
@@ -102,17 +107,20 @@ describe('NotificationFormatter', () => {
       isNotificationUser: false,
       objectId: 123,
       profileId: 456,
-      kycDeclined: true,
-      accreditationDeclined: true,
+      kycDeclined: false,
+      accreditationDeclined: false,
       accreditationExpired: false,
-      isStart: true,
-      isFundsFailed: true,
+      isStart: false,
+      isFundsFailed: false,
       tagBackground: 'secondary-light',
-      buttonText: 'Contact Us',
-      tagText: 'Investment_completed',
+      buttonText: 'See More Details',
+      tagText: 'Investment',
       isUnread: true,
-      buttonTo: urlContactUs,
-      buttonHref: urlContactUs,
+      buttonTo: {
+        name: 'ROUTE_INVESTMENT_TIMELINE',
+        params: { profileId: 456, id: 123 },
+      },
+      buttonHref: urlInvestmentTimeline(456, '123'),
     });
   });
 });

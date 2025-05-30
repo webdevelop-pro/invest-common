@@ -31,9 +31,11 @@ export const useNotifications = defineStore('notifications', () => {
   });
 
   /* * Data * */
-  const notificationUserData = computed(() => formattedNotifications.value?.filter((item: INotification) => item.type !== 'internal') || []);
+  const notificationUserData = computed(() => (
+    formattedNotifications.value?.filter((item: INotification) => item.type !== 'internal') || []));
   const notificationUserLength = computed(() => notificationUserData.value.length);
-  const notificationUnreadData = computed(() => notificationUserData.value.filter((item: INotification) => item.status === 'unread'));
+  const notificationUnreadData = computed(() => (
+    notificationUserData.value.filter((item: INotification) => item.status === 'unread')));
   const notificationUnreadLength = computed(() => notificationUnreadData.value.length);
 
   /* * Loading All Data * */
@@ -104,9 +106,15 @@ export const useNotifications = defineStore('notifications', () => {
     notificationUserData.value?.filter((item) => (item.type?.toLowerCase().includes('document')))));
 
   const tabsData = computed(() => {
-    if (currentTab.value === 'investments') return notificationsFilterTypeInvestments.value;
-    if (currentTab.value === 'accounts') return notificationsFilterTypeAccounts.value;
-    if (currentTab.value === 'document') return notificationsFilterTypeDocuments.value;
+    if (currentTab.value === 'investments') {
+      return notificationsFilterTypeInvestments.value;
+    }
+    if (currentTab.value === 'accounts') {
+      return notificationsFilterTypeAccounts.value;
+    }
+    if (currentTab.value === 'document') {
+      return notificationsFilterTypeDocuments.value;
+    }
     return notificationsFilterTypeAll.value;
   });
 
@@ -117,8 +125,12 @@ export const useNotifications = defineStore('notifications', () => {
 
   const filterData = computed(() => {
     let filtered = tabsData.value;
-    if (filterStatus.value && (filterStatus.value?.length > 0)) filtered = tabsDataFilterStatus.value;
-    if (filterType.value && (filterType.value?.length > 0)) filtered = tabsDataFilterType.value;
+    if (filterStatus.value && (filterStatus.value?.length > 0)) {
+      filtered = tabsDataFilterStatus.value;
+    }
+    if (filterType.value && (filterType.value?.length > 0)) {
+      filtered = tabsDataFilterType.value;
+    }
     return filtered;
   });
 
@@ -164,14 +176,18 @@ export const useNotifications = defineStore('notifications', () => {
     filterSettings.value = items;
 
     const statusObject = items?.filter((item: IVFilter) => item.value === 'status')[0];
-    if (!statusObject) filterStatus.value = [];
-
-    else filterStatus.value = statusObject?.model?.map((item: string) => item.toLowerCase());
+    if (!statusObject) {
+      filterStatus.value = [];
+    } else {
+      filterStatus.value = statusObject?.model?.map((item: string) => item.toLowerCase());
+    }
 
     const typeObject = items?.filter((item: IVFilter) => item.value === 'type')[0];
-    if (!typeObject) filterType.value = [];
-
-    else filterType.value = typeObject?.model?.map((item: string) => item.toLowerCase());
+    if (!typeObject) {
+      filterType.value = [];
+    } else {
+      filterType.value = typeObject?.model?.map((item: string) => item.toLowerCase());
+    }
   };
 
   const clearFilterType = () => {
@@ -195,7 +211,9 @@ export const useNotifications = defineStore('notifications', () => {
 
   const handleTabChange = () => {
     clearSearch();
-    if (currentTab.value !== 'all') clearFilterType();
+    if (currentTab.value !== 'all') {
+      clearFilterType();
+    }
   };
 
   watch(() => search.value, () => {
@@ -224,7 +242,9 @@ export const useNotifications = defineStore('notifications', () => {
 
   /* * Mark As Read By Id * */
   const markAsReadById = async (id: number) => {
-    if (!id) return;
+    if (!id) {
+      return;
+    }
     notificationsRepository.markAsReadById(id);
   };
 
