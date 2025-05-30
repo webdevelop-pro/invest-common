@@ -14,7 +14,7 @@ import VNotificationTableItemSkeleton from 'InvestCommon/features/notifications/
 
 const props = defineProps({
   small: Boolean,
-  external: Boolean, // is the component external and nee links instead of router
+  isStaticSite: Boolean, // is the component external and nee links instead of router
 });
 
 const notificationsStore = useNotifications();
@@ -110,7 +110,7 @@ const onApplyFilter = (items: IVFilter[]) => {
           :data="item"
           :loading="isLoading"
           :search="search"
-          :external="external"
+          :is-static-site="isStaticSite"
         />
       </Suspense>
       <template #loading>

@@ -16,7 +16,7 @@ const WdNotificationTable = defineAsyncComponent({
 });
 
 defineProps({
-  external: Boolean,
+  isStaticSite: Boolean,
 });
 
 const notificationsStore = useNotifications();
@@ -48,14 +48,14 @@ const onClose = () => {
           v-if="isSidebarOpen"
           small
           class="v-notification-sidebar__table"
-          :external="external"
+          :is-static-site="isStaticSite"
         />
       </div>
       <VSheetFooter class="v-notification-sidebar__bottom">
         <VButton
           size="large"
           variant="link"
-          :as="external ? 'a' : 'router-link'"
+          :as="isStaticSite ? 'a' : 'router-link'"
           :to="{ name: ROUTE_NOTIFICATIONS }"
           :href="urlNotifications"
           @click="onClose"

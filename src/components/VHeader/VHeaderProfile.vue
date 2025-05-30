@@ -43,7 +43,7 @@ const imageID = computed(() => getUserData.value?.image_link_id);
   <div class="VHeaderProfile v-header-profile">
     <div class="v-header-profile__divider is--gt-tablet-show" />
     <NotificationsSidebarButton
-      :external="IS_STATIC_SITE"
+      :is-static-site="IS_STATIC_SITE"
     />
     <VDropdown
       with-chevron

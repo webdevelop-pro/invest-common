@@ -12,7 +12,7 @@ const VNotificationSidebar = defineAsyncComponent({
 });
 
 defineProps({
-  external: Boolean,
+  isStaticSite: Boolean,
 });
 
 const notificationsStore = useNotifications();
@@ -51,7 +51,7 @@ onBeforeMount(() => {
       v-if="notificationUnreadLength && (notificationUnreadLength > 0)"
       class="notifications-sidebar-button__notification-dot"
     />
-    <VNotificationSidebar :external="external" />
+    <VNotificationSidebar :is-static-site="isStaticSite" />
   </div>
 </template>
 
