@@ -16,7 +16,7 @@ const WdNotificationTable = defineAsyncComponent({
 });
 
 defineProps({
-  isStaticSite: Boolean,
+  isStaticSite: String,
 });
 
 const notificationsStore = useNotifications();
@@ -55,7 +55,7 @@ const onClose = () => {
         <VButton
           size="large"
           variant="link"
-          :as="isStaticSite ? 'a' : 'router-link'"
+          :as="+isStaticSite ? 'a' : 'router-link'"
           :to="{ name: ROUTE_NOTIFICATIONS }"
           :href="urlNotifications"
           @click="onClose"

@@ -4,7 +4,7 @@ import {
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import { useAuthStore } from 'InvestCommon/store/useAuth';
-// import { useNotificationsStore } from 'InvestCommon/store/useNotifications';
+import { useDomainWebSocketStore } from 'InvestCommon/domain/websockets/store/useWebsockets';
 import { INotification } from 'InvestCommon/types/api/notifications';
 import {
   ROUTE_ACCREDITATION_UPLOAD, ROUTE_DASHBOARD_ACCOUNT, ROUTE_DASHBOARD_BACKGROUND_INFORMATION,
@@ -35,7 +35,7 @@ export const useUsersStore = defineStore('user', () => {
     getUserData, isGetUserLoading,
     getProfileByIdData, getProfileByIdOptionsData,
   } = storeToRefs(userProfilesStore);
-  // const notificationsStore = useNotificationsStore();
+  const websocketsStore = useDomainWebSocketStore();
   const cookies = useCookies(['session']);
 
   // general user data like email that we registered, name,...
@@ -50,7 +50,7 @@ export const useUsersStore = defineStore('user', () => {
   const userProfilesLoading = computed(() => isGetUserLoading.value);
   // SELECTED USER PROFILE
   const selectedUserProfileLoading = computed(() => userProfilesLoading.value);
-  const selectedUserProfileId = ref();
+  const selectedUserProfileId = ref(0);
   // const selectedUserProfileId = useStorage('selectedUserProfileId', 0, sessionStorage);
   // const userProfilesFilteredById = computed(() => (
   //   userProfiles.value.filter((item) => item.id === selectedUserProfileId.value)[0]));
@@ -134,7 +134,7 @@ export const useUsersStore = defineStore('user', () => {
   const urlChecked = ref(false);
 
   const urlProfileId = computed(() => {
-    if (!IS_STATIC_SITE) return route.params?.profileId;
+    if (!+IS_STATIC_SITE) return route.params?.profileId;
     return (window && window?.location?.pathname.split('/')[2]);
   });
 
@@ -156,7 +156,7 @@ export const useUsersStore = defineStore('user', () => {
   watch(() => userLoggedIn.value, async () => {
     if (userLoggedIn.value && !getUserData.value && !isGetUserLoading.value) {
       userProfilesStore.getUser();
-      // notificationsStore.notificationsHandler();
+      websocketsStore.webSocketHandler();
     }
   }, { immediate: true });
 

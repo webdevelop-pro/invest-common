@@ -14,7 +14,7 @@ import VNotificationTableItemSkeleton from 'InvestCommon/features/notifications/
 
 const props = defineProps({
   small: Boolean,
-  isStaticSite: Boolean, // is the component external and nee links instead of router
+  isStaticSite: String, // is the component external and nee links instead of router
 });
 
 const notificationsStore = useNotifications();

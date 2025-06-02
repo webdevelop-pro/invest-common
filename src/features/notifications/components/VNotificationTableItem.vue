@@ -16,12 +16,12 @@ const routerRef = ref<any>(null);
 const props = defineProps({
   data: Object as PropType<IFormattedNotification>,
   search: String,
-  isStaticSite: Boolean, // is the component external and nee links instead of router
+  isStaticSite: String, // is the component external and nee links instead of router
   loading: Boolean,
 });
 
 const isExternalLink = computed(() => {
-  if (props.external) {
+  if (+props.isStaticSite) {
     return true;
   }
 

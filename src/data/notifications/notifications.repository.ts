@@ -72,6 +72,11 @@ export const useRepositoryNotifications = defineStore('repository-notifications'
     }
   };
 
+  const updateNotificationsData = (data: string) => {
+    const notification = JSON.parse(data) as INotification;
+    notifications.value.unshift(notification);
+  };
+
   return {
     // State
     notifications,
@@ -84,6 +89,7 @@ export const useRepositoryNotifications = defineStore('repository-notifications'
     getAll,
     markAllAsRead,
     markAsReadById,
+    updateNotificationsData,
   };
 });
 

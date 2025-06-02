@@ -12,7 +12,7 @@ const VNotificationSidebar = defineAsyncComponent({
 });
 
 defineProps({
-  isStaticSite: Boolean,
+  isStaticSite: String,
 });
 
 const notificationsStore = useNotifications();
