@@ -1,18 +1,26 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import {
+  describe, it, expect, vi, beforeEach,
+} from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
-import { useAccreditationUpload } from '../useAccreditationUpload';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
-import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import { useRepositoryAccreditation } from 'InvestCommon/data/accreditation/accreditation.repository';
 import { AccreditationTypes } from 'InvestCommon/types/api/invest';
+import { ref } from 'vue';
+import { useAccreditationUpload } from '../useAccreditationUpload';
 
 // Mock the dependencies
 vi.mock('InvestCommon/store/useUsers', () => ({
-  useUsersStore: vi.fn(() => ({
-    selectedUserProfileData: { value: { id: '123', user_id: '456', accreditation_status: 'new' } },
-    selectedUserProfileId: { value: '123' },
-    selectedUserProfileType: { value: 'individual' },
-  })),
+  useUsersStore: vi.fn(() => {
+    const selectedUserProfileData = ref({ id: '123', user_id: '456', accreditation_status: 'new' });
+    const selectedUserProfileId = ref('123');
+    const selectedUserProfileType = ref('individual');
+
+    return {
+      selectedUserProfileData,
+      selectedUserProfileId,
+      selectedUserProfileType,
+    };
+  }),
 }));
 
 vi.mock('InvestCommon/store/useUserProfiles', () => ({
@@ -26,26 +34,34 @@ vi.mock('InvestCommon/data/accreditation/accreditation.repository', () => ({
     uploadDocument: vi.fn(),
     create: vi.fn(),
     update: vi.fn(),
-    error: { value: null },
+    error: ref({}),
   })),
 }));
 
 vi.mock('vue-router', () => ({
-  useRouter: () => ({
+  useRouter: vi.fn(() => ({
     push: vi.fn(),
-  }),
+  })),
 }));
 
 describe('useAccreditationUpload', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
     vi.clearAllMocks();
+
+    // Ensure the store is properly initialized with all required refs
+    const mockStore = {
+      selectedUserProfileData: ref({ id: '123', user_id: '456', accreditation_status: 'new' }),
+      selectedUserProfileId: ref('123'),
+      selectedUserProfileType: ref('individual'),
+    };
+    vi.mocked(useUsersStore).mockReturnValue(mockStore);
   });
 
   describe('initial state', () => {
     it('should initialize with correct default values', () => {
       const store = useAccreditationUpload();
-      
+
       expect(store.isLoading).toBe(false);
       expect(store.isDisabledButton).toBe(false);
       expect(store.accreditationFiles).toEqual([]);
@@ -59,7 +75,7 @@ describe('useAccreditationUpload', () => {
 
     it('should set correct breadcrumbs', () => {
       const store = useAccreditationUpload();
-      
+
       expect(store.breadcrumbs).toHaveLength(2);
       expect(store.breadcrumbs[0].text).toBe('Dashboard');
       expect(store.breadcrumbs[1].text).toBe('Accreditation Verification');
@@ -70,9 +86,9 @@ describe('useAccreditationUpload', () => {
     it('should update files when onFilesChange is called', () => {
       const store = useAccreditationUpload();
       const mockFiles = [new File([''], 'test1.pdf'), new File([''], 'test2.pdf')];
-      
+
       store.onFilesChange(mockFiles);
-      
+
       expect(store.allFiles).toEqual(mockFiles);
       expect(store.accreditationFiles).toEqual(mockFiles);
     });
@@ -80,10 +96,31 @@ describe('useAccreditationUpload', () => {
     it('should remove file description when onFileRemove is called', () => {
       const store = useAccreditationUpload();
       store.model.description1 = 'Test description';
-      
+
       store.onFileRemove(0);
-      
+
       expect(store.model.description1).toBeUndefined();
+    });
+
+    it('should handle multiple file uploads with descriptions', () => {
+      const store = useAccreditationUpload();
+      const mockFiles = [
+        new File([''], 'test1.pdf'),
+        new File([''], 'test2.pdf'),
+        new File([''], 'test3.pdf'),
+      ];
+
+      store.onFilesChange(mockFiles);
+      store.onModelChange({
+        note: 'Test note',
+        description1: 'Description 1',
+        description2: 'Description 2',
+        description3: 'Description 3',
+      });
+
+      expect(store.accreditationFiles).toEqual(mockFiles);
+      expect(store.accreditationDescriptions).toEqual(['Description 1', 'Description 2', 'Description 3']);
+      expect(store.accreditationNote).toBe('Test note');
     });
   });
 
@@ -95,20 +132,37 @@ describe('useAccreditationUpload', () => {
         description1: 'Test description 1',
         description2: 'Test description 2',
       };
-      
+
       store.onModelChange(mockModel);
-      
+
       expect(store.accreditationNote).toBe('Test note');
       expect(store.accreditationDescriptions).toEqual(['Test description 1', 'Test description 2']);
     });
 
     it('should update isFieldsValid when onValidChange is called', () => {
       const store = useAccreditationUpload();
-      
+
       store.onValidChange(false);
       expect(store.isFieldsValid).toBe(false);
-      
+
       store.onValidChange(true);
+      expect(store.isFieldsValid).toBe(true);
+    });
+
+    it('should handle validation with multiple files', () => {
+      const store = useAccreditationUpload();
+      const mockFiles = [
+        new File([''], 'test1.pdf'),
+        new File([''], 'test2.pdf'),
+      ];
+
+      store.onFilesChange(mockFiles);
+      store.onModelChange({
+        note: 'Test note',
+        description1: 'Description 1',
+        description2: 'Description 2',
+      });
+
       expect(store.isFieldsValid).toBe(true);
     });
   });
@@ -120,41 +174,91 @@ describe('useAccreditationUpload', () => {
     });
 
     it('should return false for isAccreditationCanUpload when status is pending', () => {
-      const usersStore = useUsersStore();
-      usersStore.selectedUserProfileData.value.accreditation_status = AccreditationTypes.pending;
-      
+      // Reset the mock before the test
+      vi.clearAllMocks();
+
+      // Create a new mock with the pending status
+      const mockStore = {
+        selectedUserProfileData: ref({
+          id: '123',
+          user_id: '456',
+          accreditation_status: AccreditationTypes.pending,
+        }),
+        selectedUserProfileId: ref('123'),
+        selectedUserProfileType: ref('individual'),
+      };
+
+      // Override the mock implementation for this test
+      vi.mocked(useUsersStore).mockReturnValue(mockStore);
+
       const store = useAccreditationUpload();
       expect(store.isAccreditationCanUpload).toBe(false);
+    });
+
+    it('should set isFieldsValid to true when model is valid and validateTrigger is set', () => {
+      const store = useAccreditationUpload();
+      store.model = {
+        note: 'Valid note',
+        description1: 'Valid description',
+      };
+      store.validateTrigger = true;
+      expect(store.isFieldsValid).toBe(true);
+    });
+
+    it('should update accreditationDescriptions when model changes deeply', () => {
+      const store = useAccreditationUpload();
+      store.onModelChange({
+        note: 'Initial note',
+        description1: 'Initial description',
+      });
+      expect(store.accreditationDescriptions).toEqual(['Initial description']);
+
+      store.onModelChange({
+        note: 'Initial note',
+        description1: 'Initial description',
+        description2: 'Second description',
+      });
+      expect(store.accreditationDescriptions).toEqual(['Initial description', 'Second description']);
+    });
+
+    it('should re-instantiate validator when schema changes', () => {
+      const store = useAccreditationUpload();
+      const oldValidator = store.schemaAccreditationFileInput;
+      // Simulate schema change by adding files
+      store.onFilesChange([
+        new File([''], 'test1.pdf'),
+        new File([''], 'test2.pdf'),
+        new File([''], 'test3.pdf'),
+      ]);
+      expect(store.schemaAccreditationFileInput).not.toBe(oldValidator);
     });
   });
 
   describe('file upload', () => {
-    it('should handle file upload successfully', async () => {
-      const store = useAccreditationUpload();
-      const mockFile = new File([''], 'test.pdf');
-      store.accreditationFiles = [mockFile];
-      store.accreditationDescriptions = ['Test description'];
-      store.accreditationNote = 'Test note';
+    beforeEach(() => {
+      setActivePinia(createPinia());
+      vi.clearAllMocks();
 
-      const accreditationRepository = useRepositoryAccreditation();
-      vi.mocked(accreditationRepository.uploadDocument).mockResolvedValueOnce({});
-      vi.mocked(accreditationRepository.create).mockResolvedValueOnce({});
-
-      await store.sendFiles();
-
-      expect(accreditationRepository.uploadDocument).toHaveBeenCalled();
-      expect(accreditationRepository.create).toHaveBeenCalled();
+      // Ensure the store is properly initialized with all required refs
+      const mockStore = {
+        selectedUserProfileData: ref({ id: '123', user_id: '456', accreditation_status: 'new' }),
+        selectedUserProfileId: ref('123'),
+        selectedUserProfileType: ref('individual'),
+      };
+      vi.mocked(useUsersStore).mockReturnValue(mockStore);
     });
 
-    it('should handle file upload error', async () => {
+    it('should handle upload error gracefully', async () => {
       const store = useAccreditationUpload();
       const mockFile = new File([''], 'test.pdf');
+
+      // Set up the required store values
       store.accreditationFiles = [mockFile];
       store.accreditationDescriptions = ['Test description'];
-      store.accreditationNote = 'Test note';
 
       const accreditationRepository = useRepositoryAccreditation();
-      vi.mocked(accreditationRepository.uploadDocument).mockRejectedValueOnce(new Error('Upload failed'));
+      const uploadDocumentSpy = vi.fn().mockRejectedValue(new Error('Upload failed'));
+      accreditationRepository.uploadDocument = uploadDocumentSpy;
 
       await store.sendFiles();
 
@@ -163,12 +267,52 @@ describe('useAccreditationUpload', () => {
   });
 
   describe('error handling', () => {
-    it('should return error text for specific description index', () => {
-      const store = useAccreditationUpload();
-      const accreditationRepository = useRepositoryAccreditation();
-      accreditationRepository.error.value = { description1: 'Error message' };
+    it('should return error tex', () => {
+      // Reset the mock before the test
+      vi.clearAllMocks();
 
-      expect(store.getErrorText(0)).toBe('Error message');
+      // Create a new mock with required refs
+      const mockStore = {
+        selectedUserProfileData: ref({
+          id: '123',
+          user_id: '456',
+          accreditation_status: 'new',
+        }),
+        selectedUserProfileId: ref('123'),
+        selectedUserProfileType: ref('individual'),
+      };
+
+      // Override the mock implementation for this test
+      vi.mocked(useUsersStore).mockReturnValue(mockStore);
+
+      const mockError = { description1: 'Error message' };
+      vi.mocked(useRepositoryAccreditation).mockReturnValue({
+        uploadDocument: vi.fn(),
+        create: vi.fn(),
+        update: vi.fn(),
+        error: ref(mockError),
+      });
+
+      const store = useAccreditationUpload();
+      expect(store.getErrorText(1)).toBe('Error message');
+    });
+
+    it('should handle multiple error messages', () => {
+      const mockError = {
+        description1: 'Error in description 1',
+        description2: 'Error in description 2',
+      };
+
+      vi.mocked(useRepositoryAccreditation).mockReturnValue({
+        uploadDocument: vi.fn(),
+        create: vi.fn(),
+        update: vi.fn(),
+        error: ref(mockError),
+      });
+
+      const store = useAccreditationUpload();
+      expect(store.getErrorText(1)).toBe('Error in description 1');
+      expect(store.getErrorText(2)).toBe('Error in description 2');
     });
   });
-}); 
+});

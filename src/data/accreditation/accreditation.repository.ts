@@ -80,8 +80,9 @@ export const useRepositoryAccreditation = () => {
     try {
       const response = await apiClient.post(`/auth/accreditation/upload_document/${userId}/${profileId}`, formData, {
         headers: {
-          'X-Request-ID': uuidv4(),
+          'X-Request-ID': uuidv4() as string,
         },
+        baseURL: ACCREDITATION_URL,
       });
       return response.data;
     } catch (err) {

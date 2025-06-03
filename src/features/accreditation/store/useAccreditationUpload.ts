@@ -24,7 +24,7 @@ export const useAccreditationUpload = defineStore('accreditationUpload', () => {
   const { error } = storeToRefs(accreditationRepository);
 
   const backButtonText = ref('Back to Dashboard');
-  const breadcrumbs = ref([
+  const breadcrumbs = computed(() => [
     {
       text: 'Dashboard',
       to: { name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } },
@@ -89,10 +89,13 @@ export const useAccreditationUpload = defineStore('accreditationUpload', () => {
 
   const isCreateAccreditation = computed(() => selectedUserProfileData.value?.accreditation_status === 'new');
 
-  const isAccreditationCanUpload = computed(() => (
-    (selectedUserProfileData.value?.accreditation_status !== AccreditationTypes.pending)
-    && (selectedUserProfileData.value?.accreditation_status !== AccreditationTypes.approved)
-  ));
+  const isAccreditationCanUpload = computed(() => {
+    if (!selectedUserProfileData.value) return false;
+    return (
+      selectedUserProfileData.value.accreditation_status !== AccreditationTypes.pending
+      && selectedUserProfileData.value.accreditation_status !== AccreditationTypes.approved
+    );
+  });
 
   const sendFiles = async () => {
     const promises = [] as unknown[];
@@ -156,6 +159,8 @@ export const useAccreditationUpload = defineStore('accreditationUpload', () => {
 
   const onFileRemove = (index: number) => {
     if (model[`description${index + 1}`]) delete model[`description${index + 1}`];
+    accreditationDescriptions.value = Object.values(model)
+      .filter((value): value is string => typeof value === 'string');
   };
 
   const onModelChange = (modelInner: FormModelAccreditationFileInput) => {
@@ -170,9 +175,10 @@ export const useAccreditationUpload = defineStore('accreditationUpload', () => {
     validateTrigger.value = false;
   };
 
-  const getErrorText = (index: number) => (
-    error.value ? error.value[`description${index}`] : undefined
-  );
+  const getErrorText = (index: number) => {
+    if (!error.value || !error.value[`description${index}`]) return undefined;
+    return error.value[`description${index}`];
+  };
 
   watch([isAccreditationCanUpload], ([newValue]) => {
     if (!newValue) {
@@ -220,6 +226,13 @@ export const useAccreditationUpload = defineStore('accreditationUpload', () => {
     getErrorText,
     onFileRemove,
     uploadAccreditationDocumentErrorData: error,
+    sendFiles,
+    accreditationFiles,
+    accreditationNote,
+    accreditationDescriptions,
+    filesUploadError,
+    isCreateAccreditation,
+    isAccreditationCanUpload,
   };
 });
 
