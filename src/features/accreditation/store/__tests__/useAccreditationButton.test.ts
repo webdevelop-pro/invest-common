@@ -181,4 +181,43 @@ describe('useAccreditationButton', () => {
     await store.onClick();
     expect(routerMock.push).not.toHaveBeenCalled();
   });
+
+  it('should handle missing profile data gracefully', () => {
+    const store = useAccreditationButton();
+    const usersStore = useUsersStore();
+
+    vi.spyOn(usersStore, 'selectedUserProfileData', 'get').mockReturnValue(null);
+    vi.spyOn(usersStore, 'selectedUserProfileId', 'get').mockReturnValue(null);
+
+    expect(store.data).toBeDefined();
+    expect(store.isAccreditationIsClickable).toBe(false);
+  });
+
+  it('should handle undefined accreditation status', () => {
+    const store = useAccreditationButton();
+    const usersStore = useUsersStore();
+
+    vi.spyOn(usersStore, 'selectedUserProfileData', 'get').mockReturnValue({
+      accreditation_status: undefined,
+      escrow_id: null,
+    });
+
+    expect(store.tagBackground).toBeDefined();
+    expect(store.isAccreditationIsClickable).toBe(false);
+  });
+
+  it('should handle click with missing profile ID', async () => {
+    const store = useAccreditationButton();
+    const usersStore = useUsersStore();
+
+    vi.spyOn(usersStore, 'userLoggedIn', 'get').mockReturnValue(true);
+    vi.spyOn(usersStore, 'selectedUserProfileData', 'get').mockReturnValue({
+      accreditation_status: AccreditationTypes.new,
+      escrow_id: null,
+    });
+    vi.spyOn(usersStore, 'selectedUserProfileId', 'get').mockReturnValue(null);
+
+    await store.onClick();
+    expect(routerMock.push).not.toHaveBeenCalled();
+  });
 });

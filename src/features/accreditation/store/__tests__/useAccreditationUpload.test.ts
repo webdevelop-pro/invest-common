@@ -1,5 +1,5 @@
 import {
-  describe, it, expect, vi, beforeEach,
+  describe, it, expect, vi, beforeEach, afterEach,
 } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
@@ -125,6 +125,14 @@ describe('useAccreditationUpload', () => {
   });
 
   describe('validation', () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
     it('should update model and descriptions when onModelChange is called', () => {
       const store = useAccreditationUpload();
       const mockModel = {
@@ -164,6 +172,45 @@ describe('useAccreditationUpload', () => {
       });
 
       expect(store.isFieldsValid).toBe(true);
+    });
+
+    it('should handle validation when files are removed', () => {
+      const store = useAccreditationUpload();
+      const mockFiles = [
+        new File([''], 'test1.pdf'),
+        new File([''], 'test2.pdf'),
+      ];
+
+      // Set up initial state
+      store.onFilesChange(mockFiles);
+
+      // Set up model and trigger model change
+      const model = {
+        note: 'Test note',
+        description1: 'Description 1',
+        description2: 'Description 2',
+      };
+      store.onModelChange(model);
+
+      // Verify initial state
+      expect(store.accreditationDescriptions).toEqual(['Description 1', 'Description 2']);
+      expect(store.accreditationFiles).toEqual(mockFiles);
+
+      // Remove second file and update model
+      store.onFileRemove(1);
+      const updatedModel = {
+        note: 'Test note',
+        description1: 'Description 1',
+      };
+      store.onModelChange(updatedModel);
+
+      // Update files after removal
+      store.onFilesChange([mockFiles[0]]);
+
+      // Verify state after removal
+      expect(store.accreditationDescriptions).toEqual(['Description 1']);
+      expect(store.model.description2).toBeUndefined();
+      expect(store.accreditationFiles).toEqual([mockFiles[0]]);
     });
   });
 
@@ -264,6 +311,151 @@ describe('useAccreditationUpload', () => {
 
       expect(store.isLoading).toBe(false);
     });
+
+    it('should handle successful file upload and create accreditation', async () => {
+      // Clear previous mocks
+      vi.clearAllMocks();
+
+      // Set up the mock store with new status
+      const mockStore = {
+        selectedUserProfileData: ref({
+          id: '123',
+          user_id: '456',
+          accreditation_status: AccreditationTypes.new,
+        }),
+        selectedUserProfileId: ref('123'),
+        selectedUserProfileType: ref('individual'),
+      };
+      vi.mocked(useUsersStore).mockReturnValue(mockStore);
+
+      // Set up the mock repository
+      const uploadDocumentSpy = vi.fn().mockResolvedValue({});
+      const createSpy = vi.fn().mockResolvedValue({});
+      vi.mocked(useRepositoryAccreditation).mockReturnValue({
+        uploadDocument: uploadDocumentSpy,
+        create: createSpy,
+        update: vi.fn(),
+        error: ref({}),
+      });
+
+      const store = useAccreditationUpload();
+      const mockFile = new File([''], 'test.pdf');
+      const mockNote = 'Test note';
+
+      // Set up the store state
+      store.accreditationFiles = [mockFile];
+      store.accreditationDescriptions = ['Test description'];
+      store.accreditationNote = mockNote;
+
+      await store.sendFiles();
+
+      expect(uploadDocumentSpy).toHaveBeenCalled();
+      expect(createSpy).toHaveBeenCalledWith('123', mockNote);
+      expect(store.isLoading).toBe(false);
+    });
+
+    it('should handle successful file upload and update accreditation', async () => {
+      // Clear previous mocks
+      vi.clearAllMocks();
+
+      // Set up the mock store with declined status
+      const mockStore = {
+        selectedUserProfileData: ref({
+          id: '123',
+          user_id: '456',
+          accreditation_status: AccreditationTypes.declined,
+        }),
+        selectedUserProfileId: ref('123'),
+        selectedUserProfileType: ref('individual'),
+      };
+      vi.mocked(useUsersStore).mockReturnValue(mockStore);
+
+      // Set up the mock repository
+      const uploadDocumentSpy = vi.fn().mockResolvedValue({});
+      const updateSpy = vi.fn().mockResolvedValue({});
+      vi.mocked(useRepositoryAccreditation).mockReturnValue({
+        uploadDocument: uploadDocumentSpy,
+        create: vi.fn(),
+        update: updateSpy,
+        error: ref({}),
+      });
+
+      const store = useAccreditationUpload();
+      const mockFile = new File([''], 'test.pdf');
+      const mockNote = 'Test note';
+
+      // Set up the store state
+      store.accreditationFiles = [mockFile];
+      store.accreditationDescriptions = ['Test description'];
+      store.accreditationNote = mockNote;
+
+      await store.sendFiles();
+
+      expect(uploadDocumentSpy).toHaveBeenCalled();
+      expect(updateSpy).toHaveBeenCalledWith('123', mockNote);
+      expect(store.isLoading).toBe(false);
+    });
+
+    it('should handle multiple file uploads successfully', async () => {
+      // Clear previous mocks
+      vi.clearAllMocks();
+
+      // Set up the mock store
+      const mockStore = {
+        selectedUserProfileData: ref({
+          id: '123',
+          user_id: '456',
+          accreditation_status: 'new',
+        }),
+        selectedUserProfileId: ref('123'),
+        selectedUserProfileType: ref('individual'),
+      };
+      vi.mocked(useUsersStore).mockReturnValue(mockStore);
+
+      // Set up the mock repository
+      const uploadDocumentSpy = vi.fn().mockResolvedValue({});
+      const createSpy = vi.fn().mockResolvedValue({});
+      vi.mocked(useRepositoryAccreditation).mockReturnValue({
+        uploadDocument: uploadDocumentSpy,
+        create: createSpy,
+        update: vi.fn(),
+        error: ref({}),
+      });
+
+      const store = useAccreditationUpload();
+      const mockFiles = [
+        new File([''], 'test1.pdf'),
+        new File([''], 'test2.pdf'),
+      ];
+      const mockDescriptions = ['Description 1', 'Description 2'];
+      const mockNote = 'Test note';
+
+      // Set up the store state
+      store.accreditationFiles = mockFiles;
+      store.accreditationDescriptions = mockDescriptions;
+      store.accreditationNote = mockNote;
+
+      await store.sendFiles();
+
+      expect(uploadDocumentSpy).toHaveBeenCalledTimes(2);
+      expect(createSpy).toHaveBeenCalledWith('123', mockNote);
+      expect(store.isLoading).toBe(false);
+    });
+
+    it('should not proceed with upload if no files are selected', async () => {
+      const store = useAccreditationUpload();
+      store.accreditationFiles = [];
+      store.accreditationNote = 'Test note';
+
+      const accreditationRepository = useRepositoryAccreditation();
+      const uploadDocumentSpy = vi.fn();
+      accreditationRepository.uploadDocument = uploadDocumentSpy;
+
+      await store.sendFiles();
+
+      expect(uploadDocumentSpy).not.toHaveBeenCalled();
+      expect(store.isLoading).toBe(false);
+    });
   });
 
   describe('error handling', () => {
@@ -313,6 +505,59 @@ describe('useAccreditationUpload', () => {
       const store = useAccreditationUpload();
       expect(store.getErrorText(1)).toBe('Error in description 1');
       expect(store.getErrorText(2)).toBe('Error in description 2');
+    });
+
+    it('should handle undefined error values', () => {
+      // Clear previous mocks
+      vi.clearAllMocks();
+
+      // Set up the mock with undefined error before creating the store
+      const mockError = undefined;
+      vi.mocked(useRepositoryAccreditation).mockReturnValue({
+        uploadDocument: vi.fn(),
+        create: vi.fn(),
+        update: vi.fn(),
+        error: ref(mockError),
+      });
+
+      const store = useAccreditationUpload();
+      expect(store.getErrorText(1)).toBeUndefined();
+    });
+
+    it('should handle empty error object', () => {
+      // Clear previous mocks
+      vi.clearAllMocks();
+
+      // Set up the mock with empty error object before creating the store
+      const mockError = {};
+      vi.mocked(useRepositoryAccreditation).mockReturnValue({
+        uploadDocument: vi.fn(),
+        create: vi.fn(),
+        update: vi.fn(),
+        error: ref(mockError),
+      });
+
+      const store = useAccreditationUpload();
+      expect(store.getErrorText(1)).toBeUndefined();
+    });
+
+    it('should handle non-existent error keys', () => {
+      // Clear previous mocks
+      vi.clearAllMocks();
+
+      // Set up the mock with specific error before creating the store
+      const mockError = {
+        description1: 'Error in description 1',
+      };
+      vi.mocked(useRepositoryAccreditation).mockReturnValue({
+        uploadDocument: vi.fn(),
+        create: vi.fn(),
+        update: vi.fn(),
+        error: ref(mockError),
+      });
+
+      const store = useAccreditationUpload();
+      expect(store.getErrorText(2)).toBeUndefined();
     });
   });
 });

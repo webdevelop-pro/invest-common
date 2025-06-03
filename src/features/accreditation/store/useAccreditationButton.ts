@@ -42,13 +42,14 @@ export const useAccreditationButton = defineStore('accreditationButton', () => {
     return 'yellow';
   });
 
-  const isAccreditationIsClickable = computed(() => (
-    (selectedUserProfileData.value?.accreditation_status !== AccreditationTypes.pending)
-  && (selectedUserProfileData.value?.accreditation_status !== AccreditationTypes.approved)
-  ));
+  const isAccreditationIsClickable = computed(() => {
+    const status = selectedUserProfileData.value?.accreditation_status;
+    if (!status) return false;
+    return status !== AccreditationTypes.pending && status !== AccreditationTypes.approved;
+  });
 
   const onClick = async () => {
-    if (!userLoggedIn.value || !isAccreditationIsClickable.value) {
+    if (!userLoggedIn.value || !isAccreditationIsClickable.value || !selectedUserProfileId.value) {
       return;
     }
     if (!selectedUserProfileData.value?.escrow_id) {
