@@ -48,11 +48,21 @@ export const useAccreditationUpload = defineStore('accreditationUpload', () => {
 
   const requiredValueSchema = computed(() => {
     const V = ['description1', 'note'] as string[];
-    if (allFiles.value.length >= 2) V.push('description2');
-    if (allFiles.value.length >= 3) V.push('description3');
-    if (allFiles.value.length >= 4) V.push('description4');
-    if (allFiles.value.length >= 5) V.push('description5');
-    if (allFiles.value.length >= 6) V.push('description6');
+    if (allFiles.value.length >= 2) {
+      V.push('description2');
+    }
+    if (allFiles.value.length >= 3) {
+      V.push('description3');
+    }
+    if (allFiles.value.length >= 4) {
+      V.push('description4');
+    }
+    if (allFiles.value.length >= 5) {
+      V.push('description5');
+    }
+    if (allFiles.value.length >= 6) {
+      V.push('description6');
+    }
     return V;
   });
 
@@ -90,7 +100,9 @@ export const useAccreditationUpload = defineStore('accreditationUpload', () => {
   const isCreateAccreditation = computed(() => selectedUserProfileData.value?.accreditation_status === 'new');
 
   const isAccreditationCanUpload = computed(() => {
-    if (!selectedUserProfileData.value) return false;
+    if (!selectedUserProfileData.value) {
+      return false;
+    }
     return (
       selectedUserProfileData.value.accreditation_status !== AccreditationTypes.pending
       && selectedUserProfileData.value.accreditation_status !== AccreditationTypes.approved
@@ -154,11 +166,15 @@ export const useAccreditationUpload = defineStore('accreditationUpload', () => {
     allFiles.value = filesInner;
     accreditationFiles.value = filesInner;
     validateTrigger.value = false;
-    if (!isValid.value) onValidate();
+    if (!isValid.value) {
+      onValidate();
+    }
   };
 
   const onFileRemove = (index: number) => {
-    if (model[`description${index + 1}`]) delete model[`description${index + 1}`];
+    if (model[`description${index + 1}`]) {
+      delete model[`description${index + 1}`];
+    }
     accreditationDescriptions.value = Object.values(model)
       .filter((value): value is string => typeof value === 'string');
   };
@@ -176,7 +192,9 @@ export const useAccreditationUpload = defineStore('accreditationUpload', () => {
   };
 
   const getErrorText = (index: number) => {
-    if (!error.value || !error.value[`description${index}`]) return undefined;
+    if (!error.value || !error.value[`description${index}`]) {
+      return undefined;
+    }
     return error.value[`description${index}`];
   };
 
@@ -192,7 +210,9 @@ export const useAccreditationUpload = defineStore('accreditationUpload', () => {
   });
 
   watch(() => model, () => {
-    if (!isValid.value) onValidate();
+    if (!isValid.value) {
+      onValidate();
+    }
     onModelChange(model);
   }, { deep: true });
 

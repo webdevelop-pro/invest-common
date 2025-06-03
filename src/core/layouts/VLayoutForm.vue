@@ -25,8 +25,11 @@ const emit = defineEmits(['save']);
 const router = useRouter();
 
 const onBackClick = () => {
-  if (props.buttonRoute) router.push(props.buttonRoute);
-  else router.back();
+  if (props.buttonRoute) {
+    router.push(props.buttonRoute);
+  } else {
+    router.back();
+  }
 };
 
 const saveHandler = () => {
