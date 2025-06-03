@@ -7,7 +7,7 @@ import VAvatar from 'UiKit/components/VAvatar.vue';
 import { VDropdownMenuItem } from 'UiKit/components/Base/VDropdownMenu';
 import { useDialogs } from 'InvestCommon/store/useDialogs';
 import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
-import NotificationsSidebarButton from 'InvestCommon/features/notifications/NotificationsSidebarButton.vue';
+import NotificationsSidebarButton from 'InvestCommon/features/notifications/VNotificationsSidebarButton.vue';
 import env from 'InvestCommon/global';
 
 const { IS_STATIC_SITE, FILER_URL } = env;

@@ -113,14 +113,14 @@ export class NotificationFormatter {
     if (this.accreditationDeclined || this.accreditationExpired) {
       return 'Provide info';
     }
+    if (this.isStart) {
+      return 'Start Investing';
+    }
     if (this.isNotificationInvestment || this.isNotificationProfile || this.isNotificationWallet) {
       return 'See More Details';
     }
     if (this.isNotificationDocument) {
       return 'Review Document';
-    }
-    if (this.isStart) {
-      return 'Start Investing';
     }
     return 'More Info';
   }
