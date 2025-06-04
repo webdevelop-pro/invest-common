@@ -5,7 +5,7 @@ import {
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { useRepositoryNotifications } from 'InvestCommon/data/notifications/notifications.repository';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
-import type { INotification } from 'InvestCommon/types/api/notifications';
+import type { INotification } from 'InvestCommon/data/notifications/notifications.types';
 import { IVFilter } from 'UiKit/components/VFilter/VFilter.vue';
 
 export const useNotifications = defineStore('notifications', () => {

@@ -1,4 +1,4 @@
-import { INotification } from 'InvestCommon/types/api/notifications';
+import { INotification, IFormattedNotification } from './notifications.types';
 import { capitalizeFirstLetter } from 'UiKit/helpers/text';
 import {
   urlContactUs, urlOffers, urlNotifications, urlProfileAccreditation,
@@ -9,27 +9,6 @@ import {
   ROUTE_DASHBOARD_WALLET, ROUTE_INVESTMENT_TIMELINE, ROUTE_NOTIFICATIONS,
 } from 'InvestCommon/helpers/enums/routes';
 
-export interface IFormattedNotification extends INotification {
-  isNotificationInvestment: boolean;
-  isNotificationDocument: boolean;
-  isNotificationSystem: boolean;
-  isNotificationWallet: boolean;
-  isNotificationProfile: boolean;
-  isNotificationUser: boolean;
-  objectId: number;
-  profileId: number;
-  kycDeclined: boolean;
-  accreditationDeclined: boolean;
-  accreditationExpired: boolean;
-  isStart: boolean;
-  isFundsFailed: boolean;
-  tagBackground: string;
-  buttonText: string;
-  tagText: string;
-  isUnread: boolean;
-  buttonTo: string;
-  buttonHref: string;
-}
 
 export class NotificationFormatter {
   private notification: INotification;

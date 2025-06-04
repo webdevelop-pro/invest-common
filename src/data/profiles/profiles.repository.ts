@@ -2,8 +2,7 @@ import { ref, computed } from 'vue';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { ApiClient } from 'UiKit/helpers/api/apiClient';
 import env from 'InvestCommon/global';
-import { IProfileData, IUserIdentityResponse } from 'InvestCommon/types/api/invest';
-import { IProfileIndividual, ISchema } from 'InvestCommon/types/api/user';
+import { IProfileData, IUserIdentityResponse, IProfileIndividual, ISchema } from './profiles.types';
 import { toasterErrorHandling } from 'UiKit/helpers/api/toasterErrorHandling';
 
 export const useRepositoryProfiles = defineStore('repository-profiles', () => {
@@ -166,12 +165,23 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
     }
   };
 
-  const resetAll = () => {
+  const reset = () => {
+    // Reset state
     profileData.value = undefined;
     profileOptions.value = undefined;
     profileById.value = undefined;
     userData.value = undefined;
     error.value = null;
+
+    // Reset loading states
+    isLoadingProfileOptions.value = false;
+    isLoadingSetProfile.value = false;
+    isLoadingGetProfileById.value = false;
+    isLoadingSetProfileById.value = false;
+    isLoadingGetUser.value = false;
+    isLoadingSetUser.value = false;
+    isLoadingSetUserOptions.value = false;
+    isLoadingUpdateUserData.value = false;
   };
 
   return {
@@ -200,7 +210,7 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
     setUser,
     setUserOptions,
     updateUserData,
-    resetAll,
+    reset,
   };
 });
 

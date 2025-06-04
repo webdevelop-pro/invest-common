@@ -5,7 +5,7 @@ import VBadge from 'UiKit/components/Base/VBadge/VBadge.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import arrowRight from 'UiKit/assets/images/arrow-right.svg';
 import { VTableCell, VTableRow } from 'UiKit/components/Base/VTable';
-import { IFormattedNotification } from 'InvestCommon/data/notifications/notifications.formatter';
+import { IFormattedNotification } from 'InvestCommon/data/notifications/notifications.types';
 import { useNotifications } from 'InvestCommon/features/notifications/store/useNotifications';
 import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 
@@ -60,73 +60,77 @@ const onMessageClick = () => {
     class="VTableNotificationItem v-table-notification-item"
     :class="{ 'is--unread': data?.isUnread }"
   >
-    <VTableCell :class="{ 'v-table-notification-item__badge-loading': loading }">
+    <VTableCell class="v-table-notification-item__badge-cell">
       <VSkeleton
-        v-if="loading"
+        :is-loaded="!loading"
         height="34px"
         width="86px"
-      />
-      <VBadge
-        v-else
-        :key="data?.tagText"
-        v-highlight="search"
-        :color="data?.tagBackground"
+        radius="24px"
       >
-        <span class="v-table-notification-item__tag-text">
-          {{ data?.tagText }}
-        </span>
-      </VBadge>
+        <VBadge
+          :key="data?.tagText"
+          v-highlight="search"
+          :color="data?.tagBackground"
+        >
+          <span class="v-table-notification-item__tag-text">
+            {{ data?.tagText }}
+          </span>
+        </VBadge>
+      </VSkeleton>
     </VTableCell>
-    <VTableCell :class="{ 'v-table-notification-item__text-loading': loading }">
+    <VTableCell class="v-table-notification-item__text-cell">
       <div class="v-table-notification-item__content-wrap">
-        <div v-if="loading">
+        <div class="v-table-notification-item__text">
           <VSkeleton
+            :is-loaded="!loading"
             height="21px"
             width="100px"
             class="v-table-notification-item__date is--h6__title"
-          />
-          <VSkeleton
-            height="25px"
-            width="200px"
-            class="v-table-notification-item__content is--body"
-          />
-        </div>
-        <div v-else>
-          <span
-            v-if="data?.created_at"
-            :key="data?.created_at"
-            class="v-table-notification-item__date is--h6__title"
           >
-            {{ formatToDate(new Date(data?.created_at).toISOString(), true) }}
-          </span>
-          <p
-            :key="data?.content"
-            v-highlight="search"
+            <span
+              v-if="data?.created_at"
+              :key="data?.created_at"
+              class="v-table-notification-item__date is--h6__title"
+            >
+              {{ formatToDate(new Date(data?.created_at).toISOString(), true) }}
+            </span>
+          </VSkeleton>
+
+          <VSkeleton
+            :is-loaded="!loading"
+            height="25px"
+            width="100%"
             class="v-table-notification-item__content is--body"
-            @click="onMessageClick"
-            v-html="data?.content"
-          />
+          >
+            <p
+              :key="data?.content"
+              v-highlight="search"
+              class="v-table-notification-item__content is--body"
+              @click="onMessageClick"
+              v-html="data?.content"
+            />
+          </VSkeleton>
         </div>
 
         <VSkeleton
-          v-if="loading"
+          :is-loaded="!loading"
           height="32px"
           width="143px"
-        />
-        <VButton
-          v-else
-          :key="data?.buttonText"
-          size="small"
-          variant="link"
-          class="v-table-notification-item__button"
-          @click.prevent="onButtonClick"
         >
-          {{ data?.buttonText }}
-          <arrowRight
-            class="v-table-notification-item__icon"
-            alt="modal layout close icon"
-          />
-        </VButton>
+          <VButton
+            :key="data?.buttonText"
+            size="small"
+            variant="link"
+            class="v-table-notification-item__button"
+            @click.prevent="onButtonClick"
+          >
+            {{ data?.buttonText }}
+            <arrowRight
+              class="v-table-notification-item__icon"
+              alt="modal layout close icon"
+            />
+          </VButton>
+        </VSkeleton>
       </div>
       <span
         v-if="data?.isUnread"
@@ -140,11 +144,22 @@ const onMessageClick = () => {
 <style lang="scss">
 @use 'UiKit/styles/_variables.scss' as *;
 .v-table-notification-item {
-  display: table-row;
+  @media screen and (width > $tablet){
+    display: table-row;
+  }
+
+  @media screen and (width < $tablet){
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
 
   &.is--unread .v-table-cell {
     background-color: $gray-10;
-    position: relative;
+
+    @media screen and (width > $tablet){
+      position: relative;
+    }
   }
 
   &__date {
@@ -209,8 +224,9 @@ const onMessageClick = () => {
   &__button {
     flex-shrink: 0;
 
-    @media screen and (max-width: $tablet){
+    @media screen and (width < $tablet){
       align-self: flex-start;
+      width: 100%;
     }
   }
 
@@ -218,16 +234,28 @@ const onMessageClick = () => {
     width: 16px;
   }
 
-  &__text-loading {
-    width: calc(100% - 150px);
+  &__text-cell {
+    @media screen and (width > $tablet){
+      width: calc(100% - 160px);
+    }
+
+    @media screen and (width < $tablet){
+      width: 100%;
+    }
   }
 
-  &__badge-loading {
-    width: 150px;
-  }
-}
+  &__badge-cell {
+    @media screen and (width > $tablet){
+      width: 160px;
+    }
 
-.v-skeleton {
-  transition: opacity 0.3s ease-in-out;
+    @media screen and (width < $tablet){
+      width: 100%;
+    }
+  }
+
+  &__text {
+    width: 100%;
+  }
 }
 </style>

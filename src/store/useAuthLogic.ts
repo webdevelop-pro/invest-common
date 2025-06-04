@@ -11,7 +11,7 @@ import {
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import {
   useAccreditationStore, useAuthStore, useFilerStore, useFundingStore, useInvestmentsStore,
-  useNotificationsStore, usePlaidStore,
+  usePlaidStore,
   useProfileWalletStore, useProfileWalletTransactionStore, useUserProfilesStore,
   useUsersStore, useGlobalLoader,
 } from 'InvestCommon/store';
@@ -26,6 +26,9 @@ import { oryErrorHandling } from 'UiKit/helpers/api/oryErrorHandling';
 import { useDialogs } from 'InvestCommon/store/useDialogs';
 import { SELFSERVICE } from 'InvestCommon/helpers/enums/auth';
 import { useUserSession } from './useUserSession';
+import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
+import { useRepositoryNotifications } from 'InvestCommon/data/notifications/notifications.repository';
+import { useRepositoryAccreditation } from 'InvestCommon/data/accreditation/accreditation.repository';
 
 const { IS_STATIC_SITE } = env;
 
@@ -305,8 +308,10 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     useInvestmentsStore().resetAll();
     useAccreditationStore().resetAll();
     useAuthStore().resetAll();
-    useNotificationsStore().resetAll();
     useFilerStore().resetAll();
+    useRepositoryProfiles().reset();
+    useRepositoryNotifications().reset();
+    useRepositoryAccreditation().reset();
     cookies.remove('session', cookiesOptions());
     clearAllCookies();
     useUserSession().resetAll();

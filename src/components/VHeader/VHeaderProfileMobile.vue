@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, PropType } from 'vue';
-import { useNotificationsStore } from 'InvestCommon/store/useNotifications';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
 import { useDialogs } from 'InvestCommon/store/useDialogs';
 import { storeToRefs } from 'pinia';
@@ -8,6 +7,10 @@ import {
   VNavigationMenuList, VNavigationMenuItem, VNavigationMenuLink, VNavigationMenu,
 } from 'UiKit/components/Base/VNavigationMenu';
 import VAvatar from 'UiKit/components/VAvatar.vue';
+import NotificationsSidebarButton from 'InvestCommon/features/notifications/VNotificationsSidebarButton.vue';
+import env from 'InvestCommon/global';
+
+const { IS_STATIC_SITE } = env;
 
 type MenuItem = {
   to?: string;
@@ -25,8 +28,6 @@ const emit = defineEmits(['click']);
 
 const usersStore = useUsersStore();
 const { userAccountData } = storeToRefs(usersStore);
-const notificationsStore = useNotificationsStore();
-const { notificationLength, notificationUnreadLength } = storeToRefs(notificationsStore);
 const useDialogsStore = useDialogs();
 const { isDialogLogoutOpen } = storeToRefs(useDialogsStore);
 
@@ -39,10 +40,6 @@ const onClick = () => {
 const onLogout = () => {
   isDialogLogoutOpen.value = true;
   onClick();
-};
-const onSidebarOpen = () => {
-  onClick();
-  if (notificationLength.value) notificationsStore.notificationSidebarOpen();
 };
 
 const getComponentName = (item: MenuItem) => {
@@ -70,17 +67,10 @@ const getComponentName = (item: MenuItem) => {
         </div>
       </VNavigationMenuItem>
       <VNavigationMenuItem>
-        <div
-          class="v-header-profile-mobile__notification is--h6__title"
-          data-testid="header-profile"
-          @click="onSidebarOpen"
-        >
-          Notifications
-          <span
-            v-if="notificationUnreadLength && (notificationUnreadLength > 0)"
-            class="v-header-profile-mobile__notification-dot"
-          />
-        </div>
+        <NotificationsSidebarButton
+          :is-static-site="IS_STATIC_SITE"
+          @click="onClick"
+        />
       </VNavigationMenuItem>
       <VNavigationMenuItem
         v-for="(menuItem, index) in menu"
