@@ -17,7 +17,7 @@ import { navigateWithQueryParams } from 'InvestCommon/helpers/general';
 import arrowLeft from 'UiKit/assets/images/arrow-left.svg';
 import { scrollToError } from 'UiKit/helpers/validation/general';
 import { urlOfferSingle, urlProfileAccount } from 'InvestCommon/global/links';
-import VProfileSelectList from 'InvestCommon/components/VProfileSelectList.vue';
+import VProfileSelectList from 'InvestCommon/features/profiles/VProfileSelectList.vue';
 import { InvestKycTypes } from 'InvestCommon/types/api/invest';
 import { PROFILE_TYPES } from 'InvestCommon/global/investment.json';
 import { FormChild } from 'InvestCommon/types/form';

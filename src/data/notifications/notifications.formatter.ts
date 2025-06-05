@@ -1,4 +1,3 @@
-import { INotification, IFormattedNotification } from './notifications.types';
 import { capitalizeFirstLetter } from 'UiKit/helpers/text';
 import {
   urlContactUs, urlOffers, urlNotifications, urlProfileAccreditation,
@@ -8,7 +7,7 @@ import {
   ROUTE_ACCREDITATION_UPLOAD, ROUTE_DASHBOARD_ACCOUNT,
   ROUTE_DASHBOARD_WALLET, ROUTE_INVESTMENT_TIMELINE, ROUTE_NOTIFICATIONS,
 } from 'InvestCommon/helpers/enums/routes';
-
+import { INotification, IFormattedNotification } from './notifications.types';
 
 export class NotificationFormatter {
   private notification: INotification;

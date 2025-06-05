@@ -4,15 +4,15 @@ import {
 } from 'vue';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { useRepositoryNotifications } from 'InvestCommon/data/notifications/notifications.repository';
-import { useUsersStore } from 'InvestCommon/store/useUsers';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import type { INotification } from 'InvestCommon/data/notifications/notifications.types';
 import { IVFilter } from 'UiKit/components/VFilter/VFilter.vue';
 
 export const useNotifications = defineStore('notifications', () => {
   const notificationsRepository = useRepositoryNotifications();
   const { formattedNotifications, error, isLoadingGetAll } = storeToRefs(notificationsRepository);
-  const usersStore = useUsersStore();
-  const { userLoggedIn } = storeToRefs(usersStore);
+  const userSessionStore = useSessionStore();
+  const { userLoggedIn } = storeToRefs(userSessionStore);
 
   /* * Loading State * */
   const isLoading = ref(true);
@@ -137,7 +137,7 @@ export const useNotifications = defineStore('notifications', () => {
   const tableData = computed(() => {
     // Only show loading state if we're loading AND don't have any existing data
     // AND we're not just filtering existing data
-    if (isLoading.value && (formattedNotifications.value.length === 0) && (currentTab.value === 'all')) {
+    if (isLoading.value) {
       return Array(10).fill({
         status: '',
         type: '',

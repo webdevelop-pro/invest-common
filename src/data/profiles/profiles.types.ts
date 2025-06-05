@@ -1,4 +1,7 @@
-import { AccreditationTypes, InvestKycTypes, IKycData, IAccreditationData, IOwnership } from '../../types/api/invest';
+/* eslint-disable no-use-before-define */
+import {
+  AccreditationTypes, InvestKycTypes, IKycData, IAccreditationData, IOwnership,
+} from '../../types/api/invest';
 
 export interface IEmployment {
   type: string;
@@ -258,4 +261,4 @@ export interface IBackgroundInfo {
     explanation: string;
     is_accredited: boolean;
   };
-} 
+}

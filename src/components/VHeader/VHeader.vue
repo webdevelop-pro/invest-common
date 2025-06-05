@@ -2,8 +2,7 @@
 import {
   computed, defineAsyncComponent, hydrateOnVisible, PropType, ref, watchEffect,
 } from 'vue';
-import { useAuthLogicStore } from 'InvestCommon/store/useAuthLogic';
-import { useUsersStore } from 'InvestCommon/store/useUsers';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { storeToRefs } from 'pinia';
 import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
@@ -40,8 +39,8 @@ const props = defineProps({
   path: String,
 });
 
-const usersStore = useUsersStore();
-const { userLoggedIn } = storeToRefs(usersStore);
+const sessionStore = useSessionStore();
+const { userLoggedIn } = storeToRefs(sessionStore);
 const userProfilesStore = useUserProfilesStore();
 const { isGetUserLoading } = storeToRefs(userProfilesStore);
 const path = ref(props.path || '');

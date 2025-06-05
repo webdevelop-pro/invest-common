@@ -4,7 +4,7 @@ import { useCookies } from '@vueuse/integrations/useCookies';
 import { cookiesOptions } from 'InvestCommon/global/index';
 import { ISession } from '@/types/api/auth';
 
-export const useUserSession = defineStore('userSession', () => {
+export const useSessionStore = defineStore('userSession', () => {
   const cookies = useCookies(['session']);
 
   const userSession = ref(cookies.get('session'));
@@ -37,7 +37,7 @@ export const useUserSession = defineStore('userSession', () => {
 });
 
 if (import.meta.hot) {
-  import.meta.hot.accept(acceptHMRUpdate(useUserSession, import.meta.hot));
+  import.meta.hot.accept(acceptHMRUpdate(useSessionStore, import.meta.hot));
 }
 
 /*

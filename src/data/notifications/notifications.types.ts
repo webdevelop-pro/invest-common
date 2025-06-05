@@ -48,4 +48,4 @@ export interface IFormattedNotification extends INotification {
   isUnread: boolean;
   buttonTo: string;
   buttonHref: string;
-} 
+}

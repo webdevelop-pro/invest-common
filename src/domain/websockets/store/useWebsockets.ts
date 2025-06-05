@@ -10,6 +10,7 @@ import { useProfileWalletStore } from 'InvestCommon/store/useProfileWallet/usePr
 import { useProfileWalletTransactionStore } from 'InvestCommon/store/useProfileWallet/useProfileWalletTransaction';
 import { useInvestmentsStore } from 'InvestCommon/store/useInvestments';
 import { useOfferStore } from 'InvestCommon/store/useOffer';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 
 const { NOTIFICATION_URL } = env;
 
@@ -21,8 +22,8 @@ const TOAST_OPTIONS = {
 };
 
 export const useDomainWebSocketStore = defineStore('domainWebsockets', () => {
-  const usersStore = useUsersStore();
-  const { userLoggedIn } = storeToRefs(usersStore);
+  const userSessionStore = useSessionStore();
+  const { userLoggedIn } = storeToRefs(userSessionStore);
 
   const handleInternalMessage = (notification: INotification) => {
     if (notification.data.obj === 'profile') useUsersStore().updateData(notification);
@@ -46,6 +47,9 @@ export const useDomainWebSocketStore = defineStore('domainWebsockets', () => {
   };
 
   const webSocketHandler = async () => {
+    if (!userLoggedIn.value) {
+      return;
+    }
     const url = `${NOTIFICATION_URL}/ws`;
     const uri = url.replace('https', 'wss');
 

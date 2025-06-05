@@ -41,43 +41,56 @@ const headerLength = computed(() => props.colspan ?? (props.header?.length || 0)
         </VTableHead>
       </VTableRow>
     </VTableHeader>
-    <!-- Loading State -->
-    <VTableBody v-show="loading" key="loading">
-      <template
-        v-for="index in loadingRowLength"
-        :key="`loading-${index}`"
+    <VTableBody>
+      <TransitionGroup
+        name="fade"
+        :key="loading ? 'loading' : data.length > 0 ? 'data' : 'empty'"
       >
-        <slot name="loading">
-          <VTableRow>
-            <VTableCell
-              v-for="skeletonItem in headerLength"
-              :key="`loading-cell-${skeletonItem}`"
-            >
-              <VSkeleton
-                height="26px"
-                width="100%"
-              />
-            </VTableCell>
-          </VTableRow>
-        </slot>
-      </template>
-    </VTableBody>
-    <!-- Data Slot -->
-    <VTableBody v-show="data && data.length > 0" key="data">
-      <slot name="default" />
-    </VTableBody>
-    <!-- Empty State -->
-    <VTableBody v-show="data.length === 0" key="empty">
-      <VTableEmpty :colspan="headerLength">
-        <slot name="empty">
-          No data available.
-        </slot>
-      </VTableEmpty>
+        <!-- Loading State -->
+        <template v-if="loading">
+          <template
+            v-for="index in loadingRowLength"
+            :key="`loading-${index}`"
+          >
+            <slot name="loading">
+              <VTableRow>
+                <VTableCell
+                  v-for="skeletonItem in headerLength"
+                  :key="`loading-cell-${skeletonItem}`"
+                >
+                  <VSkeleton
+                    height="26px"
+                    width="100%"
+                  />
+                </VTableCell>
+              </VTableRow>
+            </slot>
+          </template>
+        </template>
+        <!-- Data Slot -->
+        <template v-else-if="data && data.length > 0">
+          <slot name="default" />
+        </template>
+        <!-- Empty State -->
+        <VTableEmpty v-else-if="!loading && data.length === 0" key="empty" :colspan="headerLength">
+          <slot name="empty">
+            No data available.
+          </slot>
+        </VTableEmpty>
+      </TransitionGroup>
     </VTableBody>
   </VTable>
 </template>
 
-<style scoped>
+<style lang="scss">
+.v-table-default {
+  &__content {
+    position: relative;
+    min-height: 100px;
+    width: 100%;
+  }
+}
+
 .fade-enter-active,
 .fade-leave-active {
   transition: all 0.3s ease;
@@ -88,7 +101,7 @@ const headerLength = computed(() => props.colspan ?? (props.header?.length || 0)
   opacity: 0;
   position: absolute;
   width: 100%;
-  transform: translateY(0);
+  transform: translateY(10px);
 }
 
 .fade-move {

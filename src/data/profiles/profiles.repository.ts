@@ -2,152 +2,183 @@ import { ref, computed } from 'vue';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { ApiClient } from 'UiKit/helpers/api/apiClient';
 import env from 'InvestCommon/global';
-import { IProfileData, IUserIdentityResponse, IProfileIndividual, ISchema } from './profiles.types';
 import { toasterErrorHandling } from 'UiKit/helpers/api/toasterErrorHandling';
+import {
+  IProfileData, IUserIdentityResponse, IProfileIndividual, ISchema,
+} from './profiles.types';
+
+// Generic type for action states
+type ActionState<T> = {
+  data: T | undefined;
+  loading: boolean;
+  error: Error | null;
+};
+
+// Utility function to create action states
+const createActionState = <T>() => ref<ActionState<T>>({
+  data: undefined,
+  loading: false,
+  error: null,
+});
 
 export const useRepositoryProfiles = defineStore('repository-profiles', () => {
   // Dependencies
   const apiClient = new ApiClient(env.USER_URL);
 
   // State
-  const profileData = ref<IProfileData>();
   const profileOptions = ref<ISchema>();
-  const profileById = ref<IProfileIndividual>();
-  const userData = ref<IUserIdentityResponse>();
-  const error = ref<Error | null>(null);
 
-  // Loading states
-  const isLoadingProfileOptions = ref(false);
-  const isLoadingSetProfile = ref(false);
-  const isLoadingGetProfileById = ref(false);
-  const isLoadingSetProfileById = ref(false);
-  const isLoadingGetUser = ref(false);
-  const isLoadingSetUser = ref(false);
-  const isLoadingSetUserOptions = ref(false);
-  const isLoadingUpdateUserData = ref(false);
+  // Action states
+  const setProfileByIdState = createActionState<IProfileIndividual>();
+  const getProfileByIdState = createActionState<IProfileIndividual>();
+  const getProfileByIdOptionsState = createActionState<IProfileIndividual>();
+  const setProfileState = createActionState<IProfileData>();
+  const getUserState = createActionState<IUserIdentityResponse>();
+  const setUserState = createActionState<IProfileData>();
+  const setUserOptionsState = createActionState<any>();
+  const updateUserDataState = createActionState<any>();
+  const getProfileOptionsState = createActionState<ISchema>();
 
   // Computed
-  const formattedProfileData = computed(() => profileData.value);
+  const formattedProfileData = computed(() => setProfileState.data);
 
   // Actions
   const getProfileOptions = async (type: string) => {
     try {
-      isLoadingProfileOptions.value = true;
-      error.value = null;
+      getProfileOptionsState.value.loading = true;
+      getProfileOptionsState.value.error = null;
       const response = await apiClient.options<ISchema>(`/auth/profile/${type}`);
-      profileOptions.value = response.data;
-      if (profileOptions.value.definitions?.RegCF) {
-        delete profileOptions.value.definitions.RegCF?.required;
+      getProfileOptionsState.value.data = response.data;
+      if (getProfileOptionsState.value.data?.definitions?.RegCF) {
+        delete getProfileOptionsState.value.data.definitions.RegCF?.required;
       }
-      return profileOptions.value;
+      return getProfileOptionsState.value.data;
     } catch (err) {
-      error.value = err as Error;
+      getProfileOptionsState.value.error = err as Error;
       toasterErrorHandling(err, 'Failed to fetch profile options');
       throw err;
     } finally {
-      isLoadingProfileOptions.value = false;
+      getProfileOptionsState.value.loading = false;
     }
   };
 
   const setProfile = async (data: IProfileData, type: string) => {
     try {
-      isLoadingSetProfile.value = true;
-      error.value = null;
+      setProfileState.value.loading = true;
+      setProfileState.value.error = null;
       const response = await apiClient.post<IProfileData>(`/auth/profile/${type}`, data);
-      profileData.value = response.data;
-      return profileData.value;
+      setProfileState.value.data = response.data;
+      return setProfileState.value.data;
     } catch (err) {
-      error.value = err as Error;
+      setProfileState.value.error = err as Error;
       toasterErrorHandling(err, 'Failed to set profile');
       throw err;
     } finally {
-      isLoadingSetProfile.value = false;
+      setProfileState.value.loading = false;
     }
   };
 
   const getProfileById = async (type: string, id: string | number) => {
     try {
-      isLoadingGetProfileById.value = true;
-      error.value = null;
+      getProfileByIdState.value.loading = true;
+      getProfileByIdState.value.error = null;
       const response = await apiClient.get<IProfileIndividual>(`/auth/profile/${type}/${id}`);
-      profileById.value = response.data;
-      return profileById.value;
+      getProfileByIdState.value.data = response.data;
+      return getProfileByIdState.value.data;
     } catch (err) {
-      error.value = err as Error;
+      getProfileByIdState.value.error = err as Error;
       toasterErrorHandling(err, 'Failed to fetch profile by ID');
       throw err;
     } finally {
-      isLoadingGetProfileById.value = false;
+      getProfileByIdState.value.loading = false;
+    }
+  };
+
+  const getProfileByIdOptions = async (type: string, id: string | number) => {
+    try {
+      getProfileByIdOptionsState.value.loading = true;
+      getProfileByIdOptionsState.value.error = null;
+      const response = await apiClient.options<IProfileIndividual>(`/auth/profile/${type}/${id}`);
+      getProfileByIdOptionsState.value.data = response.data;
+      return getProfileByIdOptionsState.value.data;
+    } catch (err) {
+      getProfileByIdOptionsState.value.error = err as Error;
+      toasterErrorHandling(err, 'Failed to fetch profile by ID options');
+      throw err;
+    } finally {
+      getProfileByIdOptionsState.value.loading = false;
     }
   };
 
   const setProfileById = async (data: IProfileData, type: string, id: string | number) => {
     try {
-      isLoadingSetProfileById.value = true;
-      error.value = null;
+      setProfileByIdState.value.loading = true;
+      setProfileByIdState.value.error = null;
       const response = await apiClient.patch<IProfileIndividual>(`/auth/profile/${type}/${id}`, data);
-      profileById.value = response.data;
-      return profileById.value;
+      setProfileByIdState.value.data = response.data;
+      return setProfileByIdState.value.data;
     } catch (err) {
-      error.value = err as Error;
+      setProfileByIdState.value.error = err as Error;
       toasterErrorHandling(err, 'Failed to update profile');
       throw err;
     } finally {
-      isLoadingSetProfileById.value = false;
+      setProfileByIdState.value.loading = false;
     }
   };
 
   const getUser = async () => {
     try {
-      isLoadingGetUser.value = true;
-      error.value = null;
+      getUserState.value.loading = true;
+      getUserState.value.error = null;
       const response = await apiClient.get<IUserIdentityResponse>('/auth/user');
-      userData.value = response.data;
-      return userData.value;
+      getUserState.value.data = response.data;
+      console.log('getUserState.data', getUserState);
+      return getUserState.value.data;
     } catch (err) {
-      error.value = err as Error;
+      getUserState.value.error = err as Error;
       toasterErrorHandling(err, 'Failed to fetch user data');
       throw err;
     } finally {
-      isLoadingGetUser.value = false;
+      getUserState.value.loading = false;
     }
   };
 
   const setUser = async (data: IProfileData) => {
     try {
-      isLoadingSetUser.value = true;
-      error.value = null;
+      setUserState.value.loading = true;
+      setUserState.value.error = null;
       const response = await apiClient.patch<IProfileData>('/auth/user', data);
-      profileData.value = response.data;
-      return profileData.value;
+      setUserState.value.data = response.data;
+      return setUserState.value.data;
     } catch (err) {
-      error.value = err as Error;
+      setUserState.value.error = err as Error;
       toasterErrorHandling(err, 'Failed to update user data');
       throw err;
     } finally {
-      isLoadingSetUser.value = false;
+      setUserState.value.loading = false;
     }
   };
 
   const setUserOptions = async () => {
     try {
-      isLoadingSetUserOptions.value = true;
-      error.value = null;
+      setUserOptionsState.value.loading = true;
+      setUserOptionsState.value.error = null;
       const response = await apiClient.options('/auth/user');
-      return response.data;
+      setUserOptionsState.value.data = response.data;
+      return setUserOptionsState.value.data;
     } catch (err) {
-      error.value = err as Error;
+      setUserOptionsState.value.error = err as Error;
       toasterErrorHandling(err, 'Failed to fetch user options');
       throw err;
     } finally {
-      isLoadingSetUserOptions.value = false;
+      setUserOptionsState.value.loading = false;
     }
   };
 
   const updateUserData = async (id: string | number, body: string) => {
     try {
-      isLoadingUpdateUserData.value = true;
-      error.value = null;
+      updateUserDataState.value.loading = true;
+      updateUserDataState.value.error = null;
       const response = await apiClient.patch('/auth/user', body, {
         headers: {
           'Content-Type': 'application/json',
@@ -155,56 +186,58 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
           'X-Requested-With': 'XMLHttpRequest',
         },
       });
-      return response.data;
+      updateUserDataState.value.data = response.data;
+      return updateUserDataState.value.data;
     } catch (err) {
-      error.value = err as Error;
+      updateUserDataState.value.error = err as Error;
       toasterErrorHandling(err, 'Failed to update user data');
       throw err;
     } finally {
-      isLoadingUpdateUserData.value = false;
+      updateUserDataState.value.loading = false;
     }
   };
 
   const reset = () => {
-    // Reset state
-    profileData.value = undefined;
-    profileOptions.value = undefined;
-    profileById.value = undefined;
-    userData.value = undefined;
-    error.value = null;
-
-    // Reset loading states
-    isLoadingProfileOptions.value = false;
-    isLoadingSetProfile.value = false;
-    isLoadingGetProfileById.value = false;
-    isLoadingSetProfileById.value = false;
-    isLoadingGetUser.value = false;
-    isLoadingSetUser.value = false;
-    isLoadingSetUserOptions.value = false;
-    isLoadingUpdateUserData.value = false;
+    // Reset all action states
+    Object.values({
+      setProfileByIdState,
+      getProfileByIdState,
+      getProfileByIdOptionsState,
+      setProfileState,
+      getUserState,
+      setUserState,
+      setUserOptionsState,
+      updateUserDataState,
+      getProfileOptionsState,
+    }).forEach((action) => {
+      // eslint-disable-next-line no-param-reassign
+      action.value.data = undefined;
+      // eslint-disable-next-line no-param-reassign
+      action.value.loading = false;
+      // eslint-disable-next-line no-param-reassign
+      action.value.error = null;
+    });
   };
 
   return {
     // State
-    profileData,
     profileOptions,
-    profileById,
-    userData,
-    error,
+    // Action states
+    setProfileByIdState,
+    getProfileByIdState,
+    getProfileByIdOptionsState,
+    setProfileState,
+    getUserState,
+    setUserState,
+    setUserOptionsState,
+    updateUserDataState,
+    getProfileOptionsState,
     formattedProfileData,
-    // Loading states
-    isLoadingProfileOptions,
-    isLoadingSetProfile,
-    isLoadingGetProfileById,
-    isLoadingSetProfileById,
-    isLoadingGetUser,
-    isLoadingSetUser,
-    isLoadingSetUserOptions,
-    isLoadingUpdateUserData,
     // Actions
     getProfileOptions,
     setProfile,
     getProfileById,
+    getProfileByIdOptions,
     setProfileById,
     getUser,
     setUser,
