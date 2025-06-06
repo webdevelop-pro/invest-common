@@ -10,7 +10,6 @@ export * from './useBreakpoints';
 export * from './useFunding';
 export * from './useInvestments';
 export * from './useKYCIdentity';
-export * from './useNotifications';
 export * from './useProfileWallet/useProfileWallet';
 export * from './useProfileWallet/useProfileWalletTransaction';
 export * from './useFiler';

@@ -7,15 +7,16 @@ import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
   <VTableRow
     class="VTableNotificationItem v-table-notification-item is--unread"
   >
-    <VTableCell class="v-table-notification-item__badge-loading">
+    <VTableCell class="v-table-notification-item__badge-cell">
       <VSkeleton
         height="34px"
         width="86px"
+        radius="24px"
       />
     </VTableCell>
-    <VTableCell class="v-table-notification-item__text-loading">
+    <VTableCell class="v-table-notification-item__text-cell">
       <div class="v-table-notification-item__content-wrap">
-        <div>
+        <div class="v-table-notification-item__text">
           <VSkeleton
             height="21px"
             width="100px"
@@ -40,11 +41,22 @@ import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 <style lang="scss">
 @use 'UiKit/styles/_variables.scss' as *;
 .v-table-notification-item {
-  display: table-row;
+  @media screen and (width > $tablet){
+    display: table-row;
+  }
+
+  @media screen and (width < $tablet){
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
 
   &.is--unread .v-table-cell {
     background-color: $gray-10;
-    position: relative;
+
+    @media screen and (width > $tablet){
+      position: relative;
+    }
   }
 
   &__date {
@@ -55,6 +67,10 @@ import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 
   &__content {
     color: $gray-80;
+
+    @media screen and (width < $tablet){
+      width: 100% !important;
+    }
 
     a {
       font-weight: 700;
@@ -109,8 +125,9 @@ import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
   &__button {
     flex-shrink: 0;
 
-    @media screen and (max-width: $tablet){
+    @media screen and (width < $tablet){
       align-self: flex-start;
+      width: 100%;
     }
   }
 
@@ -118,12 +135,28 @@ import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
     width: 16px;
   }
 
-  &__text-loading {
-    width: calc(100% - 150px);
+  &__text-cell {
+    @media screen and (width > $tablet){
+      width: calc(100% - 160px);
+    }
+
+    @media screen and (width < $tablet){
+      width: 100%;
+    }
   }
 
-  &__badge-loading {
-    width: 150px;
+  &__badge-cell {
+    @media screen and (width > $tablet){
+      width: 160px;
+    }
+
+    @media screen and (width < $tablet){
+      width: 100%;
+    }
+  }
+
+  &__text {
+    width: 100%;
   }
 }
 </style>

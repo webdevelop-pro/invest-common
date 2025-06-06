@@ -2,8 +2,8 @@ import { ref, computed } from 'vue';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { ApiClient } from 'UiKit/helpers/api/apiClient';
 import env from 'InvestCommon/global';
-import { INotification } from 'InvestCommon/types/api/notifications';
 import { toasterErrorHandling } from 'UiKit/helpers/api/toasterErrorHandling';
+import { INotification } from './notifications.types';
 import { NotificationFormatter } from './notifications.formatter';
 
 export const useRepositoryNotifications = defineStore('repository-notifications', () => {
@@ -72,6 +72,14 @@ export const useRepositoryNotifications = defineStore('repository-notifications'
     }
   };
 
+  const reset = () => {
+    notifications.value = [];
+    isLoadingGetAll.value = false;
+    isLoadingMarkAll.value = false;
+    isLoadingMarkById.value = false;
+    error.value = null;
+  };
+
   const updateNotificationsData = (data: string) => {
     const notification = JSON.parse(data) as INotification;
     notifications.value.unshift(notification);
@@ -90,6 +98,7 @@ export const useRepositoryNotifications = defineStore('repository-notifications'
     markAllAsRead,
     markAsReadById,
     updateNotificationsData,
+    reset,
   };
 });
 

@@ -3,7 +3,6 @@ export * from './plaid';
 export * from './offers';
 export * from './invest';
 export * from './user';
-export * from './notifications';
 export * from './hubspot';
 export * from './accreditation';
 export * from './funding';
