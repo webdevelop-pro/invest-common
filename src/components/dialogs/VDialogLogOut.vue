@@ -49,7 +49,7 @@ watch(() => open.value, () => {
         </VDialogHeader>
         <div class="v-dialog-log-out__img">
           <VImage
-            :src="!IS_STATIC_SITE ? image : '/images/logout-modal.svg'"
+            :src="!+IS_STATIC_SITE ? image : '/images/logout-modal.svg'"
             alt=""
           />
         </div>
