@@ -54,9 +54,10 @@ export const fetchGetInvestUnconfirmed = () => {
 
 export const fetchSetInvest = (
   slug: string,
+  profileId: string,
   sharesCount: number,
 ) => {
-  const path = `${INVESTMENT_URL}/auth/invest/${slug}`;
+  const path = `${INVESTMENT_URL}/auth/invest/${slug}/${profileId}`;
 
   const body = JSON.stringify({
     number_of_shares: sharesCount,
