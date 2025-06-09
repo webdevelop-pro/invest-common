@@ -1,7 +1,7 @@
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { computed, ref, nextTick } from 'vue';
 import { fetchGetWalletByProfile } from 'InvestCommon/services/api/evm';
-import { INotification } from 'InvestCommon/types/api/notifications';
+import { INotification } from 'InvestCommon/data/notifications/notifications.types';
 import { useUsersStore } from '../useUsers';
 
 const STATUS_CREATED = 'created';

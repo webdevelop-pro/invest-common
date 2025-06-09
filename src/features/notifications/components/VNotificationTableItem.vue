@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { formatToDate } from 'InvestCommon/helpers/formatters/formatToDate';
-import { PropType, computed, ref } from 'vue';
+import {
+  PropType, computed, ref, onMounted,
+} from 'vue';
 import VBadge from 'UiKit/components/Base/VBadge/VBadge.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import arrowRight from 'UiKit/assets/images/arrow-right.svg';
@@ -12,6 +14,7 @@ import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 const notificationsStore = useNotifications();
 
 const routerRef = ref<any>(null);
+const isLoading = ref(false);
 
 const props = defineProps({
   data: Object as PropType<IFormattedNotification>,
@@ -29,17 +32,28 @@ const isExternalLink = computed(() => {
   return typeof props.data?.buttonTo === 'string' && props.data?.buttonTo?.startsWith('http');
 });
 
-const onMarkAsRead = () => {
-  notificationsStore.markAsReadById(props.data?.id);
+const onMarkAsRead = async () => {
+  isLoading.value = true;
+  await notificationsStore.markAsReadById(props.data?.id);
+  isLoading.value = false;
 };
-if (!isExternalLink.value) {
-  try {
-    const { useRouter } = await import('vue-router');
-    routerRef.value = useRouter();
-  } catch (e) {
-    console.warn('vue-router not available:', e);
+
+const initRouter = async () => {
+  if (!isExternalLink.value) {
+    try {
+      const { useRouter } = await import('vue-router');
+      routerRef.value = useRouter();
+    } catch (e) {
+      // Silently fail in test environment
+      console.debug('vue-router not available:', e);
+    }
   }
-}
+};
+
+onMounted(() => {
+  initRouter();
+});
+
 const onButtonClick = async () => {
   await onMarkAsRead();
   notificationsStore.onSidebarToggle(false);
@@ -62,7 +76,7 @@ const onMessageClick = () => {
   >
     <VTableCell class="v-table-notification-item__badge-cell">
       <VSkeleton
-        :is-loaded="!loading"
+        :is-loaded="!loading && !isLoading"
         height="34px"
         width="86px"
         radius="24px"
@@ -82,7 +96,7 @@ const onMessageClick = () => {
       <div class="v-table-notification-item__content-wrap">
         <div class="v-table-notification-item__text">
           <VSkeleton
-            :is-loaded="!loading"
+            :is-loaded="!loading && !isLoading"
             height="21px"
             width="100px"
             class="v-table-notification-item__date is--h6__title"
@@ -97,7 +111,7 @@ const onMessageClick = () => {
           </VSkeleton>
 
           <VSkeleton
-            :is-loaded="!loading"
+            :is-loaded="!loading && !isLoading"
             height="25px"
             width="100%"
             class="v-table-notification-item__content is--body"
@@ -113,7 +127,7 @@ const onMessageClick = () => {
         </div>
 
         <VSkeleton
-          :is-loaded="!loading"
+          :is-loaded="!loading && !isLoading"
           height="32px"
           width="143px"
         >

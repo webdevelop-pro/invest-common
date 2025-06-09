@@ -4,7 +4,7 @@ import {
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { useAuthStore } from 'InvestCommon/store/useAuth';
 import { useDomainWebSocketStore } from 'InvestCommon/domain/websockets/store/useWebsockets';
-import { INotification } from 'InvestCommon/types/api/notifications';
+import { INotification } from 'InvestCommon/data/notifications/notifications.types';
 import {
   ROUTE_ACCREDITATION_UPLOAD, ROUTE_DASHBOARD_ACCOUNT, ROUTE_DASHBOARD_BACKGROUND_INFORMATION,
   ROUTE_DASHBOARD_FINANCIAL_AND_INVESTMENT_INFO, ROUTE_DASHBOARD_PERSONAL_DETAILS, ROUTE_DASHBOARD_PORTFOLIO,

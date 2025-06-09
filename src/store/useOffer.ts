@@ -10,7 +10,7 @@ import {
 } from 'InvestCommon/services/api/offers';
 import { fetchGetInvestUnconfirmed, fetchGetInvestments } from 'InvestCommon/services/api/invest';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
-import { INotification } from 'InvestCommon/types/api/notifications';
+import { INotification } from 'InvestCommon/data/notifications/notifications.types';
 import { useUsersStore } from './useUsers';
 
 const unconfirmedOffersFilter = (unInv: IInvest[], slug: string, profileId: number | string) => (

@@ -1,5 +1,5 @@
 import { watch } from 'vue';
-import { INotification } from 'InvestCommon/types/api/notifications';
+import { INotification } from 'InvestCommon/data/notifications/notifications.types';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { useWebSocket } from '@vueuse/core';
 import env from 'InvestCommon/global/index';
