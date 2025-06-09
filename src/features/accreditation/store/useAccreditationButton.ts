@@ -53,9 +53,9 @@ export const useAccreditationButton = defineStore('accreditationButton', () => {
       return;
     }
     if (!selectedUserProfileData.value?.escrow_id) {
-      void router.push({ name: ROUTE_DASHBOARD_PERSONAL_DETAILS, params: { profileId: selectedUserProfileId.value }, query: { accreditation: true } });
+      router.push({ name: ROUTE_DASHBOARD_PERSONAL_DETAILS, params: { profileId: selectedUserProfileId.value }, query: { accreditation: true } });
     } else {
-      void router.push({ name: ROUTE_ACCREDITATION_UPLOAD, params: { profileId: selectedUserProfileId.value } });
+      router.push({ name: ROUTE_ACCREDITATION_UPLOAD, params: { profileId: selectedUserProfileId.value } });
     }
   };
 

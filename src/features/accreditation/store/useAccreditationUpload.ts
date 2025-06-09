@@ -159,7 +159,7 @@ export const useAccreditationUpload = defineStore('accreditationUpload', () => {
     if (!isFieldsValid.value) {
       return;
     }
-    void sendFiles();
+    sendFiles();
   };
 
   const onFilesChange = (filesInner: File[]) => {
@@ -200,7 +200,7 @@ export const useAccreditationUpload = defineStore('accreditationUpload', () => {
 
   watch([isAccreditationCanUpload], ([newValue]) => {
     if (!newValue) {
-      void router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
+      router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
     }
   });
 
