@@ -12,7 +12,7 @@ import {
   IInvest, IInvestConfirm, IInvestDocumentSign, IInvestFunding,
 } from 'InvestCommon/types/api/invest';
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { INotification } from 'InvestCommon/types/api/notifications';
+import { INotification } from 'InvestCommon/data/notifications/notifications.types';
 
 const isGetInvestOneLoading = ref(false);
 const isGetInvestLoading = ref(false);

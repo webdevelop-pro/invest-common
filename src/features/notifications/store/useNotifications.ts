@@ -4,26 +4,31 @@ import {
 } from 'vue';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { useRepositoryNotifications } from 'InvestCommon/data/notifications/notifications.repository';
-import { useUsersStore } from 'InvestCommon/store/useUsers';
-import type { INotification } from 'InvestCommon/types/api/notifications';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
+import type { INotification } from 'InvestCommon/data/notifications/notifications.types';
 import { IVFilter } from 'UiKit/components/VFilter/VFilter.vue';
 
 export const useNotifications = defineStore('notifications', () => {
   const notificationsRepository = useRepositoryNotifications();
-  const { formattedNotifications, error, isLoadingGetAll } = storeToRefs(notificationsRepository);
-  const usersStore = useUsersStore();
-  const { userLoggedIn } = storeToRefs(usersStore);
+  const {
+    formattedNotifications, getAllState, markAllAsReadState,
+  } = storeToRefs(notificationsRepository);
+  const userSessionStore = useSessionStore();
+  const { userLoggedIn } = storeToRefs(userSessionStore);
 
   /* * Loading State * */
   const isLoading = ref(true);
 
   // Watch for notification changes to update loading state
-  watch([formattedNotifications, error, isLoadingGetAll], ([newNotification, newError, newLoading]) => {
+  watch(() => [
+    formattedNotifications.value, getAllState.value.error, getAllState.value.loading,
+    markAllAsReadState.value.error, markAllAsReadState.value.loading,
+  ], () => {
     // Set loading state based on repository loading state
-    if (newLoading) {
+    if (getAllState.value.loading || markAllAsReadState.value.loading) {
       isLoading.value = true;
     // Stop loading if we have data, empty array, or an error
-    } else if (Array.isArray(newNotification) || newError) {
+    } else if (Array.isArray(formattedNotifications.value) || getAllState.value.error || markAllAsReadState.value.error) {
       setTimeout(() => {
         isLoading.value = false;
       }, 500);
@@ -41,7 +46,7 @@ export const useNotifications = defineStore('notifications', () => {
   /* * Loading All Data * */
   const canLoadAllData = computed(() => userLoggedIn.value);
   const conditionToLoadAllData = computed(() => (
-    !isLoadingGetAll.value && (formattedNotifications.value.length === 0) && !error.value));
+    !getAllState.value.loading && (formattedNotifications.value.length === 0) && !getAllState.value.error));
 
   const loadData = () => {
     if (canLoadAllData.value && conditionToLoadAllData.value) {
@@ -137,7 +142,7 @@ export const useNotifications = defineStore('notifications', () => {
   const tableData = computed(() => {
     // Only show loading state if we're loading AND don't have any existing data
     // AND we're not just filtering existing data
-    if (isLoading.value && (formattedNotifications.value.length === 0) && (currentTab.value === 'all')) {
+    if (isLoading.value) {
       return Array(10).fill({
         status: '',
         type: '',

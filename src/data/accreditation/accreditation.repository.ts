@@ -114,6 +114,16 @@ export const useRepositoryAccreditation = () => {
     }
   };
 
+  const reset = () => {
+    accreditation.value = [];
+    isLoadingCreate.value = false;
+    isLoadingUpdate.value = false;
+    isLoadingUpload.value = false;
+    isLoadingCreateEscrow.value = false;
+    isLoadingGetAll.value = false;
+    error.value = null;
+  };
+
   return {
     accreditation,
     isLoadingCreate,
@@ -127,5 +137,6 @@ export const useRepositoryAccreditation = () => {
     update,
     uploadDocument,
     createEscrow,
+    reset,
   };
 };

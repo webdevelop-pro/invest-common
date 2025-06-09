@@ -8,7 +8,7 @@ import {
   fetchGetTransactionsData, fetchAddTransaction, fetchCancelTransaction,
 } from 'InvestCommon/services/api/wallet';
 import { formatToFullDate } from 'InvestCommon/helpers/formatters/formatToDate';
-import { INotification } from 'InvestCommon/types/api/notifications';
+import { INotification } from 'InvestCommon/data/notifications/notifications.types';
 import { useProfileWalletStore } from 'InvestCommon/store/useProfileWallet/useProfileWallet';
 import { useProfileWalletBankAccountStore } from './useProfileWalletBankAccount';
 

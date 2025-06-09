@@ -3,7 +3,7 @@ import {
   VTable, VTableBody, VTableCell, VTableRow,
   VTableEmpty, VTableHead, VTableHeader,
 } from 'UiKit/components/Base/VTable';
-import { computed, PropType } from 'vue';
+import { computed, PropType, TransitionGroup } from 'vue';
 import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 
 interface IHead {
@@ -17,10 +17,11 @@ const props = defineProps<{
   loading?: boolean;
   loadingRowLength?: number;
   size?: 'large' | 'regular' | 'small';
+  colspan?: number;
 }>();
 
 const loadingRowLength = computed(() => props.loadingRowLength ?? 1);
-const headerLength = computed(() => props.header?.length || 0);
+const headerLength = computed(() => props.colspan ?? (props.header?.length || 0));
 </script>
 
 <template>
@@ -41,52 +42,56 @@ const headerLength = computed(() => props.header?.length || 0);
       </VTableRow>
     </VTableHeader>
     <!-- Loading State -->
-    <Transition name="fade" mode="out-in">
-      <VTableBody v-if="loading" key="loading">
-        <template
-          v-for="index in loadingRowLength"
-          :key="`loading-${index}`"
-        >
-          <slot name="loading">
-            <VTableRow>
-              <VTableCell
-                v-for="skeletonItem in headerLength"
-                :key="`loading-cell-${skeletonItem}`"
-              >
-                <VSkeleton
-                  height="26px"
-                  width="100%"
-                />
-              </VTableCell>
-            </VTableRow>
-          </slot>
-        </template>
-      </VTableBody>
-      <!-- Data Slot -->
-      <VTableBody v-else-if="data && data.length > 0" key="data">
-        <slot name="default" />
-      </VTableBody>
-      <!-- Empty State -->
-      <VTableBody v-else key="empty">
-        <VTableEmpty :colspan="headerLength">
-          <slot name="empty">
-            No data available.
-          </slot>
-        </VTableEmpty>
-      </VTableBody>
-    </Transition>
+    <VTableBody v-show="loading" key="loading">
+      <template
+        v-for="index in loadingRowLength"
+        :key="`loading-${index}`"
+      >
+        <slot name="loading">
+          <VTableRow>
+            <VTableCell
+              v-for="skeletonItem in headerLength"
+              :key="`loading-cell-${skeletonItem}`"
+            >
+              <VSkeleton
+                height="26px"
+                width="100%"
+              />
+            </VTableCell>
+          </VTableRow>
+        </slot>
+      </template>
+    </VTableBody>
+    <!-- Data Slot -->
+    <VTableBody v-show="data && data.length > 0" key="data">
+      <slot name="default" />
+    </VTableBody>
+    <!-- Empty State -->
+    <VTableBody v-show="data.length === 0" key="empty">
+      <VTableEmpty :colspan="headerLength">
+        <slot name="empty">
+          No data available.
+        </slot>
+      </VTableEmpty>
+    </VTableBody>
   </VTable>
 </template>
 
 <style scoped>
 .fade-enter-active,
 .fade-leave-active {
-  transition: all 0.3s cubic-bezier(0.33, 1, 0.68, 1);
+  transition: all 0.3s ease;
 }
 
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
-  /* transform: translateY(6px); */
+  position: absolute;
+  width: 100%;
+  transform: translateY(0);
+}
+
+.fade-move {
+  transition: transform 0.3s ease;
 }
 </style>

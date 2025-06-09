@@ -101,18 +101,17 @@ const onApplyFilter = (items: IVFilter[]) => {
     <VTableDefault
       :loading-row-length="10"
       :data="data"
+      :loading="isLoading"
       size="small"
+      :colspan="2"
     >
-      <Suspense>
+      <template v-for="(item, index) in data" :key="item.id">
         <VNotificationTableItem
-          v-for="item, index in data"
-          :key="index"
           :data="item"
-          :loading="isLoading"
           :search="search"
           :is-static-site="isStaticSite"
         />
-      </Suspense>
+      </template>
       <template #loading>
         <VNotificationTableItemSkeleton />
       </template>

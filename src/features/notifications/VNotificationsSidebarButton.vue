@@ -45,8 +45,11 @@ onBeforeMount(() => {
   >
     <message
       alt="notification icon"
-      class="notifications-sidebar-button__notification-icon"
+      class="notifications-sidebar-button__notification-icon is--gt-tablet-show"
     />
+    <span class="is--h6__title is--lt-tablet-show">
+      Notifications
+    </span>
     <span
       v-if="notificationUnreadLength && (notificationUnreadLength > 0)"
       class="notifications-sidebar-button__notification-dot"

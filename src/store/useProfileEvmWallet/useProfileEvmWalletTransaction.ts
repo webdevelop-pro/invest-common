@@ -8,7 +8,7 @@ import {
   fetchGetTransactionsData, fetchAddTransaction, fetchCancelTransaction,
 } from 'InvestCommon/services/api/evm';
 import { formatToFullDate } from 'InvestCommon/helpers/formatters/formatToDate';
-import { INotification } from 'InvestCommon/types/api/notifications';
+import { INotification } from 'InvestCommon/data/notifications/notifications.types';
 import { useProfileEvmWalletStore } from 'InvestCommon/store/useProfileEvmWallet/useProfileEvmWallet';
 
 // profile wallet transaction handling
