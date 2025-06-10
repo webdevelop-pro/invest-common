@@ -1,17 +1,19 @@
-import { ApiClient } from 'UiKit/helpers/api/apiClient';
-import { toasterErrorHandling } from 'UiKit/helpers/api/toasterErrorHandling';
+import { ApiClient } from 'InvestCommon/data/service/apiClient';
+import { oryErrorHandling } from 'InvestCommon/data/repository/error/oryErrorHandling';
+import { toasterErrorHandling } from 'InvestCommon/data/repository/error/toasterErrorHandling';
 import env from 'InvestCommon/global';
-import { createActionState } from 'UiKit/helpers/api/repository';
+import { createActionState } from 'InvestCommon/data/repository/repository';
+import { computed } from 'vue';
 import {
   ISession, IAuthFlow, ILogoutFlow, ISchema, ISuccessfullNativeAuth,
 } from './auth.type';
 
-const { AUTH_URL } = env;
+const { KRATOS_URL } = env;
 
 // https://github.com/ory/kratos-selfservice-ui-react-nextjs/blob/master/pages/login.tsx
 
 export const useRepositoryAuth = () => {
-  const apiClient = new ApiClient(AUTH_URL);
+  const apiClient = new ApiClient(KRATOS_URL);
 
   // Create action states for each function
   const getSessionState = createActionState<ISession>();
@@ -43,7 +45,7 @@ export const useRepositoryAuth = () => {
       return response.data;
     } catch (err) {
       getSessionState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to get session');
+      oryErrorHandling(err, 'session', () => {}, 'Failed to get session');
       throw err;
     } finally {
       getSessionState.value.loading = false;
@@ -59,14 +61,14 @@ export const useRepositoryAuth = () => {
       return response.data;
     } catch (err) {
       getAuthFlowState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to get auth flow');
+      oryErrorHandling(err, 'browser', () => {}, 'Failed to get auth flow');
       throw err;
     } finally {
       getAuthFlowState.value.loading = false;
     }
   };
 
-  const setLogin = async (flowId: string, body: string) => {
+  const setLogin = async (flowId: string, body: object) => {
     try {
       setLoginState.value.loading = true;
       setLoginState.value.error = null;
@@ -75,7 +77,7 @@ export const useRepositoryAuth = () => {
       return response.data;
     } catch (err) {
       setLoginState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to login');
+      oryErrorHandling(err, 'login', () => {}, 'Failed to login');
       throw err;
     } finally {
       setLoginState.value.loading = false;
@@ -91,7 +93,7 @@ export const useRepositoryAuth = () => {
       return response.data;
     } catch (err) {
       getLoginState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to get login data');
+      oryErrorHandling(err, 'login', () => {}, 'Failed to get login data');
       throw err;
     } finally {
       getLoginState.value.loading = false;
@@ -106,7 +108,7 @@ export const useRepositoryAuth = () => {
       return response;
     } catch (err) {
       getLogoutState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to logout');
+      oryErrorHandling(err, 'logout', () => {}, 'Failed to logout');
       throw err;
     } finally {
       getLogoutState.value.loading = false;
@@ -122,33 +124,23 @@ export const useRepositoryAuth = () => {
       return response.data;
     } catch (err) {
       getLogoutURLState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to get logout URL');
+      oryErrorHandling(err, 'logout', () => {}, 'Failed to get logout URL');
       throw err;
     } finally {
       getLogoutURLState.value.loading = false;
     }
   };
 
-  const setSignup = async (flowId: string, password: string, firstName: string, lastName: string, email: string, csrf_token: string) => {
+  const setSignup = async (flowId: string, body: object) => {
     try {
       setSignupState.value.loading = true;
       setSignupState.value.error = null;
-      const response = await apiClient.post(`/self-service/registration?flow=${flowId}`, {
-        password,
-        traits: {
-          email,
-          name: {
-            first: firstName,
-            last: lastName,
-          },
-        },
-        csrf_token,
-      });
+      const response = await apiClient.post(`/self-service/registration?flow=${flowId}`, body);
       setSignupState.value.data = response.data;
       return response.data;
     } catch (err) {
       setSignupState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to signup');
+      oryErrorHandling(err, 'signup', () => {}, 'Failed to signup');
       throw err;
     } finally {
       setSignupState.value.loading = false;
@@ -167,7 +159,7 @@ export const useRepositoryAuth = () => {
       return response.data;
     } catch (err) {
       setRecoveryState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to set recovery');
+      oryErrorHandling(err, 'recovery', () => {}, 'Failed to set recovery');
       throw err;
     } finally {
       setRecoveryState.value.loading = false;
@@ -186,7 +178,7 @@ export const useRepositoryAuth = () => {
       return response.data;
     } catch (err) {
       setVerificationState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to verify');
+      oryErrorHandling(err, 'verification', () => {}, 'Failed to verify');
       throw err;
     } finally {
       setVerificationState.value.loading = false;
@@ -202,7 +194,7 @@ export const useRepositoryAuth = () => {
       return response.data;
     } catch (err) {
       getSignupState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to get signup data');
+      oryErrorHandling(err, 'signup', () => {}, 'Failed to get signup data');
       throw err;
     } finally {
       getSignupState.value.loading = false;
@@ -225,6 +217,18 @@ export const useRepositoryAuth = () => {
     }
   };
 
+  const flowId = computed(() => getAuthFlowState.value.data?.id || '');
+
+  const csrfToken = computed(() => {
+    // const res = getSignupData.value?.ui || getAuthFlowState.value.data.ui;
+    const res = getAuthFlowState.value.data.ui;
+    if (res) {
+      const tokenItem = res.nodes.find((item) => item.attributes.name === 'csrf_token');
+      return tokenItem?.attributes.value ?? '';
+    }
+    return '';
+  });
+
   return {
     // States
     getSessionState,
@@ -240,6 +244,8 @@ export const useRepositoryAuth = () => {
     setVerificationState,
     getLoginState,
     getLogoutState,
+    flowId,
+    csrfToken,
 
     // Functions
     getSession,

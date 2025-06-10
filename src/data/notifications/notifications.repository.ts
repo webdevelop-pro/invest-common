@@ -1,9 +1,9 @@
 import { ref, computed } from 'vue';
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { ApiClient } from 'UiKit/helpers/api/apiClient';
+import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import env from 'InvestCommon/global';
 import { INotification } from 'InvestCommon/types/api/notifications';
-import { toasterErrorHandling } from 'UiKit/helpers/api/toasterErrorHandling';
+import { toasterErrorHandling } from 'InvestCommon/data/repository/error/toasterErrorHandling';
 import { NotificationFormatter } from './notifications.formatter';
 
 export const useRepositoryNotifications = defineStore('repository-notifications', () => {

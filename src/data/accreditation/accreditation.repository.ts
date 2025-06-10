@@ -1,6 +1,6 @@
 import { ref } from 'vue';
-import { ApiClient } from 'UiKit/helpers/api/apiClient';
-import { toasterErrorHandling } from 'UiKit/helpers/api/toasterErrorHandling';
+import { ApiClient } from 'InvestCommon/data/service/apiClient';
+import { toasterErrorHandling } from 'InvestCommon/data/repository/error/toasterErrorHandling';
 import { IAccreditationData } from 'InvestCommon/types/api/invest';
 import env from 'InvestCommon/global';
 import { v4 as uuidv4 } from 'uuid';
