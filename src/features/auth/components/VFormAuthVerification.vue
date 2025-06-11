@@ -1,58 +1,25 @@
 <script setup lang="ts">
-import {
-  computed, nextTick, reactive, ref, watch,
-} from 'vue';
-import { useAuthStore } from 'InvestCommon/store/useAuth';
-import { useAuthLogicStore } from 'InvestCommon/store/useAuthLogic';
-import { SELFSERVICE } from 'InvestCommon/helpers/enums/auth';
 import { storeToRefs } from 'pinia';
-import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
-import { FormModelCode, schemaCode } from './utilsAuth';
-import { isEmpty } from 'InvestCommon/helpers/general';
+import { useVerificationStore } from '../store/useVerification';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
-import { scrollToError } from 'UiKit/helpers/validation/general';
 
-const authStore = useAuthStore();
-const { isSetVerificationLoading, setVerificationErrorData } = storeToRefs(authStore);
-const authLogicStore = useAuthLogicStore();
-
-const flowId = computed(() => (
-  (window && window.location.search) ? new URLSearchParams(window.location.search).get('flowId') : null));
-const email = computed(() => (
-  (window && window.location.search) ? new URLSearchParams(window.location.search).get('email') : null));
-
-const model = reactive({
-} as FormModelCode);
-
-const validator = new PrecompiledValidator<FormModelCode>(
-  schemaCode,
-);
-const validation = ref<unknown>();
-const isValid = computed(() => isEmpty(validation.value || {}));
-const isDisabledButton = computed(() => (!isValid.value || isSetVerificationLoading.value));
-
-const onValidate = () => {
-  validation.value = validator.getFormValidationErrors(model);
-};
-
-watch(() => model, () => {
-  if (!isValid.value) onValidate();
-}, { deep: true });
+const verificationStore = useVerificationStore();
+const {
+  model,
+  validation,
+  isLoading,
+  isDisabledButton,
+  setRecoveryState,
+  schemaFrontend,
+} = storeToRefs(verificationStore);
 
 const verificationHandler = async () => {
-  onValidate();
-  if (!isValid.value) {
-    nextTick(() => scrollToError('VerificationForm'));
-    return;
-  }
-
-  await authLogicStore.onVerification(flowId.value, model.code, SELFSERVICE.recovery);
+  verificationStore.verificationHandler();
 };
-
 const resendHandler = async () => {
-  await authLogicStore.onRecovery(email.value, SELFSERVICE.recovery);
+  verificationStore.resendHandler();
 };
 </script>
 
@@ -65,8 +32,8 @@ const resendHandler = async () => {
       v-slot="VFormGroupProps"
       :model="model"
       :validation="validation"
-      :schema-front="schemaCode"
-      :error-text="setVerificationErrorData?.code"
+      :schema-front="schemaFrontend"
+      :error-text="setRecoveryState?.code"
       path="code"
       label="Verification Code"
       class="verification-form__input"
@@ -90,15 +57,15 @@ const resendHandler = async () => {
       size="large"
       block
       data-testid="button"
-      :loading="isSetVerificationLoading"
+      :loading="isLoading"
       :disabled="isDisabledButton"
       class="verification-form__btn"
       @click.prevent="verificationHandler"
     >
-      Varify Code
+      Verify Code
     </VButton>
 
-    <div class="verification-form__login-wrap  is--no-margin">
+    <div class="verification-form__login-wrap is--no-margin">
       <span class="verification-form__login-label is--body">
         Didn't receive the email?
       </span>

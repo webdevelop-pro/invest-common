@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import VFormAuthVerification from 'InvestCommon/components/forms/ory/VFormAuthVerification.vue';
+import VFormAuthVerification from './components/VFormAuthVerification.vue';
 import { useGlobalLoader } from 'InvestCommon/store';
 
 useGlobalLoader().hide();

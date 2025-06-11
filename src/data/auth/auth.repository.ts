@@ -34,8 +34,6 @@ export const useRepositoryAuth = () => {
   const setSocialLoginState = createActionState<ISuccessfullNativeAuth>();
   const setSocialSignupState = createActionState<ISuccessfullNativeAuth>();
 
-  const setVerificationState = createActionState<IAuthFlow>();
-
   const getSession = async () => {
     try {
       getSessionState.value.loading = true;
@@ -147,14 +145,11 @@ export const useRepositoryAuth = () => {
     }
   };
 
-  const setRecovery = async (flowId: string, email: string, csrf_token: string) => {
+  const setRecovery = async (flowId: string, body: object) => {
     try {
       setRecoveryState.value.loading = true;
       setRecoveryState.value.error = null;
-      const response = await apiClient.post(`/self-service/recovery?flow=${flowId}`, {
-        email,
-        csrf_token,
-      });
+      const response = await apiClient.post(`/self-service/recovery?flow=${flowId}`, body);
       setRecoveryState.value.data = response.data;
       return response.data;
     } catch (err) {
@@ -163,25 +158,6 @@ export const useRepositoryAuth = () => {
       throw err;
     } finally {
       setRecoveryState.value.loading = false;
-    }
-  };
-
-  const setVerification = async (flowId: string, code: string, csrf_token: string) => {
-    try {
-      setVerificationState.value.loading = true;
-      setVerificationState.value.error = null;
-      const response = await apiClient.post(`/self-service/verification?flow=${flowId}`, {
-        code,
-        csrf_token,
-      });
-      setVerificationState.value.data = response.data;
-      return response.data;
-    } catch (err) {
-      setVerificationState.value.error = err as Error;
-      oryErrorHandling(err, 'verification', () => {}, 'Failed to verify');
-      throw err;
-    } finally {
-      setVerificationState.value.loading = false;
     }
   };
 
@@ -241,7 +217,6 @@ export const useRepositoryAuth = () => {
     getSchemaState,
     setSocialLoginState,
     setSocialSignupState,
-    setVerificationState,
     getLoginState,
     getLogoutState,
     flowId,
@@ -256,7 +231,6 @@ export const useRepositoryAuth = () => {
     getLogoutURL,
     setSignup,
     setRecovery,
-    setVerification,
     getSignup,
     getSchema,
   };

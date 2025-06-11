@@ -1,77 +1,27 @@
 <script setup lang="ts">
-import {
-  computed, nextTick, onMounted, reactive, ref, watch,
-} from 'vue';
-import { useAuthLogicStore } from 'InvestCommon/store/useAuthLogic';
-import { useAuthStore } from 'InvestCommon/store/useAuth';
-import { SELFSERVICE } from 'InvestCommon/helpers/enums/auth';
-import { storeToRefs } from 'pinia';
-import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
-import { FormModelSignIn, schemaSignIn } from './utilsAuth';
-import { isEmpty } from 'InvestCommon/helpers/general';
-import { navigateWithQueryParams } from 'UiKit/helpers/general';
+import { onMounted } from 'vue';
+import { useAuthenticatorStore } from '../store/useAuthenticator';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
-import { scrollToError } from 'UiKit/helpers/validation/general';
-import {
-  urlForgot, urlSignup, urlSettings, urlProfile,
-} from 'InvestCommon/global/links';
-import { JSONSchemaType } from 'ajv/dist/types/json-schema';
+import { storeToRefs } from 'pinia';
 
-const authLogicStore = useAuthLogicStore();
-const { flowId, csrfToken } = storeToRefs(authLogicStore);
-const authStore = useAuthStore();
-
-type FormModelTOTP = {
-  totp_code: number;
-}
-const schema = {
-  $schema: 'http://json-schema.org/draft-07/schema#',
-  definitions: {
-    Auth: {
-      properties: {
-        totp_code: {},
-      },
-      type: 'object',
-      required: ['totp_code'],
-    },
-  },
-  $ref: '#/definitions/Auth',
-} as unknown as JSONSchemaType<FormModelTOTP>;
-
-const model = reactive<FormModelTOTP>({});
-const validator = new PrecompiledValidator<FormModelTOTP>(schema);
-const validation = ref<unknown>();
-const isValid = computed(() => isEmpty(validation.value || {}));
-
-const onValidate = () => {
-  validation.value = validator.getFormValidationErrors(model);
-};
-
-const onSave = async () => {
-  onValidate();
-  if (!isValid.value) {
-    nextTick(() => scrollToError('VFormAuthAuthenticator'));
-  }
-  const data = {
-    totp_code: model.totp_code.toString(),
-    method: 'totp',
-  };
-  await authLogicStore.onLogin(data, SELFSERVICE.login, undefined, true);
-};
-
-watch(() => model, () => {
-  if (!isValid.value) onValidate();
-}, { deep: true });
-
-const onLogout = () => {
-  authLogicStore.onLogout();
-};
+const authenticatorStore = useAuthenticatorStore();
+const {
+  model, validation, isDisabledButton,
+  isLoading, schemaFrontend,
+} = storeToRefs(authenticatorStore);
 
 onMounted(() => {
-  authStore.fetchAuthHandler(`${SELFSERVICE.login}?aal=aal2`);
+  authenticatorStore.onMoutedHandler();
 });
+
+const totpHandler = () => {
+  authenticatorStore.totpHandler();
+};
+const onLogout = () => {
+  authenticatorStore.onLogout();
+};
 </script>
 
 <template>
@@ -85,15 +35,15 @@ onMounted(() => {
         v-slot="VFormGroupProps"
         :model="model"
         :validation="validation"
-        :schema-front="schema"
+        :schema-front="schemaFrontend"
         path="totp_code"
-        label="Authentication code"
+        label="Authentication Code"
         class="form-auth-authenticator__input"
       >
         <VFormInput
           :model-value="model.totp_code"
           :is-error="VFormGroupProps.isFieldError"
-          placeholder="Authentication code"
+          placeholder="Enter Authentication Code"
           name="email"
           size="large"
           type="email"
@@ -104,12 +54,13 @@ onMounted(() => {
       <VButton
         size="large"
         block
-        :uppercase="false"
+        :loading="isLoading"
+        :disabled="isDisabledButton"
         data-testid="button"
         class="form-auth-authenticator__btn"
-        @click.prevent="onSave"
+        @click.prevent="totpHandler"
       >
-        Use Authenticator
+        Verify
       </VButton>
 
       <div class="form-auth-authenticator__signup-wrap  is--no-margin">

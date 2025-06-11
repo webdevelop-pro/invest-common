@@ -137,7 +137,14 @@ export class ApiClient {
     page: number,
     limit: number,
     config?: Omit<RequestConfig, 'method' | 'body'>,
-  ): Promise<ApiResponse<T> & { pagination: { currentPage: number; totalPages: number; totalItems: number; itemsPerPage: number } }> {
+  ): Promise<ApiResponse<T> & {
+      pagination: {
+        currentPage: number;
+        totalPages: number;
+        totalItems: number;
+        itemsPerPage: number;
+      }
+    }> {
     const response = await this.get<T>(url, {
       ...config,
       params: {

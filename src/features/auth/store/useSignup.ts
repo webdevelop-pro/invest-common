@@ -115,7 +115,7 @@ export const useSignupStore = defineStore('signup', () => {
   const validateForm = () => {
     onValidate();
     if (!isValid.value) {
-      nextTick(() => scrollToError('SignUpForm'));
+      nextTick(() => scrollToError('VFormAuthSignup'));
       return false;
     }
     return true;

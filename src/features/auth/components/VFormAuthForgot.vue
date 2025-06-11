@@ -1,75 +1,35 @@
 <script setup lang="ts">
-import {
-  computed, nextTick, reactive, ref, watch,
-} from 'vue';
-import { useAuthStore } from 'InvestCommon/store/useAuth';
-import { useAuthLogicStore } from 'InvestCommon/store/useAuthLogic';
 import { urlSignin } from 'InvestCommon/global/links';
-import { SELFSERVICE } from 'InvestCommon/helpers/enums/auth';
-import { storeToRefs } from 'pinia';
-import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
-import { FormModelForgot, schemaForgot } from './utilsAuth';
-import { isEmpty } from 'InvestCommon/helpers/general';
+import { useForgotStore } from '../store/useForgot';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
-import { scrollToError } from 'UiKit/helpers/validation/general';
+import { storeToRefs } from 'pinia';
 
-const authStore = useAuthStore();
-const { isSetRecoveryLoading, getSchemaData, setRecoveryErrorData } = storeToRefs(authStore);
-const authLogicStore = useAuthLogicStore();
+const forgotStore = useForgotStore();
+const {
+  model, validation, schemaBackend, isDisabledButton, setRecoveryState,
+  isLoading, schemaFrontend,
+} = storeToRefs(forgotStore);
 
-const model = reactive({
-} as FormModelForgot);
-
-let validator = new PrecompiledValidator<FormModelForgot>(
-  getSchemaData.value,
-  schemaForgot,
-);
-const validation = ref<unknown>();
-const isValid = computed(() => isEmpty(validation.value || {}));
-const isDisabledButton = computed(() => (!isValid.value || isSetRecoveryLoading.value));
-
-const onValidate = () => {
-  validation.value = validator.getFormValidationErrors(model);
+const onSubmit = () => {
+  forgotStore.recoveryHandler();
 };
-
-watch(() => model, () => {
-  if (!isValid.value) onValidate();
-}, { deep: true });
-
-watch(() => getSchemaData.value, () => {
-  validator = new PrecompiledValidator<FormModelForgot>(
-    getSchemaData.value,
-    schemaForgot,
-  );
-});
-
-const recoveryHandler = async () => {
-  onValidate();
-  if (!isValid.value) {
-    nextTick(() => scrollToError('ForgotForm'));
-    return;
-  }
-
-  await authLogicStore.onRecovery(model.email, SELFSERVICE.recovery);
-};
-
 </script>
 
 <template>
   <form
     class="VFormAuthForgot forgot-form"
     novalidate
-    @submit.prevent="recoveryHandler"
+    @submit.prevent="onSubmit()"
   >
     <VFormGroup
       v-slot="VFormGroupProps"
       :model="model"
       :validation="validation"
-      :schema-back="getSchemaData"
-      :schema-front="schemaForgot"
-      :error-text="setRecoveryErrorData?.email"
+      :schema-back="schemaBackend"
+      :schema-front="schemaFrontend"
+      :error-text="setRecoveryState?.error?.email"
       path="email"
       label="Email Address"
       class="forgot-form__input"
@@ -87,14 +47,14 @@ const recoveryHandler = async () => {
     </VFormGroup>
 
     <div class="forgot-form__text is--small">
-      Enter your email address and we’ll send you a code to reset your password.
+      Enter your email address and we'll send you a code to reset your password.
     </div>
 
     <VButton
       size="large"
       block
       data-testid="button"
-      :loading="isSetRecoveryLoading"
+      :loading="isLoading"
       :disabled="isDisabledButton"
       class="forgot-form__btn"
     >

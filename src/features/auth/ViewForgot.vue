@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import VFormAuthForgot from 'InvestCommon/components/forms/ory/VFormAuthForgot.vue';
+import VFormAuthForgot from './components/VFormAuthForgot.vue';
 import { useGlobalLoader } from 'InvestCommon/store';
 
 useGlobalLoader().hide();

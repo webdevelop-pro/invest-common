@@ -37,7 +37,7 @@ onMounted(() => {
 
 <template>
   <form
-    class="VFormAuthLogIn signup-form"
+    class="VFormAuthSignup signup-form"
     novalidate
   >
     <div class="signup-form__wrap">

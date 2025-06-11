@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import VFormAuthAuthenticator from 'InvestCommon/components/forms/ory/VFormAuthAuthenticator.vue';
+import VFormAuthAuthenticator from './components/VFormAuthAuthenticator.vue';
 import { useGlobalLoader } from 'InvestCommon/store';
 
 useGlobalLoader().hide();
@@ -9,11 +9,11 @@ useGlobalLoader().hide();
   <div class="ViewAuthenticator view-authenticator">
     <div class="view-authenticator__wrap">
       <h1 class="view-authenticator__title">
-        2-Step Verification
+        Security Verification
       </h1>
 
-      <p class="is--color-red view-authenticator__subtitle">
-        Please complete the second authentication challenge.
+      <p class="view-authenticator__subtitle">
+        Enter the 6-digit code from your authentication app
       </p>
 
       <VFormAuthAuthenticator />
@@ -39,11 +39,7 @@ useGlobalLoader().hide();
 
   &__subtitle {
     text-align: center;
-    margin-bottom: 20px;
-  }
-
-  &__separator {
-    margin: 40px 0;
+    margin-bottom: 40px;
   }
 }
 </style>
