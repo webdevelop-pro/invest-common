@@ -4,7 +4,7 @@ import {
 import { useUserSession } from 'InvestCommon/store/useUserSession';
 import { urlSignin } from 'InvestCommon/global/links';
 import { computed } from 'vue';
-import { handleAuthGuard } from '../redirectAuthGuard';
+import { redirectAuthGuard } from '../redirectAuthGuard';
 
 const mockNavigateWithQueryParams = vi.fn();
 
@@ -22,7 +22,7 @@ vi.mock('UiKit/helpers/general', () => ({
   navigateWithQueryParams: (...args: any[]) => mockNavigateWithQueryParams(...args),
 }));
 
-describe('handleAuthGuard', () => {
+describe('redirectAuthGuard', () => {
   const mockNext = vi.fn();
   const mockTo = {
     meta: {},
@@ -44,7 +44,7 @@ describe('handleAuthGuard', () => {
     // Set route to require auth
     mockTo.meta.requiresAuth = true;
 
-    handleAuthGuard(mockTo, mockFrom, mockNext);
+    redirectAuthGuard(mockTo, mockFrom, mockNext);
 
     expect(mockNavigateWithQueryParams).toHaveBeenCalledWith(urlSignin, { redirect: '/some-protected-route' });
     expect(mockNext).not.toHaveBeenCalled();
@@ -60,7 +60,7 @@ describe('handleAuthGuard', () => {
     // Set route to require auth
     mockTo.meta.requiresAuth = true;
 
-    handleAuthGuard(mockTo, mockFrom, mockNext);
+    redirectAuthGuard(mockTo, mockFrom, mockNext);
 
     expect(mockNavigateWithQueryParams).not.toHaveBeenCalled();
     expect(mockNext).toHaveBeenCalled();
@@ -76,7 +76,7 @@ describe('handleAuthGuard', () => {
     // Set route to not require auth
     mockTo.meta.requiresAuth = false;
 
-    handleAuthGuard(mockTo, mockFrom, mockNext);
+    redirectAuthGuard(mockTo, mockFrom, mockNext);
 
     expect(mockNavigateWithQueryParams).not.toHaveBeenCalled();
     expect(mockNext).toHaveBeenCalled();

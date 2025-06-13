@@ -30,7 +30,7 @@ export const oryErrorHandling = (
   // special case for 4000006 error id
   if (isCredentialsError) {
     // eslint-disable-next-line no-param-reassign
-    error.message = 'The provided credentials are invalid, check for spelling mistakes in your password or email address';
+    error.message = 'Invalid email or password.';
   }
 
   if (!responseJson?.error?.id) {

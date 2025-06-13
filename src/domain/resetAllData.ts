@@ -12,7 +12,6 @@ import { usePlaidStore } from 'InvestCommon/store/usePlaid';
 import { useInvestmentsStore } from 'InvestCommon/store/useInvestments';
 import { useAccreditationStore } from 'InvestCommon/store/useAccreditation';
 import { useAuthStore } from 'InvestCommon/store/useAuth';
-import { useNotificationsStore } from 'InvestCommon/store/useNotifications';
 import { useFilerStore } from 'InvestCommon/store/useFiler';
 
 function clearAllCookies() {
@@ -32,7 +31,6 @@ export const resetAllData = () => {
   useInvestmentsStore().resetAll();
   useAccreditationStore().resetAll();
   useAuthStore().resetAll();
-  useNotificationsStore().resetAll();
   useFilerStore().resetAll();
   clearAllCookies();
   useUserSession().resetAll();

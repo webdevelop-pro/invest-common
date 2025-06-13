@@ -63,7 +63,7 @@ describe('oryErrorHandling', () => {
     };
 
     oryErrorHandling(error as any, 'login', mockResetFlow, 'test');
-    expect(error.message).toBe('The provided credentials are invalid, check for spelling mistakes in your password or email address');
+    expect(error.message).toBe('Invalid email or password.');
   });
 
   it('should handle session_already_available error', () => {
