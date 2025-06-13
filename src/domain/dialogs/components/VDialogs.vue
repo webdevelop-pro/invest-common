@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { defineAsyncComponent } from 'vue';
-import { useDialogs } from 'InvestCommon/store/useDialogs';
+import { useDialogs } from '../store/useDialogs';
 import { storeToRefs } from 'pinia';
 
 const VDialogLogOut = defineAsyncComponent({
-  loader: () => import('InvestCommon/components/dialogs/VDialogLogOut.vue'),
+  loader: () => import('InvestCommon/features/auth/components/VDialogLogOut.vue'),
 });
 
 const VDialogRefreshSession = defineAsyncComponent({
-  loader: () => import('InvestCommon/components/dialogs/VDialogRefreshSession.vue'),
+  loader: () => import('InvestCommon/features/auth/components/VDialogRefreshSession.vue'),
 });
 
 const useDialogsStore = useDialogs();

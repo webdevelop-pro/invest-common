@@ -3,7 +3,7 @@ import {
 } from 'vue';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
-import { urlSignup, urlProfile, urlAuthenticator } from 'InvestCommon/global/links';
+import { urlSignup, urlProfile } from 'InvestCommon/global/links';
 import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
 import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
@@ -12,6 +12,7 @@ import { scrollToError } from 'UiKit/helpers/validation/general';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import { useUserSession } from 'InvestCommon/store/useUserSession';
 import { SELFSERVICE } from './type';
+import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 
 type FormModelSignIn = {
   email: string;
@@ -20,10 +21,12 @@ type FormModelSignIn = {
 
 const HUBSPOT_FORM_ID = '07463465-7f03-42d2-a85e-40cf8e29969d';
 
-export const useLoginStore = defineStore('login', () => {
+export const useLoginRefreshStore = defineStore('loginRefresh', () => {
   const authRepository = useRepositoryAuth();
-  const { getSchemaState, setLoginState, getAuthFlowState, getLoginState } = storeToRefs(authRepository);
+  const { getSchemaState, setLoginState, getAuthFlowState } = storeToRefs(authRepository);
   const userSessionStore = useUserSession();
+const useDialogsStore = useDialogs();
+const { isDialogRefreshSessionOpen } = storeToRefs(useDialogsStore);
 
   // Query parameters handling
   const queryParams = computed(() => {
@@ -59,33 +62,14 @@ export const useLoginStore = defineStore('login', () => {
   const isLoading = ref(false);
   const isDisabledButton = computed(() => !isValid.value || isLoading.value);
 
-  // Navigation
-  const onSignup = () => {
-    const params = queryParams.value.size ? queryParams.value : undefined;
-    return navigateWithQueryParams(urlSignup, params);
-  };
-
-  const navigateToProfile = () => {
-    const redirectUrl = getQueryParam('redirect') || urlProfile();
-    return navigateWithQueryParams(redirectUrl);
-  };
-
   // Form validation
   const validateForm = () => {
     onValidate();
     if (!isValid.value) {
-      nextTick(() => scrollToError('LogInForm'));
+      nextTick(() => scrollToError('VFormAuthLogInRefresh'));
       return false;
     }
     return true;
-  };
-
-  // Login handlers
-  const handleLoginSuccess = (session: any) => {
-    const { submitFormToHubspot } = useHubspotForm(HUBSPOT_FORM_ID);
-    if (model.email) submitFormToHubspot({ email: model.email });
-    userSessionStore.updateSession(session);
-    navigateToProfile();
   };
 
   const loginPasswordHandler = async () => {
@@ -93,7 +77,7 @@ export const useLoginStore = defineStore('login', () => {
 
     isLoading.value = true;
     try {
-      await authRepository.getAuthFlow(SELFSERVICE.login);
+      await authRepository.getAuthFlow(SELFSERVICE.login, { refresh: true });
       if (getAuthFlowState.value.error) {
         isLoading.value = false;
         return;
@@ -112,7 +96,8 @@ export const useLoginStore = defineStore('login', () => {
       }
 
       if (setLoginState.value.data?.session) {
-        handleLoginSuccess(setLoginState.value.data.session);
+        userSessionStore.updateSession(setLoginState.value.data.session);
+        isDialogRefreshSessionOpen.value = false;
       }
     } catch (error) {
       console.error('Login failed:', error);
@@ -127,7 +112,7 @@ export const useLoginStore = defineStore('login', () => {
     try {
       const flowId = getQueryParam('flow');
       if (!flowId) {
-        await authRepository.getAuthFlow(SELFSERVICE.login);
+        await authRepository.getAuthFlow(SELFSERVICE.login, { refresh: true });
         if (getAuthFlowState.value.error) return;
       }
 
@@ -143,15 +128,6 @@ export const useLoginStore = defineStore('login', () => {
     }
   };
 
-  const onMountedHandler = async () => {
-    if (getQueryParam('flow')) {
-      await authRepository.getLogin(getQueryParam('flow')!);
-      if (getLoginState.value.data.requested_aal === 'aal2') {
-        navigateWithQueryParams(urlAuthenticator);
-      }
-    }
-  }
-
   return {
     queryParams,
     isLoading,
@@ -161,16 +137,14 @@ export const useLoginStore = defineStore('login', () => {
     schemaFrontend,
     isDisabledButton,
     setLoginState,
-    onSignup,
     loginPasswordHandler,
     loginSocialHandler,
     onValidate,
     isValid,
     getQueryParam,
-    onMountedHandler,
   };
 });
 
 if (import.meta.hot) {
-  import.meta.hot.accept(acceptHMRUpdate(useLoginStore, import.meta.hot));
+  import.meta.hot.accept(acceptHMRUpdate(useLoginRefreshStore, import.meta.hot));
 }

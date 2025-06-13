@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useAuthLogicStore } from 'InvestCommon/store/useAuthLogic';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { storeToRefs } from 'pinia';
 import env from 'InvestCommon/global/index';
@@ -9,17 +8,18 @@ import {
 } from 'UiKit/components/Base/VDialog';
 import VImage from 'UiKit/components/Base/VImage/VImage.vue';
 import { watch } from 'vue';
-import { useDialogs } from 'InvestCommon/store/useDialogs';
+import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
+import { useLogoutStore } from '../store/useLogout';
 
 const useDialogsStore = useDialogs();
 const { isDialogLogoutOpen } = storeToRefs(useDialogsStore);
 
-const authLogicStore = useAuthLogicStore();
-const { isLoadingLogout } = storeToRefs(authLogicStore);
+const logoutStore = useLogoutStore();
+const { isLoading } = storeToRefs(logoutStore);
 const open = defineModel<boolean>();
 
 const logoutHandler = async () => {
-  await authLogicStore.onLogout();
+  await logoutStore.logoutHandler();
   open.value = false;
 };
 const { IS_STATIC_SITE } = env;
@@ -49,7 +49,7 @@ watch(() => open.value, () => {
         </VDialogHeader>
         <div class="v-dialog-log-out__img">
           <VImage
-            :src="!IS_STATIC_SITE ? image : '/images/logout-modal.svg'"
+            :src="!+IS_STATIC_SITE ? image : '/images/logout-modal.svg'"
             alt=""
           />
         </div>
@@ -74,8 +74,8 @@ watch(() => open.value, () => {
             size="large"
             color="red"
             data-testid="logout-button"
-            :loading="isLoadingLogout"
-            :disabled="isLoadingLogout"
+            :loading="isLoading"
+            :disabled="isLoading"
             @click="logoutHandler"
           >
             Log Out

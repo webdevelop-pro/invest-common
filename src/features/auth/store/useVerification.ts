@@ -67,10 +67,12 @@ export const useVerificationStore = defineStore('verification', () => {
 
   // Verification handlers
   const verificationHandler = async () => {
+    console.log('Verification handler called');
     if (!validateForm()) return;
 
     isLoading.value = true;
     try {
+      console.log('setRecovery');
       await authRepository.setRecovery(flowId.value, {
         code: model.code,
         method: 'code',

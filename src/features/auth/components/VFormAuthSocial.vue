@@ -67,6 +67,8 @@ const socialSignin = [
 </template>
 
 <style lang="scss">
+@use 'UiKit/styles/_variables.scss' as *;
+
 .social-form {
   display: flex;
   justify-content: center;
@@ -87,7 +89,9 @@ const socialSignin = [
   }
 
   &__item {
-    flex: 1 1 auto;
+    @media screen and (width > $tablet){
+      flex: 1 1 auto;
+    }
 
     &:hover {
       .social-form__item-icon {

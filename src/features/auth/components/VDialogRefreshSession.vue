@@ -1,18 +1,18 @@
 <script setup lang="ts">
-import VFormSettingsTOTP from 'InvestCommon/components/forms/ory/VFormSettingsTOTP.vue';
 import {
   VDialogContent, VDialogHeader, VDialogTitle, VDialog, VDialogFooter,
 } from 'UiKit/components/Base/VDialog';
-import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { watch } from 'vue';
-import { useDialogs } from 'InvestCommon/store/useDialogs';
+import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 import { storeToRefs } from 'pinia';
-import VFormAuthSocial from 'InvestCommon/components/forms/ory/VFormAuthSocial.vue';
-import VFormAuthLogIn from 'InvestCommon/components/forms/ory/VFormAuthLogIn.vue';
+import VFormAuthSocial from './VFormAuthSocial.vue';
+import VFormAuthLogInRefresh from './VFormAuthLogInRefresh.vue';
 import VSeparator from 'UiKit/components/Base/VSeparator/VSeparator.vue';
+import { useLoginRefreshStore } from '../store/useLoginRefresh';
 
 const useDialogsStore = useDialogs();
 const { isDialogRefreshSessionOpen } = storeToRefs(useDialogsStore);
+const loginRefreshStore = useLoginRefreshStore();
 
 const open = defineModel<boolean>();
 
@@ -21,6 +21,10 @@ watch(() => open.value, () => {
     isDialogRefreshSessionOpen.value = false;
   }
 });
+
+const onSocialClick = (event: MouseEvent) => {
+  loginRefreshStore.loginSocialHandler(event);
+};
 </script>
 
 <template>
@@ -40,15 +44,17 @@ watch(() => open.value, () => {
         Before this action we need to verify your identity. Please log in with your existing credentials.
       </p>
 
-      <VFormAuthSocial class="is--margin-top-20" />
+      <VFormAuthSocial
+        class="is--margin-top-20"
+        @click="onSocialClick($event)"
+      />
 
       <VSeparator
         label="or"
         class="is--margin-top-30"
       />
 
-      <VFormAuthLogIn
-        refresh
+      <VFormAuthLogInRefresh
         class="is--margin-top-30"
         @cancel="open = false"
       />

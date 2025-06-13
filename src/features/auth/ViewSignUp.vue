@@ -46,6 +46,11 @@ const onSocialClick = (provider: string) => {
   &__wrap {
     max-width: 558px;
     margin: 40px auto 130px;
+
+    @media screen and (width < $tablet){
+      margin: 40px auto 100px;
+      padding: 0 15px;
+    }
   }
 
   &__title {

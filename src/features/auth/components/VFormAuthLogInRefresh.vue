@@ -4,31 +4,29 @@ import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
 import VFormInputPassword from 'UiKit/components/Base/VForm/VFormInputPassword.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
-import { urlForgot } from 'InvestCommon/global/links';
-import { useLoginStore } from '../store/useLogin';
+import { useLoginRefreshStore } from '../store/useLoginRefresh';
 
-const loginStore = useLoginStore();
+
+const emit = defineEmits(['cancel']);
+
+const loginRefreshStore = useLoginRefreshStore();
 const {
   isLoading, model, validation, isDisabledButton,
   schemaBackend, schemaFrontend, setLoginState,
-} = storeToRefs(loginStore);
-
-const onSignup = () => {
-  loginStore.onSignup();
-};
+} = storeToRefs(loginRefreshStore);
 
 const loginHandler = async () => {
-  loginStore.loginPasswordHandler();
+  loginRefreshStore.loginPasswordHandler();
 };
 </script>
 
 <template>
   <form
-    class="LogInForm login-form"
+    class="VFormAuthLogInRefresh v-form-auth-login-refresh"
     novalidate
-    data-testid="login-form"
+    data-testid="v-form-auth-login-refresh"
   >
-    <div class="login-form__wrap">
+    <div class="v-form-auth-login-refresh__wrap">
       <VFormGroup
         v-slot="VFormGroupProps"
         :model="model"
@@ -38,7 +36,7 @@ const loginHandler = async () => {
         :error-text="setLoginState.error?.email"
         path="email"
         label="Email Address"
-        class="login-form__input"
+        class="v-form-auth-login-refresh__input"
       >
         <VFormInput
           :model-value="model.email"
@@ -60,7 +58,7 @@ const loginHandler = async () => {
         :error-text="setLoginState.error?.password"
         path="password"
         label="Password"
-        class="login-form__input"
+        class="v-form-auth-login-refresh__input"
       >
         <VFormInputPassword
           :model-value="model.password"
@@ -73,41 +71,28 @@ const loginHandler = async () => {
         />
       </VFormGroup>
 
-      <a
-        :href="urlForgot"
-        class="login-form__forgot is--link-2"
-      >
-        Forgot password?
-      </a>
-
       <VButton
         block
         size="large"
         :loading="isLoading"
         :disabled="isDisabledButton"
         data-testid="signup"
-        class="login-form__btn"
+        class="v-form-auth-login-refresh__btn"
         @click.stop.prevent="loginHandler"
       >
         Log In
       </VButton>
 
-      <div
-        class="login-form__signup-wrap  is--no-margin"
-      >
-        <span class="login-form__signup-label is--body">
-          Don't have an account?
-        </span>
 
-        <VButton
-          variant="link"
-          size="large"
-          class="login-form__signup-btn"
-          @click.prevent="onSignup"
-        >
-          Sign Up
-        </VButton>
-      </div>
+      <VButton
+        block
+        size="large"
+        variant="link"
+        class="is--margin-top-12"
+        @click.stop.prevent="emit('cancel')"
+      >
+        Cancel
+      </VButton>
     </div>
   </form>
 </template>
@@ -115,8 +100,7 @@ const loginHandler = async () => {
 <style lang="scss">
 @use 'UiKit/styles/_variables.scss' as *;
 
-.login-form {
-
+.v-form-auth-login-refresh {
   &__forgot {
     margin-top: 4px;
     display: block;

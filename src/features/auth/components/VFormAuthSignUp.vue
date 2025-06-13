@@ -240,6 +240,8 @@ onMounted(() => {
 </template>
 
 <style lang="scss">
+@use 'UiKit/styles/_variables.scss' as *;
+
 .signup-form {
   $root: &;
 
@@ -280,84 +282,14 @@ onMounted(() => {
     width: 100%;
   }
 
-  &__input-icon {
-    color: $gray-70;
-    width: 20px;
-    height: 20px;
-    display: flex;
-  }
-
-  &__password-strength-bar {
-    position: relative;
-    height: 3px;
-    margin: 8px auto 40px;
-    background: $gray-30;
-    border-radius: 2px;
-
-    &::before,
-    &::after {
-      position: absolute;
-      top: 0;
-      z-index: 10;
-      display: block;
-      width: 25%;
-      height: inherit;
-      content: "";
-      background: transparent;
-      border-color: $white;
-      border-style: solid;
-    }
-
-    &::before {
-      left: 25%;
-      border-width: 0 8px;
-    }
-
-    &::after {
-      right: 25%;
-      border-width: 0 8px 0 0;
-    }
-  }
-
-  &__password-strength-bar--fill {
-    position: absolute;
-    width: 0;
-    height: inherit;
-    background: transparent;
-    border-radius: inherit;
-    transition: width 0.5s ease-in-out, background 0.25s;
-
-    &[data-score="1"] {
-      width: 25%;
-      background-color: #ff5252;
-    }
-
-    &[data-score="2"] {
-      width: 50%;
-      background-color: #eec32d;
-    }
-
-    &[data-score="3"] {
-      width: 75%;
-      background-color: #a6cd0c;
-    }
-
-    &[data-score="4"] {
-      width: 100%;
-      background-color: #00d395;
-    }
-  }
-
-  &__password-strength-bar-name {
-    padding-top: 8px;
-    text-align: end;
-    color: $gray-70;
-  }
-
   &__wrap {
     padding: 40px;
     background: $white;
     box-shadow: $box-shadow-medium;
+
+    @media screen and (width < $tablet){
+      padding: 20px;
+    }
   }
 
   &__checkbox-text {
@@ -370,10 +302,21 @@ onMounted(() => {
     justify-content: center;
     margin-top: 12px;
     gap: 12px;
+
+    @media screen and (width < $tablet){
+      flex-direction: column;
+      margin-top: 20px;
+    }
   }
 
   &__login-label {
     color: $gray-80;
+  }
+
+  &__login-btn {
+    @media screen and (width < $tablet){
+      width: 100%;
+    }
   }
 }
 </style>

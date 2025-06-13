@@ -103,10 +103,6 @@ export const useAuthenticatorStore = defineStore('authenticator', () => {
     }
   };
 
-  const onLogout = () => {
-    authRepository.onLogout(); // todo fix
-  };
-
   const onMoutedHandler = async () => {
     authRepository.getAuthFlow(`${SELFSERVICE.login}?aal=aal2`);
   }
@@ -122,7 +118,6 @@ export const useAuthenticatorStore = defineStore('authenticator', () => {
     totpHandler,
     onValidate,
     isValid,
-    onLogout,
     onMoutedHandler,
     navigateToProfile,
     getQueryParam,

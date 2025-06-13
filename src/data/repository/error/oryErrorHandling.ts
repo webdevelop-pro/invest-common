@@ -3,6 +3,7 @@ import { urlAuthenticator, urlProfile, urlSignin } from 'InvestCommon/global/lin
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 import { toasterErrorHandling } from './toasterErrorHandling';
+import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 
 type FlowType = 'login' | 'registration' | 'settings' | 'recovery' | 'verification';
 
@@ -22,6 +23,14 @@ export const oryErrorHandling = (
 ) => {
   const { toast } = useToast();
   const responseJson = error?.data.responseJson;
+  const uiError = responseJson.ui?.messages?.find((m: any) => m.type === 'error');
+  const credentialsErrorId = 4000006;
+  const isCredentialsError = uiError?.id === credentialsErrorId;
+
+  // special case for 4000006 error id
+  if (isCredentialsError) {
+    error.message = 'The provided credentials are invalid, check for spelling mistakes in your password or email address';
+  }
 
   if (!responseJson?.error?.id) {
     console.log('Ory error handling: no error id found', responseJson);
@@ -55,7 +64,7 @@ export const oryErrorHandling = (
       return;
     case 'session_refresh_required': // We need to re-authenticate to perform this action
       // window.location.href = err.response?.data.redirect_browser_to
-      authLogicStore.refreshRedirect(flowType);
+      useDialogs().showRefreshSession();
       // todo make more general
       break;
     case 'browser_location_change_required': // Ory Kratos asked us to point the user to this URL.
@@ -67,8 +76,8 @@ export const oryErrorHandling = (
         ...TOAST_OPTIONS,
         title: 'Your interaction expired, please fill out the form again.',
       });
-      authStore.fetchAuthHandler(url);
-      // resetFlow(undefined)
+      // authStore.fetchAuthHandler(url);
+      resetFlow();
       // await router.push("/" + flowType)
       break;
     case 'self_service_flow_return_to_forbidden': // the return is invalid, we need a new flow
@@ -76,6 +85,7 @@ export const oryErrorHandling = (
         ...TOAST_OPTIONS,
         title: 'The return_to address is not allowed.',
       });
+      resetFlow();
       // resetFlow(undefined)
       // await router.push("/" + flowType)
       break;
@@ -84,11 +94,13 @@ export const oryErrorHandling = (
         ...TOAST_OPTIONS,
         title: 'A security violation was detected, please fill out the form again.',
       });
+      resetFlow();
 
       // resetFlow(undefined)
       // await router.push("/" + flowType)
       break;
-    case 'security_identity_mismatch': // The requested item was intended for someone else. Let's request a new flow...
+    case 'security_identity_mismatch':
+      resetFlow();// The requested item was intended for someone else. Let's request a new flow...
 
       // resetFlow(undefined)
       // await router.push("/" + flowType)

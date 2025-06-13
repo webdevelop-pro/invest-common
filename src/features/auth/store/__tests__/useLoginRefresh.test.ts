@@ -6,7 +6,7 @@ import { setActivePinia, createPinia } from 'pinia';
 import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
 import { ref } from 'vue';
 import { SELFSERVICE } from '../type';
-import { useLoginStore } from '../useLogin';
+import { useLoginRefreshStore } from '../useLoginRefresh';
 
 // Mock environment variables
 vi.mock('InvestCommon/global', () => ({
@@ -15,11 +15,13 @@ vi.mock('InvestCommon/global', () => ({
   },
 }));
 
+// Add at the top of your file, before vi.mock:
+export const mockUpdateSession = vi.fn();
+
 // Mock all required dependencies
 vi.mock('InvestCommon/data/auth/auth.repository', () => {
   const mockGetAuthFlow = vi.fn().mockResolvedValue(undefined);
   const mockSetLogin = vi.fn().mockResolvedValue(undefined);
-  const mockGetLogin = vi.fn().mockResolvedValue(undefined);
 
   return {
     useRepositoryAuth: vi.fn(() => ({
@@ -27,36 +29,18 @@ vi.mock('InvestCommon/data/auth/auth.repository', () => {
       csrfToken: { value: 'test-csrf-token' },
       getAuthFlow: mockGetAuthFlow,
       setLogin: mockSetLogin,
-      getLogin: mockGetLogin,
       getSchemaState: ref({ data: undefined, loading: false, error: null }),
       setLoginState: ref({ data: null, error: null }),
       getAuthFlowState: ref({ error: null }),
-      getLoginState: ref({ data: null, error: null }),
     })),
   };
 });
 
-vi.mock('InvestCommon/store/useUserSession', () => {
-  const mockUpdateSession = vi.fn();
-  return {
-    useUserSession: vi.fn(() => ({
-      updateSession: mockUpdateSession,
-    })),
-  };
-});
-
-vi.mock('InvestCommon/composable/useHubspotForm', () => ({
-  useHubspotForm: vi.fn(() => ({
-    submitFormToHubspot: vi.fn().mockResolvedValue(undefined),
+vi.mock('InvestCommon/store/useUserSession', () => ({
+  useUserSession: vi.fn(() => ({
+    updateSession: mockUpdateSession,
   })),
 }));
-
-vi.mock('UiKit/helpers/general', () => {
-  const mockNavigateWithQueryParams = vi.fn();
-  return {
-    navigateWithQueryParams: mockNavigateWithQueryParams,
-  };
-});
 
 vi.mock('InvestCommon/composable/useFormValidation', () => ({
   useFormValidation: vi.fn(() => {
@@ -76,17 +60,6 @@ vi.mock('InvestCommon/composable/useFormValidation', () => ({
       };
     });
 
-    // Make model values accessible through getters
-    Object.defineProperty(model, 'email', {
-      get: () => model.value.email,
-      set: (value) => { model.value.email = value; },
-    });
-
-    Object.defineProperty(model, 'password', {
-      get: () => model.value.password,
-      set: (value) => { model.value.password = value; },
-    });
-
     return {
       model,
       validation,
@@ -96,43 +69,36 @@ vi.mock('InvestCommon/composable/useFormValidation', () => ({
   }),
 }));
 
-describe('useLogin Store', () => {
-  let store: ReturnType<typeof useLoginStore>;
+vi.mock('InvestCommon/domain/dialogs/store/useDialogs', () => ({
+  useDialogs: vi.fn(() => ({
+    isDialogRefreshSessionOpen: ref(false),
+  })),
+}));
+
+describe('useLoginRefresh Store', () => {
+  let store: ReturnType<typeof useLoginRefreshStore>;
   let mockAuthRepository: ReturnType<typeof useRepositoryAuth>;
 
   beforeEach(() => {
     setActivePinia(createPinia());
     vi.clearAllMocks();
 
-    const mockAuthRepo = {
-      flowId: { value: 'test-flow-id' },
-      csrfToken: { value: 'test-csrf-token' },
-      getAuthFlow: vi.fn().mockResolvedValue(undefined),
-      setLogin: vi.fn().mockResolvedValue(undefined),
-      getLogin: vi.fn().mockResolvedValue(undefined),
-      getSchemaState: ref({ data: undefined, loading: false, error: null }),
-      setLoginState: ref({ data: null, error: null }),
-      getAuthFlowState: ref({ error: null }),
-      getLoginState: ref({ data: { requested_aal: 'aal1' }, error: null }),
-    };
-
-    vi.mocked(useRepositoryAuth).mockReturnValue(mockAuthRepo);
-    store = useLoginStore();
+    store = useLoginRefreshStore();
     mockAuthRepository = useRepositoryAuth();
   });
 
   describe('Form Validation', () => {
     it('should validate email and password fields', async () => {
-      const store = useLoginStore();
+      const store = useLoginRefreshStore();
 
-      // Test invalid email using real email rule
+      // Test invalid email
       store.model.email = 'invalid-email';
       store.model.password = 'validPassword123!';
       await store.onValidate();
       expect(store.isValid).toBe(false);
       expect(store.validation.email.length).toBeGreaterThan(0);
 
-      // Test invalid password using real password rule
+      // Test invalid password
       store.model.email = 'valid@email.com';
       store.model.password = 'short';
       await store.onValidate();
@@ -149,7 +115,7 @@ describe('useLogin Store', () => {
     });
 
     it('should handle form validation with backend schema', async () => {
-      const store = useLoginStore();
+      const store = useLoginRefreshStore();
 
       // Mock backend schema
       const backendSchema = {
@@ -179,7 +145,7 @@ describe('useLogin Store', () => {
 
   describe('Password Login', () => {
     it('should handle successful password login', async () => {
-      const store = useLoginStore();
+      const store = useLoginRefreshStore();
       store.model = {
         email: 'test@example.com',
         password: 'validPassword123!',
@@ -196,7 +162,7 @@ describe('useLogin Store', () => {
     });
 
     it('should handle login errors', async () => {
-      const store = useLoginStore();
+      const store = useLoginRefreshStore();
       store.model = {
         email: 'test@example.com',
         password: 'validPassword123!',
@@ -210,52 +176,18 @@ describe('useLogin Store', () => {
       await store.loginPasswordHandler();
       expect(store.isLoading).toBe(false);
     });
-
-    it('should handle browser location change aal2', async () => {
-      const store = useLoginStore();
-      store.model = {
-        email: 'test@example.com',
-        password: 'validPassword123!',
-      };
-
-      const browserLocationChangeResponse = {
-        error: {
-          id: 'browser_location_change_required',
-          code: 422,
-          status: 'Unprocessable Entity',
-          reason: 'In order to complete this flow please redirect the browser to: https://id.webdevelop.biz/self-service/login/browser?aal=aal2',
-          message: 'browser location change required'
-        },
-        redirect_browser_to: 'https://id.webdevelop.biz/self-service/login/browser?aal=aal2'
-      };
-
-      const mockAuthRepo = {
-        ...useRepositoryAuth(),
-        setLoginState: { value: { error: browserLocationChangeResponse, data: null } }
-      };
-      vi.mocked(useRepositoryAuth).mockReturnValue(mockAuthRepo);
-
-      await store.loginPasswordHandler();
-      
-      expect(store.isLoading).toBe(false);
-    });
   });
 
   describe('Social Login', () => {
-    it('should handle social login', async () => {
+    it('should handle social login with existing flow ID', async () => {
       // Mock URL with flow parameter
       Object.defineProperty(window, 'location', {
         value: { search: '?flow=existing-flow-id' },
         writable: true,
       });
 
-      // Mock successful auth flow
-      mockAuthRepository.getAuthFlowState.value = { error: null };
-      mockAuthRepository.setLoginState.value = { data: null, error: null };
-
       await store.loginSocialHandler('google');
 
-      // Verify the complete social login flow
       expect(mockAuthRepository.setLogin).toHaveBeenCalledWith(
         'existing-flow-id',
         expect.objectContaining({
@@ -268,8 +200,6 @@ describe('useLogin Store', () => {
     });
 
     it('should handle social login without flow ID', async () => {
-      const store = useLoginStore();
-
       // Mock URL without flow parameter
       Object.defineProperty(window, 'location', {
         value: { search: '' },
@@ -278,9 +208,8 @@ describe('useLogin Store', () => {
 
       await store.loginSocialHandler('google');
 
-      // Verify the complete flow including flow creation
-      expect(useRepositoryAuth().getAuthFlow).toHaveBeenCalledWith(SELFSERVICE.login);
-      expect(useRepositoryAuth().setLogin).toHaveBeenCalledWith(
+      expect(mockAuthRepository.getAuthFlow).toHaveBeenCalledWith(SELFSERVICE.login, { refresh: true });
+      expect(mockAuthRepository.setLogin).toHaveBeenCalledWith(
         'test-flow-id',
         expect.objectContaining({
           provider: 'google',
@@ -292,97 +221,26 @@ describe('useLogin Store', () => {
     });
   });
 
-  describe('Navigation and Query Parameters', () => {
+  describe('Query Parameters', () => {
     it('should handle query parameters correctly', () => {
-      const store = useLoginStore();
-
       // Mock URL with multiple query parameters
       Object.defineProperty(window, 'location', {
         value: { search: '?redirect=/test&source=email' },
         writable: true,
       });
 
-      // Test query parameter retrieval
       expect(store.getQueryParam('redirect')).toBe('/test');
+      expect(store.getQueryParam('source')).toBe('email');
     });
 
-    it('should handle navigation with query parameters', () => {
-      const store = useLoginStore();
-
-      // Mock URL with query parameters
-      Object.defineProperty(window, 'location', {
-        value: { search: '?redirect=/test&source=email' },
-        writable: true,
-      });
-
-      store.onSignup();
-
-      // Verify navigation with preserved query parameters
-      expect(store.getQueryParam('redirect')).toBe('/test');
-    });
-  });
-
-  describe('onMountedHandler', () => {
-    it('should handle flow parameter and navigate to authenticator when aal2 is requested', async () => {
-      const store = useLoginStore();
-      const mockFlowId = 'test-flow-id';
-
-      // Mock URL with flow parameter
-      Object.defineProperty(window, 'location', {
-        value: { search: `?flow=${mockFlowId}` },
-        writable: true,
-      });
-
-      // Mock getLogin response with aal2
-      vi.mocked(useRepositoryAuth).mockReturnValueOnce({
-        ...useRepositoryAuth(),
-        getLoginState: { value: { data: { requested_aal: 'aal2' } } },
-      });
-
-      await store.onMountedHandler();
-
-      // Verify getLogin was called with correct flow ID
-      expect(mockAuthRepository.getLogin).toHaveBeenCalledWith(mockFlowId);
-    });
-
-    it('should not navigate when flow parameter is not present', async () => {
-      const store = useLoginStore();
-
-      // Mock URL without flow parameter
+    it('should return undefined for non-existent query parameters', () => {
+      // Mock URL with no query parameters
       Object.defineProperty(window, 'location', {
         value: { search: '' },
         writable: true,
       });
 
-      await store.onMountedHandler();
-
-      // Verify getLogin was not called
-      expect(mockAuthRepository.getLogin).not.toHaveBeenCalled();
-    });
-
-    it('should not navigate when aal2 is not requested', async () => {
-      const store = useLoginStore();
-      const mockFlowId = 'test-flow-id';
-
-      // Mock URL with flow parameter
-      Object.defineProperty(window, 'location', {
-        value: { search: `?flow=${mockFlowId}` },
-        writable: true,
-      });
-
-      // Mock getLogin response without aal2
-      const mockAuthRepo = {
-        ...useRepositoryAuth(),
-        getLoginState: { value: { data: { requested_aal: 'aal1' } } }
-      };
-      vi.mocked(useRepositoryAuth).mockReturnValue(mockAuthRepo);
-
-      await store.onMountedHandler();
-
-      // Verify getLogin was called but no navigation occurred
-      expect(mockAuthRepository.getLogin).toHaveBeenCalledWith(mockFlowId);
+      expect(store.getQueryParam('nonexistent')).toBeUndefined();
     });
   });
-
-  // add 2fa tests
-});
+}); 

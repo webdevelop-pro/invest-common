@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { onMounted } from 'vue';
 import { useAuthenticatorStore } from '../store/useAuthenticator';
+import { useLogoutStore } from '../store/useLogout';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { storeToRefs } from 'pinia';
 
 const authenticatorStore = useAuthenticatorStore();
+const logoutStore = useLogoutStore();
 const {
   model, validation, isDisabledButton,
   isLoading, schemaFrontend,
@@ -20,7 +22,7 @@ const totpHandler = () => {
   authenticatorStore.totpHandler();
 };
 const onLogout = () => {
-  authenticatorStore.onLogout();
+  logoutStore.logoutHandler();
 };
 </script>
 
@@ -74,7 +76,7 @@ const onLogout = () => {
           class="form-auth-authenticator__signup-btn"
           @click.prevent="onLogout"
         >
-          Sign Out
+          Log Out
         </VButton>
       </div>
     </div>
@@ -82,6 +84,8 @@ const onLogout = () => {
 </template>
 
 <style lang="scss">
+@use 'UiKit/styles/_variables.scss' as *;
+
 .form-auth-authenticator {
 
   &__forgot {
@@ -95,10 +99,21 @@ const onLogout = () => {
     justify-content: center;
     margin-top: 12px;
     gap: 12px;
+
+    @media screen and (width < $tablet){
+      flex-direction: column;
+      margin-top: 20px;
+    }
   }
 
   &__signup-label {
     color: $gray-80;
+  }
+
+  &__signup-btn {
+    @media screen and (width < $tablet){
+      width: 100%;
+    }
   }
 
   &__btn {
@@ -122,6 +137,10 @@ const onLogout = () => {
     padding: 40px;
     background: $white;
     box-shadow: $box-shadow-medium;
+
+    @media screen and (width < $tablet){
+      padding: 20px;
+    }
   }
 }
 </style>

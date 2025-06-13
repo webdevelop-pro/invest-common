@@ -23,7 +23,7 @@ import {
 import { useCookies } from '@vueuse/integrations/useCookies';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 import { oryErrorHandling } from 'UiKit/helpers/api/oryErrorHandling';
-import { useDialogs } from 'InvestCommon/store/useDialogs';
+import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 import { SELFSERVICE } from 'InvestCommon/helpers/enums/auth';
 import { useUserSession } from './useUserSession';
 

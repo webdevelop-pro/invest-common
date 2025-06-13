@@ -27,6 +27,7 @@ const resendHandler = async () => {
   <form
     class="VFormAuthVerification verification-form"
     novalidate
+    @submit.prevent="verificationHandler()"
   >
     <VFormGroup
       v-slot="VFormGroupProps"
@@ -54,13 +55,12 @@ const resendHandler = async () => {
     </div>
 
     <VButton
+      type="submit"
       size="large"
       block
-      data-testid="button"
       :loading="isLoading"
       :disabled="isDisabledButton"
       class="verification-form__btn"
-      @click.prevent="verificationHandler"
     >
       Verify Code
     </VButton>
@@ -83,10 +83,16 @@ const resendHandler = async () => {
 </template>
 
 <style lang="scss">
+@use 'UiKit/styles/_variables.scss' as *;
+
 .verification-form {
   padding: 40px;
   background: $white;
   box-shadow: $box-shadow-medium;
+
+  @media screen and (width < $tablet){
+      padding: 20px;
+  }
 
   &__text {
     color: $gray-70;
@@ -107,10 +113,21 @@ const resendHandler = async () => {
     justify-content: center;
     margin-top: 12px;
     gap: 12px;
+
+    @media screen and (width < $tablet){
+      flex-direction: column;
+      margin-top: 20px;
+    }
   }
 
   &__login-label {
     color: $gray-80;
+  }
+
+  &__login-btn {
+    @media screen and (width < $tablet){
+      width: 100%;
+    }
   }
 }
 </style>

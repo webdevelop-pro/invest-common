@@ -74,10 +74,16 @@ const onSubmit = () => {
 </template>
 
 <style lang="scss">
+@use 'UiKit/styles/_variables.scss' as *;
+
 .forgot-form {
   padding: 40px;
   background: $white;
   box-shadow: $box-shadow-medium;
+
+  @media screen and (width < $tablet){
+      padding: 20px;
+  }
 
   &__text {
     color: $gray-70;

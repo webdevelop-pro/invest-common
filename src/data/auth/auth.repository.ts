@@ -7,6 +7,7 @@ import { computed } from 'vue';
 import {
   ISession, IAuthFlow, ILogoutFlow, ISchema, ISuccessfullNativeAuth,
 } from './auth.type';
+import { SELFSERVICE } from 'InvestCommon/features/auth/store/type';
 
 const { KRATOS_URL } = env;
 
@@ -20,7 +21,6 @@ export const useRepositoryAuth = () => {
   const getAuthFlowState = createActionState<ILogoutFlow>();
   const getSchemaState = createActionState<ISchema>();
 
-  const getLogoutURLState = createActionState<ILogoutFlow>();
   const getLogoutState = createActionState<undefined>();
 
   const setRecoveryState = createActionState<IAuthFlow>();
@@ -30,9 +30,6 @@ export const useRepositoryAuth = () => {
 
   const getSignupState = createActionState<IAuthFlow>();
   const setSignupState = createActionState<ISuccessfullNativeAuth>();
-
-  const setSocialLoginState = createActionState<ISuccessfullNativeAuth>();
-  const setSocialSignupState = createActionState<ISuccessfullNativeAuth>();
 
   const getSession = async () => {
     try {
@@ -75,7 +72,7 @@ export const useRepositoryAuth = () => {
       return response.data;
     } catch (err) {
       setLoginState.value.error = err as Error;
-      oryErrorHandling(err, 'login', () => {}, 'Failed to login');
+      oryErrorHandling(err, 'login', getAuthFlow(SELFSERVICE.login), 'Failed to login');
       throw err;
     } finally {
       setLoginState.value.loading = false;
@@ -88,10 +85,11 @@ export const useRepositoryAuth = () => {
       getLoginState.value.error = null;
       const response = await apiClient.get(`/self-service/login/flows?id=${flowId}`);
       getLoginState.value.data = response.data;
+      console.log('getLogin response:', response.data);
       return response.data;
     } catch (err) {
       getLoginState.value.error = err as Error;
-      oryErrorHandling(err, 'login', () => {}, 'Failed to get login data');
+      oryErrorHandling(err, 'login', getAuthFlow(SELFSERVICE.login), 'Failed to get login data');
       throw err;
     } finally {
       getLoginState.value.loading = false;
@@ -106,58 +104,10 @@ export const useRepositoryAuth = () => {
       return response;
     } catch (err) {
       getLogoutState.value.error = err as Error;
-      oryErrorHandling(err, 'logout', () => {}, 'Failed to logout');
+      oryErrorHandling(err, 'logout', getAuthFlow(SELFSERVICE.logout), 'Failed to logout');
       throw err;
     } finally {
       getLogoutState.value.loading = false;
-    }
-  };
-
-  const getLogoutURL = async () => {
-    try {
-      getLogoutURLState.value.loading = true;
-      getLogoutURLState.value.error = null;
-      const response = await apiClient.get('/self-service/logout/browser');
-      getLogoutURLState.value.data = response.data;
-      return response.data;
-    } catch (err) {
-      getLogoutURLState.value.error = err as Error;
-      oryErrorHandling(err, 'logout', () => {}, 'Failed to get logout URL');
-      throw err;
-    } finally {
-      getLogoutURLState.value.loading = false;
-    }
-  };
-
-  const setSignup = async (flowId: string, body: object) => {
-    try {
-      setSignupState.value.loading = true;
-      setSignupState.value.error = null;
-      const response = await apiClient.post(`/self-service/registration?flow=${flowId}`, body);
-      setSignupState.value.data = response.data;
-      return response.data;
-    } catch (err) {
-      setSignupState.value.error = err as Error;
-      oryErrorHandling(err, 'signup', () => {}, 'Failed to signup');
-      throw err;
-    } finally {
-      setSignupState.value.loading = false;
-    }
-  };
-
-  const setRecovery = async (flowId: string, body: object) => {
-    try {
-      setRecoveryState.value.loading = true;
-      setRecoveryState.value.error = null;
-      const response = await apiClient.post(`/self-service/recovery?flow=${flowId}`, body);
-      setRecoveryState.value.data = response.data;
-      return response.data;
-    } catch (err) {
-      setRecoveryState.value.error = err as Error;
-      oryErrorHandling(err, 'recovery', () => {}, 'Failed to set recovery');
-      throw err;
-    } finally {
-      setRecoveryState.value.loading = false;
     }
   };
 
@@ -170,10 +120,45 @@ export const useRepositoryAuth = () => {
       return response.data;
     } catch (err) {
       getSignupState.value.error = err as Error;
-      oryErrorHandling(err, 'signup', () => {}, 'Failed to get signup data');
+      oryErrorHandling(err, 'signup', getAuthFlow(SELFSERVICE.registration), 'Failed to get signup data');
       throw err;
     } finally {
       getSignupState.value.loading = false;
+    }
+  };
+
+  const setSignup = async (flowId: string, body: object) => {
+    try {
+      setSignupState.value.loading = true;
+      setSignupState.value.error = null;
+      const response = await apiClient.post(`/self-service/registration?flow=${flowId}`, body);
+      setSignupState.value.data = response.data;
+      return response.data;
+    } catch (err) {
+      setSignupState.value.error = err as Error;
+      oryErrorHandling(err, 'signup', getAuthFlow(SELFSERVICE.registration), 'Failed to signup');
+      throw err;
+    } finally {
+      setSignupState.value.loading = false;
+    }
+  };
+
+  const setRecovery = async (flowId: string, body: object) => {
+      console.log('setRecovery');
+    try {
+      console.log('setRecovery');
+      setRecoveryState.value.loading = true;
+      setRecoveryState.value.error = null;
+      console.log('setRecovery3');
+      const response = await apiClient.post(`/self-service/recovery?flow=${flowId}`, body);
+      setRecoveryState.value.data = response.data;
+      return response.data;
+    } catch (err) {
+      setRecoveryState.value.error = err as Error;
+      oryErrorHandling(err, 'recovery', getAuthFlow(SELFSERVICE.recovery), 'Failed to set recovery');
+      throw err;
+    } finally {
+      setRecoveryState.value.loading = false;
     }
   };
 
@@ -199,24 +184,34 @@ export const useRepositoryAuth = () => {
     // const res = getSignupData.value?.ui || getAuthFlowState.value.data.ui;
     const res = getAuthFlowState.value.data.ui;
     if (res) {
-      const tokenItem = res.nodes.find((item) => item.attributes.name === 'csrf_token');
+      const tokenItem = res.nodes.find((item: { attributes: { name: string; }; }) => (
+        item.attributes.name === 'csrf_token'));
       return tokenItem?.attributes.value ?? '';
     }
     return '';
   });
 
+  const resetAll = () => {
+    getSessionState.value = { loading: false, error: null, data: null };
+    getAuthFlowState.value = { loading: false, error: null, data: null };
+    setRecoveryState.value = { loading: false, error: null, data: null };
+    setLoginState.value = { loading: false, error: null, data: null };
+    setSignupState.value = { loading: false, error: null, data: null };
+    getSignupState.value = { loading: false, error: null, data: null };
+    getSchemaState.value = { loading: false, error: null, data: null };
+    getLoginState.value = { loading: false, error: null, data: null };
+    getLogoutState.value = { loading: false, error: null, data: null };
+  };
+
   return {
     // States
     getSessionState,
     getAuthFlowState,
-    getLogoutURLState,
     setRecoveryState,
     setLoginState,
     setSignupState,
     getSignupState,
     getSchemaState,
-    setSocialLoginState,
-    setSocialSignupState,
     getLoginState,
     getLogoutState,
     flowId,
@@ -228,10 +223,10 @@ export const useRepositoryAuth = () => {
     setLogin,
     getLogin,
     getLogout,
-    getLogoutURL,
     setSignup,
     setRecovery,
     getSignup,
     getSchema,
+    resetAll,
   };
 };
