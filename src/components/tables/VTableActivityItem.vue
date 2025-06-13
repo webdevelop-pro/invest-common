@@ -36,7 +36,10 @@ const onDeleteSession = () => {
     </VTableCell>
     <VTableCell>
       <a
-        href="#"
+        :href="`https://ipinfo.io/${data?.ip}`"
+        target="_blank"
+        rel="noopener noreferrer"
+        :title="data?.ip"
         class="is--link-regular"
       >
         {{ data?.ip }}

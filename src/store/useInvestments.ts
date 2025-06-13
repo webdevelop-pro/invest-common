@@ -58,10 +58,10 @@ export const useInvestmentsStore = defineStore('investments', () => {
     isGetInvestOneLoading.value = false;
   };
 
-  const setInvest = async (slug: string, sharesCount: number) => {
+  const setInvest = async (slug: string, profileId: string, sharesCount: number) => {
     isGetInvestLoading.value = true;
     isGetInvestError.value = false;
-    const response = await fetchSetInvest(slug, sharesCount).catch((error: Response) => {
+    const response = await fetchSetInvest(slug, profileId, sharesCount).catch((error: Response) => {
       isGetInvestError.value = true;
       generalErrorHandling(error);
     });

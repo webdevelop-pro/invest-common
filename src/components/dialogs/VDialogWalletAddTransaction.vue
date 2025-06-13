@@ -38,7 +38,7 @@ const titile = ref((isTypeDeposit.value ? 'Add Funds' : 'Withdraw'));
       <FormWalletAddTransaction
         :transaction-type="transactionType"
         class="is--margin-top-20"
-        @cancel="open = false"
+        @close="open = false"
       />
     </VDialogContent>
   </VDialog>
