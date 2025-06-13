@@ -1,13 +1,13 @@
+import { setActivePinia, createPinia } from 'pinia';
+import { toasterErrorHandling } from 'InvestCommon/data/repository/error/toasterErrorHandling';
 import {
   describe, it, expect, beforeEach, vi,
 } from 'vitest';
-import { ApiClient } from 'UiKit/helpers/api/apiClient';
-import { setActivePinia, createPinia } from 'pinia';
-import { toasterErrorHandling } from 'UiKit/helpers/api/toasterErrorHandling';
+import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import { useRepositoryNotifications } from '../notifications.repository';
 
 // Mock ApiClient
-vi.mock('UiKit/helpers/api/apiClient', () => ({
+vi.mock('InvestCommon/data/service/apiClient', () => ({
   ApiClient: vi.fn().mockImplementation(() => ({
     get: vi.fn().mockImplementation(() => Promise.resolve({ data: [] })),
     put: vi.fn().mockImplementation(() => Promise.resolve({ data: {} })),
@@ -15,7 +15,7 @@ vi.mock('UiKit/helpers/api/apiClient', () => ({
 }));
 
 // Mock toaster error handling
-vi.mock('UiKit/helpers/api/toasterErrorHandling', () => ({
+vi.mock('InvestCommon/data/repository/error/toasterErrorHandling', () => ({
   toasterErrorHandling: vi.fn(),
 }));
 

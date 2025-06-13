@@ -5,7 +5,7 @@ import VDropdown from 'UiKit/components/VDropdown.vue';
 import { storeToRefs } from 'pinia';
 import VAvatar from 'UiKit/components/VAvatar.vue';
 import { VDropdownMenuItem } from 'UiKit/components/Base/VDropdownMenu';
-import { useDialogs } from 'InvestCommon/store/useDialogs';
+import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import NotificationsSidebarButton from 'InvestCommon/features/notifications/VNotificationsSidebarButton.vue';
 import env from 'InvestCommon/global';

@@ -51,6 +51,14 @@ const isLoading = computed(() => isGetUserLoading.value);
 const isSignUpPage = computed(() => path.value.includes('signup'));
 const isSignInPage = computed(() => path.value.includes('signin'));
 const isRecoveryPage = computed(() => path.value.includes('forgot'));
+const isCheckEmailPage = computed(() => path.value.includes('check-email'));
+const isAuthenticatorPage = computed(() => path.value.includes('authenticator'));
+
+const isAuthFlowPage = computed(() => (isRecoveryPage.value || isCheckEmailPage.value));
+
+const showNavigation = computed(() => (
+  !isSignInPage.value && !isSignUpPage.value && !isRecoveryPage.value
+  && !isCheckEmailPage.value && !isAuthenticatorPage.value));
 const queryParams = computed(() => new URLSearchParams(window?.location?.search));
 // if there is flow in url it means it is from sso
 let queryFlow;
@@ -72,17 +80,17 @@ watchEffect(() => {
 <template>
   <VHeader
     v-model="isMobileSidebarOpen"
-    :show-navigation="!isSignInPage && !isSignUpPage && !isRecoveryPage"
+    :show-navigation="showNavigation"
     :path="path"
     class="VHeaderInvest v-header-invest"
   >
     <div class="v-header-invest__wrap">
       <span
-        v-if="!queryFlow && !userLoggedIn && (isSignInPage || isRecoveryPage || isSignUpPage)"
+        v-if="!queryFlow && !userLoggedIn && !showNavigation && !isAuthenticatorPage"
         class="v-header-invest__auth-text is--body"
       >
         <span
-          v-if="!userLoggedIn && !isSignInPage && !isRecoveryPage"
+          v-if="!userLoggedIn && !isSignInPage && !isAuthFlowPage"
         >
           Already have an account?
         </span>
@@ -100,7 +108,7 @@ watchEffect(() => {
         class="v-header-invest-btns__skeleton"
       />
       <div
-        v-else-if="!userLoggedIn"
+        v-else-if="!userLoggedIn && !isAuthenticatorPage"
         class="v-header-invest-btns"
         :class="{
           'v-header-invest-sign-in': isSignInPage,
@@ -108,7 +116,7 @@ watchEffect(() => {
         }"
       >
         <VButton
-          v-if="!queryFlow && !userLoggedIn && !isSignInPage && !isRecoveryPage"
+          v-if="!queryFlow && !userLoggedIn && !isSignInPage && !isAuthFlowPage"
           class="v-header-invest-btns__sign-in"
           :variant="!isSignUpPage ? 'link' : null"
           @click="signInHandler"

@@ -2,7 +2,7 @@
 import { computed, PropType } from 'vue';
 import { useNotificationsStore } from 'InvestCommon/store/useNotifications';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
-import { useDialogs } from 'InvestCommon/store/useDialogs';
+import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 import { storeToRefs } from 'pinia';
 import {
   VNavigationMenuList, VNavigationMenuItem, VNavigationMenuLink, VNavigationMenu,

@@ -1,13 +1,13 @@
 import {
   describe, it, expect, beforeEach, vi,
 } from 'vitest';
-import { ApiClient } from 'UiKit/helpers/api/apiClient';
-import { toasterErrorHandling } from 'UiKit/helpers/api/toasterErrorHandling';
+import { ApiClient } from 'InvestCommon/data/service/apiClient';
+import { toasterErrorHandling } from 'InvestCommon/data/repository/error/toasterErrorHandling';
 import { AccreditationTypes } from 'InvestCommon/types/api/invest';
 import { useRepositoryAccreditation } from '../accreditation.repository';
 
 // Mock ApiClient
-vi.mock('UiKit/helpers/api/apiClient', () => ({
+vi.mock('InvestCommon/data/service/apiClient', () => ({
   ApiClient: vi.fn().mockImplementation(() => ({
     get: vi.fn().mockImplementation(() => Promise.resolve({ data: [] })),
     post: vi.fn().mockImplementation(() => Promise.resolve({ data: {} })),
@@ -15,7 +15,7 @@ vi.mock('UiKit/helpers/api/apiClient', () => ({
 }));
 
 // Mock toaster error handling
-vi.mock('UiKit/helpers/api/toasterErrorHandling', () => ({
+vi.mock('InvestCommon/data/repository/error/toasterErrorHandling', () => ({
   toasterErrorHandling: vi.fn(),
 }));
 
@@ -193,7 +193,7 @@ describe('Accreditation Repository', () => {
     await expect(repository.createEscrow(123, 456)).rejects.toThrow(mockError);
     expect(repository.error.value).toBe(mockError);
     expect(repository.isLoadingCreateEscrow.value).toBe(false);
-    expect(toasterErrorHandling).toHaveBeenCalledWith(expect.any(Object), 'Failed to create escrow');
+    expect(toasterErrorHandling).toHaveBeenCalledWith(mockError, 'Failed to create escrow');
   });
 
   it('should verify loading states during operations', async () => {

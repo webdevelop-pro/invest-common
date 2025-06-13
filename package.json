@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build-vue": "vue-tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
   },
   "dependencies": {
     "@pinia/testing": "^0.1.7",
