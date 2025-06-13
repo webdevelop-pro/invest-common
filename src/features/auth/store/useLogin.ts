@@ -67,11 +67,6 @@ export const useLoginStore = defineStore('login', () => {
     return navigateWithQueryParams(urlSignup, params);
   };
 
-  const navigateToProfile = () => {
-    const redirectUrl = getQueryParam('redirect') || urlProfile();
-    return navigateWithQueryParams(redirectUrl);
-  };
-
   // Form validation
   const validateForm = () => {
     onValidate();
@@ -87,7 +82,7 @@ export const useLoginStore = defineStore('login', () => {
     const { submitFormToHubspot } = useHubspotForm(HUBSPOT_FORM_ID);
     if (model.email) submitFormToHubspot({ email: model.email });
     userSessionStore.updateSession(session);
-    navigateToProfile();
+    navigateWithQueryParams(getQueryParam('redirect') || urlProfile());
   };
 
   const loginPasswordHandler = async () => {
