@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-function-type */
 import { ref } from 'vue';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 

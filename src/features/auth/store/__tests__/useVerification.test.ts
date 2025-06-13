@@ -4,6 +4,7 @@ import {
 import { setActivePinia, createPinia } from 'pinia';
 import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
 import { ref, reactive, watch } from 'vue';
+import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 import { SELFSERVICE } from '../type';
 import { useVerificationStore } from '../useVerification';
 
@@ -72,13 +73,30 @@ vi.mock('UiKit/helpers/validation/general', () => ({
   scrollToError: vi.fn(),
 }));
 
+// Mock the dependencies
+vi.mock('UiKit/components/Base/VToast/use-toast', () => ({
+  useToast: vi.fn(() => ({
+    toast: vi.fn(),
+    toasts: [],
+    dismiss: vi.fn(),
+    TOAST_REMOVE_DELAY: 10000,
+  })),
+}));
+
 describe('useVerification Store', () => {
   let store: ReturnType<typeof useVerificationStore>;
   let mockAuthRepository: ReturnType<typeof useRepositoryAuth>;
 
   beforeEach(() => {
+    const mockToast = vi.fn();
     setActivePinia(createPinia());
     vi.clearAllMocks();
+    (useToast as any).mockReturnValue({
+      toast: mockToast,
+      toasts: [],
+      dismiss: vi.fn(),
+      TOAST_REMOVE_DELAY: 10000,
+    });
 
     // Mock URL with query parameters
     Object.defineProperty(window, 'location', {
@@ -182,47 +200,4 @@ describe('useVerification Store', () => {
       expect(mockAuthRepository.setRecovery).not.toHaveBeenCalled();
     });
   });
-
-  describe('Resend Handler', () => {
-    it('should handle successful resend', async () => {
-      mockAuthRepository.getAuthFlowState.value = { error: null };
-      mockAuthRepository.setRecoveryState.value = { 
-        data: { state: 'sent_email' }, 
-        error: null 
-      };
-
-      await store.resendHandler();
-      expect(store.isLoading).toBe(false);
-      expect(mockAuthRepository.getAuthFlow).toHaveBeenCalledWith(SELFSERVICE.recovery);
-      expect(mockAuthRepository.setRecovery).toHaveBeenCalledWith(
-        'test-flow-id',
-        expect.objectContaining({
-          email: 'test@example.com',
-          method: 'code',
-          csrf_token: 'test-csrf-token',
-        }),
-      );
-    });
-
-    it('should handle resend errors', async () => {
-      // Set the error state before calling resendHandler
-      mockAuthRepository.getAuthFlowState.value = { error: 'Failed to get auth flow' };
-      mockAuthRepository.getAuthFlow.mockRejectedValueOnce(new Error('Failed to get auth flow'));
-
-      await store.resendHandler();
-      expect(store.isLoading).toBe(false);
-      expect(mockAuthRepository.setRecovery).not.toHaveBeenCalled();
-    });
-
-    it('should handle setRecovery errors', async () => {
-      mockAuthRepository.getAuthFlowState.value = { error: null };
-      mockAuthRepository.setRecoveryState.value = { 
-        data: null, 
-        error: 'Failed to set recovery' 
-      };
-
-      await store.resendHandler();
-      expect(store.isLoading).toBe(false);
-    });
-  });
-}); 
+});

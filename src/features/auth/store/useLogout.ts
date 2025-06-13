@@ -1,18 +1,17 @@
 import { ref } from 'vue';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
-import { SELFSERVICE } from './type';
 import { useGlobalLoader } from 'InvestCommon/store/useGlobalLoader';
 import { redirectAfterLogout } from 'InvestCommon/domain/redirects/redirectAfterLogout';
 import { resetAllData } from 'InvestCommon/domain/resetAllData';
+import { SELFSERVICE } from './type';
 
 export const useLogoutStore = defineStore('logout', () => {
   const authRepository = useRepositoryAuth();
-  const { setLogoutState, getAuthFlowState } = storeToRefs(authRepository);
+  const { getAuthFlowState } = storeToRefs(authRepository);
 
   const isLoading = ref(false);
   const token = ref('');
-
 
   // Logout handlers
   const handleLogoutSuccess = () => {

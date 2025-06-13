@@ -4,6 +4,7 @@ import { useVerificationStore } from '../store/useVerification';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
+import { urlForgot } from 'InvestCommon/global/links';
 
 const verificationStore = useVerificationStore();
 const {
@@ -17,9 +18,6 @@ const {
 
 const verificationHandler = async () => {
   verificationStore.verificationHandler();
-};
-const resendHandler = async () => {
-  verificationStore.resendHandler();
 };
 </script>
 
@@ -73,8 +71,9 @@ const resendHandler = async () => {
       <VButton
         variant="link"
         size="large"
+        as="a"
+        :href="urlForgot"
         class="verification-form__login-btn"
-        @click.prevent="resendHandler"
       >
         Resend Code
       </VButton>

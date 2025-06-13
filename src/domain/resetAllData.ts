@@ -1,4 +1,3 @@
-
 import { useUserSession } from 'InvestCommon/store/useUserSession';
 import { useCookies } from '@vueuse/integrations/useCookies';
 import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
@@ -18,24 +17,24 @@ import { useFilerStore } from 'InvestCommon/store/useFiler';
 
 function clearAllCookies() {
   const cookies = useCookies();
-    Object.keys(cookies.getAll()).forEach((key) => cookies.remove(key));
-  }
+  Object.keys(cookies.getAll()).forEach((key) => cookies.remove(key));
+}
 
 export const resetAllData = () => {
-    useFundingStore().resetAll();
-    useProfileWalletTransactionStore().resetAll();
-    useProfileWalletStore().resetAll();
-    useProfileEvmWalletTransactionStore().resetAll();
-    useProfileEvmWalletStore().resetAll();
-    useUserProfilesStore().resetAll();
-    useUsersStore().resetAll();
-    usePlaidStore().resetAll();
-    useInvestmentsStore().resetAll();
-    useAccreditationStore().resetAll();
-    useAuthStore().resetAll();
-    useNotificationsStore().resetAll();
-    useFilerStore().resetAll();
-    clearAllCookies();
-    useUserSession().resetAll();
-    useRepositoryAuth().resetAll();
-}
+  useFundingStore().resetAll();
+  useProfileWalletTransactionStore().resetAll();
+  useProfileWalletStore().resetAll();
+  useProfileEvmWalletTransactionStore().resetAll();
+  useProfileEvmWalletStore().resetAll();
+  useUserProfilesStore().resetAll();
+  useUsersStore().resetAll();
+  usePlaidStore().resetAll();
+  useInvestmentsStore().resetAll();
+  useAccreditationStore().resetAll();
+  useAuthStore().resetAll();
+  useNotificationsStore().resetAll();
+  useFilerStore().resetAll();
+  clearAllCookies();
+  useUserSession().resetAll();
+  useRepositoryAuth().resetAll();
+};

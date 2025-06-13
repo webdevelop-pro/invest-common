@@ -22,7 +22,9 @@ const HUBSPOT_FORM_ID = '07463465-7f03-42d2-a85e-40cf8e29969d';
 
 export const useLoginStore = defineStore('login', () => {
   const authRepository = useRepositoryAuth();
-  const { getSchemaState, setLoginState, getAuthFlowState, getLoginState } = storeToRefs(authRepository);
+  const {
+    getSchemaState, setLoginState, getAuthFlowState, getLoginState,
+  } = storeToRefs(authRepository);
   const userSessionStore = useUserSession();
 
   // Query parameters handling
@@ -150,7 +152,7 @@ export const useLoginStore = defineStore('login', () => {
         navigateWithQueryParams(urlAuthenticator);
       }
     }
-  }
+  };
 
   return {
     queryParams,

@@ -6,14 +6,20 @@ import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
 import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { scrollToError } from 'UiKit/helpers/validation/general';
-import { SELFSERVICE } from './type';
 import { codeRule, errorMessageRule } from 'UiKit/helpers/validation/rules';
-import { urlCheckEmail } from 'InvestCommon/global/links';
-import { navigateWithQueryParams } from 'UiKit/helpers/general';
+import { useToast } from 'UiKit/components/Base/VToast/use-toast';
+import { SELFSERVICE } from './type';
 
 type FormModelVerification = {
   code: string;
 }
+const { toast } = useToast();
+
+const TOAST_OPTIONS = {
+  title: 'Something went wrong',
+  description: 'Please try again',
+  variant: 'error',
+};
 
 export const useVerificationStore = defineStore('verification', () => {
   const authRepository = useRepositoryAuth();
@@ -67,25 +73,8 @@ export const useVerificationStore = defineStore('verification', () => {
 
   // Verification handlers
   const verificationHandler = async () => {
-    console.log('Verification handler called');
     if (!validateForm()) return;
 
-    isLoading.value = true;
-    try {
-      console.log('setRecovery');
-      await authRepository.setRecovery(flowId.value, {
-        code: model.code,
-        method: 'code',
-        csrf_token: authRepository.csrfToken.value,
-      });
-    } catch (error) {
-      console.error('Verification failed:', error);
-    } finally {
-      isLoading.value = false;
-    }
-  };
-
-  const resendHandler = async () => {
     isLoading.value = true;
     try {
       await authRepository.getAuthFlow(SELFSERVICE.recovery);
@@ -93,23 +82,31 @@ export const useVerificationStore = defineStore('verification', () => {
         isLoading.value = false;
         return;
       }
-
-      await authRepository.setRecovery(authRepository.flowId.value, {
-        email: email.value,
+      await authRepository.setRecovery(flowId.value, {
+        code: model.code,
         method: 'code',
         csrf_token: authRepository.csrfToken.value,
       });
 
-      if (setRecoveryState.value.error) {
-        isLoading.value = false;
-        return;
-      }
+      const uiMessage = setRecoveryState.value.data.ui?.messages?.find((m: any) => m.type === 'error')?.text;
+      const uiNodeMessage = setRecoveryState.value.data.ui?.nodes?.find((node: any) => node.messages?.some((m: any) => m.type === 'error'))?.messages?.find((m: any) => m.type === 'error')?.text;
+      
+      // Check if there are any error messages in the UI structure
+      const hasErrorMessages = setRecoveryState.value.data.ui?.messages?.some((m: any) => m.type === 'error');
+      const hasErrorNodes = setRecoveryState.value.data.ui?.nodes?.some((node: any) => 
+        node.messages?.some((m: any) => m.type === 'error')
+      );
 
-      if (setRecoveryState.value.data.state === 'sent_email') {
-        navigateWithQueryParams(urlCheckEmail, { email : email.value, flowId: authRepository.flowId.value });
+      if (hasErrorMessages || hasErrorNodes) {
+        const errorMessage = uiMessage || uiNodeMessage || TOAST_OPTIONS.description;
+        toast({
+          title: 'Failed to set recovery',
+          description: errorMessage,
+          variant: 'error',
+        });
       }
     } catch (error) {
-      console.error('Resend verification code failed:', error);
+      console.error('Recovery failed:', error);
     } finally {
       isLoading.value = false;
     }
@@ -125,7 +122,6 @@ export const useVerificationStore = defineStore('verification', () => {
     isDisabledButton,
     setRecoveryState,
     verificationHandler,
-    resendHandler,
     onValidate,
     isValid,
     getQueryParam,

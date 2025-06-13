@@ -2,12 +2,12 @@ import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import { oryErrorHandling } from 'InvestCommon/data/repository/error/oryErrorHandling';
 import { toasterErrorHandling } from 'InvestCommon/data/repository/error/toasterErrorHandling';
 import env from 'InvestCommon/global';
+import { SELFSERVICE } from 'InvestCommon/features/auth/store/type';
 import { createActionState } from 'InvestCommon/data/repository/repository';
 import { computed } from 'vue';
 import {
   ISession, IAuthFlow, ILogoutFlow, ISchema, ISuccessfullNativeAuth,
 } from './auth.type';
-import { SELFSERVICE } from 'InvestCommon/features/auth/store/type';
 
 const { KRATOS_URL } = env;
 
@@ -144,12 +144,9 @@ export const useRepositoryAuth = () => {
   };
 
   const setRecovery = async (flowId: string, body: object) => {
-      console.log('setRecovery');
     try {
-      console.log('setRecovery');
       setRecoveryState.value.loading = true;
       setRecoveryState.value.error = null;
-      console.log('setRecovery3');
       const response = await apiClient.post(`/self-service/recovery?flow=${flowId}`, body);
       setRecoveryState.value.data = response.data;
       return response.data;

@@ -1,8 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import {
+  describe, it, expect, vi, beforeEach,
+} from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
-import { useForgotStore } from '../useForgot';
 import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
 import { ref } from 'vue';
+import { useForgotStore } from '../useForgot';
 
 // Mock all required dependencies
 vi.mock('InvestCommon/data/auth/auth.repository', () => {
@@ -44,7 +46,7 @@ describe('useForgot Store', () => {
       store.model.email = 'invalid-email';
       await store.onValidate();
       expect(store.isValid).toBe(false);
-      
+
       // Test valid email
       store.model.email = 'test@example.com';
       await store.onValidate();
@@ -79,12 +81,12 @@ describe('useForgot Store', () => {
       store.model.email = '';
       await store.onValidate();
       expect(store.isDisabledButton).toBe(true);
-      
+
       // Set valid email
       store.model.email = 'test@example.com';
       await store.onValidate();
       expect(store.isDisabledButton).toBe(false);
-      
+
       // Set loading state
       store.isLoading = true;
       expect(store.isDisabledButton).toBe(true);
@@ -95,22 +97,22 @@ describe('useForgot Store', () => {
     it('should not proceed if form validation fails', async () => {
       store.model.email = 'invalid-email';
       await store.recoveryHandler();
-      
+
       expect(mockAuthRepository.getAuthFlow).not.toHaveBeenCalled();
       expect(store.isLoading).toBe(false);
     });
 
     it('should handle successful recovery flow', async () => {
       store.model.email = 'test@example.com';
-      
+
       // Mock successful recovery
-      mockAuthRepository.setRecoveryState.value = { 
+      mockAuthRepository.setRecoveryState.value = {
         data: { state: 'sent_email' },
-        error: null 
+        error: null,
       };
 
       await store.recoveryHandler();
-      
+
       expect(mockAuthRepository.getAuthFlow).toHaveBeenCalledWith('/self-service/recovery/browser');
       expect(mockAuthRepository.setRecovery).toHaveBeenCalledWith('test-flow-id', {
         email: 'test@example.com',
@@ -122,30 +124,30 @@ describe('useForgot Store', () => {
 
     it('should handle auth flow error', async () => {
       store.model.email = 'test@example.com';
-      
+
       // Mock auth flow error
       mockAuthRepository.getAuthFlowState.value = { error: 'Auth flow error' };
 
       await store.recoveryHandler();
-      
+
       expect(mockAuthRepository.getAuthFlow).toHaveBeenCalled();
       expect(store.isLoading).toBe(false);
     });
 
     it('should handle recovery error', async () => {
       store.model.email = 'test@example.com';
-      
+
       // Mock recovery error
-      mockAuthRepository.setRecoveryState.value = { 
+      mockAuthRepository.setRecoveryState.value = {
         data: null,
-        error: 'Recovery error' 
+        error: 'Recovery error',
       };
 
       await store.recoveryHandler();
-      
+
       expect(mockAuthRepository.getAuthFlow).toHaveBeenCalled();
       expect(mockAuthRepository.setRecovery).toHaveBeenCalled();
       expect(store.isLoading).toBe(false);
     });
   });
-}); 
+});

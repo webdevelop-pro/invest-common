@@ -7,10 +7,10 @@ import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { scrollToError } from 'UiKit/helpers/validation/general';
 import { useUserSession } from 'InvestCommon/store/useUserSession';
-import { SELFSERVICE } from './type';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import { urlProfile } from 'InvestCommon/global/links';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
+import { SELFSERVICE } from './type';
 
 type FormModelTOTP = {
     totp_code: number;
@@ -20,7 +20,7 @@ const HUBSPOT_FORM_ID = '07463465-7f03-42d2-a85e-40cf8e29969d';
 
 export const useAuthenticatorStore = defineStore('authenticator', () => {
   const authRepository = useRepositoryAuth();
-  const { getSchemaState, setLoginState, getAuthFlowState } = storeToRefs(authRepository);
+  const { getSchemaState, setLoginState } = storeToRefs(authRepository);
   const userSessionStore = useUserSession();
 
   // Query parameters handling
@@ -71,10 +71,10 @@ export const useAuthenticatorStore = defineStore('authenticator', () => {
   };
 
   const handleSuccess = (session: any) => {
-      const { submitFormToHubspot } = useHubspotForm(HUBSPOT_FORM_ID);
-      if (model.email) submitFormToHubspot({ email: model.email });
-      userSessionStore.updateSession(session);
-      navigateToProfile();
+    const { submitFormToHubspot } = useHubspotForm(HUBSPOT_FORM_ID);
+    if (model.email) submitFormToHubspot({ email: model.email });
+    userSessionStore.updateSession(session);
+    navigateToProfile();
   };
 
   const totpHandler = async () => {
@@ -105,7 +105,7 @@ export const useAuthenticatorStore = defineStore('authenticator', () => {
 
   const onMoutedHandler = async () => {
     authRepository.getAuthFlow(`${SELFSERVICE.login}?aal=aal2`);
-  }
+  };
 
   return {
     isLoading,
@@ -126,4 +126,4 @@ export const useAuthenticatorStore = defineStore('authenticator', () => {
 
 if (import.meta.hot) {
   import.meta.hot.accept(acceptHMRUpdate(useAuthenticatorStore, import.meta.hot));
-} 
+}

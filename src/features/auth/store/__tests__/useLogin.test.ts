@@ -224,19 +224,19 @@ describe('useLogin Store', () => {
           code: 422,
           status: 'Unprocessable Entity',
           reason: 'In order to complete this flow please redirect the browser to: https://id.webdevelop.biz/self-service/login/browser?aal=aal2',
-          message: 'browser location change required'
+          message: 'browser location change required',
         },
-        redirect_browser_to: 'https://id.webdevelop.biz/self-service/login/browser?aal=aal2'
+        redirect_browser_to: 'https://id.webdevelop.biz/self-service/login/browser?aal=aal2',
       };
 
       const mockAuthRepo = {
         ...useRepositoryAuth(),
-        setLoginState: { value: { error: browserLocationChangeResponse, data: null } }
+        setLoginState: { value: { error: browserLocationChangeResponse, data: null } },
       };
       vi.mocked(useRepositoryAuth).mockReturnValue(mockAuthRepo);
 
       await store.loginPasswordHandler();
-      
+
       expect(store.isLoading).toBe(false);
     });
   });
@@ -373,7 +373,7 @@ describe('useLogin Store', () => {
       // Mock getLogin response without aal2
       const mockAuthRepo = {
         ...useRepositoryAuth(),
-        getLoginState: { value: { data: { requested_aal: 'aal1' } } }
+        getLoginState: { value: { data: { requested_aal: 'aal1' } } },
       };
       vi.mocked(useRepositoryAuth).mockReturnValue(mockAuthRepo);
 

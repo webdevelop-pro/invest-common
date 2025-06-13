@@ -47,8 +47,6 @@ export const useForgotStore = defineStore('forgot', () => {
   const isLoading = ref(false);
   const isDisabledButton = computed(() => !isValid.value || isLoading.value);
 
-
-
   // Form validation
   const validateForm = () => {
     onValidate();
@@ -82,7 +80,7 @@ export const useForgotStore = defineStore('forgot', () => {
       }
 
       if (setRecoveryState.value.data.state === 'sent_email') {
-        navigateWithQueryParams(urlCheckEmail, { email : model.email, flowId: authRepository.flowId.value });
+        navigateWithQueryParams(urlCheckEmail, { email: model.email, flowId: authRepository.flowId.value });
       }
     } catch (error) {
       console.error('Recovery failed:', error);
@@ -90,7 +88,6 @@ export const useForgotStore = defineStore('forgot', () => {
       isLoading.value = false;
     }
   };
-
 
   return {
     isLoading,

@@ -2,31 +2,29 @@ import {
   computed, nextTick, ref, toRaw,
 } from 'vue';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
-import { navigateWithQueryParams } from 'UiKit/helpers/general';
-import { urlSignup, urlProfile } from 'InvestCommon/global/links';
 import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
 import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { emailRule, errorMessageRule, passwordRule } from 'UiKit/helpers/validation/rules';
 import { scrollToError } from 'UiKit/helpers/validation/general';
-import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
+// import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import { useUserSession } from 'InvestCommon/store/useUserSession';
-import { SELFSERVICE } from './type';
 import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
+import { SELFSERVICE } from './type';
 
 type FormModelSignIn = {
   email: string;
   password: string;
 }
 
-const HUBSPOT_FORM_ID = '07463465-7f03-42d2-a85e-40cf8e29969d';
+// const HUBSPOT_FORM_ID = '07463465-7f03-42d2-a85e-40cf8e29969d';
 
 export const useLoginRefreshStore = defineStore('loginRefresh', () => {
   const authRepository = useRepositoryAuth();
   const { getSchemaState, setLoginState, getAuthFlowState } = storeToRefs(authRepository);
   const userSessionStore = useUserSession();
-const useDialogsStore = useDialogs();
-const { isDialogRefreshSessionOpen } = storeToRefs(useDialogsStore);
+  const useDialogsStore = useDialogs();
+  const { isDialogRefreshSessionOpen } = storeToRefs(useDialogsStore);
 
   // Query parameters handling
   const queryParams = computed(() => {

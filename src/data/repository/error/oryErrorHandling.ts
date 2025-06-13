@@ -2,8 +2,8 @@ import { IErrorGeneric } from 'InvestCommon/types/api/auth';
 import { urlAuthenticator, urlProfile, urlSignin } from 'InvestCommon/global/links';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
-import { toasterErrorHandling } from './toasterErrorHandling';
 import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
+import { toasterErrorHandling } from './toasterErrorHandling';
 
 type FlowType = 'login' | 'registration' | 'settings' | 'recovery' | 'verification';
 
@@ -29,6 +29,7 @@ export const oryErrorHandling = (
 
   // special case for 4000006 error id
   if (isCredentialsError) {
+    // eslint-disable-next-line no-param-reassign
     error.message = 'The provided credentials are invalid, check for spelling mistakes in your password or email address';
   }
 

@@ -1,8 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { oryErrorHandling } from './oryErrorHandling';
+import {
+  describe, it, expect, vi, beforeEach,
+} from 'vitest';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
+import { oryErrorHandling } from './oryErrorHandling';
 
 // Mock the dependencies
 vi.mock('UiKit/components/Base/VToast/use-toast', () => ({
@@ -10,8 +12,8 @@ vi.mock('UiKit/components/Base/VToast/use-toast', () => ({
     toast: vi.fn(),
     toasts: [],
     dismiss: vi.fn(),
-    TOAST_REMOVE_DELAY: 10000
-  }))
+    TOAST_REMOVE_DELAY: 10000,
+  })),
 }));
 
 vi.mock('InvestCommon/domain/dialogs/store/useDialogs', () => ({
@@ -25,7 +27,7 @@ vi.mock('UiKit/helpers/general', () => ({
 vi.mock('InvestCommon/global/links', () => ({
   urlSignin: 'urlSignin',
   urlProfile: 'urlProfile',
-  urlAuthenticator: 'urlAuthenticator'
+  urlAuthenticator: 'urlAuthenticator',
 }));
 
 describe('oryErrorHandling', () => {
@@ -35,17 +37,17 @@ describe('oryErrorHandling', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (useToast as any).mockReturnValue({ 
+    (useToast as any).mockReturnValue({
       toast: mockToast,
       toasts: [],
       dismiss: vi.fn(),
-      TOAST_REMOVE_DELAY: 10000
+      TOAST_REMOVE_DELAY: 10000,
     });
     (useDialogs as any).mockReturnValue({ showRefreshSession: mockShowRefreshSession });
     // Reset window.location.href before each test
     Object.defineProperty(window, 'location', {
       value: { href: 'http://localhost' },
-      writable: true
+      writable: true,
     });
   });
 
@@ -54,10 +56,10 @@ describe('oryErrorHandling', () => {
       data: {
         responseJson: {
           ui: {
-            messages: [{ type: 'error', id: 4000006 }]
-          }
-        }
-      }
+            messages: [{ type: 'error', id: 4000006 }],
+          },
+        },
+      },
     };
 
     oryErrorHandling(error as any, 'login', mockResetFlow, 'test');
@@ -68,9 +70,9 @@ describe('oryErrorHandling', () => {
     const error = {
       data: {
         responseJson: {
-          error: { id: 'session_already_available' }
-        }
-      }
+          error: { id: 'session_already_available' },
+        },
+      },
     };
 
     oryErrorHandling(error as any, 'login', mockResetFlow, 'test');
@@ -82,9 +84,9 @@ describe('oryErrorHandling', () => {
       data: {
         responseJson: {
           error: { id: 'session_aal2_required' },
-          redirect_browser_to: 'http://example.com/2fa'
-        }
-      }
+          redirect_browser_to: 'http://example.com/2fa',
+        },
+      },
     };
 
     oryErrorHandling(error as any, 'settings', mockResetFlow, 'test');
@@ -97,9 +99,9 @@ describe('oryErrorHandling', () => {
     const error = {
       data: {
         responseJson: {
-          error: { id: 'session_aal2_required' }
-        }
-      }
+          error: { id: 'session_aal2_required' },
+        },
+      },
     };
 
     oryErrorHandling(error as any, 'login', mockResetFlow, 'test');
@@ -110,9 +112,9 @@ describe('oryErrorHandling', () => {
     const error = {
       data: {
         responseJson: {
-          error: { id: 'session_refresh_required' }
-        }
-      }
+          error: { id: 'session_refresh_required' },
+        },
+      },
     };
 
     oryErrorHandling(error as any, 'login', mockResetFlow, 'test');
@@ -124,9 +126,9 @@ describe('oryErrorHandling', () => {
       data: {
         responseJson: {
           error: { id: 'browser_location_change_required' },
-          redirect_browser_to: 'http://example.com/aal2'
-        }
-      }
+          redirect_browser_to: 'http://example.com/aal2',
+        },
+      },
     };
 
     oryErrorHandling(error as any, 'login', mockResetFlow, 'test');
@@ -138,9 +140,9 @@ describe('oryErrorHandling', () => {
       data: {
         responseJson: {
           error: { id: 'browser_location_change_required' },
-          redirect_browser_to: 'http://example.com/other'
-        }
-      }
+          redirect_browser_to: 'http://example.com/other',
+        },
+      },
     };
 
     oryErrorHandling(error as any, 'login', mockResetFlow, 'test');
@@ -151,9 +153,9 @@ describe('oryErrorHandling', () => {
     const error = {
       data: {
         responseJson: {
-          error: { id: 'self_service_flow_expired' }
-        }
-      }
+          error: { id: 'self_service_flow_expired' },
+        },
+      },
     };
 
     oryErrorHandling(error as any, 'login', mockResetFlow, 'test');
@@ -169,9 +171,9 @@ describe('oryErrorHandling', () => {
     const error = {
       data: {
         responseJson: {
-          error: { id: 'self_service_flow_return_to_forbidden' }
-        }
-      }
+          error: { id: 'self_service_flow_return_to_forbidden' },
+        },
+      },
     };
 
     oryErrorHandling(error as any, 'login', mockResetFlow, 'test');
@@ -187,9 +189,9 @@ describe('oryErrorHandling', () => {
     const error = {
       data: {
         responseJson: {
-          error: { id: 'security_csrf_violation' }
-        }
-      }
+          error: { id: 'security_csrf_violation' },
+        },
+      },
     };
 
     oryErrorHandling(error as any, 'login', mockResetFlow, 'test');
@@ -205,9 +207,9 @@ describe('oryErrorHandling', () => {
     const error = {
       data: {
         responseJson: {
-          error: { id: 'security_identity_mismatch' }
-        }
-      }
+          error: { id: 'security_identity_mismatch' },
+        },
+      },
     };
 
     oryErrorHandling(error as any, 'login', mockResetFlow, 'test');
@@ -218,9 +220,9 @@ describe('oryErrorHandling', () => {
     const error = {
       data: {
         responseJson: {
-          error: { id: 'session_inactive' }
-        }
-      }
+          error: { id: 'session_inactive' },
+        },
+      },
     };
 
     oryErrorHandling(error as any, 'login', mockResetFlow, 'test');
@@ -231,9 +233,9 @@ describe('oryErrorHandling', () => {
     const error = {
       data: {
         responseJson: {
-          error: { id: 'unknown_error' }
-        }
-      }
+          error: { id: 'unknown_error' },
+        },
+      },
     };
 
     oryErrorHandling(error as any, 'login', mockResetFlow, 'test');
@@ -247,8 +249,8 @@ describe('oryErrorHandling', () => {
   it('should handle error without error id', () => {
     const error = {
       data: {
-        responseJson: {}
-      }
+        responseJson: {},
+      },
     };
 
     oryErrorHandling(error as any, 'login', mockResetFlow, 'test');
@@ -258,4 +260,4 @@ describe('oryErrorHandling', () => {
     expect(mockResetFlow).not.toHaveBeenCalled();
     expect(navigateWithQueryParams).not.toHaveBeenCalled();
   });
-}); 
+});

@@ -6,7 +6,6 @@ import VFormInputPassword from 'UiKit/components/Base/VForm/VFormInputPassword.v
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { useLoginRefreshStore } from '../store/useLoginRefresh';
 
-
 const emit = defineEmits(['cancel']);
 
 const loginRefreshStore = useLoginRefreshStore();
@@ -82,7 +81,6 @@ const loginHandler = async () => {
       >
         Log In
       </VButton>
-
 
       <VButton
         block

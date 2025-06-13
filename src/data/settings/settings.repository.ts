@@ -1,4 +1,4 @@
-import { ApiClient } from 'InvestCommon/data/service/apiClient';;
+import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import { toasterErrorHandling } from 'UiKit/helpers/api/toasterErrorHandling';
 import env from 'InvestCommon/global';
 import { createActionState } from 'UiKit/helpers/api/repository';

@@ -243,4 +243,4 @@ describe('useLoginRefresh Store', () => {
       expect(store.getQueryParam('nonexistent')).toBeUndefined();
     });
   });
-}); 
+});

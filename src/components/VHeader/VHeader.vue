@@ -54,13 +54,11 @@ const isRecoveryPage = computed(() => path.value.includes('forgot'));
 const isCheckEmailPage = computed(() => path.value.includes('check-email'));
 const isAuthenticatorPage = computed(() => path.value.includes('authenticator'));
 
-const isAuthFlowPage = computed(() => {
-  return isRecoveryPage.value || isCheckEmailPage.value
-});
+const isAuthFlowPage = computed(() => (isRecoveryPage.value || isCheckEmailPage.value));
 
-const showNavigation = computed(() => {
-  return !isSignInPage.value && !isSignUpPage.value && !isRecoveryPage.value && !isCheckEmailPage.value && !isAuthenticatorPage.value;
-});
+const showNavigation = computed(() => (
+  !isSignInPage.value && !isSignUpPage.value && !isRecoveryPage.value
+  && !isCheckEmailPage.value && !isAuthenticatorPage.value));
 const queryParams = computed(() => new URLSearchParams(window?.location?.search));
 // if there is flow in url it means it is from sso
 let queryFlow;

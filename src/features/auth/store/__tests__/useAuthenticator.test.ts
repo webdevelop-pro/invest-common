@@ -1,13 +1,14 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   describe, it, expect, vi, beforeEach,
 } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
 import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
 import { ref } from 'vue';
+import { useUserSession } from 'InvestCommon/store/useUserSession';
+// import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import { SELFSERVICE } from '../type';
 import { useAuthenticatorStore } from '../useAuthenticator';
-import { useUserSession } from 'InvestCommon/store/useUserSession';
-import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 
 // Mock environment variables
 vi.mock('InvestCommon/global', () => ({
@@ -140,11 +141,11 @@ describe('useAuthenticator Store', () => {
       const store = useAuthenticatorStore();
       store.model = {
         totp_code: 123456,
-        email: 'test@example.com'
+        email: 'test@example.com',
       };
 
       const mockSession = { id: 'test-session' };
-      
+
       // Mock useRepositoryAuth with successful response
       vi.mocked(useRepositoryAuth).mockReturnValue({
         ...useRepositoryAuth(),
@@ -212,4 +213,4 @@ describe('useAuthenticator Store', () => {
       expect(mockAuthRepository.getAuthFlow).toHaveBeenCalledWith(`${SELFSERVICE.login}?aal=aal2`);
     });
   });
-}); 
+});

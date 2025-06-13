@@ -1,9 +1,9 @@
+import { setActivePinia, createPinia } from 'pinia';
+import { toasterErrorHandling } from 'InvestCommon/data/repository/error/toasterErrorHandling';
 import {
   describe, it, expect, beforeEach, vi,
 } from 'vitest';
-import { ApiClient } from 'InvestCommon/data/service/apiClient';;
-import { setActivePinia, createPinia } from 'pinia';
-import { toasterErrorHandling } from 'InvestCommon/data/repository/error/toasterErrorHandling';
+import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import { useRepositoryNotifications } from '../notifications.repository';
 
 // Mock ApiClient

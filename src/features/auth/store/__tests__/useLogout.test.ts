@@ -1,11 +1,13 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import {
+  describe, it, expect, vi, beforeEach,
+} from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
 import { ref, nextTick } from 'vue';
-import { useLogoutStore } from '../useLogout';
 import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
 import { useGlobalLoader } from 'InvestCommon/store/useGlobalLoader';
 import { redirectAfterLogout } from 'InvestCommon/domain/redirects/redirectAfterLogout';
 import { resetAllData } from 'InvestCommon/domain/resetAllData';
+import { useLogoutStore } from '../useLogout';
 import { SELFSERVICE } from '../type';
 
 // Mock the dependencies
@@ -41,19 +43,19 @@ describe('useLogoutStore', () => {
     const mockAuthRepository = {
       getAuthFlow: vi.fn().mockImplementation(async () => {
         // Simulate async state update
-        await new Promise(resolve => setTimeout(resolve, 0));
+        await new Promise((resolve) => { setTimeout(resolve, 0); });
         getAuthFlowState.value = {
           error: null,
-          data: { logout_token: 'test-token' }
+          data: { logout_token: 'test-token' },
         };
         await nextTick();
       }),
       getLogout: vi.fn().mockImplementation(async () => {
         // Simulate async state update
-        await new Promise(resolve => setTimeout(resolve, 0));
+        await new Promise((resolve) => { setTimeout(resolve, 0); });
         setLogoutState.value = {
           error: null,
-          data: { status: 200 }
+          data: { status: 200 },
         };
         await nextTick();
       }),
@@ -84,20 +86,20 @@ describe('useLogoutStore', () => {
     const mockAuthRepository = {
       getAuthFlow: vi.fn().mockImplementation(async () => {
         // Simulate async state update
-        await new Promise(resolve => setTimeout(resolve, 0));
+        await new Promise((resolve) => { setTimeout(resolve, 0); });
         getAuthFlowState.value = {
           error: null,
-          data: { logout_url: 'https://example.com/logout?token=url-token' }
+          data: { logout_url: 'https://example.com/logout?token=url-token' },
         };
         await nextTick();
       }),
       getLogout: vi.fn().mockImplementation(async (token) => {
         // Simulate async state update
-        await new Promise(resolve => setTimeout(resolve, 0));
+        await new Promise((resolve) => { setTimeout(resolve, 0); });
         if (token === 'url-token') {
           setLogoutState.value = {
             error: null,
-            data: { status: 200 }
+            data: { status: 200 },
           };
           await nextTick();
         }
@@ -130,10 +132,10 @@ describe('useLogoutStore', () => {
     const mockAuthRepository = {
       getAuthFlow: vi.fn().mockImplementation(async () => {
         // Simulate async state update
-        await new Promise(resolve => setTimeout(resolve, 0));
+        await new Promise((resolve) => setTimeout(resolve, 0));
         getAuthFlowState.value = {
           error: 'Auth flow error',
-          data: null
+          data: null,
         };
         await nextTick();
       }),
@@ -163,26 +165,26 @@ describe('useLogoutStore', () => {
     const mockAuthRepository = {
       getAuthFlow: vi.fn().mockImplementation(async () => {
         // Simulate async state update
-        await new Promise(resolve => setTimeout(resolve, 0));
+        await new Promise((resolve) => setTimeout(resolve, 0));
         getAuthFlowState.value = {
           error: null,
-          data: { logout_token: 'test-token' }
+          data: { logout_token: 'test-token' },
         };
         await nextTick();
       }),
       getLogout: vi.fn().mockImplementation(async () => {
         // Simulate async state update
-        await new Promise(resolve => setTimeout(resolve, 0));
+        await new Promise((resolve) => setTimeout(resolve, 0));
         setLogoutState.value = {
           error: 'Logout error',
-          data: null
+          data: null,
         };
         await nextTick();
       }),
       getAuthFlowState,
       setLogoutState,
       flowId: { value: 'test-flow-id' },
-      csrfToken: { value: 'test-csrf-token' }
+      csrfToken: { value: 'test-csrf-token' },
     };
 
     (useRepositoryAuth as any).mockReturnValue(mockAuthRepository);
@@ -201,4 +203,4 @@ describe('useLogoutStore', () => {
     expect(resetAllData).toHaveBeenCalled();
     expect(store.isLoading).toBe(false);
   });
-}); 
+});
