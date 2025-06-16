@@ -74,7 +74,7 @@ export const useRepositoryAuth = () => {
       return response.data;
     } catch (err) {
       setLoginState.value.error = err as Error;
-      oryErrorHandling(err, 'login', getAuthFlow(SELFSERVICE.login), 'Failed to login');
+      oryErrorHandling(err, 'login', () => getAuthFlow(SELFSERVICE.login), 'Failed to login');
       throw err;
     } finally {
       setLoginState.value.loading = false;
@@ -91,7 +91,7 @@ export const useRepositoryAuth = () => {
       return response.data;
     } catch (err) {
       getLoginState.value.error = err as Error;
-      oryErrorHandling(err, 'login', getAuthFlow(SELFSERVICE.login), 'Failed to get login data');
+      oryErrorHandling(err, 'login', () => getAuthFlow(SELFSERVICE.login), 'Failed to get login data');
       throw err;
     } finally {
       getLoginState.value.loading = false;
@@ -106,7 +106,7 @@ export const useRepositoryAuth = () => {
       return response;
     } catch (err) {
       getLogoutState.value.error = err as Error;
-      oryErrorHandling(err, 'logout', getAuthFlow(SELFSERVICE.logout), 'Failed to logout');
+      oryErrorHandling(err, 'logout', () => getAuthFlow(SELFSERVICE.logout), 'Failed to logout');
       throw err;
     } finally {
       getLogoutState.value.loading = false;
@@ -122,7 +122,7 @@ export const useRepositoryAuth = () => {
       return response.data;
     } catch (err) {
       getSignupState.value.error = err as Error;
-      oryErrorHandling(err, 'signup', getAuthFlow(SELFSERVICE.registration), 'Failed to get signup data');
+      oryErrorHandling(err, 'signup', () => getAuthFlow(SELFSERVICE.registration), 'Failed to get signup data');
       throw err;
     } finally {
       getSignupState.value.loading = false;
@@ -138,7 +138,7 @@ export const useRepositoryAuth = () => {
       return response.data;
     } catch (err) {
       setSignupState.value.error = err as Error;
-      oryErrorHandling(err, 'signup', getAuthFlow(SELFSERVICE.registration), 'Failed to signup');
+      oryErrorHandling(err, 'signup', () => getAuthFlow(SELFSERVICE.registration), 'Failed to signup');
       throw err;
     } finally {
       setSignupState.value.loading = false;
@@ -154,7 +154,7 @@ export const useRepositoryAuth = () => {
       return response.data;
     } catch (err) {
       setRecoveryState.value.error = err as Error;
-      oryErrorHandling(err, 'recovery', getAuthFlow(SELFSERVICE.recovery), 'Failed to set recovery');
+      oryErrorHandling(err, 'recovery', () => getAuthFlow(SELFSERVICE.recovery), 'Failed to set recovery');
       throw err;
     } finally {
       setRecoveryState.value.loading = false;

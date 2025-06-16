@@ -62,17 +62,9 @@ export class ApiClient {
         headers: response.headers,
       };
     } catch (error) {
-      if (error instanceof APIError) {
+      if (error.name !== 'AbortError') {
         throw error;
       }
-      // Create a mock response for network errors with a valid status code
-      const mockResponse = new Response(null, {
-        status: 500, // Using 500 as a fallback for network errors
-        statusText: error instanceof Error ? error.message : 'Network error',
-      });
-      const apiError = new APIError(error instanceof Error ? error.message : 'Network error', mockResponse);
-      await apiError.initializeResponseJson();
-      throw apiError;
     }
   }
 
