@@ -23,7 +23,7 @@ export const oryErrorHandling = (
 ) => {
   const { toast } = useToast();
   const responseJson = error?.data?.responseJson;
-  const uiError = responseJson.ui?.messages?.find((m: any) => m.type === 'error');
+  const uiError = responseJson?.ui?.messages?.find((m: any) => m.type === 'error');
   const credentialsErrorId = 4000006;
   const isCredentialsError = uiError?.id === credentialsErrorId;
 
@@ -39,29 +39,28 @@ export const oryErrorHandling = (
     return;
   }
 
-  if (responseJson?.redirect_browser_to) {
-    console.log('Ory error handling: redirect_browser_to', responseJson.redirect_browser_to);
-    window.location.href = responseJson.redirect_browser_to;
-  }
+  // if (responseJson?.redirect_browser_to) {
+  //   console.log('Ory error handling: redirect_browser_to', responseJson?.redirect_browser_to);
+
+  //   if (responseJson.redirect_browser_to.includes('aal2')) navigateWithQueryParams(urlAuthenticator);
+  //   else window.location.href = responseJson.redirect_browser_to;
+  // }
 
   switch (responseJson?.error?.id) {
     case 'session_already_available': // User is already signed in, let's redirect them home!
       navigateWithQueryParams(urlProfile());
       break;
     case 'session_aal2_required': // 2FA is enabled and enforced, but user did not perform 2fa yet!
-      if (responseJson?.redirect_browser_to) {
-        const redirectTo = new URL(responseJson.redirect_browser_to);
-        if (flowType === 'settings') {
-          redirectTo.searchParams.set('return_to', window.location.href);
-        }
-        // 2FA is enabled and enforced, but user did not perform 2fa yet!
-        window.location.href = redirectTo.toString();
-        return;
-      }
-      navigateWithQueryParams(urlSignin, new URLSearchParams({
-        aal: 'aal2',
-        return_to: window.location.href,
-      }));
+      // if (responseJson?.redirect_browser_to) {
+      //   const redirectTo = new URL(responseJson.redirect_browser_to);
+      //   if (flowType === 'settings') {
+      //     redirectTo.searchParams.set('return_to', window.location.href);
+      //   }
+      //   // 2FA is enabled and enforced, but user did not perform 2fa yet!
+      //   window.location.href = redirectTo.toString();
+      //   return;
+      // }
+      navigateWithQueryParams(urlAuthenticator)
       return;
     case 'session_refresh_required': // We need to re-authenticate to perform this action
       // window.location.href = err.response?.data.redirect_browser_to

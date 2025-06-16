@@ -5,7 +5,6 @@ import {
   urlSignin, urlSignup, urlAuthenticator, urlForgot, urlCheckEmail,
   urlProfile,
 } from 'InvestCommon/global/links';
-import { watch } from 'vue';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
 
 const pagesToRedirectIfLoggedIn = [
@@ -27,14 +26,20 @@ export const redirectAuthGuardStatic = async () => {
   const currentPathname = window.location.pathname;
   const protectedPaths = pagesToRedirectIfLoggedIn.map(getPathnameFromUrl);
 
-  // Watch for changes in login state
-  watch(() => userLoggedIn.value, async () => {
-    if (!userLoggedIn.value) {
-      const resp = await useRepositoryAuth().getSession();
-      if (resp) {
-        userSessionStore.updateSession(resp);
-      }
-    } else if (protectedPaths.includes(currentPathname)) {
+  try {
+    // Skip session check if we're on the authenticator page
+    if (currentPathname === getPathnameFromUrl(urlAuthenticator)) {
+      return;
+    }
+
+    // Check session
+    const resp = await useRepositoryAuth().getSession();
+    if (resp) {
+      userSessionStore.updateSession(resp);
+    }
+
+    // Only redirect if user is logged in and on a protected path
+    if (userLoggedIn.value && protectedPaths.includes(currentPathname)) {
       // Check if there's a redirect parameter in the URL
       const urlParams = new URLSearchParams(window.location.search);
       const hasRedirect = urlParams.has('redirect');
@@ -44,5 +49,8 @@ export const redirectAuthGuardStatic = async () => {
         navigateWithQueryParams(urlProfile());
       }
     }
-  }, { immediate: true });
+  } catch (error) {
+    // If we get a 403 or other error, don't redirect
+    console.error('Auth guard error:', error);
+  }
 };
