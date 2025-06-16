@@ -5,7 +5,6 @@ import { setActivePinia, createPinia } from 'pinia';
 import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
 import { ref, reactive, watch } from 'vue';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
-import { SELFSERVICE } from '../type';
 import { useVerificationStore } from '../useVerification';
 
 // Mock environment variables

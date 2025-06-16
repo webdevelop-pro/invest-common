@@ -40,8 +40,10 @@ export const useRepositoryAuth = () => {
       return response.data;
     } catch (err) {
       getSessionState.value.error = err as Error;
-      oryErrorHandling(err, 'session', () => {}, 'Failed to get session');
-      throw err;
+      if (err?.data?.responseJson?.error?.code !== 401 && err?.data?.responseJson?.error?.code !== 403) {
+        oryErrorHandling(err, 'session', () => {}, 'Failed to get session');
+        throw err;
+      }
     } finally {
       getSessionState.value.loading = false;
     }

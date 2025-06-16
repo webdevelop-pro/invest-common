@@ -3,8 +3,7 @@ import { storeToRefs } from 'pinia';
 import { useUserSession } from 'InvestCommon/store/useUserSession';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import { urlSignin } from 'InvestCommon/global/links';
-import { useAuthLogicStore } from 'InvestCommon/store/useAuthLogic';
-import { useAuthStore } from 'InvestCommon/store/useAuth';
+import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
 
 export const redirectAuthGuard = async (
   to: RouteLocationNormalized,
@@ -13,16 +12,16 @@ export const redirectAuthGuard = async (
 ) => {
   const userSessionStore = useUserSession();
   const { userLoggedIn } = storeToRefs(userSessionStore);
-  const authStore = useAuthStore();
-  const { getSessionData, getSessionErrorResponse } = storeToRefs(authStore);
+  const repositoryAuthStore = useRepositoryAuth();
+  const { getSessionState } = storeToRefs(repositoryAuthStore);
 
   if (to.meta.requiresAuth && !userLoggedIn.value) {
-    await useAuthLogicStore().getSession();
-    if (!getSessionData.value?.active || getSessionErrorResponse.value) {
+    await useRepositoryAuth().getSession();
+    if (!getSessionState.value?.data?.active || getSessionState.value?.error) {
       navigateWithQueryParams(urlSignin, { redirect: to.fullPath });
     }
   } else {
-    useAuthLogicStore().getSession();
+    useRepositoryAuth().getSession();
     next();
   }
 };

@@ -90,12 +90,10 @@ export const useVerificationStore = defineStore('verification', () => {
 
       const uiMessage = setRecoveryState.value.data.ui?.messages?.find((m: any) => m.type === 'error')?.text;
       const uiNodeMessage = setRecoveryState.value.data.ui?.nodes?.find((node: any) => node.messages?.some((m: any) => m.type === 'error'))?.messages?.find((m: any) => m.type === 'error')?.text;
-      
+
       // Check if there are any error messages in the UI structure
       const hasErrorMessages = setRecoveryState.value.data.ui?.messages?.some((m: any) => m.type === 'error');
-      const hasErrorNodes = setRecoveryState.value.data.ui?.nodes?.some((node: any) => 
-        node.messages?.some((m: any) => m.type === 'error')
-      );
+      const hasErrorNodes = setRecoveryState.value.data.ui?.nodes?.some((node: any) => node.messages?.some((m: any) => m.type === 'error'));
 
       if (hasErrorMessages || hasErrorNodes) {
         const errorMessage = uiMessage || uiNodeMessage || TOAST_OPTIONS.description;
