@@ -11,24 +11,13 @@ const pagesToRedirectIfLoggedIn = [
   urlSignin, urlSignup, urlAuthenticator, urlForgot, urlCheckEmail,
 ];
 
-const getPathnameFromUrl = (url: string) => {
-  try {
-    return new URL(url).pathname;
-  } catch {
-    return url; // fallback to original string if URL parsing fails
-  }
-};
-
 export const redirectAuthGuardStatic = async () => {
   const userSessionStore = useUserSession();
   const { userLoggedIn } = storeToRefs(userSessionStore);
 
-  const currentPathname = window.location.pathname;
-  const protectedPaths = pagesToRedirectIfLoggedIn.map(getPathnameFromUrl);
-
   try {
     // Skip session check if we're on the authenticator page
-    if (currentPathname === getPathnameFromUrl(urlAuthenticator)) {
+    if (urlAuthenticator.includes(window.location.pathname)) {
       return;
     }
 
@@ -39,16 +28,16 @@ export const redirectAuthGuardStatic = async () => {
     }
 
     // Only redirect if user is logged in and on a protected path
-    if (userLoggedIn.value && protectedPaths.includes(currentPathname)) {
-      // Check if there's a redirect parameter in the URL
-      const urlParams = new URLSearchParams(window.location.search);
-      const hasRedirect = urlParams.has('redirect');
+    // if (userLoggedIn.value && protectedPaths.includes(currentPathname)) {
+    //   // Check if there's a redirect parameter in the URL
+    //   const urlParams = new URLSearchParams(window.location.search);
+    //   const hasRedirect = urlParams.has('redirect');
 
-      // Only redirect to profile if there's no redirect parameter
-      if (!hasRedirect) {
-        navigateWithQueryParams(urlProfile());
-      }
-    }
+    //   // Only redirect to profile if there's no redirect parameter
+    //   if (!hasRedirect) {
+    //     navigateWithQueryParams(urlProfile());
+    //   }
+    // }
   } catch (error) {
     // If we get a 403 or other error, don't redirect
     console.error('Auth guard error:', error);
