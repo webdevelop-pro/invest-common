@@ -26,7 +26,7 @@ vi.mock('UiKit/helpers/general', () => ({
 
 vi.mock('InvestCommon/global/links', () => ({
   urlSignin: 'urlSignin',
-  urlProfile: 'urlProfile',
+  urlProfile: () => 'urlProfile',
   urlAuthenticator: 'urlAuthenticator',
 }));
 

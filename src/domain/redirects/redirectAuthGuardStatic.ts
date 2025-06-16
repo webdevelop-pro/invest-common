@@ -28,9 +28,12 @@ export const redirectAuthGuardStatic = async () => {
   const protectedPaths = pagesToRedirectIfLoggedIn.map(getPathnameFromUrl);
 
   // Watch for changes in login state
-  watch(() => userLoggedIn.value, () => {
+  watch(() => userLoggedIn.value, async () => {
     if (!userLoggedIn.value) {
-      useRepositoryAuth().getSession();
+      const resp = await useRepositoryAuth().getSession();
+      if (resp) {
+        userSessionStore.updateSession(resp);
+      }
     } else if (protectedPaths.includes(currentPathname)) {
       // Check if there's a redirect parameter in the URL
       const urlParams = new URLSearchParams(window.location.search);
