@@ -18,7 +18,8 @@ export const redirectAuthGuard = async (
   if (to.meta.requiresAuth && !userLoggedIn.value) {
     await useRepositoryAuth().getSession();
     if (!getSessionState.value?.data?.active || getSessionState.value?.error) {
-      navigateWithQueryParams(urlSignin, { redirect: to.fullPath });
+      console.log(getSessionState.value)
+      // navigateWithQueryParams(urlSignin, { redirect: to.fullPath });
     }
   } else {
     useRepositoryAuth().getSession();
