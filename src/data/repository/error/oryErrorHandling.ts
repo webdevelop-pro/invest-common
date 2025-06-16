@@ -22,7 +22,7 @@ export const oryErrorHandling = (
   comment: string,
 ) => {
   const { toast } = useToast();
-  const responseJson = error?.data.responseJson;
+  const responseJson = error?.data?.responseJson;
   const uiError = responseJson.ui?.messages?.find((m: any) => m.type === 'error');
   const credentialsErrorId = 4000006;
   const isCredentialsError = uiError?.id === credentialsErrorId;
@@ -46,7 +46,7 @@ export const oryErrorHandling = (
 
   switch (responseJson?.error?.id) {
     case 'session_already_available': // User is already signed in, let's redirect them home!
-      navigateWithQueryParams(urlProfile);
+      navigateWithQueryParams(urlProfile());
       break;
     case 'session_aal2_required': // 2FA is enabled and enforced, but user did not perform 2fa yet!
       if (responseJson?.redirect_browser_to) {
