@@ -30,7 +30,11 @@ const handleKeyDown = (event: KeyboardEvent) => {
 };
 
 onBeforeMount(() => {
-  notificationsStore.loadData();
+  try {
+    notificationsStore.loadData();
+  } catch (error) {
+    console.warn('Failed to load notifications data:', error);
+  }
 });
 </script>
 
