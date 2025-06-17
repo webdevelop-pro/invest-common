@@ -39,6 +39,8 @@ const open = defineModel<boolean>();
 
 <style lang="scss">
 .v-dialog-mfa {
+  padding: 60px 40px 40px;
+
   &__cancel {
     float: right;
   }

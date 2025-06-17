@@ -65,7 +65,9 @@ const imageID = computed(() => getUserData.value?.image_link_id);
           data-testid="header-profile-logout"
           @click="onLogout"
         >
-          Log Out
+          <span
+            class="v-header-profile__item-text"
+          >Log Out</span>
         </VDropdownMenuItem>
       </template>
     </VDropdown>
@@ -96,15 +98,20 @@ const imageID = computed(() => getUserData.value?.image_link_id);
   }
 
   &__item {
+    padding: 12px;
+
+    // &:hover {
+    //   background-color: $gray-20;
+    // }
+
+    // &.router-link-active {
+    //   color: $primary;
+    // }
+  }
+
+  &__item-text {
     padding: 8px 12px;
-
-    &:hover {
-      background-color: $gray-20;
-    }
-
-    &.router-link-active {
-      color: $primary;
-    }
+    display: block;
   }
 
   &__divider {

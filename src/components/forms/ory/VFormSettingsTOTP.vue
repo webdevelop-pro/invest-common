@@ -200,7 +200,7 @@ onMounted(async () => {
   }
 
   &__btn {
-    margin-top: 28px;
+    margin-top: 35px;
   }
 
   &__skeleton {
