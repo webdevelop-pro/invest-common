@@ -203,6 +203,7 @@ watch(() => open.value, () => {
 <style lang="scss">
 @use 'UiKit/styles/_variables.scss' as *;
 .v-dialog-cancel-investment {
+  padding: 60px 40px 10px;
     @media screen and (max-width: $tablet){
       display: flex;
       flex-direction: column;

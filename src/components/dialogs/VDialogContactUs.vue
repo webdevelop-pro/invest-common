@@ -38,6 +38,7 @@ defineProps({
 
 <style lang="scss">
 .v-dialog-contact-us {
+  padding: 60px 40px 40px;
   text-align: center;
 }
 </style>

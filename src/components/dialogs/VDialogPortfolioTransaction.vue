@@ -66,6 +66,7 @@ const title = computed(() => {
 <style lang="scss">
 @use 'UiKit/styles/_variables.scss' as *;
 .v-dialog-portfolio-transaction {
+  padding: 60px 40px 40px;
 
   @media screen and (max-width: $tablet){
       display: flex;

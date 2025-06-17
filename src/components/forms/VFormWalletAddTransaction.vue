@@ -164,6 +164,7 @@ watch(() => fundingSourceFormatted.value, () => {
               placeholder="$"
               :model-value="model.amount ? String(model.amount) : undefined"
               name="amount"
+              size="large"
               money-format
               @update:model-value="model.amount = numberFormatter($event)"
             />
@@ -225,7 +226,6 @@ watch(() => fundingSourceFormatted.value, () => {
   flex-direction: column;
   max-width: 100%;
   margin: 0 auto;
-  width: 700px;
 
   &__header {
     margin-top: 33px;

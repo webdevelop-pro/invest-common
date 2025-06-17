@@ -177,6 +177,7 @@ const saveHandler = () => {
 @use 'UiKit/styles/_variables.scss' as *;
 @use 'UiKit/styles/_colors.scss' as *;
 .wd-modal-portfolio-wire {
+  padding: 60px 40px 40px;
     @media screen and (max-width: $tablet){
       display: flex;
       flex-direction: column;

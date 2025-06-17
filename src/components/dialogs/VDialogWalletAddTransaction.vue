@@ -47,5 +47,6 @@ const titile = ref((isTypeDeposit.value ? 'Add Funds' : 'Withdraw'));
 <style lang="scss">
 .v-dialog-wallet-add-transaction {
   width: 100%;
+  padding: 60px 40px 40px;
 }
 </style>
