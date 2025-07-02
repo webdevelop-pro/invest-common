@@ -31,10 +31,13 @@ export const useProfileSelectStore = defineStore('profileSelect', () => {
   };
 
   const getName = (profile) => {
-    if (profile.type === 'entity') {
-      return capitalizeFirstLetter(profile.data?.name || '');
+    if (profile.type === 'individual') {
+      return capitalizeFirstLetter(profile.type || '');
     }
-    return capitalizeFirstLetter(profile.type || '');
+    if (profile.type === 'sdira') {
+      return capitalizeFirstLetter(profile.data.full_account_name || '');
+    }
+    return capitalizeFirstLetter(profile.data.name || '');
   };
 
   const userListFormatted = computed(() => {

@@ -1,10 +1,7 @@
 <script setup lang="ts">
 import {
   watch, PropType, computed,
-  ref,
-  reactive,
 } from 'vue';
-import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
 import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
@@ -15,22 +12,22 @@ import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { FormModelInvestmentObjectives } from 'InvestCommon/types/form';
 import { numberFormatter } from 'InvestCommon/helpers/numberFormatter';
-import { filterSchema, getFilteredObject } from 'UiKit/helpers/validation/general';
-import { IInvestmentObjectives } from 'InvestCommon/types/api/user';
-import { populateModel, getOptions, createFormModel } from 'UiKit/helpers/model';
-import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
-import { isEmpty } from 'UiKit/helpers/general';
+import { filterSchema } from 'UiKit/helpers/validation/general';
+import { getOptions, createFormModel } from 'UiKit/helpers/model';
+import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
+import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 
 const props = defineProps({
   modelData: Object as PropType<FormModelInvestmentObjectives>,
+  // errorData: Object,
+  // schemaBackend: Object,
+  loading: Boolean,
 });
 
-const userIdentityStore = useUserProfilesStore();
-const {
-  setProfileByIdErrorData, getProfileByIdOptionsData, isGetProfileByIdLoading,
-} = storeToRefs(userIdentityStore);
+const useRepositoryProfilesStore = useRepositoryProfiles();
+const { setProfileByIdState, getProfileByIdOptionsState } = storeToRefs(useRepositoryProfilesStore);
 
-const schema = {
+const schemaFrontend = {
   $schema: 'http://json-schema.org/draft-07/schema#',
   definitions: {
     InvestmentObjectives: {
@@ -56,31 +53,29 @@ const schema = {
   $ref: '#/definitions/Individual',
 } as unknown as JSONSchemaType<FormModelInvestmentObjectives>;
 
-const model = reactive<FormModelInvestmentObjectives>({
-  investment_objectives: {
-    ...props.modelData?.investment_objectives,
-  },
-});
-const formModel = createFormModel(schema);
-let validator = new PrecompiledValidator<FormModelInvestmentObjectives>(
-  filterSchema(getProfileByIdOptionsData.value, formModel),
-  schema,
+const schemaBackend = computed(() => getProfileByIdOptionsState.value.data);
+const errorData = computed(() => setProfileByIdState.value.error);
+const schemaBackendLocal = computed(() => filterSchema(schemaBackend.value, createFormModel(schemaFrontend)));
+
+const {
+  model, validation, isValid, onValidate, schemaObject,
+} = useFormValidation<FormModelInvestmentObjectives>(
+  schemaFrontend,
+  schemaBackendLocal,
+  {
+    investment_objectives: {
+      ...props.modelData?.investment_objectives,
+    },
+  } as FormModelInvestmentObjectives,
 );
-const validation = ref<unknown>();
-const isValid = computed(() => isEmpty(validation.value || {}));
 
-const onValidate = () => {
-  validation.value = validator.getFormValidationErrors(model);
-};
-
-const schemaObject = computed(() => getFilteredObject(getProfileByIdOptionsData.value, formModel));
 const optionsDuration = computed(() => getOptions('investment_objectives.duration', schemaObject));
 const optionsAccess = computed(() => getOptions('investment_objectives.importance_of_access', schemaObject));
 const optionsObjectives = computed(() => getOptions('investment_objectives.objectives', schemaObject));
 const optionsRiskComfort = computed(() => getOptions('investment_objectives.risk_comfort', schemaObject));
 
 defineExpose({
-  model, validation, validator, isValid, onValidate,
+  model, validation, isValid, onValidate,
 });
 
 watch(() => props.modelData?.investment_objectives, () => {
@@ -100,17 +95,6 @@ watch(() => props.modelData?.investment_objectives, () => {
     model.investment_objectives.years_experience = props.modelData?.investment_objectives.years_experience;
   }
 }, { deep: true, immediate: true });
-
-watch(() => model, () => {
-  if (!isValid.value) onValidate();
-}, { deep: true });
-
-watch(() => [getProfileByIdOptionsData.value, schema], () => {
-  validator = new PrecompiledValidator<FormModelInvestmentObjectives>(
-    filterSchema(getProfileByIdOptionsData.value, formModel),
-    schema,
-  );
-});
 </script>
 
 <template>
@@ -124,9 +108,9 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="getProfileByIdOptionsData"
-          :schema-front="schema"
-          :error-text="setProfileByIdErrorData?.investment_objectives.objectives"
+          :schema-back="schemaBackend"
+          :schema-front="schemaFrontend"
+          :error-text="errorData?.investment_objectives.objectives"
           path="investment_objectives.objectives"
           label="Investment objectives"
         >
@@ -140,7 +124,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             size="large"
             data-testid="investment-objectives"
             :options="optionsObjectives"
-            :loading="isGetProfileByIdLoading || (optionsObjectives.length === 0)"
+            :loading="loading || (optionsObjectives.length === 0)"
           />
         </VFormGroup>
       </FormCol>
@@ -151,9 +135,9 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="getProfileByIdOptionsData"
-          :schema-front="schema"
-          :error-text="setProfileByIdErrorData?.investment_objectives.years_experience"
+          :schema-back="schemaBackend"
+          :schema-front="schemaFrontend"
+          :error-text="errorData?.investment_objectives.years_experience"
           path="investment_objectives.years_experience"
           label="Investment Years Experience"
         >
@@ -164,7 +148,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             placeholder="10"
             name="years-experience"
             data-testid="years-experience"
-            :loading="isGetProfileByIdLoading"
+            :loading="loading"
             @update:model-value="model.investment_objectives.years_experience = numberFormatter($event)"
           />
         </VFormGroup>
@@ -175,9 +159,9 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="getProfileByIdOptionsData"
-          :schema-front="schema"
-          :error-text="setProfileByIdErrorData?.investment_objectives.duration"
+          :schema-back="schemaBackend"
+          :schema-front="schemaFrontend"
+          :error-text="errorData?.investment_objectives.duration"
           path="investment_objectives.duration"
           label="How long do you plan to invest"
         >
@@ -191,7 +175,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             data-testid="duration"
             size="large"
             :options="optionsDuration"
-            :loading="isGetProfileByIdLoading || (optionsDuration.length === 0)"
+            :loading="loading || (optionsDuration.length === 0)"
           />
         </VFormGroup>
       </FormCol>
@@ -202,9 +186,9 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="getProfileByIdOptionsData"
-          :schema-front="schema"
-          :error-text="setProfileByIdErrorData?.investment_objectives.importance_of_access"
+          :schema-back="schemaBackend"
+          :schema-front="schemaFrontend"
+          :error-text="errorData?.investment_objectives.importance_of_access"
           path="investment_objectives.importance_of_access"
           label="How important is it to have immediate access to your invested funds"
         >
@@ -218,7 +202,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             placeholder="How important is it to have immediate access to your invested funds"
             size="large"
             :options="optionsAccess"
-            :loading="isGetProfileByIdLoading || (optionsAccess.length === 0)"
+            :loading="loading || (optionsAccess.length === 0)"
           />
         </VFormGroup>
       </FormCol>
@@ -229,9 +213,9 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="getProfileByIdOptionsData"
-          :schema-front="schema"
-          :error-text="setProfileByIdErrorData?.investment_objectives.risk_comfort"
+          :schema-back="schemaBackend"
+          :schema-front="schemaFrontend"
+          :error-text="errorData?.investment_objectives.risk_comfort"
           path="investment_objectives.risk_comfort"
           label="How much risk are you comfortable with"
         >
@@ -245,7 +229,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             placeholder="How much risk are you comfortable with"
             size="large"
             :options="optionsRiskComfort"
-            :loading="isGetProfileByIdLoading || (optionsRiskComfort.length === 0)"
+            :loading="loading || (optionsRiskComfort.length === 0)"
           />
         </VFormGroup>
       </FormCol>

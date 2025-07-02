@@ -13,6 +13,7 @@ import {
   ROUTE_INVESTMENT_TIMELINE,
   ROUTE_INVEST_AMOUNT, ROUTE_INVEST_FUNDING, ROUTE_INVEST_OWNERSHIP, ROUTE_INVEST_REVIEW,
   ROUTE_INVEST_SIGNATURE, ROUTE_INVEST_THANK, ROUTE_SUBMIT_KYC,
+  ROUTE_SETTINGS_ACCOUNT_DETAILS, ROUTE_SETTINGS_MFA, ROUTE_SETTINGS_SECURITY,
 } from 'InvestCommon/helpers/enums/routes';
 import { useRoute, useRouter } from 'vue-router';
 import env, { cookiesOptions } from 'InvestCommon/global/index';
@@ -51,7 +52,7 @@ export const useUsersStore = defineStore('user', () => {
   const userProfilesLoading = computed(() => getUserState.value?.loading);
   // SELECTED USER PROFILE
   const selectedUserProfileLoading = computed(() => userProfilesLoading.value);
-  const selectedUserProfileId = ref(0);
+  const selectedUserProfileId = ref(cookies.get('selectedUserProfileId'));
   // const selectedUserProfileId = useStorage('selectedUserProfileId', 0, sessionStorage);
   // const userProfilesFilteredById = computed(() => (
   //   userProfiles.value.filter((item) => item.id === selectedUserProfileId.value)[0]));
@@ -130,6 +131,7 @@ export const useUsersStore = defineStore('user', () => {
     ROUTE_DASHBOARD_BACKGROUND_INFORMATION, ROUTE_DASHBOARD_FINANCIAL_AND_INVESTMENT_INFO,
     ROUTE_DASHBOARD_PERSONAL_DETAILS, ROUTE_DASHBOARD_TRUSTED_CONTACT,
     ROUTE_ACCREDITATION_UPLOAD, ROUTE_INVESTMENT_DOCUMENTS, ROUTE_INVESTMENT_TIMELINE,
+    ROUTE_SETTINGS_ACCOUNT_DETAILS, ROUTE_SETTINGS_MFA, ROUTE_SETTINGS_SECURITY,
   ];
 
   const urlChecked = ref(false);

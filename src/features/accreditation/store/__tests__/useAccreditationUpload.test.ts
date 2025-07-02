@@ -2,45 +2,44 @@ import {
   describe, it, expect, vi, beforeEach, afterEach,
 } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
-import { useUsersStore } from 'InvestCommon/store/useUsers';
-import { useRepositoryAccreditation } from 'InvestCommon/data/accreditation/accreditation.repository';
-import { AccreditationTypes } from 'InvestCommon/types/api/invest';
+import { useRepositoryAccreditation } from '../../../../data/accreditation/accreditation.repository';
+import { useRepositoryProfiles } from '../../../../data/profiles/profiles.repository';
+import { AccreditationTypes } from '../../../../types/api/invest';
 import { ref } from 'vue';
+import { useProfilesStore } from '../../../../domain/profiles/store/useProfiles';
 import { useAccreditationUpload } from '../useAccreditationUpload';
 
-// Mock the dependencies
-vi.mock('InvestCommon/store/useUsers', () => ({
-  useUsersStore: vi.fn(() => {
-    const selectedUserProfileData = ref({ id: '123', user_id: '456', accreditation_status: 'new' });
-    const selectedUserProfileId = ref('123');
-    const selectedUserProfileType = ref('individual');
-
-    return {
-      selectedUserProfileData,
-      selectedUserProfileId,
-      selectedUserProfileType,
-    };
-  }),
-}));
-
-vi.mock('InvestCommon/store/useUserProfiles', () => ({
-  useUserProfilesStore: vi.fn(() => ({
+vi.mock('../../../../domain/profiles/store/useProfiles', () => ({
+  useProfilesStore: vi.fn(() => ({
     getProfileById: vi.fn(),
   })),
 }));
 
-vi.mock('InvestCommon/data/accreditation/accreditation.repository', () => ({
+vi.mock('../../../../data/profiles/profiles.repository', () => ({
+  useRepositoryProfiles: vi.fn(() => ({
+    getProfileById: vi.fn(),
+    getProfileByIdState: ref({ loading: false, error: null, data: { id: '123', user_id: '456', accreditation_status: 'new' } }),
+    getUserState: ref({ loading: false, error: null, data: { profiles: [] } }),
+  })),
+}));
+
+vi.mock('../../../../data/accreditation/accreditation.repository', () => ({
   useRepositoryAccreditation: vi.fn(() => ({
     uploadDocument: vi.fn(),
     create: vi.fn(),
     update: vi.fn(),
-    error: ref({}),
+    createState: ref({ loading: false, error: null, data: undefined }),
+    updateState: ref({ loading: false, error: null, data: undefined }),
   })),
 }));
 
 vi.mock('vue-router', () => ({
   useRouter: vi.fn(() => ({
     push: vi.fn(),
+  })),
+  useRoute: vi.fn(() => ({
+    params: { profileId: '123' },
+    name: 'test-route',
   })),
 }));
 
@@ -55,7 +54,7 @@ describe('useAccreditationUpload', () => {
       selectedUserProfileId: ref('123'),
       selectedUserProfileType: ref('individual'),
     };
-    vi.mocked(useUsersStore).mockReturnValue(mockStore);
+    vi.mocked(useProfilesStore).mockReturnValue(mockStore);
   });
 
   describe('initial state', () => {
@@ -236,7 +235,7 @@ describe('useAccreditationUpload', () => {
       };
 
       // Override the mock implementation for this test
-      vi.mocked(useUsersStore).mockReturnValue(mockStore);
+      vi.mocked(useProfilesStore).mockReturnValue(mockStore);
 
       const store = useAccreditationUpload();
       expect(store.isAccreditationCanUpload).toBe(false);
@@ -292,20 +291,37 @@ describe('useAccreditationUpload', () => {
         selectedUserProfileId: ref('123'),
         selectedUserProfileType: ref('individual'),
       };
-      vi.mocked(useUsersStore).mockReturnValue(mockStore);
+      vi.mocked(useProfilesStore).mockReturnValue(mockStore);
     });
 
     it('should handle upload error gracefully', async () => {
+      // Set up the mock repository first
+      const uploadDocumentSpy = vi.fn().mockRejectedValue(new Error('Upload failed'));
+      vi.mocked(useRepositoryAccreditation).mockReturnValue({
+        uploadDocument: uploadDocumentSpy,
+        create: vi.fn(),
+        update: vi.fn(),
+        createState: ref({ loading: false, error: null, data: undefined }),
+        updateState: ref({ loading: false, error: null, data: undefined }),
+      });
+
+      // Set up the mock profiles repository
+      vi.mocked(useRepositoryProfiles).mockReturnValue({
+        getProfileById: vi.fn(),
+        getProfileByIdState: ref({
+          loading: false,
+          error: null,
+          data: { id: '123', user_id: '456', accreditation_status: 'new' },
+        }),
+        getUserState: ref({ loading: false, error: null, data: { profiles: [] } }),
+      });
+
       const store = useAccreditationUpload();
       const mockFile = new File([''], 'test.pdf');
 
       // Set up the required store values
       store.accreditationFiles = [mockFile];
       store.accreditationDescriptions = ['Test description'];
-
-      const accreditationRepository = useRepositoryAccreditation();
-      const uploadDocumentSpy = vi.fn().mockRejectedValue(new Error('Upload failed'));
-      accreditationRepository.uploadDocument = uploadDocumentSpy;
 
       await store.sendFiles();
 
@@ -316,7 +332,29 @@ describe('useAccreditationUpload', () => {
       // Clear previous mocks
       vi.clearAllMocks();
 
-      // Set up the mock store with new status
+      // Set up the mock repository first
+      const uploadDocumentSpy = vi.fn().mockResolvedValue({});
+      const createSpy = vi.fn().mockResolvedValue({});
+      vi.mocked(useRepositoryAccreditation).mockReturnValue({
+        uploadDocument: uploadDocumentSpy,
+        create: createSpy,
+        update: vi.fn(),
+        createState: ref({ loading: false, error: null, data: undefined }),
+        updateState: ref({ loading: false, error: null, data: undefined }),
+      });
+
+      // Set up the mock profiles repository
+      vi.mocked(useRepositoryProfiles).mockReturnValue({
+        getProfileById: vi.fn(),
+        getProfileByIdState: ref({
+          loading: false,
+          error: null,
+          data: { id: '123', user_id: '456', accreditation_status: AccreditationTypes.new },
+        }),
+        getUserState: ref({ loading: false, error: null, data: { profiles: [] } }),
+      });
+
+      // Set up the mock profiles store with new status
       const mockStore = {
         selectedUserProfileData: ref({
           id: '123',
@@ -326,17 +364,7 @@ describe('useAccreditationUpload', () => {
         selectedUserProfileId: ref('123'),
         selectedUserProfileType: ref('individual'),
       };
-      vi.mocked(useUsersStore).mockReturnValue(mockStore);
-
-      // Set up the mock repository
-      const uploadDocumentSpy = vi.fn().mockResolvedValue({});
-      const createSpy = vi.fn().mockResolvedValue({});
-      vi.mocked(useRepositoryAccreditation).mockReturnValue({
-        uploadDocument: uploadDocumentSpy,
-        create: createSpy,
-        update: vi.fn(),
-        error: ref({}),
-      });
+      vi.mocked(useProfilesStore).mockReturnValue(mockStore);
 
       const store = useAccreditationUpload();
       const mockFile = new File([''], 'test.pdf');
@@ -358,7 +386,29 @@ describe('useAccreditationUpload', () => {
       // Clear previous mocks
       vi.clearAllMocks();
 
-      // Set up the mock store with declined status
+      // Set up the mock repository first
+      const uploadDocumentSpy = vi.fn().mockResolvedValue({});
+      const updateSpy = vi.fn().mockResolvedValue({});
+      vi.mocked(useRepositoryAccreditation).mockReturnValue({
+        uploadDocument: uploadDocumentSpy,
+        create: vi.fn(),
+        update: updateSpy,
+        createState: ref({ loading: false, error: null, data: undefined }),
+        updateState: ref({ loading: false, error: null, data: undefined }),
+      });
+
+      // Set up the mock profiles repository
+      vi.mocked(useRepositoryProfiles).mockReturnValue({
+        getProfileById: vi.fn(),
+        getProfileByIdState: ref({
+          loading: false,
+          error: null,
+          data: { id: '123', user_id: '456', accreditation_status: AccreditationTypes.declined },
+        }),
+        getUserState: ref({ loading: false, error: null, data: { profiles: [] } }),
+      });
+
+      // Set up the mock profiles store with declined status
       const mockStore = {
         selectedUserProfileData: ref({
           id: '123',
@@ -368,17 +418,7 @@ describe('useAccreditationUpload', () => {
         selectedUserProfileId: ref('123'),
         selectedUserProfileType: ref('individual'),
       };
-      vi.mocked(useUsersStore).mockReturnValue(mockStore);
-
-      // Set up the mock repository
-      const uploadDocumentSpy = vi.fn().mockResolvedValue({});
-      const updateSpy = vi.fn().mockResolvedValue({});
-      vi.mocked(useRepositoryAccreditation).mockReturnValue({
-        uploadDocument: uploadDocumentSpy,
-        create: vi.fn(),
-        update: updateSpy,
-        error: ref({}),
-      });
+      vi.mocked(useProfilesStore).mockReturnValue(mockStore);
 
       const store = useAccreditationUpload();
       const mockFile = new File([''], 'test.pdf');
@@ -400,7 +440,29 @@ describe('useAccreditationUpload', () => {
       // Clear previous mocks
       vi.clearAllMocks();
 
-      // Set up the mock store
+      // Set up the mock repository first
+      const uploadDocumentSpy = vi.fn().mockResolvedValue({});
+      const createSpy = vi.fn().mockResolvedValue({});
+      vi.mocked(useRepositoryAccreditation).mockReturnValue({
+        uploadDocument: uploadDocumentSpy,
+        create: createSpy,
+        update: vi.fn(),
+        createState: ref({ loading: false, error: null, data: undefined }),
+        updateState: ref({ loading: false, error: null, data: undefined }),
+      });
+
+      // Set up the mock profiles repository
+      vi.mocked(useRepositoryProfiles).mockReturnValue({
+        getProfileById: vi.fn(),
+        getProfileByIdState: ref({
+          loading: false,
+          error: null,
+          data: { id: '123', user_id: '456', accreditation_status: 'new' },
+        }),
+        getUserState: ref({ loading: false, error: null, data: { profiles: [] } }),
+      });
+
+      // Set up the mock profiles store with new status
       const mockStore = {
         selectedUserProfileData: ref({
           id: '123',
@@ -410,17 +472,7 @@ describe('useAccreditationUpload', () => {
         selectedUserProfileId: ref('123'),
         selectedUserProfileType: ref('individual'),
       };
-      vi.mocked(useUsersStore).mockReturnValue(mockStore);
-
-      // Set up the mock repository
-      const uploadDocumentSpy = vi.fn().mockResolvedValue({});
-      const createSpy = vi.fn().mockResolvedValue({});
-      vi.mocked(useRepositoryAccreditation).mockReturnValue({
-        uploadDocument: uploadDocumentSpy,
-        create: createSpy,
-        update: vi.fn(),
-        error: ref({}),
-      });
+      vi.mocked(useProfilesStore).mockReturnValue(mockStore);
 
       const store = useAccreditationUpload();
       const mockFiles = [
@@ -443,13 +495,30 @@ describe('useAccreditationUpload', () => {
     });
 
     it('should not proceed with upload if no files are selected', async () => {
+      // Set up the mock repository first
+      const uploadDocumentSpy = vi.fn();
+      vi.mocked(useRepositoryAccreditation).mockReturnValue({
+        uploadDocument: uploadDocumentSpy,
+        create: vi.fn(),
+        update: vi.fn(),
+        createState: ref({ loading: false, error: null, data: undefined }),
+        updateState: ref({ loading: false, error: null, data: undefined }),
+      });
+
+      // Set up the mock profiles repository
+      vi.mocked(useRepositoryProfiles).mockReturnValue({
+        getProfileById: vi.fn(),
+        getProfileByIdState: ref({
+          loading: false,
+          error: null,
+          data: { id: '123', user_id: '456', accreditation_status: 'new' },
+        }),
+        getUserState: ref({ loading: false, error: null, data: { profiles: [] } }),
+      });
+
       const store = useAccreditationUpload();
       store.accreditationFiles = [];
       store.accreditationNote = 'Test note';
-
-      const accreditationRepository = useRepositoryAccreditation();
-      const uploadDocumentSpy = vi.fn();
-      accreditationRepository.uploadDocument = uploadDocumentSpy;
 
       await store.sendFiles();
 
@@ -475,14 +544,15 @@ describe('useAccreditationUpload', () => {
       };
 
       // Override the mock implementation for this test
-      vi.mocked(useUsersStore).mockReturnValue(mockStore);
+      vi.mocked(useProfilesStore).mockReturnValue(mockStore);
 
       const mockError = { description1: 'Error message' };
       vi.mocked(useRepositoryAccreditation).mockReturnValue({
         uploadDocument: vi.fn(),
         create: vi.fn(),
         update: vi.fn(),
-        error: ref(mockError),
+        createState: ref({ loading: false, error: mockError, data: undefined }),
+        updateState: ref({ loading: false, error: null, data: undefined }),
       });
 
       const store = useAccreditationUpload();
@@ -499,7 +569,8 @@ describe('useAccreditationUpload', () => {
         uploadDocument: vi.fn(),
         create: vi.fn(),
         update: vi.fn(),
-        error: ref(mockError),
+        createState: ref({ loading: false, error: mockError, data: undefined }),
+        updateState: ref({ loading: false, error: null, data: undefined }),
       });
 
       const store = useAccreditationUpload();
@@ -517,7 +588,8 @@ describe('useAccreditationUpload', () => {
         uploadDocument: vi.fn(),
         create: vi.fn(),
         update: vi.fn(),
-        error: ref(mockError),
+        createState: ref({ loading: false, error: mockError, data: undefined }),
+        updateState: ref({ loading: false, error: null, data: undefined }),
       });
 
       const store = useAccreditationUpload();
@@ -534,7 +606,8 @@ describe('useAccreditationUpload', () => {
         uploadDocument: vi.fn(),
         create: vi.fn(),
         update: vi.fn(),
-        error: ref(mockError),
+        createState: ref({ loading: false, error: mockError, data: undefined }),
+        updateState: ref({ loading: false, error: null, data: undefined }),
       });
 
       const store = useAccreditationUpload();
@@ -553,7 +626,8 @@ describe('useAccreditationUpload', () => {
         uploadDocument: vi.fn(),
         create: vi.fn(),
         update: vi.fn(),
-        error: ref(mockError),
+        createState: ref({ loading: false, error: mockError, data: undefined }),
+        updateState: ref({ loading: false, error: null, data: undefined }),
       });
 
       const store = useAccreditationUpload();

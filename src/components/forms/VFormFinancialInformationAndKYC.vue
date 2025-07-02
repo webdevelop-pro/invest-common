@@ -20,6 +20,7 @@ import VFormPartialUnderstandingOfRisks from './VFormPartialUnderstandingOfRisks
 import { FormChild } from 'InvestCommon/types/form';
 import { scrollToError } from 'UiKit/helpers/validation/general';
 import env from 'InvestCommon/global';
+import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 
 const personalFormRef = useTemplateRef<FormChild>('personalFormChild');
 const financialInfoFormRef = useTemplateRef<FormChild>('financialInfoFormChild');
@@ -39,12 +40,17 @@ const {
 const plaidStore = usePlaidStore();
 const { isCreateTokenError } = storeToRefs(plaidStore);
 const accreditationStore = useAccreditationStore();
+const useRepositoryProfilesStore = useRepositoryProfiles();
+const { setProfileByIdState, getProfileByIdOptionsState } = storeToRefs(useRepositoryProfilesStore);
 
 const isLoading = ref(false);
 
 const isValid = computed(() => (personalFormRef.value?.isValid && financialInfoFormRef.value?.isValid
   && investmentObjectivesFormRef.value?.isValid && understandingRisksFormRef.value?.isValid));
 const isDisabledButton = computed(() => (!isValid.value || isSetProfileByIdLoading.value));
+
+const errorData = computed(() => setProfileByIdState.value.error);
+const schemaBackend = computed(() => getProfileByIdOptionsState.value.data);
 
 const hubspotHandle = () => {
   useHubspotForm(env.HUBSPOT_FORM_ID_FINANCIAL_SITUATION).submitFormToHubspot({
@@ -123,6 +129,9 @@ const cancelHandler = () => {
       <VFormPartialPersonalInformation
         ref="personalFormChild"
         :model-data="selectedUserProfileData?.data"
+        :loading="isLoading"
+        :schema-backend="schemaBackend"
+        :error-data="errorData"
       />
       <VFormPartialFinancialSituation
         ref="financialInfoFormChild"

@@ -77,7 +77,7 @@ export const useProfileWalletStore = defineStore('wallet', () => {
   ));
   const isWalletStatusAnyError = computed(() => (
     isWalletStatusError.value || isWalletStatusErrorRetry.value || isWalletStatusErrorDocument.value
-    || isWalletStatusErrorPending.value || isWalletStatusErrorSuspended.value || isWalletStatusCreated.value
+    || isWalletStatusErrorPending.value || isWalletStatusErrorSuspended.value
     || getWalletByProfileIdError.value
   ));
 
@@ -145,7 +145,7 @@ export const useProfileWalletStore = defineStore('wallet', () => {
   const isSomeLinkedBankAccount = computed(() => (getWalletByProfileIdData.value?.funding_source.length > 0));
   const fundingSource = computed(() => getWalletByProfileIdData.value?.funding_source || []);
   const isCanAddBankAccount = computed(() => ((walletId.value !== null) && (walletId.value > 0)
-    && (selectedUserProfileData.value?.kyc_status === 'approved') && !isWalletStatusAnyError.value));
+    && (selectedUserProfileData.value?.kyc_status === 'approved') && !isWalletStatusAnyError.value && !isWalletStatusCreated.value));
   const isCanLoadFunds = computed(() => (isSomeLinkedBankAccount.value && !isWalletStatusAnyError.value));
 
   const deleteLinkedBankAccount = async (sourceId: string | number) => {

@@ -1,142 +1,140 @@
-import { ref } from 'vue';
-import { ApiClient } from 'UiKit/helpers/api/apiClient';
-import { toasterErrorHandling } from 'UiKit/helpers/api/toasterErrorHandling';
+import { ApiClient } from 'InvestCommon/data/service/apiClient';
+import { toasterErrorHandling } from 'InvestCommon/data/repository/error/toasterErrorHandling';
 import { IAccreditationData } from 'InvestCommon/types/api/invest';
 import env from 'InvestCommon/global';
 import { v4 as uuidv4 } from 'uuid';
+import { createActionState } from 'InvestCommon/data/repository/repository';
 
 const { ACCREDITATION_URL } = env;
 
 export const useRepositoryAccreditation = () => {
   const apiClient = new ApiClient(ACCREDITATION_URL);
-  const accreditation = ref<IAccreditationData[]>([]);
-  const isLoadingCreate = ref(false);
-  const isLoadingUpdate = ref(false);
-  const isLoadingUpload = ref(false);
-  const isLoadingCreateEscrow = ref(false);
-  const isLoadingGetAll = ref(false);
-  const error = ref<Error | null>(null);
+
+  // Create action states for each function
+  const getAllState = createActionState<IAccreditationData[]>();
+  const createState = createActionState<any>();
+  const updateState = createActionState<any>();
+  const uploadDocumentState = createActionState<any>();
+  const createEscrowState = createActionState<any>();
 
   const getAll = async (profileId: number) => {
-    isLoadingGetAll.value = true;
-    error.value = null;
-
     try {
+      getAllState.value.loading = true;
+      getAllState.value.error = null;
       const response = await apiClient.get(`/auth/accreditation/${profileId}`);
-      accreditation.value = response.data;
+      getAllState.value.data = response.data;
       return response.data;
     } catch (err) {
-      error.value = err as Error;
+      getAllState.value.error = err as Error;
       toasterErrorHandling(err, 'Failed to fetch accreditation data');
       throw err;
     } finally {
-      isLoadingGetAll.value = false;
+      getAllState.value.loading = false;
     }
   };
 
   const create = async (profileId: number, note: string) => {
-    isLoadingCreate.value = true;
-    error.value = null;
-
     try {
+      createState.value.loading = true;
+      createState.value.error = null;
       const response = await apiClient.post(`/auth/accreditation/create/${profileId}`, {
         ai_method: 'upload',
         notes: note,
       });
+      createState.value.data = response.data;
       return response.data;
     } catch (err) {
-      error.value = err as Error;
+      createState.value.error = err as Error;
       toasterErrorHandling(err, 'Failed to create accreditation');
       throw err;
     } finally {
-      isLoadingCreate.value = false;
+      createState.value.loading = false;
     }
   };
 
   const update = async (profileId: number, note: string) => {
-    isLoadingUpdate.value = true;
-    error.value = null;
-
     try {
+      updateState.value.loading = true;
+      updateState.value.error = null;
       const response = await apiClient.post(`/auth/accreditation/update/${profileId}`, {
         ai_method: 'upload',
         notes: note,
         status: 'New Info Added',
       });
+      updateState.value.data = response.data;
       return response.data;
     } catch (err) {
-      error.value = err as Error;
+      updateState.value.error = err as Error;
       toasterErrorHandling(err, 'Failed to update accreditation');
       throw err;
     } finally {
-      isLoadingUpdate.value = false;
+      updateState.value.loading = false;
     }
   };
 
   const uploadDocument = async (userId: number, profileId: number, formData: FormData) => {
-    isLoadingUpload.value = true;
-    error.value = null;
-
     try {
+      uploadDocumentState.value.loading = true;
+      uploadDocumentState.value.error = null;
       const response = await apiClient.post(`/auth/accreditation/upload_document/${userId}/${profileId}`, formData, {
         headers: {
           'X-Request-ID': uuidv4() as string,
         },
         baseURL: ACCREDITATION_URL,
       });
+      uploadDocumentState.value.data = response.data;
       return response.data;
     } catch (err) {
-      error.value = err as Error;
+      uploadDocumentState.value.error = err as Error;
       toasterErrorHandling(err, 'Failed to upload accreditation document');
       throw err;
     } finally {
-      isLoadingUpload.value = false;
+      uploadDocumentState.value.loading = false;
     }
   };
 
   const createEscrow = async (userId: number, profileId: number) => {
-    isLoadingCreateEscrow.value = true;
-    error.value = null;
-
     try {
+      createEscrowState.value.loading = true;
+      createEscrowState.value.error = null;
       const response = await apiClient.post(`/auth/escrow/${userId}/${profileId}`, null, {
         headers: {
           'X-Request-ID': uuidv4(),
         },
       });
+      createEscrowState.value.data = response.data;
       return response.data;
     } catch (err) {
-      error.value = err as Error;
+      createEscrowState.value.error = err as Error;
       toasterErrorHandling(err, 'Failed to create escrow');
       throw err;
     } finally {
-      isLoadingCreateEscrow.value = false;
+      createEscrowState.value.loading = false;
     }
   };
 
-  const reset = () => {
-    accreditation.value = [];
-    isLoadingCreate.value = false;
-    isLoadingUpdate.value = false;
-    isLoadingUpload.value = false;
-    isLoadingCreateEscrow.value = false;
-    isLoadingGetAll.value = false;
-    error.value = null;
+  const resetAll = () => {
+    getAllState.value = { loading: false, error: null, data: undefined };
+    createState.value = { loading: false, error: null, data: undefined };
+    updateState.value = { loading: false, error: null, data: undefined };
+    uploadDocumentState.value = { loading: false, error: null, data: undefined };
+    createEscrowState.value = { loading: false, error: null, data: undefined };
   };
 
   return {
-    accreditation,
-    isLoadingCreate,
-    isLoadingUpdate,
-    isLoadingUpload,
-    isLoadingCreateEscrow,
-    isLoadingGetAll,
-    error,
+    // States
+    getAllState,
+    createState,
+    updateState,
+    uploadDocumentState,
+    createEscrowState,
+
+    // Functions
     getAll,
     create,
     update,
     uploadDocument,
     createEscrow,
-    reset,
+    resetAll,
   };
 };

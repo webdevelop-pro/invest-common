@@ -28,6 +28,8 @@ export const useProfilesStore = defineStore('profiles', () => {
   const selectedUserProfileData = computed(() => getProfileByIdState.value?.data || profileByIdInProfilesList.value);
   const selectedUserProfileType = computed(() => selectedUserProfileData.value?.type || 'individual');
 
+  const isSelectedProfileLoading = computed(() => getProfileByIdState.value?.loading || getUserState.value?.loading || false);
+
   const urlProfileId = computed(() => {
     if (!+IS_STATIC_SITE) return route.params?.profileId;
     return (window && window?.location?.pathname.split('/')[2]);
@@ -101,6 +103,7 @@ export const useProfilesStore = defineStore('profiles', () => {
     selectedUserProfileId,
     selectedUserProfileData,
     selectedUserProfileType,
+    isSelectedProfileLoading,
 
     // Methods
     setSelectedUserProfileById,

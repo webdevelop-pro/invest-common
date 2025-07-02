@@ -1,25 +1,12 @@
 import { ref, computed } from 'vue';
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { ApiClient } from 'UiKit/helpers/api/apiClient';
+import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import env from 'InvestCommon/global';
-import { toasterErrorHandling } from 'UiKit/helpers/api/toasterErrorHandling';
+import { toasterErrorHandling } from 'InvestCommon/data/repository/error/toasterErrorHandling';
+import { createActionState } from 'InvestCommon/data/repository/repository';
 import {
   IProfileData, IUserIdentityResponse, IProfileIndividual, ISchema,
 } from './profiles.types';
-
-// Generic type for action states
-type ActionState<T> = {
-  data: T | undefined;
-  loading: boolean;
-  error: Error | null;
-};
-
-// Utility function to create action states
-const createActionState = <T>() => ref<ActionState<T>>({
-  data: undefined,
-  loading: false,
-  error: null,
-});
 
 export const useRepositoryProfiles = defineStore('repository-profiles', () => {
   // Dependencies
@@ -197,26 +184,17 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
     }
   };
 
-  const reset = () => {
+  const resetAll = () => {
     // Reset all action states
-    Object.values({
-      setProfileByIdState,
-      getProfileByIdState,
-      getProfileByIdOptionsState,
-      setProfileState,
-      getUserState,
-      setUserState,
-      setUserOptionsState,
-      updateUserDataState,
-      getProfileOptionsState,
-    }).forEach((action) => {
-      // eslint-disable-next-line no-param-reassign
-      action.value.data = undefined;
-      // eslint-disable-next-line no-param-reassign
-      action.value.loading = false;
-      // eslint-disable-next-line no-param-reassign
-      action.value.error = null;
-    });
+    setProfileByIdState.value = { loading: false, error: null, data: undefined };
+    getProfileByIdState.value = { loading: false, error: null, data: undefined };
+    getProfileByIdOptionsState.value = { loading: false, error: null, data: undefined };
+    setProfileState.value = { loading: false, error: null, data: undefined };
+    getUserState.value = { loading: false, error: null, data: undefined };
+    setUserState.value = { loading: false, error: null, data: undefined };
+    setUserOptionsState.value = { loading: false, error: null, data: undefined };
+    updateUserDataState.value = { loading: false, error: null, data: undefined };
+    getProfileOptionsState.value = { loading: false, error: null, data: undefined };
   };
 
   return {
@@ -243,7 +221,7 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
     setUser,
     setUserOptions,
     updateUserData,
-    reset,
+    resetAll,
   };
 });
 

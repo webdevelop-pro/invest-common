@@ -1,13 +1,13 @@
 import {
   describe, it, expect, beforeEach, vi,
 } from 'vitest';
-import { ApiClient } from 'UiKit/helpers/api/apiClient';
-import { toasterErrorHandling } from 'UiKit/helpers/api/toasterErrorHandling';
+import { ApiClient } from 'InvestCommon/data/service/apiClient';
+import { toasterErrorHandling } from 'InvestCommon/data/repository/error/toasterErrorHandling';
 import { AccreditationTypes } from 'InvestCommon/types/api/invest';
 import { useRepositoryAccreditation } from '../accreditation.repository';
 
 // Mock ApiClient
-vi.mock('UiKit/helpers/api/apiClient', () => ({
+vi.mock('InvestCommon/data/service/apiClient', () => ({
   ApiClient: vi.fn().mockImplementation(() => ({
     get: vi.fn().mockImplementation(() => Promise.resolve({ data: [] })),
     post: vi.fn().mockImplementation(() => Promise.resolve({ data: {} })),
@@ -15,7 +15,7 @@ vi.mock('UiKit/helpers/api/apiClient', () => ({
 }));
 
 // Mock toaster error handling
-vi.mock('UiKit/helpers/api/toasterErrorHandling', () => ({
+vi.mock('InvestCommon/data/repository/error/toasterErrorHandling', () => ({
   toasterErrorHandling: vi.fn(),
 }));
 
@@ -40,9 +40,9 @@ describe('Accreditation Repository', () => {
     const result = await repository.getAll(123);
 
     expect(result).toEqual(mockAccreditation);
-    expect(repository.accreditation.value).toEqual(mockAccreditation);
-    expect(repository.isLoadingGetAll.value).toBe(false);
-    expect(repository.error.value).toBeNull();
+    expect(repository.getAllState.value.data).toEqual(mockAccreditation);
+    expect(repository.getAllState.value.loading).toBe(false);
+    expect(repository.getAllState.value.error).toBeNull();
     expect(toasterErrorHandling).not.toHaveBeenCalled();
   });
 
@@ -57,8 +57,8 @@ describe('Accreditation Repository', () => {
     const repository = useRepositoryAccreditation();
 
     await expect(repository.getAll(123)).rejects.toThrow(mockError);
-    expect(repository.error.value).toBe(mockError);
-    expect(repository.isLoadingGetAll.value).toBe(false);
+    expect(repository.getAllState.value.error).toBe(mockError);
+    expect(repository.getAllState.value.loading).toBe(false);
     expect(toasterErrorHandling).toHaveBeenCalledWith(expect.any(Object), 'Failed to fetch accreditation data');
   });
 
@@ -74,8 +74,8 @@ describe('Accreditation Repository', () => {
     const result = await repository.create(123, 'Test note');
 
     expect(result).toEqual(mockResponse);
-    expect(repository.isLoadingCreate.value).toBe(false);
-    expect(repository.error.value).toBeNull();
+    expect(repository.createState.value.loading).toBe(false);
+    expect(repository.createState.value.error).toBeNull();
     expect(toasterErrorHandling).not.toHaveBeenCalled();
   });
 
@@ -91,8 +91,8 @@ describe('Accreditation Repository', () => {
     const result = await repository.update(123, 'Updated note');
 
     expect(result).toEqual(mockResponse);
-    expect(repository.isLoadingUpdate.value).toBe(false);
-    expect(repository.error.value).toBeNull();
+    expect(repository.updateState.value.loading).toBe(false);
+    expect(repository.updateState.value.error).toBeNull();
     expect(toasterErrorHandling).not.toHaveBeenCalled();
   });
 
@@ -109,8 +109,8 @@ describe('Accreditation Repository', () => {
     const result = await repository.uploadDocument(123, 456, formData);
 
     expect(result).toEqual(mockResponse);
-    expect(repository.isLoadingUpload.value).toBe(false);
-    expect(repository.error.value).toBeNull();
+    expect(repository.uploadDocumentState.value.loading).toBe(false);
+    expect(repository.uploadDocumentState.value.error).toBeNull();
     expect(toasterErrorHandling).not.toHaveBeenCalled();
   });
 
@@ -126,8 +126,8 @@ describe('Accreditation Repository', () => {
     const result = await repository.createEscrow(123, 456);
 
     expect(result).toEqual(mockResponse);
-    expect(repository.isLoadingCreateEscrow.value).toBe(false);
-    expect(repository.error.value).toBeNull();
+    expect(repository.createEscrowState.value.loading).toBe(false);
+    expect(repository.createEscrowState.value.error).toBeNull();
     expect(toasterErrorHandling).not.toHaveBeenCalled();
   });
 
@@ -142,8 +142,8 @@ describe('Accreditation Repository', () => {
     const repository = useRepositoryAccreditation();
 
     await expect(repository.create(123, 'Test note')).rejects.toThrow(mockError);
-    expect(repository.error.value).toBe(mockError);
-    expect(repository.isLoadingCreate.value).toBe(false);
+    expect(repository.createState.value.error).toBe(mockError);
+    expect(repository.createState.value.loading).toBe(false);
     expect(toasterErrorHandling).toHaveBeenCalledWith(expect.any(Object), 'Failed to create accreditation');
   });
 
@@ -158,8 +158,8 @@ describe('Accreditation Repository', () => {
     const repository = useRepositoryAccreditation();
 
     await expect(repository.update(123, 'Updated note')).rejects.toThrow(mockError);
-    expect(repository.error.value).toBe(mockError);
-    expect(repository.isLoadingUpdate.value).toBe(false);
+    expect(repository.updateState.value.error).toBe(mockError);
+    expect(repository.updateState.value.loading).toBe(false);
     expect(toasterErrorHandling).toHaveBeenCalledWith(expect.any(Object), 'Failed to update accreditation');
   });
 
@@ -175,8 +175,8 @@ describe('Accreditation Repository', () => {
     const formData = new FormData();
 
     await expect(repository.uploadDocument(123, 456, formData)).rejects.toThrow(mockError);
-    expect(repository.error.value).toBe(mockError);
-    expect(repository.isLoadingUpload.value).toBe(false);
+    expect(repository.uploadDocumentState.value.error).toBe(mockError);
+    expect(repository.uploadDocumentState.value.loading).toBe(false);
     expect(toasterErrorHandling).toHaveBeenCalledWith(expect.any(Object), 'Failed to upload accreditation document');
   });
 
@@ -191,9 +191,9 @@ describe('Accreditation Repository', () => {
     const repository = useRepositoryAccreditation();
 
     await expect(repository.createEscrow(123, 456)).rejects.toThrow(mockError);
-    expect(repository.error.value).toBe(mockError);
-    expect(repository.isLoadingCreateEscrow.value).toBe(false);
-    expect(toasterErrorHandling).toHaveBeenCalledWith(expect.any(Object), 'Failed to create escrow');
+    expect(repository.createEscrowState.value.error).toBe(mockError);
+    expect(repository.createEscrowState.value.loading).toBe(false);
+    expect(toasterErrorHandling).toHaveBeenCalledWith(mockError, 'Failed to create escrow');
   });
 
   it('should verify loading states during operations', async () => {
@@ -209,28 +209,28 @@ describe('Accreditation Repository', () => {
 
     // Test create loading state
     const createPromise = repository.create(123, 'Test note');
-    expect(repository.isLoadingCreate.value).toBe(true);
+    expect(repository.createState.value.loading).toBe(true);
     await createPromise;
-    expect(repository.isLoadingCreate.value).toBe(false);
+    expect(repository.createState.value.loading).toBe(false);
 
     // Test update loading state
     const updatePromise = repository.update(123, 'Updated note');
-    expect(repository.isLoadingUpdate.value).toBe(true);
+    expect(repository.updateState.value.loading).toBe(true);
     await updatePromise;
-    expect(repository.isLoadingUpdate.value).toBe(false);
+    expect(repository.updateState.value.loading).toBe(false);
 
     // Test upload loading state
     const formData = new FormData();
     const uploadPromise = repository.uploadDocument(123, 456, formData);
-    expect(repository.isLoadingUpload.value).toBe(true);
+    expect(repository.uploadDocumentState.value.loading).toBe(true);
     await uploadPromise;
-    expect(repository.isLoadingUpload.value).toBe(false);
+    expect(repository.uploadDocumentState.value.loading).toBe(false);
 
     // Test escrow loading state
     const escrowPromise = repository.createEscrow(123, 456);
-    expect(repository.isLoadingCreateEscrow.value).toBe(true);
+    expect(repository.createEscrowState.value.loading).toBe(true);
     await escrowPromise;
-    expect(repository.isLoadingCreateEscrow.value).toBe(false);
+    expect(repository.createEscrowState.value.loading).toBe(false);
   });
 
   it('should handle empty or invalid inputs', async () => {
@@ -265,5 +265,26 @@ describe('Accreditation Repository', () => {
       null,
       expect.any(Object),
     );
+  });
+
+  it('should reset all states correctly', () => {
+    const repository = useRepositoryAccreditation();
+    
+    // Set some initial state
+    repository.getAllState.value = { loading: true, error: new Error('test'), data: [] };
+    repository.createState.value = { loading: true, error: new Error('test'), data: {} };
+    repository.updateState.value = { loading: true, error: new Error('test'), data: {} };
+    repository.uploadDocumentState.value = { loading: true, error: new Error('test'), data: {} };
+    repository.createEscrowState.value = { loading: true, error: new Error('test'), data: {} };
+
+    // Reset all states
+    repository.resetAll();
+
+    // Verify all states are reset
+    expect(repository.getAllState.value).toEqual({ loading: false, error: null, data: undefined });
+    expect(repository.createState.value).toEqual({ loading: false, error: null, data: undefined });
+    expect(repository.updateState.value).toEqual({ loading: false, error: null, data: undefined });
+    expect(repository.uploadDocumentState.value).toEqual({ loading: false, error: null, data: undefined });
+    expect(repository.createEscrowState.value).toEqual({ loading: false, error: null, data: undefined });
   });
 });

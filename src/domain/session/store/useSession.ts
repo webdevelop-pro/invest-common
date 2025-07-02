@@ -9,6 +9,7 @@ export const useSessionStore = defineStore('userSession', () => {
 
   const userSession = ref(cookies.get('session'));
   const userLoggedIn = computed(() => Boolean(userSession.value?.active));
+  const userSessionTraits = computed(() => userSession.value?.identity?.traits);
 
   const updateSession = (session: ISession) => {
     userSession.value = session;
@@ -33,6 +34,7 @@ export const useSessionStore = defineStore('userSession', () => {
     updateSession,
     userSession,
     userLoggedIn,
+    userSessionTraits,
   };
 });
 

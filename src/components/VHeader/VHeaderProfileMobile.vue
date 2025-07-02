@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, PropType } from 'vue';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
-import { useDialogs } from 'InvestCommon/store/useDialogs';
+import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 import { storeToRefs } from 'pinia';
 import {
   VNavigationMenuList, VNavigationMenuItem, VNavigationMenuLink, VNavigationMenu,

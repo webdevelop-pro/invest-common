@@ -25,7 +25,7 @@ import { scrollToError } from 'UiKit/helpers/validation/general';
 import { FormModelAddTransaction } from 'InvestCommon/types/form';
 import VFormSelect from 'UiKit/components/Base/VForm/VFormSelect.vue';
 
-const emit = defineEmits(['cancel']);
+const emit = defineEmits(['close']);
 
 const props = defineProps({
   transactionType: {
@@ -112,13 +112,13 @@ const saveHandler = async () => {
 
   await profileWalletTransactionStore.setProfileWalletAddTransaction(data);
   if (isSetProfileWalletAddTransactionError.value) return;
-  await profileWalletStore.getWalletByProfileId(selectedUserProfileId.value);
-  profileWalletTransactionStore.getProfileByIdWalletTransactions();
-  emit('cancel');
+  // profileWalletStore.getWalletByProfileId(selectedUserProfileId.value);
+  // profileWalletTransactionStore.getProfileByIdWalletTransactions();
+  emit('close');
 };
 
 const cancelHandler = () => {
-  emit('cancel');
+  emit('close');
 };
 
 watch(() => model, () => {

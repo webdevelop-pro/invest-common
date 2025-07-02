@@ -40,7 +40,7 @@ const isDisabledButton = computed(() => (!isValid.value || isSetUserLoading.valu
 const saveHandler = async () => {
   personalFormRef.value?.onValidate();
   if (!isValid.value) {
-    nextTick(() => scrollToError('VFormPersonalInformation'));
+    nextTick(() => scrollToError('VFormAccount'));
     return;
   }
 
