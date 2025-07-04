@@ -6,7 +6,7 @@ import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
 import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { scrollToError } from 'UiKit/helpers/validation/general';
-import { useUserSession } from 'InvestCommon/store/useUserSession';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import { urlProfile } from 'InvestCommon/global/links';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
@@ -21,7 +21,7 @@ const HUBSPOT_FORM_ID = '07463465-7f03-42d2-a85e-40cf8e29969d';
 export const useAuthenticatorStore = defineStore('authenticator', () => {
   const authRepository = useRepositoryAuth();
   const { getSchemaState, setLoginState } = storeToRefs(authRepository);
-  const userSessionStore = useUserSession();
+  const userSessionStore = useSessionStore();
 
   // Query parameters handling
   const queryParams = computed(() => {

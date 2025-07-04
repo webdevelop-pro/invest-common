@@ -2,10 +2,26 @@ import {
   describe, it, expect, vi, beforeEach,
 } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
-import { useUsersStore } from 'InvestCommon/store/useUsers';
-import { AccreditationTypes, AccreditationTextStatuses } from 'InvestCommon/data/accreditation/accreditation.types';
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
+import { AccreditationTypes } from 'InvestCommon/types/api/invest';
+import { AccreditationTextStatuses } from 'InvestCommon/data/accreditation/accreditation.types';
 import { ROUTE_ACCREDITATION_UPLOAD, ROUTE_DASHBOARD_PERSONAL_DETAILS } from 'InvestCommon/helpers/enums/routes';
 import { useAccreditationButton } from '../useAccreditationButton';
+import { ref } from 'vue';
+
+vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
+  useProfilesStore: vi.fn(() => ({
+    selectedUserProfileData: ref(null),
+    selectedUserProfileId: ref(null),
+  })),
+}));
+
+vi.mock('InvestCommon/domain/session/store/useSession', () => ({
+  useSessionStore: vi.fn(() => ({
+    userLoggedIn: ref(false),
+  })),
+}));
 
 const routerMock = { push: vi.fn() };
 
@@ -21,6 +37,7 @@ describe('useAccreditationButton', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
     routerMock.push.mockClear();
+    vi.clearAllMocks();
   });
 
   it('should initialize with correct default values', () => {
@@ -29,14 +46,16 @@ describe('useAccreditationButton', () => {
   });
 
   it('should compute correct data for new accreditation status', () => {
-    const store = useAccreditationButton();
-    const usersStore = useUsersStore();
+    const mockProfilesStore = {
+      selectedUserProfileData: ref({
+        accreditation_status: AccreditationTypes.new,
+        escrow_id: null,
+      }),
+      selectedUserProfileId: ref(123),
+    };
+    vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStore);
 
-    vi.spyOn(usersStore, 'selectedUserProfileData', 'get').mockReturnValue({
-      accreditation_status: AccreditationTypes.new,
-      escrow_id: null,
-    });
-    vi.spyOn(usersStore, 'selectedUserProfileId', 'get').mockReturnValue(123);
+    const store = useAccreditationButton();
 
     expect(store.data).toEqual({
       ...AccreditationTextStatuses[AccreditationTypes.new],
@@ -48,76 +67,98 @@ describe('useAccreditationButton', () => {
   });
 
   it('should compute correct tag background for approved status', () => {
-    const store = useAccreditationButton();
-    const usersStore = useUsersStore();
+    const mockProfilesStore = {
+      selectedUserProfileData: ref({
+        accreditation_status: AccreditationTypes.approved,
+      }),
+      selectedUserProfileId: ref(null),
+    };
+    vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStore);
 
-    vi.spyOn(usersStore, 'selectedUserProfileData', 'get').mockReturnValue({
-      accreditation_status: AccreditationTypes.approved,
-    });
+    const store = useAccreditationButton();
     expect(store.tagBackground).toBe('secondary');
   });
 
   it('should compute correct tag background and class for declined status', () => {
-    const store = useAccreditationButton();
-    const usersStore = useUsersStore();
-
-    const mockProfileData = {
-      accreditation_status: 'declined' as AccreditationTypes,
+    const mockProfilesStore = {
+      selectedUserProfileData: ref({
+        accreditation_status: 'declined' as AccreditationTypes,
+      }),
+      selectedUserProfileId: ref(null),
     };
-    vi.spyOn(usersStore, 'selectedUserProfileData', 'get').mockReturnValue(mockProfileData);
+    vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStore);
+
+    const store = useAccreditationButton();
     expect(store.tagBackground).toBe('red');
   });
 
   it('should compute correct tag background for pending status', () => {
-    const store = useAccreditationButton();
-    const usersStore = useUsersStore();
+    const mockProfilesStore = {
+      selectedUserProfileData: ref({
+        accreditation_status: AccreditationTypes.pending,
+      }),
+      selectedUserProfileId: ref(null),
+    };
+    vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStore);
 
-    vi.spyOn(usersStore, 'selectedUserProfileData', 'get').mockReturnValue({
-      accreditation_status: AccreditationTypes.pending,
-    });
+    const store = useAccreditationButton();
     expect(store.tagBackground).toBe('yellow');
   });
 
   it('should be clickable for new accreditation status', () => {
-    const store = useAccreditationButton();
-    const usersStore = useUsersStore();
+    const mockProfilesStore = {
+      selectedUserProfileData: ref({
+        accreditation_status: AccreditationTypes.new,
+      }),
+      selectedUserProfileId: ref(null),
+    };
+    vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStore);
 
-    vi.spyOn(usersStore, 'selectedUserProfileData', 'get').mockReturnValue({
-      accreditation_status: AccreditationTypes.new,
-    });
+    const store = useAccreditationButton();
     expect(store.isAccreditationIsClickable).toBe(true);
   });
 
   it('should not be clickable for pending accreditation status', () => {
-    const store = useAccreditationButton();
-    const usersStore = useUsersStore();
+    const mockProfilesStore = {
+      selectedUserProfileData: ref({
+        accreditation_status: AccreditationTypes.pending,
+      }),
+      selectedUserProfileId: ref(null),
+    };
+    vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStore);
 
-    vi.spyOn(usersStore, 'selectedUserProfileData', 'get').mockReturnValue({
-      accreditation_status: AccreditationTypes.pending,
-    });
+    const store = useAccreditationButton();
     expect(store.isAccreditationIsClickable).toBe(false);
   });
 
   it('should not be clickable for approved accreditation status', () => {
-    const store = useAccreditationButton();
-    const usersStore = useUsersStore();
+    const mockProfilesStore = {
+      selectedUserProfileData: ref({
+        accreditation_status: AccreditationTypes.approved,
+      }),
+      selectedUserProfileId: ref(null),
+    };
+    vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStore);
 
-    vi.spyOn(usersStore, 'selectedUserProfileData', 'get').mockReturnValue({
-      accreditation_status: AccreditationTypes.approved,
-    });
+    const store = useAccreditationButton();
     expect(store.isAccreditationIsClickable).toBe(false);
   });
 
   it('should handle click when user is logged in and accreditation is clickable', async () => {
-    const store = useAccreditationButton();
-    const usersStore = useUsersStore();
+    const mockProfilesStore = {
+      selectedUserProfileData: ref({
+        accreditation_status: AccreditationTypes.new,
+        escrow_id: null,
+      }),
+      selectedUserProfileId: ref(123),
+    };
+    const mockSessionStore = {
+      userLoggedIn: ref(true),
+    };
+    vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStore);
+    vi.mocked(useSessionStore).mockReturnValue(mockSessionStore);
 
-    vi.spyOn(usersStore, 'userLoggedIn', 'get').mockReturnValue(true);
-    vi.spyOn(usersStore, 'selectedUserProfileData', 'get').mockReturnValue({
-      accreditation_status: AccreditationTypes.new,
-      escrow_id: null,
-    });
-    vi.spyOn(usersStore, 'selectedUserProfileId', 'get').mockReturnValue(123);
+    const store = useAccreditationButton();
 
     await store.onClick();
     expect(routerMock.push).toHaveBeenCalledWith({
@@ -128,15 +169,20 @@ describe('useAccreditationButton', () => {
   });
 
   it('should handle click when user has escrow_id', async () => {
-    const store = useAccreditationButton();
-    const usersStore = useUsersStore();
+    const mockProfilesStore = {
+      selectedUserProfileData: ref({
+        accreditation_status: AccreditationTypes.new,
+        escrow_id: 'escrow123',
+      }),
+      selectedUserProfileId: ref(123),
+    };
+    const mockSessionStore = {
+      userLoggedIn: ref(true),
+    };
+    vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStore);
+    vi.mocked(useSessionStore).mockReturnValue(mockSessionStore);
 
-    vi.spyOn(usersStore, 'userLoggedIn', 'get').mockReturnValue(true);
-    vi.spyOn(usersStore, 'selectedUserProfileData', 'get').mockReturnValue({
-      accreditation_status: AccreditationTypes.new,
-      escrow_id: 'escrow123',
-    });
-    vi.spyOn(usersStore, 'selectedUserProfileId', 'get').mockReturnValue(123);
+    const store = useAccreditationButton();
 
     await store.onClick();
     expect(routerMock.push).toHaveBeenCalledWith({
@@ -146,76 +192,103 @@ describe('useAccreditationButton', () => {
   });
 
   it('should not handle click when user is not logged in', async () => {
-    const store = useAccreditationButton();
-    const usersStore = useUsersStore();
+    const mockProfilesStore = {
+      selectedUserProfileData: ref({
+        accreditation_status: AccreditationTypes.new,
+      }),
+      selectedUserProfileId: ref(null),
+    };
+    const mockSessionStore = {
+      userLoggedIn: ref(false),
+    };
+    vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStore);
+    vi.mocked(useSessionStore).mockReturnValue(mockSessionStore);
 
-    vi.spyOn(usersStore, 'userLoggedIn', 'get').mockReturnValue(false);
-    vi.spyOn(usersStore, 'selectedUserProfileData', 'get').mockReturnValue({
-      accreditation_status: AccreditationTypes.new,
-    });
+    const store = useAccreditationButton();
 
     await store.onClick();
     expect(routerMock.push).not.toHaveBeenCalled();
   });
 
   it('should not handle click when accreditation is not clickable', async () => {
-    const store = useAccreditationButton();
-    const usersStore = useUsersStore();
+    const mockSessionStore = {
+      userLoggedIn: ref(true),
+    };
+    vi.mocked(useSessionStore).mockReturnValue(mockSessionStore);
 
-    vi.spyOn(usersStore, 'userLoggedIn', 'get').mockReturnValue(true);
-    vi.spyOn(usersStore, 'selectedUserProfileId', 'get').mockReturnValue(123);
+    // Test pending status
+    const mockProfilesStorePending = {
+      selectedUserProfileData: ref({
+        accreditation_status: AccreditationTypes.pending,
+        escrow_id: null,
+      }),
+      selectedUserProfileId: ref(123),
+    };
+    vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStorePending);
 
-    // pending
-    vi.spyOn(usersStore, 'selectedUserProfileData', 'get').mockReturnValue({
-      accreditation_status: AccreditationTypes.pending,
-      escrow_id: null,
-    });
-    await store.onClick();
+    const storePending = useAccreditationButton();
+    await storePending.onClick();
     expect(routerMock.push).not.toHaveBeenCalled();
 
-    // approved
-    vi.spyOn(usersStore, 'selectedUserProfileData', 'get').mockReturnValue({
-      accreditation_status: AccreditationTypes.approved,
-      escrow_id: null,
-    });
-    await store.onClick();
+    // Test approved status
+    const mockProfilesStoreApproved = {
+      selectedUserProfileData: ref({
+        accreditation_status: AccreditationTypes.approved,
+        escrow_id: null,
+      }),
+      selectedUserProfileId: ref(123),
+    };
+    vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStoreApproved);
+
+    const storeApproved = useAccreditationButton();
+    await storeApproved.onClick();
     expect(routerMock.push).not.toHaveBeenCalled();
   });
 
   it('should handle missing profile data gracefully', () => {
-    const store = useAccreditationButton();
-    const usersStore = useUsersStore();
+    const mockProfilesStore = {
+      selectedUserProfileData: ref(null),
+      selectedUserProfileId: ref(null),
+    };
+    vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStore);
 
-    vi.spyOn(usersStore, 'selectedUserProfileData', 'get').mockReturnValue(null);
-    vi.spyOn(usersStore, 'selectedUserProfileId', 'get').mockReturnValue(null);
+    const store = useAccreditationButton();
 
     expect(store.data).toBeDefined();
     expect(store.isAccreditationIsClickable).toBe(false);
   });
 
   it('should handle undefined accreditation status', () => {
-    const store = useAccreditationButton();
-    const usersStore = useUsersStore();
+    const mockProfilesStore = {
+      selectedUserProfileData: ref({
+        accreditation_status: undefined,
+        escrow_id: null,
+      }),
+      selectedUserProfileId: ref(null),
+    };
+    vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStore);
 
-    vi.spyOn(usersStore, 'selectedUserProfileData', 'get').mockReturnValue({
-      accreditation_status: undefined,
-      escrow_id: null,
-    });
+    const store = useAccreditationButton();
 
     expect(store.tagBackground).toBeDefined();
     expect(store.isAccreditationIsClickable).toBe(false);
   });
 
   it('should handle click with missing profile ID', async () => {
-    const store = useAccreditationButton();
-    const usersStore = useUsersStore();
+    const mockProfilesStore = {
+      selectedUserProfileData: ref({
+        accreditation_status: AccreditationTypes.new,
+        escrow_id: null,
+      }),
+      selectedUserProfileId: ref(null),
+    };
+    const mockSessionStore = {
+      userLoggedIn: ref(true),
+    };
+    vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStore);
+    vi.mocked(useSessionStore).mockReturnValue(mockSessionStore);
 
-    vi.spyOn(usersStore, 'userLoggedIn', 'get').mockReturnValue(true);
-    vi.spyOn(usersStore, 'selectedUserProfileData', 'get').mockReturnValue({
-      accreditation_status: AccreditationTypes.new,
-      escrow_id: null,
-    });
-    vi.spyOn(usersStore, 'selectedUserProfileId', 'get').mockReturnValue(null);
+    const store = useAccreditationButton();
 
     await store.onClick();
     expect(routerMock.push).not.toHaveBeenCalled();

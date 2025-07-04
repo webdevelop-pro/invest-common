@@ -1,21 +1,14 @@
 <script setup lang="ts">
-import {
-  watch, PropType, reactive, ref, computed,
-} from 'vue';
-import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
+import { PropType, computed, watch, toRaw } from 'vue';
 import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
 import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
-import { storeToRefs } from 'pinia';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import VFormRadio from 'UiKit/components/Base/VForm/VFormRadio.vue';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { FormModelFinancialSituation } from 'InvestCommon/types/form';
 import { urlBlogSingle } from 'InvestCommon/global/links';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
-import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
-import { filterSchema } from 'UiKit/helpers/validation/general';
-import { isEmpty } from 'UiKit/helpers/general';
-import { createFormModel } from 'UiKit/helpers/model';
+import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
 
 const isAccreditedRadioOptions = [
   {
@@ -30,14 +23,12 @@ const isAccreditedRadioOptions = [
 
 const props = defineProps({
   modelData: Object as PropType<FormModelFinancialSituation>,
+  errorData: Object,
+  schemaBackend: Object as PropType<JSONSchemaType<FormModelFinancialSituation> | undefined>,
+  loading: Boolean,
 });
 
-const userIdentityStore = useUserProfilesStore();
-const {
-  setProfileByIdErrorData, getProfileByIdOptionsData,
-} = storeToRefs(userIdentityStore);
-
-const schema = {
+const schemaFrontend = {
   $schema: 'http://json-schema.org/draft-07/schema#',
   definitions: {
     AccreditedInvestor: {
@@ -57,43 +48,35 @@ const schema = {
   $ref: '#/definitions/Individual',
 } as unknown as JSONSchemaType<FormModelFinancialSituation>;
 
-const model = reactive<FormModelFinancialSituation>({
-  accredited_investor: {
-    is_accredited: props.modelData?.accredited_investor?.is_accredited || false,
+const {
+  model,
+  validation,
+  isValid,
+  onValidate,
+  schemaObject,
+} = useFormValidation<FormModelFinancialSituation>(
+  schemaFrontend,
+  props.schemaBackend,
+  {
+    accredited_investor: {
+      is_accredited: props.modelData?.accredited_investor?.is_accredited ?? false,
+    },
   },
-});
-const formModel = createFormModel(schema);
-let validator = new PrecompiledValidator<FormModelFinancialSituation>(
-  filterSchema(getProfileByIdOptionsData.value, formModel),
-  schema,
 );
-const validation = ref<unknown>();
-const isValid = computed(() => isEmpty(validation.value || {}));
-
-const onValidate = () => {
-  validation.value = validator.getFormValidationErrors(model);
-};
 
 defineExpose({
-  model, validation, validator, isValid, onValidate,
+  model, validation, isValid, onValidate,
 });
 
-watch(() => props.modelData?.accredited_investor?.is_accredited, () => {
-  if (props.modelData?.accredited_investor?.is_accredited && model.accredited_investor?.is_accredited) {
-    model.accredited_investor.is_accredited = props.modelData?.accredited_investor?.is_accredited;
+watch(() => props.modelData, (newModelData) => {
+  if (!newModelData) return;
+  if (
+    newModelData.accredited_investor?.is_accredited !== undefined &&
+    newModelData.accredited_investor?.is_accredited !== null
+  ) {
+    model.accredited_investor.is_accredited = newModelData.accredited_investor.is_accredited;
   }
-}, { deep: true });
-
-watch(() => model, () => {
-  if (!isValid.value) onValidate();
-}, { deep: true });
-
-watch(() => [getProfileByIdOptionsData.value, schema], () => {
-  validator = new PrecompiledValidator<FormModelFinancialSituation>(
-    filterSchema(getProfileByIdOptionsData.value, formModel),
-    schema,
-  );
-});
+}, { deep: true, immediate: true });
 </script>
 
 <template>
@@ -106,9 +89,9 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
         <VFormGroup
           :model="model"
           :validation="validation"
-          :schema-back="getProfileByIdOptionsData"
-          :schema-front="schema"
-          :error-text="setProfileByIdErrorData?.accredited_investor?.is_accredited"
+          :schema-back="schemaBackend"
+          :schema-front="schemaFrontend"
+          :error-text="errorData?.accredited_investor?.is_accredited"
           path="accredited_investor.is_accredited"
           data-testid="is-accredited"
         >

@@ -14,6 +14,18 @@ export interface ITextStatuses {
   tooltip?: string;
 }
 
+export interface IAccreditationData {
+  completed_at: string;
+  created_at: string;
+  status: AccreditationTypes;
+  notes?: string;
+}
+
+export interface IAccreditation {
+  accreditation_data: IAccreditationData[];
+  accreditation_status: AccreditationTypes;
+}
+
 export const AccreditationTextStatuses: Record<AccreditationTypes, ITextStatuses> = {
   [AccreditationTypes.new]: {
     text: 'Verify Accreditation',

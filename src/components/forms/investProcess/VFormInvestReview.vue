@@ -5,6 +5,7 @@ import { useFundingStore } from 'InvestCommon/store/useFunding';
 import { useInvestmentsStore } from 'InvestCommon/store/useInvestments';
 import { useOfferStore } from 'InvestCommon/store/useOffer';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import { currency } from 'InvestCommon/helpers/currency';
 import { ROUTE_INVEST_FUNDING, ROUTE_INVEST_THANK } from 'InvestCommon/helpers/enums/routes';

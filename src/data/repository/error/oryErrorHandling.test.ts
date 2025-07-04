@@ -60,9 +60,9 @@ describe('oryErrorHandling', () => {
           },
         },
       },
-    };
+    } as any;
 
-    oryErrorHandling(error as any, 'login', mockResetFlow, 'test');
+    oryErrorHandling(error, 'login', mockResetFlow, 'test');
     expect(error.message).toBe('Invalid email or password.');
   });
 
@@ -79,23 +79,7 @@ describe('oryErrorHandling', () => {
     expect(navigateWithQueryParams).toHaveBeenCalledWith('urlProfile');
   });
 
-  it('should handle session_aal2_required error with redirect', () => {
-    const error = {
-      data: {
-        responseJson: {
-          error: { id: 'session_aal2_required' },
-          redirect_browser_to: 'http://example.com/2fa',
-        },
-      },
-    };
-
-    oryErrorHandling(error as any, 'settings', mockResetFlow, 'test');
-    const expectedUrl = new URL('http://example.com/2fa');
-    expectedUrl.searchParams.set('return_to', 'http://example.com/2fa');
-    expect(window.location.href).toBe(expectedUrl.toString());
-  });
-
-  it('should handle session_aal2_required error without redirect', () => {
+  it('should handle session_aal2_required error', () => {
     const error = {
       data: {
         responseJson: {
@@ -105,7 +89,7 @@ describe('oryErrorHandling', () => {
     };
 
     oryErrorHandling(error as any, 'login', mockResetFlow, 'test');
-    expect(navigateWithQueryParams).toHaveBeenCalledWith('urlSignin', expect.any(URLSearchParams));
+    expect(navigateWithQueryParams).toHaveBeenCalledWith('urlAuthenticator');
   });
 
   it('should handle session_refresh_required error', () => {

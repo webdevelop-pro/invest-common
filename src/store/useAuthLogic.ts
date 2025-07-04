@@ -11,7 +11,7 @@ import {
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import {
   useAccreditationStore, useAuthStore, useFilerStore, useFundingStore, useInvestmentsStore,
-  useNotificationsStore, usePlaidStore,
+  usePlaidStore,
   useProfileWalletStore, useProfileWalletTransactionStore, useUserProfilesStore,
   useUsersStore, useGlobalLoader,
 } from 'InvestCommon/store';
@@ -25,7 +25,10 @@ import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 import { oryErrorHandling } from 'UiKit/helpers/api/oryErrorHandling';
 import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 import { SELFSERVICE } from 'InvestCommon/helpers/enums/auth';
-import { useUserSession } from './useUserSession';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
+import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
+import { useRepositoryNotifications } from 'InvestCommon/data/notifications/notifications.repository';
+import { useRepositoryAccreditation } from 'InvestCommon/data/accreditation/accreditation.repository';
 
 const { IS_STATIC_SITE } = env;
 
@@ -34,7 +37,7 @@ const loading = ref(false);
 // This is the store with general flow logic for auth
 export const useAuthLogicStore = defineStore('authLogic', () => {
   const router = useRouter();
-  const userSessionStore = useUserSession();
+  const userSessionStore = useSessionStore();
   const cookies = useCookies();
   const { toast } = useToast();
   const useDialogsStore = useDialogs();
@@ -305,11 +308,13 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     useInvestmentsStore().resetAll();
     useAccreditationStore().resetAll();
     useAuthStore().resetAll();
-    useNotificationsStore().resetAll();
     useFilerStore().resetAll();
+    useRepositoryProfiles().reset();
+    useRepositoryNotifications().reset();
+    useRepositoryAccreditation().reset();
     cookies.remove('session', cookiesOptions());
     clearAllCookies();
-    useUserSession().resetAll();
+    useSession().resetAll();
   };
 
   const handleAfterLogout = () => {
@@ -365,7 +370,7 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
 
     if (getLogoutResponse.value && (getLogoutResponse.value.status >= 200) && (getLogoutResponse.value.status <= 300)) {
       // cookies.remove('session', cookiesOptions());
-      useUserSession().resetAll();
+      useSession().resetAll();
       // if logout request is ok, reset all data and redirect
       useGlobalLoader().show();
       handleAfterLogout();

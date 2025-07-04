@@ -1,6 +1,6 @@
 import { NavigationGuardNext, RouteLocationNormalized } from 'vue-router';
 import { storeToRefs } from 'pinia';
-import { useUserSession } from 'InvestCommon/store/useUserSession';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import { urlSignin } from 'InvestCommon/global/links';
 import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
@@ -25,7 +25,7 @@ export const redirectAuthGuard = async (
   next: NavigationGuardNext,
 ): Promise<void> => {
   try {
-    const userSessionStore = useUserSession();
+    const userSessionStore = useSessionStore();
     const { userLoggedIn, userSession } = storeToRefs(userSessionStore);
 
     // Handle unauthenticated user

@@ -6,6 +6,7 @@ import {
 import { useAccreditationStore } from 'InvestCommon/store/useAccreditation';
 import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { storeToRefs } from 'pinia';
 import AccreditationFileInput from './components/AccreditationFileInput.vue';

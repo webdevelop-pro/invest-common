@@ -10,7 +10,7 @@ import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { emailRule, errorMessageRule, passwordRule } from 'UiKit/helpers/validation/rules';
 import { scrollToError } from 'UiKit/helpers/validation/general';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
-import { useUserSession } from 'InvestCommon/store/useUserSession';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { SELFSERVICE } from './type';
 
 type FormModelSignIn = {
@@ -25,7 +25,7 @@ export const useLoginStore = defineStore('login', () => {
   const {
     getSchemaState, setLoginState, getAuthFlowState, getLoginState,
   } = storeToRefs(authRepository);
-  const userSessionStore = useUserSession();
+  const userSessionStore = useSessionStore();
 
   // Query parameters handling
   const queryParams = computed(() => {

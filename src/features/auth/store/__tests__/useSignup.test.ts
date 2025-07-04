@@ -34,8 +34,8 @@ vi.mock('InvestCommon/data/auth/auth.repository', () => ({
   useRepositoryAuth: vi.fn(() => mockAuthStore()),
 }));
 
-vi.mock('InvestCommon/store/useUserSession', () => ({
-  useUserSession: vi.fn(() => ({
+vi.mock('InvestCommon/domain/session/store/useSession', () => ({
+  useSessionStore: vi.fn(() => ({
     updateSession: vi.fn(),
   })),
 }));

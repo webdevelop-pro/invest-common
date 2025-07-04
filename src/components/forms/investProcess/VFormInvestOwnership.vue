@@ -2,11 +2,13 @@
 import {
   computed, nextTick, defineAsyncComponent,
   hydrateOnVisible, useTemplateRef,
+  ref,
 } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useInvestmentsStore } from 'InvestCommon/store/useInvestments';
 import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import { ROUTE_INVEST_SIGNATURE, ROUTE_INVEST_AMOUNT } from 'InvestCommon/helpers/enums/routes';
 import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
@@ -17,25 +19,26 @@ import { navigateWithQueryParams } from 'InvestCommon/helpers/general';
 import arrowLeft from 'UiKit/assets/images/arrow-left.svg';
 import { scrollToError } from 'UiKit/helpers/validation/general';
 import { urlOfferSingle, urlProfileAccount } from 'InvestCommon/global/links';
-import VProfileSelectList from 'InvestCommon/components/VProfileSelectList.vue';
+import VProfileSelectList from 'InvestCommon/features/profiles/VProfileSelectList.vue';
 import { InvestKycTypes } from 'InvestCommon/types/api/invest';
 import { PROFILE_TYPES } from 'InvestCommon/global/investment.json';
 import { FormChild } from 'InvestCommon/types/form';
+import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 
 const VFormProfileEntity = defineAsyncComponent({
-  loader: () => import('InvestCommon/components/forms/VFormProfileEntity.vue'),
+  loader: () => import('InvestCommon/features/profiles/components/VFormProfileEntity.vue'),
   hydrate: hydrateOnVisible(),
 });
 const VFormProfileSDIRA = defineAsyncComponent({
-  loader: () => import('InvestCommon/components/forms/VFormProfileSDIRA.vue'),
+  loader: () => import('InvestCommon/features/profiles/components/VFormProfileSDIRA.vue'),
   hydrate: hydrateOnVisible(),
 });
 const VFormProfileSolo = defineAsyncComponent({
-  loader: () => import('InvestCommon/components/forms/VFormProfileSolo.vue'),
+  loader: () => import('InvestCommon/features/profiles/components/VFormProfileSolo.vue'),
   hydrate: hydrateOnVisible(),
 });
 const VFormProfileTrust = defineAsyncComponent({
-  loader: () => import('InvestCommon/components/forms/VFormProfileTrust.vue'),
+  loader: () => import('InvestCommon/features/profiles/components/VFormProfileTrust.vue'),
   hydrate: hydrateOnVisible(),
 });
 const VFormPartialPersonalInformation = defineAsyncComponent({
@@ -54,6 +57,8 @@ const userProfilesStore = useUserProfilesStore();
 const { isSetProfileByIdError } = storeToRefs(userProfilesStore);
 const { submitFormToHubspot } = useHubspotForm('df0f5fa3-5789-475c-b364-b189a8319446');
 const investmentsStore = useInvestmentsStore();
+const useRepositoryProfilesStore = useRepositoryProfiles();
+const { setProfileState, getProfileByIdOptionsState } = storeToRefs(useRepositoryProfilesStore);
 const {
   setOwnershipData, isSetOwnershipLoading, isSetSignatureLoading, isSetOwnershipError,
 } = storeToRefs(investmentsStore);
@@ -71,6 +76,9 @@ const entityTypeFormRef = useTemplateRef<FormChild>('entityFormChild');
 const sdiraTypeFormRef = useTemplateRef<FormChild>('sdiraFormChild');
 const soloTypeFormRef = useTemplateRef<FormChild>('soloFormChild');
 const trustTypeFormRef = useTemplateRef<FormChild>('trustFormChild');
+
+const errorData = computed(() => setProfileState.value.error);
+const schemaBackend = computed(() => getProfileByIdOptionsState.value.data);
 
 const childFormIsValid = computed(() => {
   if (selectedUserProfileType.value.toLowerCase() === PROFILE_TYPES.INDIVIDUAL) {
@@ -126,6 +134,7 @@ const onValidate = () => {
   }
 };
 
+const isLoading = ref(false);
 const isValid = computed(() => childFormIsValid.value);
 const isDisabledButton = computed(() => (!isValid.value || isAlertShow.value));
 const dataUserData = computed(() => selectedUserProfileData.value?.data);
@@ -140,6 +149,7 @@ const continueHandler = async () => {
     return;
   }
 
+  isLoading.value = true;
   await userProfilesStore.setProfileById(
     model,
     selectedUserProfileType.value,
@@ -172,6 +182,8 @@ const continueHandler = async () => {
     //   country: model.country,
     // });
   }
+
+  isLoading.value = false;
 };
 
 const onAlertButtonClick = () => {
@@ -215,27 +227,42 @@ const onAlertButtonClick = () => {
         <VFormPartialPersonalInformation
           ref="individualFormChild"
           :model-data="dataUserData"
+          :loading="isLoading"
+          :schema-backend="schemaBackend"
+          :error-data="errorData"
         />
       </template>
       <VFormProfileEntity
         v-if="selectedUserProfileType === PROFILE_TYPES.ENTITY"
         ref="entityFormChild"
         :model-data="dataUserData"
+        :loading="isLoading"
+        :schema-backend="schemaBackend"
+        :error-data="errorData"
       />
       <VFormProfileSDIRA
         v-if="selectedUserProfileType === PROFILE_TYPES.SDIRA"
         ref="sdiraFormChild"
         :model-data="dataUserData"
+        :loading="isLoading"
+        :schema-backend="schemaBackend"
+        :error-data="errorData"
       />
       <VFormProfileSolo
         v-if="selectedUserProfileType === PROFILE_TYPES.SOLO401K"
         ref="soloFormChild"
         :model-data="dataUserData"
+        :loading="isLoading"
+        :schema-backend="schemaBackend"
+        :error-data="errorData"
       />
       <VFormProfileTrust
         v-if="selectedUserProfileType === PROFILE_TYPES.TRUST"
         ref="trustFormChild"
         :model-data="dataUserData"
+        :loading="isLoading"
+        :schema-backend="schemaBackend"
+        :error-data="errorData"
       />
     </template>
 

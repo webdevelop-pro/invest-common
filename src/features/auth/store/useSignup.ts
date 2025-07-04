@@ -12,7 +12,7 @@ import {
 } from 'UiKit/helpers/validation/rules';
 import { scrollToError } from 'UiKit/helpers/validation/general';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
-import { useUserSession } from 'InvestCommon/store/useUserSession';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { SELFSERVICE } from './type';
 
 const HUBSPOT_FORM_ID = '726ad71f-e168-467f-9847-25e9377f69cf';
@@ -43,7 +43,7 @@ export const useSignupStore = defineStore('signup', () => {
     getSchemaState, setSignupState, getSignupState, getAuthFlowState,
   } = storeToRefs(authRepository);
 
-  const userSessionStore = useUserSession();
+  const userSessionStore = useSessionStore();
 
   // Query parameters handling
   const queryParams = computed(() => {

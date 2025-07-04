@@ -1,14 +1,11 @@
 <script setup lang="ts">
 import {
-  watch, PropType, computed, reactive,
-  ref,
+  watch, PropType, computed, toRaw,
 } from 'vue';
-import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
 import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
 import VFormSelect from 'UiKit/components/Base/VForm/VFormSelect.vue';
-import { storeToRefs } from 'pinia';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import {
@@ -17,23 +14,19 @@ import {
   middleNameRule, phoneRule, ssnRule, stateRule, zipRule,
 } from 'UiKit/helpers/validation/rules';
 import { FormModelPersonalInformation } from 'InvestCommon/types/form';
-import { filterSchema, getFilteredObject } from 'UiKit/helpers/validation/general';
-import { createFormModel, getOptions } from 'UiKit/helpers/model';
-import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
-import { isEmpty } from 'UiKit/helpers/general';
+import { getOptions } from 'UiKit/helpers/model';
 import VFormCombobox from 'UiKit/components/Base/VForm/VFormCombobox.vue';
+import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
 
 const props = defineProps({
   modelData: Object as PropType<FormModelPersonalInformation>,
   readOnly: Boolean,
+  errorData: Object,
+  schemaBackend: Object,
+  loading: Boolean,
 });
 
-const userProfilesStore = useUserProfilesStore();
-const {
-  setProfileByIdErrorData, getProfileByIdOptionsData, isGetProfileByIdLoading,
-} = storeToRefs(userProfilesStore);
-
-const schema = {
+const schemaFrontend = {
   $schema: 'http://json-schema.org/draft-07/schema#',
   definitions: {
     Individual: {
@@ -60,54 +53,40 @@ const schema = {
   $ref: '#/definitions/Individual',
 } as unknown as JSONSchemaType<FormModelPersonalInformation>;
 
-const model = reactive<FormModelPersonalInformation>({});
-const formModel = createFormModel(schema);
-let validator = new PrecompiledValidator<FormModelPersonalInformation>(
-  filterSchema(getProfileByIdOptionsData.value, formModel),
-  schema,
+const schemaBackendLocal = computed(() => (props.schemaBackend ? structuredClone(toRaw(props.schemaBackend)) : null));
+
+const {
+  model, validation, isValid, onValidate, schemaObject,
+} = useFormValidation<FormModelPersonalInformation>(
+  schemaFrontend,
+  schemaBackendLocal,
+  {} as FormModelPersonalInformation,
 );
-const validation = ref<unknown>();
-const isValid = computed(() => isEmpty(validation.value || {}));
 
-const onValidate = () => {
-  validation.value = validator.getFormValidationErrors(model);
-};
-
-const schemaObject = computed(() => getFilteredObject(getProfileByIdOptionsData.value, formModel));
 const optionsCountry = computed(() => getOptions('country', schemaObject));
 const optionsState = computed(() => getOptions('state', schemaObject));
 const optionsCitizenship = computed(() => getOptions('citizenship', schemaObject));
 
 defineExpose({
-  model, validation, validator, isValid, onValidate,
+  model, validation, isValid, onValidate,
 });
 
-watch(() => props.modelData, () => {
-  if (props.modelData?.first_name) model.first_name = props.modelData?.first_name;
-  if (props.modelData?.last_name) model.last_name = props.modelData?.last_name;
-  if (props.modelData?.middle_name) model.middle_name = props.modelData?.middle_name;
-  if (props.modelData?.dob) model.dob = props.modelData?.dob;
-  if (props.modelData?.address1) model.address1 = props.modelData?.address1;
-  if (props.modelData?.address2) model.address2 = props.modelData?.address2;
-  if (props.modelData?.city) model.city = props.modelData?.city;
-  if (props.modelData?.state) model.state = props.modelData?.state;
-  if (props.modelData?.zip_code) model.zip_code = props.modelData?.zip_code;
-  if (props.modelData?.country) model.country = props.modelData?.country;
-  if (props.modelData?.phone) model.phone = props.modelData?.phone;
-  if (props.modelData?.ssn) model.ssn = props.modelData?.ssn;
-  if (props.modelData?.citizenship) model.citizenship = props.modelData?.citizenship;
+watch(() => props.modelData, (newModelData) => {
+  if (!newModelData) return;
+
+  // Define the fields to sync
+  const fields = [
+    'first_name', 'last_name', 'middle_name', 'dob', 'address1', 'address2',
+    'city', 'state', 'zip_code', 'country', 'phone', 'ssn', 'citizenship',
+  ] as const;
+
+  // Update model with new data, only if the value exists
+  fields.forEach((field) => {
+    if (newModelData[field] !== undefined && newModelData[field] !== null) {
+      model[field] = newModelData[field];
+    }
+  });
 }, { deep: true, immediate: true });
-
-watch(() => model, () => {
-  if (!isValid.value) onValidate();
-}, { deep: true });
-
-watch(() => [getProfileByIdOptionsData.value, schema], () => {
-  validator = new PrecompiledValidator<FormModelPersonalInformation>(
-    filterSchema(getProfileByIdOptionsData.value, formModel),
-    schema,
-  );
-});
 </script>
 
 <template>
@@ -118,9 +97,9 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="getProfileByIdOptionsData"
-          :schema-front="schema"
-          :error-text="setProfileByIdErrorData?.first_name"
+          :schema-back="schemaBackend"
+          :schema-front="schemaFrontend"
+          :error-text="errorData?.first_name"
           path="first_name"
           label="First Name"
           data-testid="first-name-group"
@@ -133,7 +112,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             size="large"
             data-testid="first-name"
             :readonly="readOnly"
-            :loading="isGetProfileByIdLoading"
+            :loading="loading"
             @update:model-value="model.first_name = $event"
           />
         </VFormGroup>
@@ -144,9 +123,9 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="getProfileByIdOptionsData"
-          :schema-front="schema"
-          :error-text="setProfileByIdErrorData?.middle_name"
+          :schema-back="schemaBackend"
+          :schema-front="schemaFrontend"
+          :error-text="errorData?.middle_name"
           path="middle_name"
           label="Middle Name"
           data-testid="middle-name-group"
@@ -159,7 +138,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             size="large"
             data-testid="middle-name"
             :readonly="readOnly"
-            :loading="isGetProfileByIdLoading"
+            :loading="loading"
             @update:model-value="model.middle_name = $event"
           />
         </VFormGroup>
@@ -170,9 +149,9 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="getProfileByIdOptionsData"
-          :schema-front="schema"
-          :error-text="setProfileByIdErrorData?.last_name"
+          :schema-back="schemaBackend"
+          :schema-front="schemaFrontend"
+          :error-text="errorData?.last_name"
           path="last_name"
           label="Last Name"
           data-testid="last-name-group"
@@ -185,7 +164,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             size="large"
             data-testid="last-name"
             :readonly="readOnly"
-            :loading="isGetProfileByIdLoading"
+            :loading="loading"
             @update:model-value="model.last_name = $event"
           />
         </VFormGroup>
@@ -197,9 +176,9 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="getProfileByIdOptionsData"
-          :schema-front="schema"
-          :error-text="setProfileByIdErrorData?.dob"
+          :schema-back="schemaBackend"
+          :schema-front="schemaFrontend"
+          :error-text="errorData?.dob"
           path="dob"
           label="Date of Birth"
           data-testid="dob-group"
@@ -213,7 +192,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             data-testid="date-of-birth"
             type="date"
             :readonly="readOnly"
-            :loading="isGetProfileByIdLoading"
+            :loading="loading"
             @update:model-value="model.dob = $event"
           />
         </VFormGroup>
@@ -224,9 +203,9 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="getProfileByIdOptionsData"
-          :schema-front="schema"
-          :error-text="setProfileByIdErrorData?.phone"
+          :schema-back="schemaBackend"
+          :schema-front="schemaFrontend"
+          :error-text="errorData?.phone"
           path="phone"
           label="Phone number"
           data-testid="phone-group"
@@ -241,7 +220,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             size="large"
             data-testid="phone"
             :readonly="readOnly"
-            :loading="isGetProfileByIdLoading"
+            :loading="loading"
             @update:model-value="model.phone = $event"
           />
         </VFormGroup>
@@ -253,9 +232,9 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="getProfileByIdOptionsData"
-          :schema-front="schema"
-          :error-text="setProfileByIdErrorData?.citizenship"
+          :schema-back="schemaBackend"
+          :schema-front="schemaFrontend"
+          :error-text="errorData?.citizenship"
           path="citizenship"
           label="Citizenship"
           data-testid="citizenship-group"
@@ -272,7 +251,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             :options="optionsCitizenship"
             dropdown-absolute
             :readonly="readOnly"
-            :loading="isGetProfileByIdLoading || (optionsCitizenship.length === 0)"
+            :loading="loading || (optionsCitizenship.length === 0)"
             @update:model-value="model.citizenship = $event"
           />
         </VFormGroup>
@@ -282,9 +261,9 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="getProfileByIdOptionsData"
-          :schema-front="schema"
-          :error-text="setProfileByIdErrorData?.ssn"
+          :schema-back="schemaBackend"
+          :schema-front="schemaFrontend"
+          :error-text="errorData?.ssn"
           path="ssn"
           label="SSN"
           data-testid="ssn-group"
@@ -299,7 +278,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             mask="###-##-####"
             disallow-special-chars
             :readonly="readOnly"
-            :loading="isGetProfileByIdLoading"
+            :loading="loading"
             @update:model-value="model.ssn = $event"
           />
         </VFormGroup>
@@ -314,9 +293,9 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="getProfileByIdOptionsData"
-          :schema-front="schema"
-          :error-text="setProfileByIdErrorData?.address1"
+          :schema-back="schemaBackend"
+          :schema-front="schemaFrontend"
+          :error-text="errorData?.address1"
           path="address1"
           label="Address 1"
           data-testid="address-1-group"
@@ -329,7 +308,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             size="large"
             data-testid="address-1"
             :readonly="readOnly"
-            :loading="isGetProfileByIdLoading"
+            :loading="loading"
             @update:model-value="model.address1 = $event"
           />
         </VFormGroup>
@@ -340,9 +319,9 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="getProfileByIdOptionsData"
-          :schema-front="schema"
-          :error-text="setProfileByIdErrorData?.address2"
+          :schema-back="schemaBackend"
+          :schema-front="schemaFrontend"
+          :error-text="errorData?.address2"
           path="address2"
           label="Address 2"
           data-testid="address-2-group"
@@ -355,7 +334,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             size="large"
             data-testid="address-2"
             :readonly="readOnly"
-            :loading="isGetProfileByIdLoading"
+            :loading="loading"
             @update:model-value="model.address2 = $event"
           />
         </VFormGroup>
@@ -368,9 +347,9 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="getProfileByIdOptionsData"
-          :schema-front="schema"
-          :error-text="setProfileByIdErrorData?.city"
+          :schema-back="schemaBackend"
+          :schema-front="schemaFrontend"
+          :error-text="errorData?.city"
           path="city"
           label="City"
           data-testid="city-group"
@@ -385,7 +364,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             disallow-special-chars
             disallow-numbers
             :readonly="readOnly"
-            :loading="isGetProfileByIdLoading"
+            :loading="loading"
             @update:model-value="model.city = $event"
           />
         </VFormGroup>
@@ -395,9 +374,9 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="getProfileByIdOptionsData"
-          :schema-front="schema"
-          :error-text="setProfileByIdErrorData?.state"
+          :schema-back="schemaBackend"
+          :schema-front="schemaFrontend"
+          :error-text="errorData?.state"
           path="state"
           label="State"
           data-testid="state-group"
@@ -413,7 +392,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             :options="optionsState"
             data-testid="state"
             :readonly="readOnly"
-            :loading="isGetProfileByIdLoading || (optionsState.length === 0)"
+            :loading="loading || (optionsState.length === 0)"
           />
         </VFormGroup>
       </FormCol>
@@ -425,9 +404,9 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="getProfileByIdOptionsData"
-          :schema-front="schema"
-          :error-text="setProfileByIdErrorData?.zip_code"
+          :schema-back="schemaBackend"
+          :schema-front="schemaFrontend"
+          :error-text="errorData?.zip_code"
           path="zip_code"
           label="Zip Code"
           data-testid="zip-group"
@@ -443,7 +422,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             return-masked-value
             disallow-special-chars
             :readonly="readOnly"
-            :loading="isGetProfileByIdLoading"
+            :loading="loading"
             @update:model-value="model.zip_code = $event"
           />
         </VFormGroup>
@@ -454,9 +433,9 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="getProfileByIdOptionsData"
-          :schema-front="schema"
-          :error-text="setProfileByIdErrorData?.country"
+          :schema-back="schemaBackend"
+          :schema-front="schemaFrontend"
+          :error-text="errorData?.country"
           path="country"
           label="Country"
           data-testid="country-group"
@@ -472,7 +451,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
             :options="optionsCountry"
             data-testid="country"
             :readonly="readOnly"
-            :loading="isGetProfileByIdLoading || (optionsCountry?.length === 0)"
+            :loading="loading || (optionsCountry?.length === 0)"
           />
         </VFormGroup>
       </FormCol>

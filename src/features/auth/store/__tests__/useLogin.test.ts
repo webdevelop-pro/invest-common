@@ -36,10 +36,10 @@ vi.mock('InvestCommon/data/auth/auth.repository', () => {
   };
 });
 
-vi.mock('InvestCommon/store/useUserSession', () => {
+vi.mock('InvestCommon/domain/session/store/useSession', () => {
   const mockUpdateSession = vi.fn();
   return {
-    useUserSession: vi.fn(() => ({
+    useSessionStore: vi.fn(() => ({
       updateSession: mockUpdateSession,
     })),
   };

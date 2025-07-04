@@ -1,5 +1,5 @@
 import { storeToRefs } from 'pinia';
-import { useUserSession } from 'InvestCommon/store/useUserSession';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
 import {
   urlSignin, urlSignup, urlAuthenticator, urlForgot, urlCheckEmail,
@@ -12,7 +12,7 @@ const pagesToRedirectIfLoggedIn = [
 ];
 
 export const redirectAuthGuardStatic = async () => {
-  const userSessionStore = useUserSession();
+  const userSessionStore = useSessionStore();
   const { userLoggedIn } = storeToRefs(userSessionStore);
 
   try {

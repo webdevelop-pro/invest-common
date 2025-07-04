@@ -8,6 +8,7 @@ import {
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { useInvestmentsStore } from 'InvestCommon/store/useInvestments';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useOfferStore } from 'InvestCommon/store/useOffer';
 import { storeToRefs } from 'pinia';
 import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
@@ -33,6 +34,7 @@ const { isGetInvestOneLoading, getInvestOneData } = storeToRefs(investmentsStore
 const offersStore = useOfferStore();
 const { isGetOfferOneLoading } = storeToRefs(offersStore);
 const userStore = useUsersStore();
+const profilesStore = useProfilesStore();
 const { selectedUserProfileId } = storeToRefs(userStore);
 const router = useRouter();
 const route = useRoute();

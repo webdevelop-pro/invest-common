@@ -1,7 +1,7 @@
 import {
   describe, it, expect, vi, beforeEach,
 } from 'vitest';
-import { useUserSession } from 'InvestCommon/store/useUserSession';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import { urlSignin } from 'InvestCommon/global/links';
@@ -10,8 +10,8 @@ import { resetAllData } from 'InvestCommon/domain/resetAllData';
 import env from 'InvestCommon/global';
 
 // Mock the dependencies
-vi.mock('InvestCommon/store/useUserSession', () => ({
-  useUserSession: vi.fn(),
+vi.mock('InvestCommon/domain/session/store/useSession', () => ({
+  useSessionStore: vi.fn(),
 }));
 
 vi.mock('InvestCommon/data/auth/auth.repository', () => ({
@@ -61,7 +61,7 @@ describe('redirectAuthGuard', () => {
         updateSession: vi.fn(),
       };
 
-      (useUserSession as any).mockReturnValue(mockUserSessionStore);
+      (useSessionStore as any).mockReturnValue(mockUserSessionStore);
       (useRepositoryAuth as any).mockReturnValue({
         getSession: vi.fn().mockResolvedValue(mockSession),
       });
@@ -78,7 +78,7 @@ describe('redirectAuthGuard', () => {
         updateSession: vi.fn(),
       };
 
-      (useUserSession as any).mockReturnValue(mockUserSessionStore);
+      (useSessionStore as any).mockReturnValue(mockUserSessionStore);
       (useRepositoryAuth as any).mockReturnValue({
         getSession: vi.fn().mockResolvedValue(null),
       });
@@ -97,7 +97,7 @@ describe('redirectAuthGuard', () => {
         updateSession: vi.fn(),
       };
 
-      (useUserSession as any).mockReturnValue(mockUserSessionStore);
+      (useSessionStore as any).mockReturnValue(mockUserSessionStore);
       (useRepositoryAuth as any).mockReturnValue({
         getSession: vi.fn().mockResolvedValue(null),
       });
@@ -119,7 +119,7 @@ describe('redirectAuthGuard', () => {
         userSession: null,
       };
 
-      (useUserSession as any).mockReturnValue(mockUserSessionStore);
+      (useSessionStore as any).mockReturnValue(mockUserSessionStore);
 
       await redirectAuthGuard(mockTo as any, mockFrom as any, mockNext);
 
@@ -133,7 +133,7 @@ describe('redirectAuthGuard', () => {
         userSession: { id: 1 },
       };
 
-      (useUserSession as any).mockReturnValue(mockUserSessionStore);
+      (useSessionStore as any).mockReturnValue(mockUserSessionStore);
 
       await redirectAuthGuard(mockTo as any, mockFrom as any, mockNext);
 
@@ -149,7 +149,7 @@ describe('redirectAuthGuard', () => {
         updateSession: vi.fn(),
       };
 
-      (useUserSession as any).mockReturnValue(mockUserSessionStore);
+      (useSessionStore as any).mockReturnValue(mockUserSessionStore);
       (useRepositoryAuth as any).mockReturnValue({
         getSession: vi.fn().mockRejectedValue(new Error('API Error')),
       });

@@ -1,6 +1,9 @@
-import { useUserSession } from 'InvestCommon/store/useUserSession';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useCookies } from '@vueuse/integrations/useCookies';
 import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
+import { useRepositoryAccreditation } from 'InvestCommon/data/accreditation/accreditation.repository';
+import { useRepositoryNotifications } from 'InvestCommon/data/notifications/notifications.repository';
+import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useFundingStore } from 'InvestCommon/store/useFunding';
 import { useProfileWalletTransactionStore } from 'InvestCommon/store/useProfileWallet/useProfileWalletTransaction';
 import { useProfileWalletStore } from 'InvestCommon/store/useProfileWallet/useProfileWallet';
@@ -8,6 +11,7 @@ import { useProfileEvmWalletTransactionStore } from 'InvestCommon/store/useProfi
 import { useProfileEvmWalletStore } from 'InvestCommon/store/useProfileEvmWallet/useProfileEvmWallet';
 import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { usePlaidStore } from 'InvestCommon/store/usePlaid';
 import { useInvestmentsStore } from 'InvestCommon/store/useInvestments';
 import { useAccreditationStore } from 'InvestCommon/store/useAccreditation';
@@ -33,6 +37,9 @@ export const resetAllData = () => {
   useAuthStore().resetAll();
   useFilerStore().resetAll();
   clearAllCookies();
-  useUserSession().resetAll();
+  useSessionStore().resetAll();
   useRepositoryAuth().resetAll();
+  useRepositoryAccreditation().resetAll();
+  useRepositoryNotifications().resetAll();
+  useRepositoryProfiles().resetAll();
 };

@@ -8,7 +8,7 @@ import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { emailRule, errorMessageRule, passwordRule } from 'UiKit/helpers/validation/rules';
 import { scrollToError } from 'UiKit/helpers/validation/general';
 // import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
-import { useUserSession } from 'InvestCommon/store/useUserSession';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 import { SELFSERVICE } from './type';
 
@@ -22,7 +22,7 @@ type FormModelSignIn = {
 export const useLoginRefreshStore = defineStore('loginRefresh', () => {
   const authRepository = useRepositoryAuth();
   const { getSchemaState, setLoginState, getAuthFlowState } = storeToRefs(authRepository);
-  const userSessionStore = useUserSession();
+  const userSessionStore = useSessionStore();
   const useDialogsStore = useDialogs();
   const { isDialogRefreshSessionOpen } = storeToRefs(useDialogsStore);
 

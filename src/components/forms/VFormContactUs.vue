@@ -10,6 +10,7 @@ import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import VFormTextarea from 'UiKit/components/Base/VForm/VFormTextarea.vue';
 import VFormSelect from 'UiKit/components/Base/VForm/VFormSelect.vue';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import { storeToRefs } from 'pinia';
 import env from 'InvestCommon/global';

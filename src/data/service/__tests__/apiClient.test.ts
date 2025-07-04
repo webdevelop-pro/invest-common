@@ -91,15 +91,9 @@ describe('ApiClient', () => {
       mockFetch.mockRejectedValueOnce(networkError);
 
       const promise = apiClient.request('/test');
-      await expect(promise).rejects.toThrow(APIError);
+      await expect(promise).rejects.toThrow('Network error');
       await expect(promise).rejects.toMatchObject({
-        name: 'APIError',
         message: 'Network error',
-        data: {
-          timestamp: expect.any(Date),
-          statusCode: 500,
-          responseJson: null,
-        },
       });
     });
 

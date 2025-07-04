@@ -6,7 +6,7 @@ import {
 import { setActivePinia, createPinia } from 'pinia';
 import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
 import { ref } from 'vue';
-import { useUserSession } from 'InvestCommon/store/useUserSession';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 // import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import { SELFSERVICE } from '../type';
 import { useAuthenticatorStore } from '../useAuthenticator';
@@ -40,8 +40,8 @@ vi.mock('InvestCommon/data/auth/auth.repository', () => {
   };
 });
 
-vi.mock('InvestCommon/store/useUserSession', () => ({
-  useUserSession: vi.fn(() => ({
+vi.mock('InvestCommon/domain/session/store/useSession', () => ({
+  useSessionStore: vi.fn(() => ({
     updateSession: mockUpdateSession,
   })),
 }));
@@ -173,7 +173,7 @@ describe('useAuthenticator Store', () => {
 
       await store.totpHandler();
       expect(store.isLoading).toBe(false);
-      expect(useUserSession().updateSession).not.toHaveBeenCalled();
+      expect(useSessionStore().updateSession).not.toHaveBeenCalled();
     });
   });
 

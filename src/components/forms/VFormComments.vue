@@ -4,6 +4,7 @@ import {
 } from 'vue';
 import { useOfferStore } from 'InvestCommon/store/useOffer';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { IOfferCommentPayload } from 'InvestCommon/types/api/offers';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
@@ -18,6 +19,7 @@ import { scrollToError } from 'UiKit/helpers/validation/general';
 import { urlSignin } from 'InvestCommon/global/links';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 
 const props = defineProps({
   offerId: {
@@ -57,8 +59,8 @@ const {
   isSetOfferCommentLoading, setOfferCommentsData, setOfferCommentsOptionsData,
   setOfferCommentsErrorData, isSetOfferCommentOptionsLoading,
 } = storeToRefs(offerStore);
-const usersStore = useUsersStore();
-const { userLoggedIn } = storeToRefs(usersStore);
+const userSessionStore = useSessionStore();
+const { userLoggedIn } = storeToRefs(userSessionStore);
 
 const model = reactive({
   offer_id: props.offerId,

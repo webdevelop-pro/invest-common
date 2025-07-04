@@ -7,10 +7,12 @@ import VTableItemContent from './VTablePortfolioItemContent.vue';
 import { IInvest } from 'InvestCommon/types/api/invest';
 import { storeToRefs } from 'pinia';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { isInvestmentFundingClickable } from 'InvestCommon/helpers/investment';
 import { useSyncWithUrl } from 'UiKit/composables/useSyncWithUrl';
 
 const userStore = useUsersStore();
+const profilesStore = useProfilesStore();
 const { selectedUserProfileData, selectedUserProfileId } = storeToRefs(userStore);
 
 const VDialogPortfolioTransaction = defineAsyncComponent({

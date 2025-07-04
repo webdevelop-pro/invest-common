@@ -1,27 +1,25 @@
 import {
   ref, computed,
-  watch, reactive,
+  watch, nextTick,
 } from 'vue';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
-import { useUsersStore } from 'InvestCommon/store/useUsers';
-import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import { AccreditationTypes } from 'InvestCommon/types/api/invest';
 import { useRouter } from 'vue-router';
 import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/helpers/enums/routes';
 import { descriptionFileRule, errorMessageRule, noteFileRule } from 'UiKit/helpers/validation/rules';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
-import { isEmpty } from 'InvestCommon/helpers/general';
-import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
 import { FormModelAccreditationFileInput } from 'InvestCommon/types/form';
 import { useRepositoryAccreditation } from 'InvestCommon/data/accreditation/accreditation.repository';
+import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
+import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
 
-export const useAccreditationUpload = defineStore('accreditationUpload', () => {
+export const useAccreditationUpload = defineStore('useAccreditationUpload', () => {
   const router = useRouter();
-  const usersStore = useUsersStore();
-  const { selectedUserProfileData, selectedUserProfileId, selectedUserProfileType } = storeToRefs(usersStore);
-  const userProfilesStore = useUserProfilesStore();
   const accreditationRepository = useRepositoryAccreditation();
-  const { error } = storeToRefs(accreditationRepository);
+  const { updateState, createState } = storeToRefs(accreditationRepository);
+  const userProfileStore = useProfilesStore();
+  const { selectedUserProfileData, selectedUserProfileId, selectedUserProfileType } = storeToRefs(userProfileStore);
 
   const backButtonText = ref('Back to Dashboard');
   const breadcrumbs = computed(() => [
@@ -43,8 +41,6 @@ export const useAccreditationUpload = defineStore('accreditationUpload', () => {
   const validateTrigger = ref(false);
   const filesUploadError = ref('');
   const allFiles = ref<File[]>([]);
-
-  const model = reactive({} as FormModelAccreditationFileInput);
 
   const requiredValueSchema = computed(() => {
     const V = ['description1', 'note'] as string[];
@@ -87,15 +83,12 @@ export const useAccreditationUpload = defineStore('accreditationUpload', () => {
     $ref: '#/definitions/Individual',
   } as unknown as JSONSchemaType<FormModelAccreditationFileInput>));
 
-  let validator = new PrecompiledValidator<FormModelAccreditationFileInput>(
+  const {
+    model, validation, isValid, onValidate,
+  } = useFormValidation<FormModelAccreditationFileInput>(
     schemaAccreditationFileInput.value,
+  {} as FormModelAccreditationFileInput,
   );
-  const validation = ref<unknown>();
-  const isValid = computed(() => isEmpty(validation.value || {}));
-
-  const onValidate = () => {
-    validation.value = validator.getFormValidationErrors(model);
-  };
 
   const isCreateAccreditation = computed(() => selectedUserProfileData.value?.accreditation_status === 'new');
 
@@ -108,6 +101,8 @@ export const useAccreditationUpload = defineStore('accreditationUpload', () => {
       && selectedUserProfileData.value.accreditation_status !== AccreditationTypes.approved
     );
   });
+
+  const uploadAccreditationDocumentErrorData = computed(() => createState?.value?.error || updateState?.value?.error);
 
   const sendFiles = async () => {
     const promises = [] as unknown[];
@@ -143,8 +138,8 @@ export const useAccreditationUpload = defineStore('accreditationUpload', () => {
         }
       }
 
-      if (!error.value) {
-        userProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
+      if (!createState?.value?.error && !updateState?.value?.error) {
+        useRepositoryProfiles().getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
         router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
       }
     } catch (err) {
@@ -156,10 +151,13 @@ export const useAccreditationUpload = defineStore('accreditationUpload', () => {
 
   const handleSave = () => {
     validateTrigger.value = true;
-    if (!isFieldsValid.value) {
-      return;
-    }
-    sendFiles();
+    nextTick(() => {
+      if (!isFieldsValid.value) {
+        return;
+      }
+      console.log(isFieldsValid.value, 'isFieldsValid.value');
+      sendFiles();
+    });
   };
 
   const onFilesChange = (filesInner: File[]) => {
@@ -192,10 +190,11 @@ export const useAccreditationUpload = defineStore('accreditationUpload', () => {
   };
 
   const getErrorText = (index: number) => {
-    if (!error.value || !error.value[`description${index}`]) {
+    const error = createState?.value?.error || updateState?.value?.error;
+    if (!error || !error[`description${index}`]) {
       return undefined;
     }
-    return error.value[`description${index}`];
+    return error[`description${index}`];
   };
 
   watch([isAccreditationCanUpload], ([newValue]) => {
@@ -215,12 +214,6 @@ export const useAccreditationUpload = defineStore('accreditationUpload', () => {
     }
     onModelChange(model);
   }, { deep: true });
-
-  watch(() => schemaAccreditationFileInput.value, () => {
-    validator = new PrecompiledValidator<FormModelAccreditationFileInput>(
-      schemaAccreditationFileInput.value,
-    );
-  }, { deep: true, immediate: true });
 
   watch(() => validateTrigger.value, () => {
     if (validateTrigger.value) {
@@ -245,7 +238,7 @@ export const useAccreditationUpload = defineStore('accreditationUpload', () => {
     schemaAccreditationFileInput,
     getErrorText,
     onFileRemove,
-    uploadAccreditationDocumentErrorData: error,
+    uploadAccreditationDocumentErrorData,
     sendFiles,
     accreditationFiles,
     accreditationNote,

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, PropType, ref } from 'vue';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useFilerStore } from 'InvestCommon/store/useFiler';
 import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import { storeToRefs } from 'pinia';
@@ -17,6 +18,7 @@ defineProps({
 });
 
 const userStore = useUsersStore();
+const profilesStore = useProfilesStore();
 const { selectedUserProfileData } = storeToRefs(userStore);
 const filerStore = useFilerStore();
 const { postSignurlData } = storeToRefs(filerStore);

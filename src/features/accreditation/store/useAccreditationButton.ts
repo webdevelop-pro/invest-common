@@ -3,26 +3,26 @@ import {
   watch,
 } from 'vue';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
-import { useUsersStore } from 'InvestCommon/store/useUsers';
-import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import { AccreditationTypes } from 'InvestCommon/types/api/invest';
 import { AccreditationTextStatuses } from 'InvestCommon/data/accreditation/accreditation.types';
 import { useRouter } from 'vue-router';
 import { ROUTE_ACCREDITATION_UPLOAD, ROUTE_DASHBOARD_PERSONAL_DETAILS } from 'InvestCommon/helpers/enums/routes';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 
-export const useAccreditationButton = defineStore('accreditationButton', () => {
+export const useAccreditationButton = defineStore('useAccreditationButton', () => {
   const router = useRouter();
-  const usersStore = useUsersStore();
-  const { userLoggedIn, selectedUserProfileData, selectedUserProfileId } = storeToRefs(usersStore);
-  const userProfileStore = useUserProfilesStore();
-  const { isGetProfileByIdLoading } = storeToRefs(userProfileStore);
+  const userProfileStore = useProfilesStore();
+  const { selectedUserProfileData, selectedUserProfileId, isSelectedProfileLoading } = storeToRefs(userProfileStore);
+  const userSessionStore = useSessionStore();
+  const { userLoggedIn } = storeToRefs(userSessionStore);
 
   /* * Loading State * */
   const isLoading = ref(true);
 
   // Watch for notification changes to update loading state
-  watch([isGetProfileByIdLoading], ([newLoading]) => {
-    isLoading.value = newLoading;
+  watch([selectedUserProfileData, isSelectedProfileLoading], () => {
+    isLoading.value = !selectedUserProfileData.value && isSelectedProfileLoading.value;
   });
 
   const data = computed(() => {

@@ -2,10 +2,9 @@ import {
   computed, ref, watch,
 } from 'vue';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
-import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import { useAuthStore } from 'InvestCommon/store/useAuth';
 import { useDomainWebSocketStore } from 'InvestCommon/domain/websockets/store/useWebsockets';
-import { INotification } from 'InvestCommon/types/api/notifications';
+import { INotification } from 'InvestCommon/data/notifications/notifications.types';
 import {
   ROUTE_ACCREDITATION_UPLOAD, ROUTE_DASHBOARD_ACCOUNT, ROUTE_DASHBOARD_BACKGROUND_INFORMATION,
   ROUTE_DASHBOARD_FINANCIAL_AND_INVESTMENT_INFO, ROUTE_DASHBOARD_PERSONAL_DETAILS, ROUTE_DASHBOARD_PORTFOLIO,
@@ -20,7 +19,8 @@ import { useRoute, useRouter } from 'vue-router';
 import env, { cookiesOptions } from 'InvestCommon/global/index';
 import { PROFILE_TYPES } from 'InvestCommon/global/investment.json';
 import { useCookies } from '@vueuse/integrations/useCookies';
-import { useUserSession } from './useUserSession';
+import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 
 const { IS_STATIC_SITE } = env;
 
@@ -29,13 +29,14 @@ export const useUsersStore = defineStore('user', () => {
   const route = useRoute();
   const authStore = useAuthStore();
   const { isGetSessionLoading } = storeToRefs(authStore);
-  const userSessionStore = useUserSession();
+  const userSessionStore = useSessionStore();
   const { userSession, userLoggedIn } = storeToRefs(userSessionStore);
-  const userProfilesStore = useUserProfilesStore();
+  const useRepositoryProfilesStore = useRepositoryProfiles();
   const {
-    getUserData, isGetUserLoading,
-    getProfileByIdData, getProfileByIdOptionsData,
-  } = storeToRefs(userProfilesStore);
+    getUserState,
+    getProfileByIdState, getProfileByIdOptionsState,
+  } = storeToRefs(useRepositoryProfilesStore);
+  // console.log('getUserState.value', getUserState.value.value);
   const websocketsStore = useDomainWebSocketStore();
   const cookies = useCookies(['session']);
 
@@ -43,12 +44,12 @@ export const useUsersStore = defineStore('user', () => {
   const userAccountSession = computed(() => userSession.value);
   const userAccountData = computed(() => ({
     ...userSession.value?.identity?.traits,
-    ...getUserData.value,
+    ...getUserState.value?.data,
   }));
   const userAccountLoading = computed(() => isGetSessionLoading.value);
   // LIST OF USER PROFILES
-  const userProfiles = computed(() => getUserData.value?.profiles || []);
-  const userProfilesLoading = computed(() => isGetUserLoading.value);
+  const userProfiles = computed(() => getUserState.value?.data?.profiles || []);
+  const userProfilesLoading = computed(() => getUserState.value?.loading);
   // SELECTED USER PROFILE
   const selectedUserProfileLoading = computed(() => userProfilesLoading.value);
   const selectedUserProfileId = ref(cookies.get('selectedUserProfileId'));
@@ -57,32 +58,32 @@ export const useUsersStore = defineStore('user', () => {
   //   userProfiles.value.filter((item) => item.id === selectedUserProfileId.value)[0]));
   // const selectedUserProfileData = computed(() => (
   // { ...userProfilesFilteredById.value, ...getUserIndividualProfileData.value }));
-  const selectedUserProfileData = computed(() => getProfileByIdData.value);
-  const selectedUserProfileType = computed(() => userProfiles.value.find((item) => item.id === selectedUserProfileId.value)?.type || 'individual');
-  const selectedUserProfileOptions = computed(() => getProfileByIdOptionsData.value);
-  const selectedUserIndividualProfile = computed(() => userProfiles.value.find((profile) => profile.type === 'individual'));
+  const selectedUserProfileData = computed(() => getProfileByIdState.value?.data);
+  const selectedUserProfileType = computed(() => userProfiles.value.find((item: { id: number; type: string }) => item.id === selectedUserProfileId.value)?.type || 'individual');
+  const selectedUserProfileOptions = computed(() => getProfileByIdOptionsState.value?.data);
+  const selectedUserIndividualProfile = computed(() => userProfiles.value.find((profile: { type: string }) => profile.type === 'individual'));
 
   const updateData = (notification: INotification) => {
-    const profile = userProfiles.value.find((item) => item.id === notification.data.fields?.object_id);
+    const profile = userProfiles.value.find((item: { id: number }) => item.id === notification.data.fields?.object_id);
     if (profile) {
       if (notification.data.fields?.kyc_status) profile.kyc_status = notification.data.fields.kyc_status;
       if (notification.data.fields?.accreditation_status) {
         profile.accreditation_status = notification.data.fields.accreditation_status;
       }
     }
-    if (getProfileByIdData.value) {
+    if (getProfileByIdState.value?.data) {
       if (notification.data.fields?.kyc_status) {
-        getProfileByIdData.value.kyc_status = notification.data.fields.kyc_status;
+        getProfileByIdState.value.data.kyc_status = notification.data.fields.kyc_status;
       }
       if (notification.data.fields?.accreditation_status) {
-        getProfileByIdData.value.accreditation_status = notification.data.fields.accreditation_status;
+        getProfileByIdState.value.data.accreditation_status = notification.data.fields.accreditation_status;
       }
     }
-    userProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
+    useRepositoryProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
   };
 
   const updateDataInProfile = (nameOfProperty: string, data: object | string | number) => {
-    getProfileByIdData.value[nameOfProperty] = data;
+    getProfileByIdState.value.data[nameOfProperty] = data;
   };
 
   const selectedUserProfileRiskAcknowledged = computed(() => {
@@ -100,11 +101,11 @@ export const useUsersStore = defineStore('user', () => {
   });
 
   const selectedUserProfielKYCStatusNotStarted = computed(() => (
-    getProfileByIdData.value?.kyc_status === 'new'
+    getProfileByIdState.value.data?.kyc_status === 'new'
   ));
 
   const selectedUserProfileShowKycInitFormIndividual = computed(() => ((
-    !getProfileByIdData.value?.data.citizenship || !selectedUserProfileRiskAcknowledged.value
+    !getProfileByIdState.value.data?.data.citizenship || !selectedUserProfileRiskAcknowledged.value
     || !selectedUserProfileAccreditationDataOK.value || selectedUserProfielKYCStatusNotStarted.value
   ) && (selectedUserProfileType.value === PROFILE_TYPES.INDIVIDUAL)));
 
@@ -119,7 +120,7 @@ export const useUsersStore = defineStore('user', () => {
   };
 
   const updateUserSelectedAccount = () => {
-    userProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
+    useRepositoryProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
   };
 
   // REDIRECT URL AND CHECK PROFILE ID
@@ -141,7 +142,7 @@ export const useUsersStore = defineStore('user', () => {
   });
 
   const resetAll = () => {
-    getUserData.value = undefined;
+    // getUserState.value.data.value = undefined;
     // selectedUserProfileId.value = null;
     cookies.remove('selectedUserProfileId', cookiesOptions());
     userSessionStore.resetAll();
@@ -152,12 +153,12 @@ export const useUsersStore = defineStore('user', () => {
   const isUrlProfileSameAsSelected = computed(() => Number(urlProfileId.value) === selectedUserProfileId.value);
   const isUrlProfileIdInProfiles = computed(() => {
     if (!isRouteToCheckProfileInUrl.value) return true;
-    return urlProfileId.value && userProfiles.value?.some((profile) => profile.id === Number(urlProfileId.value));
+    return urlProfileId.value && userProfiles.value?.some((profile: { id: number }) => profile.id === Number(urlProfileId.value));
   });
 
   watch(() => userLoggedIn.value, async () => {
-    if (userLoggedIn.value && !getUserData.value && !isGetUserLoading.value) {
-      userProfilesStore.getUser();
+    if (userLoggedIn.value && !getUserState.value?.data && !getUserState.value?.loading) {
+      useRepositoryProfilesStore.getUser();
       websocketsStore.webSocketHandler();
     }
   }, { immediate: true });
@@ -165,8 +166,8 @@ export const useUsersStore = defineStore('user', () => {
   watch(() => [selectedUserProfileId.value, urlProfileId.value], () => {
     if (userLoggedIn.value && isUrlProfileSameAsSelected.value && selectedUserProfileId.value
       && (selectedUserProfileId.value > 0)) {
-      userProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
-      userProfilesStore.getProfileByIdOptions(selectedUserProfileType.value, selectedUserProfileId.value);
+      useRepositoryProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
+      useRepositoryProfilesStore.getProfileByIdOptions(selectedUserProfileType.value, selectedUserProfileId.value);
     }
   }, { immediate: true });
 

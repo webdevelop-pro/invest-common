@@ -1,15 +1,17 @@
 import { watch } from 'vue';
-import { INotification } from 'InvestCommon/types/api/notifications';
+import { INotification } from 'InvestCommon/data/notifications/notifications.types';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { useWebSocket } from '@vueuse/core';
 import env from 'InvestCommon/global/index';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 import { useRepositoryNotifications } from 'InvestCommon/data/notifications/notifications.repository';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useProfileWalletStore } from 'InvestCommon/store/useProfileWallet/useProfileWallet';
 import { useProfileWalletTransactionStore } from 'InvestCommon/store/useProfileWallet/useProfileWalletTransaction';
 import { useInvestmentsStore } from 'InvestCommon/store/useInvestments';
 import { useOfferStore } from 'InvestCommon/store/useOffer';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 
 const { NOTIFICATION_URL } = env;
 
@@ -21,8 +23,8 @@ const TOAST_OPTIONS = {
 };
 
 export const useDomainWebSocketStore = defineStore('domainWebsockets', () => {
-  const usersStore = useUsersStore();
-  const { userLoggedIn } = storeToRefs(usersStore);
+  const userSessionStore = useSessionStore();
+  const { userLoggedIn } = storeToRefs(userSessionStore);
 
   const handleInternalMessage = (notification: INotification) => {
     if (notification.data.obj === 'profile') useUsersStore().updateData(notification);
@@ -46,6 +48,9 @@ export const useDomainWebSocketStore = defineStore('domainWebsockets', () => {
   };
 
   const webSocketHandler = async () => {
+    if (!userLoggedIn.value) {
+      return;
+    }
     const url = `${NOTIFICATION_URL}/ws`;
     const uri = url.replace('https', 'wss');
 

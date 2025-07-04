@@ -5,6 +5,7 @@ import {
 } from 'vue';
 import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { storeToRefs } from 'pinia';
@@ -40,7 +41,7 @@ const isDisabledButton = computed(() => (!isValid.value || isSetUserLoading.valu
 const saveHandler = async () => {
   personalFormRef.value?.onValidate();
   if (!isValid.value) {
-    nextTick(() => scrollToError('VFormPersonalInformation'));
+    nextTick(() => scrollToError('VFormAccount'));
     return;
   }
 

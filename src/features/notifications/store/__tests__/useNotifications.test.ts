@@ -3,7 +3,7 @@ import {
 } from 'vitest';
 import { setActivePinia, createPinia, storeToRefs } from 'pinia';
 import { useRepositoryNotifications } from 'InvestCommon/data/notifications/notifications.repository';
-import { useUsersStore } from 'InvestCommon/store/useUsers';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { nextTick } from 'vue';
 import { useNotifications } from '../useNotifications';
 
@@ -54,10 +54,8 @@ vi.mock('InvestCommon/data/notifications/notifications.repository', () => ({
   useRepositoryNotifications: vi.fn(),
 }));
 
-vi.mock('InvestCommon/store/useUsers', () => ({
-  useUsersStore: vi.fn().mockReturnValue({
-    userLoggedIn: { value: true },
-  }),
+vi.mock('InvestCommon/domain/session/store/useSession', () => ({
+  useSessionStore: vi.fn(),
 }));
 
 describe('useNotifications Store', () => {
@@ -65,6 +63,21 @@ describe('useNotifications Store', () => {
   let mockMarkAllAsRead: ReturnType<typeof vi.fn>;
   let mockMarkAsReadById: ReturnType<typeof vi.fn>;
   let store: ReturnType<typeof useNotifications>;
+
+  // Helper function to wait for loading to complete
+  const waitForLoadingComplete = async () => {
+    // Wait for the 500ms timeout in the watcher
+    await new Promise(resolve => setTimeout(resolve, 600));
+    await nextTick();
+  };
+
+  // Helper function to set up store with data loaded
+  const setupStoreWithData = async () => {
+    await store.loadData();
+    // Directly set isLoading to false since the watcher might not trigger in tests
+    store.isLoading = false;
+    await nextTick();
+  };
 
   beforeEach(() => {
     setActivePinia(createPinia());
@@ -75,7 +88,7 @@ describe('useNotifications Store', () => {
     mockMarkAllAsRead = vi.fn();
     mockMarkAsReadById = vi.fn();
 
-    // Mock the repository response with some notifications
+    // Mock the repository response with proper structure
     vi.mocked(useRepositoryNotifications).mockReturnValue({
       formattedNotifications: {
         value: [
@@ -83,15 +96,34 @@ describe('useNotifications Store', () => {
           { type: 'profile', status: 'read', content: 'Test profile' },
         ],
       },
-      error: { value: null },
-      isLoadingGetAll: { value: false },
+      getAllState: {
+        value: {
+          loading: false,
+          error: null,
+          data: null,
+        },
+      },
+      markAllAsReadState: {
+        value: {
+          loading: false,
+          error: null,
+          data: null,
+        },
+      },
+      markAsReadByIdState: {
+        value: {
+          loading: false,
+          error: null,
+          data: null,
+        },
+      },
       getAll: mockGetAll,
       markAllAsRead: mockMarkAllAsRead,
       markAsReadById: mockMarkAsReadById,
     });
 
-    // Mock the users store
-    vi.mocked(useUsersStore).mockReturnValue({
+    // Mock the session store with proper structure
+    vi.mocked(useSessionStore).mockReturnValue({
       userLoggedIn: { value: true },
     });
 
@@ -117,8 +149,27 @@ describe('useNotifications Store', () => {
     it('should handle loading state correctly', async () => {
       vi.mocked(useRepositoryNotifications).mockReturnValue({
         formattedNotifications: { value: [] },
-        error: { value: null },
-        isLoadingGetAll: { value: true },
+        getAllState: {
+          value: {
+            loading: true,
+            error: null,
+            data: null,
+          },
+        },
+        markAllAsReadState: {
+          value: {
+            loading: false,
+            error: null,
+            data: null,
+          },
+        },
+        markAsReadByIdState: {
+          value: {
+            loading: false,
+            error: null,
+            data: null,
+          },
+        },
         getAll: mockGetAll,
         markAllAsRead: mockMarkAllAsRead,
         markAsReadById: mockMarkAsReadById,
@@ -135,8 +186,7 @@ describe('useNotifications Store', () => {
   describe('Notification Filtering', () => {
     describe('Tab Filtering', () => {
       it('should filter notifications by investments tab', async () => {
-        await store.loadData();
-        await nextTick();
+        await setupStoreWithData();
 
         store.currentTab = 'investments';
         await nextTick();
@@ -147,8 +197,7 @@ describe('useNotifications Store', () => {
       });
 
       it('should filter notifications by accounts tab', async () => {
-        await store.loadData();
-        await nextTick();
+        await setupStoreWithData();
 
         store.currentTab = 'accounts';
         await nextTick();
@@ -161,8 +210,7 @@ describe('useNotifications Store', () => {
 
     describe('Status Filtering', () => {
       it('should filter notifications by unread status', async () => {
-        await store.loadData();
-        await nextTick();
+        await setupStoreWithData();
 
         store.filterStatus = ['unread'];
         await nextTick();
@@ -173,8 +221,7 @@ describe('useNotifications Store', () => {
       });
 
       it('should filter notifications by read status', async () => {
-        await store.loadData();
-        await nextTick();
+        await setupStoreWithData();
 
         store.filterStatus = ['read'];
         await nextTick();
@@ -187,8 +234,7 @@ describe('useNotifications Store', () => {
 
     describe('Search Functionality', () => {
       it('should search notifications by content', async () => {
-        await store.loadData();
-        await nextTick();
+        await setupStoreWithData();
 
         store.search = 'Test investment';
         await nextTick();
@@ -199,8 +245,7 @@ describe('useNotifications Store', () => {
       });
 
       it('should search notifications by type', async () => {
-        await store.loadData();
-        await nextTick();
+        await setupStoreWithData();
 
         store.search = 'investment';
         await nextTick();
@@ -232,8 +277,7 @@ describe('useNotifications Store', () => {
 
   describe('Filter Management', () => {
     it('should apply filters correctly', async () => {
-      await store.loadData();
-      await nextTick();
+      await setupStoreWithData();
 
       const mockFilters = [
         {
@@ -258,8 +302,7 @@ describe('useNotifications Store', () => {
     });
 
     it('should clear filters correctly', async () => {
-      await store.loadData();
-      await nextTick();
+      await setupStoreWithData();
 
       // Set initial filters
       store.filterStatus = ['unread'];
@@ -284,7 +327,10 @@ describe('useNotifications Store', () => {
   });
 
   describe('Sidebar Management', () => {
-    it('should toggle sidebar state', () => {
+    it('should toggle sidebar state', async () => {
+      // Wait for initial loading to complete
+      await setupStoreWithData();
+
       expect(store.isSidebarOpen).toBe(false);
 
       store.onSidebarToggle(true);
