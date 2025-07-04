@@ -87,7 +87,6 @@ export const useRepositoryAuth = () => {
       getLoginState.value.error = null;
       const response = await apiClient.get(`/self-service/login/flows?id=${flowId}`);
       getLoginState.value.data = response.data;
-      console.log('getLogin response:', response.data);
       return response.data;
     } catch (err) {
       getLoginState.value.error = err as Error;

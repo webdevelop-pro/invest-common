@@ -5,6 +5,7 @@ import {
 import { requiredFetchParams } from 'UiKit/helpers/api/requiredFetchParams';
 import env from 'InvestCommon/global';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { v4 as uuidv4 } from 'uuid';
 import { storeToRefs } from 'pinia';
 

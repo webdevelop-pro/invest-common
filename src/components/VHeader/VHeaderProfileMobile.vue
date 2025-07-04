@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, PropType } from 'vue';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 import { storeToRefs } from 'pinia';
 import {

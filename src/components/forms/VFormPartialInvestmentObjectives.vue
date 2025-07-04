@@ -1,31 +1,25 @@
 <script setup lang="ts">
 import {
-  watch, PropType, computed,
+  watch, PropType, computed, toRaw,
 } from 'vue';
 import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
 import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
 import VFormSelect from 'UiKit/components/Base/VForm/VFormSelect.vue';
-import { storeToRefs } from 'pinia';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { FormModelInvestmentObjectives } from 'InvestCommon/types/form';
 import { numberFormatter } from 'InvestCommon/helpers/numberFormatter';
-import { filterSchema } from 'UiKit/helpers/validation/general';
 import { getOptions, createFormModel } from 'UiKit/helpers/model';
 import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
-import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 
 const props = defineProps({
   modelData: Object as PropType<FormModelInvestmentObjectives>,
-  // errorData: Object,
-  // schemaBackend: Object,
+  errorData: Object,
+  schemaBackend: Object,
   loading: Boolean,
 });
-
-const useRepositoryProfilesStore = useRepositoryProfiles();
-const { setProfileByIdState, getProfileByIdOptionsState } = storeToRefs(useRepositoryProfilesStore);
 
 const schemaFrontend = {
   $schema: 'http://json-schema.org/draft-07/schema#',
@@ -53,9 +47,7 @@ const schemaFrontend = {
   $ref: '#/definitions/Individual',
 } as unknown as JSONSchemaType<FormModelInvestmentObjectives>;
 
-const schemaBackend = computed(() => getProfileByIdOptionsState.value.data);
-const errorData = computed(() => setProfileByIdState.value.error);
-const schemaBackendLocal = computed(() => filterSchema(schemaBackend.value, createFormModel(schemaFrontend)));
+const schemaBackendLocal = computed(() => (props.schemaBackend ? structuredClone(toRaw(props.schemaBackend)) : null));
 
 const {
   model, validation, isValid, onValidate, schemaObject,
@@ -78,22 +70,16 @@ defineExpose({
   model, validation, isValid, onValidate,
 });
 
-watch(() => props.modelData?.investment_objectives, () => {
-  if (props.modelData?.investment_objectives?.duration) {
-    model.investment_objectives.duration = props.modelData?.investment_objectives.duration;
-  }
-  if (props.modelData?.investment_objectives?.importance_of_access) {
-    model.investment_objectives.importance_of_access = props.modelData?.investment_objectives.importance_of_access;
-  }
-  if (props.modelData?.investment_objectives?.objectives) {
-    model.investment_objectives.objectives = props.modelData?.investment_objectives.objectives;
-  }
-  if (props.modelData?.investment_objectives?.risk_comfort) {
-    model.investment_objectives.risk_comfort = props.modelData?.investment_objectives.risk_comfort;
-  }
-  if (props.modelData?.investment_objectives?.years_experience) {
-    model.investment_objectives.years_experience = props.modelData?.investment_objectives.years_experience;
-  }
+watch(() => props.modelData, (newModelData) => {
+  if (!newModelData || !newModelData.investment_objectives) return;
+  const fields = [
+    'duration', 'importance_of_access', 'objectives', 'risk_comfort', 'years_experience',
+  ] as const;
+  fields.forEach((field) => {
+    if (newModelData.investment_objectives[field] !== undefined && newModelData.investment_objectives[field] !== null) {
+      model.investment_objectives[field] = newModelData.investment_objectives[field];
+    }
+  });
 }, { deep: true, immediate: true });
 </script>
 

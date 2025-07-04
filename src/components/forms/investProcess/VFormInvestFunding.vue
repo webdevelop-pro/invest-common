@@ -9,6 +9,7 @@ import { useOfferStore } from 'InvestCommon/store/useOffer';
 import { useProfileWalletStore } from 'InvestCommon/store/useProfileWallet/useProfileWallet';
 import { useProfileEvmWalletStore } from 'InvestCommon/store/useProfileEvmWallet/useProfileEvmWallet';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import { ROUTE_INVEST_REVIEW, ROUTE_INVEST_SIGNATURE } from 'InvestCommon/helpers/enums/routes';
 import { IInvestFunding } from 'InvestCommon/types/api/invest';

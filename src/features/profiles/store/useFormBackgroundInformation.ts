@@ -212,7 +212,7 @@ export const useFormBackgroundInformation = defineStore('useFormBackgroundInform
         {
           employment: {
             ...model.employment,
-            type: model.employment.type,
+            type: model.employment?.type,
           },
           finra_affiliated: model.finra_affiliated,
           ten_percent_shareholder: model.ten_percent_shareholder,
@@ -224,13 +224,13 @@ export const useFormBackgroundInformation = defineStore('useFormBackgroundInform
 
       submitFormToHubspot({
         email: userSessionTraits.value?.email,
-        employment_type: model.employment.type,
-        employer_name: model.employment.employer_name,
-        title: model.employment.title,
-        employer_address_1: model.employment.address1,
-        employer_address_2: model.employment.address2,
-        city: model.employment.city,
-        zip: model.employment.zip_code,
+        employment_type: model.employment?.type,
+        employer_name: model.employment?.employer_name,
+        title: model.employment?.title,
+        employer_address_1: model.employment?.address1,
+        employer_address_2: model.employment?.address2,
+        city: model.employment?.city,
+        zip: model.employment?.zip_code,
         ...model.finra_affiliated,
         ...model.ten_percent_shareholder,
         irs_backup_withholding: model.irs_backup_withholding,

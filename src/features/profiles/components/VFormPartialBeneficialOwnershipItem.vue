@@ -1,55 +1,34 @@
 <script setup lang="ts">
-import { PropType, watch } from 'vue';
-import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
+import { PropType, watch, onMounted } from 'vue';
 import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
 import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
-import { storeToRefs } from 'pinia';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import VFormCheckbox from 'UiKit/components/Base/VForm/VFormCheckbox.vue';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import VFormCombobox from 'UiKit/components/Base/VForm/VFormCombobox.vue';
+import { useVFormPartialBeneficialOwnershipItem, FormPartialBeneficialOwnershipItem } from './logic/useVFormPartialBeneficialOwnershipItem';
+import { Ref } from 'vue';
 
-export interface FormPartialBeneficialOwnershipItem {
-  first_name: string;
-  last_name: string;
-  dob: string;
-  address1: string;
-  city: string;
-  state: string;
-  zip_code: string;
-  country: string;
-  phone: string;
-  email: string;
-  non_us: string;
-  ssn?: string;
-  type_of_identification?: {
-    id_number: string;
-    country: string;
-  };
-}
+const props = defineProps<{
+  itemIndex: number;
+  validation: object;
+  schema: JSONSchemaType<FormPartialBeneficialOwnershipItem>;
+  optionsCountry: Array<any>;
+  optionsState: Array<any>;
+  trust: boolean;
+  errorData: any;
+  schemaBackend: object;
+  loading: boolean;
+}>();
+
 const model = defineModel<FormPartialBeneficialOwnershipItem>();
-const props = defineProps({
-  itemIndex: Number,
-  validation: Object,
-  schema: Object as PropType<JSONSchemaType<FormPartialBeneficialOwnershipItem>>,
-  optionsCountry: Array,
-  optionsState: Array,
-  trust: Boolean,
-});
 
-const userProfilesStore = useUserProfilesStore();
-const {
-  getProfileByIdOptionsData, setProfileErrorData, isGetProfileByIdLoading,
-} = storeToRefs(userProfilesStore);
+const { title } = useVFormPartialBeneficialOwnershipItem(model.value, props.trust);
 
-const title = props.trust ? 'Trustee or Protector' : 'Beneficial Owner';
-
-watch(() => model.value?.non_us, () => {
-  if (model.value?.non_us) {
-    model.value.type_of_identification = {};
-  } else {
-    delete model.value?.type_of_identification;
+onMounted(() => {
+  if (model.value && !model.value.type_of_identification) {
+    model.value.type_of_identification = { id_number: '', country: '' };
   }
 });
 </script>
@@ -65,9 +44,9 @@ watch(() => model.value?.non_us, () => {
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="getProfileByIdOptionsData"
+          :schema-back="schemaBackend"
           :schema-front="schema"
-          :error-text="setProfileErrorData?.beneficials[itemIndex].first_name"
+          :error-text="errorData?.beneficials[itemIndex].first_name"
           :path="`beneficials.${itemIndex}.first_name`"
           label="First Name"
           data-testid="first-name-group"
@@ -79,7 +58,7 @@ watch(() => model.value?.non_us, () => {
             name="first-name"
             size="large"
             data-testid="first-name"
-            :loading="isGetProfileByIdLoading"
+            :loading="loading"
           />
         </VFormGroup>
       </FormCol>
@@ -89,9 +68,9 @@ watch(() => model.value?.non_us, () => {
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="getProfileByIdOptionsData"
+          :schema-back="schemaBackend"
           :schema-front="schema"
-          :error-text="setProfileErrorData?.beneficials[itemIndex].last_name"
+          :error-text="errorData?.beneficials[itemIndex].last_name"
           :path="`beneficials.${itemIndex}.last_name`"
           label="Last Name"
           data-testid="last-name-group"
@@ -103,7 +82,7 @@ watch(() => model.value?.non_us, () => {
             name="last-name"
             size="large"
             data-testid="last-name"
-            :loading="isGetProfileByIdLoading"
+            :loading="loading"
           />
         </VFormGroup>
       </FormCol>
@@ -112,9 +91,9 @@ watch(() => model.value?.non_us, () => {
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="getProfileByIdOptionsData"
+          :schema-back="schemaBackend"
           :schema-front="schema"
-          :error-text="setProfileErrorData?.beneficials[itemIndex].dob"
+          :error-text="errorData?.beneficials[itemIndex].dob"
           :path="`beneficials.${itemIndex}.dob`"
           label="Date of Birth"
           data-testid="dob-group"
@@ -127,7 +106,7 @@ watch(() => model.value?.non_us, () => {
             size="large"
             data-testid="date-of-birth"
             type="date"
-            :loading="isGetProfileByIdLoading"
+            :loading="loading"
           />
         </VFormGroup>
       </FormCol>
@@ -144,9 +123,9 @@ watch(() => model.value?.non_us, () => {
             v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
-            :schema-back="getProfileByIdOptionsData"
+            :schema-back="schemaBackend"
             :schema-front="schema"
-            :error-text="setProfileErrorData?.beneficials[itemIndex].ssn"
+            :error-text="errorData?.beneficials[itemIndex].ssn"
             :path="`beneficials.${itemIndex}.ssn`"
             label="SSN"
             :required="!model.non_us"
@@ -161,7 +140,7 @@ watch(() => model.value?.non_us, () => {
               data-testid="ssn"
               mask="###-##-####"
               disallow-special-chars
-            :loading="isGetProfileByIdLoading"
+            :loading="loading"
             />
           </VFormGroup>
         </FormCol>
@@ -173,9 +152,9 @@ watch(() => model.value?.non_us, () => {
             v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
-            :schema-back="getProfileByIdOptionsData"
+            :schema-back="schemaBackend"
             :schema-front="schema"
-            :error-text="setProfileErrorData?.beneficials[itemIndex].type_of_identification?.id_number"
+            :error-text="errorData?.beneficials[itemIndex].type_of_identification?.id_number"
             :path="`beneficials.${itemIndex}.type_of_identification.id_number`"
             label="Passport Series and Number"
             :required="model.non_us"
@@ -188,7 +167,7 @@ watch(() => model.value?.non_us, () => {
               name="is_number"
               size="large"
               data-testid="id-number"
-              :loading="isGetProfileByIdLoading"
+              :loading="loading"
             />
           </VFormGroup>
         </FormCol>
@@ -197,9 +176,9 @@ watch(() => model.value?.non_us, () => {
             v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
-            :schema-back="getProfileByIdOptionsData"
+            :schema-back="schemaBackend"
             :schema-front="schema"
-            :error-text="setProfileErrorData?.beneficials[itemIndex].type_of_identification?.country"
+            :error-text="errorData?.beneficials[itemIndex].type_of_identification?.country"
             :path="`beneficials.${itemIndex}.type_of_identification.country`"
             label="Country of Issue"
             :required="model.non_us"
@@ -217,7 +196,7 @@ watch(() => model.value?.non_us, () => {
               :options="optionsCountry"
               dropdown-absolute
               data-testid="passport-country"
-              :loading="isGetProfileByIdLoading || (optionsCountry.length === 0)"
+              :loading="loading || (optionsCountry.length === 0)"
             />
           </VFormGroup>
         </FormCol>
@@ -229,9 +208,9 @@ watch(() => model.value?.non_us, () => {
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="getProfileByIdOptionsData"
+          :schema-back="schemaBackend"
           :schema-front="schema"
-          :error-text="setProfileErrorData?.beneficials[itemIndex].email"
+          :error-text="errorData?.beneficials[itemIndex].email"
           :path="`beneficials.${itemIndex}.email`"
           label="Email"
           data-testid="email-group"
@@ -244,7 +223,7 @@ watch(() => model.value?.non_us, () => {
             text
             type="email"
             size="large"
-            :loading="isGetProfileByIdLoading"
+            :loading="loading"
           />
         </VFormGroup>
       </FormCol>
@@ -254,9 +233,9 @@ watch(() => model.value?.non_us, () => {
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="getProfileByIdOptionsData"
+          :schema-back="schemaBackend"
           :schema-front="schema"
-          :error-text="setProfileErrorData?.beneficials[itemIndex].phone"
+          :error-text="errorData?.beneficials[itemIndex].phone"
           :path="`beneficials.${itemIndex}.phone`"
           label="Phone number"
           data-testid="phone-group"
@@ -270,7 +249,7 @@ watch(() => model.value?.non_us, () => {
             name="phone"
             size="large"
             data-testid="phone"
-            :loading="isGetProfileByIdLoading"
+            :loading="loading"
           />
         </VFormGroup>
       </FormCol>
@@ -281,9 +260,9 @@ watch(() => model.value?.non_us, () => {
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="getProfileByIdOptionsData"
+          :schema-back="schemaBackend"
           :schema-front="schema"
-          :error-text="setProfileErrorData?.beneficials[itemIndex].address1"
+          :error-text="errorData?.beneficials[itemIndex].address1"
           :path="`beneficials.${itemIndex}.address1`"
           label="Address 1"
           data-testid="address-1-group"
@@ -295,7 +274,7 @@ watch(() => model.value?.non_us, () => {
             name="address-1"
             size="large"
             data-testid="address-1"
-            :loading="isGetProfileByIdLoading"
+            :loading="loading"
           />
         </VFormGroup>
       </FormCol>
@@ -305,9 +284,9 @@ watch(() => model.value?.non_us, () => {
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="getProfileByIdOptionsData"
+          :schema-back="schemaBackend"
           :schema-front="schema"
-          :error-text="setProfileErrorData?.beneficials[itemIndex].address2"
+          :error-text="errorData?.beneficials[itemIndex].address2"
           :path="`beneficials.${itemIndex}.address2`"
           label="Address 2"
           data-testid="address-2-group"
@@ -319,7 +298,7 @@ watch(() => model.value?.non_us, () => {
             name="address-2"
             size="large"
             data-testid="address-2"
-            :loading="isGetProfileByIdLoading"
+            :loading="loading"
           />
         </VFormGroup>
       </FormCol>
@@ -331,9 +310,9 @@ watch(() => model.value?.non_us, () => {
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="getProfileByIdOptionsData"
+          :schema-back="schemaBackend"
           :schema-front="schema"
-          :error-text="setProfileErrorData?.beneficials[itemIndex].city"
+          :error-text="errorData?.beneficials[itemIndex].city"
           :path="`beneficials.${itemIndex}.city`"
           label="City"
           data-testid="city-group"
@@ -347,7 +326,7 @@ watch(() => model.value?.non_us, () => {
             data-testid="city"
             disallow-special-chars
             disallow-numbers
-            :loading="isGetProfileByIdLoading"
+            :loading="loading"
           />
         </VFormGroup>
       </FormCol>
@@ -356,9 +335,9 @@ watch(() => model.value?.non_us, () => {
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="getProfileByIdOptionsData"
+          :schema-back="schemaBackend"
           :schema-front="schema"
-          :error-text="setProfileErrorData?.beneficials[itemIndex].state"
+          :error-text="errorData?.beneficials[itemIndex].state"
           :path="`beneficials.${itemIndex}.state`"
           label="State"
           data-testid="state-group"
@@ -373,7 +352,7 @@ watch(() => model.value?.non_us, () => {
             item-value="value"
             searchable
             :options="optionsState"
-            :loading="isGetProfileByIdLoading || (optionsState.length === 0)"
+            :loading="loading || (optionsState.length === 0)"
             data-testid="state"
           />
         </VFormGroup>
@@ -386,9 +365,9 @@ watch(() => model.value?.non_us, () => {
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="getProfileByIdOptionsData"
+          :schema-back="schemaBackend"
           :schema-front="schema"
-          :error-text="setProfileErrorData?.beneficials[itemIndex].zip_code"
+          :error-text="errorData?.beneficials[itemIndex].zip_code"
           :path="`beneficials.${itemIndex}.zip_code`"
           label="Zip Code"
           data-testid="zip-group"
@@ -403,7 +382,7 @@ watch(() => model.value?.non_us, () => {
             mask="#####-####"
             return-masked-value
             disallow-special-chars
-            :loading="isGetProfileByIdLoading"
+            :loading="loading"
           />
         </VFormGroup>
       </FormCol>
@@ -413,9 +392,9 @@ watch(() => model.value?.non_us, () => {
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="getProfileByIdOptionsData"
+          :schema-back="schemaBackend"
           :schema-front="schema"
-          :error-text="setProfileErrorData?.beneficials[itemIndex].country"
+          :error-text="errorData?.beneficials[itemIndex].country"
           :path="`beneficials.${itemIndex}.country`"
           label="Country"
           data-testid="country-group"
@@ -430,7 +409,7 @@ watch(() => model.value?.non_us, () => {
             item-value="value"
             searchable
             :options="optionsCountry"
-            :loading="isGetProfileByIdLoading || (optionsCountry?.length === 0)"
+            :loading="loading || (optionsCountry?.length === 0)"
             data-testid="country"
           />
         </VFormGroup>

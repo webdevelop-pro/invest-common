@@ -119,7 +119,6 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
       getUserState.value.error = null;
       const response = await apiClient.get<IUserIdentityResponse>('/auth/user');
       getUserState.value.data = response.data;
-      console.log('getUserState.data', getUserState);
       return getUserState.value.data;
     } catch (err) {
       getUserState.value.error = err as Error;

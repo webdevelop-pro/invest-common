@@ -9,6 +9,7 @@ import { storeToRefs } from 'pinia';
 import { capitalizeFirstLetter } from 'UiKit/helpers/text';
 import checkIcon from 'UiKit/assets/images/circle-check.svg';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 
 const authLogicStore = useAuthLogicStore();
 const usersStore = useUsersStore();

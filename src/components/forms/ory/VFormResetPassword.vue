@@ -24,6 +24,7 @@ import eyeOff from 'UiKit/assets/images/eye-off.svg';
 import eye from 'UiKit/assets/images/eye.svg';
 import { urlSettings } from 'InvestCommon/global/links';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 
 const authStore = useAuthStore();
 const { isSetPasswordLoading, setPasswordErrorData } = storeToRefs(authStore);

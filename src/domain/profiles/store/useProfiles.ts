@@ -27,6 +27,7 @@ export const useProfilesStore = defineStore('profiles', () => {
   const profileByIdInProfilesList = computed(() => userProfiles.value.find((item) => item.id === selectedUserProfileId.value));
   const selectedUserProfileData = computed(() => getProfileByIdState.value?.data || profileByIdInProfilesList.value);
   const selectedUserProfileType = computed(() => selectedUserProfileData.value?.type || 'individual');
+  const selectedUserIndividualProfile = computed(() => userProfiles.value.find((profile: { type: string }) => profile.type === 'individual'));
 
   const isSelectedProfileLoading = computed(() => getProfileByIdState.value?.loading || getUserState.value?.loading || false);
 
@@ -81,9 +82,6 @@ export const useProfilesStore = defineStore('profiles', () => {
   // on init user load if there is no selectedUserProfileId or it is === 0
   // and user profiles loaded and first id is not 0, set selectedUserProfileId - step 2
   watch(() => userProfiles.value[0]?.id, () => {
-    if (!userLoggedIn.value) {
-      return;
-    }
     if ((!selectedUserProfileId.value || selectedUserProfileId.value === 0) && (userProfiles.value[0]?.id > 0)) {
       setSelectedUserProfileById(userProfiles.value[0]?.id);
     }
@@ -104,6 +102,7 @@ export const useProfilesStore = defineStore('profiles', () => {
     selectedUserProfileData,
     selectedUserProfileType,
     isSelectedProfileLoading,
+    selectedUserIndividualProfile,
 
     // Methods
     setSelectedUserProfileById,

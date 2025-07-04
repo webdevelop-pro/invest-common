@@ -100,6 +100,8 @@ export const useRepositoryAccreditation = () => {
       const response = await apiClient.post(`/auth/escrow/${userId}/${profileId}`, null, {
         headers: {
           'X-Request-ID': uuidv4(),
+          'Content-Type': 'application/json',
+          accept: 'application/json',
         },
       });
       createEscrowState.value.data = response.data;

@@ -1,50 +1,61 @@
 <script setup lang="ts">
-import { useUsersStore } from 'InvestCommon/store/useUsers';
 import { useGlobalLoader } from 'InvestCommon/store/useGlobalLoader';
-import LayoutBackButton from 'InvestCommon/components/layouts/LayoutBackButton.vue';
-import VFormEntityInformation from 'InvestCommon/components/forms/VFormEntityInformation.vue';
-import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/helpers/enums/routes';
 import { storeToRefs } from 'pinia';
-import { computed } from 'vue';
+import VLayoutForm from 'InvestCommon/core/layouts/VLayoutForm.vue';
+import { useFormEntityInformation } from './store/useFormEntityInformation';
+import VFormPartialEntityInformation from './components/VFormPartialEntityInformation.vue';
 
 const globalLoader = useGlobalLoader();
 globalLoader.hide();
 
-const usersStore = useUsersStore();
-const { selectedUserProfileId } = storeToRefs(usersStore);
+const formStore = useFormEntityInformation();
+const {
+  backButtonText, breadcrumbs, isLoading, isDisabledButton,
+  modelData, schemaBackend, errorData,
+} = storeToRefs(formStore);
 
-const accountRoute = computed(() => (
-  { name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } }));
-
-const breadcrumbs = [
-  {
-    text: 'Dashboard',
-    to: accountRoute.value,
-  },
-  {
-    text: 'Profile Details',
-    to: accountRoute.value,
-  },
-  {
-    text: 'Entity Information',
-  },
-];
+const handleSave = () => {
+  formStore.handleSave();
+};
 </script>
 
 <template>
   <div class="ViewDashboardEntityInformation view-dashboard-entity-information is--no-margin">
-    <LayoutBackButton
-      button-text="Back to Profile Details"
-      :button-route="accountRoute"
+    <VLayoutForm
+      :button-text="backButtonText"
       :breadcrumbs="breadcrumbs"
+      :is-disabled-button="isDisabledButton"
+      :is-loading="isLoading"
+      @save="handleSave"
     >
-      <VFormEntityInformation />
-    </LayoutBackButton>
+      <div class="view-dashboard-entity-information__header is--h1__title">
+        Entity Information
+      </div>
+      <div class="view-dashboard-entity-information__content">
+        <VFormPartialEntityInformation
+          ref="entityInformationFormChild"
+          :model-data="modelData"
+          :loading="isLoading"
+          :schema-backend="schemaBackend"
+          :error-data="errorData"
+        />
+      </div>
+    </VLayoutForm>
   </div>
 </template>
 
 <style lang="scss">
 .view-dashboard-entity-information {
   width: 100%;
+
+  &__header {
+    margin-bottom: 40px;
+    min-height: 75px;
+  }
+
+  &__subtitle {
+    margin-top: 12px;
+    margin-bottom: 20px;
+  }
 }
 </style>

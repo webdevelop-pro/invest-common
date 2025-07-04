@@ -1,50 +1,56 @@
 <script setup lang="ts">
-import { useUsersStore } from 'InvestCommon/store/useUsers';
 import { useGlobalLoader } from 'InvestCommon/store/useGlobalLoader';
-import LayoutBackButton from 'InvestCommon/components/layouts/LayoutBackButton.vue';
-import VFormCustodianInformation from 'InvestCommon/components/forms/VFormCustodianInformation.vue';
-import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/helpers/enums/routes';
 import { storeToRefs } from 'pinia';
-import { computed } from 'vue';
+import VLayoutForm from 'InvestCommon/core/layouts/VLayoutForm.vue';
+import { useFormCustodianInformation } from './store/useFormCustodianInformation';
+import VFormPartialCustodian from './components/VFormPartialCustodian.vue';
 
 const globalLoader = useGlobalLoader();
 globalLoader.hide();
 
-const usersStore = useUsersStore();
-const { selectedUserProfileId } = storeToRefs(usersStore);
+const formStore = useFormCustodianInformation();
+const {
+  backButtonText, breadcrumbs, isLoading, isDisabledButton,
+  modelData, schemaBackend, errorData, isLoadingFields,
+} = storeToRefs(formStore);
 
-const accountRoute = computed(() => (
-  { name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } }));
-
-const breadcrumbs = [
-  {
-    text: 'Dashboard',
-    to: accountRoute.value,
-  },
-  {
-    text: 'Profile Details',
-    to: accountRoute.value,
-  },
-  {
-    text: 'Custodian Information',
-  },
-];
+const handleSave = () => {
+  formStore.handleSave();
+};
 </script>
 
 <template>
   <div class="ViewDashboardCustodianInformation view-dashboard-custodian-information is--no-margin">
-    <LayoutBackButton
-      button-text="Back to Profile Details"
-      :button-route="accountRoute"
+    <VLayoutForm
+      :button-text="backButtonText"
       :breadcrumbs="breadcrumbs"
+      :is-disabled-button="isDisabledButton"
+      :is-loading="isLoading"
+      @save="handleSave"
     >
-      <VFormCustodianInformation />
-    </LayoutBackButton>
+      <div class="view-dashboard-custodian-information__header is--h1__title">
+        Custodian Information
+      </div>
+      <div class="view-dashboard-custodian-information__content">
+        <VFormPartialCustodian
+          ref="custodianInformationFormChild"
+          :model-data="modelData"
+          :schema-backend="schemaBackend"
+          :error-data="errorData"
+          :loading="isLoadingFields"
+        />
+      </div>
+    </VLayoutForm>
   </div>
 </template>
 
 <style lang="scss">
 .view-dashboard-custodian-information {
   width: 100%;
+
+  &__header {
+    margin-bottom: 40px;
+    min-height: 75px;
+  }
 }
 </style>

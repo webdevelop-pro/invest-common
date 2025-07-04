@@ -4,6 +4,7 @@ import { useRouter, useRoute } from 'vue-router';
 import { useInvestmentsStore } from 'InvestCommon/store/useInvestments';
 import { useOfferStore } from 'InvestCommon/store/useOffer';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useHelloSign } from 'InvestCommon/composable/useHelloSign';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import {

@@ -5,6 +5,7 @@ import {
 } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useProfileWalletTransactionStore } from 'InvestCommon/store/useProfileWallet/useProfileWalletTransaction';
 import { useProfileWalletStore } from 'InvestCommon/store/useProfileWallet/useProfileWallet';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';

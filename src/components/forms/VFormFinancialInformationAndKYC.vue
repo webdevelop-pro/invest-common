@@ -6,6 +6,7 @@ import {
 } from 'vue';
 import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useAccreditationStore } from 'InvestCommon/store/useAccreditation';
 import { usePlaidStore } from 'InvestCommon/store/usePlaid';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
@@ -136,14 +137,23 @@ const cancelHandler = () => {
       <VFormPartialFinancialSituation
         ref="financialInfoFormChild"
         :model-data="selectedUserProfileData?.data"
+        :loading="isLoading"
+        :schema-backend="schemaBackend"
+        :error-data="errorData"
       />
       <VFormPartialInvestmentObjectives
         ref="investmentObjectivesFormChild"
         :model-data="selectedUserProfileData?.data"
+        :loading="isLoading"
+        :schema-backend="schemaBackend"
+        :error-data="errorData"
       />
       <VFormPartialUnderstandingOfRisks
         ref="understandingRisksFormChild"
         :model-data="selectedUserProfileData?.data"
+        :loading="isLoading"
+        :schema-backend="schemaBackend"
+        :error-data="errorData"
       />
     </div>
     <div class="form-reg-cf-information__footer">

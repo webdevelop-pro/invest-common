@@ -5,6 +5,12 @@ export interface FormChild {
     validation: unknown;
     model: object;
     onValidate: () => void;
+    personalFormRef?: any;
+    custodianFormRef?: any;
+    planFormRef?: any;
+    entityFormRef?: any;
+    businessControllerFormRef?: any;
+    trustedContactFormRef?: any;
 }
 
 export interface FormModelPersonalInformation {
@@ -124,4 +130,34 @@ export type FormModelContactUs = {
   email: string;
   subject: string;
   message: string;
+}
+
+export interface FormModelPlanInformation {
+  name: string;
+  is_use_ein: string;
+  ein?: string;
+}
+
+export interface FormModelEntityInformation {
+  solely_for_investing: string;
+  tax_exempts: string;
+  type: string | undefined;
+  owner_title: string | undefined;
+  name: string | undefined;
+}
+
+export interface FormModelBusinessController {
+  business_controller: {
+    first_name: string;
+    last_name: string;
+    address1: string;
+    address2?: string;
+    city: string;
+    state: string;
+    zip_code: string;
+    country: string;
+    phone: string;
+    email: string;
+    dob: string;
+  };
 }

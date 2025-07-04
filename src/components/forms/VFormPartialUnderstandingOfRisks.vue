@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {
-  watch, PropType, reactive, ref, computed,
+  watch, PropType, computed, toRaw,
 } from 'vue';
 import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
@@ -11,14 +11,14 @@ import { storeToRefs } from 'pinia';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { FormModelUnderstandRisks } from 'InvestCommon/types/form';
-import { createFormModel } from 'UiKit/helpers/model';
-import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
-import { filterSchema } from 'UiKit/helpers/validation/general';
-import { isEmpty } from 'UiKit/helpers/general';
+import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
 
 const props = defineProps({
   modelData: Object as PropType<FormModelUnderstandRisks>,
   consentPlaid: Boolean,
+  errorData: Object,
+  schemaBackend: Object,
+  loading: Boolean,
 });
 
 const userIdentityStore = useUserProfilesStore();
@@ -26,7 +26,7 @@ const {
   setProfileByIdErrorData, getProfileByIdOptionsData,
 } = storeToRefs(userIdentityStore);
 
-const schema = {
+const schemaFrontend = {
   $schema: 'http://json-schema.org/draft-07/schema#',
   definitions: {
     Individual: {
@@ -57,59 +57,41 @@ const schema = {
   $ref: '#/definitions/Individual',
 } as unknown as JSONSchemaType<FormModelUnderstandRisks>;
 
-const model = reactive<FormModelUnderstandRisks>({
-  risk_involved: props.modelData?.risk_involved || false,
-  no_legal_advices_from_company: props.modelData?.no_legal_advices_from_company || false,
-  educational_materials: props.modelData?.educational_materials || false,
-  cancelation_restrictions: props.modelData?.cancelation_restrictions || false,
-  resell_difficulties: props.modelData?.resell_difficulties || false,
-  consent_plaid: props.consentPlaid,
-});
-const formModel = createFormModel(schema);
-let validator = new PrecompiledValidator<FormModelUnderstandRisks>(
-  filterSchema(getProfileByIdOptionsData.value, formModel),
-  schema,
+const {
+  model, validation, isValid, onValidate,
+} = useFormValidation<FormModelUnderstandRisks>(
+  schemaFrontend,
+  props.schemaBackend,
+  {
+    risk_involved: props.modelData?.risk_involved || false,
+    no_legal_advices_from_company: props.modelData?.no_legal_advices_from_company || false,
+    educational_materials: props.modelData?.educational_materials || false,
+    cancelation_restrictions: props.modelData?.cancelation_restrictions || false,
+    resell_difficulties: props.modelData?.resell_difficulties || false,
+    consent_plaid: props.consentPlaid,
+  } as FormModelUnderstandRisks,
 );
-const validation = ref<unknown>();
-const isValid = computed(() => isEmpty(validation.value || {}));
-
-const onValidate = () => {
-  validation.value = validator.getFormValidationErrors(model);
-};
 
 defineExpose({
-  model, validation, validator, isValid, onValidate,
+  model, validation, isValid, onValidate,
 });
 
-watch(() => props.modelData, () => {
-  // risks
-  if (props.modelData?.risk_involved) {
-    model.risk_involved = props.modelData?.risk_involved;
-  }
-  if (props.modelData?.no_legal_advices_from_company) {
-    model.no_legal_advices_from_company = props.modelData?.no_legal_advices_from_company;
-  }
-  if (props.modelData?.educational_materials) {
-    model.educational_materials = props.modelData?.educational_materials;
-  }
-  if (props.modelData?.cancelation_restrictions) {
-    model.cancelation_restrictions = props.modelData?.cancelation_restrictions;
-  }
-  if (props.modelData?.resell_difficulties) {
-    model.resell_difficulties = props.modelData?.resell_difficulties;
-  }
+watch(() => props.modelData, (newModelData) => {
+  if (!newModelData) return;
+  const fields = [
+    'risk_involved',
+    'no_legal_advices_from_company',
+    'educational_materials',
+    'cancelation_restrictions',
+    'resell_difficulties',
+    'consent_plaid',
+  ] as const;
+  fields.forEach((field) => {
+    if (newModelData[field] !== undefined && newModelData[field] !== null) {
+      model[field] = newModelData[field];
+    }
+  });
 }, { deep: true, immediate: true });
-
-watch(() => model, () => {
-  if (!isValid.value) onValidate();
-}, { deep: true });
-
-watch(() => [getProfileByIdOptionsData.value, schema], () => {
-  validator = new PrecompiledValidator<FormModelUnderstandRisks>(
-    filterSchema(getProfileByIdOptionsData.value, formModel),
-    schema,
-  );
-});
 </script>
 
 <template>
@@ -124,7 +106,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
           :model="model"
           :validation="validation"
           :schema-back="getProfileByIdOptionsData"
-          :schema-front="schema"
+          :schema-front="schemaFrontend"
           :error-text="setProfileByIdErrorData?.educational_materials"
           path="educational_materials"
           data-testid="educational-materials-group"
@@ -149,7 +131,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
           :model="model"
           :validation="validation"
           :schema-back="getProfileByIdOptionsData"
-          :schema-front="schema"
+          :schema-front="schemaFrontend"
           :error-text="setProfileByIdErrorData?.cancelation_restrictions"
           path="cancelation_restrictions"
           data-testid="cancelation-restrictions-group"
@@ -174,7 +156,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
           :model="model"
           :validation="validation"
           :schema-back="getProfileByIdOptionsData"
-          :schema-front="schema"
+          :schema-front="schemaFrontend"
           :error-text="setProfileByIdErrorData?.resell_difficulties"
           path="resell_difficulties"
           data-testid="resell-difficulties-group"
@@ -199,7 +181,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
           :model="model"
           :validation="validation"
           :schema-back="getProfileByIdOptionsData"
-          :schema-front="schema"
+          :schema-front="schemaFrontend"
           :error-text="setProfileByIdErrorData?.risk_involved"
           path="risk_involved"
           data-testid="risk-involved-group"
@@ -224,7 +206,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
           :model="model"
           :validation="validation"
           :schema-back="getProfileByIdOptionsData"
-          :schema-front="schema"
+          :schema-front="schemaFrontend"
           :error-text="setProfileByIdErrorData?.no_legal_advices_from_company"
           path="no_legal_advices_from_company"
           data-testid="no_legal_advices_from_company-group"
@@ -250,7 +232,7 @@ watch(() => [getProfileByIdOptionsData.value, schema], () => {
           :model="model"
           :validation="validation"
           :schema-back="getProfileByIdOptionsData"
-          :schema-front="schema"
+          :schema-front="schemaFrontend"
           :error-text="setProfileByIdErrorData?.consent_plaid"
           path="consent_plaid"
           data-testid="consent-plaid-group"
