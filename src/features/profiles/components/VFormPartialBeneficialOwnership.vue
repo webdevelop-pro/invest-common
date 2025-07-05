@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { PropType } from 'vue';
+import { PropType, computed } from 'vue';
 import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
 import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import VFormSelect from 'UiKit/components/Base/VForm/VFormSelect.vue';
@@ -7,8 +7,6 @@ import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import VFormPartialBeneficialOwnershipItem from './VFormPartialBeneficialOwnershipItem.vue';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { useVFormPartialBeneficialOwnership, FormModelBeneficialOwnership } from './logic/useVFormPartialBeneficialOwnership';
-
-
 
 const props = defineProps({
   modelData: {
@@ -20,6 +18,12 @@ const props = defineProps({
   loading: Boolean,
   trust: Boolean,
 });
+
+const modelDataComputed = computed(() => props.modelData);
+const errorDataComputed = computed(() => props.errorData);
+const schemaBackendComputed = computed(() => props.schemaBackend);
+const loadingComputed = computed(() => props.loading);
+const trustComputed = computed(() => props.trust);
 
 const {
   model,
@@ -33,16 +37,13 @@ const {
   getSchema,
   title,
   selectText,
-  errorData,
-  loading,
   trust,
-  schemaBackend,
 } = useVFormPartialBeneficialOwnership(
-  props.modelData,
-  props.errorData,
-  props.schemaBackend,
-  props.loading,
-  props.trust,
+  modelDataComputed,
+  errorDataComputed,
+  schemaBackendComputed,
+  loadingComputed,
+  trustComputed,
 );
 
 defineExpose({
@@ -61,9 +62,9 @@ defineExpose({
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="schemaBackend"
+          :schema-back="schemaBackendComputed"
           :schema-front="getSchema()"
-          :error-text="errorData?.beneficial_owners_number"
+          :error-text="errorDataComputed?.beneficial_owners_number"
           path="beneficial_owners_number"
           :label="selectText"
           data-testid="beneficial-owners-number-group"
@@ -79,7 +80,7 @@ defineExpose({
             :options="options"
             dropdown-absolute
             data-testid="beneficial-owners-number"
-            :loading="loading || (options.length === 0)"
+            :loading="loadingComputed || (options.length === 0)"
           />
         </VFormGroup>
       </FormCol>
@@ -96,10 +97,10 @@ defineExpose({
         :schema="getSchema(model.beneficials[index]?.non_us)"
         :options-country="optionsCountry"
         :options-state="optionsState"
-        :trust="trust"
-        :loading="loading"
-        :schema-backend="schemaBackend || {}"
-        :error-data="errorData"
+        :trust="trustComputed"
+        :loading="loadingComputed"
+        :schema-backend="schemaBackendComputed || {}"
+        :error-data="errorDataComputed"
       />
     </template>
   </div>

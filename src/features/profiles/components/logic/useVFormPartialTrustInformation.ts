@@ -1,4 +1,4 @@
-import { computed, reactive, toRaw, watch } from 'vue';
+import { computed, reactive, toRaw, watch, ComputedRef } from 'vue';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
@@ -19,16 +19,16 @@ export interface FormModelTrustInformation {
 }
 
 export const useVFormPartialTrustInformation = (
-  modelData: FormModelTrustInformation | undefined,
-  schemaBackend: JSONSchemaType<FormModelTrustInformation> | undefined,
-  showDocument: boolean,
+  modelData: ComputedRef<FormModelTrustInformation | undefined>,
+  schemaBackend: ComputedRef<JSONSchemaType<FormModelTrustInformation> | undefined>,
+  showDocument: ComputedRef<boolean>,
 ) => {
   let modelLocal = reactive<FormModelTrustInformation>({
-    ein: modelData?.ein,
-    is_use_ein: modelData?.is_use_ein,
-    type: modelData?.type,
-    owner_title: modelData?.owner_title,
-    name: modelData?.name,
+    ein: modelData.value?.ein,
+    is_use_ein: modelData.value?.is_use_ein,
+    type: modelData.value?.type,
+    owner_title: modelData.value?.owner_title,
+    name: modelData.value?.name,
   });
 
   const required = computed(() => {
@@ -36,13 +36,13 @@ export const useVFormPartialTrustInformation = (
     if (modelLocal.is_use_ein && modelLocal.is_use_ein === 'Yes') {
       baseRequired.push('ein');
     }
-    if (showDocument) {
+    if (showDocument.value) {
       baseRequired.push('trust_agreement_id');
     }
     return baseRequired;
   });
 
-  const schemaFrontend = {
+  const schemaFrontend = computed(() => ({
     $schema: 'http://json-schema.org/draft-07/schema#',
     definitions: {
       Trust: {
@@ -60,9 +60,9 @@ export const useVFormPartialTrustInformation = (
       },
     },
     $ref: '#/definitions/Trust',
-  } as unknown as JSONSchemaType<FormModelTrustInformation>;
+  } as unknown as JSONSchemaType<FormModelTrustInformation>));
 
-  const schemaBackendLocal = computed(() => (schemaBackend ? structuredClone(toRaw(schemaBackend)) : null));
+  const schemaBackendLocal = computed(() => (schemaBackend.value ? structuredClone(toRaw(schemaBackend.value)) : undefined));
 
   const {
     model,
@@ -84,19 +84,19 @@ export const useVFormPartialTrustInformation = (
     return temp;
   });
 
-  watch(() => modelData, () => {
-    if (modelData?.ein) {
-      model.ein = modelData?.ein;
+  watch(() => modelData.value, () => {
+    if (modelData.value?.ein) {
+      model.ein = modelData.value?.ein;
       model.is_use_ein = 'Yes';
     }
-    if (modelData?.type) {
-      model.type = modelData?.type;
+    if (modelData.value?.type) {
+      model.type = modelData.value?.type;
     }
-    if (modelData?.owner_title) {
-      model.owner_title = modelData?.owner_title;
+    if (modelData.value?.owner_title) {
+      model.owner_title = modelData.value?.owner_title;
     }
-    if (modelData?.name) {
-      model.name = modelData?.name;
+    if (modelData.value?.name) {
+      model.name = modelData.value?.name;
     }
   }, { deep: true });
 

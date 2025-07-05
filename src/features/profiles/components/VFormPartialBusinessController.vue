@@ -76,9 +76,9 @@ defineExpose({
             v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
-            :schema-back="schemaBackend"
+            :schema-back="schemaBackendComputed"
             :schema-front="schemaFrontend"
-            :error-text="errorData?.business_controller?.first_name"
+            :error-text="errorDataComputed?.business_controller?.first_name"
             path="business_controller.first_name"
             label="First Name"
             data-testid="first-name-group"
@@ -90,7 +90,7 @@ defineExpose({
               name="first-name"
               size="large"
               data-testid="first-name"
-              :loading="loading"
+              :loading="loadingComputed"
               @update:model-value="model.business_controller.first_name = $event"
             />
           </VFormGroup>
@@ -101,9 +101,9 @@ defineExpose({
             v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
-            :schema-back="schemaBackend"
+            :schema-back="schemaBackendComputed"
             :schema-front="schemaFrontend"
-            :error-text="errorData?.business_controller?.last_name"
+            :error-text="errorDataComputed?.business_controller?.last_name"
             path="business_controller.last_name"
             label="Last Name"
             data-testid="last-name-group"
@@ -114,7 +114,7 @@ defineExpose({
               placeholder="Last Name"
               name="last-name"
               size="large"
-              :loading="loading"
+             :loading="loadingComputed"
               data-testid="last-name"
               @update:model-value="model.business_controller.last_name = $event"
             />
@@ -127,9 +127,9 @@ defineExpose({
             v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
-            :schema-back="schemaBackend"
+            :schema-back="schemaBackendComputed"
             :schema-front="schemaFrontend"
-            :error-text="errorData?.business_controller?.phone"
+            :error-text="errorDataComputed?.business_controller?.phone"
             path="business_controller.phone"
             label="Phone number"
             data-testid="phone-group"
@@ -142,7 +142,7 @@ defineExpose({
               disallow-special-chars
               name="phone"
               size="large"
-              :loading="loading"
+             :loading="loadingComputed"
               data-testid="phone"
               @update:model-value="model.business_controller.phone = $event"
             />
@@ -153,9 +153,9 @@ defineExpose({
             v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
-            :schema-back="schemaBackend"
+            :schema-back="schemaBackendComputed"
             :schema-front="schemaFrontend"
-            :error-text="errorData?.business_controller?.dob"
+            :error-text="errorDataComputed?.business_controller?.dob"
             path="business_controller.dob"
             label="Date of Birth"
             data-testid="dob-group"
@@ -168,7 +168,7 @@ defineExpose({
               size="large"
               data-testid="date-of-birth"
               type="date"
-              :loading="loading"
+             :loading="loadingComputed"
               @update:model-value="model.business_controller.dob = $event"
             />
           </VFormGroup>
@@ -180,9 +180,9 @@ defineExpose({
             v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
-            :schema-back="schemaBackend"
+            :schema-back="schemaBackendComputed"
             :schema-front="schemaFrontend"
-            :error-text="errorData?.business_controller?.address1"
+            :error-text="errorDataComputed?.business_controller?.address1"
             path="business_controller.address1"
             label="Address 1"
             data-testid="address-1-group"
@@ -194,7 +194,7 @@ defineExpose({
               name="address-1"
               size="large"
               data-testid="address-1"
-              :loading="loading"
+             :loading="loadingComputed"
               @update:model-value="model.business_controller.address1 = $event"
             />
           </VFormGroup>
@@ -205,9 +205,9 @@ defineExpose({
             v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
-            :schema-back="schemaBackend"
+            :schema-back="schemaBackendComputed"
             :schema-front="schemaFrontend"
-            :error-text="errorData?.business_controller?.address2"
+            :error-text="errorDataComputed?.business_controller?.address2"
             path="business_controller.address2"
             label="Address 2"
             data-testid="address-2-group"
@@ -219,7 +219,7 @@ defineExpose({
               name="address-2"
               size="large"
               data-testid="address-2"
-              :loading="loading"
+             :loading="loadingComputed"
               @update:model-value="model.business_controller.address2 = $event"
             />
           </VFormGroup>
@@ -232,9 +232,9 @@ defineExpose({
             v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
-            :schema-back="schemaBackend"
+            :schema-back="schemaBackendComputed"
             :schema-front="schemaFrontend"
-            :error-text="errorData?.business_controller?.city"
+            :error-text="errorDataComputed?.business_controller?.city"
             path="business_controller.city"
             label="City"
             data-testid="city-group"
@@ -248,7 +248,7 @@ defineExpose({
               data-testid="city"
               disallow-special-chars
               disallow-numbers
-              :loading="loading"
+             :loading="loadingComputed"
               @update:model-value="model.business_controller.city = $event"
             />
           </VFormGroup>
@@ -258,9 +258,9 @@ defineExpose({
             v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
-            :schema-back="schemaBackend"
+            :schema-back="schemaBackendComputed"
             :schema-front="schemaFrontend"
-            :error-text="errorData?.business_controller?.state"
+            :error-text="errorDataComputed?.business_controller?.state"
             path="business_controller.state"
             label="State"
             data-testid="state-group"
@@ -276,7 +276,7 @@ defineExpose({
               searchable
               :options="optionsState"
               data-testid="state"
-              :loading="loading || (optionsState.length === 0)"
+              :loading="loadingComputed || (optionsState.length === 0)"
             />
           </VFormGroup>
         </FormCol>
@@ -288,9 +288,9 @@ defineExpose({
             v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
-            :schema-back="schemaBackend"
+            :schema-back="schemaBackendComputed"
             :schema-front="schemaFrontend"
-            :error-text="errorData?.business_controller?.zip_code"
+            :error-text="errorDataComputed?.business_controller?.zip_code"
             path="business_controller.zip_code"
             label="Zip Code"
             data-testid="zip-group"
@@ -305,7 +305,7 @@ defineExpose({
               mask="#####-####"
               return-masked-value
               disallow-special-chars
-              :loading="loading"
+             :loading="loadingComputed"
               @update:model-value="model.business_controller.zip_code = $event"
             />
           </VFormGroup>
@@ -316,9 +316,9 @@ defineExpose({
             v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
-            :schema-back="schemaBackend"
+            :schema-back="schemaBackendComputed"
             :schema-front="schemaFrontend"
-            :error-text="errorData?.business_controller?.country"
+            :error-text="errorDataComputed?.business_controller?.country"
             path="business_controller.country"
             label="Country"
             data-testid="country-group"
@@ -334,7 +334,7 @@ defineExpose({
               searchable
               :options="optionsCountry"
               data-testid="country"
-              :loading="loading || (optionsCountry.length === 0)"
+              :loading="loadingComputed || (optionsCountry.length === 0)"
             />
           </VFormGroup>
         </FormCol>
@@ -345,9 +345,9 @@ defineExpose({
             v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
-            :schema-back="schemaBackend"
+            :schema-back="schemaBackendComputed"
             :schema-front="schemaFrontend"
-            :error-text="errorData?.business_controller?.email"
+            :error-text="errorDataComputed?.business_controller?.email"
             path="business_controller.email"
             label="Email"
             data-testid="email-group"
@@ -360,7 +360,7 @@ defineExpose({
               text
               type="email"
               size="large"
-              :loading="loading"
+             :loading="loadingComputed"
               @update:model-value="model.business_controller.email = $event"
             />
           </VFormGroup>

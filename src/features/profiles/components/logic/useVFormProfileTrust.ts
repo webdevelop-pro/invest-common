@@ -3,7 +3,7 @@ import { FormChild } from 'InvestCommon/types/form';
 import { storeToRefs } from 'pinia';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 
-export function useVFormProfileTrust(modelData: any) {
+export function useVFormProfileTrust() {
   const userSessionStore = useSessionStore();
   const { userSessionTraits } = storeToRefs(userSessionStore);
 

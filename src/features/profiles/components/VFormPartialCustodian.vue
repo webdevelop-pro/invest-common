@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { PropType } from 'vue';
+import { PropType, computed } from 'vue';
 import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
 import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
@@ -15,6 +15,11 @@ const props = defineProps({
   loading: Boolean,
 });
 
+const modelDataComputed = computed(() => props.modelData);
+const errorDataComputed = computed(() => props.errorData);
+const schemaBackendComputed = computed(() => props.schemaBackend);
+const loadingComputed = computed(() => props.loading);
+
 const {
   model,
   validation,
@@ -23,7 +28,7 @@ const {
   optionsCustodian,
   schemaFrontend,
 } = useVFormPartialCustodian(
-  props.modelData,
+  modelDataComputed,
 );
 
 defineExpose({
@@ -42,9 +47,9 @@ defineExpose({
           v-slot="{ isFieldError }"
           :model="model"
           :validation="validation"
-          :schema-back="schemaBackend"
+          :schema-back="schemaBackendComputed"
           :schema-front="schemaFrontend"
-          :error-text="errorData?.type"
+          :error-text="errorDataComputed?.type"
           path="type"
           label="Custodian"
           data-testid="type-group"
@@ -60,7 +65,7 @@ defineExpose({
             searchable
             :options="optionsCustodian"
             data-testid="type"
-            :loading="loading || (optionsCustodian?.length === 0)"
+            :loading="loadingComputed || (optionsCustodian?.length === 0)"
           />
         </VFormGroup>
       </FormCol>
@@ -69,9 +74,9 @@ defineExpose({
           v-slot="{ isFieldError }"
           :model="model"
           :validation="validation"
-          :schema-back="schemaBackend"
+          :schema-back="schemaBackendComputed"
           :schema-front="schemaFrontend"
-          :error-text="errorData?.account_number"
+          :error-text="errorDataComputed?.account_number"
           path="account_number"
           label="Account Number"
           data-testid="account_number-group"
@@ -83,7 +88,7 @@ defineExpose({
             name="account_number"
             size="large"
             data-testid="account_number"
-            :loading="loading"
+            :loading="loadingComputed"
           />
         </VFormGroup>
       </FormCol>
@@ -94,9 +99,9 @@ defineExpose({
           v-slot="{ isFieldError }"
           :model="model"
           :validation="validation"
-          :schema-back="schemaBackend"
+          :schema-back="schemaBackendComputed"
           :schema-front="schemaFrontend"
-          :error-text="errorData?.full_account_name"
+          :error-text="errorDataComputed?.full_account_name"
           path="full_account_name"
           label="Full Account Name"
           data-testid="full-account-name-group"
@@ -108,7 +113,7 @@ defineExpose({
             name="full_account_name"
             size="large"
             data-testid="full-account-name"
-            :loading="loading"
+            :loading="loadingComputed"
           />
         </VFormGroup>
       </FormCol>

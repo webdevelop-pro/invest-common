@@ -1,4 +1,4 @@
-import { computed, reactive, toRaw, watch } from 'vue';
+import { computed, reactive, toRaw, watch, type ComputedRef } from 'vue';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
@@ -16,14 +16,14 @@ export interface FormModelPlanInformation {
 }
 
 export const useVFormPartialPlanInformation = (
-  modelData: FormModelPlanInformation | undefined,
-  schemaBackend: JSONSchemaType<FormModelPlanInformation> | undefined,
-  showDocument: boolean,
+  modelData: ComputedRef<FormModelPlanInformation | undefined>,
+  schemaBackend: ComputedRef<JSONSchemaType<FormModelPlanInformation> | undefined>,
+  showDocument: ComputedRef<boolean>,
 ) => {
   let modelLocal = reactive<FormModelPlanInformation>({
-    name: modelData?.name,
-    is_use_ein: modelData?.is_use_ein || (modelData?.ein ? 'Yes' : 'No'),
-    ein: modelData?.ein,
+    name: modelData.value?.name,
+    is_use_ein: modelData.value?.is_use_ein || (modelData.value?.ein ? 'Yes' : 'No'),
+    ein: modelData.value?.ein,
   });
 
   const required = computed(() => {
@@ -31,13 +31,13 @@ export const useVFormPartialPlanInformation = (
     if (modelLocal.is_use_ein && modelLocal.is_use_ein === 'Yes') {
       baseRequired.push('ein');
     }
-    if (showDocument) {
+    if (showDocument.value) {
       baseRequired.push('plan_document_id');
     }
     return baseRequired;
   });
 
-  const schemaFrontend = {
+  const schemaFrontend = computed(() => ({
     $schema: 'http://json-schema.org/draft-07/schema#',
     definitions: {
       Solo401k: {
@@ -53,9 +53,12 @@ export const useVFormPartialPlanInformation = (
       },
     },
     $ref: '#/definitions/Solo401k',
-  } as unknown as JSONSchemaType<FormModelPlanInformation>;
+  })) as unknown as ComputedRef<JSONSchemaType<FormModelPlanInformation>>;
 
-  const schemaBackendLocal = computed(() => (schemaBackend ? structuredClone(toRaw(schemaBackend)) : null));
+  const schemaBackendLocal = computed(() => {
+    const backendSchema = schemaBackend.value;
+    return backendSchema ? structuredClone(toRaw(backendSchema)) : null;
+  });
 
   const {
     model,
@@ -75,12 +78,13 @@ export const useVFormPartialPlanInformation = (
     return temp;
   });
 
-  watch(() => modelData, () => {
-    if (modelData?.name) {
-      model.name = modelData?.name;
+  watch(() => modelData.value, () => {
+    const currentModelData = modelData.value;
+    if (currentModelData?.name) {
+      model.name = currentModelData.name;
     }
-    if (modelData?.ein) {
-      model.ein = modelData?.ein;
+    if (currentModelData?.ein) {
+      model.ein = currentModelData.ein;
       model.is_use_ein = 'Yes';
     }
   }, { deep: true });

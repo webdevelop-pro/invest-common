@@ -1,7 +1,10 @@
 <script setup lang="ts">
+import { PropType, computed } from 'vue';
 import { useVFormProfileSDIRA } from './logic/useVFormProfileSDIRA';
 import VFormPartialPersonalInformation from 'InvestCommon/components/forms/VFormPartialPersonalInformation.vue';
 import VFormPartialCustodian from './VFormPartialCustodian.vue';
+import { FormModelPersonalInformation } from 'InvestCommon/types/form';
+import { FormModelSdira } from './logic/useVFormPartialCustodian';
 
 const props = defineProps({
   modelData: Object,
@@ -10,9 +13,14 @@ const props = defineProps({
   loading: Boolean,
 });
 
+const modelDataComputed = computed(() => props.modelData);
+const errorDataComputed = computed(() => props.errorData);
+const schemaBackendComputed = computed(() => props.schemaBackend);
+const loadingComputed = computed(() => props.loading);
+
 const {
   model, isValid, onValidate, personalFormRef, custodianFormRef,
-} = useVFormProfileSDIRA(props.modelData);
+} = useVFormProfileSDIRA();
 
 defineExpose({
   model, isValid, onValidate, personalFormRef, custodianFormRef,
@@ -26,18 +34,18 @@ defineExpose({
     </div>
     <VFormPartialPersonalInformation
       ref="personalFormChild"
-      :model-data="modelData"
+      :model-data="modelDataComputed"
       ein
-      :loading="loading"
-      :schema-backend="schemaBackend"
-      :error-data="errorData"
+      :loading="loadingComputed"
+      :schema-backend="schemaBackendComputed"
+      :error-data="errorDataComputed"
     />
     <VFormPartialCustodian
       ref="custodianFormChild"
-      :model-data="modelData"
-      :loading="loading"
-      :schema-backend="schemaBackend"
-      :error-data="errorData"
+      :model-data="modelDataComputed"
+      :loading="loadingComputed"
+      :schema-backend="schemaBackendComputed"
+      :error-data="errorDataComputed"
     />
   </div>
 </template>

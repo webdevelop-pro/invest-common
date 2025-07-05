@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { PropType } from 'vue';
+import { PropType, computed } from 'vue';
 import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
 import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
@@ -18,6 +18,12 @@ const props = defineProps({
   showDocument: Boolean,
 });
 
+const modelDataComputed = computed(() => props.modelData);
+const errorDataComputed = computed(() => props.errorData);
+const schemaBackendComputed = computed(() => props.schemaBackend);
+const loadingComputed = computed(() => props.loading);
+const showDocumentComputed = computed(() => props.showDocument);
+
 const {
   model,
   validation,
@@ -28,9 +34,9 @@ const {
   yesNoOptions,
   schemaFrontend,
 } = useVFormPartialTrustInformation(
-  props.modelData,
-  props.schemaBackend,
-  props.showDocument,
+  modelDataComputed,
+  schemaBackendComputed,
+  showDocumentComputed,
 );
 
 defineExpose({
@@ -49,9 +55,9 @@ defineExpose({
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="schemaBackend"
+          :schema-back="schemaBackendComputed"
           :schema-front="schemaFrontend"
-          :error-text="errorData?.type"
+          :error-text="errorDataComputed?.type"
           path="type"
           label="Type of Trust"
           data-testid="type-group"
@@ -66,7 +72,7 @@ defineExpose({
             item-value="value"
             searchable
             :options="optionsType"
-            :loading="loading || (optionsType?.length === 0)"
+            :loading="loadingComputed || (optionsType?.length === 0)"
             data-testid="type"
           />
         </VFormGroup>
@@ -76,9 +82,9 @@ defineExpose({
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="schemaBackend"
+          :schema-back="schemaBackendComputed"
           :schema-front="schemaFrontend"
-          :error-text="errorData?.name"
+          :error-text="errorDataComputed?.name"
           path="name"
           label="Name of Trust"
           data-testid="name-group"
@@ -90,7 +96,7 @@ defineExpose({
             name="name"
             size="large"
             data-testid="name"
-            :loading="loading"
+            :loading="loadingComputed"
             @update:model-value="model.name = $event"
           />
         </VFormGroup>
@@ -100,9 +106,9 @@ defineExpose({
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="schemaBackend"
+          :schema-back="schemaBackendComputed"
           :schema-front="schemaFrontend"
-          :error-text="errorData?.owner_title"
+          :error-text="errorDataComputed?.owner_title"
           path="owner_title"
           label="Your Title within Trust"
           data-testid="owner-title-group"
@@ -114,7 +120,7 @@ defineExpose({
             name="owner_title"
             size="large"
             data-testid="owner-title"
-            :loading="loading"
+            :loading="loadingComputed"
             @update:model-value="model.owner_title = $event"
           />
         </VFormGroup>
@@ -126,9 +132,9 @@ defineExpose({
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="schemaBackend"
+          :schema-back="schemaBackendComputed"
           :schema-front="schemaFrontend"
-          :error-text="errorData?.is_use_ein"
+          :error-text="errorDataComputed?.is_use_ein"
           path="is_use_ein"
           data-testid="is-use-ein-group"
           label="Does this Trust have an EIN"
@@ -148,9 +154,9 @@ defineExpose({
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="schemaBackend"
+          :schema-back="schemaBackendComputed"
           :schema-front="schemaFrontend"
-          :error-text="errorData?.ein"
+          :error-text="errorDataComputed?.ein"
           path="ein"
           label="EIN"
           data-testid="ein-group"
@@ -164,28 +170,28 @@ defineExpose({
             mask="##-#######"
             disallow-special-chars
             data-testid="ein"
-            :loading="loading"
+            :loading="loadingComputed"
             @update:model-value="model.ein = $event"
           />
         </VFormGroup>
       </FormCol>
     </FormRow>
-    <FormRow v-if="showDocument">
+    <FormRow v-if="showDocumentComputed">
       <FormCol>
         <VFormGroup
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="schemaBackend"
+          :schema-back="schemaBackendComputed"
           :schema-front="schemaFrontend"
-          :error-text="errorData?.trust_agreement_id"
+          :error-text="errorDataComputed?.trust_agreement_id"
           path="trust_agreement_id"
           label="Trust Agreement"
           data-testid="trust-document-group"
         >
           <VFormDocument
             :is-error="VFormGroupProps.isFieldError"
-            :loading="loading"
+            :loading="loadingComputed"
             @upload-success="model.trust_agreement_id = $event"
           />
         </VFormGroup>

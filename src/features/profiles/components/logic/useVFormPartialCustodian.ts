@@ -1,4 +1,4 @@
-import { computed, reactive, ref, toRaw, watch } from 'vue';
+import { computed, reactive, ref, toRaw, watch, type ComputedRef } from 'vue';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
@@ -13,18 +13,12 @@ export interface FormModelSdira {
 }
 
 export const useVFormPartialCustodian = (
-  modelData: FormModelSdira | undefined,
+  modelData: ComputedRef<FormModelSdira | undefined>,
 ) => {
   const useRepositoryProfilesStore = useRepositoryProfiles();
   const { getProfileByIdOptionsState } = storeToRefs(useRepositoryProfilesStore);
 
   const schemaBackend = computed(() => getProfileByIdOptionsState.value.data);
-
-  let modelLocal = reactive<FormModelSdira>({
-    full_account_name: modelData?.full_account_name,
-    type: modelData?.type,
-    account_number: modelData?.account_number,
-  });
 
   const schemaFrontend = {
     $schema: 'http://json-schema.org/draft-07/schema#',
@@ -43,6 +37,7 @@ export const useVFormPartialCustodian = (
     $ref: '#/definitions/Sdira',
   } as unknown as JSONSchemaType<FormModelSdira>;
 
+  const schemaBackendLocal = computed(() => (schemaBackend.value ? structuredClone(toRaw(schemaBackend.value)) : undefined));
 
   const {
     model,
@@ -52,13 +47,17 @@ export const useVFormPartialCustodian = (
     schemaObject,
   } = useFormValidation<FormModelSdira>(
     schemaFrontend,
-    schemaBackend,
-    modelLocal,
+    schemaBackendLocal,
+    {
+      full_account_name: '',
+      type: '',
+      account_number: '',
+    },
   );
 
   const optionsCustodian = computed(() => getOptions('type', schemaObject));
 
-  watch(() => modelData, (newModelData) => {
+  watch(modelData, (newModelData) => {
     if (!newModelData) return;
     const fields = [
       'full_account_name', 'type', 'account_number',
@@ -68,10 +67,6 @@ export const useVFormPartialCustodian = (
         model[field] = newModelData[field];
       }
     });
-  }, { deep: true, immediate: true });
-
-  watch(() => model, () => {
-    modelLocal = model;
   }, { deep: true, immediate: true });
 
   return {

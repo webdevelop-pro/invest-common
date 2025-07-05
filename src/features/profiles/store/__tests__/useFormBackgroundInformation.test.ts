@@ -14,7 +14,6 @@ import { getOptions } from 'UiKit/helpers/model';
 import { ROUTE_DASHBOARD_ACCOUNT } from '../../../../helpers/enums/routes';
 import { useFormBackgroundInformation } from '../useFormBackgroundInformation';
 
-// Mock router
 const mockRouterInstance = {
   push: vi.fn(),
   currentRoute: {
@@ -27,7 +26,6 @@ vi.mock('vue-router', () => ({
   useRouter: vi.fn(() => mockRouterInstance),
 }));
 
-// Mock profiles store
 const selectedUserProfileId = ref('123');
 const selectedUserProfileType = ref('individual');
 const selectedUserProfileData = ref({
@@ -66,7 +64,6 @@ vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
   useProfilesStore: vi.fn(() => mockProfilesStore),
 }));
 
-// Mock repository profiles
 const mockSetProfileById = vi.fn();
 const mockGetProfileById = vi.fn();
 const setProfileByIdState = ref({ error: null });
@@ -89,13 +86,11 @@ vi.mock('InvestCommon/data/profiles/profiles.repository', () => ({
   useRepositoryProfiles: vi.fn(() => mockRepositoryProfiles),
 }));
 
-// Mock session store
 const userSessionTraits = ref({ email: 'john@example.com' });
 vi.mock('InvestCommon/domain/session/store/useSession', () => ({
   useSessionStore: vi.fn(() => ({ userSessionTraits })),
 }));
 
-// Mock useFormValidation
 const isValid = ref(false);
 const model = reactive({
   employment: {
@@ -131,7 +126,6 @@ vi.mock('InvestCommon/composable/useFormValidation', () => ({
   })),
 }));
 
-// Mock Hubspot
 const mockSubmitFormToHubspot = vi.fn();
 vi.mock('InvestCommon/composable/useHubspotForm', () => ({
   useHubspotForm: vi.fn(() => ({
@@ -139,35 +133,29 @@ vi.mock('InvestCommon/composable/useHubspotForm', () => ({
   })),
 }));
 
-// Mock scrollToError
 vi.mock('UiKit/helpers/validation/general', () => ({
   scrollToError: vi.fn(),
   getFilteredObject: vi.fn(() => ({})),
 }));
 
-// Mock getOptions
 vi.mock('UiKit/helpers/model', () => ({
   getOptions: vi.fn(() => []),
 }));
 
-// Mock env
 vi.mock('InvestCommon/global', () => ({
   default: {
     HUBSPOT_FORM_ID_BACKGROUND_INFORMATION: 'test-hubspot-form-id',
   },
 }));
 
-// Mock checkObjectAndDeleteNotRequiredFields
 vi.mock('InvestCommon/helpers/general', () => ({
   checkObjectAndDeleteNotRequiredFields: vi.fn((keep, required, obj) => obj),
 }));
 
-// Mock ajv/dist/types/json-schema
 vi.mock('ajv/dist/types/json-schema', () => ({
   JSONSchemaType: vi.fn(),
 }));
 
-// --- TESTS ---
 describe('useFormBackgroundInformation', () => {
   let store: ReturnType<typeof useFormBackgroundInformation>;
   let mockRouter: any;

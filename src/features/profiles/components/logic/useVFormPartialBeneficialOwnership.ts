@@ -1,4 +1,4 @@
-import { computed, watch, toRaw } from 'vue';
+import { computed, watch, toRaw, ComputedRef } from 'vue';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import {
   address1Rule, cityRule, countryRuleObject, dobRule,
@@ -29,11 +29,11 @@ const defItem = {
   };
 
 export function useVFormPartialBeneficialOwnership(
-  modelData: FormModelBeneficialOwnership,
-  errorData: any,
-  schemaBackend: JSONSchemaType<FormModelBeneficialOwnership> | undefined,
-  loading: boolean,
-  trust: boolean,
+  modelData: ComputedRef<FormModelBeneficialOwnership>,
+  errorData: ComputedRef<any>,
+  schemaBackend: ComputedRef<JSONSchemaType<FormModelBeneficialOwnership> | undefined>,
+  loading: ComputedRef<boolean>,
+  trust: ComputedRef<boolean>,
 ) {
   const getSchema = () => {
     // const requireBusinessController = [...requiredDefault];
@@ -103,11 +103,11 @@ export function useVFormPartialBeneficialOwnership(
           required: ['beneficial_owners_number'],
         },
       },
-      $ref: trust ? '#/definitions/Trust' : '#/definitions/Entity',
+      $ref: trust.value ? '#/definitions/Trust' : '#/definitions/Entity',
     } as unknown as JSONSchemaType<FormModelBeneficialOwnership>);
   };
 
-  const schemaBackendLocal = computed(() => (schemaBackend ? structuredClone(toRaw(schemaBackend)) : null));
+  const schemaBackendLocal = computed(() => (schemaBackend.value ? structuredClone(toRaw(schemaBackend.value)) : undefined));
 
   const {
     model,
@@ -145,8 +145,8 @@ export function useVFormPartialBeneficialOwnership(
     model.beneficials = [...items];
   });
 
-  const title = trust ? 'Trustees/Protectors Information' : 'Beneficial Ownership Information';
-  const selectText = trust ? 'How many trustees and protectors does your trust have?' : 'How many Beneficial Owners who own 25% or more of this Legal Entity?';
+  const title = computed(() => trust.value ? 'Trustees/Protectors Information' : 'Beneficial Ownership Information');
+  const selectText = computed(() => trust.value ? 'How many trustees and protectors does your trust have?' : 'How many Beneficial Owners who own 25% or more of this Legal Entity?');
 
   return {
     model,

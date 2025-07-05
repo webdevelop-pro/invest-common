@@ -2,7 +2,7 @@ import { computed } from 'vue';
 import { useTemplateRef } from 'vue';
 import { FormChild } from 'InvestCommon/types/form';
 
-export function useVFormProfileSolo(modelData: any) {
+export function useVFormProfileSolo() {
   const personalFormRef = useTemplateRef<FormChild>('personalFormChild');
   const planFormRef = useTemplateRef<FormChild>('planFormChild');
 

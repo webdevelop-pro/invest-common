@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { PropType } from 'vue';
+import { PropType, computed } from 'vue';
 import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
 import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
@@ -17,6 +17,12 @@ const props = defineProps({
   showDocument: Boolean,
 });
 
+const modelDataComputed = computed(() => props.modelData);
+const errorDataComputed = computed(() => props.errorData);
+const schemaBackendComputed = computed(() => props.schemaBackend);
+const loadingComputed = computed(() => props.loading);
+const showDocumentComputed = computed(() => props.showDocument);
+
 const {
   model,
   validation,
@@ -26,9 +32,9 @@ const {
   yesNoOptions,
   schemaFrontend,
 } = useVFormPartialPlanInformation(
-  props.modelData,
-  props.schemaBackend,
-  props.showDocument,
+  modelDataComputed,
+  schemaBackendComputed,
+  showDocumentComputed,
 );
 
 defineExpose({
@@ -47,9 +53,9 @@ defineExpose({
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="schemaBackend"
+          :schema-back="schemaBackendComputed"
           :schema-front="schemaFrontend"
-          :error-text="errorData?.name"
+          :error-text="errorDataComputed?.name"
           path="name"
           label="Name of the Solo 401(k)"
           data-testid="name-group"
@@ -61,7 +67,7 @@ defineExpose({
             name="name"
             size="large"
             data-testid="name"
-            :loading="loading"
+            :loading="loadingComputed"
             @update:model-value="model.name = $event"
           />
         </VFormGroup>
@@ -73,9 +79,9 @@ defineExpose({
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="schemaBackend"
+          :schema-back="schemaBackendComputed"
           :schema-front="schemaFrontend"
-          :error-text="errorData?.is_use_ein"
+          :error-text="errorDataComputed?.is_use_ein"
           path="is_use_ein"
           data-testid="is-use-ein-group"
           label="Does this Solo 401K use an EIN for tax filing?"
@@ -95,9 +101,9 @@ defineExpose({
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="schemaBackend"
+          :schema-back="schemaBackendComputed"
           :schema-front="schemaFrontend"
-          :error-text="errorData?.ein"
+          :error-text="errorDataComputed?.ein"
           path="ein"
           label="EIN"
           data-testid="ein-group"
@@ -111,28 +117,28 @@ defineExpose({
             mask="##-#######"
             disallow-special-chars
             data-testid="ein"
-            :loading="loading"
+            :loading="loadingComputed"
             @update:model-value="model.ein = $event"
           />
         </VFormGroup>
       </FormCol>
     </FormRow>
-    <FormRow v-if="showDocument">
+    <FormRow v-if="showDocumentComputed">
       <FormCol>
         <VFormGroup
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="schemaBackend"
+          :schema-back="schemaBackendComputed"
           :schema-front="schemaFrontend"
-          :error-text="errorData?.plan_document_id"
+          :error-text="errorDataComputed?.plan_document_id"
           path="plan_document_id"
           label="Plan Document"
           data-testid="ein-group"
         >
           <VFormDocument
             :is-error="VFormGroupProps.isFieldError"
-            :loading="loading"
+            :loading="loadingComputed"
             @upload-success="model.plan_document_id = $event"
           />
         </VFormGroup>

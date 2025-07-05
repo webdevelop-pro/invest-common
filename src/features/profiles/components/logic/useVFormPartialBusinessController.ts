@@ -114,7 +114,6 @@ export const useVFormPartialBusinessController = (
   }, { deep: true, immediate: true });
 
   watch([personalData, sameData], () => {
-    console.log('watcher triggered:', personalData.value, sameData.value);
     if (!sameData.value) model.business_controller = {} as any;
     if (personalData.value && sameData.value) {
       model.business_controller.first_name = personalData.value.first_name;
@@ -128,7 +127,6 @@ export const useVFormPartialBusinessController = (
       model.business_controller.phone = personalData.value.phone;
       model.business_controller.dob = personalData.value.dob;
       model.business_controller.email = personalData.value.email;
-    console.log(model);
     }
   }, { deep: true, immediate: true });
 

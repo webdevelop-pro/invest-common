@@ -7,12 +7,10 @@ import { useRouter } from 'vue-router';
 import { ref, nextTick } from 'vue';
 import { useProfileSelectStore } from '../useProfileSelect';
 
-// Mock the routes enum
 vi.mock('InvestCommon/helpers/enums/routes', () => ({
   ROUTE_CREATE_PROFILE: 'ROUTE_CREATE_PROFILE',
 }));
 
-// Mock the router
 const mockPush = vi.fn();
 vi.mock('vue-router', () => ({
   useRouter: vi.fn(() => ({
@@ -25,7 +23,6 @@ vi.mock('vue-router', () => ({
   })),
 }));
 
-// Mock the profiles store
 let mockSetSelectedUserProfileById: ReturnType<typeof vi.fn>;
 vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
   useProfilesStore: vi.fn(() => {

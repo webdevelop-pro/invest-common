@@ -1,9 +1,13 @@
 <script setup lang="ts">
+import { PropType, computed } from 'vue';
 import { useVFormProfileEntity } from './logic/useVFormProfileEntity';
 import VFormPartialPersonalInformation from 'InvestCommon/components/forms/VFormPartialPersonalInformation.vue';
 import VFormPartialEntityInformation from './VFormPartialEntityInformation.vue';
 import VFormPartialBusinessController from './VFormPartialBusinessController.vue';
 import VFormPartialBeneficialOwnership from './VFormPartialBeneficialOwnership.vue';
+import { FormModelPersonalInformation, FormModelEntityInformation, FormModelBusinessController } from 'InvestCommon/types/form';
+import { FormModelBeneficialOwnership } from './logic/useVFormPartialBeneficialOwnership';
+import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 
 const props = defineProps({
   modelData: Object,
@@ -12,12 +16,17 @@ const props = defineProps({
   loading: Boolean,
 });
 
+const modelDataComputed = computed(() => props.modelData);
+const errorDataComputed = computed(() => props.errorData);
+const schemaBackendComputed = computed(() => props.schemaBackend);
+const loadingComputed = computed(() => props.loading);
+
 const {
   model,
   isValid,
   controllerData,
   onValidate,
-} = useVFormProfileEntity(props.modelData);
+} = useVFormProfileEntity();
 
 defineExpose({
   model, isValid, onValidate,
@@ -31,34 +40,34 @@ defineExpose({
     </div>
     <VFormPartialPersonalInformation
       ref="personalFormChild"
-      :model-data="modelData"
+      :model-data="modelDataComputed"
       ein
-      :loading="loading"
-      :schema-backend="schemaBackend"
-      :error-data="errorData"
+      :loading="loadingComputed"
+      :schema-backend="schemaBackendComputed"
+      :error-data="errorDataComputed"
     />
     <VFormPartialEntityInformation
       ref="entityInfoFormChild"
-      :model-data="modelData"
-      :loading="loading"
-      :schema-backend="schemaBackend"
-      :error-data="errorData"
+      :model-data="modelDataComputed"
+      :loading="loadingComputed"
+      :schema-backend="schemaBackendComputed"
+      :error-data="errorDataComputed"
       show-document
     />
     <VFormPartialBusinessController
       ref="businessControllerFormChild"
-      :model-data="modelData"
+      :model-data="modelDataComputed"
       :personal-data="controllerData"
-      :loading="loading"
-      :schema-backend="schemaBackend"
-      :error-data="errorData"
+      :loading="loadingComputed"
+      :schema-backend="schemaBackendComputed"
+      :error-data="errorDataComputed"
     />
     <VFormPartialBeneficialOwnership
       ref="beneficialOwnershipFormChild"
-      :model-data="modelData"
-      :loading="loading"
-      :schema-backend="schemaBackend"
-      :error-data="errorData"
+      :model-data="modelDataComputed"
+      :loading="loadingComputed"
+      :schema-backend="schemaBackendComputed"
+      :error-data="errorDataComputed"
     />
   </div>
 </template>

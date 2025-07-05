@@ -26,7 +26,6 @@ vi.mock('vue-router', () => ({
   useRouter: vi.fn(() => mockRouterInstance),
 }));
 
-// Shared refs/objects for useProfilesStore mock
 const selectedUserProfileId = ref('123');
 const selectedUserProfileType = ref('individual');
 const selectedUserProfileData = ref({
@@ -52,7 +51,6 @@ vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
   useProfilesStore: vi.fn(() => mockProfilesStore),
 }));
 
-// Shared refs/objects for useFormValidation mock
 const isValid = ref(false);
 const model = {
   beneficiary: {
@@ -67,7 +65,6 @@ const model = {
 const validation = ref({});
 const mockOnValidate = vi.fn();
 
-// Shared ref for userSessionTraits
 const userSessionTraits = ref({ email: 'john@example.com' });
 
 vi.mock('InvestCommon/composable/useFormValidation', () => ({
@@ -79,7 +76,6 @@ vi.mock('InvestCommon/composable/useFormValidation', () => ({
   })),
 }));
 
-// Shared refs/objects for useRepositoryProfiles mock
 const mockSetProfileById = vi.fn();
 const mockGetProfileById = vi.fn();
 const setProfileByIdState = ref({ error: null });
@@ -112,7 +108,6 @@ vi.mock('InvestCommon/domain/session/store/useSession', () => ({
   })),
 }));
 
-// Shared refs/objects for useHubspotForm mock
 const mockSubmitFormToHubspot = vi.fn();
 vi.mock('InvestCommon/composable/useHubspotForm', () => ({
   useHubspotForm: vi.fn(() => ({
@@ -213,7 +208,7 @@ describe('useFormTrustedContact', () => {
 
     it('should handle schema backend when data is undefined', () => {
       mockRepositoryProfiles.getProfileByIdOptionsState.value.data = undefined;
-      model.beneficiary = {} as any; // Reset the shared model for this test, bypass type
+      model.beneficiary = {} as any;
       const newStore = useFormTrustedContact();
       expect(newStore.schemaBackend).toBeNull();
     });
@@ -243,7 +238,7 @@ describe('useFormTrustedContact', () => {
       };
 
       mockProfilesStore.selectedUserProfileData.value.data.beneficiary = newBeneficiary;
-      model.beneficiary = newBeneficiary as any; // Reset the shared model for this test
+      model.beneficiary = newBeneficiary as any;
       const newStore = useFormTrustedContact();
 
       expect(newStore.model.beneficiary).toEqual(newBeneficiary);
@@ -251,7 +246,7 @@ describe('useFormTrustedContact', () => {
 
     it('should handle when beneficiary data is null', () => {
       mockProfilesStore.selectedUserProfileData.value.data.beneficiary = null;
-      model.beneficiary = {} as any; // Reset the shared model for this test
+      model.beneficiary = {} as any;
       const newStore = useFormTrustedContact();
 
       expect(newStore.model.beneficiary).toEqual({});
@@ -259,7 +254,7 @@ describe('useFormTrustedContact', () => {
 
     it('should handle when beneficiary data is undefined', () => {
       mockProfilesStore.selectedUserProfileData.value.data.beneficiary = undefined;
-      model.beneficiary = {} as any; // Reset the shared model for this test, bypass type
+      model.beneficiary = {} as any;
       const newStore = useFormTrustedContact();
       expect(newStore.model.beneficiary).toEqual({});
     });
@@ -351,7 +346,6 @@ describe('useFormTrustedContact', () => {
     });
 
     it('should handle save with different profile types', async () => {
-      // Set up the profile type and id BEFORE creating the store
       mockProfilesStore.selectedUserProfileType.value = 'entity';
       mockProfilesStore.selectedUserProfileId.value = '456';
 
@@ -397,7 +391,6 @@ describe('useFormTrustedContact', () => {
     });
 
     it('should handle save with different beneficiary data', async () => {
-      // Reset userSessionTraits email to default for this test
       userSessionTraits.value.email = 'john@example.com';
       model.beneficiary = {
         first_name: 'John',
@@ -407,7 +400,6 @@ describe('useFormTrustedContact', () => {
         email: 'john@example.com',
         dob: '1985-05-15',
       };
-      // Set up the profile type and id BEFORE creating the store
       selectedUserProfileType.value = 'individual';
       selectedUserProfileId.value = '123';
       const testStore = useFormTrustedContact();
@@ -459,7 +451,6 @@ describe('useFormTrustedContact', () => {
       try {
         await store.handleSave();
       } catch (e) {
-        // expected error, do nothing
       }
 
       expect(mockSetProfileById).toHaveBeenCalled();
@@ -478,14 +469,12 @@ describe('useFormTrustedContact', () => {
       try {
         await store.handleSave();
       } catch (e) {
-        // expected error, do nothing
       }
 
       expect(mockSetProfileById).toHaveBeenCalled();
       expect(mockSubmitFormToHubspot).toHaveBeenCalled();
       expect(store.isLoading).toBe(false);
 
-      // These should NOT be called if submitFormToHubspot throws
       expect(mockGetProfileById).not.toHaveBeenCalled();
       expect(mockRouter.push).not.toHaveBeenCalled();
     });
@@ -509,7 +498,6 @@ describe('useFormTrustedContact', () => {
       try {
         await store.handleSave();
       } catch (e) {
-        // expected error, do nothing
       }
 
       expect(store.isLoading).toBe(false);
@@ -580,7 +568,6 @@ describe('useFormTrustedContact', () => {
 
   describe('Integration scenarios', () => {
     it('should handle complete workflow from initialization to successful save', async () => {
-      // Setup valid form BEFORE creating the store
       isValid.value = true;
       model.beneficiary = {
         first_name: 'Jane',
@@ -593,17 +580,13 @@ describe('useFormTrustedContact', () => {
       mockSetProfileById.mockResolvedValue(undefined);
       mockGetProfileById.mockResolvedValue(undefined);
 
-      // Recreate store with updated mocks
       const testStore = useFormTrustedContact();
 
-      // Verify initial state
       expect(testStore.isLoading).toBe(false);
-      expect(testStore.isDisabledButton).toBe(false); // Should be false since isValid is true
+      expect(testStore.isDisabledButton).toBe(false);
 
-      // Execute save
       await testStore.handleSave();
 
-      // Verify all operations were called
       expect(mockOnValidate).toHaveBeenCalled();
       expect(mockSetProfileById).toHaveBeenCalled();
       expect(mockSubmitFormToHubspot).toHaveBeenCalled();
@@ -613,20 +596,15 @@ describe('useFormTrustedContact', () => {
     });
 
     it('should handle complete workflow with validation failure', async () => {
-      // Clear mocks first
       vi.clearAllMocks();
 
-      // Setup invalid form
       isValid.value = false;
       mockFormValidation.model.beneficiary = null;
 
-      // Recreate store with updated mocks
       const testStore = useFormTrustedContact();
 
-      // Execute save
       await testStore.handleSave();
 
-      // Verify validation was called but no other operations
       expect(mockOnValidate).toHaveBeenCalled();
       expect(mockScrollToError).toHaveBeenCalledWith('ViewDashboardTrustedContact');
       expect(mockSetProfileById).not.toHaveBeenCalled();

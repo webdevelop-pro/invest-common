@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { PropType, computed } from 'vue';
 import { useVFormProfileSolo } from './logic/useVFormProfileSolo';
 import VFormPartialPersonalInformation from 'InvestCommon/components/forms/VFormPartialPersonalInformation.vue';
 import VFormPartialPlanInformation from './VFormPartialPlanInformation.vue';
@@ -10,13 +11,18 @@ const props = defineProps({
   loading: Boolean,
 });
 
+const modelDataComputed = computed(() => props.modelData);
+const errorDataComputed = computed(() => props.errorData);
+const schemaBackendComputed = computed(() => props.schemaBackend);
+const loadingComputed = computed(() => props.loading);
+
 const {
   model,
   isValid,
   onValidate,
   personalFormRef,
   planFormRef,
-} = useVFormProfileSolo(props.modelData);
+} = useVFormProfileSolo();
 
 defineExpose({
   model,
@@ -34,18 +40,18 @@ defineExpose({
     </div>
     <VFormPartialPersonalInformation
       ref="personalFormChild"
-      :model-data="modelData"
+      :model-data="modelDataComputed"
       ein
-      :loading="loading"
-      :schema-backend="schemaBackend"
-      :error-data="errorData"
+      :loading="loadingComputed"
+      :schema-backend="schemaBackendComputed"
+      :error-data="errorDataComputed"
     />
     <VFormPartialPlanInformation
       ref="planFormChild"
-      :model-data="modelData"
-      :loading="loading"
-      :schema-backend="schemaBackend"
-      :error-data="errorData"
+      :model-data="modelDataComputed"
+      :loading="loadingComputed"
+      :schema-backend="schemaBackendComputed"
+      :error-data="errorDataComputed"
       show-document
     />
   </div>

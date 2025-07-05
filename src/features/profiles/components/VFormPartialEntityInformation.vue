@@ -20,6 +20,12 @@ const props = defineProps({
   showDocument: Boolean,
 });
 
+const modelDataComputed = computed(() => props.modelData);
+const errorDataComputed = computed(() => props.errorData);
+const schemaBackendComputed = computed(() => props.schemaBackend);
+const loadingComputed = computed(() => props.loading);
+const showDocumentComputed = computed(() => props.showDocument);
+
 const {
   model,
   validation,
@@ -30,11 +36,11 @@ const {
   optionsType,
   operatingAgreementLabel,
 } = useVFormPartialEntityInformation(
-  props.modelData,
-  props.schemaBackend,
-  props.errorData,
-  props.loading,
-  props.showDocument,
+  modelDataComputed,
+  schemaBackendComputed,
+  errorDataComputed,
+  loadingComputed,
+  showDocumentComputed,
 );
 
 defineExpose({
@@ -54,9 +60,9 @@ defineExpose({
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="schemaBackend"
+          :schema-back="schemaBackendComputed"
           :schema-front="schemaFrontend"
-          :error-text="errorData?.type"
+          :error-text="errorDataComputed?.type"
           path="type"
           label="Type of Entity"
           data-testid="type-group"
@@ -71,7 +77,7 @@ defineExpose({
             item-value="value"
             searchable
             :options="optionsType"
-            :loading="loading || (optionsType?.length === 0)"
+            :loading="loadingComputed || (optionsType?.length === 0)"
             data-testid="type"
           />
         </VFormGroup>
@@ -81,9 +87,9 @@ defineExpose({
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="schemaBackend"
+          :schema-back="schemaBackendComputed"
           :schema-front="schemaFrontend"
-          :error-text="errorData?.name"
+          :error-text="errorDataComputed?.name"
           path="name"
           label="Name of Entity"
           data-testid="name-group"
@@ -95,7 +101,7 @@ defineExpose({
             name="name"
             size="large"
             data-testid="name"
-            :loading="loading"
+            :loading="loadingComputed"
             @update:model-value="model.name = $event"
           />
         </VFormGroup>
@@ -105,9 +111,9 @@ defineExpose({
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="schemaBackend"
+          :schema-back="schemaBackendComputed"
           :schema-front="schemaFrontend"
-          :error-text="errorData?.owner_title"
+          :error-text="errorDataComputed?.owner_title"
           path="owner_title"
           label="Your Title within Entity"
           data-testid="owner-title-group"
@@ -119,7 +125,7 @@ defineExpose({
             name="owner_title"
             size="large"
             data-testid="owner-title"
-            :loading="loading"
+            :loading="loadingComputed"
             @update:model-value="model.owner_title = $event"
           />
         </VFormGroup>
@@ -131,9 +137,9 @@ defineExpose({
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="schemaBackend"
+          :schema-back="schemaBackendComputed"
           :schema-front="schemaFrontend"
-          :error-text="errorData?.solely_for_investing"
+          :error-text="errorDataComputed?.solely_for_investing"
           path="solely_for_investing"
           data-testid="solely-for-investing"
           label="Was this Entity created solely for investing on our platform?"
@@ -153,9 +159,9 @@ defineExpose({
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="schemaBackend"
+          :schema-back="schemaBackendComputed"
           :schema-front="schemaFrontend"
-          :error-text="errorData?.tax_exempts"
+          :error-text="errorDataComputed?.tax_exempts"
           path="tax_exempts"
           data-testid="tax-exempts"
           label="Does your entity have Tax Exempt Status?"
@@ -169,64 +175,64 @@ defineExpose({
         </VFormGroup>
       </FormCol>
     </FormRow>
-    <FormRow v-if="showDocument">
+    <FormRow v-if="showDocumentComputed">
       <FormCol>
         <VFormGroup
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="schemaBackend"
+          :schema-back="schemaBackendComputed"
           :schema-front="schemaFrontend"
-          :error-text="errorData?.organization_document_id"
+          :error-text="errorDataComputed?.organization_document_id"
           path="organization_document_id"
           label="Organization Document"
           data-testid="organization-document-group"
         >
           <VFormDocument
             :is-error="VFormGroupProps.isFieldError"
-            :loading="loading"
+            :loading="loadingComputed"
             @upload-success="model.organization_document_id = $event"
           />
         </VFormGroup>
       </FormCol>
     </FormRow>
-    <FormRow v-if="showDocument">
+    <FormRow v-if="showDocumentComputed">
       <FormCol>
         <VFormGroup
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="schemaBackend"
+          :schema-back="schemaBackendComputed"
           :schema-front="schemaFrontend"
-          :error-text="errorData?.formation_document_id	"
+          :error-text="errorDataComputed?.formation_document_id	"
           path="formation_document_id	"
           label="Formation Document"
           data-testid="entity-document-group"
         >
           <VFormDocument
             :is-error="VFormGroupProps.isFieldError"
-            :loading="loading"
+            :loading="loadingComputed"
             @upload-success="model.formation_document_id	 = $event"
           />
         </VFormGroup>
       </FormCol>
     </FormRow>
-    <FormRow v-if="showDocument">
+    <FormRow v-if="showDocumentComputed">
       <FormCol>
         <VFormGroup
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="schemaBackend"
+          :schema-back="schemaBackendComputed"
           :schema-front="schemaFrontend"
-          :error-text="errorData?.operating_agreement_id"
+          :error-text="errorDataComputed?.operating_agreement_id"
           path="operating_agreement_id"
           :label="operatingAgreementLabel"
           data-testid="operating-agreement-document-group"
         >
           <VFormDocument
             :is-error="VFormGroupProps.isFieldError"
-            :loading="loading"
+            :loading="loadingComputed"
             @upload-success="model.operating_agreement_id = $event"
           />
         </VFormGroup>

@@ -12,7 +12,6 @@ import { scrollToError } from 'UiKit/helpers/validation/general';
 import { ROUTE_DASHBOARD_ACCOUNT } from '../../../../helpers/enums/routes';
 import { useFormBusinessController } from '../useFormBusinessController';
 
-// Mock useTemplateRef at module level
 const mockFormRef = ref<any>(null);
 
 vi.mock('vue', async () => {
@@ -72,7 +71,7 @@ vi.mock('InvestCommon/data/profiles/profiles.repository', () => ({
   useRepositoryProfiles: vi.fn(() => ({
     setProfileById: vi.fn(),
     getProfileById: vi.fn(),
-    setProfileByIdState: ref({ error: null }),
+    setProfileByIdState: ref({ error: null as Error | null }),
     getProfileByIdOptionsState: ref({ data: { schema: 'test-schema' } }),
   })),
 }));
@@ -124,7 +123,6 @@ describe('useFormBusinessController', () => {
 
     vi.clearAllMocks();
     
-    // Reset mock form ref
     mockFormRef.value = null;
 
     store = useFormBusinessController();
@@ -248,6 +246,7 @@ describe('useFormBusinessController', () => {
   });
 
   describe('handleSave - Error scenarios', () => {
+
     it('should not proceed with hubspot submission and navigation when setProfileById fails', async () => {
       mockRepositoryProfiles.setProfileById.mockRejectedValue(new Error('API Error'));
 
@@ -282,12 +281,6 @@ describe('useFormBusinessController', () => {
     });
 
     it('should not proceed when setProfileByIdState has error', async () => {
-      // Mock setProfileById to set the error state after being called
-      mockRepositoryProfiles.setProfileById.mockImplementation(() => {
-        mockRepositoryProfiles.setProfileByIdState.value.error = 'Validation Error';
-        return Promise.resolve();
-      });
-
       const mockForm = {
         onValidate: vi.fn(),
         isValid: true,
@@ -307,14 +300,15 @@ describe('useFormBusinessController', () => {
         },
       };
 
-      mockFormRef.value = mockForm;
-
-      // Create a new store after setting the mock form ref
-      const newStore = useFormBusinessController();
+      mockRepositoryProfiles.setProfileById.mockImplementation(() => {
+        mockRepositoryProfiles.setProfileByIdState.value.error = new Error('Validation Error');
+        return Promise.resolve();
+      });
       
-      await newStore.handleSave();
+      mockFormRef.value = mockForm;
+      
+      await store.handleSave();
 
-      // setProfileById should be called, but subsequent actions should be prevented
       expect(mockRepositoryProfiles.setProfileById).toHaveBeenCalled();
       expect(mockHubspotForm.submitFormToHubspot).not.toHaveBeenCalled();
       expect(mockRepositoryProfiles.getProfileById).not.toHaveBeenCalled();
@@ -345,15 +339,12 @@ describe('useFormBusinessController', () => {
 
       const newStore = useFormBusinessController();
       
-      // Start the save operation
       const savePromise = newStore.handleSave();
       
-      // Check loading state during operation
       expect(newStore.isLoading).toBe(true);
       
       await savePromise;
       
-      // Check loading state after operation
       expect(newStore.isLoading).toBe(false);
     });
 
@@ -392,22 +383,20 @@ describe('useFormBusinessController', () => {
       mockRepositoryProfiles.setProfileById.mockRejectedValue(new Error('Network Error'));
 
       const mockForm = {
-        value: {
-          onValidate: vi.fn(),
-          isValid: true,
-          model: {
-            business_controller: {
-              first_name: 'Test',
-              last_name: 'Controller',
-              address1: '123 Test St',
-              city: 'Test City',
-              state: 'CA',
-              zip_code: '12345',
-              country: 'US',
-              phone: '555-1234',
-              email: 'test@controller.com',
-              dob: '1990-01-01',
-            },
+        onValidate: vi.fn(),
+        isValid: true,
+        model: {
+          business_controller: {
+            first_name: 'Test',
+            last_name: 'Controller',
+            address1: '123 Test St',
+            city: 'Test City',
+            state: 'CA',
+            zip_code: '12345',
+            country: 'US',
+            phone: '555-1234',
+            email: 'test@controller.com',
+            dob: '1990-01-01',
           },
         },
       };
