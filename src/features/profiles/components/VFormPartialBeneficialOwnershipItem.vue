@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { PropType, watch, onMounted } from 'vue';
+import { onMounted } from 'vue';
 import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
 import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
@@ -8,7 +8,6 @@ import VFormCheckbox from 'UiKit/components/Base/VForm/VFormCheckbox.vue';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import VFormCombobox from 'UiKit/components/Base/VForm/VFormCombobox.vue';
 import { useVFormPartialBeneficialOwnershipItem, FormPartialBeneficialOwnershipItem } from './logic/useVFormPartialBeneficialOwnershipItem';
-import { Ref } from 'vue';
 
 const props = defineProps<{
   itemIndex: number;

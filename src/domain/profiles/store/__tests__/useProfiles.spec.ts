@@ -43,10 +43,10 @@ describe('useProfilesStore', () => {
 
     // Mock session store
     const mockSessionStore = {
-      userSession: ref({ 
-        active: true, 
+      userSession: ref({
+        active: true,
         expires_at: '2024-12-31',
-        identity: { traits: {} }
+        identity: { traits: {} },
       }),
       userLoggedIn: computed(() => true),
       userSessionTraits: computed(() => ({})),
@@ -90,19 +90,19 @@ describe('useProfilesStore', () => {
   it('should initialize with 0 when user is not logged in', () => {
     // Reset Pinia store
     setActivePinia(createPinia());
-    
+
     // Mock cookies to return 0
     (useCookies as any).mockReturnValue({
       set: vi.fn(),
       get: vi.fn().mockReturnValue(0),
     });
-    
+
     // Mock session store with user not logged in
     const mockSessionStore = {
-      userSession: ref({ 
-        active: false, 
+      userSession: ref({
+        active: false,
         expires_at: '2024-12-31',
-        identity: { traits: {} }
+        identity: { traits: {} },
       }),
       userLoggedIn: computed(() => false),
       userSessionTraits: computed(() => ({})),
@@ -136,19 +136,19 @@ describe('useProfilesStore', () => {
   it('should initialize with 0 when user is logged in but no profiles available', () => {
     // Reset Pinia store
     setActivePinia(createPinia());
-    
+
     // Mock cookies to return 0
     (useCookies as any).mockReturnValue({
       set: vi.fn(),
       get: vi.fn().mockReturnValue(0),
     });
-    
+
     // Mock session store with user logged in
     const mockSessionStore = {
-      userSession: ref({ 
-        active: true, 
+      userSession: ref({
+        active: true,
         expires_at: '2024-12-31',
-        identity: { traits: {} }
+        identity: { traits: {} },
       }),
       userLoggedIn: computed(() => true),
       userSessionTraits: computed(() => ({})),
@@ -190,7 +190,7 @@ describe('useProfilesStore', () => {
     // First set to a valid ID, then try to set to 0
     store.setSelectedUserProfileById(123);
     expect(store.selectedUserProfileId).toBe(123);
-    
+
     store.setSelectedUserProfileById(0);
     expect(store.selectedUserProfileId).toBe(0);
   });

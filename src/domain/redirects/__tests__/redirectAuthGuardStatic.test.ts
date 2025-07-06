@@ -101,7 +101,7 @@ describe('redirectAuthGuardStatic', () => {
     expect(mockGetSession).toHaveBeenCalled();
     expect(consoleSpy).toHaveBeenCalledWith('Auth guard error:', expect.any(Error));
     expect(mockUserSessionStore.updateSession).not.toHaveBeenCalled();
-    
+
     consoleSpy.mockRestore();
   });
 

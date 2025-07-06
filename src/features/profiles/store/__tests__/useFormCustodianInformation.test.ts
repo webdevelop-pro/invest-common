@@ -2,7 +2,7 @@ import {
   describe, it, expect, vi, beforeEach, afterEach,
 } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
-import { ref, nextTick } from 'vue';
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
@@ -109,10 +109,10 @@ vi.mock('InvestCommon/types/form', () => ({
   FormChild: vi.fn(),
 }));
 
-const makeFormChild = (isValid = true, model = {}, onValidate = vi.fn()) => ({ 
-  isValid: isValid, 
-  model: model, 
-  onValidate: onValidate,
+const makeFormChild = (isValid = true, model = {}, onValidate = vi.fn()) => ({
+  isValid,
+  model,
+  onValidate,
 });
 
 describe('useFormCustodianInformation', () => {
@@ -282,13 +282,13 @@ describe('useFormCustodianInformation', () => {
           account_number: '123456789',
         },
         'individual',
-        '123'
+        '123',
       );
-      
+
       expect(setProfileByIdState.value.error).toBeNull();
-      
+
       expect(vi.mocked(useHubspotForm)).toHaveBeenCalledWith('test-custodian-hubspot-form-id');
-      
+
       const hubspotFormMock = vi.mocked(useHubspotForm).mock.results[0].value;
       expect(hubspotFormMock.submitFormToHubspot).toHaveBeenCalledWith({
         email: 'john@example.com',
@@ -296,11 +296,11 @@ describe('useFormCustodianInformation', () => {
         type: 'self-directed',
         account_number: '123456789',
       });
-      
+
       expect(mockRepositoryProfiles.getProfileById).toHaveBeenCalledWith('individual', '123');
       expect(mockRouter.push).toHaveBeenCalledWith({
         name: ROUTE_DASHBOARD_ACCOUNT,
-        params: { profileId: '123' }
+        params: { profileId: '123' },
       });
     });
 
@@ -337,7 +337,7 @@ describe('useFormCustodianInformation', () => {
       expect(mockRepositoryProfiles.setProfileById).toHaveBeenCalledWith(
         {},
         'individual',
-        '123'
+        '123',
       );
     });
 
@@ -350,7 +350,7 @@ describe('useFormCustodianInformation', () => {
       expect(mockRepositoryProfiles.setProfileById).toHaveBeenCalledWith(
         {},
         'individual',
-        '123'
+        '123',
       );
     });
   });
@@ -387,18 +387,18 @@ describe('useFormCustodianInformation', () => {
     it('should handle getProfileById rejection', async () => {
       mockRepositoryProfiles.getProfileById.mockRejectedValue(new Error('Profile fetch error'));
       const mockOnValidate = vi.fn();
-      
+
       mockFormRef.value = makeFormChild(true, {
         full_account_name: 'John Doe IRA',
         type: 'self-directed',
         account_number: '123456789',
       }, mockOnValidate);
-      
+
       const newStore = useFormCustodianInformation();
 
       // Since getProfileById is not awaited, the promise should resolve
       await newStore.handleSave();
-      
+
       expect(newStore.isLoading).toBe(false);
       expect(mockOnValidate).toHaveBeenCalled();
       expect(mockRepositoryProfiles.getProfileById).toHaveBeenCalledWith('individual', '123');

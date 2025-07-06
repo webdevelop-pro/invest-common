@@ -3,7 +3,7 @@ import {
   nextTick,
 } from 'vue';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
-import { ROUTE_DASHBOARD_ACCOUNT, ROUTE_ACCREDITATION_UPLOAD } from 'InvestCommon/helpers/enums/routes';
+import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/helpers/enums/routes';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useRouter } from 'vue-router';
 import { FormChild } from 'InvestCommon/types/form';

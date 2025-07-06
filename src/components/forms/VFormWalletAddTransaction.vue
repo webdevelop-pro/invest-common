@@ -138,7 +138,8 @@ const fundingSourceFormatted = computed(() => (
     id: `${item.id}`,
   }))) || []);
 
-const fundingSourceFormattedLastItem = computed(() => fundingSourceFormatted.value[fundingSourceFormatted.value.length - 1]);
+const fundingSourceFormattedLastItem = computed(() => (
+  fundingSourceFormatted.value[fundingSourceFormatted.value.length - 1]));
 
 watch(() => fundingSourceFormatted.value, () => {
   if (!model.funding_source_id) model.funding_source_id = Number(fundingSourceFormattedLastItem.value?.id);

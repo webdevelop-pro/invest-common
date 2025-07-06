@@ -93,4 +93,4 @@ export const useFormTrustInformation = defineStore('useFormTrustInformation', ()
 
 if (import.meta.hot) {
   import.meta.hot.accept(acceptHMRUpdate(useFormTrustInformation, import.meta.hot));
-} 
+}

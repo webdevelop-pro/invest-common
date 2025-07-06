@@ -2,7 +2,7 @@ import {
   describe, it, expect, vi, beforeEach, afterEach,
 } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
-import { ref, nextTick } from 'vue';
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
@@ -368,8 +368,8 @@ describe('useFormTrustedContact', () => {
         '456',
       );
       expect(mockGetProfileById).toHaveBeenCalledWith('entity', '456');
-      expect(mockRouter.push).toHaveBeenCalledWith({ 
-        name: ROUTE_DASHBOARD_ACCOUNT, 
+      expect(mockRouter.push).toHaveBeenCalledWith({
+        name: ROUTE_DASHBOARD_ACCOUNT,
         params: { profileId: '456' },
       });
     });

@@ -2,7 +2,7 @@ import {
   describe, it, expect, vi, beforeEach, afterEach,
 } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
-import { ref, nextTick } from 'vue';
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
@@ -10,7 +10,7 @@ import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryAccreditation } from 'InvestCommon/data/accreditation/accreditation.repository';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import { scrollToError } from 'UiKit/helpers/validation/general';
-import { ROUTE_DASHBOARD_ACCOUNT, ROUTE_ACCREDITATION_UPLOAD } from '../../../../helpers/enums/routes';
+import { ROUTE_DASHBOARD_ACCOUNT } from '../../../../helpers/enums/routes';
 import { useFormPersonalInformation } from '../useFormPersonalInformation';
 
 const mockRouterInstance = {

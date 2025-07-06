@@ -2,12 +2,7 @@ import {
   describe, it, expect, vi, beforeEach, afterEach,
 } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
-import { ref, nextTick } from 'vue';
-import { useRouter } from 'vue-router';
-import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
-import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
-import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
-import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
+import { ref } from 'vue';
 import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/helpers/enums/routes';
 import { useFormTrustInformation } from '../useFormTrustInformation';
 
@@ -53,10 +48,14 @@ vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
   })),
 }));
 
+const mockSetProfileById = vi.fn().mockResolvedValue(undefined);
+const mockGetProfileById = vi.fn().mockResolvedValue(undefined);
+const mockSubmitFormToHubspot = vi.fn();
+
 vi.mock('InvestCommon/data/profiles/profiles.repository', () => ({
   useRepositoryProfiles: vi.fn(() => ({
-    setProfileById: vi.fn().mockResolvedValue(undefined),
-    getProfileById: vi.fn().mockResolvedValue(undefined),
+    setProfileById: mockSetProfileById,
+    getProfileById: mockGetProfileById,
     setProfileByIdState: ref({ data: null, error: null }),
     getProfileByIdOptionsState: ref({ data: { schema: {} }, error: null }),
   })),
@@ -72,15 +71,13 @@ vi.mock('InvestCommon/domain/session/store/useSession', () => ({
 
 vi.mock('InvestCommon/composable/useHubspotForm', () => ({
   useHubspotForm: vi.fn(() => ({
-    submitFormToHubspot: vi.fn(),
+    submitFormToHubspot: mockSubmitFormToHubspot,
   })),
 }));
 
-vi.mock('UiKit/helpers/validation/general', () => {
-  return {
-    scrollToError: vi.fn(),
-  };
-});
+vi.mock('UiKit/helpers/validation/general', () => ({
+  scrollToError: vi.fn(),
+}));
 
 vi.mock('InvestCommon/global', () => ({
   default: {
@@ -93,7 +90,7 @@ describe('useFormTrustInformation', () => {
 
   beforeEach(() => {
     setActivePinia(createPinia());
-    
+
     mockFormRef.value = {
       isValid: true,
       model: {
@@ -106,9 +103,12 @@ describe('useFormTrustInformation', () => {
       },
       onValidate: vi.fn(),
     };
-    
+
     vi.clearAllMocks();
-    
+    mockSetProfileById.mockResolvedValue(undefined);
+    mockGetProfileById.mockResolvedValue(undefined);
+    mockSubmitFormToHubspot.mockClear();
+
     store = useFormTrustInformation();
   });
 
@@ -139,8 +139,6 @@ describe('useFormTrustInformation', () => {
       ]);
     });
 
-
-
     it('should return model data from selected user profile', () => {
       expect(store.modelData).toEqual({
         trust_information: {
@@ -156,29 +154,15 @@ describe('useFormTrustInformation', () => {
   });
 
   describe('handleSave', () => {
-    let mockSetProfileById: any;
-    let mockGetProfileById: any;
-    let mockSubmitFormToHubspot: any;
     let handleSaveStore: any;
 
     beforeEach(() => {
-      mockSetProfileById = vi.fn();
-      mockGetProfileById = vi.fn();
-      mockSubmitFormToHubspot = vi.fn();
-      
-      const useRepositoryProfilesStore = useRepositoryProfiles();
-      useRepositoryProfilesStore.setProfileById = mockSetProfileById;
-      useRepositoryProfilesStore.getProfileById = mockGetProfileById;
-      
-      const mockHubspotForm = useHubspotForm('trust-info-form-id');
-      mockHubspotForm.submitFormToHubspot = mockSubmitFormToHubspot;
-      
       handleSaveStore = useFormTrustInformation();
     });
 
     it('should validate form before saving', async () => {
       mockFormRef.value.isValid = true;
-      
+
       await handleSaveStore.handleSave();
 
       expect(mockFormRef.value.onValidate).toHaveBeenCalled();
@@ -194,10 +178,10 @@ describe('useFormTrustInformation', () => {
 
     it('should save form data when valid', async () => {
       mockFormRef.value.isValid = true;
-      
+
       await store.handleSave();
 
-      expect(vi.mocked(useRepositoryProfiles)().setProfileById).toHaveBeenCalledWith(
+      expect(mockSetProfileById).toHaveBeenCalledWith(
         {
           trust_name: 'Test Trust',
           trust_address: '123 Trust St',
@@ -207,13 +191,13 @@ describe('useFormTrustInformation', () => {
           trust_country: 'US',
         },
         'individual',
-        '123'
+        '123',
       );
     });
 
     it('should submit form to Hubspot after successful save', async () => {
       mockFormRef.value.isValid = true;
-      
+
       await handleSaveStore.handleSave();
 
       expect(mockSubmitFormToHubspot).toHaveBeenCalledWith({
@@ -229,7 +213,7 @@ describe('useFormTrustInformation', () => {
 
     it('should refresh profile data after successful save', async () => {
       mockFormRef.value.isValid = true;
-      
+
       await handleSaveStore.handleSave();
 
       expect(mockGetProfileById).toHaveBeenCalledWith('individual', '123');
@@ -237,7 +221,7 @@ describe('useFormTrustInformation', () => {
 
     it('should navigate to account page after successful save', async () => {
       mockFormRef.value.isValid = true;
-      
+
       await handleSaveStore.handleSave();
 
       expect(mockPush).toHaveBeenCalledWith({
@@ -246,27 +230,33 @@ describe('useFormTrustInformation', () => {
       });
     });
 
-
     it('should handle errors during save operation', async () => {
       mockFormRef.value.isValid = true;
-      
+
       const mockError = new Error('Save failed');
       mockSetProfileById.mockRejectedValue(mockError);
 
-      await handleSaveStore.handleSave();
+      try {
+        await handleSaveStore.handleSave();
+      } catch (error) {
+        // Expected error
+      }
 
       expect(handleSaveStore.isLoading).toBe(false);
     });
 
     it('should ensure loading is false even if error occurs', async () => {
       mockFormRef.value.isValid = true;
-      
+
       mockSetProfileById.mockRejectedValue(new Error('Save failed'));
 
-      await handleSaveStore.handleSave();
+      try {
+        await handleSaveStore.handleSave();
+      } catch (error) {
+        // Expected error
+      }
 
       expect(handleSaveStore.isLoading).toBe(false);
     });
   });
-
-}); 
+});

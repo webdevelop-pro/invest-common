@@ -2,7 +2,6 @@ import {
   urlCheckEmail, urlForgot, urlProfilePortfolio, urlSignup,
 } from 'InvestCommon/global/links';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
-import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { storeToRefs } from 'pinia';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
 

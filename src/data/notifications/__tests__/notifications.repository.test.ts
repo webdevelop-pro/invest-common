@@ -244,15 +244,15 @@ describe('Notifications Repository', () => {
 
   it('should reset all data correctly', () => {
     const store = useRepositoryNotifications();
-    
+
     // Set some initial state
     store.notifications = [{ id: 1, type: 'test', status: 'unread' }];
     store.getAllState.value = { loading: true, error: new Error('test'), data: [{ id: 1 }] };
     store.markAllAsReadState.value = { loading: true, error: new Error('test'), data: undefined };
     store.markAsReadByIdState.value = { loading: true, error: new Error('test'), data: undefined };
-    
+
     store.resetAll();
-    
+
     expect(store.notifications).toEqual([]);
     expect(store.getAllState.value).toEqual({ loading: false, error: null, data: null });
     expect(store.markAllAsReadState.value).toEqual({ loading: false, error: null, data: null });
@@ -261,7 +261,7 @@ describe('Notifications Repository', () => {
 
   it('should reset data correctly', () => {
     const store = useRepositoryNotifications();
-    
+
     // Set some initial state
     store.notifications = [{ id: 1, type: 'test', status: 'unread' }];
     store.getAllState.value.data = [{ id: 1 }];
@@ -273,9 +273,9 @@ describe('Notifications Repository', () => {
     store.markAsReadByIdState.value.data = undefined;
     store.markAsReadByIdState.value.loading = true;
     store.markAsReadByIdState.value.error = new Error('test');
-    
+
     store.reset();
-    
+
     expect(store.notifications).toEqual([]);
     expect(store.getAllState.value.data).toBeUndefined();
     expect(store.getAllState.value.loading).toBe(false);
@@ -292,12 +292,12 @@ describe('Notifications Repository', () => {
     const store = useRepositoryNotifications();
     const initialNotifications = [{ id: 1, type: 'test', status: 'unread' }];
     store.notifications = [...initialNotifications];
-    
+
     const newNotification = { id: 2, type: 'new_test', status: 'unread' };
     const notificationData = JSON.stringify(newNotification);
-    
+
     store.updateNotificationsData(notificationData);
-    
+
     expect(store.notifications).toEqual([newNotification, ...initialNotifications]);
   });
 });

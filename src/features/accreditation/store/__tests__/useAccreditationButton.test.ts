@@ -7,8 +7,8 @@ import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { AccreditationTypes } from 'InvestCommon/types/api/invest';
 import { AccreditationTextStatuses } from 'InvestCommon/data/accreditation/accreditation.types';
 import { ROUTE_ACCREDITATION_UPLOAD, ROUTE_DASHBOARD_PERSONAL_DETAILS } from 'InvestCommon/helpers/enums/routes';
-import { useAccreditationButton } from '../useAccreditationButton';
 import { ref } from 'vue';
+import { useAccreditationButton } from '../useAccreditationButton';
 
 vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
   useProfilesStore: vi.fn(() => ({

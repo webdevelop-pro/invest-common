@@ -269,7 +269,7 @@ describe('Accreditation Repository', () => {
 
   it('should reset all states correctly', () => {
     const repository = useRepositoryAccreditation();
-    
+
     // Set some initial state
     repository.getAllState.value = { loading: true, error: new Error('test'), data: [] };
     repository.createState.value = { loading: true, error: new Error('test'), data: {} };

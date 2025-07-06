@@ -2,16 +2,10 @@ import {
   describe, it, expect, vi, beforeEach, afterEach,
 } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
-import { nextTick, ref, computed } from 'vue';
-import { useFormBackgroundInformation } from '../useFormFinancialInformation';
-import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
-import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
-import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
-import { useRepositoryAccreditation } from 'InvestCommon/data/accreditation/accreditation.repository';
-import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
+import { ref } from 'vue';
 import { scrollToError } from 'UiKit/helpers/validation/general';
 import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/helpers/enums/routes';
-
+import { useFormBackgroundInformation } from '../useFormFinancialInformation';
 
 const mockPush = vi.fn();
 const mockRouter = {
@@ -20,7 +14,6 @@ const mockRouter = {
 vi.mock('vue-router', () => ({
   useRouter: () => mockRouter,
 }));
-
 
 const mockProfilesStore = {
   selectedUserProfileId: ref('123'),
@@ -55,7 +48,6 @@ vi.mock('InvestCommon/data/accreditation/accreditation.repository', () => ({
   useRepositoryAccreditation: vi.fn(() => mockAccreditationRepository),
 }));
 
-
 const mockSubmitFormToHubspot = vi.fn();
 vi.mock('InvestCommon/composable/useHubspotForm', () => ({
   useHubspotForm: vi.fn(() => ({
@@ -63,11 +55,9 @@ vi.mock('InvestCommon/composable/useHubspotForm', () => ({
   })),
 }));
 
-
 vi.mock('UiKit/helpers/validation/general', () => ({
   scrollToError: vi.fn(),
 }));
-
 
 vi.mock('InvestCommon/global', () => ({
   default: {
@@ -76,7 +66,6 @@ vi.mock('InvestCommon/global', () => ({
     HUBSPOT_FORM_ID_INVESTMENT_OBJECTIVES: 'investment-objectives-form-id',
   },
 }));
-
 
 const mockFinancialInfoFormRef = {
   value: {
@@ -110,7 +99,6 @@ const mockUnderstandingRisksFormRef = {
     onValidate: vi.fn(),
   },
 };
-
 
 vi.mock('vue', async () => {
   const actual = await vi.importActual('vue');
@@ -245,7 +233,7 @@ describe('useFormFinancialInformation', () => {
       await store.handleSave();
 
       expect(mockSubmitFormToHubspot).toHaveBeenCalledTimes(3);
-      
+
       expect(mockSubmitFormToHubspot).toHaveBeenCalledWith({
         email: 'test@example.com',
         is_accredited: true,
@@ -355,4 +343,4 @@ describe('useFormFinancialInformation', () => {
       expect(mockUnderstandingRisksFormRef.value.onValidate).toHaveBeenCalled();
     });
   });
-}); 
+});

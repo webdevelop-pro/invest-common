@@ -11,7 +11,6 @@ import { useProfileEvmWalletTransactionStore } from 'InvestCommon/store/useProfi
 import { useProfileEvmWalletStore } from 'InvestCommon/store/useProfileEvmWallet/useProfileEvmWallet';
 import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import { useUsersStore } from 'InvestCommon/store/useUsers';
-import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { usePlaidStore } from 'InvestCommon/store/usePlaid';
 import { useInvestmentsStore } from 'InvestCommon/store/useInvestments';
 import { useAccreditationStore } from 'InvestCommon/store/useAccreditation';

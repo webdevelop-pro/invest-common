@@ -70,9 +70,9 @@ export const useFormEntityInformation = defineStore('useFormEntityInformation', 
       isLoading.value = false;
       if (!setProfileByIdState.value.error) {
         useHubspotForm(env.HUBSPOT_FORM_ID_ENTITY_INFORMATION).submitFormToHubspot({
-            email: userSessionTraits.value?.email,
-            ...entityInformationFormRef.value?.model,
-          });
+          email: userSessionTraits.value?.email,
+          ...entityInformationFormRef.value?.model,
+        });
       }
       useRepositoryProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
       router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
@@ -95,4 +95,4 @@ export const useFormEntityInformation = defineStore('useFormEntityInformation', 
 
 if (import.meta.hot) {
   import.meta.hot.accept(acceptHMRUpdate(useFormEntityInformation, import.meta.hot));
-} 
+}

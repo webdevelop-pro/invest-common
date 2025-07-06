@@ -94,4 +94,4 @@ export const useFormBusinessController = defineStore('useFormBusinessController'
 
 if (import.meta.hot) {
   import.meta.hot.accept(acceptHMRUpdate(useFormBusinessController, import.meta.hot));
-} 
+}

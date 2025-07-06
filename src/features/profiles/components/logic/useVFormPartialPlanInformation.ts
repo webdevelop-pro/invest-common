@@ -1,4 +1,6 @@
-import { computed, reactive, toRaw, watch, type ComputedRef } from 'vue';
+import {
+  computed, reactive, toRaw, watch, type ComputedRef,
+} from 'vue';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
@@ -102,4 +104,4 @@ export const useVFormPartialPlanInformation = (
     yesNoOptions,
     schemaFrontend,
   };
-}; 
+};

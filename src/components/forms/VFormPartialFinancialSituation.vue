@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { PropType, computed, watch, toRaw } from 'vue';
+import { PropType, watch } from 'vue';
 import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
 import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
@@ -71,8 +71,8 @@ defineExpose({
 watch(() => props.modelData, (newModelData) => {
   if (!newModelData) return;
   if (
-    newModelData.accredited_investor?.is_accredited !== undefined &&
-    newModelData.accredited_investor?.is_accredited !== null
+    newModelData.accredited_investor?.is_accredited !== undefined
+    && newModelData.accredited_investor?.is_accredited !== null
   ) {
     model.accredited_investor.is_accredited = newModelData.accredited_investor.is_accredited;
   }
@@ -109,7 +109,7 @@ watch(() => props.modelData, (newModelData) => {
           <VFormRadio
             :model-value="model.accredited_investor.is_accredited"
             :options="isAccreditedRadioOptions"
-            @update:modelValue="model.accredited_investor.is_accredited = ($event === 'true')"
+            @update:model-value="model.accredited_investor.is_accredited = ($event === 'true')"
           />
         </VFormGroup>
       </FormCol>

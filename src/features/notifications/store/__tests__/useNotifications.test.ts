@@ -64,13 +64,6 @@ describe('useNotifications Store', () => {
   let mockMarkAsReadById: ReturnType<typeof vi.fn>;
   let store: ReturnType<typeof useNotifications>;
 
-  // Helper function to wait for loading to complete
-  const waitForLoadingComplete = async () => {
-    // Wait for the 500ms timeout in the watcher
-    await new Promise(resolve => setTimeout(resolve, 600));
-    await nextTick();
-  };
-
   // Helper function to set up store with data loaded
   const setupStoreWithData = async () => {
     await store.loadData();

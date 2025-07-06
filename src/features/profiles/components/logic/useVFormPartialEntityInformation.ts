@@ -1,4 +1,6 @@
-import { computed, reactive, toRaw, watch, ComputedRef, ref } from 'vue';
+import {
+  computed, reactive, toRaw, watch, ComputedRef,
+} from 'vue';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
@@ -86,7 +88,7 @@ export const useVFormPartialEntityInformation = (
 
   const operatingAgreementLabel = computed(() => {
     const entityType = model.type;
-    
+
     switch (entityType) {
       case 'LLC':
         return 'Operating Agreement';
@@ -126,4 +128,4 @@ export const useVFormPartialEntityInformation = (
     optionsType,
     operatingAgreementLabel,
   };
-}; 
+};

@@ -1,4 +1,4 @@
-import { computed, watch } from 'vue';
+import { computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { SELECT_PROFILE_TYPES as selectTypes } from 'InvestCommon/utils';
@@ -59,4 +59,4 @@ export const useVFormProfileSelectType = () => {
     isValid,
     onValidate,
   };
-}; 
+};

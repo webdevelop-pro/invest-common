@@ -37,7 +37,6 @@ const {
   getSchema,
   title,
   selectText,
-  trust,
 } = useVFormPartialBeneficialOwnership(
   modelDataComputed,
   errorDataComputed,

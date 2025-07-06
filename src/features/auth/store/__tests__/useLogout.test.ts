@@ -1,3 +1,4 @@
+/* eslint-disable no-promise-executor-return */
 import {
   describe, it, expect, vi, beforeEach,
 } from 'vitest';

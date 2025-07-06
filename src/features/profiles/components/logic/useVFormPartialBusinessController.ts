@@ -1,5 +1,5 @@
 import {
-  computed, reactive, ref, toRaw, watch, type ComputedRef,
+  computed, ref, toRaw, watch, type ComputedRef,
 } from 'vue';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import {

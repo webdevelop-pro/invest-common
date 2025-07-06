@@ -5,9 +5,9 @@ import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import { urlSignin } from 'InvestCommon/global/links';
-import { redirectAuthGuard } from '../redirectAuthGuard';
 import { resetAllData } from 'InvestCommon/domain/resetAllData';
 import env from 'InvestCommon/global';
+import { redirectAuthGuard } from '../redirectAuthGuard';
 
 // Mock the dependencies
 vi.mock('InvestCommon/domain/session/store/useSession', () => ({
@@ -160,4 +160,4 @@ describe('redirectAuthGuard', () => {
       expect(mockNext).toHaveBeenCalledWith(false);
     });
   });
-}); 
+});

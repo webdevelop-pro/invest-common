@@ -2,13 +2,11 @@ import {
   describe, it, expect, vi, beforeEach, afterEach,
 } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
-import { ref, nextTick } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref } from 'vue';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
-import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/helpers/enums/routes';
 import { useFormPlanInformation } from '../useFormPlanInformation';
 
 const mockFormRef = ref<any>(null);
@@ -302,4 +300,4 @@ describe('useFormPlanInformation', () => {
       expect(mockRepositoryProfiles.getProfileById).toHaveBeenCalledWith('business', '789');
     });
   });
-}); 
+});

@@ -60,7 +60,7 @@ export const oryErrorHandling = (
       //   window.location.href = redirectTo.toString();
       //   return;
       // }
-      navigateWithQueryParams(urlAuthenticator)
+      navigateWithQueryParams(urlAuthenticator);
       return;
     case 'session_refresh_required': // We need to re-authenticate to perform this action
       // window.location.href = err.response?.data.redirect_browser_to

@@ -2,10 +2,10 @@ import {
   describe, it, expect, vi, beforeEach, afterEach,
 } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
+import { ref } from 'vue';
 import { useRepositoryAccreditation } from '../../../../data/accreditation/accreditation.repository';
 import { useRepositoryProfiles } from '../../../../data/profiles/profiles.repository';
 import { AccreditationTypes } from '../../../../types/api/invest';
-import { ref } from 'vue';
 import { useProfilesStore } from '../../../../domain/profiles/store/useProfiles';
 import { useAccreditationUpload } from '../useAccreditationUpload';
 

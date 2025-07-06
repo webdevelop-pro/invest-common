@@ -204,15 +204,15 @@ defineExpose({
           :validation="validation"
           :schema-back="schemaBackendComputed"
           :schema-front="schemaFrontend"
-          :error-text="errorDataComputed?.formation_document_id	"
-          path="formation_document_id	"
+          :error-text="errorDataComputed?.formation_document_id"
+          path="formation_document_id"
           label="Formation Document"
           data-testid="entity-document-group"
         >
           <VFormDocument
             :is-error="VFormGroupProps.isFieldError"
             :loading="loadingComputed"
-            @upload-success="model.formation_document_id	 = $event"
+            @upload-success="model.formation_document_id = $event"
           />
         </VFormGroup>
       </FormCol>

@@ -1,5 +1,4 @@
-import { computed } from 'vue';
-import { useTemplateRef } from 'vue';
+import { computed, useTemplateRef } from 'vue';
 import { FormChild } from 'InvestCommon/types/form';
 
 export function useVFormProfileSolo() {
@@ -27,4 +26,4 @@ export function useVFormProfileSolo() {
     isValid,
     onValidate,
   };
-} 
+}

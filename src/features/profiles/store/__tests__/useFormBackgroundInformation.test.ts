@@ -4,13 +4,8 @@ import {
 import { setActivePinia, createPinia } from 'pinia';
 import { ref, nextTick, reactive } from 'vue';
 import { useRouter } from 'vue-router';
-import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
-import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
-import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import { scrollToError } from 'UiKit/helpers/validation/general';
-import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
-import { getOptions } from 'UiKit/helpers/model';
 import { ROUTE_DASHBOARD_ACCOUNT } from '../../../../helpers/enums/routes';
 import { useFormBackgroundInformation } from '../useFormBackgroundInformation';
 
@@ -324,4 +319,4 @@ describe('useFormBackgroundInformation', () => {
       expect(store).toHaveProperty('isAdditionalFields');
     });
   });
-}); 
+});

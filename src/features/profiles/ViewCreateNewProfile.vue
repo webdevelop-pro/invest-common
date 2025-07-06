@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { storeToRefs } from 'pinia';
 import { useFormCreateNewProfile } from './store/useFormCreateNewProfile';
 import { useGlobalLoader } from 'InvestCommon/store/useGlobalLoader';
 import { defineAsyncComponent, hydrateOnVisible } from 'vue';
@@ -29,14 +28,14 @@ const VFormProfileTrust = defineAsyncComponent({
 const globalLoader = useGlobalLoader();
 globalLoader.hide();
 
-const formStore = useFormCreateNewProfile();
+const formComposable = useFormCreateNewProfile();
 const {
   backButtonText, breadcrumbs, isLoading, isDisabledButton,
   modelData, PROFILE_TYPES, selectedType, schemaBackend, errorData,
-} = storeToRefs(formStore);
+} = formComposable;
 
 const handleSave = () => {
-  formStore.handleSave();
+  formComposable.handleSave();
 };
 </script>
 

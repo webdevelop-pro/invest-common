@@ -1,4 +1,6 @@
-import { computed, watch, toRaw, ComputedRef } from 'vue';
+import {
+  computed, watch, toRaw, ComputedRef,
+} from 'vue';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import {
   address1Rule, cityRule, countryRuleObject, dobRule,
@@ -25,8 +27,8 @@ const options = [
 
 const requiredDefault = ['address1', 'first_name', 'last_name', 'dob', 'email', 'phone', 'city', 'state', 'zip_code', 'country'];
 const defItem = {
-    non_us: false,
-  };
+  non_us: false,
+};
 
 export function useVFormPartialBeneficialOwnership(
   modelData: ComputedRef<FormModelBeneficialOwnership>,
@@ -145,8 +147,8 @@ export function useVFormPartialBeneficialOwnership(
     model.beneficials = [...items];
   });
 
-  const title = computed(() => trust.value ? 'Trustees/Protectors Information' : 'Beneficial Ownership Information');
-  const selectText = computed(() => trust.value ? 'How many trustees and protectors does your trust have?' : 'How many Beneficial Owners who own 25% or more of this Legal Entity?');
+  const title = computed(() => (trust.value ? 'Trustees/Protectors Information' : 'Beneficial Ownership Information'));
+  const selectText = computed(() => (trust.value ? 'How many trustees and protectors does your trust have?' : 'How many Beneficial Owners who own 25% or more of this Legal Entity?'));
 
   return {
     model,
@@ -166,4 +168,4 @@ export function useVFormPartialBeneficialOwnership(
     trust,
     schemaBackend,
   };
-} 
+}

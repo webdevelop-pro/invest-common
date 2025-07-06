@@ -1,5 +1,5 @@
 import {
-  computed, reactive, toRaw, watch, Ref,
+  computed, watch, Ref,
 } from 'vue';
 
 export interface FormPartialBeneficialOwnershipItem {
@@ -28,8 +28,10 @@ export const useVFormPartialBeneficialOwnershipItem = (
 ) => {
   watch(() => model.value?.non_us, () => {
     if (model.value?.non_us) {
+      // eslint-disable-next-line no-param-reassign
       model.value.type_of_identification = { id_number: '', country: '' };
     } else {
+      // eslint-disable-next-line no-param-reassign
       delete model.value?.type_of_identification;
     }
   });

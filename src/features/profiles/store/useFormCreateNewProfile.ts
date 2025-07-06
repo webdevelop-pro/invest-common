@@ -2,7 +2,7 @@ import {
   ref, computed, useTemplateRef,
   nextTick, watch,
 } from 'vue';
-import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
+import { storeToRefs } from 'pinia';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import { useRouter } from 'vue-router';
 import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/helpers/enums/routes';
@@ -15,10 +15,12 @@ import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryAccreditation } from 'InvestCommon/data/accreditation/accreditation.repository';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 
-export const useFormCreateNewProfile = defineStore('useFormCreateNewProfile', () => {
+export const useFormCreateNewProfile = () => {
   const router = useRouter();
   const userProfileStore = useProfilesStore();
-  const { selectedUserProfileId, selectedUserProfileData, selectedUserIndividualProfile } = storeToRefs(userProfileStore);
+  const {
+    selectedUserProfileId, selectedUserProfileData, selectedUserIndividualProfile,
+  } = storeToRefs(userProfileStore);
   const useRepositoryProfilesStore = useRepositoryProfiles();
   const { setProfileState, getProfileByIdOptionsState, setProfileByIdState } = storeToRefs(useRepositoryProfilesStore);
   const userSessionStore = useSessionStore();
@@ -46,8 +48,8 @@ export const useFormCreateNewProfile = defineStore('useFormCreateNewProfile', ()
 
   const PROFILE_TYPES = computed(() => profileTypes);
   const selectedType = computed(() => String(selectTypeFormRef.value?.model?.type_profile));
-  const errorData = computed(() => setProfileState.value.error);
-  const schemaBackend = computed(() => getProfileByIdOptionsState.value.data);
+  const errorData = computed(() => setProfileState.value.error || null);
+  const schemaBackend = computed(() => getProfileByIdOptionsState.value.data || null);
 
   const childFormIsValid = computed(() => {
     if (selectedType.value.toLowerCase() === profileTypes.ENTITY) {
@@ -115,9 +117,11 @@ export const useFormCreateNewProfile = defineStore('useFormCreateNewProfile', ()
   const modelData = computed(() => selectedUserIndividualProfile.value?.data || {});
   const isIndividualEscrow = computed(() => selectedUserIndividualProfile.value?.escrow_id);
   const isCreateEscrowForProfile = computed(() => (
-    (selectedType.value.toLowerCase() === profileTypes.ENTITY) || (selectedType.value.toLowerCase() === profileTypes.TRUST)));
+    (selectedType.value.toLowerCase() === profileTypes.ENTITY)
+    || (selectedType.value.toLowerCase() === profileTypes.TRUST)));
   const isCheckIndividualEscrow = computed(() => (
-    (selectedType.value.toLowerCase() === profileTypes.SDIRA) || (selectedType.value.toLowerCase() === profileTypes.SOLO401K)));
+    (selectedType.value.toLowerCase() === profileTypes.SDIRA)
+    || (selectedType.value.toLowerCase() === profileTypes.SOLO401K)));
 
   const handleHubspot = () => {
     const model = { ...childFormModel.value };
@@ -252,7 +256,6 @@ export const useFormCreateNewProfile = defineStore('useFormCreateNewProfile', ()
   };
 
   const handleSave = async () => {
-    const model = { ...childFormModel.value };
     onValidate();
     if (!isValid.value) {
       nextTick(() => scrollToError('ViewCreateNewProfile'));
@@ -263,9 +266,9 @@ export const useFormCreateNewProfile = defineStore('useFormCreateNewProfile', ()
 
     try {
       if (isCreateEscrowForProfile.value) {
-        handlerCreateEscrow();
+        await handlerCreateEscrow();
       } else if (isCheckIndividualEscrow.value) {
-        handlerCheckIndividualEscrow();
+        await handlerCheckIndividualEscrow();
       }
     } finally {
       isLoading.value = false;
@@ -292,8 +295,4 @@ export const useFormCreateNewProfile = defineStore('useFormCreateNewProfile', ()
     schemaBackend,
     errorData,
   };
-});
-
-if (import.meta.hot) {
-  import.meta.hot.accept(acceptHMRUpdate(useFormCreateNewProfile, import.meta.hot));
-}
+};
