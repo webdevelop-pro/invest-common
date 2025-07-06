@@ -48,7 +48,7 @@ export const useFormTrustedContact = defineStore('useFormTrustedContact', () => 
   const isLoadingFields = computed(() => getProfileByIdOptionsState.value.loading);
   const { submitFormToHubspot } = useHubspotForm(env.HUBSPOT_FORM_ID_TRUSTED_CONTACT);
 
-  const errorData = computed(() => setProfileByIdState.value.error);
+  const errorData = computed(() => setProfileByIdState.value.error?.data?.responseJson);
   const schemaBackend = computed(() => (
     getProfileByIdOptionsState.value.data ? structuredClone(toRaw(getProfileByIdOptionsState.value.data)) : null));
 

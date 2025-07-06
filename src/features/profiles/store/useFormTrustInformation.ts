@@ -47,7 +47,7 @@ export const useFormTrustInformation = defineStore('useFormTrustInformation', ()
   const isDisabledButton = computed(() => !isValid.value);
   const modelData = computed(() => selectedUserProfileData?.value?.data);
 
-  const errorData = computed(() => setProfileByIdState.value.error || undefined);
+  const errorData = computed(() => setProfileByIdState.value.error?.data?.responseJson || undefined);
   const schemaBackend = computed(() => getProfileByIdOptionsState.value.data || undefined);
 
   const handleSave = async () => {

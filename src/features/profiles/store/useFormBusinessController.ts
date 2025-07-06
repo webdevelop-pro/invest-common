@@ -48,7 +48,7 @@ export const useFormBusinessController = defineStore('useFormBusinessController'
   const isDisabledButton = computed(() => (!isValid.value));
   const modelData = computed(() => selectedUserProfileData?.value?.data);
 
-  const errorData = computed(() => setProfileByIdState.value.error);
+  const errorData = computed(() => setProfileByIdState.value.error?.data?.responseJson);
   const schemaBackend = computed(() => getProfileByIdOptionsState.value.data);
 
   const handleSave = async () => {

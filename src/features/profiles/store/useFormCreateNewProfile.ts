@@ -48,7 +48,7 @@ export const useFormCreateNewProfile = () => {
 
   const PROFILE_TYPES = computed(() => profileTypes);
   const selectedType = computed(() => String(selectTypeFormRef.value?.model?.type_profile));
-  const errorData = computed(() => setProfileState.value.error || null);
+  const errorData = computed(() => setProfileState.value.error?.data?.responseJson || null);
   const schemaBackend = computed(() => getProfileByIdOptionsState.value.data || null);
 
   const childFormIsValid = computed(() => {

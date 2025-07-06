@@ -77,7 +77,7 @@ const sdiraTypeFormRef = useTemplateRef<FormChild>('sdiraFormChild');
 const soloTypeFormRef = useTemplateRef<FormChild>('soloFormChild');
 const trustTypeFormRef = useTemplateRef<FormChild>('trustFormChild');
 
-const errorData = computed(() => setProfileState.value.error);
+const errorData = computed(() => setProfileState.value.error?.data?.responseJson);
 const schemaBackend = computed(() => getProfileByIdOptionsState.value.data);
 
 const childFormIsValid = computed(() => {

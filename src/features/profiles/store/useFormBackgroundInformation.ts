@@ -56,7 +56,7 @@ export const useFormBackgroundInformation = defineStore('useFormBackgroundInform
   const dataFinraData = computed(() => selectedUserProfileData.value?.data?.finra_affiliated);
   const dataShareholderData = computed(() => selectedUserProfileData.value?.data?.ten_percent_shareholder);
 
-  const errorData = computed(() => setProfileByIdState.value.error);
+  const errorData = computed(() => setProfileByIdState.value.error?.data?.responseJson);
   const schemaBackend = computed(() => (
     getProfileByIdOptionsState.value.data ? structuredClone(toRaw(getProfileByIdOptionsState.value.data)) : {}));
 

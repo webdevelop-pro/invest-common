@@ -45,7 +45,7 @@ export const useFormCustodianInformation = defineStore('useFormCustodianInformat
   const isLoadingFields = computed(() => getProfileByIdOptionsState.value.loading);
   const { submitFormToHubspot } = useHubspotForm(env.HUBSPOT_FORM_ID_CUSTODIAN);
 
-  const errorData = computed(() => setProfileByIdState.value.error);
+  const errorData = computed(() => setProfileByIdState.value.error?.data?.responseJson);
   const schemaBackend = computed(() => (
     getProfileByIdOptionsState.value.data ? structuredClone(toRaw(getProfileByIdOptionsState.value.data)) : null));
 

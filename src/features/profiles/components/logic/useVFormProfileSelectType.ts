@@ -35,7 +35,7 @@ export const useVFormProfileSelectType = () => {
 
   const modelData = computed(() => selectedUserProfileData?.value?.data);
   const schemaBackend = computed(() => getProfileByIdOptionsState.value.data);
-  const errorData = computed(() => setProfileByIdState.value.error);
+  const errorData = computed(() => setProfileByIdState.value.error?.data?.responseJson);
 
   const {
     model,

@@ -1,33 +1,55 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { PropType, watch } from 'vue';
+import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
 import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
+import { storeToRefs } from 'pinia';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import VFormCheckbox from 'UiKit/components/Base/VForm/VFormCheckbox.vue';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import VFormCombobox from 'UiKit/components/Base/VForm/VFormCombobox.vue';
-import { useVFormPartialBeneficialOwnershipItem, FormPartialBeneficialOwnershipItem } from './logic/useVFormPartialBeneficialOwnershipItem';
 
-const props = defineProps<{
-  itemIndex: number;
-  validation: object;
-  schema: JSONSchemaType<FormPartialBeneficialOwnershipItem>;
-  optionsCountry: Array<any>;
-  optionsState: Array<any>;
-  trust: boolean;
-  errorData: any;
-  schemaBackend: object;
-  loading: boolean;
-}>();
+export interface FormPartialBeneficialOwnershipItem {
+  first_name: string;
+  last_name: string;
+  dob: string;
+  address1: string;
+  address2?: string;
+  city: string;
+  state: string;
+  zip_code: string;
+  country: string;
+  phone: string;
+  email: string;
+  non_us: string;
+  ssn?: string;
+  type_of_identification?: {
+    id_number: string;
+    country: string;
+  };
+}
 
 const model = defineModel<FormPartialBeneficialOwnershipItem>();
+const props = defineProps({
+  itemIndex: Number,
+  validation: Object,
+  schema: Object as PropType<JSONSchemaType<FormPartialBeneficialOwnershipItem>>,
+  optionsCountry: Array,
+  optionsState: Array,
+  trust: Boolean,
+  errorData: Object as PropType<any>,
+  schemaBackend: Object,
+  loading: Boolean,
+});
 
-const { title } = useVFormPartialBeneficialOwnershipItem(model.value, props.trust);
+const title = props.trust ? 'Trustee or Protector' : 'Beneficial Owner';
 
-onMounted(() => {
-  if (model.value && !model.value.type_of_identification) {
-    model.value.type_of_identification = { id_number: '', country: '' };
+watch(() => model.value?.non_us, () => {
+  if (model.value?.non_us) {
+    model.value.type_of_identification = {};
+  } else {
+    delete model.value?.type_of_identification;
   }
 });
 </script>

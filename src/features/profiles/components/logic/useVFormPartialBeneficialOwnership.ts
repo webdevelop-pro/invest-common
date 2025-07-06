@@ -10,7 +10,7 @@ import {
 import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
 import { getOptions } from 'UiKit/helpers/model';
 import { getFieldSchema } from 'UiKit/helpers/validation/general';
-import type { FormPartialBeneficialOwnershipItem } from './useVFormPartialBeneficialOwnershipItem';
+import type { FormPartialBeneficialOwnershipItem } from '../VFormPartialBeneficialOwnershipItem.vue';
 
 export interface FormModelBeneficialOwnership {
   beneficial_owners_number: number;

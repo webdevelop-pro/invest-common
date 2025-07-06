@@ -50,7 +50,7 @@ const isValid = computed(() => (personalFormRef.value?.isValid && financialInfoF
   && investmentObjectivesFormRef.value?.isValid && understandingRisksFormRef.value?.isValid));
 const isDisabledButton = computed(() => (!isValid.value || isSetProfileByIdLoading.value));
 
-const errorData = computed(() => setProfileByIdState.value.error);
+const errorData = computed(() => setProfileByIdState.value.error?.data?.responseJson);
 const schemaBackend = computed(() => getProfileByIdOptionsState.value.data);
 
 const hubspotHandle = () => {
