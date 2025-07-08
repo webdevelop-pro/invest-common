@@ -114,7 +114,7 @@ defineExpose({
               placeholder="Last Name"
               name="last-name"
               size="large"
-             :loading="loadingComputed"
+              :loading="loadingComputed"
               data-testid="last-name"
               @update:model-value="model.business_controller.last_name = $event"
             />
@@ -142,7 +142,7 @@ defineExpose({
               disallow-special-chars
               name="phone"
               size="large"
-             :loading="loadingComputed"
+              :loading="loadingComputed"
               data-testid="phone"
               @update:model-value="model.business_controller.phone = $event"
             />
@@ -168,7 +168,7 @@ defineExpose({
               size="large"
               data-testid="date-of-birth"
               type="date"
-             :loading="loadingComputed"
+              :loading="loadingComputed"
               @update:model-value="model.business_controller.dob = $event"
             />
           </VFormGroup>
@@ -194,7 +194,7 @@ defineExpose({
               name="address-1"
               size="large"
               data-testid="address-1"
-             :loading="loadingComputed"
+              :loading="loadingComputed"
               @update:model-value="model.business_controller.address1 = $event"
             />
           </VFormGroup>
@@ -219,7 +219,7 @@ defineExpose({
               name="address-2"
               size="large"
               data-testid="address-2"
-             :loading="loadingComputed"
+              :loading="loadingComputed"
               @update:model-value="model.business_controller.address2 = $event"
             />
           </VFormGroup>
@@ -248,7 +248,7 @@ defineExpose({
               data-testid="city"
               disallow-special-chars
               disallow-numbers
-             :loading="loadingComputed"
+              :loading="loadingComputed"
               @update:model-value="model.business_controller.city = $event"
             />
           </VFormGroup>
@@ -305,7 +305,7 @@ defineExpose({
               mask="#####-####"
               return-masked-value
               disallow-special-chars
-             :loading="loadingComputed"
+              :loading="loadingComputed"
               @update:model-value="model.business_controller.zip_code = $event"
             />
           </VFormGroup>
@@ -342,7 +342,6 @@ defineExpose({
       <FormRow>
         <FormCol col2>
           <VFormGroup
-            v-slot="VFormGroupProps"
             :model="model"
             :validation="validation"
             :schema-back="schemaBackendComputed"
@@ -352,17 +351,22 @@ defineExpose({
             label="Email"
             data-testid="email-group"
           >
-            <VFormInput
-              :is-error="VFormGroupProps.isFieldError"
-              :model-value="model.business_controller.email"
-              placeholder="Email Address"
-              name="email"
-              text
-              type="email"
-              size="large"
-             :loading="loadingComputed"
-              @update:model-value="model.business_controller.email = $event"
-            />
+            <template #default="VFormGroupProps">
+              <VFormInput
+                :is-error="VFormGroupProps.isFieldError"
+                :model-value="model.business_controller.email"
+                placeholder="Email Address"
+                name="email"
+                text
+                type="email"
+                size="large"
+                :loading="loadingComputed"
+                @update:model-value="model.business_controller.email = $event"
+              />
+            </template>
+            <template #tooltip>
+              Email address will be used to send identity verification links to trust/entity associates.
+            </template>
           </VFormGroup>
         </FormCol>
       </FormRow>

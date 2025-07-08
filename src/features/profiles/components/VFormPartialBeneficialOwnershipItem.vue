@@ -226,7 +226,6 @@ watch(() => model.value?.non_us, () => {
     <FormRow>
       <FormCol col2>
         <VFormGroup
-          v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
           :schema-back="schemaBackend"
@@ -236,16 +235,21 @@ watch(() => model.value?.non_us, () => {
           label="Email"
           data-testid="email-group"
         >
-          <VFormInput
-            v-model="model.email"
-            :is-error="VFormGroupProps.isFieldError"
-            placeholder="Email Address"
-            name="email"
-            text
-            type="email"
-            size="large"
-            :loading="loading"
-          />
+          <template #default="VFormGroupProps">
+            <VFormInput
+              v-model="model.email"
+              :is-error="VFormGroupProps.isFieldError"
+              placeholder="Email Address"
+              name="email"
+              text
+              type="email"
+              size="large"
+              :loading="loading"
+            />
+          </template>
+          <template #tooltip>
+            Email address will be used to send identity verification links to trust/entity associates.
+          </template>
         </VFormGroup>
       </FormCol>
 
