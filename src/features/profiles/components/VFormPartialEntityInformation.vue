@@ -176,7 +176,26 @@ defineExpose({
       </FormCol>
     </FormRow>
     <FormRow v-if="showDocumentComputed">
-      <FormCol>
+      <FormCol col3>
+        <VFormGroup
+          v-slot="VFormGroupProps"
+          :model="model"
+          :validation="validation"
+          :schema-back="schemaBackendComputed"
+          :schema-front="schemaFrontend"
+          :error-text="errorDataComputed?.operating_agreement_id"
+          path="operating_agreement_id"
+          :label="operatingAgreementLabel"
+          data-testid="operating-agreement-document-group"
+        >
+          <VFormDocument
+            :is-error="VFormGroupProps.isFieldError"
+            :loading="loadingComputed"
+            @upload-success="model.operating_agreement_id = $event"
+          />
+        </VFormGroup>
+      </FormCol>
+      <FormCol col3>
         <VFormGroup
           v-slot="VFormGroupProps"
           :model="model"
@@ -195,9 +214,7 @@ defineExpose({
           />
         </VFormGroup>
       </FormCol>
-    </FormRow>
-    <FormRow v-if="showDocumentComputed">
-      <FormCol>
+      <FormCol col3>
         <VFormGroup
           v-slot="VFormGroupProps"
           :model="model"
@@ -213,27 +230,6 @@ defineExpose({
             :is-error="VFormGroupProps.isFieldError"
             :loading="loadingComputed"
             @upload-success="model.formation_document_id = $event"
-          />
-        </VFormGroup>
-      </FormCol>
-    </FormRow>
-    <FormRow v-if="showDocumentComputed">
-      <FormCol>
-        <VFormGroup
-          v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackendComputed"
-          :schema-front="schemaFrontend"
-          :error-text="errorDataComputed?.operating_agreement_id"
-          path="operating_agreement_id"
-          :label="operatingAgreementLabel"
-          data-testid="operating-agreement-document-group"
-        >
-          <VFormDocument
-            :is-error="VFormGroupProps.isFieldError"
-            :loading="loadingComputed"
-            @upload-success="model.operating_agreement_id = $event"
           />
         </VFormGroup>
       </FormCol>
