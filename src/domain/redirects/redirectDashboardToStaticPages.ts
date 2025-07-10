@@ -8,8 +8,8 @@ export const redirectDashboardToStaticPages = async (
   next: NavigationGuardNext,
 ) => {
   if (!to.meta.requiresAuth) {
-    const href = `${env.FRONTEND_URL_STATIC}${to.path}`;
-    navigateWithQueryParams(href, to.query);
+    // const href = `${env.FRONTEND_URL_STATIC}${to.path}`;
+    // navigateWithQueryParams(href, to.query);
   } else {
     next();
   }
