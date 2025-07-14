@@ -248,7 +248,7 @@ export const useFormCreateNewProfile = () => {
     if (!setProfileState.value.error) {
       handleHubspot();
       await useRepositoryProfilesStore.getUser();
-      userProfileStore.setSelectedUserProfileById(Number(setProfileState.value.data?.id));
+      await userProfileStore.setSelectedUserProfileById(Number(setProfileState.value.data?.id));
       useRepositoryProfilesStore.getProfileById(selectedType.value, String(setProfileState.value.data?.id));
       isLoading.value = false;
       router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: String(setProfileState.value.data?.id) } });
