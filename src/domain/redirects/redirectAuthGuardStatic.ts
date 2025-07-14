@@ -17,7 +17,7 @@ export const redirectAuthGuardStatic = async () => {
 
   try {
     // Skip session check if we're on the authenticator page
-    if (urlAuthenticator.includes(window.location.pathname)) {
+    if (window.location.pathname !== '/' && urlAuthenticator.includes(window.location.pathname)) {
       return;
     }
 

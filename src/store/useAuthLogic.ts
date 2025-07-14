@@ -309,12 +309,12 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     useAccreditationStore().resetAll();
     useAuthStore().resetAll();
     useFilerStore().resetAll();
-    useRepositoryProfiles().reset();
-    useRepositoryNotifications().reset();
-    useRepositoryAccreditation().reset();
-    cookies.remove('session', cookiesOptions());
+    // useRepositoryProfiles().reset();
+    // useRepositoryNotifications().reset();
+    // useRepositoryAccreditation().reset();
+    // cookies.remove('session', cookiesOptions());
     clearAllCookies();
-    useSession().resetAll();
+    // useSession().resetAll();
   };
 
   const handleAfterLogout = () => {
