@@ -7,6 +7,7 @@ import env, { cookiesOptions } from 'InvestCommon/global/index';
 import { useCookies } from '@vueuse/integrations/useCookies';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
+import { useDomainWebSocketStore } from 'InvestCommon/domain/websockets/store/useWebsockets';
 
 const { IS_STATIC_SITE } = env;
 
@@ -16,6 +17,7 @@ export const useProfilesStore = defineStore('profiles', () => {
   const userSessionStore = useSessionStore();
   const { userSession, userLoggedIn } = storeToRefs(userSessionStore);
   const cookies = useCookies();
+  const websocketsStore = useDomainWebSocketStore();
 
   const useRepositoryProfilesStore = useRepositoryProfiles();
   const {
@@ -45,6 +47,7 @@ export const useProfilesStore = defineStore('profiles', () => {
     }
     if (!getUserState.value?.data && !getUserState.value?.loading) {
       useRepositoryProfilesStore.getUser();
+      websocketsStore.webSocketHandler();
     }
   }, { immediate: true });
 

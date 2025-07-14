@@ -247,7 +247,7 @@ export const useFormCreateNewProfile = () => {
 
     if (!setProfileState.value.error) {
       handleHubspot();
-      useRepositoryProfilesStore.getUser();
+      await useRepositoryProfilesStore.getUser();
       userProfileStore.setSelectedUserProfileById(Number(setProfileState.value.data?.id));
       useRepositoryProfilesStore.getProfileById(selectedType.value, String(setProfileState.value.data?.id));
       isLoading.value = false;

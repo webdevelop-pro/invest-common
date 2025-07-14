@@ -143,7 +143,7 @@ const SOCIAL_LIST = [
       </div>
     </div>
   </div>
-  <VFooterText />
+  <VFooterText class="v-footer__text" />
   <VFooterBottom
     :items="legalItems"
   />
@@ -219,10 +219,20 @@ const SOCIAL_LIST = [
         text-decoration: underline;
       }
     }
+
+    @include media-lte(tablet) {
+      margin-bottom: 0;
+    }
   }
   &__menu {
     @include media-lte(desktop) {
       width: 100%;
+    }
+  }
+
+  &__text {
+    @include media-lte(tablet) {
+      padding-top: 40px;
     }
   }
 }

@@ -11,6 +11,7 @@ import { useProfileWalletTransactionStore } from 'InvestCommon/store/useProfileW
 import { useInvestmentsStore } from 'InvestCommon/store/useInvestments';
 import { useOfferStore } from 'InvestCommon/store/useOffer';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
+import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 
 const { NOTIFICATION_URL } = env;
 
@@ -26,7 +27,7 @@ export const useDomainWebSocketStore = defineStore('domainWebsockets', () => {
   const { userLoggedIn } = storeToRefs(userSessionStore);
 
   const handleInternalMessage = (notification: INotification) => {
-    if (notification.data.obj === 'profile') useUsersStore().updateData(notification);
+    if (notification.data.obj === 'profile') useRepositoryProfiles().updateNotificationData(notification);
     if (notification.data.obj === 'wallet') useProfileWalletStore().updateNotificationData(notification);
     if (notification.data.obj === 'transaction') useProfileWalletTransactionStore().updateNotificationData(notification);
     if (notification.data.obj === 'investment') {

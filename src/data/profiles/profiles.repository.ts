@@ -7,6 +7,7 @@ import { createActionState } from 'InvestCommon/data/repository/repository';
 import {
   IProfileData, IUserIdentityResponse, IProfileIndividual, ISchema,
 } from './profiles.types';
+import { INotification } from '../notifications/notifications.types';
 
 export const useRepositoryProfiles = defineStore('repository-profiles', () => {
   // Dependencies
@@ -27,7 +28,7 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
   const getProfileOptionsState = createActionState<ISchema>();
 
   // Computed
-  const formattedProfileData = computed(() => setProfileState.data);
+  const formattedProfileData = computed(() => setProfileState.value.data);
 
   // Actions
   const getProfileOptions = async (type: string) => {
@@ -183,6 +184,22 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
     }
   };
 
+  const updateNotificationData = (notification: INotification) => {
+    const objectId = notification.data.fields?.object_id;
+    // Update in user profiles list if present
+    const profiles = getUserState.value.data?.profiles;
+    if (profiles && objectId !== undefined) {
+      const profile = profiles.find((item: { id: number }) => item.id === objectId);
+      if (profile && notification.data.fields) {
+        Object.assign(profile, notification.data.fields);
+      }
+    }
+    // Update in currently loaded profile if it matches
+    if (getProfileByIdState.value?.data && getProfileByIdState.value.data.id === objectId && notification.data.fields) {
+      Object.assign(getProfileByIdState.value.data, notification.data.fields);
+    }
+  };
+
   const resetAll = () => {
     // Reset all action states
     setProfileByIdState.value = { loading: false, error: null, data: undefined };
@@ -221,6 +238,7 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
     setUserOptions,
     updateUserData,
     resetAll,
+    updateNotificationData,
   };
 });
 
