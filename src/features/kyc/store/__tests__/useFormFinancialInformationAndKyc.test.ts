@@ -133,7 +133,6 @@ describe('useFormFinancialInformationAndKyc', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
     vi.clearAllMocks();
-    // Re-initialize the refs to ensure fresh references for each test
     mockRepositoryProfiles.setProfileByIdState = ref({ loading: false, error: null, data: undefined });
     mockRepositoryProfiles.getProfileByIdOptionsState = ref({ loading: false, error: null, data: { schema: {} } });
     store = useFormFinancialInformationAndKyc();
