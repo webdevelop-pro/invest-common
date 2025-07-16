@@ -51,12 +51,14 @@ export const KycTextStatuses: Record<InvestKycTypes, ITextStatuses> = {
     class: 'failed',
   },
   [InvestKycTypes.pending]: {
-    text: 'Verification In Progress',
+    // text: 'Verification In Progress',
+    text: 'Continue',
     class: 'pending',
-    tooltip: 'Pending until all associated parties complete KYC.',
+    // tooltip: 'Pending until all associated parties complete KYC.',
+    button: true,
   },
   [InvestKycTypes.approved]: {
     text: 'Verified',
     class: 'success',
   },
-}; 
+};
