@@ -46,6 +46,11 @@ const timeFormatted = computed(() => (dateFull.value ? getTimeFormat(String(date
             {{ timeFormatted }}
           </div>
         </VTableCell>
+        <VTableCell class="v-table-portfolio-transaction__transaction-id">
+          <div class="is--small-2">
+            ID {{ investment?.entity_id }}
+          </div>
+        </VTableCell>
         <VTableCell>
           <div class="v-table-portfolio-transaction__type">
             <VBadge
@@ -82,6 +87,10 @@ const timeFormatted = computed(() => (dateFull.value ? getTimeFormat(String(date
 
   &__type {
     display: flex;
+  }
+
+  &__transaction-id {
+    color: $gray-80;
   }
 }
 </style>

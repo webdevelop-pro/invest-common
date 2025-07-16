@@ -72,6 +72,7 @@ export interface ITransactionDataFormatted {
   id: number;
   status: WalletTransactionStatusTypes;
   type: WalletAddTransactionTypes;
+  entity_id: string;
   amount: {
     value: string;
     currency: string;

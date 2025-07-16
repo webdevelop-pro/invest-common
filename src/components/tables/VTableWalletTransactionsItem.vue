@@ -9,6 +9,7 @@ interface ITableWalletTransaction {
   date: string;
   time: string;
   amount: string;
+  transaction_id: string;
   type: string;
   status: {
     text: string;
@@ -35,6 +36,16 @@ defineProps({
       <div class="is--color-gray-60">
         {{ data?.time }}
       </div>
+    </VTableCell>
+    <VTableCell>
+      <VTooltip>
+        <div class="v-table-wallet-transactions__transaction-id is--small-2">
+          ID {{ data?.transaction_id }}
+        </div>
+        <template #content>
+          {{ data?.transaction_id }}
+        </template>
+      </VTooltip>
     </VTableCell>
     <VTableCell>
       <div class="v-table-wallet-transactions__table-type">
@@ -81,6 +92,16 @@ defineProps({
 
   &__table-type {
     display: flex;
+  }
+
+  &__transaction-id {
+    color: $gray-80;
+    // width: 18%;
+    max-width: 110px;
+    width: 110px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 </style>
