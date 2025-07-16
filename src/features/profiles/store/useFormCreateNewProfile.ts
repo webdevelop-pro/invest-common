@@ -116,12 +116,16 @@ export const useFormCreateNewProfile = () => {
   const isDisabledButton = computed(() => (!isValid.value));
   const modelData = computed(() => selectedUserIndividualProfile.value?.data || {});
   const isIndividualEscrow = computed(() => selectedUserIndividualProfile.value?.escrow_id);
+  const isTrustRevocable = computed(() => (
+    (selectedType.value.toLowerCase() === profileTypes.TRUST) && childFormModel.value?.type?.toLowerCase().includes('revocable')));
+
   const isCreateEscrowForProfile = computed(() => (
     (selectedType.value.toLowerCase() === profileTypes.ENTITY)
-    || (selectedType.value.toLowerCase() === profileTypes.TRUST)));
+    || ((selectedType.value.toLowerCase() === profileTypes.TRUST) && !isTrustRevocable.value)));
   const isCheckIndividualEscrow = computed(() => (
     (selectedType.value.toLowerCase() === profileTypes.SDIRA)
-    || (selectedType.value.toLowerCase() === profileTypes.SOLO401K)));
+    || (selectedType.value.toLowerCase() === profileTypes.SOLO401K)
+    || isTrustRevocable.value));
 
   const handleHubspot = () => {
     const model = { ...childFormModel.value };

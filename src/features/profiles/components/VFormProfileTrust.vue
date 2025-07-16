@@ -25,10 +25,20 @@ const {
   isValid,
   controllerData,
   onValidate,
+  personalFormRef,
+  trustInfoFormRef,
+  businessControllerRef,
+  beneficialOwnershipRef,
 } = useVFormProfileTrust();
 
 defineExpose({
-  model, isValid, onValidate,
+  model,
+  isValid,
+  onValidate,
+  personalFormRef,
+  trustInfoFormRef,
+  businessControllerRef,
+  beneficialOwnershipRef,
 });
 </script>
 

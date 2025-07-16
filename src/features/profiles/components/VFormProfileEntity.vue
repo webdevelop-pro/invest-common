@@ -26,10 +26,20 @@ const {
   isValid,
   controllerData,
   onValidate,
+  personalFormRef,
+  entityInfoFormRef,
+  businessControllerRef,
+  beneficialOwnershipRef,
 } = useVFormProfileEntity();
 
 defineExpose({
-  model, isValid, onValidate,
+  model,
+  isValid,
+  onValidate,
+  personalFormRef,
+  entityInfoFormRef,
+  businessControllerRef,
+  beneficialOwnershipRef,
 });
 </script>
 
