@@ -11,7 +11,7 @@ import {
 } from 'InvestCommon/helpers/investment';
 import { ROUTE_INVESTMENT_DOCUMENTS } from 'InvestCommon/helpers/enums/routes';
 import expand from 'UiKit/assets/images/expand.svg';
-import { IDistributionsData } from 'InvestCommon/types/api/distributions';
+import { IStakingData } from 'InvestCommon/types/api/distributions';
 import { VTableCell, VTableRow } from 'UiKit/components/Base/VTable';
 import chevronDownIcon from 'UiKit/assets/images/chevron-down.svg';
 import VImage from 'UiKit/components/Base/VImage/VImage.vue';
@@ -22,7 +22,7 @@ const { selectedUserProfileData, selectedUserProfileId } = storeToRefs(userStore
 
 const props = defineProps({
   item: {
-    type: Object as PropType<IDistributionsData>,
+    type: Object as PropType<IStakingData>,
     required: true,
   },
   search: String,
@@ -41,9 +41,6 @@ const itemFormatted = computed(() => ({
   tagBackground: getDistributionTagBackground(props.item.status),
 }));
 
-const isDefaultImage = computed(() => (
-  !props.item?.investment?.offer?.image?.meta_data?.small && !props.item?.investment?.offer?.image?.url));
-
 </script>
 
 <template>
@@ -59,47 +56,25 @@ const isDefaultImage = computed(() => (
         />
       </router-link>
     </VTableCell>
-    <VTableCell v-highlight="search">
-      {{ itemFormatted.id }}
-    </VTableCell>
     <VTableCell class="v-table-distributions-header__table-offer">
       <div class="v-table-distributions-header__table-image-wrap">
-        <VImage
-          :src="itemFormatted.image"
-          :alt="`${itemFormatted.offer} image`"
-          fit="cover"
-          class="v-table-distributions-header__table-image is--no-margin"
-          :class="{ 'is--default-image': isDefaultImage }"
-        />
+        {{ props.item.provider }}
       </div>
-      <div v-if="itemFormatted.offer">
-        <div v-highlight="search">
-          {{ itemFormatted.offer }}
-        </div>
-        <div class="v-table-distributions-header__table-funded is--small">
-          {{ itemFormatted.offerLegalName }}
-        </div>
+      <div v-if="props.item.pool">
+        {{ props.item.pool }}
       </div>
     </VTableCell>
+    <VTableCell class="is--color-black is--h5__title">
+      {{ props.item.reward_rate }}
+    </VTableCell>
     <VTableCell>
-      {{ itemFormatted.date }}
+      {{ props.item.tvl }}
+    </VTableCell>
+    <VTableCell>
+        {{ props.item.assets[0] }}
     </VTableCell>
     <VTableCell class="is--color-black is--h5__title">
-      {{ itemFormatted.amount }}
-    </VTableCell>
-    <VTableCell>
-      {{ itemFormatted.ownership }}
-    </VTableCell>
-    <VTableCell class="is--color-black is--h5__title">
-      {{ itemFormatted.total_distribution }}
-    </VTableCell>
-    <VTableCell>
-      <VBadge
-        :color="itemFormatted.tagBackground"
-        class="v-table-distributions-header__table-tag"
-      >
-        {{ itemFormatted.status }}
-      </VBadge>
+      {{ props.item.network }}
     </VTableCell>
     <VTableCell>
       <chevronDownIcon class="v-table-item-header__chevron" />

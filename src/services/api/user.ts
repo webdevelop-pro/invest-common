@@ -87,6 +87,9 @@ export const fetchGetProfileByID = (type: string, id: string | number) => {
 export const fetchGetUser = () => {
   const path = `${USER_URL}/auth/user`;
 
+  console.log(env, USER_URL);
+
+
   const data = {
     method: 'GET',
     ...requiredFetchParams(),

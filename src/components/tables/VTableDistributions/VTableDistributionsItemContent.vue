@@ -10,7 +10,7 @@ import { VTableCell, VTableRow } from 'UiKit/components/Base/VTable';
 
 defineProps({
   item: {
-    type: Object as PropType<IDistributionsData>,
+    type: Object as PropType<IStakingData>,
     required: true,
   },
   isLoading: Boolean,
@@ -24,43 +24,14 @@ defineProps({
       :colspan="colspan"
     >
       <div class="v-table-item-content__cell">
-        <div class="v-table-distributions-content__documents">
-          <VSkeleton
-            v-if="isLoading"
-            height="32px"
-            width="180px"
-            class="v-table-distributions-content__skeleton"
-          />
-          <template v-else>
-            <VButton
-              v-for="doc in item.documents"
-              :key="doc.id"
-              as="a"
-              target="_blank"
-              rel="noopener noreferrer"
-              :href="doc.url"
-              size="small"
-              variant="outlined"
-              color="secondary"
-              icon-placement="left"
-              class="v-table-distributions-content__document-button"
-            >
-              <file
-                alt="file icon"
-                class="v-table-distributions-content__document-icon"
-              />
-              <span class="v-table-distributions-content__document-text">{{ doc.name }}</span>
-            </VButton>
-          </template>
-        </div>
         <div class="v-table-distributions-content__info">
           <div class="v-table-distributions-content__info-column">
             <div class="v-table-distributions-content__info-col">
               <span class="v-table-distributions-content__text is--h6__title">
-                Total Amount:
+                Total Invested:
               </span>
               <span class="v-table-distributions-content__text is--h6__title">
-                Current Year:
+                Earned:
               </span>
             </div>
             <div class="v-table-distributions-content__info-col">
@@ -74,7 +45,7 @@ defineProps({
                 v-else
                 class="v-table-distributions-content__value is--body"
               >
-                {{ currency(item?.total_amount) }}
+                {{ currency(0) }}
               </span>
               <VSkeleton
                 v-if="isLoading"
@@ -86,46 +57,11 @@ defineProps({
                 v-else
                 class="v-table-distributions-content__value is--body"
               >
-                {{ currency(item?.amount) }}
+                {{ currency(0) }}
               </span>
             </div>
           </div>
-          <div class="v-table-distributions-content__info-column">
-            <div class="v-table-distributions-content__info-col">
-              <span class="v-table-distributions-content__text is--h6__title">
-                Transaction Status:
-              </span>
-              <span class="v-table-distributions-content__text is--h6__title">
-                Distribution Date:
-              </span>
-            </div>
-            <div class="v-table-distributions-content__info-col">
-              <VSkeleton
-                v-if="isLoading"
-                height="18px"
-                width="50px"
-                class="v-table-distributions-content__skeleton"
-              />
-              <span
-                v-else
-                class="v-table-distributions-content__value is--body"
-              >
-                {{ item?.status }}
-              </span>
-              <VSkeleton
-                v-if="isLoading"
-                height="18px"
-                width="50px"
-                class="v-table-distributions-content__skeleton"
-              />
-              <span
-                v-else
-                class="v-table-distributions-content__value is--body"
-              >
-                {{ formatToFullDate(new Date(item.created_at).toISOString()) }}
-              </span>
-            </div>
-          </div>
+            {{ item.points }}
         </div>
         <div class="v-table-distributions-content__actions" />
       </div>

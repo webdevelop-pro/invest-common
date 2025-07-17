@@ -26,7 +26,6 @@ export interface IDistributionsData {
     updated_at: string;
     documents: IDistributionsDocuments[];
     investment: IInvest;
-    created_at: string;
 }
 
 export interface IDistributionsMeta {
@@ -34,4 +33,16 @@ export interface IDistributionsMeta {
   geografic_labels: string[];
   performance_data: number[];
   performance_labels: number[] | string[];
+}
+
+export interface IStakingData {
+    id: number;
+    provider: string;
+    pool: string;
+    reward_rate: string;
+    tvl: string;
+    points: string;
+    assets: string[];
+    network: string;
+    created_at: string;
 }
