@@ -69,6 +69,7 @@ export const useAccreditationButton = defineStore('useAccreditationButton', () =
     if (!userLoggedIn.value || !isAccreditationIsClickable.value || !selectedUserProfileId.value) {
       return;
     }
+    await userProfileStore.setSelectedUserProfileById(accreditationProfileId.value);
     if (!selectedUserProfileData.value?.escrow_id) {
       router.push({
         name: ROUTE_DASHBOARD_PERSONAL_DETAILS,
