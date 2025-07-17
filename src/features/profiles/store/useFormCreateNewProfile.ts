@@ -119,13 +119,10 @@ export const useFormCreateNewProfile = () => {
   const isTrustRevocable = computed(() => (
     (selectedType.value.toLowerCase() === profileTypes.TRUST) && childFormModel.value?.type?.toLowerCase().includes('revocable')));
 
-  const isCreateEscrowForProfile = computed(() => (
-    (selectedType.value.toLowerCase() === profileTypes.ENTITY)
-    || ((selectedType.value.toLowerCase() === profileTypes.TRUST) && !isTrustRevocable.value)));
-  const isCheckIndividualEscrow = computed(() => (
+  const isProfileAktAsIndividual = computed(() => (
     (selectedType.value.toLowerCase() === profileTypes.SDIRA)
     || (selectedType.value.toLowerCase() === profileTypes.SOLO401K)
-    || isTrustRevocable.value));
+    || isTrustRevocable.value)); // same logic as in domain profiles
 
   const handleHubspot = () => {
     const model = { ...childFormModel.value };
@@ -269,10 +266,10 @@ export const useFormCreateNewProfile = () => {
     isLoading.value = true;
 
     try {
-      if (isCreateEscrowForProfile.value) {
-        await handlerCreateEscrow();
-      } else if (isCheckIndividualEscrow.value) {
+      if (isProfileAktAsIndividual.value) {
         await handlerCheckIndividualEscrow();
+      } else {
+        await handlerCreateEscrow();
       }
     } finally {
       isLoading.value = false;

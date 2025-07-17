@@ -72,12 +72,12 @@ describe('useProfileSelectStore', () => {
 
     expect(formattedList).toHaveLength(3); // 2 profiles + "Add New" option
     expect(formattedList[0]).toEqual({
-      text: 'IN1: Individual Investment Profile',
-      id: '1',
-    });
-    expect(formattedList[1]).toEqual({
       text: 'EN2: Company Inc Investment Profile',
       id: '2',
+    });
+    expect(formattedList[1]).toEqual({
+      text: 'IN1: Individual Investment Profile',
+      id: '1',
     });
     expect(formattedList[2]).toEqual({
       text: '+ Add A New Investment Account',

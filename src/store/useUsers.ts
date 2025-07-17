@@ -163,13 +163,13 @@ export const useUsersStore = defineStore('user', () => {
     }
   }, { immediate: true });
 
-  watch(() => [selectedUserProfileId.value, urlProfileId.value], () => {
-    if (userLoggedIn.value && isUrlProfileSameAsSelected.value && selectedUserProfileId.value
-      && (selectedUserProfileId.value > 0)) {
-      useRepositoryProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
-      useRepositoryProfilesStore.getProfileByIdOptions(selectedUserProfileType.value, selectedUserProfileId.value);
-    }
-  }, { immediate: true });
+  // watch(() => [selectedUserProfileId.value, urlProfileId.value], () => {
+  //   if (userLoggedIn.value && isUrlProfileSameAsSelected.value && selectedUserProfileId.value
+  //     && (selectedUserProfileId.value > 0)) {
+  //     useRepositoryProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
+  //     useRepositoryProfilesStore.getProfileByIdOptions(selectedUserProfileType.value, selectedUserProfileId.value);
+  //   }
+  // }, { immediate: true });
 
   watch(() => userProfiles.value[0]?.id, () => {
     if (userLoggedIn.value

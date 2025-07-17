@@ -11,6 +11,7 @@ import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useRepositoryKyc } from 'InvestCommon/data/kyc/kyc.repository';
 import { useKycButton } from '../useKycButton';
+import { PROFILE_TYPES } from 'InvestCommon/global/investment.json';
 
 const mockCookies = {
   get: vi.fn(),
@@ -49,6 +50,8 @@ const mockProfilesStore = {
   selectedUserProfileId: ref(123 as number | null),
   isSelectedProfileLoading: ref(false),
   selectedUserProfileShowKycInitForm: ref(false),
+  selectedUserProfileType: ref(PROFILE_TYPES.SDIRA),
+  selectedUserIndividualProfile: ref(null), // <-- added for test coverage
 };
 vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
   useProfilesStore: () => mockProfilesStore,
@@ -294,6 +297,58 @@ describe('useKycButton', () => {
       await nextTick();
 
       expect(store.data.class).toBe(KycTextStatuses[InvestKycTypes.approved].class);
+    });
+  });
+
+  describe('kycProfileId logic', () => {
+    it('should use selectedUserIndividualProfile.id when type is SDIRA and id is present', () => {
+      mockProfilesStore.selectedUserProfileType.value = PROFILE_TYPES.SDIRA;
+      mockProfilesStore.selectedUserIndividualProfile.value = { id: 999 } as any;
+      const store = useKycButton();
+      expect(store.data.to.params.profileId).toBe(123);
+      mockProfilesStore.selectedUserProfileShowKycInitForm.value = false;
+      store.onClick();
+      expect(mockKycRepository.handlePlaidKyc).toHaveBeenCalledWith(999);
+    });
+    it('should fallback to selectedUserProfileId when type is SDIRA and individual profile is null', async () => {
+      mockProfilesStore.selectedUserProfileType.value = PROFILE_TYPES.SDIRA;
+      mockProfilesStore.selectedUserIndividualProfile.value = null;
+      const store = useKycButton();
+      mockProfilesStore.selectedUserProfileShowKycInitForm.value = false;
+      await store.onClick();
+      expect(mockKycRepository.handlePlaidKyc).toHaveBeenCalledWith(123);
+    });
+    it('should use selectedUserProfileId when type is not SDIRA/SOLO401K', async () => {
+      mockProfilesStore.selectedUserProfileType.value = 'individual';
+      mockProfilesStore.selectedUserIndividualProfile.value = { id: 999 } as any;
+      const store = useKycButton();
+      mockProfilesStore.selectedUserProfileShowKycInitForm.value = false;
+      await store.onClick();
+      expect(mockKycRepository.handlePlaidKyc).toHaveBeenCalledWith(123);
+    });
+  });
+
+  describe('handleKycClick logic', () => {
+    it('should call router.push when selectedUserProfileShowKycInitForm is true', async () => {
+      mockProfilesStore.selectedUserProfileShowKycInitForm.value = true;
+      mockProfilesStore.selectedUserProfileType.value = PROFILE_TYPES.SDIRA;
+      mockProfilesStore.selectedUserIndividualProfile.value = { id: 555 } as any;
+      const store = useKycButton();
+      await store.onClick();
+      expect(mockPush).toHaveBeenCalledWith({
+        name: ROUTE_SUBMIT_KYC,
+        params: { profileId: 555 },
+      });
+      expect(mockKycRepository.handlePlaidKyc).not.toHaveBeenCalled();
+    });
+    it('should call handlePlaidKyc when selectedUserProfileShowKycInitForm is false', async () => {
+      mockProfilesStore.selectedUserProfileShowKycInitForm.value = false;
+      mockProfilesStore.selectedUserProfileType.value = PROFILE_TYPES.SDIRA;
+      mockProfilesStore.selectedUserIndividualProfile.value = { id: 777 } as any;
+      const store = useKycButton();
+      await store.onClick();
+      expect(mockKycRepository.handlePlaidKyc).toHaveBeenCalledWith(777);
+      expect(mockPush).not.toHaveBeenCalled();
     });
   });
 });

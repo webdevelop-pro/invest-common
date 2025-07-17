@@ -55,7 +55,8 @@ export const useDomainWebSocketStore = defineStore('domainWebsockets', () => {
     const uri = url.replace('https', 'wss');
 
     console.log(`connection to ${uri}`);
-    const { data, close } = useWebSocket(uri, {
+    const { data, close, status } = useWebSocket(uri, {
+      autoClose: true,
       autoReconnect: {
         retries: 3,
         delay: 1000,
@@ -80,6 +81,9 @@ export const useDomainWebSocketStore = defineStore('domainWebsockets', () => {
 
     watch(() => data.value, () => {
       handleMessage(data.value);
+    }, { deep: true });
+    watch(() => status.value, () => {
+      console.log(`websocket status: ${status.value}`);
     }, { deep: true });
   };
 

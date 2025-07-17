@@ -9,6 +9,7 @@ import { AccreditationTextStatuses } from 'InvestCommon/data/accreditation/accre
 import { ROUTE_ACCREDITATION_UPLOAD, ROUTE_DASHBOARD_PERSONAL_DETAILS } from 'InvestCommon/helpers/enums/routes';
 import { ref } from 'vue';
 import { useAccreditationButton } from '../useAccreditationButton';
+import { PROFILE_TYPES } from 'InvestCommon/global/investment.json';
 
 vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
   useProfilesStore: vi.fn(() => ({
@@ -33,6 +34,28 @@ vi.mock('vue-router', () => ({
   }),
 }));
 
+function createMockProfilesStore({
+  selectedUserProfileData = null,
+  selectedUserProfileId = null,
+  selectedUserProfileType = PROFILE_TYPES.INDIVIDUAL,
+  userProfiles = [],
+  isSelectedProfileLoading = false,
+  selectedUserIndividualProfile = null,
+  selectedUserProfileShowKycInitForm = false,
+  isTrustRevocable = false,
+} = {}) {
+  return {
+    userProfiles: ref(userProfiles),
+    selectedUserProfileId: ref(selectedUserProfileId),
+    selectedUserProfileData: ref(selectedUserProfileData),
+    selectedUserProfileType: ref(selectedUserProfileType),
+    isSelectedProfileLoading: ref(isSelectedProfileLoading),
+    selectedUserIndividualProfile: ref(selectedUserIndividualProfile),
+    selectedUserProfileShowKycInitForm: ref(selectedUserProfileShowKycInitForm),
+    isTrustRevocable: ref(isTrustRevocable),
+  };
+}
+
 describe('useAccreditationButton', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
@@ -46,13 +69,13 @@ describe('useAccreditationButton', () => {
   });
 
   it('should compute correct data for new accreditation status', () => {
-    const mockProfilesStore = {
-      selectedUserProfileData: ref({
+    const mockProfilesStore = createMockProfilesStore({
+      selectedUserProfileData: {
         accreditation_status: AccreditationTypes.new,
         escrow_id: null,
-      }),
-      selectedUserProfileId: ref(123),
-    };
+      },
+      selectedUserProfileId: 123,
+    });
     vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStore);
 
     const store = useAccreditationButton();
@@ -67,12 +90,12 @@ describe('useAccreditationButton', () => {
   });
 
   it('should compute correct tag background for approved status', () => {
-    const mockProfilesStore = {
-      selectedUserProfileData: ref({
+    const mockProfilesStore = createMockProfilesStore({
+      selectedUserProfileData: {
         accreditation_status: AccreditationTypes.approved,
-      }),
-      selectedUserProfileId: ref(null),
-    };
+      },
+      selectedUserProfileId: null,
+    });
     vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStore);
 
     const store = useAccreditationButton();
@@ -80,12 +103,12 @@ describe('useAccreditationButton', () => {
   });
 
   it('should compute correct tag background and class for declined status', () => {
-    const mockProfilesStore = {
-      selectedUserProfileData: ref({
+    const mockProfilesStore = createMockProfilesStore({
+      selectedUserProfileData: {
         accreditation_status: 'declined' as AccreditationTypes,
-      }),
-      selectedUserProfileId: ref(null),
-    };
+      },
+      selectedUserProfileId: null,
+    });
     vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStore);
 
     const store = useAccreditationButton();
@@ -93,12 +116,12 @@ describe('useAccreditationButton', () => {
   });
 
   it('should compute correct tag background for pending status', () => {
-    const mockProfilesStore = {
-      selectedUserProfileData: ref({
+    const mockProfilesStore = createMockProfilesStore({
+      selectedUserProfileData: {
         accreditation_status: AccreditationTypes.pending,
-      }),
-      selectedUserProfileId: ref(null),
-    };
+      },
+      selectedUserProfileId: null,
+    });
     vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStore);
 
     const store = useAccreditationButton();
@@ -106,12 +129,12 @@ describe('useAccreditationButton', () => {
   });
 
   it('should be clickable for new accreditation status', () => {
-    const mockProfilesStore = {
-      selectedUserProfileData: ref({
+    const mockProfilesStore = createMockProfilesStore({
+      selectedUserProfileData: {
         accreditation_status: AccreditationTypes.new,
-      }),
-      selectedUserProfileId: ref(null),
-    };
+      },
+      selectedUserProfileId: null,
+    });
     vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStore);
 
     const store = useAccreditationButton();
@@ -119,12 +142,12 @@ describe('useAccreditationButton', () => {
   });
 
   it('should not be clickable for pending accreditation status', () => {
-    const mockProfilesStore = {
-      selectedUserProfileData: ref({
+    const mockProfilesStore = createMockProfilesStore({
+      selectedUserProfileData: {
         accreditation_status: AccreditationTypes.pending,
-      }),
-      selectedUserProfileId: ref(null),
-    };
+      },
+      selectedUserProfileId: null,
+    });
     vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStore);
 
     const store = useAccreditationButton();
@@ -132,12 +155,12 @@ describe('useAccreditationButton', () => {
   });
 
   it('should not be clickable for approved accreditation status', () => {
-    const mockProfilesStore = {
-      selectedUserProfileData: ref({
+    const mockProfilesStore = createMockProfilesStore({
+      selectedUserProfileData: {
         accreditation_status: AccreditationTypes.approved,
-      }),
-      selectedUserProfileId: ref(null),
-    };
+      },
+      selectedUserProfileId: null,
+    });
     vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStore);
 
     const store = useAccreditationButton();
@@ -145,13 +168,13 @@ describe('useAccreditationButton', () => {
   });
 
   it('should handle click when user is logged in and accreditation is clickable', async () => {
-    const mockProfilesStore = {
-      selectedUserProfileData: ref({
+    const mockProfilesStore = createMockProfilesStore({
+      selectedUserProfileData: {
         accreditation_status: AccreditationTypes.new,
         escrow_id: null,
-      }),
-      selectedUserProfileId: ref(123),
-    };
+      },
+      selectedUserProfileId: 123,
+    });
     const mockSessionStore = {
       userLoggedIn: ref(true),
     };
@@ -169,13 +192,13 @@ describe('useAccreditationButton', () => {
   });
 
   it('should handle click when user has escrow_id', async () => {
-    const mockProfilesStore = {
-      selectedUserProfileData: ref({
+    const mockProfilesStore = createMockProfilesStore({
+      selectedUserProfileData: {
         accreditation_status: AccreditationTypes.new,
         escrow_id: 'escrow123',
-      }),
-      selectedUserProfileId: ref(123),
-    };
+      },
+      selectedUserProfileId: 123,
+    });
     const mockSessionStore = {
       userLoggedIn: ref(true),
     };
@@ -192,12 +215,12 @@ describe('useAccreditationButton', () => {
   });
 
   it('should not handle click when user is not logged in', async () => {
-    const mockProfilesStore = {
-      selectedUserProfileData: ref({
+    const mockProfilesStore = createMockProfilesStore({
+      selectedUserProfileData: {
         accreditation_status: AccreditationTypes.new,
-      }),
-      selectedUserProfileId: ref(null),
-    };
+      },
+      selectedUserProfileId: null,
+    });
     const mockSessionStore = {
       userLoggedIn: ref(false),
     };
@@ -214,16 +237,14 @@ describe('useAccreditationButton', () => {
     const mockSessionStore = {
       userLoggedIn: ref(true),
     };
-    vi.mocked(useSessionStore).mockReturnValue(mockSessionStore);
-
     // Test pending status
-    const mockProfilesStorePending = {
-      selectedUserProfileData: ref({
+    const mockProfilesStorePending = createMockProfilesStore({
+      selectedUserProfileData: {
         accreditation_status: AccreditationTypes.pending,
         escrow_id: null,
-      }),
-      selectedUserProfileId: ref(123),
-    };
+      },
+      selectedUserProfileId: 123,
+    });
     vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStorePending);
 
     const storePending = useAccreditationButton();
@@ -231,13 +252,13 @@ describe('useAccreditationButton', () => {
     expect(routerMock.push).not.toHaveBeenCalled();
 
     // Test approved status
-    const mockProfilesStoreApproved = {
-      selectedUserProfileData: ref({
+    const mockProfilesStoreApproved = createMockProfilesStore({
+      selectedUserProfileData: {
         accreditation_status: AccreditationTypes.approved,
         escrow_id: null,
-      }),
-      selectedUserProfileId: ref(123),
-    };
+      },
+      selectedUserProfileId: 123,
+    });
     vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStoreApproved);
 
     const storeApproved = useAccreditationButton();
@@ -246,10 +267,10 @@ describe('useAccreditationButton', () => {
   });
 
   it('should handle missing profile data gracefully', () => {
-    const mockProfilesStore = {
-      selectedUserProfileData: ref(null),
-      selectedUserProfileId: ref(null),
-    };
+    const mockProfilesStore = createMockProfilesStore({
+      selectedUserProfileData: null,
+      selectedUserProfileId: null,
+    });
     vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStore);
 
     const store = useAccreditationButton();
@@ -259,13 +280,13 @@ describe('useAccreditationButton', () => {
   });
 
   it('should handle undefined accreditation status', () => {
-    const mockProfilesStore = {
-      selectedUserProfileData: ref({
+    const mockProfilesStore = createMockProfilesStore({
+      selectedUserProfileData: {
         accreditation_status: undefined,
         escrow_id: null,
-      }),
-      selectedUserProfileId: ref(null),
-    };
+      },
+      selectedUserProfileId: null,
+    });
     vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStore);
 
     const store = useAccreditationButton();
@@ -275,13 +296,13 @@ describe('useAccreditationButton', () => {
   });
 
   it('should handle click with missing profile ID', async () => {
-    const mockProfilesStore = {
-      selectedUserProfileData: ref({
+    const mockProfilesStore = createMockProfilesStore({
+      selectedUserProfileData: {
         accreditation_status: AccreditationTypes.new,
         escrow_id: null,
-      }),
-      selectedUserProfileId: ref(null),
-    };
+      },
+      selectedUserProfileId: null,
+    });
     const mockSessionStore = {
       userLoggedIn: ref(true),
     };
@@ -292,5 +313,94 @@ describe('useAccreditationButton', () => {
 
     await store.onClick();
     expect(routerMock.push).not.toHaveBeenCalled();
+  });
+
+  it('should use individual profile id for SDIRA type on click', async () => {
+    const mockProfilesStore = createMockProfilesStore({
+      selectedUserProfileData: {
+        accreditation_status: AccreditationTypes.new,
+        escrow_id: null,
+      },
+      selectedUserProfileId: 123,
+      selectedUserProfileType: PROFILE_TYPES.SDIRA,
+      selectedUserIndividualProfile: { id: 999 },
+    });
+    const mockSessionStore = { userLoggedIn: ref(true) };
+    vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStore);
+    vi.mocked(useSessionStore).mockReturnValue(mockSessionStore);
+    const store = useAccreditationButton();
+    await store.onClick();
+    expect(routerMock.push).toHaveBeenCalledWith({
+      name: ROUTE_DASHBOARD_PERSONAL_DETAILS,
+      params: { profileId: 999 },
+      query: { accreditation: true },
+    });
+  });
+
+  it('should use individual profile id for SOLO401K type on click', async () => {
+    const mockProfilesStore = createMockProfilesStore({
+      selectedUserProfileData: {
+        accreditation_status: AccreditationTypes.new,
+        escrow_id: null,
+      },
+      selectedUserProfileId: 123,
+      selectedUserProfileType: PROFILE_TYPES.SOLO401K,
+      selectedUserIndividualProfile: { id: 888 },
+    });
+    const mockSessionStore = { userLoggedIn: ref(true) };
+    vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStore);
+    vi.mocked(useSessionStore).mockReturnValue(mockSessionStore);
+    const store = useAccreditationButton();
+    await store.onClick();
+    expect(routerMock.push).toHaveBeenCalledWith({
+      name: ROUTE_DASHBOARD_PERSONAL_DETAILS,
+      params: { profileId: 888 },
+      query: { accreditation: true },
+    });
+  });
+
+  it('should use individual profile id for revocable trust on click', async () => {
+    const mockProfilesStore = createMockProfilesStore({
+      selectedUserProfileData: {
+        accreditation_status: AccreditationTypes.new,
+        escrow_id: null,
+      },
+      selectedUserProfileId: 123,
+      selectedUserProfileType: PROFILE_TYPES.TRUST,
+      selectedUserIndividualProfile: { id: 777 },
+      isTrustRevocable: true,
+    });
+    const mockSessionStore = { userLoggedIn: ref(true) };
+    vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStore);
+    vi.mocked(useSessionStore).mockReturnValue(mockSessionStore);
+    const store = useAccreditationButton();
+    await store.onClick();
+    expect(routerMock.push).toHaveBeenCalledWith({
+      name: ROUTE_DASHBOARD_PERSONAL_DETAILS,
+      params: { profileId: 777 },
+      query: { accreditation: true },
+    });
+  });
+
+  it('should fallback to selectedUserProfileId if individual profile is null', async () => {
+    const mockProfilesStore = createMockProfilesStore({
+      selectedUserProfileData: {
+        accreditation_status: AccreditationTypes.new,
+        escrow_id: null,
+      },
+      selectedUserProfileId: 123,
+      selectedUserProfileType: PROFILE_TYPES.SDIRA,
+      selectedUserIndividualProfile: null,
+    });
+    const mockSessionStore = { userLoggedIn: ref(true) };
+    vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStore);
+    vi.mocked(useSessionStore).mockReturnValue(mockSessionStore);
+    const store = useAccreditationButton();
+    await store.onClick();
+    expect(routerMock.push).toHaveBeenCalledWith({
+      name: ROUTE_DASHBOARD_PERSONAL_DETAILS,
+      params: { profileId: 123 },
+      query: { accreditation: true },
+    });
   });
 });

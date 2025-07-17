@@ -57,12 +57,12 @@ export const useRepositoryKyc = defineStore('repository-kyc', () => {
   };
 
   // Generalized Plaid KYC handler
-  const handlePlaidKyc = async () => {
+  const handlePlaidKyc = async (id: number) => {
     if (!selectedUserProfileData.value?.id) return;
-    
+
     isPlaidLoading.value = true;
     try {
-      await createToken(selectedUserProfileData.value.id);
+      await createToken(id || selectedUserProfileData.value.id);
       if (kycToken.value && kycToken.value.link_token) {
         const plaidScript = document.createElement('script');
         plaidScript.setAttribute('src', 'https://cdn.plaid.com/link/v2/stable/link-initialize.js');

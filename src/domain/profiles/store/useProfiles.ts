@@ -30,7 +30,7 @@ export const useProfilesStore = defineStore('profiles', () => {
   const profileByIdInProfilesList = computed(() => (
     userProfiles.value.find((item) => item.id === selectedUserProfileId.value)));
   const selectedUserProfileData = computed(() => getProfileByIdState.value?.data || profileByIdInProfilesList.value);
-  const selectedUserProfileType = computed(() => selectedUserProfileData.value?.type || 'individual');
+  const selectedUserProfileType = computed(() => userProfiles.value.find((item: { id: number; type: string }) => item.id === selectedUserProfileId.value)?.type || 'individual');
   const selectedUserIndividualProfile = computed(() => userProfiles.value.find((profile: { type: string }) => profile.type === 'individual'));
 
   const isSelectedProfileLoading = computed(() => (
@@ -68,6 +68,9 @@ export const useProfilesStore = defineStore('profiles', () => {
 
   const selectedUserProfileShowKycInitForm = computed(() => (
     selectedUserProfileShowKycInitFormIndividual.value));
+
+  const isTrustRevocable = computed(() => (
+    (selectedUserProfileType.value.toLowerCase() === PROFILE_TYPES.TRUST) && selectedUserProfileData.value?.type?.toLowerCase().includes('revocable')));
 
   // if user is logged in and profile is not loaded, load it - step 1
   watch(() => userLoggedIn.value, async () => {
@@ -136,6 +139,7 @@ export const useProfilesStore = defineStore('profiles', () => {
     isSelectedProfileLoading,
     selectedUserIndividualProfile,
     selectedUserProfileShowKycInitForm,
+    isTrustRevocable,
 
     // Methods
     setSelectedUserProfileById,

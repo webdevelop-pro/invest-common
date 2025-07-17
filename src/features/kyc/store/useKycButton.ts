@@ -11,6 +11,7 @@ import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { urlContactUs } from 'InvestCommon/global/links';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useRepositoryKyc } from 'InvestCommon/data/kyc/kyc.repository';
+import { PROFILE_TYPES } from 'InvestCommon/global/investment.json';
 
 export const useKycButton = defineStore('useKycButton', () => {
   const router = useRouter();
@@ -18,6 +19,7 @@ export const useKycButton = defineStore('useKycButton', () => {
   const userProfilesStore = useProfilesStore();
   const {
     selectedUserProfileData, selectedUserProfileId, isSelectedProfileLoading, selectedUserProfileShowKycInitForm,
+    selectedUserProfileType, selectedUserIndividualProfile,
   } = storeToRefs(userProfilesStore);
   const userSessionStore = useSessionStore();
   const { userLoggedIn } = storeToRefs(userSessionStore);
@@ -65,14 +67,26 @@ export const useKycButton = defineStore('useKycButton', () => {
   const isKycStatusDeclined = computed(() => kycStatus.value === InvestKycTypes.declined);
   const showContactUs = computed(() => isKycStatusDeclined.value);
 
+  const isProfileAktAsIndividual = computed(() => (
+    (selectedUserProfileType.value === PROFILE_TYPES.SDIRA)
+    || (selectedUserProfileType.value === PROFILE_TYPES.SOLO401K)
+  ));
+
+  const kycProfileId = computed(() => {
+    if (isProfileAktAsIndividual.value) {
+      return selectedUserIndividualProfile.value?.id || selectedUserProfileId.value;
+    }
+    return selectedUserProfileId.value;
+  });
+
   const handleKycClick = async () => {
     if (selectedUserProfileShowKycInitForm.value) {
       void router.push({
         name: ROUTE_SUBMIT_KYC,
-        params: { profileId: selectedUserProfileId.value },
+        params: { profileId: kycProfileId.value },
       });
     } else {
-      await useRepositoryKycStore.handlePlaidKyc();
+      await useRepositoryKycStore.handlePlaidKyc(kycProfileId.value);
     }
   };
 

@@ -42,7 +42,7 @@ export const useProfileSelectStore = defineStore('profileSelect', () => {
 
   const userListFormatted = computed(() => {
     const userProfilesList: ISelectedProfile[] = [];
-    userProfiles.value?.forEach((item) => {
+    userProfiles.value?.reverse().forEach((item) => {
       const text = `${getId(item)}: ${getName(item)} Investment Profile`;
       userProfilesList.push({
         text: text.charAt(0).toUpperCase() + text.slice(1),

@@ -26,6 +26,7 @@ export interface FormModelBusinessController {
     email: string;
     dob: string;
   };
+  different_owner?: boolean;
 }
 
 export const useVFormPartialBusinessController = (
@@ -61,6 +62,7 @@ export const useVFormPartialBusinessController = (
             type: 'object',
             $ref: '#/definitions/BusinessController',
           },
+          different_owner: {},
         },
         type: 'object',
         errorMessage: errorMessageRule,
@@ -93,6 +95,7 @@ export const useVFormPartialBusinessController = (
         email: '',
         dob: '',
       },
+      different_owner: false,
     },
   );
 
@@ -114,7 +117,10 @@ export const useVFormPartialBusinessController = (
   }, { deep: true, immediate: true });
 
   watch([personalData, sameData], () => {
-    if (!sameData.value) model.business_controller = {} as any;
+    model.different_owner = !sameData.value;
+    if (!sameData.value) {
+      model.business_controller = {} as any;
+    }
     if (personalData.value && sameData.value) {
       model.business_controller.first_name = personalData.value.first_name;
       model.business_controller.last_name = personalData.value.last_name;
