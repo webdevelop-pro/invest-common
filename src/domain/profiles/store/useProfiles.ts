@@ -72,15 +72,18 @@ export const useProfilesStore = defineStore('profiles', () => {
   const isTrustRevocable = computed(() => (
     (selectedUserProfileType.value.toLowerCase() === PROFILE_TYPES.TRUST) && selectedUserProfileData.value?.type?.toLowerCase().includes('revocable')));
 
-  // if user is logged in and profile is not loaded, load it - step 1
-  watch(() => userLoggedIn.value, async () => {
+  const init = async () => {
     if (!userLoggedIn.value) {
       return;
     }
     if (!getUserState.value?.data && !getUserState.value?.loading) {
       useRepositoryProfilesStore.getUser();
-      websocketsStore.webSocketHandler();
     }
+    websocketsStore.webSocketHandler();
+  };
+  // if user is logged in and profile is not loaded, load it - step 1
+  watch(() => userLoggedIn.value, async () => {
+    init();
   }, { immediate: true });
 
   const setSelectedUserProfileById = (id: number) => {
@@ -147,6 +150,7 @@ export const useProfilesStore = defineStore('profiles', () => {
     updateSelectedAccount,
     updateDataInProfile,
     updateData,
+    init,
   };
 });
 

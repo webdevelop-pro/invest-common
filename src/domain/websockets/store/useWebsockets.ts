@@ -11,6 +11,7 @@ import { useInvestmentsStore } from 'InvestCommon/store/useInvestments';
 import { useOfferStore } from 'InvestCommon/store/useOffer';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
+import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository';
 
 const { NOTIFICATION_URL } = env;
 
@@ -26,9 +27,10 @@ export const useDomainWebSocketStore = defineStore('domainWebsockets', () => {
   const { userLoggedIn } = storeToRefs(userSessionStore);
 
   const handleInternalMessage = (notification: INotification) => {
+    // TODO refactor to be more general
     if (notification.data.obj === 'profile') useRepositoryProfiles().updateNotificationData(notification);
     if (notification.data.obj === 'wallet') useProfileWalletStore().updateNotificationData(notification);
-    if (notification.data.obj === 'transaction') useProfileWalletTransactionStore().updateNotificationData(notification);
+    if (notification.data.obj === 'transaction') useRepositoryWallet().updateNotificationData(notification);
     if (notification.data.obj === 'investment') {
       useInvestmentsStore().updateNotificationData(notification);
       useOfferStore().updateNotificationData(notification);
@@ -47,6 +49,7 @@ export const useDomainWebSocketStore = defineStore('domainWebsockets', () => {
   };
 
   const webSocketHandler = async () => {
+    console.log('webSocketHandler called');
     if (!userLoggedIn.value) {
       return;
     }
