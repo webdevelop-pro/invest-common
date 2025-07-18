@@ -1,5 +1,5 @@
 import {
-  computed, ref, watch,
+  computed, nextTick, ref, watch,
 } from 'vue';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
@@ -30,7 +30,7 @@ export const useProfilesStore = defineStore('profiles', () => {
   const profileByIdInProfilesList = computed(() => (
     userProfiles.value.find((item) => item.id === selectedUserProfileId.value)));
   const selectedUserProfileData = computed(() => getProfileByIdState.value?.data || profileByIdInProfilesList.value);
-  const selectedUserProfileType = computed(() => userProfiles.value.find((item: { id: number; type: string }) => item.id === selectedUserProfileId.value)?.type || 'individual');
+  const selectedUserProfileType = computed(() => userProfiles.value.find((item: { id: number; type: string }) => item.id === selectedUserProfileId.value)?.type);
   const selectedUserIndividualProfile = computed(() => userProfiles.value.find((profile: { type: string }) => profile.type === 'individual'));
 
   const isSelectedProfileLoading = computed(() => (
@@ -122,9 +122,9 @@ export const useProfilesStore = defineStore('profiles', () => {
     }
   }, { immediate: true });
 
-  watch(() => [selectedUserProfileId.value, urlProfileId.value], () => {
+  watch(() => [selectedUserProfileId.value, urlProfileId.value, selectedUserProfileType.value], () => {
     if (userLoggedIn.value && isUrlProfileSameAsSelected.value && selectedUserProfileId.value
-      && (selectedUserProfileId.value > 0)) {
+      && selectedUserProfileType.value && (selectedUserProfileId.value > 0)) {
       useRepositoryProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
       useRepositoryProfilesStore.getProfileByIdOptions(selectedUserProfileType.value, selectedUserProfileId.value);
     }
