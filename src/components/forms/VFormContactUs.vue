@@ -9,8 +9,7 @@ import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import VFormTextarea from 'UiKit/components/Base/VForm/VFormTextarea.vue';
 import VFormSelect from 'UiKit/components/Base/VForm/VFormSelect.vue';
-import { useUsersStore } from 'InvestCommon/store/useUsers';
-import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import { storeToRefs } from 'pinia';
 import env from 'InvestCommon/global';
@@ -84,8 +83,8 @@ const SELECT_SUBJECT = [
 ];
 
 const { submitFormToHubspot } = useHubspotForm(env.HUBSPOT_FORM_ID_CONTACT_US);
-const usersStore = useUsersStore();
-const { userAccountData } = storeToRefs(usersStore);
+const userSessionStore = useSessionStore();
+const { userSessionTraits } = storeToRefs(userSessionStore);
 
 let model = reactive({
 } as FormModelContactUs);
@@ -105,15 +104,15 @@ watch(() => model, () => {
   if (!isValid.value) onValidate();
 }, { deep: true });
 
-watch(() => [userAccountData.value?.first_name, userAccountData.value?.last_name], () => {
-  if (userAccountData.value?.first_name || userAccountData.value?.last_name) {
-    model.name = `${userAccountData.value?.first_name} ${userAccountData.value?.last_name}`;
+watch(() => [userSessionTraits.value?.first_name, userSessionTraits.value?.last_name], () => {
+  if (userSessionTraits.value?.first_name || userSessionTraits.value?.last_name) {
+    model.name = `${userSessionTraits.value?.first_name} ${userSessionTraits.value?.last_name}`;
   }
 }, { deep: true, immediate: true });
 
-watch(() => userAccountData.value?.email, () => {
-  if (userAccountData.value?.email) {
-    model.email = userAccountData.value?.email || '';
+watch(() => userSessionTraits.value?.email, () => {
+  if (userSessionTraits.value?.email) {
+    model.email = userSessionTraits.value?.email || '';
   }
 }, { deep: true, immediate: true });
 

@@ -2,7 +2,7 @@ import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { computed, ref, nextTick } from 'vue';
 import { fetchGetWalletByProfile } from 'InvestCommon/services/api/evm';
 import { INotification } from 'InvestCommon/data/notifications/notifications.types';
-import { useUsersStore } from '../useUsers';
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 
 const STATUS_CREATED = 'created';
 const STATUS_ERROR = 'error';
@@ -14,8 +14,8 @@ const STATUS_ERROR_SUSPENDED = 'error_suspended';
 // account wallet data
 
 export const useProfileEvmWalletStore = defineStore('Evmwallet', () => {
-  const usersStore = useUsersStore();
-  const { selectedUserProfileId } = storeToRefs(usersStore);
+  const profilesStore = useProfilesStore();
+  const { selectedUserProfileId } = storeToRefs(profilesStore);
 
   const isGetEvmWalletByProfileIdLoading = ref(false);
   const getEvmWalletByProfileIdError = ref();

@@ -156,12 +156,12 @@ export const useUsersStore = defineStore('user', () => {
     return urlProfileId.value && userProfiles.value?.some((profile: { id: number }) => profile.id === Number(urlProfileId.value));
   });
 
-  watch(() => userLoggedIn.value, async () => {
-    if (userLoggedIn.value && !getUserState.value?.data && !getUserState.value?.loading) {
-      useRepositoryProfilesStore.getUser();
-      websocketsStore.webSocketHandler();
-    }
-  }, { immediate: true });
+  // watch(() => userLoggedIn.value, async () => {
+  //   if (userLoggedIn.value && !getUserState.value?.data && !getUserState.value?.loading) {
+  //     useRepositoryProfilesStore.getUser();
+  //     websocketsStore.webSocketHandler();
+  //   }
+  // }, { immediate: true });
 
   // watch(() => [selectedUserProfileId.value, urlProfileId.value], () => {
   //   if (userLoggedIn.value && isUrlProfileSameAsSelected.value && selectedUserProfileId.value
@@ -171,25 +171,25 @@ export const useUsersStore = defineStore('user', () => {
   //   }
   // }, { immediate: true });
 
-  watch(() => userProfiles.value[0]?.id, () => {
-    if (userLoggedIn.value
-      && (!selectedUserProfileId.value || selectedUserProfileId.value === 0) && (userProfiles.value[0]?.id > 0)) {
-      setSelectedUserProfileById(userProfiles.value[0]?.id);
-    }
-  }, { immediate: true });
+  // watch(() => userProfiles.value[0]?.id, () => {
+  //   if (userLoggedIn.value
+  //     && (!selectedUserProfileId.value || selectedUserProfileId.value === 0) && (userProfiles.value[0]?.id > 0)) {
+  //     setSelectedUserProfileById(userProfiles.value[0]?.id);
+  //   }
+  // }, { immediate: true });
 
-  watch(() => [urlProfileId.value, userProfiles.value[0]?.id], () => {
-    if (!isUrlProfileIdInProfiles.value && urlProfileId.value && userProfiles.value[0]?.id && (userProfiles.value[0]?.id > 0)) {
-      router.push({
-        name: router.currentRoute.value.name,
-        params: { profileId: selectedUserProfileId.value || userProfiles.value[0]?.id },
-        query: { ...router.currentRoute.value.query },
-      });
-    } else if (!isUrlProfileSameAsSelected.value && urlProfileId.value && isUrlProfileIdInProfiles.value
-        && (Number(urlProfileId.value) > 0)) {
-      setSelectedUserProfileById(Number(urlProfileId.value));
-    }
-  }, { immediate: true });
+  // watch(() => [urlProfileId.value, userProfiles.value[0]?.id], () => {
+  //   if (!isUrlProfileIdInProfiles.value && urlProfileId.value && userProfiles.value[0]?.id && (userProfiles.value[0]?.id > 0)) {
+  //     router.push({
+  //       name: router.currentRoute.value.name,
+  //       params: { profileId: selectedUserProfileId.value || userProfiles.value[0]?.id },
+  //       query: { ...router.currentRoute.value.query },
+  //     });
+  //   } else if (!isUrlProfileSameAsSelected.value && urlProfileId.value && isUrlProfileIdInProfiles.value
+  //       && (Number(urlProfileId.value) > 0)) {
+  //     setSelectedUserProfileById(Number(urlProfileId.value));
+  //   }
+  // }, { immediate: true });
 
   return {
     resetAll,

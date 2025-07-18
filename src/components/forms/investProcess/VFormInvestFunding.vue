@@ -8,7 +8,6 @@ import { useInvestmentsStore } from 'InvestCommon/store/useInvestments';
 import { useOfferStore } from 'InvestCommon/store/useOffer';
 import { useProfileWalletStore } from 'InvestCommon/store/useProfileWallet/useProfileWallet';
 import { useProfileEvmWalletStore } from 'InvestCommon/store/useProfileEvmWallet/useProfileEvmWallet';
-import { useUsersStore } from 'InvestCommon/store/useUsers';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import { ROUTE_INVEST_REVIEW, ROUTE_INVEST_SIGNATURE } from 'InvestCommon/helpers/enums/routes';
@@ -32,6 +31,7 @@ import { scrollToError } from 'UiKit/helpers/validation/general';
 import { urlOfferSingle } from 'InvestCommon/global/links';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 
 const SELECT_OPTIONS_FUNDING_TYPE = [
   {
@@ -78,10 +78,10 @@ const {
 
 const offerStore = useOfferStore();
 const { getUnconfirmedOfferData } = storeToRefs(offerStore);
-const usersStore = useUsersStore();
-const {
-  selectedUserProfileData, userAccountData, userLoggedIn, selectedUserProfileId,
-} = storeToRefs(usersStore);
+const profilesStore = useProfilesStore();
+const { selectedUserProfileData, selectedUserProfileId } = storeToRefs(profilesStore);
+const userSessionStore = useSessionStore();
+const { userSessionTraits, userLoggedIn } = storeToRefs(userSessionStore);
 
 const fundingSourceFormatted = computed(() => fundingSource.value?.map((item) => ({
   value: String(item.id),
@@ -196,7 +196,7 @@ const currentProps = computed(() => {
 
 const fundingAnalytics = (type: FundingTypes, options: object) => {
   submitFormToHubspot({
-    email: userAccountData.value?.email,
+    email: userSessionTraits.value?.email,
     funding_type: type,
     ...options,
   });

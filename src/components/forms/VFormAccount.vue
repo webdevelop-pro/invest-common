@@ -4,7 +4,6 @@ import {
   nextTick,
 } from 'vue';
 import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
-import { useUsersStore } from 'InvestCommon/store/useUsers';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
@@ -16,6 +15,7 @@ import env from 'InvestCommon/global';
 import VFormPartialAccount from './VFormPartialAccount.vue';
 import { ROUTE_SETTINGS_MFA } from 'InvestCommon/helpers/enums/routes';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 
 const { toast } = useToast();
 
@@ -29,8 +29,10 @@ const personalFormRef = useTemplateRef<FormChild>('personalFormChild');
 const router = useRouter();
 const userIdentityStore = useUserProfilesStore();
 const { isSetUserLoading, isSetUserError } = storeToRefs(userIdentityStore);
-const usersStore = useUsersStore();
-const { selectedUserProfileId, userAccountData } = storeToRefs(usersStore);
+const profilesStore = useProfilesStore();
+const { selectedUserProfileId } = storeToRefs(profilesStore);
+const userSessionStore = useSessionStore();
+const { userSessionTraits } = storeToRefs(userSessionStore);
 
 const { submitFormToHubspot } = useHubspotForm(env.HUBSPOT_FORM_ID_ACCOUNT);
 
@@ -72,7 +74,7 @@ const cancelHandler = () => {
     <div class="form-account__content">
       <VFormPartialAccount
         ref="personalFormChild"
-        :model-data="userAccountData"
+        :model-data="userSessionTraits"
       />
     </div>
     <div class="form-account__footer">

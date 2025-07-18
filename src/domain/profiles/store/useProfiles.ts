@@ -140,6 +140,7 @@ export const useProfilesStore = defineStore('profiles', () => {
     selectedUserIndividualProfile,
     selectedUserProfileShowKycInitForm,
     isTrustRevocable,
+    selectedUserProfileRiskAcknowledged,
 
     // Methods
     setSelectedUserProfileById,

@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import { computed, PropType } from 'vue';
-import { useUsersStore } from 'InvestCommon/store/useUsers';
-import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 import { storeToRefs } from 'pinia';
 import {
@@ -10,6 +8,7 @@ import {
 import VAvatar from 'UiKit/components/VAvatar.vue';
 import NotificationsSidebarButton from 'InvestCommon/features/notifications/VNotificationsSidebarButton.vue';
 import env from 'InvestCommon/global';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 
 const { IS_STATIC_SITE } = env;
 
@@ -27,12 +26,12 @@ defineProps({
 
 const emit = defineEmits(['click']);
 
-const usersStore = useUsersStore();
-const { userAccountData } = storeToRefs(usersStore);
+const userSessionStore = useSessionStore();
+const { userSessionTraits } = storeToRefs(userSessionStore);
 const useDialogsStore = useDialogs();
 const { isDialogLogoutOpen } = storeToRefs(useDialogsStore);
 
-const userEmail = computed(() => userAccountData.value?.email);
+const userEmail = computed(() => userSessionTraits.value?.email);
 
 const onClick = () => {
   emit('click');

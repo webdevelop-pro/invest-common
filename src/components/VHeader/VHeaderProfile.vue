@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import { computed, PropType } from 'vue';
-import { useUsersStore } from 'InvestCommon/store/useUsers';
-import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import VDropdown from 'UiKit/components/VDropdown.vue';
 import { storeToRefs } from 'pinia';
 import VAvatar from 'UiKit/components/VAvatar.vue';
@@ -10,6 +8,7 @@ import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import NotificationsSidebarButton from 'InvestCommon/features/notifications/VNotificationsSidebarButton.vue';
 import env from 'InvestCommon/global';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 
 const { IS_STATIC_SITE, FILER_URL } = env;
 
@@ -25,14 +24,14 @@ defineProps({
   menu: Array as PropType<MenuItem[]>,
 });
 
-const usersStore = useUsersStore();
-const { userAccountData } = storeToRefs(usersStore);
+const userSessionStore = useSessionStore();
+const { userSessionTraits } = storeToRefs(userSessionStore);
 const useDialogsStore = useDialogs();
 const { isDialogLogoutOpen } = storeToRefs(useDialogsStore);
 const userProfileStore = useUserProfilesStore();
 const { getUserData } = storeToRefs(userProfileStore);
 
-const userEmail = computed(() => userAccountData.value?.email);
+const userEmail = computed(() => userSessionTraits.value?.email);
 
 const onLogout = () => {
   isDialogLogoutOpen.value = true;

@@ -5,7 +5,6 @@ import { useWebSocket } from '@vueuse/core';
 import env from 'InvestCommon/global/index';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 import { useRepositoryNotifications } from 'InvestCommon/data/notifications/notifications.repository';
-import { useUsersStore } from 'InvestCommon/store/useUsers';
 import { useProfileWalletStore } from 'InvestCommon/store/useProfileWallet/useProfileWallet';
 import { useProfileWalletTransactionStore } from 'InvestCommon/store/useProfileWallet/useProfileWalletTransaction';
 import { useInvestmentsStore } from 'InvestCommon/store/useInvestments';

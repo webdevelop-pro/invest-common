@@ -1,9 +1,10 @@
 import {
   urlCheckEmail, urlForgot, urlProfilePortfolio, urlSignup,
 } from 'InvestCommon/global/links';
-import { useUsersStore } from 'InvestCommon/store/useUsers';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { storeToRefs } from 'pinia';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 
 // Utility functions for file path manipulation
 export function getFileNameByPath(path: string): string {
@@ -63,8 +64,10 @@ export function getLocationFullPath(location: Location = window.location): strin
 
 export const isRedirectToProfile = () => {
   const queryRedirect = new URLSearchParams(window.location.search).get('redirect');
-  const usersStore = useUsersStore();
-  const { selectedUserProfileId, userLoggedIn } = storeToRefs(usersStore);
+  const profilesStore = useProfilesStore();
+  const { selectedUserProfileId } = storeToRefs(profilesStore);
+  const userSessionStore = useSessionStore();
+  const { userLoggedIn } = storeToRefs(userSessionStore);
   if (!userLoggedIn.value) return;
   const urlToCheck = [urlSignup, urlForgot, urlCheckEmail];
   const url = window?.location.pathname;

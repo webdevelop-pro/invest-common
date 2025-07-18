@@ -3,8 +3,6 @@ import { computed, defineAsyncComponent, ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useInvestmentsStore } from 'InvestCommon/store/useInvestments';
 import { useOfferStore } from 'InvestCommon/store/useOffer';
-import { useUsersStore } from 'InvestCommon/store/useUsers';
-import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useHelloSign } from 'InvestCommon/composable/useHelloSign';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import {
@@ -18,6 +16,7 @@ import VBadge from 'UiKit/components/Base/VBadge/VBadge.vue';
 import arrowLeft from 'UiKit/assets/images/arrow-left.svg?component';
 import file from 'UiKit/assets/images/file.svg';
 import { urlTerms, urlPrivacy, urlOfferSingle } from 'InvestCommon/global/links';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 
 const VDialogDocument = defineAsyncComponent({
   loader: () => import('InvestCommon/components/dialogs/VDialogDocument.vue'),
@@ -26,8 +25,8 @@ const VDialogDocument = defineAsyncComponent({
 const { submitFormToHubspot } = useHubspotForm('745431ff-2fed-4567-91d7-54e1c3385844');
 const offerStore = useOfferStore();
 const { getUnconfirmedOfferData } = storeToRefs(offerStore);
-const usersStore = useUsersStore();
-const { userAccountData } = storeToRefs(usersStore);
+const userSessionStore = useSessionStore();
+const { userSessionTraits } = storeToRefs(userSessionStore);
 const {
   onClose, onSign, openHelloSign, closeHelloSign,
 } = useHelloSign();
@@ -62,7 +61,7 @@ const continueHandler = () => {
   });
 
   submitFormToHubspot({
-    email: userAccountData.value?.email,
+    email: userSessionTraits.value?.email,
     invest_checkbox_1: checkbox1.value,
     invest_checkbox_2: checkbox2.value,
     sign_id: signId.value,

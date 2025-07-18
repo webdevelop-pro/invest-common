@@ -8,7 +8,6 @@ import { IInvest } from 'InvestCommon/types/api/invest';
 import { PostLinkTypes } from 'InvestCommon/types/api/blog';
 import VFormTextarea from 'UiKit/components/Base/VForm/VFormTextarea.vue';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
-import { useUsersStore } from 'InvestCommon/store/useUsers';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useInvestmentsStore } from 'InvestCommon/store/useInvestments';
 import { useOfferStore } from 'InvestCommon/store/useOffer';
@@ -25,6 +24,7 @@ import {
   VDialogContent, VDialogFooter, VDialog, VDialogTitle,
   VDialogHeader,
 } from 'UiKit/components/Base/VDialog';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 
 const props = defineProps({
   investment: {
@@ -59,8 +59,10 @@ const investmentsStore = useInvestmentsStore();
 const {
   cancelInvestData, isCancelInvestLoading, setCancelOptionsData, setCancelErrorData,
 } = storeToRefs(investmentsStore);
-const usersStore = useUsersStore();
-const { userAccountData, selectedUserProfileId } = storeToRefs(usersStore);
+const profilesStore = useProfilesStore();
+const { selectedUserProfileId } = storeToRefs(profilesStore);
+const userSessionStore = useSessionStore();
+const { userSessionTraits } = storeToRefs(userSessionStore);
 
 let validator = new PrecompiledValidator<FormModel>(setCancelOptionsData.value, schema.value);
 const validation = ref<unknown>();
@@ -87,7 +89,7 @@ const cancelInvestHandler = async () => {
 
   if (cancelInvestData.value) {
     submitFormToHubspot({
-      email: userAccountData.value?.email,
+      email: userSessionTraits.value?.email,
       cancellation_reason: model.cancelation_reason,
       cancellation_offer_name: props.investment?.offer?.name,
       cancellation_offer_id: props.investment?.id,

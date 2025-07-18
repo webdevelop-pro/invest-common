@@ -5,7 +5,6 @@ import {
 import { useRouter, useRoute } from 'vue-router';
 import { useInvestmentsStore } from 'InvestCommon/store/useInvestments';
 import { useOfferStore } from 'InvestCommon/store/useOffer';
-import { useUsersStore } from 'InvestCommon/store/useUsers';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import { currency } from 'InvestCommon/helpers/currency';
@@ -24,6 +23,7 @@ import { isEmpty } from 'InvestCommon/helpers/general';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { scrollToError } from 'UiKit/helpers/validation/general';
 import { urlOfferSingle } from 'InvestCommon/global/links';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 
 const { submitFormToHubspot } = useHubspotForm('749740b1-d955-4158-b949-b68e13a59e5b');
 
@@ -36,8 +36,10 @@ const offerStore = useOfferStore();
 const {
   getUnconfirmedOfferData,
 } = storeToRefs(offerStore);
-const usersStore = useUsersStore();
-const { selectedUserProfileData, userAccountData } = storeToRefs(usersStore);
+const profilesStore = useProfilesStore();
+const { selectedUserProfileData } = storeToRefs(profilesStore);
+const userSessionStore = useSessionStore();
+const { userSessionTraits } = storeToRefs(userSessionStore);
 
 const router = useRouter();
 const route = useRoute();
@@ -114,7 +116,7 @@ const continueHandler = async () => {
     });
 
     submitFormToHubspot({
-      email: userAccountData.value?.email,
+      email: userSessionTraits.value?.email,
       shares_amount: sharesAmount.value,
       investment_amount: investmentAmount.value,
     });

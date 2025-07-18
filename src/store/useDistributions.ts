@@ -4,12 +4,12 @@ import { fetchGetDistributions } from 'InvestCommon/services/api/distributions';
 import { IDistributionsData, IDistributionsMeta } from 'InvestCommon/types/api/distributions';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { transformDistributionsData } from 'InvestCommon/helpers/transformInvestData';
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useOfferStore } from './useOffer';
-import { useUsersStore } from './useUsers';
 
 export const useDistributionsStore = defineStore('distributions', () => {
-  const usersStore = useUsersStore();
-  const { selectedUserProfileId } = storeToRefs(usersStore);
+  const profilesStore = useProfilesStore();
+  const { selectedUserProfileId } = storeToRefs(profilesStore);
 
   const isGetDistributionsLoading = ref(false);
   const isGetDistributionsError = ref(false);

@@ -3,7 +3,6 @@ import { currency } from 'InvestCommon/helpers/currency';
 import { formatToFullDate } from 'InvestCommon/helpers/formatters/formatToDate';
 import VBadge from 'UiKit/components/Base/VBadge/VBadge.vue';
 import { PropType, computed } from 'vue';
-import { useUsersStore } from 'InvestCommon/store/useUsers';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { storeToRefs } from 'pinia';
 import {
@@ -16,9 +15,8 @@ import { VTableCell, VTableRow } from 'UiKit/components/Base/VTable';
 import chevronDownIcon from 'UiKit/assets/images/chevron-down.svg';
 import VImage from 'UiKit/components/Base/VImage/VImage.vue';
 
-const userStore = useUsersStore();
 const profilesStore = useProfilesStore();
-const { selectedUserProfileData, selectedUserProfileId } = storeToRefs(userStore);
+const { selectedUserProfileId, selectedUserProfileData } = storeToRefs(profilesStore);
 
 const props = defineProps({
   item: {

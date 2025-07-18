@@ -23,15 +23,14 @@ import { isEmpty } from 'UiKit/helpers/general';
 import eyeOff from 'UiKit/assets/images/eye-off.svg';
 import eye from 'UiKit/assets/images/eye.svg';
 import { urlSettings } from 'InvestCommon/global/links';
-import { useUsersStore } from 'InvestCommon/store/useUsers';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 
 const authStore = useAuthStore();
 const { isSetPasswordLoading, setPasswordErrorData } = storeToRefs(authStore);
 const authLogicStore = useAuthLogicStore();
 const { loading } = storeToRefs(authStore);
-const usersStore = useUsersStore();
-const { selectedUserProfileId } = storeToRefs(usersStore);
+const profilesStore = useProfilesStore();
+const { selectedUserProfileId } = storeToRefs(profilesStore);
 
 const showCreatePassword = ref(true);
 const showRepeatPassword = ref(true);

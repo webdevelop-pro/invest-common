@@ -10,7 +10,7 @@ import { useRouter } from 'vue-router';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import env from 'InvestCommon/global';
 import { urlProfilePortfolio } from 'InvestCommon/global/links';
-import { useUsersStore } from './useUsers';
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 
 const { IS_STATIC_SITE } = env;
 
@@ -30,8 +30,8 @@ export interface IEventMetadata {
 // store with plaid function to create token
 
 export const usePlaidStore = defineStore('plaid', () => {
-  const usersStore = useUsersStore();
-  const { selectedUserProfileData, selectedUserProfileId } = storeToRefs(usersStore);
+  const profilesStore = useProfilesStore();
+  const { selectedUserProfileId, selectedUserProfileData } = storeToRefs(profilesStore);
   // const kycIdentitiesStore = useKYCIdentityStore();
 
   const createToken = async (profileId: number) => {

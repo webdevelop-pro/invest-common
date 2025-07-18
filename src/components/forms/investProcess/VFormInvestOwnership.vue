@@ -7,7 +7,6 @@ import {
 import { useRouter, useRoute } from 'vue-router';
 import { useInvestmentsStore } from 'InvestCommon/store/useInvestments';
 import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
-import { useUsersStore } from 'InvestCommon/store/useUsers';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import { ROUTE_INVEST_SIGNATURE, ROUTE_INVEST_AMOUNT } from 'InvestCommon/helpers/enums/routes';
@@ -62,11 +61,8 @@ const { setProfileState, getProfileByIdOptionsState } = storeToRefs(useRepositor
 const {
   setOwnershipData, isSetOwnershipLoading, isSetSignatureLoading, isSetOwnershipError,
 } = storeToRefs(investmentsStore);
-const usersStore = useUsersStore();
-const {
-  selectedUserProfileData, selectedUserProfileType,
-  selectedUserProfileId,
-} = storeToRefs(usersStore);
+const profilesStore = useProfilesStore();
+const { selectedUserProfileData, selectedUserProfileType, selectedUserProfileId } = storeToRefs(profilesStore);
 
 const isAlertShow = computed(() => (selectedUserProfileData.value?.kyc_status !== InvestKycTypes.approved));
 const isAlertText = computed(() => 'You need to pass KYC before you can make investment with this profile.');

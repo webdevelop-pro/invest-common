@@ -11,14 +11,14 @@ import {
 import { fetchGetInvestUnconfirmed, fetchGetInvestments } from 'InvestCommon/services/api/invest';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { INotification } from 'InvestCommon/data/notifications/notifications.types';
-import { useUsersStore } from './useUsers';
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 
 const unconfirmedOffersFilter = (unInv: IInvest[], slug: string, profileId: number | string) => (
   unInv.find((item) => item?.offer?.slug === slug && item?.profile_id === profileId));
 
 export const useOfferStore = defineStore('offers', () => {
-  const usersStore = useUsersStore();
-  const { selectedUserProfileId } = storeToRefs(usersStore);
+  const profilesStore = useProfilesStore();
+  const { selectedUserProfileId } = storeToRefs(profilesStore);
 
   const isGetOffersLoading = ref(false);
   const isGetOffersError = ref(false);

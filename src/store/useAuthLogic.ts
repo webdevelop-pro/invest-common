@@ -13,7 +13,7 @@ import {
   useAccreditationStore, useAuthStore, useFilerStore, useFundingStore, useInvestmentsStore,
   usePlaidStore,
   useProfileWalletStore, useProfileWalletTransactionStore, useUserProfilesStore,
-  useUsersStore, useGlobalLoader,
+  useGlobalLoader,
 } from 'InvestCommon/store';
 import env, { cookiesOptions } from 'InvestCommon/global/index';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
@@ -303,7 +303,6 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
     useProfileWalletTransactionStore().resetAll();
     useProfileWalletStore().resetAll();
     useUserProfilesStore().resetAll();
-    useUsersStore().resetAll();
     usePlaidStore().resetAll();
     useInvestmentsStore().resetAll();
     useAccreditationStore().resetAll();

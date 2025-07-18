@@ -2,8 +2,8 @@ import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { computed, ref, nextTick } from 'vue';
 import { fetchGetWalletByProfile } from 'InvestCommon/services/api/wallet';
 import { INotification } from 'InvestCommon/data/notifications/notifications.types';
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useProfileWalletBankAccountStore } from './useProfileWalletBankAccount';
-import { useUsersStore } from '../useUsers';
 import { IEventMetadata, IPlaidHandler } from '../usePlaid';
 
 const STATUS_CREATED = 'created';
@@ -16,8 +16,8 @@ const STATUS_ERROR_SUSPENDED = 'error_suspended';
 // account wallet data
 
 export const useProfileWalletStore = defineStore('wallet', () => {
-  const usersStore = useUsersStore();
-  const { selectedUserProfileData, selectedUserProfileId } = storeToRefs(usersStore);
+  const profilesStore = useProfilesStore();
+  const { selectedUserProfileId, selectedUserProfileData } = storeToRefs(profilesStore);
   const profileWalletBankAccountStore = useProfileWalletBankAccountStore();
   const {
     getLinkTokenAddAccountData, getLinkTokenAddAccountError,

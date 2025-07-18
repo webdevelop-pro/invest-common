@@ -1,8 +1,9 @@
 import { NavigationGuardNext, RouteLocationNormalized } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
+import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 
-export const redirectProfileIdGuard = (
+export const redirectProfileIdGuard = async (
   to: RouteLocationNormalized,
   from: RouteLocationNormalized,
   next: NavigationGuardNext,
@@ -14,6 +15,9 @@ export const redirectProfileIdGuard = (
 
   const profilesStore = useProfilesStore();
   const { userProfiles, selectedUserProfileId } = storeToRefs(profilesStore);
+  const useRepositoryProfilesStore = useRepositoryProfiles();
+
+  await useRepositoryProfilesStore.getUser();
   const urlProfileId = Number(to.params.profileId);
 
   // If no profile ID in URL, redirect to first profile

@@ -4,12 +4,12 @@ import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import env from 'InvestCommon/global';
 import { toasterErrorHandling } from 'InvestCommon/data/repository/error/toasterErrorHandling';
 import { createActionState } from 'InvestCommon/data/repository/repository';
-import { IKycTokenResponse } from './kyc.types';
-import { useUsersStore } from 'InvestCommon/store/useUsers';
 import { useRouter } from 'vue-router';
 import { ROUTE_DASHBOARD_PORTFOLIO } from 'InvestCommon/helpers/enums/routes';
 import { useRedirect } from 'InvestCommon/composable/useRedirect';
 import { urlProfilePortfolio } from 'InvestCommon/global/links';
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
+import { IKycTokenResponse } from './kyc.types';
 
 // Add Plaid window type
 declare global {
@@ -24,8 +24,8 @@ export const useRepositoryKyc = defineStore('repository-kyc', () => {
   // Dependencies
   const apiClient = new ApiClient();
   const { IS_STATIC_SITE, PLAID_URL } = env;
-  const usersStore = useUsersStore();
-  const { selectedUserProfileData, selectedUserProfileId } = storeToRefs(usersStore);
+  const profilesStore = useProfilesStore();
+  const { selectedUserProfileId, selectedUserProfileData } = storeToRefs(profilesStore);
 
   // State
   const kycToken = ref<IKycTokenResponse | null>(null);

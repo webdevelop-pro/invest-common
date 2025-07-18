@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { formatToDate } from 'InvestCommon/helpers/formatters/formatToDate';
 import {
-  PropType, computed, ref, onMounted,
+  PropType, computed, ref, onMounted, nextTick,
 } from 'vue';
 import VBadge from 'UiKit/components/Base/VBadge/VBadge.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
@@ -50,19 +50,23 @@ const initRouter = async () => {
   }
 };
 
-onMounted(() => {
-  initRouter();
-});
+// onMounted(() => {
+//   initRouter();
+// });
 
 const onButtonClick = async () => {
   await onMarkAsRead();
   notificationsStore.onSidebarToggle(false);
 
-  if (!isExternalLink.value) {
-    routerRef.value?.push(props.data?.buttonTo);
-  } else {
+  // if (!isExternalLink.value) {
+  //   routerRef.value?.push(props.data?.buttonTo);
+  // } else {
+  //   window.location.href = props.data?.buttonHref;
+  // }
+  nextTick(() => {
+    console.log(props.data?.buttonHref)
     window.location.href = props.data?.buttonHref;
-  }
+  });
 };
 
 const onMessageClick = () => {

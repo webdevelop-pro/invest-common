@@ -8,19 +8,18 @@ import { useAuthStore } from 'InvestCommon/store/useAuth';
 import { storeToRefs } from 'pinia';
 import { capitalizeFirstLetter } from 'UiKit/helpers/text';
 import checkIcon from 'UiKit/assets/images/circle-check.svg';
-import { useUsersStore } from 'InvestCommon/store/useUsers';
-import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 
 const authLogicStore = useAuthLogicStore();
-const usersStore = useUsersStore();
 const authStore = useAuthStore();
 const { getFlowData, setSettingsErrorData } = storeToRefs(authStore);
-const { userAccountSession } = storeToRefs(usersStore);
+const userSessionStore = useSessionStore();
+const { userSession } = storeToRefs(userSessionStore);
 
 const loadingProvider = ref();
 
 const oidcSocials = computed(() => getFlowData.value?.ui?.nodes?.filter((item) => item.group === 'oidc'));
-const loggedInSocial = computed(() => userAccountSession.value?.authentication_methods?.filter((item) => item?.method === 'oidc'));
+const loggedInSocial = computed(() => userSession.value?.authentication_methods?.filter((item) => item?.method === 'oidc'));
 
 const data = computed(() => {
   const res: any[] = [];

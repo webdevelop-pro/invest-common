@@ -4,7 +4,6 @@ import { useRoute, useRouter } from 'vue-router';
 import { useFundingStore } from 'InvestCommon/store/useFunding';
 import { useInvestmentsStore } from 'InvestCommon/store/useInvestments';
 import { useOfferStore } from 'InvestCommon/store/useOffer';
-import { useUsersStore } from 'InvestCommon/store/useUsers';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import { currency } from 'InvestCommon/helpers/currency';
@@ -18,6 +17,7 @@ import { storeToRefs } from 'pinia';
 import arrowLeft from 'UiKit/assets/images/arrow-left.svg';
 import { urlOfferSingle } from 'InvestCommon/global/links';
 import { useProfileWalletStore } from 'InvestCommon/store/useProfileWallet/useProfileWallet';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 
 const route = useRoute();
 const router = useRouter();
@@ -37,8 +37,10 @@ const {
 } = storeToRefs(fundingStore);
 const offerStore = useOfferStore();
 const { getUnconfirmedOfferData } = storeToRefs(offerStore);
-const usersStore = useUsersStore();
-const { selectedUserProfileData, userAccountData } = storeToRefs(usersStore);
+const profilesStore = useProfilesStore();
+const { selectedUserProfileData } = storeToRefs(profilesStore);
+const userSessionStore = useSessionStore();
+const { userSessionTraits } = storeToRefs(userSessionStore);
 
 const isBankExist = computed(() => getFundingData.value?.meta
   && getFundingData.value?.meta.bank
@@ -84,7 +86,7 @@ investmentsStore.$onAction(
             });
 
             submitFormToHubspot({
-              email: userAccountData.value?.email,
+              email: userSessionTraits.value?.email,
               investment_id: setReviewData.value?.investment.id,
               offer_name: getUnconfirmedOfferData.value?.offer?.name,
               offer_slug: getUnconfirmedOfferData.value?.offer?.slug,

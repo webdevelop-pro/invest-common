@@ -5,7 +5,6 @@ import { IInvest } from 'InvestCommon/types/api/invest';
 import VBadge from 'UiKit/components/Base/VBadge/VBadge.vue';
 import { PropType, computed } from 'vue';
 import { useOfferStore } from 'InvestCommon/store/useOffer';
-import { useUsersStore } from 'InvestCommon/store/useUsers';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { storeToRefs } from 'pinia';
 import {
@@ -18,9 +17,8 @@ import chevronDownIcon from 'UiKit/assets/images/chevron-down.svg';
 import VImage from 'UiKit/components/Base/VImage/VImage.vue';
 import { capitalizeFirstLetter } from 'UiKit/helpers/text';
 
-const userStore = useUsersStore();
 const profilesStore = useProfilesStore();
-const { selectedUserProfileData, selectedUserProfileId } = storeToRefs(userStore);
+const { selectedUserProfileId, selectedUserProfileData } = storeToRefs(profilesStore);
 const offerStore = useOfferStore();
 
 const props = defineProps({

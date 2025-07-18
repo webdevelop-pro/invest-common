@@ -2,7 +2,6 @@ export * from './useGlobalLoader';
 export * from './useAuth';
 export * from './useAuthLogic';
 export * from './useAccreditation';
-export * from './useUsers';
 export * from './useUserProfiles';
 export * from './usePlaid';
 export * from './useOffer';

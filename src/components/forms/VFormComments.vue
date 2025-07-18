@@ -3,8 +3,6 @@ import {
   ref, watch, computed, reactive, nextTick,
 } from 'vue';
 import { useOfferStore } from 'InvestCommon/store/useOffer';
-import { useUsersStore } from 'InvestCommon/store/useUsers';
-import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { IOfferCommentPayload } from 'InvestCommon/types/api/offers';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';

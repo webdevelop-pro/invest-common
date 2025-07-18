@@ -4,12 +4,9 @@ import {
   reactive, computed, PropType, ref, watch, nextTick,
 } from 'vue';
 import { useRouter } from 'vue-router';
-import { useUsersStore } from 'InvestCommon/store/useUsers';
-import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useProfileWalletTransactionStore } from 'InvestCommon/store/useProfileWallet/useProfileWalletTransaction';
 import { useProfileWalletStore } from 'InvestCommon/store/useProfileWallet/useProfileWallet';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
-import { ROUTE_DASHBOARD_WALLET } from 'InvestCommon/helpers/enums/routes';
 import { storeToRefs } from 'pinia';
 import { WalletAddTransactionTypes } from 'InvestCommon/types/api/wallet';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
@@ -35,8 +32,6 @@ const props = defineProps({
   },
 });
 
-const usersStore = useUsersStore();
-const { selectedUserProfileId } = storeToRefs(usersStore);
 const profileWalletStore = useProfileWalletStore();
 const { currentBalance, pendingOutcomingBalance, fundingSource } = storeToRefs(profileWalletStore);
 
