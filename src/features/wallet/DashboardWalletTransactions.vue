@@ -18,6 +18,10 @@ const props = defineProps({
     type: Boolean,
     required: true,
   },
+  isError: {
+    type: Boolean,
+    required: true,
+  },
 });
 
 const walletTransactionsStore = useWalletTransactions();
@@ -112,7 +116,7 @@ const VDialogWalletAddTransaction = defineAsyncComponent({
         class="investment-documents__table"
         size="small"
         :data="getTransactionsState?.data || []"
-        :loading="isSkeleton"
+        :loading="isSkeleton && !isError"
         :loading-row-length="5"
         :colspan="5"
       >

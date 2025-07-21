@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 import { capitalizeFirstLetter } from 'UiKit/helpers/text';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { ROUTE_CREATE_PROFILE } from 'InvestCommon/helpers/enums/routes';
+import { useProfileWalletStore } from 'InvestCommon/store/useProfileWallet/useProfileWallet';
 
 interface ISelectedProfile {
   text: string;
@@ -62,6 +63,7 @@ export const useProfileSelectStore = defineStore('profileSelect', () => {
       router.push({ name: ROUTE_CREATE_PROFILE });
     } else {
       userProfilesStore.setSelectedUserProfileById(id);
+      useProfileWalletStore().resetAll();
       router.push({ name: router.currentRoute.value.name, params: { profileId: id } });
     }
   };

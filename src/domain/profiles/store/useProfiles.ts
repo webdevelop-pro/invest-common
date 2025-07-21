@@ -29,8 +29,11 @@ export const useProfilesStore = defineStore('profiles', () => {
   const selectedUserProfileId = ref(cookies.get('selectedUserProfileId'));
   const profileByIdInProfilesList = computed(() => (
     userProfiles.value.find((item) => item.id === selectedUserProfileId.value)));
-  const selectedUserProfileData = computed(() => getProfileByIdState.value?.data || profileByIdInProfilesList.value);
-  const selectedUserProfileType = computed(() => userProfiles.value.find((item: { id: number; type: string }) => item.id === selectedUserProfileId.value)?.type);
+  const selectedUserProfileData = computed(() => (
+    { ...profileByIdInProfilesList.value, ...getProfileByIdState.value?.data }));
+  const selectedUserProfileType = computed(() => (
+    userProfiles.value.find((item: { id: number; type: string }) => (
+      item.id === Number(selectedUserProfileId.value)))?.type));
   const selectedUserIndividualProfile = computed(() => userProfiles.value.find((profile: { type: string }) => profile.type === 'individual'));
 
   const isSelectedProfileLoading = computed(() => (
@@ -88,7 +91,7 @@ export const useProfilesStore = defineStore('profiles', () => {
 
   const setSelectedUserProfileById = (id: number) => {
     console.log('selectedUserProfileId', id);
-    selectedUserProfileId.value = id;
+    selectedUserProfileId.value = Number(id);
     if (id === 0) return;
     cookies.set('selectedUserProfileId', id, cookiesOptions((new Date(userSession.value?.expires_at))));
   };
@@ -125,8 +128,8 @@ export const useProfilesStore = defineStore('profiles', () => {
     }
   }, { immediate: true });
 
-  watch(() => [selectedUserProfileId.value, urlProfileId.value, selectedUserProfileType.value], () => {
-    if (userLoggedIn.value && isUrlProfileSameAsSelected.value && selectedUserProfileId.value
+  watch(() => [selectedUserProfileId.value, selectedUserProfileType.value, isUrlProfileSameAsSelected.value], () => {
+    if (userLoggedIn.value && isUrlProfileSameAsSelected.value
       && selectedUserProfileType.value && (selectedUserProfileId.value > 0)) {
       useRepositoryProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
       useRepositoryProfilesStore.getProfileByIdOptions(selectedUserProfileType.value, selectedUserProfileId.value);
