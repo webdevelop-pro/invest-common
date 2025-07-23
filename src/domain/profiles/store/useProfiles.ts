@@ -1,5 +1,5 @@
 import {
-  computed, nextTick, ref, watch,
+  computed, ref, watch,
 } from 'vue';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
@@ -7,7 +7,6 @@ import env, { cookiesOptions } from 'InvestCommon/global/index';
 import { useCookies } from '@vueuse/integrations/useCookies';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
-import { useDomainWebSocketStore } from 'InvestCommon/domain/websockets/store/useWebsockets';
 import { PROFILE_TYPES } from 'InvestCommon/global/investment.json';
 
 const { IS_STATIC_SITE } = env;
@@ -18,7 +17,6 @@ export const useProfilesStore = defineStore('profiles', () => {
   const userSessionStore = useSessionStore();
   const { userSession, userLoggedIn } = storeToRefs(userSessionStore);
   const cookies = useCookies();
-  const websocketsStore = useDomainWebSocketStore();
 
   const useRepositoryProfilesStore = useRepositoryProfiles();
   const {
@@ -82,7 +80,6 @@ export const useProfilesStore = defineStore('profiles', () => {
     if (!getUserState.value?.data && !getUserState.value?.loading) {
       useRepositoryProfilesStore.getUser();
     }
-    websocketsStore.webSocketHandler();
   };
   // if user is logged in and profile is not loaded, load it - step 1
   watch(() => userLoggedIn.value, async () => {

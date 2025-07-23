@@ -6,6 +6,8 @@ import { urlSignin } from 'InvestCommon/global/links';
 import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
 import { resetAllData } from 'InvestCommon/domain/resetAllData';
 import env from 'InvestCommon/global';
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
+import { useDomainWebSocketStore } from 'InvestCommon/domain/websockets/store/useWebsockets';
 
 /**
  * Handles authentication and session management for route navigation
@@ -27,13 +29,17 @@ export const redirectAuthGuard = async (
   try {
     const userSessionStore = useSessionStore();
     const { userLoggedIn, userSession } = storeToRefs(userSessionStore);
+    const profilesStore = useProfilesStore();
+    const websocketsStore = useDomainWebSocketStore();
 
     // Handle unauthenticated user
     if (!userLoggedIn.value) {
       const session = await useRepositoryAuth().getSession();
 
       if (session) {
-        userSessionStore.updateSession(session);
+        await userSessionStore.updateSession(session);
+        profilesStore.init();
+        websocketsStore.webSocketHandler();
         return next();
       }
 

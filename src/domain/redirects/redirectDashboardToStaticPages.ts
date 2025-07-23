@@ -7,11 +7,26 @@ export const redirectDashboardToStaticPages = async (
   from: RouteLocationNormalized,
   next: NavigationGuardNext,
 ) => {
-  if (!to.meta.requiresAuth) {
-    // const href = `${env.FRONTEND_URL_STATIC}${to.path}`;
-    // navigateWithQueryParams(href, to.query);
-  } else {
-    next();
+  const redirectBasePaths: string[] = [
+    '/faq',
+    '/how-it-works',
+    '/resource-center',
+    '/offers',
+    '/signin',
+    '/signup',
+    '/forgot',
+    '/check-email',
+    '/contact-us',
+    '/legal/terms-of-use',
+    '/legal/privacy-policy',
+    '/legal/cookie',
+  ];
+  const isRedirectPath = redirectBasePaths.some((path) => ((to.path === path) || to.path.startsWith(`${path}/`)));
+  const isHome = to.path === '/';
+  // Check for exact match or dynamic paths under specified bases
+  if (isRedirectPath || isHome) {
+    const href = `${env.FRONTEND_URL_STATIC}${to.path}`;
+    navigateWithQueryParams(href, to.query);
   }
 };
 
