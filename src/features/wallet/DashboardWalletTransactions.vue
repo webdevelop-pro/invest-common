@@ -18,10 +18,7 @@ const props = defineProps({
     type: Boolean,
     required: true,
   },
-  isError: {
-    type: Boolean,
-    required: true,
-  },
+  isError: Boolean,
 });
 
 const walletTransactionsStore = useWalletTransactions();
@@ -33,9 +30,7 @@ const {
   isSkeleton,
   isCanWithdraw,
   isCanLoadFunds,
-  currentBalance,
-  pendingIncomingBalance,
-  pendingOutcomingBalance,
+  walletData,
   getTransactionsState,
 } = storeToRefs(walletTransactionsStore);
 
@@ -44,7 +39,7 @@ watch(() => [props.profileId, props.loggedIn], ([newProfileId, newLoggedIn]) => 
 }, { immediate: true });
 
 const VDialogWalletAddTransaction = defineAsyncComponent({
-  loader: () => import('InvestCommon/components/dialogs/VDialogWalletAddTransaction.vue'),
+  loader: () => import('./components/VDialogWalletAddTransaction.vue'),
 });
 </script>
 
@@ -57,13 +52,13 @@ const VDialogWalletAddTransaction = defineAsyncComponent({
         </div>
         <div class="dashboard-wallet-transactions__balance-numbers">
           <span class="dashboard-wallet-transactions__balance-current is--subheading-1">
-            {{ currency(currentBalance) }}
+            {{ currency(walletData?.currentBalance) }}
           </span>
           <span
             v-if="isShowIncomingBalance"
             class="dashboard-wallet-transactions__balance-incoming is--small"
           >
-            + {{ currency(pendingIncomingBalance) }}
+            + {{ currency(walletData?.pendingIncomingBalance) }}
           </span>
           <span v-if="isShowOutgoingBalance">|</span>
           <VTooltip
@@ -73,7 +68,7 @@ const VDialogWalletAddTransaction = defineAsyncComponent({
               v-if="isShowOutgoingBalance"
               class="dashboard-wallet-transactions__balance-outcoming is--small"
             >
-              - {{ currency(pendingOutcomingBalance) }}
+              - {{ currency(walletData?.pendingOutcomingBalance) }}
             </span>
             <template #content>
               Pending investment

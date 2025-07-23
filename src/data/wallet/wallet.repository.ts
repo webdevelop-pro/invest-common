@@ -6,14 +6,15 @@ import { toasterErrorHandling } from 'InvestCommon/data/repository/error/toaster
 import { createActionState } from 'InvestCommon/data/repository/repository';
 import { INotification } from 'InvestCommon/data/notifications/notifications.types';
 import { TransactionFormatter } from './formatter/transactions.formatter';
+import { WalletFormatter } from './formatter/wallet.formatter';
 import {
-  ITransactionDataResponse, IWalletDataResponse,
+  ITransactionDataResponse, IWalletDataFormatted, IWalletDataResponse,
 } from './wallet.types';
 
 export const useRepositoryWallet = defineStore('repository-wallet', () => {
   const apiClient = new ApiClient(env.WALLET_URL);
 
-  const getWalletState = createActionState<IWalletDataResponse>();
+  const getWalletState = createActionState<IWalletDataFormatted>();
   const getTransactionsState = createActionState<ITransactionDataResponse[]>();
   const addBankAccountState = createActionState<any>();
   const addTransactionState = createActionState<any>();
@@ -30,8 +31,9 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
       getWalletState.value.loading = true;
       getWalletState.value.error = null;
       const response = await apiClient.get<IWalletDataResponse>(`/auth/wallet/${profileId}`);
-      getWalletState.value.data = response.data;
-      return response.data;
+      const formatted = new WalletFormatter(response.data as any).format();
+      getWalletState.value.data = formatted;
+      return formatted;
     } catch (err) {
       getWalletState.value.error = err as Error;
       toasterErrorHandling(err, 'Failed to fetch wallet');
@@ -126,7 +128,7 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
     try {
       createLinkExchangeState.value.loading = true;
       createLinkExchangeState.value.error = null;
-      const response = await apiClient.post(`/auth/linkaccount/${profileId}/exchange`, JSON.parse(body));
+      const response = await apiClient.post(`/auth/linkaccount/${profileId}/exchange`, body);
       createLinkExchangeState.value.data = response.data;
       return response.data;
     } catch (err) {
@@ -142,7 +144,7 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
     try {
       createLinkProcessState.value.loading = true;
       createLinkProcessState.value.error = null;
-      const response = await apiClient.post(`/auth/linkaccount/${profileId}/process`, JSON.parse(body));
+      const response = await apiClient.post(`/auth/linkaccount/${profileId}/process`, body);
       createLinkProcessState.value.data = response.data;
       return response.data;
     } catch (err) {
@@ -158,7 +160,7 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
     try {
       deleteLinkedAccountState.value.loading = true;
       deleteLinkedAccountState.value.error = null;
-      const response = await apiClient.delete(`/auth/linkaccount/${profileId}`, JSON.parse(body));
+      const response = await apiClient.delete(`/auth/linkaccount/${profileId}`, body);
       deleteLinkedAccountState.value.data = response.data;
       return response.data;
     } catch (err) {
@@ -183,6 +185,17 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
         }
       }
       getTransactions(walletId.value);
+    } else if (notification.data.obj === 'wallet') {
+      let temp = getWalletState.value.data;
+      Object.assign(temp, notification.data.fields);
+      if (notification.data.fields?.inc_balance !== undefined) {
+        temp.pending_incoming_balance = notification.data.fields.inc_balance;
+      }
+      if (notification.data.fields?.out_balance !== undefined) {
+        temp.pending_outcoming_balance = notification.data.fields.out_balance;
+      }
+      const formatted = new WalletFormatter(temp as any).format();
+      getWalletState.value.data = formatted;
     }
   };
 

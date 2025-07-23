@@ -451,6 +451,7 @@ describe('useFormTrustedContact', () => {
       try {
         await store.handleSave();
       } catch (e) {
+        // ignore
       }
 
       expect(mockSetProfileById).toHaveBeenCalled();
@@ -469,6 +470,7 @@ describe('useFormTrustedContact', () => {
       try {
         await store.handleSave();
       } catch (e) {
+        // ignore
       }
 
       expect(mockSetProfileById).toHaveBeenCalled();
@@ -498,6 +500,7 @@ describe('useFormTrustedContact', () => {
       try {
         await store.handleSave();
       } catch (e) {
+        // ignore
       }
 
       expect(store.isLoading).toBe(false);

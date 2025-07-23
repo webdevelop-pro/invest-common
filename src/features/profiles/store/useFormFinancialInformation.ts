@@ -12,7 +12,6 @@ import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import { scrollToError } from 'UiKit/helpers/validation/general';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
-import { useRepositoryAccreditation } from 'InvestCommon/data/accreditation/accreditation.repository';
 
 export const useFormBackgroundInformation = defineStore('useFormBackgroundInformation', () => {
   const router = useRouter();
@@ -22,7 +21,6 @@ export const useFormBackgroundInformation = defineStore('useFormBackgroundInform
   const { setProfileByIdState, getProfileByIdOptionsState } = storeToRefs(useRepositoryProfilesStore);
   const userSessionStore = useSessionStore();
   const { userSessionTraits } = storeToRefs(userSessionStore);
-  const accreditationRepository = useRepositoryAccreditation();
 
   const backButtonText = ref('Back to Profile Details');
   const accountRoute = computed(() => (

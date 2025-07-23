@@ -5,8 +5,6 @@ import { useWebSocket } from '@vueuse/core';
 import env from 'InvestCommon/global/index';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 import { useRepositoryNotifications } from 'InvestCommon/data/notifications/notifications.repository';
-import { useProfileWalletStore } from 'InvestCommon/store/useProfileWallet/useProfileWallet';
-import { useProfileWalletTransactionStore } from 'InvestCommon/store/useProfileWallet/useProfileWalletTransaction';
 import { useInvestmentsStore } from 'InvestCommon/store/useInvestments';
 import { useOfferStore } from 'InvestCommon/store/useOffer';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
@@ -29,8 +27,7 @@ export const useDomainWebSocketStore = defineStore('domainWebsockets', () => {
   const handleInternalMessage = (notification: INotification) => {
     // TODO refactor to be more general
     if (notification.data.obj === 'profile') useRepositoryProfiles().updateNotificationData(notification);
-    if (notification.data.obj === 'wallet') useProfileWalletStore().updateNotificationData(notification);
-    if (notification.data.obj === 'transaction') useRepositoryWallet().updateNotificationData(notification);
+    if ((notification.data.obj === 'transaction') || (notification.data.obj === 'wallet')) useRepositoryWallet().updateNotificationData(notification);
     if (notification.data.obj === 'investment') {
       useInvestmentsStore().updateNotificationData(notification);
       useOfferStore().updateNotificationData(notification);

@@ -10,7 +10,7 @@ import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles
 import { useRouter } from 'vue-router';
 import env from 'InvestCommon/global';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
-import { scrollToError } from 'UiKit/helpers/validation/general';
+import { scrollToError, getFilteredObject } from 'UiKit/helpers/validation/general';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
@@ -20,7 +20,6 @@ import {
 } from 'UiKit/helpers/validation/rules';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { checkObjectAndDeleteNotRequiredFields } from 'InvestCommon/helpers/general';
-import { getFilteredObject } from 'UiKit/helpers/validation/general';
 
 export const useFormBackgroundInformation = defineStore('useFormBackgroundInformation', () => {
   const router = useRouter();

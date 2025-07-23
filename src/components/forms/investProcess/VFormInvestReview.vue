@@ -16,8 +16,8 @@ import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import { storeToRefs } from 'pinia';
 import arrowLeft from 'UiKit/assets/images/arrow-left.svg';
 import { urlOfferSingle } from 'InvestCommon/global/links';
-import { useProfileWalletStore } from 'InvestCommon/store/useProfileWallet/useProfileWallet';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
+import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository';
 
 const route = useRoute();
 const router = useRouter();
@@ -26,10 +26,9 @@ const { slug, id, profileId } = route.params;
 const investmentsStore = useInvestmentsStore();
 const { setReviewData, isSetReviewLoading } = storeToRefs(investmentsStore);
 const { submitFormToHubspot } = useHubspotForm('23d573ec-3714-4fdb-97c2-a3b688d5008f');
-const profileWalletStore = useProfileWalletStore();
-const {
-  fundingSource,
-} = storeToRefs(profileWalletStore);
+const walletRepository = useRepositoryWallet();
+const { getWalletState } = storeToRefs(walletRepository);
+const fundingSource = computed(() => getWalletState.value.data?.funding_source || []);
 
 const fundingStore = useFundingStore();
 const {
@@ -102,7 +101,7 @@ investmentsStore.$onAction(
 
 watch(() => fundingSourceId.value, () => {
   if (fundingSourceId.value > 0) {
-    profileWalletStore.getWalletByProfileId(profileId);
+    walletRepository.getWalletByProfile(profileId);
   }
 }, { immediate: true });
 </script>

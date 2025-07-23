@@ -7,12 +7,11 @@ const kycThirdPartyStore = useKycThirdParty();
 useGlobalLoader().hide();
 onMounted(() => {
   kycThirdPartyStore.handlePlaidKycThirdParty();
-})
+});
 </script>
 
 <template>
-  <div class="ViewKYCThirdParty view-kyc-third-party is--page">
-  </div>
+  <div class="ViewKYCThirdParty view-kyc-third-party is--page" />
 </template>
 
 <style lang="scss">

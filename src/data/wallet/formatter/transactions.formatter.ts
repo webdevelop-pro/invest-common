@@ -21,11 +21,6 @@ const getTimeFormat = (fullDate: string) => {
   return `${hours}:${minutes}`;
 };
 
-const getTableCurrencyFormat = (item: ITransactionDataFormatted) => {
-  if (item.isTypeDeposit) return `+ ${currency(Number(item.amount), 0)}`;
-  return `- ${currency(Number(item.amount), 0)}`;
-};
-
 export class TransactionFormatter {
   private transaction: ITransactionDataFormatted;
 
@@ -47,16 +42,21 @@ export class TransactionFormatter {
     return null;
   }
 
+  get tableCurrencyFormat() {
+    if (this.isTypeDeposit) return `+ ${currency(Number(this.transaction.amount), 0)}`;
+    return `- ${currency(Number(this.transaction.amount), 0)}`;
+  }
+
   format(): ITransactionDataFormatted {
     return {
       ...this.transaction,
-      amountFormatted: getTableCurrencyFormat(this.transaction),
       submited_at_date: formatToFullDate(new Date(this.transaction.created_at || '').toISOString()),
       submited_at_time: getTimeFormat(this.transaction.created_at),
       updated_at_date: formatToFullDate(new Date(this.transaction.updated_at || '').toISOString()),
       updated_at_time: getTimeFormat(this.transaction.updated_at),
       isTypeDeposit: this.isTypeDeposit,
       isTypeInvestment: this.isTypeInvestment,
+      amountFormatted: this.tableCurrencyFormat,
       tagColor: this.tagBackground,
       statusFormated: {
         text: FundingStatuses[this.transaction.status]?.text,

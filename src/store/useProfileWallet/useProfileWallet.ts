@@ -107,6 +107,12 @@ export const useProfileWalletStore = defineStore('wallet', () => {
   const isLinkBankAccountLoading = ref(false);
   const isAddBankAccountError = computed(() => (
     getLinkTokenAddAccountError.value || linkTokenExchangeError.value || linkTokenProcessError.value));
+
+  // SKELETON STATE FOR UI
+  const isSkeleton = computed(() => (
+    isGetWalletByProfileIdLoading.value || !fundingSource.value || fundingSource.value.length === 0
+  ));
+
   const handleLinkBankAccount = async () => {
     isLinkBankAccountLoading.value = true;
     if (!getLinkTokenAddAccountData.value?.link_token) {
@@ -154,6 +160,12 @@ export const useProfileWalletStore = defineStore('wallet', () => {
     });
     await profileWalletBankAccountStore.deleteAccount(selectedUserProfileId.value, body);
     getWalletByProfileId(selectedUserProfileId.value);
+  };
+
+  // New: handle delete with loading check
+  const handleDeleteBankAccount = async (sourceId: string | number) => {
+    if (profileWalletBankAccountStore.isDeleteAccountLoading) return;
+    await deleteLinkedBankAccount(sourceId);
   };
 
   // BALANCE
@@ -237,6 +249,8 @@ export const useProfileWalletStore = defineStore('wallet', () => {
     isAddBankAccountError,
     handleDeleteAccount,
     isDeleteAccountLoading,
+    isSkeleton,
+    handleDeleteBankAccount,
   };
 });
 

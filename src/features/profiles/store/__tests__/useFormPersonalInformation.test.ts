@@ -89,7 +89,6 @@ describe('useFormPersonalInformation', () => {
   let mockRouter: any;
   let mockProfilesStore: any;
   let mockRepositoryProfiles: any;
-  let mockSessionStore: any;
   let mockAccreditationRepository: any;
   let mockHubspotForm: any;
   let mockScrollToError: any;

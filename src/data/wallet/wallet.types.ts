@@ -70,6 +70,13 @@ export interface IWalletDataFormatted {
   isWalletStatusErrorDocument: boolean;
   isWalletStatusErrorPending: boolean;
   isWalletStatusErrorSuspended: boolean;
+  isWalletStatusAnyError: boolean;
+  currentBalance: number;
+  pendingIncomingBalance: number;
+  pendingOutcomingBalance: number;
+  totalBalance: number;
+  isCurrentBalanceZero: boolean;
+  isTotalBalanceZero: boolean;
 }
 
 export interface ITransactionDataResponse {

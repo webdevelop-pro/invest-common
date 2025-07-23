@@ -1,6 +1,5 @@
 import { ref, computed, watch } from 'vue';
 import { defineStore, storeToRefs, acceptHMRUpdate } from 'pinia';
-import { useProfileWalletStore } from 'InvestCommon/store/useProfileWallet/useProfileWallet';
 import { WalletAddTransactionTypes } from 'InvestCommon/data/wallet/wallet.types';
 import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository';
 
@@ -10,26 +9,28 @@ export const useWalletTransactions = defineStore('useWalletTransactions', () => 
   const loggedIn = ref<boolean>(false);
 
   // Stores
-  const profileWalletStore = useProfileWalletStore();
-  const {
-    isCanWithdraw, isCanLoadFunds, currentBalance, pendingIncomingBalance,
-    pendingOutcomingBalance, isGetWalletByProfileIdLoading, walletId,
-  } = storeToRefs(profileWalletStore);
   const walletRepository = useRepositoryWallet();
-  const { getTransactionsState } = storeToRefs(walletRepository);
+  const { getTransactionsState, getWalletState, walletId } = storeToRefs(walletRepository);
 
   // Dialog state
   const isDialogAddTransactionOpen = ref(false);
   const addTransactiontTransactionType = ref(WalletAddTransactionTypes.deposit);
+  const walletData = computed(() => getWalletState.value.data);
 
   // Computed
-  const isShowIncomingBalance = computed(() => (pendingIncomingBalance.value > 0));
-  const isShowOutgoingBalance = computed(() => (pendingOutcomingBalance.value > 0));
+  const isShowIncomingBalance = computed(() => (
+    (walletData.value?.pendingIncomingBalance ?? 0) > 0
+  ));
+  const isShowOutgoingBalance = computed(() => (
+    (walletData.value?.pendingOutcomingBalance ?? 0) > 0
+  ));
   const isLoading = ref(true);
+  const isCanLoadFunds = computed(() => (walletData.value?.isSomeLinkedBankAccount && !walletData.value?.isWalletStatusAnyError));
+  const isCanWithdraw = computed(() => walletData.value?.isSomeLinkedBankAccount && !walletData.value?.isCurrentBalanceZero);
 
   // Watch for notification changes to update loading state
-  watch(() => [getTransactionsState.value.loading, isGetWalletByProfileIdLoading.value], () => {
-    const loadingResult = getTransactionsState.value.loading || isGetWalletByProfileIdLoading.value;
+  watch(() => [getTransactionsState.value.loading, getWalletState.value.loading], () => {
+    const loadingResult = getTransactionsState.value.loading || getWalletState.value.loading;
     if (loadingResult) {
       isLoading.value = true;
     } else {
@@ -67,18 +68,14 @@ export const useWalletTransactions = defineStore('useWalletTransactions', () => 
     // State
     isDialogAddTransactionOpen,
     addTransactiontTransactionType,
-    profileId,
-    loggedIn,
     // Computed
     isShowIncomingBalance,
     isShowOutgoingBalance,
     isSkeleton,
     // Store refs
-    isCanWithdraw,
+    walletData,
     isCanLoadFunds,
-    currentBalance,
-    pendingIncomingBalance,
-    pendingOutcomingBalance,
+    isCanWithdraw,
     getTransactionsState,
     // Actions
     onWithdrawClick,
@@ -89,4 +86,4 @@ export const useWalletTransactions = defineStore('useWalletTransactions', () => 
 
 if (import.meta.hot) {
   import.meta.hot.accept(acceptHMRUpdate(useWalletTransactions, import.meta.hot));
-} 
+}

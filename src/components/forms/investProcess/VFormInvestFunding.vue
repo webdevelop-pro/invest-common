@@ -6,7 +6,6 @@ import {
 import { useRouter, useRoute } from 'vue-router';
 import { useInvestmentsStore } from 'InvestCommon/store/useInvestments';
 import { useOfferStore } from 'InvestCommon/store/useOffer';
-import { useProfileWalletStore } from 'InvestCommon/store/useProfileWallet/useProfileWallet';
 import { useProfileEvmWalletStore } from 'InvestCommon/store/useProfileEvmWallet/useProfileEvmWallet';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
@@ -32,6 +31,7 @@ import { urlOfferSingle } from 'InvestCommon/global/links';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
+import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository';
 
 const SELECT_OPTIONS_FUNDING_TYPE = [
   {
@@ -67,10 +67,11 @@ const {
   setFundingData, isSetFundingLoading, setFundingOptionsData, setFundingErrorData,
 } = storeToRefs(investmentsStore);
 const { submitFormToHubspot } = useHubspotForm('b27d194e-cbab-4c53-9d60-1065be6425be');
-const profileWalletStore = useProfileWalletStore();
-const {
-  isWalletStatusAnyError, isTotalBalanceZero, walletId, fundingSource,
-} = storeToRefs(profileWalletStore);
+
+const walletRepository = useRepositoryWallet();
+const { getWalletState, addTransactionState, walletId } = storeToRefs(walletRepository);
+const fundingSource = computed(() => getWalletState.value.data?.funding_source || []);
+
 const profileEvmWalletStore = useProfileEvmWalletStore();
 const {
   isEvmWalletStatusAnyError, isEvmTotalBalanceZero, evmWalletId, evmBalances,
@@ -91,8 +92,8 @@ const fundingSourceFormatted = computed(() => fundingSource.value?.map((item) =>
 const SELECT_OPTIONS_FUNDING_TYPE_WITH_WALLET = computed(() => ([
   {
     value: FundingTypes.wallet,
-    text: `Wallet (${currency(profileWalletStore.totalBalance)})`,
-    disabled: isTotalBalanceZero.value,
+    text: `Wallet (${currency(getWalletState.value.data?.totalBalance)})`,
+    disabled: getWalletState.value.data?.isTotalBalanceZero,
   },
 ]));
 const SELECT_OPTIONS_FUNDING_TYPE_WITH_CRYPTO_WALLET = computed(() => ([
@@ -125,9 +126,9 @@ const componentData = ref({
   accountNumber: '',
   routingNumber: '',
 });
-const hasWallet = computed(() => ((walletId.value > 0) && !isWalletStatusAnyError.value));
+const hasWallet = computed(() => ((walletId.value > 0) && !getWalletState.value.data?.isWalletStatusAnyError));
 const notEnoughWalletFunds = computed(() => (
-  (getUnconfirmedOfferData.value?.amount || 0) > profileWalletStore.totalBalance));
+  (getUnconfirmedOfferData.value?.amount || 0) > getWalletState.value.data?.totalBalance));
 
 const hasEvmWallet = computed(() => ((evmWalletId.value > 0) && !isEvmWalletStatusAnyError.value));
 const notEnoughEvmWalletFunds = computed(() => (
@@ -277,7 +278,7 @@ watch(() => model, () => {
 
 onBeforeMount(() => {
   if (userLoggedIn.value) {
-    profileWalletStore.getWalletByProfileId(selectedUserProfileId.value);
+    walletRepository.getWalletByProfile(selectedUserProfileId.value);
     profileEvmWalletStore.getEvmWalletByProfileId(selectedUserProfileId.value);
   }
 });

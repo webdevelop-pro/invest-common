@@ -291,6 +291,7 @@ describe('useFormFinancialInformation', () => {
       try {
         await store.handleSave();
       } catch (e) {
+        // ignore
       }
 
       expect(mockRepositoryProfiles.setProfileById).toHaveBeenCalled();
@@ -307,6 +308,7 @@ describe('useFormFinancialInformation', () => {
       try {
         await store.handleSave();
       } catch (e) {
+        // ignore
       }
 
       expect(mockRepositoryProfiles.setProfileById).toHaveBeenCalled();
@@ -322,6 +324,7 @@ describe('useFormFinancialInformation', () => {
       try {
         await store.handleSave();
       } catch (e) {
+        // ignore
       }
 
       expect(store.isLoading).toBe(false);

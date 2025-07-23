@@ -71,7 +71,8 @@ export const useVFormPartialBusinessController = (
     $ref: '#/definitions/Entity',
   } as unknown as JSONSchemaType<FormModelBusinessController>;
 
-  const schemaBackendLocal = computed(() => (schemaBackend.value ? structuredClone(toRaw(schemaBackend.value)) : undefined));
+  const schemaBackendLocal = computed(() => (
+    schemaBackend.value ? structuredClone(toRaw(schemaBackend.value)) : undefined));
 
   const {
     model,

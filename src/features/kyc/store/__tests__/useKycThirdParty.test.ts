@@ -1,4 +1,6 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import {
+  describe, it, expect, vi, beforeEach, afterEach,
+} from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
 import { useKycThirdParty } from '../useKycThirdParty';
 
@@ -34,9 +36,7 @@ describe('useKycThirdParty', () => {
       })),
     };
     scriptEl = { setAttribute: vi.fn(), onload: null, tagName: 'SCRIPT' };
-    vi.spyOn(document, 'createElement').mockImplementation((tag) => {
-      return tag === 'script' ? scriptEl : document.createElement(tag);
-    });
+    vi.spyOn(document, 'createElement').mockImplementation((tag) => (tag === 'script' ? scriptEl : document.createElement(tag)));
     vi.spyOn(document.head, 'appendChild').mockImplementation((el: any) => el);
     store = useKycThirdParty();
   });
@@ -57,7 +57,7 @@ describe('useKycThirdParty', () => {
     expect(document.createElement).toHaveBeenCalledWith('script');
     expect(document.head.appendChild).toHaveBeenCalled();
     expect(window.Plaid.create).toHaveBeenCalledWith(
-      expect.objectContaining({ token: 'test-token' })
+      expect.objectContaining({ token: 'test-token' }),
     );
   });
 
@@ -71,7 +71,7 @@ describe('useKycThirdParty', () => {
         title: 'Thank you for completing KYC',
         description: 'Your KYC process is now complete.',
         variant: 'info',
-      })
+      }),
     );
   });
 
@@ -81,4 +81,4 @@ describe('useKycThirdParty', () => {
     const handlerArgs = (window.Plaid.create as any).mock.calls[0][0];
     expect(() => handlerArgs.onExit('err', { meta: 1 })).not.toThrow();
   });
-}); 
+});

@@ -37,79 +37,71 @@ export function useVFormPartialBeneficialOwnership(
   loading: ComputedRef<boolean>,
   trust: ComputedRef<boolean>,
 ) {
-  const getSchema = () => {
-    // const requireBusinessController = [...requiredDefault];
-    const requireIdentification = [];
-    // if (!non_us) requireBusinessController.push('ssn');
-    // if (non_us) {
-    //   requireIdentification.push('id_number');
-    //   requireIdentification.push('country');
-    // }
-    return ({
-      $schema: 'http://json-schema.org/draft-07/schema#',
-      definitions: {
-        BusinessController: {
-          properties: {
-            first_name: firstNameRule,
-            last_name: lastNameRule,
-            address1: address1Rule,
-            dob: dobRule,
-            city: cityRule,
-            state: stateRule,
-            zip_code: zipRule,
-            country: countryRuleObject,
-            phone: phoneRule,
-            email: emailRule,
-            non_us: { type: 'boolean' },
-            ssn: ssnRule,
-          },
-          required: requiredDefault,
-          if: { properties: { non_us: { const: false } } },
-          then: { required: ['ssn'] },
+  const getSchema = () => ({
+    $schema: 'http://json-schema.org/draft-07/schema#',
+    definitions: {
+      BusinessController: {
+        properties: {
+          first_name: firstNameRule,
+          last_name: lastNameRule,
+          address1: address1Rule,
+          dob: dobRule,
+          city: cityRule,
+          state: stateRule,
+          zip_code: zipRule,
+          country: countryRuleObject,
+          phone: phoneRule,
+          email: emailRule,
+          non_us: { type: 'boolean' },
+          ssn: ssnRule,
         },
-        Identification: {
-          allOf: [
-            {
-              if: { properties: { non_us: { const: true } } },
-              then: { required: ['id_number', 'country'] },
-            },
-          ],
-          // required: ['id_number', 'country'],
-        },
-        Entity: {
-          properties: {
-            beneficials: {
-              items: {
-                type: 'object',
-                $ref: '#/definitions/BusinessController',
-              },
-            },
-            beneficial_owners_number: {},
-          },
-          type: 'object',
-          errorMessage: errorMessageRule,
-          required: ['beneficial_owners_number'],
-        },
-        Trust: {
-          properties: {
-            beneficials: {
-              items: {
-                type: 'object',
-                $ref: '#/definitions/BusinessController',
-              },
-            },
-            beneficial_owners_number: {},
-          },
-          type: 'object',
-          errorMessage: errorMessageRule,
-          required: ['beneficial_owners_number'],
-        },
+        required: requiredDefault,
+        if: { properties: { non_us: { const: false } } },
+        then: { required: ['ssn'] },
       },
-      $ref: trust.value ? '#/definitions/Trust' : '#/definitions/Entity',
-    } as unknown as JSONSchemaType<FormModelBeneficialOwnership>);
-  };
+      Identification: {
+        allOf: [
+          {
+            if: { properties: { non_us: { const: true } } },
+            then: { required: ['id_number', 'country'] },
+          },
+        ],
+        // required: ['id_number', 'country'],
+      },
+      Entity: {
+        properties: {
+          beneficials: {
+            items: {
+              type: 'object',
+              $ref: '#/definitions/BusinessController',
+            },
+          },
+          beneficial_owners_number: {},
+        },
+        type: 'object',
+        errorMessage: errorMessageRule,
+        required: ['beneficial_owners_number'],
+      },
+      Trust: {
+        properties: {
+          beneficials: {
+            items: {
+              type: 'object',
+              $ref: '#/definitions/BusinessController',
+            },
+          },
+          beneficial_owners_number: {},
+        },
+        type: 'object',
+        errorMessage: errorMessageRule,
+        required: ['beneficial_owners_number'],
+      },
+    },
+    $ref: trust.value ? '#/definitions/Trust' : '#/definitions/Entity',
+  } as unknown as JSONSchemaType<FormModelBeneficialOwnership>);
 
-  const schemaBackendLocal = computed(() => (schemaBackend.value ? structuredClone(toRaw(schemaBackend.value)) : undefined));
+  const schemaBackendLocal = computed(() => (
+    schemaBackend.value ? structuredClone(toRaw(schemaBackend.value)) : undefined));
 
   const {
     model,

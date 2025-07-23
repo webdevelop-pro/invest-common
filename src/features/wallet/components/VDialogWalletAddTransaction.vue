@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import FormWalletAddTransaction from 'InvestCommon/components/forms/VFormWalletAddTransaction.vue';
+import FormWalletAddTransaction from './VFormWalletAddTransaction.vue';
 import { WalletAddTransactionTypes } from 'InvestCommon/types/api/wallet';
-import { PropType, ref, watch } from 'vue';
+import { computed, PropType, ref } from 'vue';
 import {
   VDialogContent, VDialog,
   VDialogHeader,
@@ -17,7 +17,7 @@ const props = defineProps({
 });
 
 const isTypeDeposit = ref((props.transactionType === WalletAddTransactionTypes.deposit));
-const titile = ref((isTypeDeposit.value ? 'Add Funds' : 'Withdraw'));
+const titile = computed(() => (isTypeDeposit.value ? 'Add Funds' : 'Withdraw'));
 </script>
 
 <template>
