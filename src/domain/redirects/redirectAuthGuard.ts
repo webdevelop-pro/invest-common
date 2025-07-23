@@ -8,6 +8,7 @@ import { resetAllData } from 'InvestCommon/domain/resetAllData';
 import env from 'InvestCommon/global';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useDomainWebSocketStore } from 'InvestCommon/domain/websockets/store/useWebsockets';
+import { ISession } from 'InvestCommon/types/api/auth';
 
 /**
  * Handles authentication and session management for route navigation
@@ -23,8 +24,6 @@ import { useDomainWebSocketStore } from 'InvestCommon/domain/websockets/store/us
  */
 export const redirectAuthGuard = async (
   to: RouteLocationNormalized,
-  from: RouteLocationNormalized,
-  next: NavigationGuardNext,
 ): Promise<void> => {
   try {
     const userSessionStore = useSessionStore();
@@ -32,35 +31,40 @@ export const redirectAuthGuard = async (
     const profilesStore = useProfilesStore();
     const websocketsStore = useDomainWebSocketStore();
 
-    // Handle unauthenticated user
-    if (!userLoggedIn.value) {
-      const session = await useRepositoryAuth().getSession();
+    // Helper for redirecting to signin
+    const redirectToSignin = () => {
+      resetAllData();
+      const redirectUrl = `${env.FRONTEND_URL}${to.fullPath}`;
+      navigateWithQueryParams(urlSignin, { redirect: redirectUrl });
+    };
 
-      if (session) {
+    // Not logged in: try to get session from server
+    if (!userLoggedIn.value) {
+      const session = (await useRepositoryAuth().getSession()) as ISession | null;
+
+      if (session?.active) {
         await userSessionStore.updateSession(session);
         profilesStore.init();
-        websocketsStore.webSocketHandler();
-        return next();
+        return;
       }
 
-      if (!session?.active && to.meta.requiresAuth) {
-        resetAllData();
-        const redirectUrl = `${env.FRONTEND_URL}${to.fullPath}`;
-        return navigateWithQueryParams(urlSignin, { redirect: redirectUrl });
+      if (to.meta.requiresAuth) {
+        redirectToSignin();
       }
-
-      return next();
+      return;
     }
 
-    // Handle authenticated user
+    // Logged in but session missing: reset all data
     if (!userSession.value) {
       resetAllData();
+      return;
     }
 
-    return next();
+    // Authenticated and session present: allow navigation
+    return;
   } catch (error) {
     console.error('Auth guard error:', error);
     resetAllData();
-    return next(false);
+    return;
   }
 };

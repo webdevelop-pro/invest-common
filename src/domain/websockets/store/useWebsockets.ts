@@ -24,34 +24,56 @@ export const useDomainWebSocketStore = defineStore('domainWebsockets', () => {
   const userSessionStore = useSessionStore();
   const { userLoggedIn } = storeToRefs(userSessionStore);
 
+  // Instantiate stores/repositories once
+  const repositoryProfiles = useRepositoryProfiles();
+  const repositoryWallet = useRepositoryWallet();
+  const repositoryNotifications = useRepositoryNotifications();
+  const investmentsStore = useInvestmentsStore();
+  const offerStore = useOfferStore();
+
   const handleInternalMessage = (notification: INotification) => {
-    // TODO refactor to be more general
-    if (notification.data.obj === 'profile') useRepositoryProfiles().updateNotificationData(notification);
-    if ((notification.data.obj === 'transaction') || (notification.data.obj === 'wallet')) useRepositoryWallet().updateNotificationData(notification);
-    if (notification.data.obj === 'investment') {
-      useInvestmentsStore().updateNotificationData(notification);
-      useOfferStore().updateNotificationData(notification);
-    }
-    if (notification.data.obj === 'offer') {
-      useOfferStore().updateNotificationData(notification);
+    switch (notification.data.obj) {
+      case 'profile':
+        repositoryProfiles.updateNotificationData(notification);
+        break;
+      case 'transaction':
+      case 'wallet':
+        repositoryWallet.updateNotificationData(notification);
+        break;
+      case 'investment':
+        investmentsStore.updateNotificationData(notification);
+        offerStore.updateNotificationData(notification);
+        break;
+      case 'offer':
+        offerStore.updateNotificationData(notification);
+        break;
+      default:
+        // Optionally handle unknown types
+        break;
     }
   };
 
   const handleMessage = (data: string) => {
+    if (!data) return;
     console.log(`ws message: ${data}`);
     if (data === 'pong') return;
-    useRepositoryNotifications().updateNotificationsData(data);
-    const notification = JSON.parse(data) as INotification;
-    if (notification.type === 'internal') handleInternalMessage(notification);
+    repositoryNotifications.updateNotificationsData(data);
+    try {
+      const notification = JSON.parse(data) as INotification;
+      if (notification.type === 'internal') handleInternalMessage(notification);
+    } catch (e) {
+      console.error('Failed to parse WebSocket message:', e);
+    }
   };
 
-  const webSocketHandler = async () => {
+  const webSocketHandler = async (): Promise<void> => {
     console.log('webSocketHandler called');
     if (!userLoggedIn.value) {
       return;
     }
     const url = `${NOTIFICATION_URL}/ws`;
-    const uri = url.replace('https', 'wss');
+    // Support both http and https
+    const uri = url.replace(/^https:/, 'wss:').replace(/^http:/, 'ws:');
 
     console.log(`connection to ${uri}`);
     const { data, close, status } = useWebSocket(uri, {
@@ -73,17 +95,23 @@ export const useDomainWebSocketStore = defineStore('domainWebsockets', () => {
     watch(userLoggedIn, () => {
       if (!userLoggedIn.value) {
         close();
-
         console.log(`connection to ${uri} is closed`);
       }
     });
 
-    watch(() => data.value, () => {
-      handleMessage(data.value);
-    }, { deep: true });
-    watch(() => status.value, () => {
-      console.log(`websocket status: ${status.value}`);
-    }, { deep: true });
+    watch(
+      () => data.value,
+      (val) => {
+        if (val) handleMessage(val);
+      },
+      { deep: true },
+    );
+    watch(
+      () => status.value,
+      () => {
+        console.log(`websocket status: ${status.value}`);
+      },
+    );
   };
 
   return {

@@ -2,17 +2,14 @@ import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import { urlOffers, urlSignin } from 'InvestCommon/global/links';
 
 export const redirectAfterLogout = async () => {
+  const pathname = window?.location?.pathname ?? '';
   let queryParams;
 
-  if (window?.location?.pathname?.includes('offer')) {
-    queryParams = { redirect: window?.location?.pathname };
-  }
-  if (window?.location?.pathname?.includes('/invest')) {
+  if (pathname.includes('offer')) {
+    queryParams = { redirect: pathname };
+  } else if (pathname.includes('/invest')) {
     queryParams = { redirect: urlOffers };
   }
-  if (queryParams) {
-    navigateWithQueryParams(urlSignin, queryParams);
-  } else {
-    navigateWithQueryParams(urlSignin);
-  }
+
+  navigateWithQueryParams(urlSignin, queryParams);
 };

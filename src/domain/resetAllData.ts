@@ -17,10 +17,13 @@ import { useInvestmentsStore } from 'InvestCommon/store/useInvestments';
 import { useAccreditationStore } from 'InvestCommon/store/useAccreditation';
 import { useAuthStore } from 'InvestCommon/store/useAuth';
 import { useFilerStore } from 'InvestCommon/store/useFiler';
+import { cookiesOptions } from 'InvestCommon/global/index';
 
 function clearAllCookies() {
   const cookies = useCookies();
-  Object.keys(cookies.getAll()).forEach((key) => cookies.remove(key));
+  Object.keys(cookies.getAll()).forEach((key) => {
+    cookies.remove(key, cookiesOptions());
+  });
 }
 
 export const resetAllData = () => {
