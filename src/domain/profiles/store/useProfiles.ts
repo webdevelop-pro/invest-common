@@ -8,6 +8,7 @@ import { useCookies } from '@vueuse/integrations/useCookies';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { PROFILE_TYPES } from 'InvestCommon/global/investment.json';
+import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository';
 
 const { IS_STATIC_SITE } = env;
 
@@ -90,6 +91,7 @@ export const useProfilesStore = defineStore('profiles', () => {
     console.log('selectedUserProfileId', id);
     selectedUserProfileId.value = Number(id);
     if (id === 0) return;
+    useRepositoryWallet().resetAll();
     cookies.set('selectedUserProfileId', id, cookiesOptions((new Date(userSession.value?.expires_at))));
   };
 

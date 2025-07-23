@@ -7,6 +7,7 @@ import { urlContactUs } from 'InvestCommon/global/links';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useRouter } from 'vue-router';
+import { PROFILE_TYPES } from 'InvestCommon/global/investment.json';
 
 const FUNDING_TAB_INFO = {
   title: 'Wallet',
@@ -72,8 +73,10 @@ export const useWalletMain = defineStore('useWalletMain', () => {
   });
 
   const selectedIdAsDataIs = computed(() => selectedUserProfileData.value.id === selectedUserProfileId.value);
+  const isSdira = computed(() => (selectedUserProfileData.value.type === PROFILE_TYPES.SDIRA));
   const canLoadWalletData = computed(() => (
-    selectedIdAsDataIs.value && userLoggedIn.value && !isKYCAlert.value && (selectedUserProfileId.value > 0)));
+    !isSdira.value && selectedIdAsDataIs.value && userLoggedIn.value
+    && !isKYCAlert.value && (selectedUserProfileId.value > 0)));
 
   const updateData = async () => {
     if (canLoadWalletData.value && !getWalletState.value.loading && (selectedUserProfileId.value > 0)) {
@@ -110,6 +113,7 @@ export const useWalletMain = defineStore('useWalletMain', () => {
     alertTitle,
     alertButtonText,
     canLoadWalletData,
+    isSdira,
     // Action
     updateData,
     onAlertButtonClick,

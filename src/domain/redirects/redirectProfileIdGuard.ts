@@ -27,7 +27,7 @@ export const redirectProfileIdGuard = async (to: RouteLocationNormalized) => {
   }
 
   // If profileId in URL does not exist, redirect to first available profile
-  const profileExists = profiles.some(profile => profile.id === urlProfileId);
+  const profileExists = profiles.some((profile) => profile.id === urlProfileId);
   if (!profileExists) {
     return {
       name: to.name as string,

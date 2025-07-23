@@ -16,6 +16,7 @@ export enum InvestKycTypes {
   pending = 'pending',
   approved = 'approved',
   declined = 'declined',
+  in_progress = 'in_progress',
 }
 
 export enum AccreditationTypes {

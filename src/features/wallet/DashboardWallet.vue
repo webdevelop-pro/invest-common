@@ -27,6 +27,7 @@ const {
   isTopTextShow,
   alertButtonText,
   FUNDING_TAB_INFO,
+  isSdira,
 } = walletMainStore;
 
 onBeforeMount(() => {
@@ -63,7 +64,7 @@ onBeforeMount(() => {
         <DashboardWalletTransactions
           :profile-id="selectedUserProfileId"
           :logged-in="userLoggedIn"
-          :is-error="isAlertShow"
+          :is-error="isAlertShow || isSdira"
         />
       </div>
       <div class="dashboard-wallet__bank-accounts">
