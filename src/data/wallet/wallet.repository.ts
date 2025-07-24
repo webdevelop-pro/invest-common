@@ -184,7 +184,9 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
           Object.assign(item, formatted);
         }
       }
-      getTransactions(walletId.value);
+      if ((walletId.value > 0)) {
+        getTransactions(walletId.value);
+      }
     } else if (notification.data.obj === 'wallet') {
       let temp = getWalletState.value.data;
       Object.assign(temp, notification.data.fields);
