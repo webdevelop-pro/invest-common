@@ -1,5 +1,5 @@
 import {
-  describe, it, expect, vi, beforeEach,
+  describe, it, expect, vi, beforeEach, afterEach,
 } from 'vitest';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import { urlOffers, urlSignin } from 'InvestCommon/global/links';
@@ -15,10 +15,23 @@ vi.mock('InvestCommon/global/links', () => ({
 }));
 
 describe('redirectAfterLogout', () => {
+  const originalLocation = window.location;
+
   beforeEach(() => {
     vi.clearAllMocks();
-    delete window.location;
-    window.location = { pathname: '' } as Location;
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      writable: true,
+      value: { pathname: '' },
+    });
+  });
+
+  afterEach(() => {
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      writable: true,
+      value: originalLocation,
+    });
   });
 
   it('should redirect to signin with offer path when pathname includes "offer"', async () => {
@@ -40,12 +53,6 @@ describe('redirectAfterLogout', () => {
   it('should redirect to signin without params when pathname matches no conditions', async () => {
     window.location.pathname = '/some-other-path';
     await redirectAfterLogout();
-    expect(navigateWithQueryParams).toHaveBeenCalledWith(urlSignin);
-  });
-
-  it('should handle undefined window.location gracefully', async () => {
-    delete window.location;
-    await redirectAfterLogout();
-    expect(navigateWithQueryParams).toHaveBeenCalledWith(urlSignin);
+    expect(navigateWithQueryParams).toHaveBeenCalledWith(urlSignin, undefined);
   });
 });

@@ -53,6 +53,7 @@ function createMockProfilesStore({
     selectedUserIndividualProfile: ref(selectedUserIndividualProfile),
     selectedUserProfileShowKycInitForm: ref(selectedUserProfileShowKycInitForm),
     isTrustRevocable: ref(isTrustRevocable),
+    setSelectedUserProfileById: vi.fn(), // <-- Add this mock method
   };
 }
 

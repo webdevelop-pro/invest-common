@@ -4,10 +4,16 @@ import {
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import type { RouteLocationNormalized } from 'vue-router';
 import { redirectProfileIdGuard } from '../redirectProfileIdGuard';
+import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 
 // Mock the profiles store
 vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
   useProfilesStore: vi.fn(),
+}));
+
+// Mock useRepositoryProfiles
+vi.mock('InvestCommon/data/profiles/profiles.repository', () => ({
+  useRepositoryProfiles: vi.fn(),
 }));
 
 // Mock storeToRefs
@@ -19,7 +25,6 @@ vi.mock('pinia', () => ({
 }));
 
 describe('redirectProfileIdGuard', () => {
-  const mockNext = vi.fn();
   const mockTo = {
     meta: {},
     params: {},
@@ -43,17 +48,24 @@ describe('redirectProfileIdGuard', () => {
     query: {},
   } as RouteLocationNormalized;
 
+  let mockGetUser: any;
+  let mockRepositoryProfiles: any;
+
   beforeEach(() => {
     vi.clearAllMocks();
+    mockGetUser = vi.fn().mockResolvedValue(undefined);
+    mockRepositoryProfiles = { getUser: mockGetUser };
+    vi.mocked(useRepositoryProfiles).mockReturnValue(mockRepositoryProfiles as any);
   });
 
-  it('should call next() when checkProfileIdInUrl is false', () => {
+  it('should return undefined when checkProfileIdInUrl is false', async () => {
     const to = { ...mockTo, meta: { checkProfileIdInUrl: false } };
-    redirectProfileIdGuard(to, mockFrom, mockNext);
-    expect(mockNext).toHaveBeenCalledWith();
+    const result = await redirectProfileIdGuard(to);
+    expect(result).toBeUndefined();
+    expect(mockGetUser).not.toHaveBeenCalled();
   });
 
-  it('should redirect to first profile when no profile ID in URL but profiles exist', () => {
+  it('should redirect to first profile when no profile ID in URL but profiles exist', async () => {
     const mockStore = {
       userProfiles: { value: [{ id: 1 }, { id: 2 }] },
       selectedUserProfileId: { value: 1 },
@@ -62,16 +74,17 @@ describe('redirectProfileIdGuard', () => {
     vi.mocked(useProfilesStore).mockReturnValue(mockStore as any);
 
     const to = { ...mockTo, meta: { checkProfileIdInUrl: true } };
-    redirectProfileIdGuard(to, mockFrom, mockNext);
+    const result = await redirectProfileIdGuard(to);
 
-    expect(mockNext).toHaveBeenCalledWith({
+    expect(result).toEqual({
       name: 'test-route',
-      params: { profileId: 1 },
+      params: { ...to.params, profileId: 1 },
       query: {},
     });
+    expect(mockGetUser).toHaveBeenCalled();
   });
 
-  it('should redirect to first available profile when profile ID does not exist', () => {
+  it('should redirect to first available profile when profile ID does not exist', async () => {
     const mockStore = {
       userProfiles: { value: [{ id: 1 }, { id: 2 }] },
       selectedUserProfileId: { value: 1 },
@@ -80,16 +93,17 @@ describe('redirectProfileIdGuard', () => {
     vi.mocked(useProfilesStore).mockReturnValue(mockStore as any);
 
     const to = { ...mockTo, meta: { checkProfileIdInUrl: true }, params: { profileId: '999' } };
-    redirectProfileIdGuard(to, mockFrom, mockNext);
+    const result = await redirectProfileIdGuard(to);
 
-    expect(mockNext).toHaveBeenCalledWith({
+    expect(result).toEqual({
       name: 'test-route',
-      params: { profileId: 1 },
+      params: { ...to.params, profileId: 1 },
       query: {},
     });
+    expect(mockGetUser).toHaveBeenCalled();
   });
 
-  it('should set selected profile and continue when profile ID exists', () => {
+  it('should set selected profile and return undefined when profile ID exists', async () => {
     const mockStore = {
       userProfiles: { value: [{ id: 1 }, { id: 2 }] },
       selectedUserProfileId: { value: 1 },
@@ -98,13 +112,14 @@ describe('redirectProfileIdGuard', () => {
     vi.mocked(useProfilesStore).mockReturnValue(mockStore as any);
 
     const to = { ...mockTo, meta: { checkProfileIdInUrl: true }, params: { profileId: '2' } };
-    redirectProfileIdGuard(to, mockFrom, mockNext);
+    const result = await redirectProfileIdGuard(to);
 
     expect(mockStore.setSelectedUserProfileById).toHaveBeenCalledWith(2);
-    expect(mockNext).toHaveBeenCalledWith();
+    expect(result).toBeUndefined();
+    expect(mockGetUser).toHaveBeenCalled();
   });
 
-  it('should handle empty profiles array gracefully', () => {
+  it('should handle empty profiles array gracefully', async () => {
     const mockStore = {
       userProfiles: { value: [] },
       selectedUserProfileId: { value: 1 },
@@ -113,12 +128,9 @@ describe('redirectProfileIdGuard', () => {
     vi.mocked(useProfilesStore).mockReturnValue(mockStore as any);
 
     const to = { ...mockTo, meta: { checkProfileIdInUrl: true }, params: { profileId: '999' } };
-    redirectProfileIdGuard(to, mockFrom, mockNext);
+    const result = await redirectProfileIdGuard(to);
 
-    expect(mockNext).toHaveBeenCalledWith({
-      name: 'test-route',
-      params: { profileId: 1 },
-      query: {},
-    });
+    expect(result).toBeUndefined();
+    expect(mockGetUser).toHaveBeenCalled();
   });
 });

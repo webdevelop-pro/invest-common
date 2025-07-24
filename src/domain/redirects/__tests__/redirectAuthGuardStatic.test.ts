@@ -8,7 +8,6 @@ import { nextTick } from 'vue';
 import { urlSignin, urlAuthenticator } from 'InvestCommon/global/links';
 import { redirectAuthGuardStatic } from '../redirectAuthGuardStatic';
 
-// Mock the dependencies
 vi.mock('InvestCommon/domain/session/store/useSession', () => ({
   useSessionStore: vi.fn(),
 }));

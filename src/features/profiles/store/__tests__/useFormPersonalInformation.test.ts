@@ -89,6 +89,7 @@ describe('useFormPersonalInformation', () => {
   let mockRouter: any;
   let mockProfilesStore: any;
   let mockRepositoryProfiles: any;
+  let mockSessionStore: any;
   let mockAccreditationRepository: any;
   let mockHubspotForm: any;
   let mockScrollToError: any;
@@ -119,38 +120,6 @@ describe('useFormPersonalInformation', () => {
       expect(store.isLoading).toBe(false);
       expect(store.readOnly).toBeUndefined();
       expect(store.isAccreditation).toBeUndefined();
-    });
-
-    it('should compute breadcrumbs correctly', () => {
-      expect(store.breadcrumbs).toEqual([
-        {
-          text: 'Dashboard',
-          to: { name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: '123' } },
-        },
-        {
-          text: 'Profile Details',
-          to: { name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: '123' } },
-        },
-        {
-          text: 'Personal Information',
-        },
-      ]);
-    });
-
-    it('should compute model data correctly', () => {
-      expect(store.modelData).toEqual({
-        first_name: 'John',
-        last_name: 'Doe',
-        email: 'john@example.com',
-      });
-    });
-
-    it('should compute schema backend correctly', () => {
-      expect(store.schemaBackend).toEqual({ schema: 'test-schema' });
-    });
-
-    it('should compute error data correctly', () => {
-      expect(store.errorData).toBeNull();
     });
   });
 

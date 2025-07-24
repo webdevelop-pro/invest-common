@@ -214,7 +214,7 @@ describe('useFormTrustedContact', () => {
     });
 
     it('should handle error data when setProfileByIdState has error', () => {
-      mockRepositoryProfiles.setProfileByIdState.value.error = 'API Error';
+      mockRepositoryProfiles.setProfileByIdState.value.error = { data: { responseJson: 'API Error' } };
       const newStore = useFormTrustedContact();
       expect(newStore.errorData).toBe('API Error');
     });
