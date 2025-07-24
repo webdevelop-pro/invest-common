@@ -6,6 +6,7 @@ import { useRepositoryAccreditation } from 'InvestCommon/data/accreditation/accr
 import { useRepositoryNotifications } from 'InvestCommon/data/notifications/notifications.repository';
 import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
+import { useRepositoryFiler } from 'InvestCommon/data/filer/filer.repository';
 import { useFundingStore } from 'InvestCommon/store/useFunding';
 import { useProfileWalletTransactionStore } from 'InvestCommon/store/useProfileWallet/useProfileWalletTransaction';
 import { useProfileWalletStore } from 'InvestCommon/store/useProfileWallet/useProfileWallet';
@@ -46,4 +47,5 @@ export const resetAllData = () => {
   useRepositoryProfiles().resetAll();
   useRepositoryKyc().resetAll();
   useRepositoryWallet().resetAll();
+  useRepositoryFiler().resetAll();
 };

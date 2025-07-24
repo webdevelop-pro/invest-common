@@ -1,7 +1,7 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import env from 'InvestCommon/global';
-import { IFilerItem } from 'InvestCommon/types/api/filer';
+import { IFilerItem } from 'InvestCommon/types/api/filer.type';
 import { toasterErrorHandling } from 'InvestCommon/data/repository/error/toasterErrorHandling';
 import { createActionState } from 'InvestCommon/data/repository/repository';
 
@@ -75,7 +75,7 @@ export const useRepositoryFiler = defineStore('repository-filer', () => {
     try {
       postSignurlState.value.loading = true;
       postSignurlState.value.error = null;
-      const response = await apiClient.post<any>(`/auth/files/signurl`, body, {
+      const response = await apiClient.post<any>('/auth/files/signurl', body, {
         headers: {
           'Content-Type': 'application/json',
           accept: 'application/json',
@@ -125,6 +125,32 @@ export const useRepositoryFiler = defineStore('repository-filer', () => {
     }
   };
 
+  const uploadHandler = async (file: File, objectId: string | number, objectName: string | number, userId: number) => {
+    await postSignurl({
+      filename: file.name,
+      mime: file.type,
+      user_id: userId,
+      path: `/${objectName}/${objectId}`,
+    });
+    if (postSignurlState.value.error) {
+      return false;
+    }
+    if (postSignurlState.value.data?.url) {
+      const uploadData = {
+        objectName,
+        objectId,
+        userId,
+        url: postSignurlState.value.data?.url,
+        fileId: postSignurlState.value.data?.meta?.id,
+      };
+      await uploadFile(file, file.type, uploadData);
+    }
+    if (uploadFileState.value.error) {
+      return false;
+    }
+    return true;
+  };
+
   const resetAll = () => {
     getFilesState.value = { loading: false, error: null, data: undefined };
     getPublicFilesState.value = { loading: false, error: null, data: undefined };
@@ -147,9 +173,10 @@ export const useRepositoryFiler = defineStore('repository-filer', () => {
     uploadFile,
     getImageByIdLink,
     resetAll,
+    uploadHandler,
   };
 });
 
 if (import.meta.hot) {
   import.meta.hot.accept(acceptHMRUpdate(useRepositoryFiler, import.meta.hot));
-} 
+}

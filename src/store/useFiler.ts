@@ -6,7 +6,7 @@ import {
   fetchGetImageByIdLink,
 } from 'InvestCommon/services/api/filer';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
-import { IFilerItem } from 'InvestCommon/types/api/filer';
+import { IFilerItem } from 'InvestCommon/types/api/filer.type';
 import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 
 export const useFilerStore = defineStore('filer', () => {

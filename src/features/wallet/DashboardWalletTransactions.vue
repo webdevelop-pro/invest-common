@@ -5,7 +5,7 @@ import { currency } from 'InvestCommon/helpers/currency';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import VTooltip from 'UiKit/components/VTooltip.vue';
 import plus from 'UiKit/assets/images/plus.svg';
-import VTableDefault from 'InvestCommon/core/components/VTableDefault.vue';
+import VTableDefault from 'InvestCommon/shared/components/VTableDefault.vue';
 import VTableWalletTransactionsItem from './components/VTableWalletTransactionsItem.vue';
 import { useWalletTransactions } from './store/useWalletTransactions';
 

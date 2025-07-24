@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useGlobalLoader } from 'InvestCommon/store/useGlobalLoader';
-import VLayoutForm from 'InvestCommon/core/layouts/VLayoutForm.vue';
+import VLayoutForm from 'InvestCommon/shared/layouts/VLayoutForm.vue';
 import FormAccreditationUploadFiles from './components/VFormAccreditationUploadFiles.vue';
 import { storeToRefs } from 'pinia';
 import { useAccreditationUpload } from './store/useAccreditationUpload';

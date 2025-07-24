@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useGlobalLoader } from 'InvestCommon/store/useGlobalLoader';
 import { storeToRefs } from 'pinia';
-import VLayoutForm from 'InvestCommon/core/layouts/VLayoutForm.vue';
+import VLayoutForm from 'InvestCommon/shared/layouts/VLayoutForm.vue';
 import { useFormCustodianInformation } from './store/useFormCustodianInformation';
 import VFormPartialCustodian from './components/VFormPartialCustodian.vue';
 

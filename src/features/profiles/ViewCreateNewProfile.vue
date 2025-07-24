@@ -2,7 +2,7 @@
 import { useFormCreateNewProfile } from './store/useFormCreateNewProfile';
 import { useGlobalLoader } from 'InvestCommon/store/useGlobalLoader';
 import { defineAsyncComponent, hydrateOnVisible } from 'vue';
-import VLayoutForm from 'InvestCommon/core/layouts/VLayoutForm.vue';
+import VLayoutForm from 'InvestCommon/shared/layouts/VLayoutForm.vue';
 
 const VFormCreateProfileSelectType = defineAsyncComponent({
   loader: () => import('./components/VFormCreateProfileSelectType.vue'),
