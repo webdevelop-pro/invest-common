@@ -8,6 +8,7 @@ import { currency } from 'InvestCommon/helpers/currency';
 import { InvestTransactionStatuses } from 'InvestCommon/helpers/enums/invest';
 import VBadge from 'UiKit/components/Base/VBadge/VBadge.vue';
 import { formatToFullDate } from 'InvestCommon/helpers/formatters/formatToDate';
+import VTooltip from 'UiKit/components/VTooltip.vue';
 
 const props = defineProps({
   investment: {
@@ -46,10 +47,17 @@ const timeFormatted = computed(() => (dateFull.value ? getTimeFormat(String(date
             {{ timeFormatted }}
           </div>
         </VTableCell>
-        <VTableCell class="v-table-portfolio-transaction__transaction-id">
-          <div class="is--small-2">
-            ID {{ investment?.entity_id }}
-          </div>
+        <VTableCell
+          v-if="investment?.payment_data?.transaction_id"
+        >
+          <VTooltip>
+            <div class="v-table-wallet-transactions__transaction-id is--small-2">
+              ID {{ investment?.payment_data?.transaction_id }}
+            </div>
+            <template #content>
+              {{ investment?.payment_data?.transaction_id }}
+            </template>
+          </VTooltip>
         </VTableCell>
         <VTableCell>
           <div class="v-table-portfolio-transaction__type">

@@ -25,7 +25,7 @@ defineProps({
       </div>
     </VTableCell>
     <VTableCell>
-      <VTooltip>
+      <VTooltip v-if="data?.entity_id">
         <div class="v-table-wallet-transactions__transaction-id is--small-2">
           ID {{ data?.entity_id }}
         </div>
