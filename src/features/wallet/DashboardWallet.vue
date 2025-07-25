@@ -17,7 +17,6 @@ const { selectedUserProfileData, selectedUserProfileId } = storeToRefs(userProfi
 const userSessionStore = useSessionStore();
 const { userLoggedIn } = storeToRefs(userSessionStore);
 
-const walletMainStore = useWalletMain();
 const {
   isAlertShow,
   isAlertType,
@@ -28,10 +27,12 @@ const {
   alertButtonText,
   FUNDING_TAB_INFO,
   isSdira,
-} = walletMainStore;
+  updateData,
+  onAlertButtonClick,
+} = useWalletMain();
 
 onBeforeMount(() => {
-  walletMainStore.updateData();
+  updateData();
 });
 </script>
 
@@ -47,7 +48,7 @@ onBeforeMount(() => {
       data-testid="funding-alert"
       class="dashboard-wallet__alert"
       :button-text="alertButtonText"
-      @click="walletMainStore.onAlertButtonClick"
+      @click="onAlertButtonClick"
     >
       <template #title>
         {{ alertTitle }}

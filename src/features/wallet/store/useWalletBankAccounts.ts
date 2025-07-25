@@ -1,8 +1,8 @@
 import { ref, computed } from 'vue';
-import { defineStore, storeToRefs, acceptHMRUpdate } from 'pinia';
+import { storeToRefs } from 'pinia';
 import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository';
 
-export const useWalletBankAccounts = defineStore('useWalletBankAccounts', () => {
+export function useWalletBankAccounts() {
   // State
   const selectedProfileData = ref<object | null>(null);
   const loggedIn = ref<boolean>(false);
@@ -122,8 +122,5 @@ export const useWalletBankAccounts = defineStore('useWalletBankAccounts', () => 
     onDeleteAccountClick,
     setProfileContext,
   };
-});
+};
 
-if (import.meta.hot) {
-  import.meta.hot.accept(acceptHMRUpdate(useWalletBankAccounts, import.meta.hot));
-}

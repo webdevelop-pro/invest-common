@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { storeToRefs } from 'pinia';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import InfoSlot from 'UiKit/components/VInfo/VInfoSlot.vue';
 import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
@@ -20,17 +19,19 @@ const props = defineProps({
   isError: Boolean,
 });
 
-const walletBankAccountsStore = useWalletBankAccounts();
 const {
   fundingSource,
   isCanAddBankAccount,
   isLinkBankAccountLoading,
   isSkeleton,
   deleteLinkedAccountState,
-} = storeToRefs(walletBankAccountsStore);
+  setProfileContext,
+  onAddAccountClick,
+  onDeleteAccountClick,
+} = useWalletBankAccounts();
 
 watch(() => [props.profileData, props.loggedIn], ([newProfileData, newLoggedIn]) => {
-  walletBankAccountsStore.setProfileContext(newProfileData, Boolean(newLoggedIn));
+  setProfileContext(newProfileData, Boolean(newLoggedIn));
 }, { immediate: true });
 </script>
 
@@ -49,7 +50,7 @@ watch(() => [props.profileData, props.loggedIn], ([newProfileData, newLoggedIn])
         variant="link"
         class="dashboard-wallet-bank-accounts__button"
         data-testid="funding-add-account-btn"
-        @click="walletBankAccountsStore.onAddAccountClick"
+        @click="onAddAccountClick"
       >
         <plus
           alt="plus icon"
@@ -94,7 +95,7 @@ watch(() => [props.profileData, props.loggedIn], ([newProfileData, newLoggedIn])
             variant="link"
             icon-only
             class="dashboard-wallet-bank-accounts__item-button"
-            @click="walletBankAccountsStore.onDeleteAccountClick(item.id)"
+            @click="onDeleteAccountClick(item.id)"
           >
             <closeIcon
               alt="close icon"

@@ -2,7 +2,7 @@ import {
   computed, reactive, toRaw, watch, ComputedRef,
 } from 'vue';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
-import { errorMessageRule } from 'UiKit/helpers/validation/rules';
+import { errorMessageRule, documentRule } from 'UiKit/helpers/validation/rules';
 import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
 import { getOptions } from 'UiKit/helpers/model';
 
@@ -43,7 +43,7 @@ export const useVFormPartialEntityInformation = (
   const required = computed(() => {
     const baseRequired = ['type', 'solely_for_investing', 'tax_exempts', 'name', 'owner_title'];
     if (showDocument.value) {
-      baseRequired.push('operating_agreement_id');
+      baseRequired.push('operating_agreement_id', 'formation_document_id', 'organization_document_id');
     }
     return baseRequired;
   });
@@ -58,9 +58,9 @@ export const useVFormPartialEntityInformation = (
           tax_exempts: {},
           name: {},
           owner_title: {},
-          formation_document_id: {},
-          organization_document_id: {},
-          operating_agreement_id: {},
+          formation_document_id: documentRule,
+          organization_document_id: documentRule,
+          operating_agreement_id: documentRule,
         },
         type: 'object',
         errorMessage: errorMessageRule,

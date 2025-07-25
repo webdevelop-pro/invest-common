@@ -1,13 +1,14 @@
 import {
   computed, watch, nextTick,
 } from 'vue';
-import { defineStore, storeToRefs, acceptHMRUpdate } from 'pinia';
+import { storeToRefs } from 'pinia';
 import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository';
 import { urlContactUs } from 'InvestCommon/global/links';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useRouter } from 'vue-router';
 import { PROFILE_TYPES } from 'InvestCommon/global/investment.json';
+import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 
 const FUNDING_TAB_INFO = {
   title: 'Wallet',
@@ -20,24 +21,33 @@ const FUNDING_TAB_INFO = {
     `,
 };
 
-export const useWalletMain = defineStore('useWalletMain', () => {
+export function useWalletMain() {
   const router = useRouter();
   const userProfileStore = useProfilesStore();
   const { selectedUserProfileData, selectedUserProfileId } = storeToRefs(userProfileStore);
   const userSessionStore = useSessionStore();
   const { userLoggedIn } = storeToRefs(userSessionStore);
+  const useRepositoryProfilesStore = useRepositoryProfiles();
+  const { getProfileByIdState } = storeToRefs(useRepositoryProfilesStore);
   // Stores
   const walletRepository = useRepositoryWallet();
   const { getWalletState } = storeToRefs(walletRepository);
 
   // KYC and wallet status logic
   const kycStatus = computed(() => selectedUserProfileData.value?.kyc_status);
-  const isKYCAlert = computed(() => kycStatus.value && (kycStatus.value !== 'approved'));
+  const isKYCInProgress = computed(() => kycStatus.value && (kycStatus.value === 'in_progress'));
+  const isKYCApproved = computed(() => kycStatus.value && (kycStatus.value === 'approved'));
+  const isKYCAlert = computed(() => !isKYCApproved.value && !isKYCInProgress.value);
   const isKYCDeclined = computed(() => kycStatus.value && (kycStatus.value === 'declined'));
-  const isWalletAlert = computed(() => getWalletState.value.data?.isWalletStatusAnyError);
+  const isWalletAlert = computed(() => getWalletState.value.data?.isWalletStatusAnyError || getWalletState.value.error);
+  const isAlertInfo = computed(() => (
+    (getWalletState.value.data?.isWalletStatusCreated || isKYCInProgress.value) && !isWalletAlert.value));
+  const isAlertNotAble = computed(() => isWalletAlert.value || isKYCDeclined.value);
+  const isAlertKYC = computed(() => (
+    isKYCAlert.value && !isKYCDeclined.value && !isKYCInProgress.value && !isWalletAlert.value));
 
   const isAlertShow = computed(() => (
-    isKYCAlert.value || isWalletAlert.value || isKYCDeclined.value || getWalletState.value.data?.isWalletStatusCreated
+    (isAlertNotAble.value || isAlertInfo.value || isAlertKYC.value) && !getProfileByIdState.value.loading
   ));
 
   const isTopTextShow = computed(() => (
@@ -45,31 +55,30 @@ export const useWalletMain = defineStore('useWalletMain', () => {
   ));
 
   const isAlertType = computed(() => {
-    if (getWalletState.value.data?.isWalletStatusCreated) return 'info';
+    if (isAlertInfo.value) return 'info';
     return 'error';
   });
 
   const isAlertText = computed(() => {
-    if (isWalletAlert.value || isKYCDeclined.value) {
+    if (isAlertNotAble.value) {
       return `Unfortunately, we were not able to create a wallet for you. Please <a href="${urlContactUs}">contact us</a>\n    to resolve the issue.`;
     }
-    if (getWalletState.value.data?.isWalletStatusCreated) {
+    if (isAlertInfo.value) {
       return `This usually takes a few moments. If \n    it takes longer than expected, <a href="${urlContactUs}">contact us</a> for assistance.`;
     }
-    return `You need to <a href="/profile/${selectedUserProfileId.value}/kyc">pass KYC </a>\n    before you can make a transfer`;
+    if (isAlertKYC.value) return `You need to <a href="/profile/${selectedUserProfileId.value}/kyc">pass KYC </a>\n    before you can make a transfer`;
+    return undefined;
   });
 
   const alertTitle = computed(() => {
-    if (isKYCAlert.value && !isKYCDeclined.value) return 'Identity verification is needed. ';
-    if (getWalletState.value.data?.isWalletStatusCreated) return 'Your wallet is being created and verified.';
+    if (isAlertKYC.value) return 'Identity verification is needed. ';
+    if (isAlertInfo.value) return 'Your wallet is being created and verified.';
     return undefined;
   });
 
   const alertButtonText = computed(() => {
-    if (isWalletAlert.value) return undefined;
-    if (isKYCDeclined.value) return undefined;
-    if (getWalletState.value.data?.isWalletStatusCreated) return undefined;
-    return 'Verify Identity';
+    if (isAlertKYC.value) return 'Verify Identity';
+    return undefined;
   });
 
   const selectedIdAsDataIs = computed(() => selectedUserProfileData.value.id === selectedUserProfileId.value);
@@ -120,8 +129,4 @@ export const useWalletMain = defineStore('useWalletMain', () => {
     getWalletState,
     FUNDING_TAB_INFO,
   };
-});
-
-if (import.meta.hot) {
-  import.meta.hot.accept(acceptHMRUpdate(useWalletMain, import.meta.hot));
 }

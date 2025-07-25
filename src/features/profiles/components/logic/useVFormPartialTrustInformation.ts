@@ -2,7 +2,7 @@ import {
   computed, reactive, toRaw, watch, ComputedRef,
 } from 'vue';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
-import { errorMessageRule } from 'UiKit/helpers/validation/rules';
+import { errorMessageRule, documentRule } from 'UiKit/helpers/validation/rules';
 import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
 import { getOptions } from 'UiKit/helpers/model';
 
@@ -54,7 +54,7 @@ export const useVFormPartialTrustInformation = (
           ein: {},
           name: {},
           owner_title: {},
-          trust_agreement_id: {},
+          trust_agreement_id: documentRule,
         },
         type: 'object',
         errorMessage: errorMessageRule,

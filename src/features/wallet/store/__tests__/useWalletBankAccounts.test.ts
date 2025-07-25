@@ -11,8 +11,8 @@ globalThis.window = Object.assign(globalThis.window || {}, {
   Plaid: { create: vi.fn(() => mockPlaidHandler) },
 });
 
-describe('useWalletBankAccounts Store', () => {
-  let store: any;
+describe('useWalletBankAccounts composable', () => {
+  let composable: any;
   let walletRepositoryMock: any;
 
   beforeEach(async () => {
@@ -42,7 +42,7 @@ describe('useWalletBankAccounts Store', () => {
       useRepositoryWallet: vi.fn(() => walletRepositoryMock),
     }));
     const module = await import('../useWalletBankAccounts');
-    store = module.useWalletBankAccounts();
+    composable = module.useWalletBankAccounts();
   });
 
   afterEach(() => {
@@ -51,53 +51,53 @@ describe('useWalletBankAccounts Store', () => {
 
   describe('Computed Properties', () => {
     it('should compute isCanAddBankAccount as true when all conditions met', () => {
-      store.setProfileContext({ id: 1, kyc_status: 'approved' }, true);
+      composable.setProfileContext({ id: 1, kyc_status: 'approved' }, true);
       walletRepositoryMock.walletId.value = 123;
       walletRepositoryMock.getWalletState.value.data.isWalletStatusAnyError = false;
       walletRepositoryMock.getWalletState.value.data.isWalletStatusCreated = false;
-      expect(store.isCanAddBankAccount).toBe(true);
+      expect(composable.isCanAddBankAccount.value).toBe(true);
     });
     it('should compute isCanAddBankAccount as false if kyc_status is not approved', () => {
-      store.setProfileContext({ id: 1, kyc_status: 'pending' }, true);
-      expect(store.isCanAddBankAccount).toBe(false);
+      composable.setProfileContext({ id: 1, kyc_status: 'pending' }, true);
+      expect(composable.isCanAddBankAccount.value).toBe(false);
     });
     it('should compute isCanAddBankAccount as false if walletId is null', () => {
-      store.setProfileContext({ id: 1, kyc_status: 'approved' }, true);
+      composable.setProfileContext({ id: 1, kyc_status: 'approved' }, true);
       walletRepositoryMock.walletId.value = null;
-      expect(store.isCanAddBankAccount).toBe(false);
+      expect(composable.isCanAddBankAccount.value).toBe(false);
     });
     it('should compute isCanAddBankAccount as false if isWalletAnyError is true', () => {
-      store.setProfileContext({ id: 1, kyc_status: 'approved' }, true);
+      composable.setProfileContext({ id: 1, kyc_status: 'approved' }, true);
       walletRepositoryMock.getWalletState.value.data.isWalletStatusAnyError = true;
-      expect(store.isCanAddBankAccount).toBe(false);
+      expect(composable.isCanAddBankAccount.value).toBe(false);
     });
   });
 
   describe('onDeleteAccountClick', () => {
     it('should not call deleteLinkedAccount if loading', async () => {
       walletRepositoryMock.deleteLinkedAccountState.value.loading = true;
-      store.setProfileContext({ id: 1, kyc_status: 'approved' }, true);
-      await store.onDeleteAccountClick('abc');
+      composable.setProfileContext({ id: 1, kyc_status: 'approved' }, true);
+      await composable.onDeleteAccountClick('abc');
       expect(walletRepositoryMock.deleteLinkedAccount).not.toHaveBeenCalled();
     });
     it('should call deleteLinkedAccount and getWalletByProfile if profileId > 0', async () => {
-      store.setProfileContext({ id: 1, kyc_status: 'approved' }, true);
-      await store.onDeleteAccountClick('abc');
+      composable.setProfileContext({ id: 1, kyc_status: 'approved' }, true);
+      await composable.onDeleteAccountClick('abc');
       expect(walletRepositoryMock.deleteLinkedAccount).toHaveBeenCalledWith(1, { funding_source_id: 'abc' });
       expect(walletRepositoryMock.getWalletByProfile).toHaveBeenCalledWith(1);
     });
     it('should not call deleteLinkedAccount if profileId <= 0', async () => {
-      store.setProfileContext({ id: 0, kyc_status: 'approved' }, true);
-      await store.onDeleteAccountClick('abc');
+      composable.setProfileContext({ id: 0, kyc_status: 'approved' }, true);
+      await composable.onDeleteAccountClick('abc');
       expect(walletRepositoryMock.deleteLinkedAccount).not.toHaveBeenCalled();
     });
   });
 
   describe('Plaid Integration', () => {
     it('should not call createLinkToken if link_token exists', async () => {
-      store.setProfileContext({ id: 1, kyc_status: 'approved' }, true);
+      composable.setProfileContext({ id: 1, kyc_status: 'approved' }, true);
       walletRepositoryMock.createLinkTokenState.value.data = { link_token: 'exists' };
-      await store.onAddAccountClick();
+      await composable.onAddAccountClick();
       expect(walletRepositoryMock.createLinkToken).not.toHaveBeenCalled();
     });
   });

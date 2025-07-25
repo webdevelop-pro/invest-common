@@ -1,8 +1,8 @@
 import {
   describe, it, expect, vi, beforeEach, afterEach,
 } from 'vitest';
-import { setActivePinia, createPinia } from 'pinia';
 import { ref, Ref } from 'vue';
+import { createPinia, setActivePinia } from 'pinia';
 
 const mockRouterPush = vi.fn();
 vi.mock('vue-router', () => ({
@@ -17,21 +17,17 @@ let mockGetWalletState: Ref<{
   data: { isWalletStatusAnyError: boolean; isWalletStatusCreated: boolean }
 }>;
 
-type StoreRefs = Record<string, unknown>;
-
 vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
   useProfilesStore: () => ({
     selectedUserProfileData: mockSelectedUserProfileData,
     selectedUserProfileId: mockSelectedUserProfileId,
   }),
-  storeToRefs: (store: StoreRefs) => store,
 }));
 
 vi.mock('InvestCommon/domain/session/store/useSession', () => ({
   useSessionStore: () => ({
     userLoggedIn: mockUserLoggedIn,
   }),
-  storeToRefs: (store: StoreRefs) => store,
 }));
 
 vi.mock('InvestCommon/data/wallet/wallet.repository', () => ({
@@ -39,7 +35,6 @@ vi.mock('InvestCommon/data/wallet/wallet.repository', () => ({
     getWalletState: mockGetWalletState,
     getWalletByProfile: vi.fn(),
   }),
-  storeToRefs: (store: StoreRefs) => store,
 }));
 
 vi.mock('InvestCommon/global/links', () => ({
@@ -77,37 +72,37 @@ describe('useWalletMain', () => {
   ])('kyc_status is %s → isKYCAlert: %s', (kyc, expected) => {
     mockSelectedUserProfileData.value.kyc_status = kyc as string;
     const store = useWalletMain();
-    expect(store.isKYCAlert).toBe(expected);
+    expect(store.isKYCAlert.value).toBe(expected);
   });
 
   it('isWalletAlert is true when isWalletStatusAnyError is true', () => {
     mockGetWalletState.value.data.isWalletStatusAnyError = true;
     const store = useWalletMain();
-    expect(store.isWalletAlert).toBe(true);
+    expect(store.isWalletAlert.value).toBe(true);
   });
 
   it('isAlertShow is true if wallet error', () => {
     mockGetWalletState.value.data.isWalletStatusAnyError = true;
     const store = useWalletMain();
-    expect(store.isAlertShow).toBe(true);
+    expect(store.isAlertShow.value).toBe(true);
   });
 
   it('alertButtonText is "Verify Identity" only for KYC required', () => {
     mockSelectedUserProfileData.value.kyc_status = 'pending';
     const store = useWalletMain();
-    expect(store.alertButtonText).toBe('Verify Identity');
+    expect(store.alertButtonText.value).toBe('Verify Identity');
     mockGetWalletState.value.data.isWalletStatusAnyError = true;
-    expect(store.alertButtonText).toBeUndefined();
+    expect(store.alertButtonText.value).toBeUndefined();
   });
 
   it('canLoadWalletData is true only if ids match and logged in', () => {
     const store = useWalletMain();
-    expect(store.canLoadWalletData).toBe(true);
+    expect(store.canLoadWalletData.value).toBe(true);
     mockSelectedUserProfileData.value.id = 2;
-    expect(store.canLoadWalletData).toBe(false);
+    expect(store.canLoadWalletData.value).toBe(false);
     mockSelectedUserProfileData.value.id = 1;
     mockUserLoggedIn.value = false;
-    expect(store.canLoadWalletData).toBe(false);
+    expect(store.canLoadWalletData.value).toBe(false);
   });
 
   it('onAlertButtonClick navigates to KYC if needed', () => {

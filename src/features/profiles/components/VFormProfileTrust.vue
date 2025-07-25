@@ -13,6 +13,7 @@ const props = defineProps({
   errorData: Object,
   schemaBackend: Object as PropType<JSONSchemaType<any> | undefined>,
   loading: Boolean,
+  showDocument: Boolean,
 });
 
 const modelDataComputed = computed(() => props.modelData);
@@ -61,7 +62,7 @@ defineExpose({
       :loading="loadingComputed"
       :schema-backend="schemaBackendComputed"
       :error-data="errorDataComputed"
-      show-document
+      :show-document="showDocument"
     />
     <VFormPartialBusinessController
       ref="businessControllerFormChild"

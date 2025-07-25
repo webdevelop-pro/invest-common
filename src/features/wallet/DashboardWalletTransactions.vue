@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { defineAsyncComponent, watch } from 'vue';
-import { storeToRefs } from 'pinia';
 import { currency } from 'InvestCommon/helpers/currency';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import VTooltip from 'UiKit/components/VTooltip.vue';
@@ -21,7 +20,7 @@ const props = defineProps({
   isError: Boolean,
 });
 
-const walletTransactionsStore = useWalletTransactions();
+const walletTransactions = useWalletTransactions();
 const {
   isDialogAddTransactionOpen,
   addTransactiontTransactionType,
@@ -32,10 +31,13 @@ const {
   isCanLoadFunds,
   walletData,
   getTransactionsState,
-} = storeToRefs(walletTransactionsStore);
+  onWithdrawClick,
+  onAddFundsClick,
+  setProfileContext,
+} = walletTransactions;
 
 watch(() => [props.profileId, props.loggedIn], ([newProfileId, newLoggedIn]) => {
-  walletTransactionsStore.setProfileContext(Number(newProfileId), Boolean(newLoggedIn));
+  setProfileContext(Number(newProfileId), Boolean(newLoggedIn));
 }, { immediate: true });
 
 const VDialogWalletAddTransaction = defineAsyncComponent({
@@ -83,7 +85,7 @@ const VDialogWalletAddTransaction = defineAsyncComponent({
           :disabled="!isCanLoadFunds"
           data-testid="funding-add-funds-btn"
           class="dashboard-wallet-transactions__funds-button"
-          @click="walletTransactionsStore.onAddFundsClick"
+          @click="onAddFundsClick"
         >
           <plus
             alt="plus icon"
@@ -97,7 +99,7 @@ const VDialogWalletAddTransaction = defineAsyncComponent({
           variant="outlined"
           data-testid="funding-withdraw-btn"
           class="dashboard-wallet-transactions__funds-button"
-          @click="walletTransactionsStore.onWithdrawClick"
+          @click="onWithdrawClick"
         >
           Withdraw
         </VButton>

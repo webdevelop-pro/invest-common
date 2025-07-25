@@ -2,7 +2,7 @@ import {
   computed, reactive, toRaw, watch, type ComputedRef,
 } from 'vue';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
-import { errorMessageRule } from 'UiKit/helpers/validation/rules';
+import { errorMessageRule, documentRule } from 'UiKit/helpers/validation/rules';
 import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
 
 const yesNoOptions = [
@@ -47,7 +47,7 @@ export const useVFormPartialPlanInformation = (
           name: {},
           is_use_ein: {},
           ein: {},
-          plan_document_id: {},
+          plan_document_id: documentRule,
         },
         type: 'object',
         errorMessage: errorMessageRule,

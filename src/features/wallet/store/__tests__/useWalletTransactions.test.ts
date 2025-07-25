@@ -6,8 +6,8 @@ import { ref, nextTick } from 'vue';
 import { WalletAddTransactionTypes } from 'InvestCommon/data/wallet/wallet.types';
 import { useWalletTransactions } from '../useWalletTransactions';
 
-describe('useWalletTransactions Store', () => {
-  let store: ReturnType<typeof useWalletTransactions>;
+describe('useWalletTransactions composable', () => {
+  let composable: ReturnType<typeof useWalletTransactions>;
 
   beforeEach(() => {
     setActivePinia(createPinia());
@@ -36,19 +36,19 @@ describe('useWalletTransactions Store', () => {
           walletId: ref(123),
         })),
       }));
-      store = useWalletTransactions();
+      composable = useWalletTransactions();
     });
 
     it('should open withdraw dialog and set transaction type', () => {
-      store.onWithdrawClick();
-      expect(store.isDialogAddTransactionOpen).toBe(true);
-      expect(store.addTransactiontTransactionType).toBe(WalletAddTransactionTypes.withdrawal);
+      composable.onWithdrawClick();
+      expect(composable.isDialogAddTransactionOpen.value).toBe(true);
+      expect(composable.addTransactiontTransactionType.value).toBe(WalletAddTransactionTypes.withdrawal);
     });
 
     it('should open add funds dialog and set transaction type', () => {
-      store.onAddFundsClick();
-      expect(store.isDialogAddTransactionOpen).toBe(true);
-      expect(store.addTransactiontTransactionType).toBe(WalletAddTransactionTypes.deposit);
+      composable.onAddFundsClick();
+      expect(composable.isDialogAddTransactionOpen.value).toBe(true);
+      expect(composable.addTransactiontTransactionType.value).toBe(WalletAddTransactionTypes.deposit);
     });
   });
 
@@ -75,8 +75,8 @@ describe('useWalletTransactions Store', () => {
         })),
       }));
       const { useWalletTransactions } = await import('../useWalletTransactions');
-      const newStore = useWalletTransactions();
-      expect(newStore.isShowIncomingBalance).toBe(true);
+      const composable = useWalletTransactions();
+      expect(composable.isShowIncomingBalance.value).toBe(true);
     });
 
     it('should not show incoming balance when pendingIncomingBalance = 0', async () => {
@@ -101,8 +101,8 @@ describe('useWalletTransactions Store', () => {
         })),
       }));
       const { useWalletTransactions } = await import('../useWalletTransactions');
-      const newStore = useWalletTransactions();
-      expect(newStore.isShowIncomingBalance).toBe(false);
+      const composable = useWalletTransactions();
+      expect(composable.isShowIncomingBalance.value).toBe(false);
     });
 
     it('should show outgoing balance when pendingOutcomingBalance > 0', async () => {
@@ -127,8 +127,8 @@ describe('useWalletTransactions Store', () => {
         })),
       }));
       const { useWalletTransactions } = await import('../useWalletTransactions');
-      const newStore = useWalletTransactions();
-      expect(newStore.isShowOutgoingBalance).toBe(true);
+      const composable = useWalletTransactions();
+      expect(composable.isShowOutgoingBalance.value).toBe(true);
     });
 
     it('should not show outgoing balance when pendingOutcomingBalance = 0', async () => {
@@ -153,8 +153,8 @@ describe('useWalletTransactions Store', () => {
         })),
       }));
       const { useWalletTransactions } = await import('../useWalletTransactions');
-      const newStore = useWalletTransactions();
-      expect(newStore.isShowOutgoingBalance).toBe(false);
+      const composable = useWalletTransactions();
+      expect(composable.isShowOutgoingBalance.value).toBe(false);
     });
   });
 
@@ -172,8 +172,8 @@ describe('useWalletTransactions Store', () => {
         })),
       }));
       const { useWalletTransactions } = await import('../useWalletTransactions');
-      const newStore = useWalletTransactions();
-      newStore.setProfileContext(123, true);
+      const composable = useWalletTransactions();
+      composable.setProfileContext(123, true);
       await nextTick();
       await nextTick();
       expect(mockGetTransactions).toHaveBeenCalledWith(123);
@@ -190,8 +190,8 @@ describe('useWalletTransactions Store', () => {
         })),
       }));
       const { useWalletTransactions } = await import('../useWalletTransactions');
-      const newStore = useWalletTransactions();
-      newStore.setProfileContext(0, true);
+      const composable = useWalletTransactions();
+      composable.setProfileContext(0, true);
       await nextTick();
       expect(mockGetTransactions).not.toHaveBeenCalled();
     });
@@ -207,8 +207,8 @@ describe('useWalletTransactions Store', () => {
         })),
       }));
       const { useWalletTransactions } = await import('../useWalletTransactions');
-      const newStore = useWalletTransactions();
-      newStore.setProfileContext(123, true);
+      const composable = useWalletTransactions();
+      composable.setProfileContext(123, true);
       await nextTick();
       expect(mockGetTransactions).not.toHaveBeenCalled();
     });

@@ -3,7 +3,7 @@ import { defineStore, storeToRefs, acceptHMRUpdate } from 'pinia';
 import { WalletAddTransactionTypes } from 'InvestCommon/data/wallet/wallet.types';
 import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository';
 
-export const useWalletTransactions = defineStore('useWalletTransactions', () => {
+export function useWalletTransactions() {
   // State
   const profileId = ref<number | null>(null);
   const loggedIn = ref<boolean>(false);
@@ -82,8 +82,4 @@ export const useWalletTransactions = defineStore('useWalletTransactions', () => 
     onAddFundsClick,
     setProfileContext,
   };
-});
-
-if (import.meta.hot) {
-  import.meta.hot.accept(acceptHMRUpdate(useWalletTransactions, import.meta.hot));
 }

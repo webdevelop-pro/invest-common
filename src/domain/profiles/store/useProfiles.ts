@@ -89,9 +89,9 @@ export const useProfilesStore = defineStore('profiles', () => {
 
   const setSelectedUserProfileById = (id: number) => {
     console.log('selectedUserProfileId', id);
+    useRepositoryWallet().resetAll();
     selectedUserProfileId.value = Number(id);
     if (id === 0) return;
-    useRepositoryWallet().resetAll();
     cookies.set('selectedUserProfileId', id, cookiesOptions((new Date(userSession.value?.expires_at))));
   };
 

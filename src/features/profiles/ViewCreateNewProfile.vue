@@ -62,6 +62,7 @@ const handleSave = () => {
           :loading="isLoading"
           :schema-backend="schemaBackend"
           :error-data="errorData"
+          show-document
         />
         <VFormProfileSDIRA
           v-if="selectedType === PROFILE_TYPES.SDIRA"
@@ -78,6 +79,7 @@ const handleSave = () => {
           :loading="isLoading"
           :schema-backend="schemaBackend"
           :error-data="errorData"
+          show-document
         />
         <VFormProfileTrust
           v-if="selectedType === PROFILE_TYPES.TRUST"
@@ -86,6 +88,7 @@ const handleSave = () => {
           :loading="isLoading"
           :schema-backend="schemaBackend"
           :error-data="errorData"
+          show-document
         />
       </div>
     </VLayoutForm>
