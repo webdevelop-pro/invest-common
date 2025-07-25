@@ -1,63 +1,36 @@
 <script setup lang="ts">
-import { computed, PropType, ref } from 'vue';
-import { useFilerStore } from 'InvestCommon/store/useFiler';
-import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
-import { storeToRefs } from 'pinia';
+import { PropType } from 'vue';
 import VAvatar from 'UiKit/components/VAvatar.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import pen from 'UiKit/assets/images/pen.svg?component';
 import env from 'InvestCommon/global';
+import { useAccountPhoto } from './logic/useAccountPhoto';
 
-const { FILER_URL } = env;
-
-defineProps({
+const props = defineProps({
   size: String as PropType<'large' | 'medium' | 'small'>,
   label: String,
+  userId: {
+    type: Number,
+    required: true,
+  },
+  imageId: {
+    type: Number,
+    default: 0,
+  },
 });
 
-const filerStore = useFilerStore();
-const { postSignurlData } = storeToRefs(filerStore);
-const userProfileStore = useUserProfilesStore();
-const { getUserData } = storeToRefs(userProfileStore);
+const emit = defineEmits(['upload-id']);
 
-const refFiles = ref<HTMLInputElement>();
-const filesUploadError = ref('');
-const imageFile = ref<File>();
-const isLoading = ref(false);
-
-const onUpload = async (file: File) => {
-  const res = await filerStore.uploadHandler(file, getUserData.value?.id, 'user');
-  if (res) {
-    const body = JSON.stringify({
-      image_link_id: postSignurlData.value?.meta?.id,
-    });
-    await userProfileStore.updateUserData(getUserData.value?.id, body);
-    userProfileStore.getUser();
-  }
-};
-
-const onClick = () => {
-  refFiles.value?.click();
-};
-const onFileChange = async () => {
-  isLoading.value = true;
-  const fileList = refFiles.value?.files as FileList;
-  const incomingFiles = Array.from(fileList);
-  const maxAllowedSize = 10 * 1024 * 1024; // 10MB
-  filesUploadError.value = '';
-
-  incomingFiles.forEach((file: File) => {
-    if (file.size >= maxAllowedSize) {
-      filesUploadError.value = 'Please upload a smaller file size. Limit 10MB';
-    }
-  });
-  if (filesUploadError.value) return;
-  [imageFile.value] = incomingFiles;
-  await onUpload(imageFile.value);
-  isLoading.value = false;
-};
-
-const imageID = computed(() => getUserData.value?.image_link_id);
+const {
+  FILER_URL,
+  refFiles,
+  filesUploadError,
+  imageFile,
+  isLoading,
+  onUpload,
+  onClick,
+  onFileChange,
+} = useAccountPhoto(props, emit);
 </script>
 
 <template>
@@ -68,7 +41,7 @@ const imageID = computed(() => getUserData.value?.image_link_id);
     <div class="v-account-photo__content is--margin-top-20">
       <VAvatar
         size="large"
-        :src="imageID > 0 ? `${FILER_URL}/auth/files/${imageID}?size=medium` : undefined"
+        :src="(imageId > 0) ? `${FILER_URL}/auth/files/${imageId}?size=medium` : undefined"
         alt="avatar image"
         class="v-account-photo__avatar"
       />

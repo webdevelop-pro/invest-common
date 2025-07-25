@@ -2,7 +2,7 @@
 import { useGlobalLoader } from 'InvestCommon/store/useGlobalLoader';
 import VFormPartialPersonalInformation from 'InvestCommon/components/forms/VFormPartialPersonalInformation.vue';
 import { storeToRefs } from 'pinia';
-import VLayoutForm from 'InvestCommon/core/layouts/VLayoutForm.vue';
+import VLayoutForm from 'InvestCommon/shared/layouts/VLayoutForm.vue';
 import { useFormPersonalInformation } from './store/useFormPersonalInformation';
 
 const globalLoader = useGlobalLoader();

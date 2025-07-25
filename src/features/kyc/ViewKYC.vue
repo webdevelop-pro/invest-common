@@ -2,7 +2,7 @@
 import { useGlobalLoader } from 'InvestCommon/store/useGlobalLoader';
 import { storeToRefs } from 'pinia';
 import { useFormFinancialInformationAndKyc } from './store/useFormFinancialInformationAndKyc';
-import VLayoutForm from 'InvestCommon/core/layouts/VLayoutForm.vue';
+import VLayoutForm from 'InvestCommon/shared/layouts/VLayoutForm.vue';
 import VFormPartialPersonalInformation from 'InvestCommon/components/forms/VFormPartialPersonalInformation.vue';
 import VFormPartialFinancialSituation from 'InvestCommon/components/forms/VFormPartialFinancialSituation.vue';
 import VFormPartialInvestmentObjectives from 'InvestCommon/components/forms/VFormPartialInvestmentObjectives.vue';
