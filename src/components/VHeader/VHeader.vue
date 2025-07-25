@@ -9,6 +9,7 @@ import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import { urlSignin, urlSignup } from 'InvestCommon/global/links';
 import VHeader from 'UiKit/components/VHeader/VHeader.vue';
 import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
+import { MenuItem } from 'InvestCommon/types/global'; // Use shared MenuItem type
 
 const VHeaderProfile = defineAsyncComponent({
   loader: () => import('./VHeaderProfile.vue'),
@@ -23,17 +24,6 @@ const VButton = defineAsyncComponent({
   hydrate: hydrateOnVisible(),
 });
 
-type MenuItem = {
-  to?: {
-    name: string;
-  };
-  href?: string;
-  active?: boolean;
-  text: string;
-  children?: MenuItem[];
-  path?: string;
-}
-
 const props = defineProps({
   profileMenu: Array as PropType<MenuItem[]>,
   path: String,
@@ -43,35 +33,54 @@ const sessionStore = useSessionStore();
 const { userLoggedIn } = storeToRefs(sessionStore);
 const userProfilesStore = useUserProfilesStore();
 const { isGetUserLoading } = storeToRefs(userProfilesStore);
-const path = ref(props.path || '');
+// Use props.path directly, no need for ref unless it is updated elsewhere
 const isMobileSidebarOpen = defineModel<boolean>();
 
 const isLoading = computed(() => isGetUserLoading.value);
-const isSignUpPage = computed(() => path.value.includes('signup'));
-const isSignInPage = computed(() => path.value.includes('signin'));
-const isRecoveryPage = computed(() => path.value.includes('forgot'));
-const isCheckEmailPage = computed(() => path.value.includes('check-email'));
-const isAuthenticatorPage = computed(() => path.value.includes('authenticator'));
+const isSignUpPage = computed(() => props.path?.includes('signup'));
+const isSignInPage = computed(() => props.path?.includes('signin'));
+const isRecoveryPage = computed(() => props.path?.includes('forgot'));
+const isCheckEmailPage = computed(() => props.path?.includes('check-email'));
+const isAuthenticatorPage = computed(() => props.path?.includes('authenticator'));
+const isKYCBoPage = computed(() => props.path?.includes('kyc-bo'));
 
 const isAuthFlowPage = computed(() => (isRecoveryPage.value || isCheckEmailPage.value));
 
 const showNavigation = computed(() => (
   !isSignInPage.value && !isSignUpPage.value && !isRecoveryPage.value
-  && !isCheckEmailPage.value && !isAuthenticatorPage.value));
+  && !isCheckEmailPage.value && !isAuthenticatorPage.value && !isKYCBoPage.value));
+
+const showAccountText = computed(() => (
+  !queryFlow && !userLoggedIn.value && !showNavigation.value && !isAuthenticatorPage.value && !isKYCBoPage.value))
+const showHaveAccount = computed(() => (!isSignInPage.value && !isAuthFlowPage.value))
+const showDontHaveAccount = computed(() => (!isSignUpPage.value))
+const showAuthButtons = computed(() => (
+  !queryFlow && !userLoggedIn.value && !isAuthenticatorPage.value && !isKYCBoPage.value))
+
+
 const queryParams = computed(() => new URLSearchParams(window?.location?.search));
 // if there is flow in url it means it is from sso
-let queryFlow;
+let queryFlow: string | null = null; // Explicitly type queryFlow
+
 
 const signInHandler = () => {
-  navigateWithQueryParams(urlSignin, queryParams.value);
+  // Convert URLSearchParams to Record<string, string>
+  const paramsObj: Record<string, string> = {};
+  queryParams.value.forEach((value, key) => {
+    paramsObj[key] = value;
+  });
+  navigateWithQueryParams(urlSignin, paramsObj);
 };
 
 const signUpHandler = () => {
-  navigateWithQueryParams(urlSignup, queryParams.value);
+  const paramsObj: Record<string, string> = {};
+  queryParams.value.forEach((value, key) => {
+    paramsObj[key] = value;
+  });
+  navigateWithQueryParams(urlSignup, paramsObj);
 };
 
 watchEffect(() => {
-  path.value = props.path || '';
   queryFlow = (window && window?.location?.search) ? new URLSearchParams(window.location.search).get('flow') : null;
 });
 </script>
@@ -85,16 +94,16 @@ watchEffect(() => {
   >
     <div class="v-header-invest__wrap">
       <span
-        v-if="!queryFlow && !userLoggedIn && !showNavigation && !isAuthenticatorPage"
+        v-if="showAccountText"
         class="v-header-invest__auth-text is--body"
       >
         <span
-          v-if="!userLoggedIn && !isSignInPage && !isAuthFlowPage"
+          v-if="showHaveAccount"
         >
           Already have an account?
         </span>
         <span
-          v-if="!userLoggedIn && !isSignUpPage"
+          v-if="showDontHaveAccount"
         >
           Don't have an account?
         </span>
@@ -107,7 +116,7 @@ watchEffect(() => {
         class="v-header-invest-btns__skeleton"
       />
       <div
-        v-else-if="!userLoggedIn && !isAuthenticatorPage"
+        v-else-if="showAuthButtons"
         class="v-header-invest-btns"
         :class="{
           'v-header-invest-sign-in': isSignInPage,
@@ -115,7 +124,7 @@ watchEffect(() => {
         }"
       >
         <VButton
-          v-if="!queryFlow && !userLoggedIn && !isSignInPage && !isAuthFlowPage"
+          v-if="showHaveAccount"
           class="v-header-invest-btns__sign-in"
           :variant="!isSignUpPage ? 'link' : null"
           @click="signInHandler"
@@ -124,7 +133,7 @@ watchEffect(() => {
         </VButton>
 
         <VButton
-          v-if="!queryFlow && !userLoggedIn && !isSignUpPage"
+          v-if="showDontHaveAccount"
           class="v-header-invest-btns__sign-up"
           @click="signUpHandler"
         >
@@ -139,7 +148,7 @@ watchEffect(() => {
 
     <template #mobile>
       <div
-        v-if="!userLoggedIn"
+        v-if="showAuthButtons"
         class="v-header-invest-btns"
         :class="{
           'v-header-invest-sign-in': isSignInPage,
@@ -147,7 +156,7 @@ watchEffect(() => {
         }"
       >
         <VButton
-          v-if="!userLoggedIn && !isSignInPage && !isRecoveryPage"
+          v-if="showHaveAccount"
           class="v-header-invest-btns__sign-in"
           :variant="!isSignUpPage ? 'link' : null"
           @click="signInHandler"
@@ -156,7 +165,7 @@ watchEffect(() => {
         </VButton>
 
         <VButton
-          v-if="!userLoggedIn && !isSignUpPage"
+          v-if="showDontHaveAccount"
           class="v-header-invest-btns__sign-up"
           @click="signUpHandler"
         >

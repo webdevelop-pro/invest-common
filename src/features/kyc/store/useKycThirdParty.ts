@@ -1,16 +1,14 @@
 import { ref, computed } from 'vue';
-import { acceptHMRUpdate, defineStore } from 'pinia';
 import { toasterErrorHandling } from 'InvestCommon/data/repository/error/toasterErrorHandling';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 
-export const useKycThirdParty = defineStore('useKycThirdParty', () => {
+export function useKycThirdParty() {
   const isPlaidLoading = ref(false);
+  const plaidSuccess = ref(false);
+  const { toast } = useToast();
+
   const query = computed(() => new URLSearchParams(window.location.search));
   const token = computed(() => query.value.get('token'));
-  // const expiration = computed(() => query.value.get('expiration'));
-  // const requestId = computed(() => query.value.get('request_id'));
-
-  const { toast } = useToast();
 
   const handlePlaidKycThirdParty = async () => {
     isPlaidLoading.value = true;
@@ -24,6 +22,7 @@ export const useKycThirdParty = defineStore('useKycThirdParty', () => {
             token: token.value,
             onSuccess: () => {
               isPlaidLoading.value = false;
+              plaidSuccess.value = true;
               toast({
                 title: 'Thank you for completing KYC',
                 description: 'Your KYC process is now complete.',
@@ -54,9 +53,9 @@ export const useKycThirdParty = defineStore('useKycThirdParty', () => {
 
   return {
     handlePlaidKycThirdParty,
+    isPlaidLoading,
+    plaidSuccess,
+    token,
+    query,
   };
-});
-
-if (import.meta.hot) {
-  import.meta.hot.accept(acceptHMRUpdate(useKycThirdParty, import.meta.hot));
 }
