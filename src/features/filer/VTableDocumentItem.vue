@@ -85,10 +85,19 @@ const onDocumentClick = async () => {
 </template>
 
 <style lang="scss">
+@use 'UiKit/styles/_variables.scss' as *;
+
 .v-table-document-item {
   width: 100%;
   cursor: pointer !important;
   align-items: center;
+
+  @media screen and (width < $tablet){
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    align-items: center;
+  }
 
   &__icon {
     width: 20px;
@@ -110,6 +119,11 @@ const onDocumentClick = async () => {
   &__tags {
     gap: 4px;
     width: 260px;
+
+    @media screen and (width < $tablet){
+      display: flex;
+      justify-content: center;
+    }
   }
 }
 </style>

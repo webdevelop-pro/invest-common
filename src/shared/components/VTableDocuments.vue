@@ -31,6 +31,10 @@ const props = defineProps({
   },
   loadingDocumentId: Number,
   loadingTable: Boolean,
+  withDownload: {
+    type: Boolean,
+  },
+  showPagination: Boolean,
 });
 
 const emit = defineEmits<{(e: 'row-click', item: IFilerItemFormatted): void;}>();
@@ -70,7 +74,7 @@ const searchData = computed(() => {
 
 const filterResults = computed(() => searchData.value.length);
 const showSearch = computed(() => filterResults.value > 0);
-const showPagination = computed(() => (
+const isshowPagination = computed(() => (
   Boolean(documentListLength.value && (documentListLength.value > 0)) && (filterResults.value > 0)
 ));
 
@@ -88,13 +92,13 @@ watch(() => currentTab.value, () => {
 </script>
 
 <template>
-  <div class="VTableDocuments investment-documents">
-    <div class="investment-documents__toolbar">
+  <div class="VTableDocuments v-table-documents">
+    <div class="v-table-documents__toolbar">
       <VTabs
         v-model="currentTab"
         :default-value="tabs[0].value"
         variant="secondary"
-        class="investment-documents__tabs"
+        class="v-table-documents__tabs"
       >
         <VTabsList
           variant="secondary"
@@ -113,16 +117,17 @@ watch(() => currentTab.value, () => {
         v-model="search"
         :disabled="!showSearch"
         size="small"
-        class="investment-documents__search"
+        class="v-table-documents__search"
       />
       <FilterPagination
-        :show-filter-pagination="showPagination"
+        v-if="showPagination"
+        :show-filter-pagination="isshowPagination"
         :filter-results="filterResults"
         :total-length="documentListLength"
       />
     </div>
     <VTableDefault
-      class="investment-documents__table"
+      class="v-table-documents__table"
       :data="searchData"
       :header="tableHeader"
       :loading="loadingTable"
@@ -133,7 +138,7 @@ watch(() => currentTab.value, () => {
         :search="search"
         :data="item"
         :loading="loadingDocumentId === item.id"
-        with-download
+        :with-download="withDownload"
         @click="onDocumentClick"
       />
       <template #empty>
@@ -144,7 +149,7 @@ watch(() => currentTab.value, () => {
 </template>
 
 <style lang="scss">
-.investment-documents {
+.v-table-documents {
   $root: &;
 
   &__toolbar {
@@ -161,9 +166,17 @@ watch(() => currentTab.value, () => {
     }
   }
 
-  &__tabs {
+  & &__tabs {
+    margin-top: 0;
+    width: auto;
     @media screen and (max-width: $tablet){
       width: 100%;
+    }
+  }
+
+  .v-table-header {
+    @media screen and (width < $tablet){
+      display: none;
     }
   }
 }
