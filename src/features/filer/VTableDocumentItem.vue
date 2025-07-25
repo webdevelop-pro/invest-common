@@ -11,6 +11,7 @@ const props = defineProps({
   data: Object as PropType<IFilerItemFormatted>,
   search: String,
   loading: Boolean,
+  withDownload: Boolean,
 });
 
 const emit = defineEmits(['click']);
@@ -61,12 +62,16 @@ const onDocumentClick = async () => {
     <VTableCell class="v-table-document-item__date-wrap is--small">
       {{ data?.date }}
     </VTableCell>
-    <VTableCell class="v-table-document-item__download-wrap">
+    <VTableCell
+      v-if="withDownload"
+      class="v-table-document-item__download-wrap"
+    >
       <VButton
         size="small"
         variant="link"
         :loading="loading || isLoading"
         :disabled="loading || isLoading"
+        class="is--margin-top-0"
         @click.stop="onDocumentClick"
       >
         <download
@@ -83,6 +88,7 @@ const onDocumentClick = async () => {
 .v-table-document-item {
   width: 100%;
   cursor: pointer !important;
+  align-items: center;
 
   &__icon {
     width: 20px;
@@ -102,7 +108,6 @@ const onDocumentClick = async () => {
   }
 
   &__tags {
-    display: flex;
     gap: 4px;
     width: 260px;
   }
