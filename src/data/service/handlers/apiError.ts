@@ -3,12 +3,22 @@ export interface APIErrorData {
   response: Response;
   statusCode: number;
   responseJson: any;
+  stack: string;
+  httpRequest?: {
+    method: string;
+    url: string;
+    path: string;
+    userAgent: string;
+    referer: string;
+    remoteIp: string;
+    protocol: string;
+  };
 }
 
 export class APIError extends Error {
   public data: APIErrorData;
 
-  constructor(message: string, response: Response) {
+  constructor(message: string, response: Response, httpRequest?: APIErrorData['httpRequest']) {
     super(message);
 
     // Maintains proper stack trace (only in V8 engines)
@@ -22,6 +32,16 @@ export class APIError extends Error {
       response: response.clone(),
       statusCode: response.status,
       responseJson: null,
+      stack: this.stack || '',
+      httpRequest: httpRequest || {
+        method: 'UNKNOWN',
+        url: 'UNKNOWN',
+        path: 'UNKNOWN',
+        userAgent: 'UNKNOWN',
+        referer: '',
+        remoteIp: 'UNKNOWN',
+        protocol: 'UNKNOWN',
+      },
     };
 
     // Initialize responseJson asynchronously

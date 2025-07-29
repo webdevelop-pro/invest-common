@@ -2,7 +2,7 @@ import { ref, computed } from 'vue';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import env from 'InvestCommon/global';
-import { toasterErrorHandling } from 'InvestCommon/data/repository/error/toasterErrorHandling';
+import { globalErrorHandling } from 'InvestCommon/data/repository/error/globalErrorHandling';
 import { createActionState } from 'InvestCommon/data/repository/repository';
 import { INotification } from 'InvestCommon/data/notifications/notifications.types';
 import { TransactionFormatter } from './formatter/transactions.formatter';
@@ -36,7 +36,7 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
       return formatted;
     } catch (err) {
       getWalletState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to fetch wallet');
+      globalErrorHandling(err, 'Failed to fetch wallet');
       throw err;
     } finally {
       getWalletState.value.loading = false;
@@ -53,7 +53,7 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
       return response.data.items;
     } catch (err) {
       getTransactionsState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to fetch wallet transactions');
+      globalErrorHandling(err, 'Failed to fetch wallet transactions');
       throw err;
     } finally {
       getTransactionsState.value.loading = false;
@@ -69,7 +69,7 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
       return response.data;
     } catch (err) {
       addBankAccountState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to add bank account');
+      globalErrorHandling(err, 'Failed to add bank account');
       throw err;
     } finally {
       addBankAccountState.value.loading = false;
@@ -85,7 +85,7 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
       return response.data;
     } catch (err) {
       addTransactionState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to add transaction');
+      globalErrorHandling(err, 'Failed to add transaction');
       throw err;
     } finally {
       addTransactionState.value.loading = false;
@@ -101,7 +101,7 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
       return response.data;
     } catch (err) {
       cancelTransactionState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to cancel transaction');
+      globalErrorHandling(err, 'Failed to cancel transaction');
       throw err;
     } finally {
       cancelTransactionState.value.loading = false;
@@ -117,7 +117,7 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
       return response.data;
     } catch (err) {
       createLinkTokenState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to create link token');
+      globalErrorHandling(err, 'Failed to create link token');
       throw err;
     } finally {
       createLinkTokenState.value.loading = false;
@@ -133,7 +133,7 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
       return response.data;
     } catch (err) {
       createLinkExchangeState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to exchange link token');
+      globalErrorHandling(err, 'Failed to exchange link token');
       throw err;
     } finally {
       createLinkExchangeState.value.loading = false;
@@ -149,7 +149,7 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
       return response.data;
     } catch (err) {
       createLinkProcessState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to process link token');
+      globalErrorHandling(err, 'Failed to process link token');
       throw err;
     } finally {
       createLinkProcessState.value.loading = false;
@@ -165,7 +165,7 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
       return response.data;
     } catch (err) {
       deleteLinkedAccountState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to delete linked account');
+      globalErrorHandling(err, 'Failed to delete linked account');
       throw err;
     } finally {
       deleteLinkedAccountState.value.loading = false;

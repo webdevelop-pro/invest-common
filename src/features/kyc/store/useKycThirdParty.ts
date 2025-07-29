@@ -1,5 +1,5 @@
 import { ref, computed } from 'vue';
-import { toasterErrorHandling } from 'InvestCommon/data/repository/error/toasterErrorHandling';
+import { globalErrorHandling } from 'InvestCommon/data/repository/error/globalErrorHandling';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 
 export function useKycThirdParty() {
@@ -47,7 +47,7 @@ export function useKycThirdParty() {
       }
     } catch (err) {
       isPlaidLoading.value = false;
-      toasterErrorHandling(err, 'Failed to handle Plaid KYC');
+      globalErrorHandling(err, 'Failed to handle Plaid KYC');
     }
   };
 

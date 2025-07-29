@@ -4,7 +4,7 @@ import { acceptHMRUpdate, defineStore } from 'pinia';
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import env from 'InvestCommon/global';
 import { INotification } from 'InvestCommon/types/api/notifications';
-import { toasterErrorHandling } from 'InvestCommon/data/repository/error/toasterErrorHandling';
+import { globalErrorHandling } from 'InvestCommon/data/repository/error/globalErrorHandling';
 import { createActionState } from 'InvestCommon/data/repository/repository';
 import { NotificationFormatter } from './notifications.formatter';
 
@@ -34,7 +34,7 @@ export const useRepositoryNotifications = defineStore('repository-notifications'
       return getAllState.value.data;
     } catch (err) {
       getAllState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to fetch notifications');
+      globalErrorHandling(err, 'Failed to fetch notifications');
       throw err;
     } finally {
       getAllState.value.loading = false;
@@ -53,7 +53,7 @@ export const useRepositoryNotifications = defineStore('repository-notifications'
       markAllAsReadState.value.data = undefined;
     } catch (err) {
       markAllAsReadState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to mark all notifications as read');
+      globalErrorHandling(err, 'Failed to mark all notifications as read');
       throw err;
     } finally {
       markAllAsReadState.value.loading = false;
@@ -71,7 +71,7 @@ export const useRepositoryNotifications = defineStore('repository-notifications'
       markAsReadByIdState.value.data = undefined;
     } catch (err) {
       markAsReadByIdState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to mark notification as read');
+      globalErrorHandling(err, 'Failed to mark notification as read');
       throw err;
     } finally {
       markAsReadByIdState.value.loading = false;

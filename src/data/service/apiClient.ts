@@ -37,6 +37,16 @@ export class ApiClient {
 
     const headers = config.headers ? config.headers : defaultHeaders;
 
+    // Gather HTTP request data
+    const httpRequest = {
+      method: config.method || 'GET',
+      url: fullUrl,
+      path: new URL(fullUrl).pathname,
+      userAgent: navigator.userAgent,
+      referer: document.referrer,
+      protocol: window.location.protocol.replace(':', ''),
+    };
+
     try {
       const response = await fetch(fullUrl, {
         credentials: 'include',
@@ -46,7 +56,7 @@ export class ApiClient {
       });
 
       if (!response.ok) {
-        const error = new APIError('Failed to fetch data', response);
+        const error = new APIError('Failed to fetch data', response, httpRequest);
         await error.initializeResponseJson();
         throw error;
       }
@@ -62,9 +72,11 @@ export class ApiClient {
         headers: response.headers,
       };
     } catch (error) {
-      if (error.name !== 'AbortError') {
+      if (error instanceof Error && error.name !== 'AbortError') {
         throw error;
       }
+      // Re-throw AbortError or return undefined for other cases
+      throw error;
     }
   }
 

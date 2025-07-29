@@ -2,7 +2,7 @@ import { ref, computed } from 'vue';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import env from 'InvestCommon/global';
-import { toasterErrorHandling } from 'InvestCommon/data/repository/error/toasterErrorHandling';
+import { globalErrorHandling } from 'InvestCommon/data/repository/error/globalErrorHandling';
 import { createActionState } from 'InvestCommon/data/repository/repository';
 import { useRouter } from 'vue-router';
 import { ROUTE_DASHBOARD_PORTFOLIO } from 'InvestCommon/helpers/enums/routes';
@@ -49,7 +49,7 @@ export const useRepositoryKyc = defineStore('repository-kyc', () => {
       return response.data;
     } catch (err) {
       tokenState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to create KYC token');
+      globalErrorHandling(err, 'Failed to create KYC token');
       throw err;
     } finally {
       tokenState.value.loading = false;
@@ -102,7 +102,7 @@ export const useRepositoryKyc = defineStore('repository-kyc', () => {
       }
     } catch (err) {
       isPlaidLoading.value = false;
-      toasterErrorHandling(err, 'Failed to handle Plaid KYC');
+      globalErrorHandling(err, 'Failed to handle Plaid KYC');
     }
   };
 
