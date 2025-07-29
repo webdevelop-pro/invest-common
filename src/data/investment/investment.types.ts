@@ -1,6 +1,6 @@
 import { FundingTypes } from 'InvestCommon/helpers/enums/general';
 import { IOffer } from 'InvestCommon/types/api/offers';
-import { IProfileIndividual } from 'InvestCommon/types/api/user';
+import { IOfferFormatted } from 'InvestCommon/data/offer/offer.types';
 
 export enum InvestStepTypes {
   amount = 'amount',
@@ -16,7 +16,6 @@ export enum InvestmentStatuses {
   successfully_closed = 'successfully_closed',
   cancelled_after_investment = 'cancelled_after_investment',
 }
-
 
 export interface IInvestPaymentData {
   account_type: string;
@@ -83,9 +82,8 @@ export interface IInvestment {
   transaction_ref: string;
 }
 
-// Formatter interfaces
 export interface IInvestmentFormatted extends IInvestment {
-  // Formatted properties
+  offer: IOfferFormatted;
   amountFormatted: string;
   amountWithSign: string;
   numberOfSharesFormatted: string;
@@ -94,17 +92,17 @@ export interface IInvestmentFormatted extends IInvestment {
   createdAtTime: string;
   submitedAtFormatted: string;
   submitedAtTime: string;
-  closedAtFormatted: string;
   fundingStatusFormatted: string;
   fundingTypeFormatted: string;
+  isFundingTypeWire: boolean;
   statusFormatted: {
     text: string;
     tooltip?: string;
     color: string;
   };
-  // Computed boolean properties
   isActive: boolean;
   isCompleted: boolean;
   isCancelled: boolean;
   isPending: boolean;
+  isFundingClickable: boolean;
 }

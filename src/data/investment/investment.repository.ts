@@ -10,11 +10,12 @@ import { createActionState } from 'InvestCommon/data/repository/repository';
 import { storeToRefs } from 'pinia';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { InvestmentFormatter } from 'InvestCommon/data/investment/investment.formatter';
-import { IInvestmentFormatted } from 'InvestCommon/data/investment/investment.types';
+import { IInvestmentFormatted, IInvestment } from 'InvestCommon/data/investment/investment.types';
+import { acceptHMRUpdate, defineStore } from 'pinia';
 
 const { INVESTMENT_URL, ESIGN_URL } = env;
 
-export const useRepositoryInvestment = () => {
+export const useRepositoryInvestment = defineStore('repositoryInvestment', () => {
   const apiClient = new ApiClient(INVESTMENT_URL);
   const esignApiClient = new ApiClient(ESIGN_URL);
 
@@ -22,7 +23,7 @@ export const useRepositoryInvestment = () => {
   const getInvestmentsState = createActionState<IInvestData>();
   const getInvestOneState = createActionState<IInvestmentFormatted>();
   const getInvestUnconfirmedState = createActionState<IInvestUnconfirmed>();
-  const setInvestState = createActionState<IInvest>();
+  const setInvestState = createActionState<IInvestment>();
   const setAmountState = createActionState<{number_of_shares: number}>();
   const setOwnershipState = createActionState<{step: string}>();
   const setSignatureState = createActionState<any>();
@@ -57,7 +58,7 @@ export const useRepositoryInvestment = () => {
       getInvestOneState.value.loading = true;
       getInvestOneState.value.error = null;
       const response = await apiClient.get(`/auth/investment/${id}`);
-      const investmentData = response.data as IInvest;
+      const investmentData = response.data as IInvestment;
       const formatter = new InvestmentFormatter(investmentData);
       const formattedData = formatter.format();
       getInvestOneState.value.data = formattedData;
@@ -76,8 +77,8 @@ export const useRepositoryInvestment = () => {
       getInvestUnconfirmedState.value.loading = true;
       getInvestUnconfirmedState.value.error = null;
       const response = await apiClient.get('/auth/investment/unconfirmed');
-      getInvestUnconfirmedState.value.data = response.data;
-      return response.data;
+      getInvestUnconfirmedState.value.data = response.data as IInvestUnconfirmed;
+      return response.data as IInvestUnconfirmed;
     } catch (err) {
       getInvestUnconfirmedState.value.error = err as Error;
       toasterErrorHandling(err, 'Failed to fetch unconfirmed investments');
@@ -94,8 +95,8 @@ export const useRepositoryInvestment = () => {
       const response = await apiClient.post(`/auth/invest/${slug}/${profileId}`, {
         number_of_shares: sharesCount,
       });
-      setInvestState.value.data = response.data;
-      return response.data;
+      setInvestState.value.data = response.data as IInvestment;
+      return response.data as IInvestment;
     } catch (err) {
       setInvestState.value.error = err as Error;
       toasterErrorHandling(err, 'Failed to set investment');
@@ -112,8 +113,8 @@ export const useRepositoryInvestment = () => {
       const response = await apiClient.put(`/auth/invest/${slug}/amount/${id}/${profileId}`, {
         number_of_shares: shares,
       });
-      setAmountState.value.data = response.data;
-      return response.data;
+      setAmountState.value.data = response.data as {number_of_shares: number};
+      return response.data as {number_of_shares: number};
     } catch (err) {
       setAmountState.value.error = err as Error;
       toasterErrorHandling(err, 'Failed to set amount');
@@ -128,8 +129,8 @@ export const useRepositoryInvestment = () => {
       setOwnershipState.value.loading = true;
       setOwnershipState.value.error = null;
       const response = await apiClient.put(`/auth/invest/${slug}/ownership/${id}/${profileId}`, {});
-      setOwnershipState.value.data = response.data;
-      return response.data;
+      setOwnershipState.value.data = response.data as {step: string};
+      return response.data as {step: string};
     } catch (err) {
       setOwnershipState.value.error = err as Error;
       toasterErrorHandling(err, 'Failed to set ownership');
@@ -168,8 +169,8 @@ export const useRepositoryInvestment = () => {
       setDocumentState.value.loading = true;
       setDocumentState.value.error = null;
       const response = await esignApiClient.post(`/auth/create_document/${slug}/esign/${investId}/${profileId}`);
-      setDocumentState.value.data = response.data;
-      return response.data;
+      setDocumentState.value.data = response.data as IInvestDocumentSign;
+      return response.data as IInvestDocumentSign;
     } catch (err) {
       setDocumentState.value.error = err as Error;
       toasterErrorHandling(err, 'Failed to set document');
@@ -189,9 +190,10 @@ export const useRepositoryInvestment = () => {
           accept: 'application/pdf',
           'X-Request-ID': uuidv4() as string,
         },
+        type: 'blob',
       });
-      getDocumentState.value.data = response.data;
-      return response.data;
+      getDocumentState.value.data = response.data as Blob;
+      return response.data as Blob;
     } catch (err) {
       getDocumentState.value.error = err as Error;
       toasterErrorHandling(err, 'Failed to get document');
@@ -222,8 +224,8 @@ export const useRepositoryInvestment = () => {
       setReviewState.value.loading = true;
       setReviewState.value.error = null;
       const response = await apiClient.put(`/auth/invest/${slug}/review/${id}/${profileId}`, {});
-      setReviewState.value.data = response.data;
-      return response.data;
+      setReviewState.value.data = response.data as IInvestConfirm;
+      return response.data as IInvestConfirm;
     } catch (err) {
       setReviewState.value.error = err as Error;
       toasterErrorHandling(err, 'Failed to set review');
@@ -372,4 +374,8 @@ export const useRepositoryInvestment = () => {
     setCancelOptions,
     resetAll,
   };
-}; 
+});
+
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useRepositoryInvestment, import.meta.hot));
+} 

@@ -5,6 +5,8 @@ import {
   InvestStepTypes,
   IInvestmentFormatted,
 } from './investment.types';
+import { OfferFormatter } from 'InvestCommon/data/offer/offer.formatter';
+import { IOfferFormatted } from 'InvestCommon/data/offer/offer.types';
 
 // Currency formatter function
 const defaultInstance = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 });
@@ -29,7 +31,7 @@ const formatToFullDate = (ISOString: string): string => {
 };
 
 // Simple capitalize function since we can't import from UiKit
-const capitalizeFirstLetter = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
+export const capitalizeFirstLetter = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
 
 const getTimeFormat = (fullDate: string) => {
   const date = new Date(fullDate);
@@ -85,12 +87,6 @@ export class InvestmentFormatter {
       : '-';
   }
 
-  get closedAtFormatted(): string {
-    return this.investment.closed_at
-      ? formatToFullDate(new Date(this.investment.closed_at).toISOString())
-      : '-';
-  }
-
   get fundingStatusFormatted() {
     const statusMap = {
       [InvestFundingStatuses.none]: 'None',
@@ -110,7 +106,11 @@ export class InvestmentFormatter {
   }
 
   get fundingTypeFormatted() {
-    return capitalizeFirstLetter(this.investment.funding_type || '');
+    return this.investment.funding_type ? capitalizeFirstLetter(this.investment.funding_type) : '-';
+  }
+
+  get isFundingTypeWire() {
+    return this.investment.funding_type === 'wire';
   }
 
   get statusFormatted() {
@@ -132,18 +132,8 @@ export class InvestmentFormatter {
   get offerFormatted() {
     if (!this.investment.offer) return undefined;
 
-    return {
-      name: this.investment.offer.name,
-      legal_name: this.investment.offer.legal_name,
-      security_type: this.investment.offer.security_type,
-      security_typeFormatted: this.investment.offer.security_type
-        ? capitalizeFirstLetter(this.investment.offer.security_type)
-        : undefined,
-      valuation: this.investment.offer.valuation,
-      valuationFormatted: this.investment.offer.valuation
-        ? currency(this.investment.offer.valuation, 0)
-        : undefined,
-    };
+    const offerFormatter = new OfferFormatter(this.investment.offer);
+    return offerFormatter.format();
   }
 
   get isActive() {
@@ -164,6 +154,18 @@ export class InvestmentFormatter {
            || this.investment.funding_status === InvestFundingStatuses.initialize;
   }
 
+  get isFundingClickable() {
+    const isLeggalyConfirmed = this.investment.status === InvestmentStatuses.legally_confirmed;
+    const isConfirmed = this.investment.status === InvestmentStatuses.confirmed;
+    if (!this.isFundingTypeWire && !isLeggalyConfirmed) return false;
+    if (this.isFundingTypeWire && !isLeggalyConfirmed && !isConfirmed) return false;
+    if (!this.isFundingTypeWire && (this.investment.funding_status === InvestFundingStatuses.none)) return false;
+    if (this.investment.funding_status === InvestFundingStatuses.creation_error) return false;
+    if (this.investment.funding_status === InvestFundingStatuses.sent_back_pending) return false;
+    if (this.investment.funding_status === InvestFundingStatuses.sent_back_settled) return false;
+    return true;
+  }
+
   format(): IInvestmentFormatted {
     return {
       ...this.investment,
@@ -175,15 +177,16 @@ export class InvestmentFormatter {
       createdAtTime: this.createdAtTime,
       submitedAtFormatted: this.submitedAtFormatted,
       submitedAtTime: this.submitedAtTime,
-      closedAtFormatted: this.closedAtFormatted,
       fundingStatusFormatted: this.fundingStatusFormatted,
       fundingTypeFormatted: this.fundingTypeFormatted,
+      isFundingTypeWire: this.isFundingTypeWire,
       statusFormatted: this.statusFormatted,
-      offer: this.investment.offer,
+      offer: this.offerFormatted || this.investment.offer as IOfferFormatted,
       isActive: this.isActive,
       isCompleted: this.isCompleted,
       isCancelled: this.isCancelled,
       isPending: this.isPending,
+      isFundingClickable: this.isFundingClickable,
     };
   }
 }

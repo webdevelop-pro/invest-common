@@ -12,6 +12,8 @@ import { fetchGetInvestUnconfirmed, fetchGetInvestments } from 'InvestCommon/ser
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { INotification } from 'InvestCommon/data/notifications/notifications.types';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
+import { OfferFormatter } from 'InvestCommon/data/offer/offer.formatter';
+import { IOfferFormatted } from 'InvestCommon/data/offer/offer.types';
 
 const unconfirmedOffersFilter = (unInv: IInvest[], slug: string, profileId: number | string) => (
   unInv.find((item) => item?.offer?.slug === slug && item?.profile_id === profileId));
@@ -36,7 +38,7 @@ export const useOfferStore = defineStore('offers', () => {
 
   const isGetOfferOneLoading = ref(false);
   const isGetOfferOneError = ref(false);
-  const getOfferOneData = ref<IOffer>();
+  const getOfferOneData = ref<IOfferFormatted>();
   const getOfferOne = async (slug: string | number) => {
     isGetOfferOneLoading.value = true;
     isGetOfferOneError.value = false;
@@ -45,7 +47,8 @@ export const useOfferStore = defineStore('offers', () => {
       generalErrorHandling(error);
     });
     if (response) {
-      getOfferOneData.value = response;
+      const formatter = new OfferFormatter(response);
+      getOfferOneData.value = formatter.format();
     }
     isGetOfferOneLoading.value = false;
   };

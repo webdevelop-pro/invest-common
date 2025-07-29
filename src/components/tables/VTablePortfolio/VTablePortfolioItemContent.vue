@@ -1,12 +1,10 @@
 <script setup lang="ts">
-import { currency } from 'InvestCommon/helpers/currency';
 import { formatToFullDate } from 'InvestCommon/helpers/formatters/formatToDate';
 import { IInvest } from 'InvestCommon/types/api/invest';
 import {
   PropType, computed, onBeforeMount, ref, watch,
 } from 'vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
-import { useInvestmentsStore } from 'InvestCommon/store/useInvestments';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useOfferStore } from 'InvestCommon/store/useOffer';
 import { storeToRefs } from 'pinia';
@@ -16,7 +14,7 @@ import { useRoute, useRouter } from 'vue-router';
 import file from 'UiKit/assets/images/file.svg';
 import timeline from 'UiKit/assets/images/timeline.svg';
 import { VTableCell, VTableRow } from 'UiKit/components/Base/VTable';
-import { capitalizeFirstLetter } from 'UiKit/helpers/text';
+import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
 
 const props = defineProps({
   item: {
@@ -28,8 +26,8 @@ const props = defineProps({
 
 const emit = defineEmits(['onCancelInvestmentClick']);
 
-const investmentsStore = useInvestmentsStore();
-const { isGetInvestOneLoading, getInvestOneData } = storeToRefs(investmentsStore);
+const investmentRepository = useRepositoryInvestment();
+const { getInvestOneState } = storeToRefs(investmentRepository);
 const offersStore = useOfferStore();
 const { isGetOfferOneLoading } = storeToRefs(offersStore);
 const profilesStore = useProfilesStore();
@@ -39,7 +37,7 @@ const route = useRoute();
 
 const queryPopupCancelInvestment = computed(() => (route.query.popup === 'cancel'));
 
-const isLoading = computed(() => (isGetInvestOneLoading.value || isGetOfferOneLoading.value));
+const isLoading = computed(() => (getInvestOneState.value.loading || isGetOfferOneLoading.value));
 
 const closedAt = computed(() => {
   if (new Date(props.item?.offer.close_at).getTime() < new Date('01-01-2022').getTime() || !props.item?.offer.close_at) return 'not closed';
@@ -58,7 +56,7 @@ const onCancelInvestmentClick = () => {
 
 onBeforeMount(async () => {
   if (props.item.id) {
-    investmentsStore.getInvestOne(String(props.item.id));
+    investmentRepository.getInvestOne(String(props.item.id));
   }
 });
 
@@ -121,7 +119,7 @@ watch(() => [queryPopupCancelInvestment.value], () => {
                 v-else
                 class="v-table-item-content__value is--body"
               >
-                {{ getInvestOneData?.number_of_shares.toLocaleString('en-US') }}
+                {{ getInvestOneState.data?.numberOfSharesFormatted }}
               </span>
               <VSkeleton
                 v-if="isLoading"
@@ -133,7 +131,7 @@ watch(() => [queryPopupCancelInvestment.value], () => {
                 v-else
                 class="v-table-item-content__value is--body"
               >
-                {{ currency(getInvestOneData?.price_per_share) }}
+                {{ getInvestOneState.data?.pricePerShareFormatted }}
               </span>
             </div>
           </div>
@@ -157,7 +155,7 @@ watch(() => [queryPopupCancelInvestment.value], () => {
                 v-else
                 class="v-table-item-content__value is--body"
               >
-                {{ getInvestOneData?.offer.security_type ? capitalizeFirstLetter(item?.offer.security_type || '') : '-' }}
+                {{ getInvestOneState.data?.offer.securityTypeFormatted }}
               </span>
               <VSkeleton
                 v-if="isLoading"

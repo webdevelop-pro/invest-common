@@ -52,9 +52,22 @@ export class ApiClient {
       }
 
       const contentType = response.headers.get('content-type');
-      const data = contentType?.includes('application/json')
-        ? await response.json()
-        : await response.text();
+      const defaultType = contentType?.includes('application/json') ? 'json' : 'text';
+      const type = config.type || defaultType;
+      let data: any;
+
+      switch (type) {
+        case 'json':
+          data = await response.json();
+          break;
+        case 'blob':
+          data = await response.blob();
+          break;
+        case 'text':
+        default:
+          data = await response.text();
+          break;
+      }
 
       return {
         data,
