@@ -52,14 +52,15 @@ export class FilerFormatter {
     return items.map(item => this.capitalizeFirstLetter(item.name));
   }
 
-  static formatToFullDate = (ISOString: string) => (
-    new Intl.DateTimeFormat('en-US', {
+  static formatToFullDate = (ISOString: string) => {
+    if (!ISOString) return '';
+    return new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
       month: 'numeric',
       day: 'numeric',
     })
       .format(new Date(ISOString))
-  );
+  };
 
   /**
    * Formats filer items into a one-dimensional array, grouped by folder (object-type) but flattened.

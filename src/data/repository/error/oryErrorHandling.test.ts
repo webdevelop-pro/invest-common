@@ -213,7 +213,7 @@ describe('oryErrorHandling', () => {
     expect(navigateWithQueryParams).toHaveBeenCalledWith('urlSignin');
   });
 
-  it('should handle unknown error with toasterErrorHandling', () => {
+  it('should handle unknown error with globalErrorHandling', () => {
     const error = {
       data: {
         responseJson: {
@@ -223,7 +223,7 @@ describe('oryErrorHandling', () => {
     };
 
     oryErrorHandling(error as any, 'login', mockResetFlow, 'test');
-    // Note: We can't directly test toasterErrorHandling since it's imported
+    // Note: We can't directly test globalErrorHandling since it's imported
     // but we can verify that other handlers weren't called
     expect(mockToast).not.toHaveBeenCalled();
     expect(mockResetFlow).not.toHaveBeenCalled();
@@ -238,7 +238,7 @@ describe('oryErrorHandling', () => {
     };
 
     oryErrorHandling(error as any, 'login', mockResetFlow, 'test');
-    // Note: We can't directly test toasterErrorHandling since it's imported
+    // Note: We can't directly test globalErrorHandling since it's imported
     // but we can verify that other handlers weren't called
     expect(mockToast).not.toHaveBeenCalled();
     expect(mockResetFlow).not.toHaveBeenCalled();
