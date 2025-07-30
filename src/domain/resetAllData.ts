@@ -14,7 +14,7 @@ import { useProfileEvmWalletTransactionStore } from 'InvestCommon/store/useProfi
 import { useProfileEvmWalletStore } from 'InvestCommon/store/useProfileEvmWallet/useProfileEvmWallet';
 import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import { usePlaidStore } from 'InvestCommon/store/usePlaid';
-import { useInvestmentsStore } from 'InvestCommon/store/useInvestments';
+import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
 import { useAccreditationStore } from 'InvestCommon/store/useAccreditation';
 import { useAuthStore } from 'InvestCommon/store/useAuth';
 import { useFilerStore } from 'InvestCommon/store/useFiler';
@@ -35,7 +35,6 @@ export const resetAllData = () => {
   useProfileEvmWalletStore().resetAll();
   useUserProfilesStore().resetAll();
   usePlaidStore().resetAll();
-  useInvestmentsStore().resetAll();
   useAccreditationStore().resetAll();
   useAuthStore().resetAll();
   useFilerStore().resetAll();
@@ -48,4 +47,5 @@ export const resetAllData = () => {
   useRepositoryKyc().resetAll();
   useRepositoryWallet().resetAll();
   useRepositoryFiler().resetAll();
+  useRepositoryInvestment().resetAll();
 };

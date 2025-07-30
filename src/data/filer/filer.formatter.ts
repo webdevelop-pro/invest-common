@@ -16,14 +16,13 @@ export class FilerFormatter {
     return input.charAt(0).toUpperCase() + input.slice(1);
   };
 
-
   /**
    * Deeply merges two objects with properties (Record<string, IFilerItem>),
    * using lodash's merge for recursive merging.
    */
   static deepMergeById(
     obj1: Record<string, IFilerItem> = {},
-    obj2: Record<string, IFilerItem> = {}
+    obj2: Record<string, IFilerItem> = {},
   ): Record<string, IFilerItem> {
     return merge({}, obj1, obj2);
   }
@@ -33,7 +32,7 @@ export class FilerFormatter {
    */
   static deepMergeToArray(
     obj1: Record<string, IFilerItem> = {},
-    obj2: Record<string, IFilerItem> = {}
+    obj2: Record<string, IFilerItem> = {},
   ): IFilerItem[] {
     return Object.values(this.deepMergeById(obj1, obj2));
   }
@@ -49,17 +48,18 @@ export class FilerFormatter {
    * Returns an array of item.name values from the provided filer items.
    */
   static extractNames(items: IFilerItem[]): string[] {
-    return items.map(item => this.capitalizeFirstLetter(item.name));
+    return items.map((item) => this.capitalizeFirstLetter(item.name));
   }
 
-  static formatToFullDate = (ISOString: string) => (
-    new Intl.DateTimeFormat('en-US', {
+  static formatToFullDate = (ISOString: string) => {
+    if (!ISOString) return;
+    return new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
       month: 'numeric',
       day: 'numeric',
     })
-      .format(new Date(ISOString))
-  );
+      .format(new Date(ISOString));
+  };
 
   /**
    * Formats filer items into a one-dimensional array, grouped by folder (object-type) but flattened.
@@ -149,10 +149,10 @@ export class FilerFormatter {
     // 1. Merge files
     const filesMerged = FilerFormatter.deepMergeToArray(
       (getFilesData as any)?.entities,
-      (getFilesPublicData as any)?.entities
+      (getFilesPublicData as any)?.entities,
     );
     // 2. Filter out media
-    const filesFiltered = FilerFormatter.filterByPredicate(filesMerged, item => item.name !== 'media');
+    const filesFiltered = FilerFormatter.filterByPredicate(filesMerged, (item) => item.name !== 'media');
     // 3. Flatten grouped entities (if needed)
     const filesFormatted = FilerFormatter.flattenGroupedEntities(filesFiltered);
     // 4. Sort by typeFormatted, with 'investment-agreements' first, then by date (newest first)
@@ -172,12 +172,12 @@ export class FilerFormatter {
     // 1. Merge files
     const filesMerged = FilerFormatter.deepMergeToArray(
       (getFilesData as any)?.entities,
-      (getFilesPublicData as any)?.entities
+      (getFilesPublicData as any)?.entities,
     );
     // 2. Filter out media
-    const filesFiltered = FilerFormatter.filterByPredicate(filesMerged, item => item.name !== 'media');
+    const filesFiltered = FilerFormatter.filterByPredicate(filesMerged, (item) => item.name !== 'media');
 
     const result = FilerFormatter.extractNames(filesFiltered);
     return result;
   }
-} 
+}
