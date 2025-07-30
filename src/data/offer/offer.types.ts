@@ -11,11 +11,19 @@ export interface IOfferFormatted extends IOffer {
   };
   approvedAtFormatted: string;
   closeAtFormatted: string;
-  isActive: boolean;
-  isCompleted: boolean;
-  isCancelled: boolean;
   isDefaultImage: boolean;
+  offerFundedPercent: number;
   imageBig: string;
   imageSmall: string;
   imageMedium: string;
+  isStatusNew: boolean;
+  isStatusDraft: boolean;
+  isStatusLegalReview: boolean;
+  isStatusLegalAccepted: boolean;
+  isStatusLegalDeclined: boolean;
+  isStatusPublished: boolean;
+  isStatusLegalClosed: boolean;
+  isStatusClosedSuccessfully: boolean;
+  isStatusClosedUnsuccessfully: boolean;
+  isFundingCompleted: boolean;
 } 

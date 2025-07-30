@@ -2,16 +2,15 @@
 import { PropType, ref, watch } from 'vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { jsPDF } from 'jspdf';
-import { currency } from 'InvestCommon/helpers/currency';
-import { IInvest } from 'InvestCommon/types/api/invest';
 import download from 'UiKit/assets/images/download.svg';
 import {
   VDialogContent, VDialogFooter, VDialogHeader, VDialogTitle, VDialog,
 } from 'UiKit/components/Base/VDialog';
+import { IInvestmentFormatted } from 'InvestCommon/data/investment/investment.types';
 
 const props = defineProps({
   investment: {
-    type: Object as PropType<IInvest>,
+    type: Object as PropType<IInvestmentFormatted>,
     required: true,
   },
   userName: String,
@@ -78,7 +77,7 @@ const saveHandler = () => {
               Amount:
             </span>
             <span class="wd-modal-portfolio-wire__text-value">
-              {{ currency(investment?.amount) }}
+              {{ investment.amountFormatted }}
             </span>
           </div>
           <div class="wd-modal-portfolio-wire__row">

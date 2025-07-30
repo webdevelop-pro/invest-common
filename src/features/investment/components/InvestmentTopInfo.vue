@@ -14,13 +14,13 @@ const VDialogContactUs = defineAsyncComponent({
   loader: () => import('InvestCommon/components/dialogs/VDialogContactUs.vue'),
 });
 const VDialogPortfolioTransaction = defineAsyncComponent({
-  loader: () => import('InvestCommon/components/dialogs/VDialogPortfolioTransaction.vue'),
+  loader: () => import('InvestCommon/features/investment/components/VDialogPortfolioTransaction.vue'),
 });
 const VDialogPortfolioWire = defineAsyncComponent({
-  loader: () => import('InvestCommon/components/dialogs/VDialogPortfolioWire.vue'),
+  loader: () => import('InvestCommon/features/investment/components/VDialogPortfolioWire.vue'),
 });
 const VDialogPortfolioCancelInvestment = defineAsyncComponent({
-  loader: () => import('InvestCommon/components/dialogs/VDialogPortfolioCancelInvestment.vue'),
+  loader: () => import('InvestCommon/features/investment/components/VDialogPortfolioCancelInvestment.vue'),
 });
 
 const props = defineProps({
@@ -228,6 +228,7 @@ const {
       v-if="getInvestOneData"
       v-model:open="isDialogCancelOpen"
       :investment="getInvestOneData as any"
+      @close="isDialogCancelOpen = false"
     />
   </div>
 </template>

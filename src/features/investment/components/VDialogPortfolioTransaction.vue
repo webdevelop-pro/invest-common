@@ -7,11 +7,12 @@ import {
   VDialogContent, VDialogFooter, VDialogTitle, VDialog,
   VDialogHeader,
 } from 'UiKit/components/Base/VDialog';
-import VTablePortfolioTransaction from 'InvestCommon/components/tables/VTablePortfolioTransaction.vue';
+import VTablePortfolioTransaction from 'InvestCommon/features/investment/components/VTablePortfolioTransaction.vue';
+import { IInvestmentFormatted } from 'InvestCommon/data/investment/investment.types';
 
 const props = defineProps({
   investment: {
-    type: Object as PropType<IInvest>,
+    type: Object as PropType<IInvestmentFormatted>,
     required: true,
   },
   userName: String,

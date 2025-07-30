@@ -212,7 +212,7 @@ export interface IUserIdentityResponse {
   data: IBackgroundInfo;
   last_login: string;
   created_at: string;
-  profiles: IProfileIndividual[];
+  profiles: IProfileFormatted[];
 }
 
 export interface IProfileList {
@@ -261,4 +261,21 @@ export interface IBackgroundInfo {
     explanation: string;
     is_accredited: boolean;
   };
+}
+
+export interface IProfileFormatted extends IProfileIndividual {
+  isKycApproved: boolean;
+  isKycInProgress: boolean;
+  isKycPending: boolean;
+  isKycDeclined: boolean;
+  isKycNew: boolean;
+  isKycNone: boolean;
+  isAccreditationApproved: boolean;
+  isAccreditationInProgress: boolean;
+  isAccreditationPending: boolean;
+  isAccreditationDeclined: boolean;
+  isAccreditationNew: boolean;
+  isAccreditationInfoRequired: boolean;
+  isAccreditationExpired: boolean;
+  isCanCallKycPlaid: boolean;
 }

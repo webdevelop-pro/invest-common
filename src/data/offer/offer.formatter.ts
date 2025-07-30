@@ -85,18 +85,6 @@ export class OfferFormatter {
     };
   }
 
-  get isActive() {
-    return this.offer.status === OfferStatuses.published;
-  }
-
-  get isCompleted() {
-    return this.offer.status === OfferStatuses.closed_successfully;
-  }
-
-  get isCancelled() {
-    return this.offer.status === OfferStatuses.closed_unsuccessfully;
-  }
-
   getOfferImage(metaSize: 'big' | 'small' | 'medium' = 'small'): string {
     const imageID = this.offer?.image_link_id;
     if (imageID && (imageID > 0)) {
@@ -105,8 +93,68 @@ export class OfferFormatter {
     return defaultImage;
   }
 
+  get offerFundedPercent() {
+    if (!this.offer.total_shares || this.offer.total_shares === 0) {
+      return 0;
+    }
+    
+    const percent = (this.offer.subscribed_shares / this.offer.total_shares) * 100;
+    
+    // For high percentages (>85%), use floor to avoid showing 100% prematurely
+    if (percent > 85) {
+      return Math.floor(percent);
+    }
+    
+    // For lower percentages, use ceil to show progress
+    return Math.ceil(percent);
+  }
+
   get isDefaultImage(): boolean {
     return !(this.offer?.image_link_id);
+  }
+
+  get isStatusNew(): boolean {
+    return this.offer.status === OfferStatuses.new;
+  }
+
+  get isStatusDraft(): boolean {
+    return this.offer.status === OfferStatuses.draft;
+  }
+
+  get isStatusLegalReview(): boolean {
+    return this.offer.status === OfferStatuses.legal_review;
+  }
+
+  get isStatusLegalAccepted(): boolean {
+    return this.offer.status === OfferStatuses.legal_accepted;
+  }
+
+  get isStatusLegalDeclined(): boolean {
+    return this.offer.status === OfferStatuses.legal_declined;
+  }
+
+  get isStatusPublished(): boolean {
+    return this.offer.status === OfferStatuses.published;
+  }
+
+  get isStatusLegalClosed(): boolean {
+    return this.offer.status === OfferStatuses.legal_closed;
+  }
+
+  get isStatusClosedSuccessfully(): boolean {
+    return this.offer.status === OfferStatuses.closed_successfully;
+  }
+
+  get isStatusClosedUnsuccessfully(): boolean {
+    return this.offer.status === OfferStatuses.closed_unsuccessfully;
+  }
+
+  get isFundingCompleted(): boolean {
+    return (
+      this.offer.status === OfferStatuses.legal_closed ||
+      this.offer.status === OfferStatuses.closed_successfully ||
+      this.offer.status === OfferStatuses.closed_unsuccessfully
+    );
   }
 
   format(): IOfferFormatted {
@@ -119,13 +167,21 @@ export class OfferFormatter {
       statusFormatted: this.statusFormatted,
       approvedAtFormatted: this.approvedAtFormatted,
       closeAtFormatted: this.closeAtFormatted,
-      isActive: this.isActive,
-      isCompleted: this.isCompleted,
-      isCancelled: this.isCancelled,
       isDefaultImage: this.isDefaultImage,
+      offerFundedPercent: this.offerFundedPercent,
       imageBig: this.getOfferImage('big'),
       imageSmall: this.getOfferImage('small'),
       imageMedium: this.getOfferImage('medium'),
+      isStatusNew: this.isStatusNew,
+      isStatusDraft: this.isStatusDraft,
+      isStatusLegalReview: this.isStatusLegalReview,
+      isStatusLegalAccepted: this.isStatusLegalAccepted,
+      isStatusLegalDeclined: this.isStatusLegalDeclined,
+      isStatusPublished: this.isStatusPublished,
+      isStatusLegalClosed: this.isStatusLegalClosed,
+      isStatusClosedSuccessfully: this.isStatusClosedSuccessfully,
+      isStatusClosedUnsuccessfully: this.isStatusClosedUnsuccessfully,
+      isFundingCompleted: this.isFundingCompleted,
     };
   }
 }

@@ -92,6 +92,10 @@ export interface IInvestmentFormatted extends IInvestment {
   createdAtTime: string;
   submitedAtFormatted: string;
   submitedAtTime: string;
+  paymentDataCreatedAtFormatted: string;
+  paymentDataCreatedAtTime: string;
+  paymentDataUpdatedAtFormatted: string;
+  paymentDataUpdatedAtTime: string;
   fundingStatusFormatted: string;
   fundingTypeFormatted: string;
   isFundingTypeWire: boolean;

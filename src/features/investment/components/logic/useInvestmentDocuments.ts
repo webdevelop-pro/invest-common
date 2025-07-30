@@ -1,4 +1,6 @@
-import { computed, ref, watch, ComputedRef, Ref } from 'vue';
+import {
+  computed, ref, watch, ComputedRef, Ref,
+} from 'vue';
 import { storeToRefs } from 'pinia';
 import { FilerFormatter } from 'InvestCommon/data/filer/filer.formatter';
 import { IFilerItemFormatted } from 'InvestCommon/data/filer/filer.type';
@@ -58,7 +60,7 @@ export const useInvestmentDocuments = (options: UseInvestmentDocumentsOptions): 
     const submitedAt = getInvestOneState.value.data?.submited_at;
     const submitedAtString = typeof submitedAt === 'string' ? submitedAt : '';
     const formattedDate = FilerFormatter.formatToFullDate(submitedAtString) || '';
-    
+
     return [{
       id: 0,
       name: 'Subscription Agreement',
@@ -121,9 +123,7 @@ export const useInvestmentDocuments = (options: UseInvestmentDocumentsOptions): 
     }
   };
 
-  const loadingTable = computed(() => 
-    getFilesState.value.loading || getInvestOneState.value.loading
-  );
+  const loadingTable = computed(() => getFilesState.value.loading || getInvestOneState.value.loading);
 
   watch(() => getInvestOneState.value.data?.offer?.id, () => {
     getOfferDocuments();
@@ -137,4 +137,4 @@ export const useInvestmentDocuments = (options: UseInvestmentDocumentsOptions): 
     loadingTable,
     onDocumentClick,
   };
-}; 
+};

@@ -2,34 +2,18 @@
 import {
   VTable, VTableBody, VTableCell, VTableRow,
 } from 'UiKit/components/Base/VTable';
-import { IInvest } from 'InvestCommon/types/api/invest';
 import { computed, PropType } from 'vue';
-import { currency } from 'InvestCommon/helpers/currency';
 import { InvestTransactionStatuses } from 'InvestCommon/helpers/enums/invest';
 import VBadge from 'UiKit/components/Base/VBadge/VBadge.vue';
-import { formatToFullDate } from 'InvestCommon/helpers/formatters/formatToDate';
 import VTooltip from 'UiKit/components/VTooltip.vue';
+import { IInvestmentFormatted } from 'InvestCommon/data/investment/investment.types';
 
 const props = defineProps({
   investment: {
-    type: Object as PropType<IInvest>,
+    type: Object as PropType<IInvestmentFormatted>,
     required: true,
   },
 });
-
-const dateFull = computed(() => {
-  let dateInner = props.investment.payment_data.created_at;
-  if (props.investment.payment_data.updated_at) dateInner = props.investment.payment_data.updated_at;
-  return dateInner;
-});
-const getTimeFormat = (fullDate: string) => {
-  const date = new Date(fullDate);
-  const hours = date.getHours();
-  const minutes = date.getMinutes().toString().padStart(2, '0');
-  return `${hours}:${minutes}`;
-};
-const dateFormatted = computed(() => (dateFull.value ? formatToFullDate(new Date(dateFull.value).toISOString()) : ''));
-const timeFormatted = computed(() => (dateFull.value ? getTimeFormat(String(dateFull.value)) : ''));
 </script>
 
 <template>
@@ -41,10 +25,10 @@ const timeFormatted = computed(() => (dateFull.value ? getTimeFormat(String(date
       <VTableRow>
         <VTableCell>
           <div>
-            {{ dateFormatted }}
+            {{ investment.payment_data.updated_at ? investment.paymentDataUpdatedAtFormatted : investment.paymentDataCreatedAtFormatted }}
           </div>
           <div class="v-table-portfolio-transaction__time">
-            {{ timeFormatted }}
+            {{ investment.payment_data.updated_at ? investment.paymentDataUpdatedAtTime : investment.paymentDataCreatedAtTime }}
           </div>
         </VTableCell>
         <VTableCell
@@ -74,7 +58,7 @@ const timeFormatted = computed(() => (dateFull.value ? getTimeFormat(String(date
         </VTableCell>
         <VTableCell>
           <div class="v-table-portfolio-transaction__amount is--h6__title">
-            {{ currency(Number(investment.amount), 0) }}
+            {{ investment.amountFormatted }}
           </div>
         </VTableCell>
       </VTableRow>
