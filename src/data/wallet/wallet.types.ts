@@ -100,6 +100,7 @@ export interface ITransactionDataFormatted extends ITransactionDataResponse {
   submited_at_time?: string;
   isTypeDeposit?: boolean;
   isTypeInvestment?: boolean;
+  typeFormatted?: string;
   statusFormated?: {
     text: string;
     tooltip?: string;

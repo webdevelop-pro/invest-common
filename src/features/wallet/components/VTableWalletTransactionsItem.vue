@@ -41,7 +41,7 @@ defineProps({
           :color="data?.tagColor"
           class="profile-status-info__tag"
         >
-          {{ data?.type[0]?.toUpperCase() + data?.type?.slice(1) }}
+          {{ data?.typeFormatted }}
         </VBadge>
       </div>
     </VTableCell>

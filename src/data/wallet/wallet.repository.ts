@@ -173,31 +173,38 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
   };
 
   const updateNotificationData = (notification: INotification) => {
-    const objectId = notification.data.fields.object_id;
-    if (notification.data.obj === 'transaction') {
-      const list = getTransactionsState.value.data;
-      if (list && objectId !== undefined) {
-        const item = list.find((itemLocal: { id: number }) => itemLocal.id === objectId);
-        if (item && notification.data.fields) {
-          Object.assign(item, notification.data.fields);
-          const formatted = new TransactionFormatter(item).format();
-          Object.assign(item, formatted);
-        }
+    const { obj, fields } = notification.data;
+    const objectId = fields?.object_id;
+
+    if (obj === 'transaction') {
+      if (!objectId || !fields) return;
+      if (!getTransactionsState.value.data) {
+        getTransactionsState.value.data = [];
       }
-      if ((walletId.value > 0)) {
-        getTransactions(walletId.value);
+      const index = getTransactionsState.value.data?.findIndex((t) => t.id === objectId);
+
+      if (index !== -1) {
+        Object.assign(getTransactionsState.value.data[index], fields);
+        Object.assign(getTransactionsState.value.data[index], new TransactionFormatter(getTransactionsState.value.data[index]).format());
+      } else {
+        const newItem = { ...fields, id: fields.object_id };
+        Object.assign(newItem, new TransactionFormatter(newItem).format());
+        getTransactionsState.value.data?.unshift(newItem);
       }
-    } else if (notification.data.obj === 'wallet') {
-      let temp = getWalletState.value.data;
-      Object.assign(temp, notification.data.fields);
-      if (notification.data.fields?.inc_balance !== undefined) {
-        temp.pending_incoming_balance = notification.data.fields.inc_balance;
+    } else if (obj === 'wallet') {
+      const wallet = getWalletState.value.data;
+      if (!wallet) return;
+
+      Object.assign(wallet, fields);
+
+      if (fields?.inc_balance !== undefined) {
+        wallet.pending_incoming_balance = fields.inc_balance;
       }
-      if (notification.data.fields?.out_balance !== undefined) {
-        temp.pending_outcoming_balance = notification.data.fields.out_balance;
+      if (fields?.out_balance !== undefined) {
+        wallet.pending_outcoming_balance = fields.out_balance;
       }
-      const formatted = new WalletFormatter(temp as any).format();
-      getWalletState.value.data = formatted;
+
+      getWalletState.value.data = new WalletFormatter(wallet as any).format();
     }
   };
 

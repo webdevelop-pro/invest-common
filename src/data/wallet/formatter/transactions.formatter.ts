@@ -36,6 +36,10 @@ export class TransactionFormatter {
     return this.transaction?.type === WalletAddTransactionTypes.deposit;
   }
 
+  get typeFormatted() {
+    return this.transaction?.type ? this.transaction.type[0]?.toUpperCase() + this.transaction.type?.slice(1) : '';
+  }
+
   get tagBackground() {
     if (this.isTypeDeposit) return 'secondary-light';
     if (this.isTypeInvestment) return 'purple-light';
@@ -50,12 +54,13 @@ export class TransactionFormatter {
   format(): ITransactionDataFormatted {
     return {
       ...this.transaction,
-      submited_at_date: formatToFullDate(new Date(this.transaction.created_at || '').toISOString()),
-      submited_at_time: getTimeFormat(this.transaction.created_at),
-      updated_at_date: formatToFullDate(new Date(this.transaction.updated_at || '').toISOString()),
-      updated_at_time: getTimeFormat(this.transaction.updated_at),
+      submited_at_date: this.transaction.created_at ? formatToFullDate(new Date(this.transaction.created_at).toISOString()) : '-',
+      submited_at_time: this.transaction.created_at ? getTimeFormat(this.transaction.created_at) : '-',
+      updated_at_date: this.transaction.updated_at ? formatToFullDate(new Date(this.transaction.updated_at).toISOString()) : '-',
+      updated_at_time: this.transaction.updated_at ? getTimeFormat(this.transaction.updated_at) : '-',
       isTypeDeposit: this.isTypeDeposit,
       isTypeInvestment: this.isTypeInvestment,
+      typeFormatted: this.typeFormatted,
       amountFormatted: this.tableCurrencyFormat,
       tagColor: this.tagBackground,
       statusFormated: {
