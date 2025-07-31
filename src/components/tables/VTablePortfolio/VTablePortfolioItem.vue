@@ -14,13 +14,13 @@ const profilesStore = useProfilesStore();
 const { selectedUserProfileId, selectedUserProfileData } = storeToRefs(profilesStore);
 
 const VDialogPortfolioTransaction = defineAsyncComponent({
-  loader: () => import('InvestCommon/components/dialogs/VDialogPortfolioTransaction.vue'),
+  loader: () => import('InvestCommon/features/investment/components/VDialogPortfolioTransaction.vue'),
 });
 const VDialogPortfolioWire = defineAsyncComponent({
-  loader: () => import('InvestCommon/components/dialogs/VDialogPortfolioWire.vue'),
+  loader: () => import('InvestCommon/features/investment/components/VDialogPortfolioWire.vue'),
 });
 const VDialogPortfolioCancelInvestment = defineAsyncComponent({
-  loader: () => import('InvestCommon/components/dialogs/VDialogPortfolioCancelInvestment.vue'),
+  loader: () => import('InvestCommon/features/investment/components/VDialogPortfolioCancelInvestment.vue'),
 });
 
 const props = defineProps({
@@ -117,5 +117,6 @@ watch(() => props.activeId, (newId) => {
   <VDialogPortfolioCancelInvestment
     v-model:open="isDialogCancelOpen"
     :investment="item"
+    @close="isDialogCancelOpen = false"
   />
 </template>

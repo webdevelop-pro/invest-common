@@ -87,6 +87,30 @@ export class InvestmentFormatter {
       : '-';
   }
 
+  get paymentDataCreatedAtFormatted(): string {
+    return this.investment.payment_data?.created_at
+      ? formatToFullDate(new Date(this.investment.payment_data.created_at).toISOString())
+      : '-';
+  }
+
+  get paymentDataCreatedAtTime(): string {
+    return this.investment.payment_data?.created_at
+      ? getTimeFormat(this.investment.payment_data.created_at.toString())
+      : '-';
+  }
+
+  get paymentDataUpdatedAtFormatted(): string {
+    return this.investment.payment_data?.updated_at
+      ? formatToFullDate(new Date(this.investment.payment_data.updated_at).toISOString())
+      : '-';
+  }
+
+  get paymentDataUpdatedAtTime(): string {
+    return this.investment.payment_data?.updated_at
+      ? getTimeFormat(this.investment.payment_data.updated_at.toString())
+      : '-';
+  }
+
   get fundingStatusFormatted() {
     const statusMap = {
       [InvestFundingStatuses.none]: 'None',
@@ -177,6 +201,10 @@ export class InvestmentFormatter {
       createdAtTime: this.createdAtTime,
       submitedAtFormatted: this.submitedAtFormatted,
       submitedAtTime: this.submitedAtTime,
+      paymentDataCreatedAtFormatted: this.paymentDataCreatedAtFormatted,
+      paymentDataCreatedAtTime: this.paymentDataCreatedAtTime,
+      paymentDataUpdatedAtFormatted: this.paymentDataUpdatedAtFormatted,
+      paymentDataUpdatedAtTime: this.paymentDataUpdatedAtTime,
       fundingStatusFormatted: this.fundingStatusFormatted,
       fundingTypeFormatted: this.fundingTypeFormatted,
       isFundingTypeWire: this.isFundingTypeWire,

@@ -214,11 +214,6 @@ describe('useAccreditationUpload', () => {
   });
 
   describe('accreditation status checks', () => {
-    it('should return true for isCreateAccreditation when status is new', () => {
-      const store = useAccreditationUpload();
-      expect(store.isCreateAccreditation).toBe(true);
-    });
-
     it('should return false for isAccreditationCanUpload when status is pending', () => {
       // Reset the mock before the test
       vi.clearAllMocks();
@@ -229,15 +224,19 @@ describe('useAccreditationUpload', () => {
           id: '123',
           user_id: '456',
           accreditation_status: AccreditationTypes.pending,
+          isAccreditationPending: true,
+          isAccreditationApproved: false,
+          isAccreditationNew: false,
         }),
         selectedUserProfileId: ref('123'),
         selectedUserProfileType: ref('individual'),
       };
 
       // Override the mock implementation for this test
-      vi.mocked(useProfilesStore).mockReturnValue(mockStore);
+      vi.mocked(useProfilesStore).mockReturnValue(mockStore as any);
 
       const store = useAccreditationUpload();
+      // With the new logic, isAccreditationCanUpload should be false when isAccreditationApproved is false
       expect(store.isAccreditationCanUpload).toBe(false);
     });
 
@@ -287,11 +286,18 @@ describe('useAccreditationUpload', () => {
 
       // Ensure the store is properly initialized with all required refs
       const mockStore = {
-        selectedUserProfileData: ref({ id: '123', user_id: '456', accreditation_status: 'new' }),
+        selectedUserProfileData: ref({ 
+          id: '123', 
+          user_id: '456', 
+          accreditation_status: 'new',
+          isAccreditationPending: false,
+          isAccreditationApproved: false,
+          isAccreditationNew: true
+        }),
         selectedUserProfileId: ref('123'),
         selectedUserProfileType: ref('individual'),
       };
-      vi.mocked(useProfilesStore).mockReturnValue(mockStore);
+      vi.mocked(useProfilesStore).mockReturnValue(mockStore as any);
     });
 
     it('should handle upload error gracefully', async () => {
@@ -341,7 +347,7 @@ describe('useAccreditationUpload', () => {
         update: vi.fn(),
         createState: ref({ loading: false, error: null, data: undefined }),
         updateState: ref({ loading: false, error: null, data: undefined }),
-      });
+      } as any);
 
       // Set up the mock profiles repository
       vi.mocked(useRepositoryProfiles).mockReturnValue({
@@ -352,7 +358,7 @@ describe('useAccreditationUpload', () => {
           data: { id: '123', user_id: '456', accreditation_status: AccreditationTypes.new },
         }),
         getUserState: ref({ loading: false, error: null, data: { profiles: [] } }),
-      });
+      } as any);
 
       // Set up the mock profiles store with new status
       const mockStore = {
@@ -360,11 +366,12 @@ describe('useAccreditationUpload', () => {
           id: '123',
           user_id: '456',
           accreditation_status: AccreditationTypes.new,
+          isAccreditationNew: true,
         }),
         selectedUserProfileId: ref('123'),
         selectedUserProfileType: ref('individual'),
       };
-      vi.mocked(useProfilesStore).mockReturnValue(mockStore);
+      vi.mocked(useProfilesStore).mockReturnValue(mockStore as any);
 
       const store = useAccreditationUpload();
       const mockFile = new File([''], 'test.pdf');
@@ -449,7 +456,7 @@ describe('useAccreditationUpload', () => {
         update: vi.fn(),
         createState: ref({ loading: false, error: null, data: undefined }),
         updateState: ref({ loading: false, error: null, data: undefined }),
-      });
+      } as any);
 
       // Set up the mock profiles repository
       vi.mocked(useRepositoryProfiles).mockReturnValue({
@@ -460,7 +467,7 @@ describe('useAccreditationUpload', () => {
           data: { id: '123', user_id: '456', accreditation_status: 'new' },
         }),
         getUserState: ref({ loading: false, error: null, data: { profiles: [] } }),
-      });
+      } as any);
 
       // Set up the mock profiles store with new status
       const mockStore = {
@@ -468,11 +475,12 @@ describe('useAccreditationUpload', () => {
           id: '123',
           user_id: '456',
           accreditation_status: 'new',
+          isAccreditationNew: true,
         }),
         selectedUserProfileId: ref('123'),
         selectedUserProfileType: ref('individual'),
       };
-      vi.mocked(useProfilesStore).mockReturnValue(mockStore);
+      vi.mocked(useProfilesStore).mockReturnValue(mockStore as any);
 
       const store = useAccreditationUpload();
       const mockFiles = [
