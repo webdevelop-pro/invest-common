@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {
-  computed, defineAsyncComponent, hydrateOnVisible, PropType, ref, watchEffect,
+  computed, defineAsyncComponent, hydrateOnVisible, PropType, watchEffect,
 } from 'vue';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { storeToRefs } from 'pinia';

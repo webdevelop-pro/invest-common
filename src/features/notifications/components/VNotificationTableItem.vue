@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { formatToDate } from 'InvestCommon/helpers/formatters/formatToDate';
 import {
-  PropType, computed, ref, onMounted, nextTick,
+  PropType, computed, ref, nextTick,
 } from 'vue';
 import VBadge from 'UiKit/components/Base/VBadge/VBadge.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';

@@ -13,7 +13,6 @@ export const formatToNumber = (
   const numberString = typeof number === 'number' && number < 1e-6
     ? number.toFixed(18)
     : number.toString();
-  // eslint-disable-next-line no-nested-ternary
   let minimumFractionDigits = round === Infinity
     ? numberString.split('.')[1]?.length
     : round ? 2 : undefined;

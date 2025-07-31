@@ -1,4 +1,3 @@
-/* eslint-disable no-use-before-define */
 import {
   ref, computed, nextTick,
   toRaw, watch,
@@ -244,13 +243,27 @@ export const useFormBackgroundInformation = defineStore('useFormBackgroundInform
   };
 
   watch(() => selectedUserProfileData.value?.data.employment, () => {
-    if (dataEmploymentData.value?.type && model.employment) model.employment.type = dataEmploymentData.value?.type;
-    if (dataEmploymentData.value?.employer_name && model.employment) model.employment.employer_name = dataEmploymentData.value?.employer_name;
-    if (dataEmploymentData.value?.title && model.employment) model.employment.title = dataEmploymentData.value?.title;
-    if (dataEmploymentData.value?.address1 && model.employment) model.employment.address1 = dataEmploymentData.value?.address1;
-    if (dataEmploymentData.value?.address2 && model.employment) model.employment.address2 = dataEmploymentData.value?.address2;
-    if (dataEmploymentData.value?.city && model.employment) model.employment.city = dataEmploymentData.value?.city;
-    if (dataEmploymentData.value?.zip_code && model.employment) model.employment.zip_code = dataEmploymentData.value?.zip_code;
+    if (dataEmploymentData.value?.type && model.employment) {
+      model.employment.type = dataEmploymentData.value?.type;
+    }
+    if (dataEmploymentData.value?.employer_name && model.employment) {
+      model.employment.employer_name = dataEmploymentData.value?.employer_name;
+    }
+    if (dataEmploymentData.value?.title && model.employment){
+      model.employment.title = dataEmploymentData.value?.title;
+    }
+    if (dataEmploymentData.value?.address1 && model.employment) {
+      model.employment.address1 = dataEmploymentData.value?.address1;
+    }
+    if (dataEmploymentData.value?.address2 && model.employment) {
+      model.employment.address2 = dataEmploymentData.value?.address2;
+    }
+    if (dataEmploymentData.value?.city && model.employment) {
+      model.employment.city = dataEmploymentData.value?.city;
+    }
+    if (dataEmploymentData.value?.zip_code && model.employment) {
+      model.employment.zip_code = dataEmploymentData.value?.zip_code;
+    }
   }, { deep: true, immediate: true });
 
   watch(() => selectedUserProfileData.value?.data.finra_affiliated, () => {

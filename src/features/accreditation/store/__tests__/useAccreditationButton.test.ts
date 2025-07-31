@@ -235,9 +235,6 @@ describe('useAccreditationButton', () => {
   });
 
   it('should not handle click when accreditation is not clickable', async () => {
-    const mockSessionStore = {
-      userLoggedIn: ref(true),
-    };
     // Test pending status
     const mockProfilesStorePending = createMockProfilesStore({
       selectedUserProfileData: {

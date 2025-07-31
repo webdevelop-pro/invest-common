@@ -39,7 +39,8 @@ export const useVFormPartialCustodian = (
     $ref: '#/definitions/Sdira',
   } as unknown as JSONSchemaType<FormModelSdira>;
 
-  const schemaBackendLocal = computed(() => (schemaBackend.value ? structuredClone(toRaw(schemaBackend.value)) : undefined));
+  const schemaBackendLocal = computed(() => (
+    schemaBackend.value ? structuredClone(toRaw(schemaBackend.value)) : undefined));
 
   const {
     model,

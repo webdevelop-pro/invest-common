@@ -220,7 +220,6 @@ describe('useSignup Store', () => {
       setActivePinia(pinia);
 
       // Create a mock auth store
-      // eslint-disable-next-line no-shadow
       const mockAuthStore = defineStore('auth', () => {
         const getSchemaState = ref({ data: {} });
         const setSignupState = ref({ error: null, data: null });

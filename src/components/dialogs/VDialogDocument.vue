@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {
-  onMounted, onBeforeUnmount, nextTick,
+  onBeforeUnmount, nextTick,
   watch,
 } from 'vue';
 

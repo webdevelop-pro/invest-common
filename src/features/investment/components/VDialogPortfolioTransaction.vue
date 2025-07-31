@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { PropType, computed, watch } from 'vue';
+import { PropType, computed } from 'vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { urlContactUs } from 'InvestCommon/global/links';
 import {

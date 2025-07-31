@@ -70,7 +70,7 @@ export const useRepositoryKyc = defineStore('repository-kyc', () => {
         plaidScript.onload = () => {
           const handler = window?.Plaid.create({
             token: kycToken.value?.link_token,
-            onSuccess: (publicToken: string, metadata: unknown) => {
+            onSuccess: () => {
               isPlaidLoading.value = false;
               usersStore.updateUserSelectedAccount();
               if (IS_STATIC_SITE) {

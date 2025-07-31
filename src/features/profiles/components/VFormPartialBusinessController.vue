@@ -3,7 +3,6 @@ import { PropType, computed } from 'vue';
 import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
 import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
-import VFormSelect from 'UiKit/components/Base/VForm/VFormSelect.vue';
 import VFormCheckbox from 'UiKit/components/Base/VForm/VFormCheckbox.vue';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import VFormCombobox from 'UiKit/components/Base/VForm/VFormCombobox.vue';

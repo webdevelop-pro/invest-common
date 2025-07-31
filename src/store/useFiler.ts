@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import { computed, ref } from 'vue';
 import { generalErrorHandling } from 'UiKit/helpers/generalErrorHandling';
 import {
@@ -66,7 +65,9 @@ export const useFilerStore = defineStore('filer', () => {
   const getFilesDataPublicaDocuments = computed(() => getFilesPublicData.value?.filter((item: { [x: string]: string; }) => item['object-type'] !== 'media'));
   const getFilesDataPublicMedia = computed(() => {
     const filtered = getFilesPublicData.value?.filter((item: { [x: string]: string; }) => item['object-type'] === 'media');
-    return filtered.map((item: { meta_data: { big: string | string[]; medium: string | string[]; small: string | string[]; }; }) => {
+    return filtered.map((item: {
+      meta_data: { big: string | string[]; medium: string | string[]; small: string | string[]; };
+    }) => {
       // Ensure that the URLs are properly prefixed if they don't include 'http'
       if (!item.meta_data?.big?.includes('http')) {
         item.meta_data.big = `https://webdevelop-us-media-thumbs.storage.googleapis.com${item.meta_data?.big}`;

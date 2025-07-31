@@ -2,7 +2,6 @@ import {
   IInvestment,
   InvestmentStatuses,
   InvestFundingStatuses,
-  InvestStepTypes,
   IInvestmentFormatted,
 } from './investment.types';
 import { OfferFormatter } from 'InvestCommon/data/offer/offer.formatter';

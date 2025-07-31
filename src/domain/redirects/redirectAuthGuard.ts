@@ -1,4 +1,4 @@
-import { NavigationGuardNext, RouteLocationNormalized } from 'vue-router';
+import { RouteLocationNormalized } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
@@ -7,7 +7,7 @@ import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
 import { resetAllData } from 'InvestCommon/domain/resetAllData';
 import env from 'InvestCommon/global';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
-import { useDomainWebSocketStore } from 'InvestCommon/domain/websockets/store/useWebsockets';
+// import { useDomainWebSocketStore } from 'InvestCommon/domain/websockets/store/useWebsockets';
 import { ISession } from 'InvestCommon/types/api/auth';
 
 /**
@@ -29,7 +29,7 @@ export const redirectAuthGuard = async (
     const userSessionStore = useSessionStore();
     const { userLoggedIn, userSession } = storeToRefs(userSessionStore);
     const profilesStore = useProfilesStore();
-    const websocketsStore = useDomainWebSocketStore();
+    // const websocketsStore = useDomainWebSocketStore();
 
     // Helper for redirecting to signin
     const redirectToSignin = () => {

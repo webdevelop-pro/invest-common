@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useGlobalLoader } from 'InvestCommon/store';
-import { computed, onMounted } from 'vue';
+import { onMounted } from 'vue';
 import { useKycThirdParty } from './store/useKycThirdParty';
 
 const { handlePlaidKycThirdParty, plaidSuccess } = useKycThirdParty();
@@ -13,9 +13,16 @@ onMounted(() => {
 
 <template>
   <div class="ViewKYCThirdParty view-kyc-third-party is--page">
-    <div v-if="plaidSuccess" class="kyc-success-message">
-      <h2>Thank you for completing KYC</h2>
-      <p class="is--subheading-1">Your KYC process is now complete.</p>
+    <div
+      v-if="plaidSuccess"
+      class="kyc-success-message"
+    >
+      <h2>
+        Thank you for completing KYC
+      </h2>
+      <p class="is--subheading-1">
+        Your KYC process is now complete.
+      </p>
     </div>
   </div>
 </template>

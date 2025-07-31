@@ -7,7 +7,7 @@ import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import { useAccreditationUpload } from '../store/useAccreditationUpload';
 import { TFields } from 'InvestCommon/types/form';
 
-const props = defineProps({
+defineProps({
   validate: Boolean,
 });
 

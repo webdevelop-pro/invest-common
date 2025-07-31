@@ -5,7 +5,6 @@ function escapeRegExp(string: string) {
 }
 
 function clearHighlights(el: HTMLElement) {
-  // eslint-disable-next-line no-param-reassign
   el.innerHTML = el.innerHTML.replace(/<\/?span[^>]*>/g, '');
 }
 
@@ -22,7 +21,6 @@ function highlightText(el: HTMLElement, word: string) {
   const cleanHTML = innerHTML.replace(/<\/?span[^>]*>/g, '');
 
   const newHTML = cleanHTML.replace(regex, (match) => `<span class="highlight">${match}</span>`);
-  // eslint-disable-next-line no-param-reassign
   el.innerHTML = newHTML;
 }
 

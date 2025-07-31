@@ -3,7 +3,6 @@ import {
   watch, nextTick,
 } from 'vue';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
-import { AccreditationTypes } from 'InvestCommon/types/api/invest';
 import { useRouter } from 'vue-router';
 import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/helpers/enums/routes';
 import { descriptionFileRule, errorMessageRule, noteFileRule } from 'UiKit/helpers/validation/rules';

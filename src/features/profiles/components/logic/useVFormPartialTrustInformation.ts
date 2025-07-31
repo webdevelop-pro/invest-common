@@ -64,7 +64,8 @@ export const useVFormPartialTrustInformation = (
     $ref: '#/definitions/Trust',
   } as unknown as JSONSchemaType<FormModelTrustInformation>));
 
-  const schemaBackendLocal = computed(() => (schemaBackend.value ? structuredClone(toRaw(schemaBackend.value)) : undefined));
+  const schemaBackendLocal = computed(() => (
+    schemaBackend.value ? structuredClone(toRaw(schemaBackend.value)) : undefined));
 
   const {
     model,

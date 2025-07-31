@@ -7,7 +7,6 @@ import { useAccreditationUpload } from '../store/useAccreditationUpload';
 const accreditationUploadStore = useAccreditationUpload();
 const {
   validateTrigger,
-  isFieldsValid,
 } = storeToRefs(accreditationUploadStore);
 
 const { onFilesChange, onModelChange, onValidChange } = accreditationUploadStore;

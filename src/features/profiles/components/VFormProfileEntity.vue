@@ -1,13 +1,10 @@
 <script setup lang="ts">
-import { PropType, computed } from 'vue';
+import { computed } from 'vue';
 import { useVFormProfileEntity } from './logic/useVFormProfileEntity';
 import VFormPartialPersonalInformation from 'InvestCommon/components/forms/VFormPartialPersonalInformation.vue';
 import VFormPartialEntityInformation from './VFormPartialEntityInformation.vue';
 import VFormPartialBusinessController from './VFormPartialBusinessController.vue';
 import VFormPartialBeneficialOwnership from './VFormPartialBeneficialOwnership.vue';
-import { FormModelPersonalInformation, FormModelEntityInformation, FormModelBusinessController } from 'InvestCommon/types/form';
-import { FormModelBeneficialOwnership } from './logic/useVFormPartialBeneficialOwnership';
-import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 
 const props = defineProps({
   modelData: Object,

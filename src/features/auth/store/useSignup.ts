@@ -211,7 +211,6 @@ export const useSignupStore = defineStore('signup', () => {
       } else if (name === 'traits.name' && !model.first_name && !model.last_name) {
         const nameSplitted = value?.trim().split(/\s+/);
         if (nameSplitted && nameSplitted.length > 0) {
-          // eslint-disable-next-line prefer-destructuring
           model.first_name = nameSplitted[0];
           model.last_name = nameSplitted[nameSplitted.length - 1];
         }

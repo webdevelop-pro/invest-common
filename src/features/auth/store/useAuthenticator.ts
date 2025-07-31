@@ -46,7 +46,8 @@ export const useAuthenticatorStore = defineStore('authenticator', () => {
     $ref: '#/definitions/Auth',
   } as unknown as JSONSchemaType<FormModelTOTP>));
 
-  const schemaBackend = computed(() => (getSchemaState.value.data ? structuredClone(toRaw(getSchemaState.value.data)) : null));
+  const schemaBackend = computed(() => (
+    getSchemaState.value.data ? structuredClone(toRaw(getSchemaState.value.data)) : null));
 
   const {
     model, validation, isValid, onValidate,

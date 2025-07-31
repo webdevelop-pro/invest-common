@@ -11,7 +11,6 @@ export function parseTopOptions(markdown: string): IAuthor | IMarkdownOptions | 
     metadata.favoriteTags = favoriteTagsStr
       .split(',')
       .map((tag) => tag.trim().replace(/['"]+/g, ''));
-    // eslint-disable-next-line
     markdown = markdown.replace(favoriteTagsMatch[0], ''); // Remove favoriteTags from markdown
   }
 
@@ -20,7 +19,6 @@ export function parseTopOptions(markdown: string): IAuthor | IMarkdownOptions | 
     metadata.tags = favoriteTagsStr
       .split(',')
       .map((tag) => tag.trim().replace(/['"]+/g, ''));
-    // eslint-disable-next-line
     markdown = markdown.replace(tagsMatch[0], ''); // Remove favoriteTags from markdown
   }
 

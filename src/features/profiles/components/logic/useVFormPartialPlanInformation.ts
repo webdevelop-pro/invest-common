@@ -67,7 +67,6 @@ export const useVFormPartialPlanInformation = (
     validation,
     isValid,
     onValidate,
-    schemaObject,
   } = useFormValidation<FormModelPlanInformation>(
     schemaFrontend,
     schemaBackendLocal,

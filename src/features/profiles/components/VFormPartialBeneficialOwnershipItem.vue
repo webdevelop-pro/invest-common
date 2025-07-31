@@ -1,10 +1,8 @@
 <script setup lang="ts">
 import { PropType, watch } from 'vue';
-import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
 import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
-import { storeToRefs } from 'pinia';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import VFormCheckbox from 'UiKit/components/Base/VForm/VFormCheckbox.vue';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
@@ -161,7 +159,7 @@ watch(() => model.value?.non_us, () => {
               data-testid="ssn"
               mask="###-##-####"
               disallow-special-chars
-            :loading="loading"
+              :loading="loading"
             />
           </VFormGroup>
         </FormCol>

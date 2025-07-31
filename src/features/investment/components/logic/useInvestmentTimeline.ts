@@ -66,7 +66,11 @@ export const useInvestmentTimeline = () => {
   const ApprovedAccreditationText = computed(() => `The accreditation status of your ${selectedUserProfileData.value?.type} investment profile has been successfully approved.`);
 
   const accreditationParsedHistory = computed(() => {
-    const { accreditation_status, isAccreditationApproved, isAccreditationPending } = selectedUserProfileData.value || {};
+    const {
+      accreditation_status,
+      isAccreditationApproved,
+      isAccreditationPending
+    } = selectedUserProfileData.value || {};
     const data = accreditationParsedData.value;
 
     if (!data?.length) {

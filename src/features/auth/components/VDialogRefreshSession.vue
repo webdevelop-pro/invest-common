@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {
-  VDialogContent, VDialogHeader, VDialogTitle, VDialog, VDialogFooter,
+  VDialogContent, VDialog,
 } from 'UiKit/components/Base/VDialog';
 import { watch } from 'vue';
 import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';

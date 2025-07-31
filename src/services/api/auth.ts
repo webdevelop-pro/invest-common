@@ -301,7 +301,6 @@ export const fetchDeleteOneSession = (id: string) => {
     ...requiredFetchParams(),
   };
 
-  // eslint-disable-next-line consistent-return
   return fetch(path, data).then((response) => {
     if (!response.ok) return Promise.reject(response);
   });

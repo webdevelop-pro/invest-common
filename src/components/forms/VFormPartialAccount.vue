@@ -15,8 +15,8 @@ import {
   emailRule, errorMessageRule, firstNameRule, lastNameRule,
   middleNameRule, phoneRule,
 } from 'UiKit/helpers/validation/rules';
-import { filterSchema, getFilteredObject } from 'UiKit/helpers/validation/general';
-import { createFormModel, getOptions } from 'UiKit/helpers/model';
+import { filterSchema } from 'UiKit/helpers/validation/general';
+import { createFormModel } from 'UiKit/helpers/model';
 import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
 import { isEmpty } from 'UiKit/helpers/general';
 

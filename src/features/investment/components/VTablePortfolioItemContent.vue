@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {
-  PropType, computed, onBeforeMount, ref, watch,
+  PropType, computed, watch,
 } from 'vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';

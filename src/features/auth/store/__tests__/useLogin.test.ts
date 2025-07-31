@@ -1,4 +1,3 @@
-/* eslint-disable no-shadow */
 import {
   describe, it, expect, vi, beforeEach,
 } from 'vitest';

@@ -282,7 +282,8 @@ describe('useDashboardPortfolioStore', () => {
 
         const filtered = store.filteredData;
         expect(filtered).toHaveLength(2);
-        expect(filtered.every(item => [InvestmentStatuses.confirmed, InvestmentStatuses.legally_confirmed].includes(item.status))).toBe(true);
+        expect(filtered.every(item => (
+          [InvestmentStatuses.confirmed, InvestmentStatuses.legally_confirmed].includes(item.status)))).toBe(true);
       });
 
       it('should filter by search term (investment ID)', () => {

@@ -1,4 +1,4 @@
-import { computed, onMounted, ref, watch, type Ref, isRef } from 'vue';
+import { computed, onMounted, ref, type Ref, isRef } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useSyncWithUrl } from 'UiKit/composables/useSyncWithUrl';
@@ -15,7 +15,8 @@ export function useTablePortfolioItem(props: UseTablePortfolioItemProps) {
 
   // Unwrap refs to make them reactive
   const item = computed(() => isRef(props.item) ? props.item.value : props.item);
-  const activeId = computed(() => props.activeId ? (isRef(props.activeId) ? props.activeId.value : props.activeId) : undefined);
+  const activeId = computed(() => (
+    props.activeId ? (isRef(props.activeId) ? props.activeId.value : props.activeId) : undefined));
 
   const isOpenId = useSyncWithUrl<number>({
     key: 'id',

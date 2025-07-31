@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { PropType, ref, watch } from 'vue';
+import { PropType, ref } from 'vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { jsPDF } from 'jspdf';
 import download from 'UiKit/assets/images/download.svg';
@@ -20,7 +20,6 @@ const open = defineModel<boolean>();
 const DownloadComp = ref<HTMLElement | null>(null);
 
 const saveHandler = () => {
-  // eslint-disable-next-line new-cap
   const pdf = new jsPDF();
 
   pdf.html(DownloadComp.value, {
@@ -96,7 +95,7 @@ const saveHandler = () => {
               {{ investment?.offer?.name }}
             </span>
           </div>
-          <hr class="wd-modal-portfolio-wire__divider" />
+          <hr class="wd-modal-portfolio-wire__divider">
           <div class="wd-modal-portfolio-wire__row">
             <span class="wd-modal-portfolio-wire__text-title is--h6__title">
               Wire to:

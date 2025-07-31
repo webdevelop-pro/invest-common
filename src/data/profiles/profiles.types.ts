@@ -1,4 +1,3 @@
-/* eslint-disable no-use-before-define */
 import {
   AccreditationTypes, InvestKycTypes, IKycData, IAccreditationData, IOwnership,
 } from '../../types/api/invest';

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {
-  watch, PropType, computed, toRaw,
+  watch, PropType,
 } from 'vue';
 import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';

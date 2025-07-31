@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {
-  ref, computed, reactive, watch, nextTick, onMounted,
+  ref, computed, reactive, watch, nextTick,
   onBeforeMount,
 } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
@@ -69,12 +69,12 @@ const {
 const { submitFormToHubspot } = useHubspotForm('b27d194e-cbab-4c53-9d60-1065be6425be');
 
 const walletRepository = useRepositoryWallet();
-const { getWalletState, addTransactionState, walletId } = storeToRefs(walletRepository);
+const { getWalletState, walletId } = storeToRefs(walletRepository);
 const fundingSource = computed(() => getWalletState.value.data?.funding_source || []);
 
 const profileEvmWalletStore = useProfileEvmWalletStore();
 const {
-  isEvmWalletStatusAnyError, isEvmTotalBalanceZero, evmWalletId, evmBalances,
+  isEvmWalletStatusAnyError, isEvmTotalBalanceZero, evmWalletId,
 } = storeToRefs(profileEvmWalletStore);
 
 const offerStore = useOfferStore();

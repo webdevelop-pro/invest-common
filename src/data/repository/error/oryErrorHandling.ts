@@ -29,7 +29,6 @@ export const oryErrorHandling = (
 
   // special case for 4000006 error id
   if (isCredentialsError) {
-    // eslint-disable-next-line no-param-reassign
     error.message = 'Invalid email or password.';
   }
 

@@ -1,4 +1,3 @@
-/* eslint-disable no-promise-executor-return */
 import {
   describe, it, expect, vi, beforeEach,
 } from 'vitest';
@@ -38,8 +37,14 @@ describe('useLogoutStore', () => {
 
   it('should handle successful logout flow', async () => {
     // Mock repository responses
-    const getAuthFlowState = ref<{ error: string | null; data: { logout_token: string } | null }>({ error: null, data: null });
-    const setLogoutState = ref<{ error: string | null; data: { status: number } | null }>({ error: null, data: null });
+    const getAuthFlowState = ref<{
+      error: string | null;
+      data: { logout_token: string } | null }
+    >({ error: null, data: null });
+    const setLogoutState = ref<{
+      error: string | null; 
+      data: { status: number } | null }
+    >({ error: null, data: null });
 
     const mockAuthRepository = {
       getAuthFlow: vi.fn().mockImplementation(async () => {
@@ -81,8 +86,14 @@ describe('useLogoutStore', () => {
   });
 
   it('should extract token from logout_url if logout_token is not present', async () => {
-    const getAuthFlowState = ref<{ error: string | null; data: { logout_url: string } | null }>({ error: null, data: null });
-    const setLogoutState = ref<{ error: string | null; data: { status: number } | null }>({ error: null, data: null });
+    const getAuthFlowState = ref<{
+      error: string | null;
+      data: { logout_url: string } | null }
+    >({ error: null, data: null });
+    const setLogoutState = ref<{
+      error: string | null;
+      data: { status: number } | null }
+    >({ error: null, data: null });
 
     const mockAuthRepository = {
       getAuthFlow: vi.fn().mockImplementation(async () => {
@@ -127,8 +138,14 @@ describe('useLogoutStore', () => {
   });
 
   it('should handle auth flow error', async () => {
-    const getAuthFlowState = ref<{ error: string | null; data: { logout_url: string } | null }>({ error: null, data: null });
-    const setLogoutState = ref<{ error: string | null; data: { status: number } | null }>({ error: null, data: null });
+    const getAuthFlowState = ref<{
+      error: string | null;
+      data: { logout_url: string } | null }
+    >({ error: null, data: null });
+    const setLogoutState = ref<{
+      error: string | null;
+      data: { status: number } | null }
+    >({ error: null, data: null });
 
     const mockAuthRepository = {
       getAuthFlow: vi.fn().mockImplementation(async () => {
@@ -160,8 +177,14 @@ describe('useLogoutStore', () => {
   });
 
   it('should handle logout state error', async () => {
-    const getAuthFlowState = ref<{ error: string | null; data: { logout_token: string } | null }>({ error: null, data: null });
-    const setLogoutState = ref<{ error: string | null; data: { status: number } | null }>({ error: null, data: null });
+    const getAuthFlowState = ref<{
+      error: string | null;
+      data: { logout_token: string } | null }
+    >({ error: null, data: null });
+    const setLogoutState = ref<{
+      error: string | null;
+      data: { status: number } | null }
+    >({ error: null, data: null });
 
     const mockAuthRepository = {
       getAuthFlow: vi.fn().mockImplementation(async () => {

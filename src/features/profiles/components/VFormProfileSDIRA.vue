@@ -1,10 +1,8 @@
 <script setup lang="ts">
-import { PropType, computed } from 'vue';
+import { computed } from 'vue';
 import { useVFormProfileSDIRA } from './logic/useVFormProfileSDIRA';
 import VFormPartialPersonalInformation from 'InvestCommon/components/forms/VFormPartialPersonalInformation.vue';
 import VFormPartialCustodian from './VFormPartialCustodian.vue';
-import { FormModelPersonalInformation } from 'InvestCommon/types/form';
-import { FormModelSdira } from './logic/useVFormPartialCustodian';
 
 const props = defineProps({
   modelData: Object,

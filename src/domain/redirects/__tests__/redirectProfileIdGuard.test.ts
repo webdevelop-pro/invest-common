@@ -36,17 +36,6 @@ describe('redirectProfileIdGuard', () => {
     redirectedFrom: undefined,
     path: '/test',
   } as RouteLocationNormalized;
-  const mockFrom = {
-    matched: [],
-    fullPath: '/',
-    hash: '',
-    redirectedFrom: undefined,
-    path: '/',
-    meta: {},
-    params: {},
-    name: 'home',
-    query: {},
-  } as RouteLocationNormalized;
 
   let mockGetUser: any;
   let mockRepositoryProfiles: any;

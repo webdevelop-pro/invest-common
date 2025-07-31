@@ -108,7 +108,10 @@ export const useFormFinancialInformationAndKyc = defineStore('useFormFinancialIn
       if (!tokenState.value.error && !setProfileByIdState.value.error
     && selectedUserProfileData.value?.user_id && selectedUserProfileData.value?.id
     && !selectedUserProfileData.value?.escrow_id) {
-        await accreditationRepository.createEscrow(selectedUserProfileData.value?.user_id, selectedUserProfileData.value?.id);
+        await accreditationRepository.createEscrow(
+          selectedUserProfileData.value?.user_id,
+          selectedUserProfileData.value?.id
+        );
       }
       isLoading.value = false;
       if (!setProfileByIdState.value.error) hubspotHandle();

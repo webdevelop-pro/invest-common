@@ -1,4 +1,4 @@
-import { ref, computed } from 'vue';
+import { computed } from 'vue';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import env from 'InvestCommon/global';
@@ -185,7 +185,10 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
 
       if (index !== -1) {
         Object.assign(getTransactionsState.value.data[index], fields);
-        Object.assign(getTransactionsState.value.data[index], new TransactionFormatter(getTransactionsState.value.data[index]).format());
+        Object.assign(
+          getTransactionsState.value.data[index], 
+          new TransactionFormatter(getTransactionsState.value.data[index]).format()
+      );
       } else {
         const newItem = { ...fields, id: fields.object_id };
         Object.assign(newItem, new TransactionFormatter(newItem).format());

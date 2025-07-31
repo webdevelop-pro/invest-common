@@ -13,7 +13,7 @@ import { IInvestmentFormatted } from 'InvestCommon/data/investment/investment.ty
 const profilesStore = useProfilesStore();
 const { selectedUserProfileId, selectedUserProfileData } = storeToRefs(profilesStore);
 
-const props = defineProps({
+defineProps({
   item: {
     type: Object as PropType<IInvestmentFormatted>,
     required: true,

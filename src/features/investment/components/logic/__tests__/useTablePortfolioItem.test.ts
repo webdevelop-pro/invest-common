@@ -1,7 +1,7 @@
 import {
   describe, it, expect, vi, beforeEach, afterEach,
 } from 'vitest';
-import { ref, nextTick, type Ref } from 'vue';
+import { ref, type Ref } from 'vue';
 import { IInvestmentFormatted } from 'InvestCommon/data/investment/investment.types';
 import { useTablePortfolioItem } from '../useTablePortfolioItem';
 

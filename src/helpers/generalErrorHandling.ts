@@ -19,7 +19,6 @@ export const generalErrorHandling = async (error: Response) => {
 
     if (errorJson as IOfferSharesError) {
       const data:IOfferSharesError = errorJson;
-      // eslint-disable-next-line prefer-destructuring
       if (data.number_of_shares.length) TOAST_OPTIONS.description = data.number_of_shares[0];
     } else if (errorJson as IAuthGenericError) {
       const data:IAuthGenericError = errorJson;
@@ -67,7 +66,6 @@ export const errorHandling422 = async (error: Response) => {
   toast(TOAST_OPTIONS);
 };
 
-// eslint-disable-next-line consistent-return
 export const errorHandlingRecovery = async (error: Response) => {
   try {
     const errorJson = await error.json();
@@ -129,7 +127,6 @@ export const errorHandlingSettings = async (error: Response) => {
     return null;
   }
 
-  // eslint-disable-next-line consistent-return
   if (errorJson?.error?.id === 'session_refresh_required') return;
   toast(TOAST_OPTIONS);
   return errorJson;

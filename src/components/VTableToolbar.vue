@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, PropType, ref } from 'vue';
+import { computed, PropType } from 'vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import VFormInputSearch from 'UiKit/components/Base/VForm/VFormInputSearch.vue';
 import VFilter, { IVFilter } from 'UiKit/components/VFilter/VFilter.vue';

@@ -1,9 +1,9 @@
 import {
-  computed, ref, watch,
+  computed, ref,
 } from 'vue';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { useAuthStore } from 'InvestCommon/store/useAuth';
-import { useDomainWebSocketStore } from 'InvestCommon/domain/websockets/store/useWebsockets';
+// import { useDomainWebSocketStore } from 'InvestCommon/domain/websockets/store/useWebsockets';
 import { INotification } from 'InvestCommon/data/notifications/notifications.types';
 import {
   ROUTE_ACCREDITATION_UPLOAD, ROUTE_DASHBOARD_ACCOUNT, ROUTE_DASHBOARD_BACKGROUND_INFORMATION,
@@ -15,7 +15,7 @@ import {
   ROUTE_INVEST_SIGNATURE, ROUTE_INVEST_THANK, ROUTE_SUBMIT_KYC,
   ROUTE_SETTINGS_ACCOUNT_DETAILS, ROUTE_SETTINGS_MFA, ROUTE_SETTINGS_SECURITY,
 } from 'InvestCommon/helpers/enums/routes';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import env, { cookiesOptions } from 'InvestCommon/global/index';
 import { PROFILE_TYPES } from 'InvestCommon/global/investment.json';
 import { useCookies } from '@vueuse/integrations/useCookies';
@@ -25,7 +25,6 @@ import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 const { IS_STATIC_SITE } = env;
 
 export const useUsersStore = defineStore('user', () => {
-  const router = useRouter();
   const route = useRoute();
   const authStore = useAuthStore();
   const { isGetSessionLoading } = storeToRefs(authStore);
@@ -37,7 +36,6 @@ export const useUsersStore = defineStore('user', () => {
     getProfileByIdState, getProfileByIdOptionsState,
   } = storeToRefs(useRepositoryProfilesStore);
   // console.log('getUserState.value', getUserState.value.value);
-  const websocketsStore = useDomainWebSocketStore();
   const cookies = useCookies(['session']);
 
   // general user data like email that we registered, name,...
@@ -124,22 +122,22 @@ export const useUsersStore = defineStore('user', () => {
   };
 
   // REDIRECT URL AND CHECK PROFILE ID
-  const routesToCheckProfileInUrl = [
-    ROUTE_SUBMIT_KYC, ROUTE_INVEST_AMOUNT, ROUTE_INVEST_FUNDING, ROUTE_INVEST_OWNERSHIP,
-    ROUTE_INVEST_REVIEW, ROUTE_INVEST_SIGNATURE, ROUTE_INVEST_THANK,
-    ROUTE_DASHBOARD_ACCOUNT, ROUTE_DASHBOARD_PORTFOLIO, ROUTE_DASHBOARD_WALLET,
-    ROUTE_DASHBOARD_BACKGROUND_INFORMATION, ROUTE_DASHBOARD_FINANCIAL_AND_INVESTMENT_INFO,
-    ROUTE_DASHBOARD_PERSONAL_DETAILS, ROUTE_DASHBOARD_TRUSTED_CONTACT,
-    ROUTE_ACCREDITATION_UPLOAD, ROUTE_INVESTMENT_DOCUMENTS, ROUTE_INVESTMENT_TIMELINE,
-    ROUTE_SETTINGS_ACCOUNT_DETAILS, ROUTE_SETTINGS_MFA, ROUTE_SETTINGS_SECURITY,
-  ];
+  // const routesToCheckProfileInUrl = [
+  //   ROUTE_SUBMIT_KYC, ROUTE_INVEST_AMOUNT, ROUTE_INVEST_FUNDING, ROUTE_INVEST_OWNERSHIP,
+  //   ROUTE_INVEST_REVIEW, ROUTE_INVEST_SIGNATURE, ROUTE_INVEST_THANK,
+  //   ROUTE_DASHBOARD_ACCOUNT, ROUTE_DASHBOARD_PORTFOLIO, ROUTE_DASHBOARD_WALLET,
+  //   ROUTE_DASHBOARD_BACKGROUND_INFORMATION, ROUTE_DASHBOARD_FINANCIAL_AND_INVESTMENT_INFO,
+  //   ROUTE_DASHBOARD_PERSONAL_DETAILS, ROUTE_DASHBOARD_TRUSTED_CONTACT,
+  //   ROUTE_ACCREDITATION_UPLOAD, ROUTE_INVESTMENT_DOCUMENTS, ROUTE_INVESTMENT_TIMELINE,
+  //   ROUTE_SETTINGS_ACCOUNT_DETAILS, ROUTE_SETTINGS_MFA, ROUTE_SETTINGS_SECURITY,
+  // ];
 
   const urlChecked = ref(false);
 
-  const urlProfileId = computed(() => {
-    if (!+IS_STATIC_SITE) return route.params?.profileId;
-    return (window && window?.location?.pathname.split('/')[2]);
-  });
+  // const urlProfileId = computed(() => {
+  //   if (!+IS_STATIC_SITE) return route.params?.profileId;
+  //   return (window && window?.location?.pathname.split('/')[2]);
+  // });
 
   const resetAll = () => {
     // getUserState.value.data.value = undefined;
@@ -149,12 +147,12 @@ export const useUsersStore = defineStore('user', () => {
     urlChecked.value = false;
   };
 
-  const isRouteToCheckProfileInUrl = computed(() => (routesToCheckProfileInUrl.includes(String(route?.name))));
-  const isUrlProfileSameAsSelected = computed(() => Number(urlProfileId.value) === selectedUserProfileId.value);
-  const isUrlProfileIdInProfiles = computed(() => {
-    if (!isRouteToCheckProfileInUrl.value) return true;
-    return urlProfileId.value && userProfiles.value?.some((profile: { id: number }) => profile.id === Number(urlProfileId.value));
-  });
+  // const isRouteToCheckProfileInUrl = computed(() => (routesToCheckProfileInUrl.includes(String(route?.name))));
+  // const isUrlProfileSameAsSelected = computed(() => Number(urlProfileId.value) === selectedUserProfileId.value);
+  // const isUrlProfileIdInProfiles = computed(() => {
+  //   if (!isRouteToCheckProfileInUrl.value) return true;
+  //   return urlProfileId.value && userProfiles.value?.some((profile: { id: number }) => profile.id === Number(urlProfileId.value));
+  // });
 
   // watch(() => userLoggedIn.value, async () => {
   //   if (userLoggedIn.value && !getUserState.value?.data && !getUserState.value?.loading) {

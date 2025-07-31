@@ -14,6 +14,13 @@ const props = defineProps({
     required: true,
   },
 });
+
+const date = computed(() => (
+  props.investment.payment_data.updated_at
+    ? props.investment.paymentDataUpdatedAtFormatted : props.investment.paymentDataCreatedAtFormatted));
+const time = computed(() => (
+  props.investment.payment_data.updated_at
+    ? props.investment.paymentDataUpdatedAtTime : props.investment.paymentDataCreatedAtTime));
 </script>
 
 <template>
@@ -25,10 +32,10 @@ const props = defineProps({
       <VTableRow>
         <VTableCell>
           <div>
-            {{ investment.payment_data.updated_at ? investment.paymentDataUpdatedAtFormatted : investment.paymentDataCreatedAtFormatted }}
+            {{ date }}
           </div>
           <div class="v-table-portfolio-transaction__time">
-            {{ investment.payment_data.updated_at ? investment.paymentDataUpdatedAtTime : investment.paymentDataCreatedAtTime }}
+            {{ time }}
           </div>
         </VTableCell>
         <VTableCell

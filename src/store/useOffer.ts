@@ -180,9 +180,7 @@ export const useOfferStore = defineStore('offers', () => {
   const getOfferFundedPercent = (offer: IOffer) => {
     if (!offer) return;
     const percent = (offer.subscribed_shares / offer.total_shares) * 100;
-    // eslint-disable-next-line consistent-return
     if (percent > 85) return Math.floor(percent);
-    // eslint-disable-next-line consistent-return
     return Math.ceil(percent);
   };
 

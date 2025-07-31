@@ -1,5 +1,3 @@
-/* eslint-disable no-shadow */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   describe, it, expect, vi, beforeEach,
 } from 'vitest';
