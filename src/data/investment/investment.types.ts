@@ -85,6 +85,7 @@ export interface IInvestment {
 export interface IInvestmentFormatted extends IInvestment {
   offer: IOfferFormatted;
   amountFormatted: string;
+  amountFormattedZero: string;
   amountWithSign: string;
   numberOfSharesFormatted: string;
   pricePerShareFormatted: string;
@@ -109,4 +110,15 @@ export interface IInvestmentFormatted extends IInvestment {
   isCancelled: boolean;
   isPending: boolean;
   isFundingClickable: boolean;
+}
+
+export interface IInvestmentsData {
+  meta: {
+    avarange_annual: number;
+    total_distributions: number;
+    total_investments_12_months: number;
+    total_investments: number;
+  };
+  count: number;
+  data: IInvestmentFormatted[];
 }

@@ -1,7 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import {
+  describe, it, expect, vi, beforeEach,
+} from 'vitest';
 import { ref } from 'vue';
-import { useInvestmentTopInfo, type UseInvestmentTopInfoProps } from '../useInvestmentTopInfo';
 import { ROUTE_DASHBOARD_PORTFOLIO } from 'InvestCommon/helpers/enums/routes';
+import { useInvestmentTopInfo, type UseInvestmentTopInfoProps } from '../useInvestmentTopInfo';
 
 const mockPush = vi.fn();
 const mockRouter = {
@@ -49,7 +51,7 @@ describe('useInvestmentTopInfo', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     props = {
       investmentId: '123',
       profileData: {
@@ -130,9 +132,9 @@ describe('useInvestmentTopInfo', () => {
 
     it('should open cancel dialog onCancelInvestmentClick', () => {
       expect(composable.isDialogCancelOpen.value).toBe(false);
-      
+
       composable.onCancelInvestmentClick();
-      
+
       expect(composable.isDialogCancelOpen.value).toBe(true);
     });
 
@@ -145,9 +147,9 @@ describe('useInvestmentTopInfo', () => {
         };
 
         expect(composable.isDialogWireOpen.value).toBe(false);
-        
+
         composable.onFundingType();
-        
+
         expect(composable.isDialogWireOpen.value).toBe(true);
         expect(composable.isDialogTransactionOpen.value).toBe(false);
       });
@@ -160,9 +162,9 @@ describe('useInvestmentTopInfo', () => {
         };
 
         expect(composable.isDialogTransactionOpen.value).toBe(false);
-        
+
         composable.onFundingType();
-        
+
         expect(composable.isDialogTransactionOpen.value).toBe(true);
         expect(composable.isDialogWireOpen.value).toBe(false);
       });
@@ -174,7 +176,7 @@ describe('useInvestmentTopInfo', () => {
         };
 
         composable.onFundingType();
-        
+
         expect(composable.isDialogWireOpen.value).toBe(false);
         expect(composable.isDialogTransactionOpen.value).toBe(false);
       });
@@ -183,7 +185,7 @@ describe('useInvestmentTopInfo', () => {
         mockGetInvestOneState.value.data = null as any;
 
         composable.onFundingType();
-        
+
         expect(composable.isDialogWireOpen.value).toBe(false);
         expect(composable.isDialogTransactionOpen.value).toBe(false);
       });
@@ -192,11 +194,11 @@ describe('useInvestmentTopInfo', () => {
     describe('onContactUsClick', () => {
       it('should open contact us dialog', () => {
         expect(composable.isDialogContactUsOpen.value).toBe(false);
-        
+
         composable.onContactUsClick();
-        
+
         expect(composable.isDialogContactUsOpen.value).toBe(true);
       });
     });
   });
-}); 
+});

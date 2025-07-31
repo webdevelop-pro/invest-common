@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { PropType, computed, watch } from 'vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
-import { IInvest } from 'InvestCommon/types/api/invest';
 import { urlContactUs } from 'InvestCommon/global/links';
 import {
   VDialogContent, VDialogFooter, VDialogTitle, VDialog,

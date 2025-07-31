@@ -258,7 +258,7 @@ export interface IInvestData {
     total_investments: number;
   };
   count: number;
-  data: IInvest[];
+  data: IInvestmentFormatted[];
 }
 
 export interface IInvestConfirm {

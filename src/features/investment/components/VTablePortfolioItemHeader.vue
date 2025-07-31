@@ -1,29 +1,21 @@
 <script setup lang="ts">
-import { currency } from 'InvestCommon/helpers/currency';
-import { formatToFullDate } from 'InvestCommon/helpers/formatters/formatToDate';
-import { IInvest } from 'InvestCommon/types/api/invest';
 import VBadge from 'UiKit/components/Base/VBadge/VBadge.vue';
 import { PropType, computed } from 'vue';
-import { useOfferStore } from 'InvestCommon/store/useOffer';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { storeToRefs } from 'pinia';
-import {
-  getInvestmentOfferImage, getInvestmentStatusFormated, getInvestmentTagBackground, isInvestmentFundingClickable,
-} from 'InvestCommon/helpers/investment';
 import { ROUTE_INVESTMENT_DOCUMENTS } from 'InvestCommon/helpers/enums/routes';
 import expand from 'UiKit/assets/images/expand.svg';
 import { VTableCell, VTableRow } from 'UiKit/components/Base/VTable';
 import chevronDownIcon from 'UiKit/assets/images/chevron-down.svg';
 import VImage from 'UiKit/components/Base/VImage/VImage.vue';
-import { capitalizeFirstLetter } from 'UiKit/helpers/text';
+import { IInvestmentFormatted } from 'InvestCommon/data/investment/investment.types';
 
 const profilesStore = useProfilesStore();
 const { selectedUserProfileId, selectedUserProfileData } = storeToRefs(profilesStore);
-const offerStore = useOfferStore();
 
 const props = defineProps({
   item: {
-    type: Object as PropType<IInvest>,
+    type: Object as PropType<IInvestmentFormatted>,
     required: true,
   },
   search: String,
@@ -31,22 +23,7 @@ const props = defineProps({
 
 const emit = defineEmits(['clickFundingType']);
 
-const itemFormatted = computed(() => ({
-  id: props.item.id,
-  date: formatToFullDate(new Date(props.item.submited_at).toISOString()),
-  offer: props.item.offer?.name,
-  offerLegalName: props.item.offer?.legal_name,
-  image: getInvestmentOfferImage(props.item),
-  type: capitalizeFirstLetter(props.item.funding_type || ''),
-  ownership: capitalizeFirstLetter(selectedUserProfileData.value?.type || ''),
-  amount: currency(props.item.amount),
-  status: getInvestmentStatusFormated(props.item.status),
-  tagBackground: getInvestmentTagBackground(props.item.status),
-  amountPercent: offerStore.getOfferFundedPercent(props.item.offer),
-}));
-
-const isDefaultImage = computed(() => (!props.item?.offer?.image_link_id));
-const isFundingClickable = computed(() => isInvestmentFundingClickable(props.item));
+const profileType = computed(() => selectedUserProfileData.value?.type || '');
 </script>
 
 <template>
@@ -56,6 +33,7 @@ const isFundingClickable = computed(() => isInvestmentFundingClickable(props.ite
     <VTableCell>
       <router-link
         :to="{ name: ROUTE_INVESTMENT_DOCUMENTS, params: { profileId: selectedUserProfileId, id: item.id } }"
+        class="v-table-item-header__document-icon"
         @click.stop
       >
         <expand
@@ -65,50 +43,52 @@ const isFundingClickable = computed(() => isInvestmentFundingClickable(props.ite
       </router-link>
     </VTableCell>
     <VTableCell v-highlight="search">
-      {{ itemFormatted.id }}
-    </VTableCell>
-    <VTableCell class="v-table-item-header__table-offer is--body">
-      <div class="v-table-item-header__table-image-wrap">
-        <VImage
-          :src="itemFormatted.image"
-          :alt="`${itemFormatted.offer} image`"
-          fit="cover"
-          class="v-table-item-header__table-image"
-          :class="{ 'is--default-image': isDefaultImage }"
-        />
-      </div>
-      <div>
-        <div v-highlight="search">
-          {{ itemFormatted.offer }}
-        </div>
-        <div class="v-table-item-header__table-funded is--small">
-          {{ itemFormatted.amountPercent?.toFixed(0) }}% funded
-        </div>
-      </div>
+      {{ item.id }}
     </VTableCell>
     <VTableCell>
-      {{ itemFormatted.date }}
+      <div class="v-table-item-header__table-offer is--body">
+        <div class="v-table-item-header__table-image-wrap">
+          <VImage
+            :src="item?.offer?.imageSmall"
+            :alt="`${item.offer?.name} image`"
+            fit="cover"
+            class="v-table-item-header__table-image"
+            :class="{ 'is--default-image': item?.offer?.isDefaultImage }"
+          />
+        </div>
+        <div>
+          <div v-highlight="search">
+            {{ item.offer?.name }}
+          </div>
+          <div class="v-table-item-header__table-funded is--small">
+            {{ item.offer?.offerFundedPercent }}% funded
+          </div>
+        </div>
+      </div>
     </VTableCell>
-    <VTableCell class="is--color-black is--h5__title">
-      {{ itemFormatted.amount }}
+    <VTableCell class="v-table-item-header__date">
+      {{ item.submitedAtFormatted }}
     </VTableCell>
-    <VTableCell>
-      {{ itemFormatted.ownership }}
+    <VTableCell class="v-table-item-header__amount is--color-black is--h5__title">
+      {{ item.amountFormattedZero }}
+    </VTableCell>
+    <VTableCell class="v-table-item-header__ownership">
+      {{ profileType.charAt(0).toUpperCase() + profileType.slice(1) }}
     </VTableCell>
     <VTableCell>
       <div
         class="v-table-item-header__table-funding-type"
-        :class="{ 'is--link-regular': isFundingClickable }"
-        @click.stop="emit('clickFundingType', itemFormatted.id)"
+        :class="{ 'is--link-regular': item.isFundingClickable }"
+        @click.stop="emit('clickFundingType', item.id)"
       >
-        {{ itemFormatted.type }}
+        {{ item.fundingTypeFormatted }}
       </div>
     </VTableCell>
-    <VTableCell>
+    <VTableCell class="v-table-item-header__status">
       <VBadge
-        :color="itemFormatted.tagBackground"
+        :color="item.statusFormatted.color"
       >
-        {{ itemFormatted.status }}
+        {{ item.statusFormatted.text }}
       </VBadge>
     </VTableCell>
     <VTableCell>
@@ -124,6 +104,10 @@ const isFundingClickable = computed(() => isInvestmentFundingClickable(props.ite
 
   color: $gray-80;
   cursor: pointer !important;
+
+  &__document-icon {
+    display: block;
+  }
 
   &__table-funded {
     color: $gray-60;
@@ -141,7 +125,7 @@ const isFundingClickable = computed(() => isInvestmentFundingClickable(props.ite
   &__table-offer {
     display: flex;
     align-items: center;
-    width: 100%;
+    max-width: 205px;
     gap: 16px;
   }
 
@@ -152,6 +136,7 @@ const isFundingClickable = computed(() => isInvestmentFundingClickable(props.ite
     display: flex;
     justify-content: center;
     align-items: center;
+    flex-shrink: 0;
   }
 
   &__table-funding-type {
@@ -170,7 +155,7 @@ const isFundingClickable = computed(() => isInvestmentFundingClickable(props.ite
   }
 
   &__chevron {
-    width: 16px;
+    width: 20px;
     transition: 0.3s all ease;
   }
 

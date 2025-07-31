@@ -1,12 +1,9 @@
 <script setup lang="ts">
-import { formatToFullDate } from 'InvestCommon/helpers/formatters/formatToDate';
-import { IInvest } from 'InvestCommon/types/api/invest';
 import {
   PropType, computed, onBeforeMount, ref, watch,
 } from 'vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
-import { useOfferStore } from 'InvestCommon/store/useOffer';
 import { storeToRefs } from 'pinia';
 import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 import { ROUTE_INVESTMENT_DOCUMENTS, ROUTE_INVESTMENT_TIMELINE } from 'InvestCommon/helpers/enums/routes';
@@ -14,35 +11,25 @@ import { useRoute, useRouter } from 'vue-router';
 import file from 'UiKit/assets/images/file.svg';
 import timeline from 'UiKit/assets/images/timeline.svg';
 import { VTableCell, VTableRow } from 'UiKit/components/Base/VTable';
-import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
+import { IInvestmentFormatted } from 'InvestCommon/data/investment/investment.types';
 
 const props = defineProps({
   item: {
-    type: Object as PropType<IInvest>,
+    type: Object as PropType<IInvestmentFormatted>,
     required: true,
   },
   colspan: Number,
+  loading: Boolean,
 });
 
 const emit = defineEmits(['onCancelInvestmentClick']);
 
-const investmentRepository = useRepositoryInvestment();
-const { getInvestOneState } = storeToRefs(investmentRepository);
-const offersStore = useOfferStore();
-const { isGetOfferOneLoading } = storeToRefs(offersStore);
 const profilesStore = useProfilesStore();
 const { selectedUserProfileId } = storeToRefs(profilesStore);
 const router = useRouter();
 const route = useRoute();
 
 const queryPopupCancelInvestment = computed(() => (route.query.popup === 'cancel'));
-
-const isLoading = computed(() => (getInvestOneState.value.loading || isGetOfferOneLoading.value));
-
-const closedAt = computed(() => {
-  if (new Date(props.item?.offer.close_at).getTime() < new Date('01-01-2022').getTime() || !props.item?.offer.close_at) return 'not closed';
-  return formatToFullDate(new Date(props.item?.offer.close_at).toISOString());
-});
 
 const onTimelineClick = () => {
   router.push({
@@ -53,12 +40,6 @@ const onTimelineClick = () => {
 const onCancelInvestmentClick = () => {
   emit('onCancelInvestmentClick');
 };
-
-onBeforeMount(async () => {
-  if (props.item.id) {
-    investmentRepository.getInvestOne(String(props.item.id));
-  }
-});
 
 watch(() => [queryPopupCancelInvestment.value], () => {
   if (queryPopupCancelInvestment.value) {
@@ -75,7 +56,7 @@ watch(() => [queryPopupCancelInvestment.value], () => {
       <div class="v-table-item-content__cell">
         <div class="v-table-item-content__documents">
           <VSkeleton
-            v-if="isLoading"
+            v-if="loading"
             height="32px"
             width="180px"
             class="v-table-item-content__skeleton"
@@ -110,7 +91,7 @@ watch(() => [queryPopupCancelInvestment.value], () => {
             </div>
             <div class="v-table-item-content__info-col">
               <VSkeleton
-                v-if="isLoading"
+                v-if="loading"
                 height="18px"
                 width="50px"
                 class="v-table-item-content__skeleton"
@@ -119,10 +100,10 @@ watch(() => [queryPopupCancelInvestment.value], () => {
                 v-else
                 class="v-table-item-content__value is--body"
               >
-                {{ getInvestOneState.data?.numberOfSharesFormatted }}
+                {{ item?.numberOfSharesFormatted }}
               </span>
               <VSkeleton
-                v-if="isLoading"
+                v-if="loading"
                 height="18px"
                 width="50px"
                 class="v-table-item-content__skeleton"
@@ -131,7 +112,7 @@ watch(() => [queryPopupCancelInvestment.value], () => {
                 v-else
                 class="v-table-item-content__value is--body"
               >
-                {{ getInvestOneState.data?.pricePerShareFormatted }}
+                {{ item?.pricePerShareFormatted }}
               </span>
             </div>
           </div>
@@ -146,7 +127,7 @@ watch(() => [queryPopupCancelInvestment.value], () => {
             </div>
             <div class="v-table-item-content__info-col">
               <VSkeleton
-                v-if="isLoading"
+                v-if="loading"
                 height="18px"
                 width="50px"
                 class="v-table-item-content__skeleton"
@@ -155,10 +136,10 @@ watch(() => [queryPopupCancelInvestment.value], () => {
                 v-else
                 class="v-table-item-content__value is--body"
               >
-                {{ getInvestOneState.data?.offer.securityTypeFormatted }}
+                {{ item?.offer?.securityTypeFormatted }}
               </span>
               <VSkeleton
-                v-if="isLoading"
+                v-if="loading"
                 height="18px"
                 width="50px"
                 class="v-table-item-content__skeleton"
@@ -167,7 +148,7 @@ watch(() => [queryPopupCancelInvestment.value], () => {
                 v-else
                 class="v-table-item-content__value is--body"
               >
-                {{ closedAt }}
+                {{ item?.offer?.closeAtFormatted }}
               </span>
             </div>
           </div>
@@ -293,6 +274,7 @@ watch(() => [queryPopupCancelInvestment.value], () => {
     display: flex;
     align-items: center;
     gap: 12px;
+    min-width: 218px;
   }
 
   &__document-icon {

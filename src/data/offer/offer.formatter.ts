@@ -2,9 +2,9 @@ import {
   IOffer,
   OfferStatuses,
 } from 'InvestCommon/types/api/offers';
-import { IOfferFormatted } from './offer.types';
 import defaultImage from 'InvestCommon/assets/images/default.svg?url';
 import env from 'InvestCommon/global';
+import { IOfferFormatted } from './offer.types';
 
 // Currency formatter function
 const defaultInstance = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 });
@@ -88,7 +88,7 @@ export class OfferFormatter {
   getOfferImage(metaSize: 'big' | 'small' | 'medium' = 'small'): string {
     const imageID = this.offer?.image_link_id;
     if (imageID && (imageID > 0)) {
-      return `${env.FILER_URL}/public/files/${imageID}?size=${metaSize}`
+      return `${env.FILER_URL}/public/files/${imageID}?size=${metaSize}`;
     }
     return defaultImage;
   }
@@ -97,14 +97,14 @@ export class OfferFormatter {
     if (!this.offer.total_shares || this.offer.total_shares === 0) {
       return 0;
     }
-    
+
     const percent = (this.offer.subscribed_shares / this.offer.total_shares) * 100;
-    
+
     // For high percentages (>85%), use floor to avoid showing 100% prematurely
     if (percent > 85) {
       return Math.floor(percent);
     }
-    
+
     // For lower percentages, use ceil to show progress
     return Math.ceil(percent);
   }
@@ -151,9 +151,9 @@ export class OfferFormatter {
 
   get isFundingCompleted(): boolean {
     return (
-      this.offer.status === OfferStatuses.legal_closed ||
-      this.offer.status === OfferStatuses.closed_successfully ||
-      this.offer.status === OfferStatuses.closed_unsuccessfully
+      this.offer.status === OfferStatuses.legal_closed
+      || this.offer.status === OfferStatuses.closed_successfully
+      || this.offer.status === OfferStatuses.closed_unsuccessfully
     );
   }
 

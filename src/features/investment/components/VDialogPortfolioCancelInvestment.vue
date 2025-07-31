@@ -13,7 +13,7 @@ import {
   VDialogHeader,
 } from 'UiKit/components/Base/VDialog';
 import { IInvestmentFormatted } from 'InvestCommon/data/investment/investment.types';
-import { usePortfolioCancelInvestment } from '../logic/usePortfolioCancelInvestment';
+import { usePortfolioCancelInvestment } from './logic/usePortfolioCancelInvestment';
 
 const props = defineProps({
   investment: {

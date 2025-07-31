@@ -1,17 +1,11 @@
 <script setup lang="ts">
 import {
-  PropType, computed, defineAsyncComponent, onMounted, ref, watch,
+  PropType, defineAsyncComponent, watch,
 } from 'vue';
 import VTableItemHeader from './VTablePortfolioItemHeader.vue';
 import VTableItemContent from './VTablePortfolioItemContent.vue';
-import { IInvest } from 'InvestCommon/types/api/invest';
-import { storeToRefs } from 'pinia';
-import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
-import { isInvestmentFundingClickable } from 'InvestCommon/helpers/investment';
-import { useSyncWithUrl } from 'UiKit/composables/useSyncWithUrl';
-
-const profilesStore = useProfilesStore();
-const { selectedUserProfileId, selectedUserProfileData } = storeToRefs(profilesStore);
+import { IInvestmentFormatted } from 'InvestCommon/data/investment/investment.types';
+import { useTablePortfolioItem } from './logic/useTablePortfolioItem';
 
 const VDialogPortfolioTransaction = defineAsyncComponent({
   loader: () => import('InvestCommon/features/investment/components/VDialogPortfolioTransaction.vue'),
@@ -25,52 +19,34 @@ const VDialogPortfolioCancelInvestment = defineAsyncComponent({
 
 const props = defineProps({
   item: {
-    type: Object as PropType<IInvest>,
+    type: Object as PropType<IInvestmentFormatted>,
     required: true,
   },
   search: String,
   colspan: Number,
   activeId: Number,
+  loading: Boolean,
 });
+
 const isOpen = defineModel<boolean>();
-const isOpenId = useSyncWithUrl<number>({
-  key: 'id',
-  defaultValue: 0,
-  parse: (val) => {
-    const num = Number(val);
-    return Number.isNaN(num) ? 0 : num;
-  },
-});
-const scrollTarget = computed(() => `scrollTarget${props.item?.id}`);
-const isDialogTransactionOpen = ref(false);
-const isDialogWireOpen = ref(false);
-const isDialogCancelOpen = ref(false);
 
-const userName = computed(() => `${selectedUserProfileData.value?.data.first_name} ${selectedUserProfileData.value?.data.last_name}`);
-const isFundingLinkWire = computed(() => props.item?.type === 'wire');
-const isFundingClickable = computed(() => isInvestmentFundingClickable(props.item));
-const isActiveId = computed(() => (props.item.id === props.activeId));
+const {
+  scrollTarget,
+  isDialogTransactionOpen,
+  isDialogWireOpen,
+  isDialogCancelOpen,
+  userName,
+  isActiveId,
+  onFundingType,
+  isOpenId,
+} = useTablePortfolioItem(props);
 
-const onFundingType = () => {
-  if (!isFundingClickable.value) return;
-  if (isFundingLinkWire.value) isDialogWireOpen.value = true;
-  else isDialogTransactionOpen.value = true;
-};
-
-onMounted(() => {
-  if (props.activeId && (props.item.id === props.activeId)) {
-    const target = document.getElementById(scrollTarget.value);
-    // Ensure the element exists before scrolling
-    if (target) {
-      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  }
-});
-
+// Watch for item.id changes to update isOpen state
 watch(() => props.item.id, () => {
   isOpen.value = isActiveId.value;
 }, { immediate: true });
 
+// Watch for isOpen changes to sync with URL
 watch(() => isOpen.value, () => {
   if (isOpen.value) {
     isOpenId.value = props.item.id;
@@ -79,7 +55,8 @@ watch(() => isOpen.value, () => {
   }
 });
 
-watch(() => props.activeId, (newId) => {
+// Watch for activeId changes to close item if not active
+watch(() => props.activeId, () => {
   if (!isActiveId.value) {
     isOpen.value = false;
   }
@@ -91,6 +68,7 @@ watch(() => props.activeId, (newId) => {
     :id="scrollTarget"
     :item="item"
     :search="search"
+    :loading="loading"
     :class="{ 'is--open': isOpen }"
     @click="isOpen = !isOpen"
     @click-funding-type="onFundingType"
@@ -99,22 +77,26 @@ watch(() => props.activeId, (newId) => {
   <VTableItemContent
     v-if="isOpen"
     :item="item"
+    :loading="loading"
     :colspan="colspan"
     :class="{ 'is--open': isOpen }"
     @on-cancel-investment-click="isDialogCancelOpen = true"
   />
 
   <VDialogPortfolioTransaction
+    v-if="item"
     v-model:open="isDialogTransactionOpen"
     :investment="item"
     :user-name="userName"
   />
   <VDialogPortfolioWire
+    v-if="item"
     v-model:open="isDialogWireOpen"
     :investment="item"
     :user-name="userName"
   />
   <VDialogPortfolioCancelInvestment
+    v-if="item"
     v-model:open="isDialogCancelOpen"
     :investment="item"
     @close="isDialogCancelOpen = false"

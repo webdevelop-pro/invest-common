@@ -4,7 +4,6 @@ import {
 import { setActivePinia, createPinia } from 'pinia';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { usePortfolioCancelInvestment } from '../usePortfolioCancelInvestment';
 import { IInvestmentFormatted } from 'InvestCommon/data/investment/investment.types';
 import { ROUTE_DASHBOARD_PORTFOLIO } from 'InvestCommon/helpers/enums/routes';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
@@ -13,6 +12,7 @@ import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
 import { scrollToError } from 'UiKit/helpers/validation/general';
+import { usePortfolioCancelInvestment } from '../usePortfolioCancelInvestment';
 
 // Mock dependencies
 vi.mock('vue-router', () => ({ useRouter: vi.fn() }));
@@ -159,4 +159,4 @@ describe('usePortfolioCancelInvestment', () => {
       expect(composable.errorData.value).toEqual(errorData);
     });
   });
-}); 
+});

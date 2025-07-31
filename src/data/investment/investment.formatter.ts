@@ -51,6 +51,10 @@ export class InvestmentFormatter {
     return currency(this.investment.amount);
   }
 
+  get amountFormattedZero() {
+    return currency(this.investment.amount, 0);
+  }
+
   get amountWithSign() {
     return `- ${currency(this.investment.amount, 0)}`;
   }
@@ -194,6 +198,7 @@ export class InvestmentFormatter {
     return {
       ...this.investment,
       amountFormatted: this.amountFormatted,
+      amountFormattedZero: this.amountFormattedZero,
       amountWithSign: this.amountWithSign,
       numberOfSharesFormatted: this.numberOfSharesFormatted,
       pricePerShareFormatted: this.pricePerShareFormatted,

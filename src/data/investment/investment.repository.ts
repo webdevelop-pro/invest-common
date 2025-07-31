@@ -1,17 +1,16 @@
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import { toasterErrorHandling } from 'InvestCommon/data/repository/error/toasterErrorHandling';
 import {
-  IInvest, IInvestData, IInvestUnconfirmed, IInvestConfirm, IInvestDocumentSign,
+  IInvestUnconfirmed, IInvestConfirm, IInvestDocumentSign,
   IInvestFunding,
 } from 'InvestCommon/types/api/invest';
 import env from 'InvestCommon/global';
 import { v4 as uuidv4 } from 'uuid';
 import { createActionState } from 'InvestCommon/data/repository/repository';
-import { storeToRefs } from 'pinia';
+import { storeToRefs, acceptHMRUpdate, defineStore } from 'pinia';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { InvestmentFormatter } from 'InvestCommon/data/investment/investment.formatter';
-import { IInvestmentFormatted, IInvestment } from 'InvestCommon/data/investment/investment.types';
-import { acceptHMRUpdate, defineStore } from 'pinia';
+import { IInvestmentFormatted, IInvestment, IInvestmentsData } from 'InvestCommon/data/investment/investment.types';
 
 const { INVESTMENT_URL, ESIGN_URL } = env;
 
@@ -20,7 +19,7 @@ export const useRepositoryInvestment = defineStore('repositoryInvestment', () =>
   const esignApiClient = new ApiClient(ESIGN_URL);
 
   // Create action states for each function
-  const getInvestmentsState = createActionState<IInvestData>();
+  const getInvestmentsState = createActionState<IInvestmentsData>();
   const getInvestOneState = createActionState<IInvestmentFormatted>();
   const getInvestUnconfirmedState = createActionState<IInvestUnconfirmed>();
   const setInvestState = createActionState<IInvestment>();
@@ -42,8 +41,18 @@ export const useRepositoryInvestment = defineStore('repositoryInvestment', () =>
       getInvestmentsState.value.loading = true;
       getInvestmentsState.value.error = null;
       const response = await apiClient.get(`/auth/investment/${id}/confirmed`);
-      getInvestmentsState.value.data = response.data as IInvestData;
-      return response.data as IInvestData;
+      const rawData = response.data as any;
+
+      // Format investments if data array exists
+      const formattedData = rawData.data && Array.isArray(rawData.data)
+        ? {
+          ...rawData,
+          data: rawData.data.map((investment: any) => new InvestmentFormatter(investment as IInvestment).format()),
+        }
+        : rawData;
+
+      getInvestmentsState.value.data = formattedData;
+      return formattedData;
     } catch (err) {
       getInvestmentsState.value.error = err as Error;
       toasterErrorHandling(err, 'Failed to fetch investments');
@@ -144,7 +153,7 @@ export const useRepositoryInvestment = defineStore('repositoryInvestment', () =>
     try {
       setSignatureState.value.loading = true;
       setSignatureState.value.error = null;
-      
+
       const userSessionStore = useSessionStore();
       const { userSession } = storeToRefs(userSessionStore);
 
@@ -378,4 +387,4 @@ export const useRepositoryInvestment = defineStore('repositoryInvestment', () =>
 
 if (import.meta.hot) {
   import.meta.hot.accept(acceptHMRUpdate(useRepositoryInvestment, import.meta.hot));
-} 
+}
