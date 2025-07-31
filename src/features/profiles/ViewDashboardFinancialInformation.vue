@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { useGlobalLoader } from 'InvestCommon/store/useGlobalLoader';
-import { storeToRefs } from 'pinia';
 import VLayoutForm from 'InvestCommon/shared/layouts/VLayoutForm.vue';
-import { useFormBackgroundInformation } from './store/useFormBackgroundInformation';
+import { useFormFinancialInformation } from './store/useFormFinancialInformation';
 import VFormPartialFinancialSituation from 'InvestCommon/components/forms/VFormPartialFinancialSituation.vue';
 import VFormPartialInvestmentObjectives from 'InvestCommon/components/forms/VFormPartialInvestmentObjectives.vue';
 import VFormPartialUnderstandingOfRisks from 'InvestCommon/components/forms/VFormPartialUnderstandingOfRisks.vue';
@@ -10,15 +9,10 @@ import VFormPartialUnderstandingOfRisks from 'InvestCommon/components/forms/VFor
 const globalLoader = useGlobalLoader();
 globalLoader.hide();
 
-const formStore = useFormBackgroundInformation();
 const {
   backButtonText, breadcrumbs, isLoading, isDisabledButton,
-  modelData, schemaBackend, errorData,
-} = storeToRefs(formStore);
-
-const handleSave = () => {
-  formStore.handleSave();
-};
+  modelData, schemaBackend, errorData, handleSave,
+} = useFormFinancialInformation();
 </script>
 
 <template>

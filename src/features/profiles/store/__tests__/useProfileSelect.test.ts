@@ -1,76 +1,49 @@
-import {
-  describe, it, expect, vi, beforeEach,
-} from 'vitest';
-import { setActivePinia, createPinia } from 'pinia';
-import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useRouter } from 'vue-router';
-import { ref, nextTick } from 'vue';
+import { ref } from 'vue';
 import { useProfileSelectStore } from '../useProfileSelect';
+
+const mockPush = vi.fn();
+const mockSetSelectedUserProfileById = vi.fn();
 
 vi.mock('InvestCommon/helpers/enums/routes', () => ({
   ROUTE_CREATE_PROFILE: 'ROUTE_CREATE_PROFILE',
 }));
 
-const mockPush = vi.fn();
 vi.mock('vue-router', () => ({
   useRouter: vi.fn(() => ({
     push: mockPush,
-    currentRoute: {
-      value: {
-        name: 'test-route',
-      },
-    },
+    currentRoute: { value: { name: 'test-route' } },
   })),
 }));
 
-let mockSetSelectedUserProfileById: ReturnType<typeof vi.fn>;
 vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
-  useProfilesStore: vi.fn(() => {
-    const selectedUserProfileId = ref(1);
-    const userProfiles = ref([
-      {
-        id: 1,
-        type: 'individual',
-        data: { name: 'John Doe' },
-      },
-      {
-        id: 2,
-        type: 'entity',
-        data: { name: 'Company Inc' },
-      },
-    ]);
-
-    mockSetSelectedUserProfileById = vi.fn((id) => {
-      selectedUserProfileId.value = Number(id);
-    });
-
-    return {
-      selectedUserProfileId,
-      userProfiles,
-      setSelectedUserProfileById: mockSetSelectedUserProfileById,
-    };
-  }),
+  useProfilesStore: vi.fn(() => ({
+    selectedUserProfileId: ref(1),
+    userProfiles: ref([
+      { id: 1, type: 'individual', data: { name: 'John Doe' } },
+      { id: 2, type: 'entity', data: { name: 'Company Inc' } },
+    ]),
+    setSelectedUserProfileById: mockSetSelectedUserProfileById,
+  })),
 }));
 
 describe('useProfileSelectStore', () => {
   beforeEach(() => {
-    setActivePinia(createPinia());
     mockPush.mockClear();
-    if (mockSetSelectedUserProfileById) {
-      mockSetSelectedUserProfileById.mockClear();
-    }
+    mockSetSelectedUserProfileById.mockClear();
   });
 
   it('should initialize with correct default values', () => {
-    const store = useProfileSelectStore();
-    expect(store.defaultValue).toBe('1');
+    const composable = useProfileSelectStore();
+    expect(composable.defaultValue.value).toBe('1');
   });
 
   it('should format user profiles list correctly', () => {
-    const store = useProfileSelectStore();
-    const formattedList = store.userListFormatted;
+    const composable = useProfileSelectStore();
+    const formattedList = composable.userListFormatted.value;
 
-    expect(formattedList).toHaveLength(3); // 2 profiles + "Add New" option
+    expect(formattedList).toHaveLength(3);
     expect(formattedList[0]).toEqual({
       text: 'EN2: Company Inc Investment Profile',
       id: '2',
@@ -86,8 +59,8 @@ describe('useProfileSelectStore', () => {
   });
 
   it('should handle profile selection for existing profile', () => {
-    const store = useProfileSelectStore();
-    store.onUpdateSelectedProfile('2');
+    const composable = useProfileSelectStore();
+    composable.onUpdateSelectedProfile('2');
 
     expect(mockSetSelectedUserProfileById).toHaveBeenCalledWith('2');
     expect(mockPush).toHaveBeenCalledWith({
@@ -97,30 +70,25 @@ describe('useProfileSelectStore', () => {
   });
 
   it('should handle "new" profile selection', () => {
-    const store = useProfileSelectStore();
-    store.onUpdateSelectedProfile('new');
+    const composable = useProfileSelectStore();
+    composable.onUpdateSelectedProfile('new');
     expect(mockPush).toHaveBeenCalledWith({
       name: 'ROUTE_CREATE_PROFILE',
     });
   });
 
   it('should not update selection for invalid id', () => {
-    const store = useProfileSelectStore();
+    const composable = useProfileSelectStore();
     const router = useRouter();
-    const profilesStore = useProfilesStore();
-    store.onUpdateSelectedProfile('');
+    composable.onUpdateSelectedProfile('');
 
-    expect(profilesStore.setSelectedUserProfileById).not.toHaveBeenCalled();
+    expect(mockSetSelectedUserProfileById).not.toHaveBeenCalled();
     expect(router.push).not.toHaveBeenCalled();
   });
 
   it('should update loading state when profile is selected', async () => {
-    const store = useProfileSelectStore();
-    const profilesStore = useProfilesStore();
-
-    profilesStore.setSelectedUserProfileById(1);
-    await nextTick();
-
-    expect(store.isLoading).toBe(false);
+    const composable = useProfileSelectStore();
+    mockSetSelectedUserProfileById(1);
+    expect(composable.isLoading.value).toBe(false);
   });
 });

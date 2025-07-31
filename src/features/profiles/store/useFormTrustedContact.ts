@@ -1,9 +1,8 @@
 import {
   ref, computed, nextTick,
-  toRaw,
-  watch,
+  toRaw, watch,
 } from 'vue';
-import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
+import { storeToRefs } from 'pinia';
 import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/helpers/enums/routes';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useRouter } from 'vue-router';
@@ -18,7 +17,7 @@ import {
 } from 'UiKit/helpers/validation/rules';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 
-export const useFormTrustedContact = defineStore('useFormTrustedContact', () => {
+export const useFormTrustedContact = () => {
   const router = useRouter();
   const userProfileStore = useProfilesStore();
   const { selectedUserProfileId, selectedUserProfileType, selectedUserProfileData } = storeToRefs(userProfileStore);
@@ -103,7 +102,15 @@ export const useFormTrustedContact = defineStore('useFormTrustedContact', () => 
 
   watch(() => selectedUserProfileData.value?.data?.beneficiary, () => {
     if (selectedUserProfileData.value?.data?.beneficiary) {
-      model.beneficiary = selectedUserProfileData.value?.data?.beneficiary;
+      const beneficiaryData = selectedUserProfileData.value.data.beneficiary;
+      model.beneficiary = {
+        first_name: beneficiaryData.first_name || '',
+        last_name: beneficiaryData.last_name || '',
+        relationship_type: beneficiaryData.relationship_type || '',
+        phone: beneficiaryData.phone || '',
+        email: beneficiaryData.email || '',
+        dob: beneficiaryData.dob || '',
+      };
     }
   }, { deep: true, immediate: true });
 
@@ -153,8 +160,5 @@ export const useFormTrustedContact = defineStore('useFormTrustedContact', () => 
     errorData,
     validation,
   };
-});
+};
 
-if (import.meta.hot) {
-  import.meta.hot.accept(acceptHMRUpdate(useFormTrustedContact, import.meta.hot));
-}

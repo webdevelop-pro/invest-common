@@ -1,4 +1,4 @@
-import { defineStore, storeToRefs } from 'pinia';
+import { storeToRefs } from 'pinia';
 import { computed, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { capitalizeFirstLetter } from 'UiKit/helpers/text';
@@ -10,7 +10,7 @@ interface ISelectedProfile {
   id: number | string;
 }
 
-export const useProfileSelectStore = defineStore('profileSelect', () => {
+export const useProfileSelectStore = () => {
   const router = useRouter();
   const userProfilesStore = useProfilesStore();
   const { selectedUserProfileId, userProfiles } = storeToRefs(userProfilesStore);
@@ -72,4 +72,4 @@ export const useProfileSelectStore = defineStore('profileSelect', () => {
     userListFormatted,
     onUpdateSelectedProfile,
   };
-});
+};

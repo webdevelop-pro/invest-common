@@ -3,7 +3,7 @@ import {
   toRaw, watch,
   reactive,
 } from 'vue';
-import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
+import { storeToRefs } from 'pinia';
 import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/helpers/enums/routes';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useRouter } from 'vue-router';
@@ -20,7 +20,7 @@ import {
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { checkObjectAndDeleteNotRequiredFields } from 'InvestCommon/helpers/general';
 
-export const useFormBackgroundInformation = defineStore('useFormBackgroundInformation', () => {
+export const useFormBackgroundInformation = () => {
   const router = useRouter();
   const userProfileStore = useProfilesStore();
   const { selectedUserProfileId, selectedUserProfileType, selectedUserProfileData } = storeToRefs(userProfileStore);
@@ -329,8 +329,4 @@ export const useFormBackgroundInformation = defineStore('useFormBackgroundInform
     validation,
     isAdditionalFields,
   };
-});
-
-if (import.meta.hot) {
-  import.meta.hot.accept(acceptHMRUpdate(useFormBackgroundInformation, import.meta.hot));
-}
+};

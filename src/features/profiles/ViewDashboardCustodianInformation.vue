@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useGlobalLoader } from 'InvestCommon/store/useGlobalLoader';
-import { storeToRefs } from 'pinia';
 import VLayoutForm from 'InvestCommon/shared/layouts/VLayoutForm.vue';
 import { useFormCustodianInformation } from './store/useFormCustodianInformation';
 import VFormPartialCustodian from './components/VFormPartialCustodian.vue';
@@ -8,15 +7,11 @@ import VFormPartialCustodian from './components/VFormPartialCustodian.vue';
 const globalLoader = useGlobalLoader();
 globalLoader.hide();
 
-const formStore = useFormCustodianInformation();
 const {
   backButtonText, breadcrumbs, isLoading, isDisabledButton,
   modelData, schemaBackend, errorData, isLoadingFields,
-} = storeToRefs(formStore);
-
-const handleSave = () => {
-  formStore.handleSave();
-};
+  handleSave,
+} = useFormCustodianInformation();
 </script>
 
 <template>

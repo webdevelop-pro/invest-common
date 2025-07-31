@@ -3,18 +3,18 @@ import { PropType } from 'vue';
 import VFormSelect from 'UiKit/components/Base/VForm/VFormSelect.vue';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import { useProfileSelectStore } from './store/useProfileSelect';
-import { storeToRefs } from 'pinia';
 
 defineProps({
   size: String as PropType<'large' | 'medium' | 'small'>,
   label: String,
 });
 
-const profileSelectStore = useProfileSelectStore();
-const { userListFormatted, isLoading, defaultValue } = storeToRefs(profileSelectStore);
+const {
+  userListFormatted, isLoading, defaultValue, onUpdateSelectedProfile,
+} = useProfileSelectStore();
 
 const onUpdate = (value: string) => {
-  profileSelectStore.onUpdateSelectedProfile(value);
+  onUpdateSelectedProfile(value);
 };
 </script>
 

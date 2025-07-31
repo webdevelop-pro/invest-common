@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useGlobalLoader } from 'InvestCommon/store/useGlobalLoader';
-import { storeToRefs } from 'pinia';
 import VLayoutForm from 'InvestCommon/shared/layouts/VLayoutForm.vue';
 import { useFormPlanInformation } from './store/useFormPlanInformation';
 import VFormPartialPlanInformation from './components/VFormPartialPlanInformation.vue';
@@ -8,15 +7,11 @@ import VFormPartialPlanInformation from './components/VFormPartialPlanInformatio
 const globalLoader = useGlobalLoader();
 globalLoader.hide();
 
-const formStore = useFormPlanInformation();
 const {
   backButtonText, breadcrumbs, isLoading, isDisabledButton,
-  modelData, schemaBackend, errorData,
-} = storeToRefs(formStore);
+  modelData, schemaBackend, errorData, handleSave,
+} = useFormPlanInformation();
 
-const handleSave = () => {
-  formStore.handleSave();
-};
 </script>
 
 <template>

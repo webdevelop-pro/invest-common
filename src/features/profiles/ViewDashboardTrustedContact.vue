@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useGlobalLoader } from 'InvestCommon/store/useGlobalLoader';
-import { storeToRefs } from 'pinia';
 import VLayoutForm from 'InvestCommon/shared/layouts/VLayoutForm.vue';
 import { useFormTrustedContact } from './store/useFormTrustedContact';
 import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
@@ -11,16 +10,12 @@ import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 const globalLoader = useGlobalLoader();
 globalLoader.hide();
 
-const formStore = useFormTrustedContact();
 const {
   backButtonText, breadcrumbs, isLoading, isDisabledButton,
   model, schemaBackend, errorData, validation, schemaFrontend,
-  isLoadingFields,
-} = storeToRefs(formStore);
+  isLoadingFields, handleSave,
+} = useFormTrustedContact();
 
-const handleSave = () => {
-  formStore.handleSave();
-};
 </script>
 
 <template>

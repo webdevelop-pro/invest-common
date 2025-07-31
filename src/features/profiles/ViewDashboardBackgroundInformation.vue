@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useGlobalLoader } from 'InvestCommon/store/useGlobalLoader';
-import { storeToRefs } from 'pinia';
 import { useFormBackgroundInformation } from './store/useFormBackgroundInformation';
 import VLayoutForm from 'InvestCommon/shared/layouts/VLayoutForm.vue';
 import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
@@ -13,16 +12,13 @@ import VFormCheckbox from 'UiKit/components/Base/VForm/VFormCheckbox.vue';
 const globalLoader = useGlobalLoader();
 globalLoader.hide();
 
-const formStore = useFormBackgroundInformation();
 const {
   backButtonText, breadcrumbs, isLoading, isDisabledButton,
   model, schemaBackend, errorData, validation, schemaFrontend,
-  isLoadingFields, optionsEmployment, isAdditionalFields,
-} = storeToRefs(formStore);
+  isLoadingFields, optionsEmployment, isAdditionalFields, handleSave,
+} = useFormBackgroundInformation();
 
-const handleSave = () => {
-  formStore.handleSave();
-};
+
 </script>
 
 <template>

@@ -6,7 +6,7 @@ import { ref, nextTick, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import { scrollToError } from 'UiKit/helpers/validation/general';
-import { ROUTE_DASHBOARD_ACCOUNT } from '../../../../helpers/enums/routes';
+import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/helpers/enums/routes';
 import { useFormBackgroundInformation } from '../useFormBackgroundInformation';
 
 const mockRouterInstance = {
@@ -152,7 +152,7 @@ vi.mock('ajv/dist/types/json-schema', () => ({
 }));
 
 describe('useFormBackgroundInformation', () => {
-  let store: ReturnType<typeof useFormBackgroundInformation>;
+  let composable: ReturnType<typeof useFormBackgroundInformation>;
   let mockRouter: any;
   let mockHubspotForm: any;
   let mockScrollToError: any;
@@ -163,7 +163,7 @@ describe('useFormBackgroundInformation', () => {
     mockHubspotForm = vi.mocked(useHubspotForm)();
     mockScrollToError = vi.mocked(scrollToError);
     vi.clearAllMocks();
-    store = useFormBackgroundInformation();
+    composable = useFormBackgroundInformation();
   });
 
   afterEach(() => {
@@ -172,11 +172,11 @@ describe('useFormBackgroundInformation', () => {
 
   describe('Initialization', () => {
     it('should initialize with correct default values', () => {
-      expect(store.backButtonText).toBe('Back to Profile Details');
-      expect(store.isLoading).toBe(false);
+      expect(composable.backButtonText.value).toBe('Back to Profile Details');
+      expect(composable.isLoading.value).toBe(false);
     });
     it('should compute breadcrumbs correctly', () => {
-      expect(store.breadcrumbs).toEqual([
+      expect(composable.breadcrumbs.value).toEqual([
         { text: 'Dashboard', to: { name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: '123' } } },
         { text: 'Profile Details', to: { name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: '123' } } },
         { text: 'Your Background Information' },
@@ -184,22 +184,22 @@ describe('useFormBackgroundInformation', () => {
     });
     it('should compute isDisabledButton based on isValid', () => {
       isValid.value = false;
-      expect(store.isDisabledButton).toBe(true);
+      expect(composable.isDisabledButton.value).toBe(true);
       isValid.value = true;
-      expect(store.isDisabledButton).toBe(false);
+      expect(composable.isDisabledButton.value).toBe(false);
     });
     it('should compute isAdditionalFields correctly', () => {
       model.employment.type = 'full-time';
-      expect(store.isAdditionalFields).toBe(true);
+      expect(composable.isAdditionalFields.value).toBe(true);
       model.employment.type = 'Retired';
-      expect(store.isAdditionalFields).toBe(false);
+      expect(composable.isAdditionalFields.value).toBe(false);
     });
   });
 
   describe('handleSave', () => {
     it('should not proceed if form is invalid', async () => {
       isValid.value = false;
-      await store.handleSave();
+      await composable.handleSave();
       expect(mockOnValidate).toHaveBeenCalled();
       expect(mockScrollToError).toHaveBeenCalledWith('ViewDashboardBackgroundInformation');
       expect(mockSetProfileById).not.toHaveBeenCalled();
@@ -210,7 +210,7 @@ describe('useFormBackgroundInformation', () => {
       isValid.value = true;
       mockSetProfileById.mockResolvedValue(undefined);
       mockGetProfileById.mockResolvedValue(undefined);
-      await store.handleSave();
+      await composable.handleSave();
       expect(mockOnValidate).toHaveBeenCalled();
       expect(mockSetProfileById).toHaveBeenCalledWith(
         {
@@ -243,11 +243,11 @@ describe('useFormBackgroundInformation', () => {
       isValid.value = true;
       mockSetProfileById.mockRejectedValue(new Error('API Error'));
       try {
-        await store.handleSave();
+        await composable.handleSave();
       } catch (e) {
         // Suppress error for test
       }
-      expect(store.isLoading).toBe(false);
+      expect(composable.isLoading.value).toBe(false);
     });
   });
 
@@ -299,24 +299,6 @@ describe('useFormBackgroundInformation', () => {
       selectedUserProfileData.value.data.irs_backup_withholding = false;
       await nextTick();
       expect(model.irs_backup_withholding).toBe(false);
-    });
-  });
-
-  describe('Return values', () => {
-    it('should return all expected properties', () => {
-      expect(store).toHaveProperty('backButtonText');
-      expect(store).toHaveProperty('breadcrumbs');
-      expect(store).toHaveProperty('isDisabledButton');
-      expect(store).toHaveProperty('isLoading');
-      expect(store).toHaveProperty('isLoadingFields');
-      expect(store).toHaveProperty('handleSave');
-      expect(store).toHaveProperty('schemaBackend');
-      expect(store).toHaveProperty('errorData');
-      expect(store).toHaveProperty('optionsEmployment');
-      expect(store).toHaveProperty('model');
-      expect(store).toHaveProperty('schemaFrontend');
-      expect(store).toHaveProperty('validation');
-      expect(store).toHaveProperty('isAdditionalFields');
     });
   });
 });

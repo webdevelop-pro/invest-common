@@ -1,22 +1,16 @@
 <script setup lang="ts">
 import { useGlobalLoader } from 'InvestCommon/store/useGlobalLoader';
 import VFormPartialPersonalInformation from 'InvestCommon/components/forms/VFormPartialPersonalInformation.vue';
-import { storeToRefs } from 'pinia';
 import VLayoutForm from 'InvestCommon/shared/layouts/VLayoutForm.vue';
 import { useFormPersonalInformation } from './store/useFormPersonalInformation';
 
 const globalLoader = useGlobalLoader();
 globalLoader.hide();
 
-const formStore = useFormPersonalInformation();
 const {
   backButtonText, breadcrumbs, isLoading, isDisabledButton,
-  readOnly, modelData, schemaBackend, errorData,
-} = storeToRefs(formStore);
-
-const handleSave = () => {
-  formStore.handleSave();
-};
+  readOnly, modelData, schemaBackend, errorData, handleSave,
+} = useFormPersonalInformation();
 </script>
 
 <template>

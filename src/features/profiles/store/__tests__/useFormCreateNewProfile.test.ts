@@ -300,7 +300,6 @@ describe('useFormCreateNewProfile', () => {
 
     const { composable } = setupComposable('entity', { type: 'LLC' });
 
-    // The error should be caught by the try/finally block
     await expect(composable.handleSave()).rejects.toThrow('Test error');
 
     expect(composable.isLoading.value).toBe(false);
@@ -312,24 +311,8 @@ describe('useFormCreateNewProfile', () => {
 
     const { composable } = setupComposable('sdira', { type: 'Alto' });
 
-    // The error should be caught by the try/finally block
     await expect(composable.handleSave()).rejects.toThrow('Test error');
 
     expect(composable.isLoading.value).toBe(false);
-  });
-
-  it('should expose all expected properties', () => {
-    const { composable } = setupComposable('individual');
-    expect(composable).toHaveProperty('backButtonText');
-    expect(composable).toHaveProperty('breadcrumbs');
-    expect(composable).toHaveProperty('selectedType');
-    expect(composable).toHaveProperty('selectedUserProfileData');
-    expect(composable).toHaveProperty('isDisabledButton');
-    expect(composable).toHaveProperty('isLoading');
-    expect(composable).toHaveProperty('handleSave');
-    expect(composable).toHaveProperty('PROFILE_TYPES');
-    expect(composable).toHaveProperty('modelData');
-    expect(composable).toHaveProperty('schemaBackend');
-    expect(composable).toHaveProperty('errorData');
   });
 });

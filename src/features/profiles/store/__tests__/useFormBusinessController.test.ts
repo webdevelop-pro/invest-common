@@ -1,13 +1,12 @@
 import {
   describe, it, expect, vi, beforeEach, afterEach,
 } from 'vitest';
-import { setActivePinia, createPinia } from 'pinia';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { scrollToError } from 'UiKit/helpers/validation/general';
-import { ROUTE_DASHBOARD_ACCOUNT } from '../../../../helpers/enums/routes';
+import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/helpers/enums/routes';
 import { useFormBusinessController } from '../useFormBusinessController';
 
 const mockFormRef = ref<any>(null);
@@ -105,15 +104,13 @@ vi.mock('InvestCommon/types/form', () => ({
 }));
 
 describe('useFormBusinessController', () => {
-  let store: ReturnType<typeof useFormBusinessController>;
+  let composable: ReturnType<typeof useFormBusinessController>;
   let mockRouter: any;
   let mockProfilesStore: any;
   let mockSessionStore: any;
   let mockScrollToError: any;
 
   beforeEach(() => {
-    setActivePinia(createPinia());
-
     mockRouter = vi.mocked(useRouter)();
     mockProfilesStore = vi.mocked(useProfilesStore)();
     mockSessionStore = vi.mocked(useSessionStore)();
@@ -128,7 +125,7 @@ describe('useFormBusinessController', () => {
     hubspotFormMockInstance.submitFormToHubspot.mockReset();
     mockFormRef.value = null;
 
-    store = useFormBusinessController();
+    composable = useFormBusinessController();
   });
 
   afterEach(() => {
@@ -137,12 +134,12 @@ describe('useFormBusinessController', () => {
 
   describe('Initialization', () => {
     it('should initialize with correct default values', () => {
-      expect(store.backButtonText).toBe('Back to Profile Details');
-      expect(store.isLoading).toBe(false);
+      expect(composable.backButtonText.value).toBe('Back to Profile Details');
+      expect(composable.isLoading.value).toBe(false);
     });
 
     it('should compute breadcrumbs correctly', () => {
-      expect(store.breadcrumbs).toEqual([
+      expect(composable.breadcrumbs.value).toEqual([
         {
           text: 'Dashboard',
           to: { name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: '123' } },
@@ -158,7 +155,7 @@ describe('useFormBusinessController', () => {
     });
 
     it('should compute model data correctly', () => {
-      expect(store.modelData).toEqual({
+      expect(composable.modelData.value).toEqual({
         business_controller: {
           first_name: 'John',
           last_name: 'Controller',
@@ -176,13 +173,13 @@ describe('useFormBusinessController', () => {
     });
 
     it('should compute schema backend correctly', () => {
-      expect(store.schemaBackend).toEqual({ schema: 'test-schema' });
+      expect(composable.schemaBackend.value).toEqual({ schema: 'test-schema' });
     });
   });
 
   describe('handleSave - Validation failure', () => {
     it('should not proceed when form validation fails', async () => {
-      await store.handleSave();
+      await composable.handleSave();
 
       expect(mockScrollToError).toHaveBeenCalledWith('ViewDashboardBusinessController');
       expect(repositoryProfilesMockInstance.setProfileById).not.toHaveBeenCalled();
@@ -192,8 +189,8 @@ describe('useFormBusinessController', () => {
     });
 
     it('should not proceed when form ref is undefined', async () => {
-      const newStore = useFormBusinessController();
-      await newStore.handleSave();
+      const newComposable = useFormBusinessController();
+      await newComposable.handleSave();
 
       expect(mockScrollToError).toHaveBeenCalledWith('ViewDashboardBusinessController');
       expect(repositoryProfilesMockInstance.setProfileById).not.toHaveBeenCalled();
@@ -229,8 +226,8 @@ describe('useFormBusinessController', () => {
 
       mockFormRef.value = mockForm;
 
-      const newStore = useFormBusinessController();
-      await newStore.handleSave();
+      const newComposable = useFormBusinessController();
+      await newComposable.handleSave();
 
       expect(repositoryProfilesMockInstance.setProfileById).toHaveBeenCalledWith(
         mockForm.model,
@@ -274,8 +271,8 @@ describe('useFormBusinessController', () => {
 
       mockFormRef.value = mockForm;
 
-      const newStore = useFormBusinessController();
-      await expect(newStore.handleSave()).rejects.toThrow('API Error');
+      const newComposable = useFormBusinessController();
+      await expect(newComposable.handleSave()).rejects.toThrow('API Error');
 
       expect(repositoryProfilesMockInstance.setProfileById).toHaveBeenCalled();
       expect(hubspotFormMockInstance.submitFormToHubspot).not.toHaveBeenCalled();
@@ -312,14 +309,14 @@ describe('useFormBusinessController', () => {
 
       mockFormRef.value = mockForm;
 
-      const newStore = useFormBusinessController();
+      const newComposable = useFormBusinessController();
 
       expect(mockFormRef.value).toStrictEqual(mockForm);
       expect(mockForm.isValid).toBe(true);
 
       expect(repositoryProfilesMockInstance.setProfileById).toBeDefined();
 
-      await newStore.handleSave();
+      await newComposable.handleSave();
 
       expect(repositoryProfilesMockInstance.setProfileById).toHaveBeenCalled();
       expect(hubspotFormMockInstance.submitFormToHubspot).not.toHaveBeenCalled();
@@ -349,15 +346,15 @@ describe('useFormBusinessController', () => {
 
       mockFormRef.value = mockForm;
 
-      const newStore = useFormBusinessController();
+      const newComposable = useFormBusinessController();
 
-      const savePromise = newStore.handleSave();
+      const savePromise = newComposable.handleSave();
 
-      expect(newStore.isLoading).toBe(true);
+      expect(newComposable.isLoading.value).toBe(true);
 
       await savePromise;
 
-      expect(newStore.isLoading).toBe(false);
+      expect(newComposable.isLoading.value).toBe(false);
     });
 
     it('should set loading to false even when error occurs', async () => {
@@ -384,11 +381,11 @@ describe('useFormBusinessController', () => {
 
       mockFormRef.value = mockForm;
 
-      const newStore = useFormBusinessController();
+      const newComposable = useFormBusinessController();
 
-      await expect(newStore.handleSave()).rejects.toThrow('API Error');
+      await expect(newComposable.handleSave()).rejects.toThrow('API Error');
 
-      expect(newStore.isLoading).toBe(false);
+      expect(newComposable.isLoading.value).toBe(false);
     });
 
     it('should handle network errors gracefully', async () => {
@@ -415,25 +412,25 @@ describe('useFormBusinessController', () => {
 
       mockFormRef.value = mockForm;
 
-      const newStore = useFormBusinessController();
+      const newComposable = useFormBusinessController();
 
-      await expect(newStore.handleSave()).rejects.toThrow('Network Error');
-      expect(newStore.isLoading).toBe(false);
+      await expect(newComposable.handleSave()).rejects.toThrow('Network Error');
+      expect(newComposable.isLoading.value).toBe(false);
     });
   });
 
   describe('Return values', () => {
     it('should return all expected properties', () => {
-      const returnedStore = useFormBusinessController();
+      const returnedComposable = useFormBusinessController();
 
-      expect(returnedStore).toHaveProperty('backButtonText');
-      expect(returnedStore).toHaveProperty('breadcrumbs');
-      expect(returnedStore).toHaveProperty('isDisabledButton');
-      expect(returnedStore).toHaveProperty('isLoading');
-      expect(returnedStore).toHaveProperty('handleSave');
-      expect(returnedStore).toHaveProperty('modelData');
-      expect(returnedStore).toHaveProperty('schemaBackend');
-      expect(returnedStore).toHaveProperty('errorData');
+      expect(returnedComposable).toHaveProperty('backButtonText');
+      expect(returnedComposable).toHaveProperty('breadcrumbs');
+      expect(returnedComposable).toHaveProperty('isDisabledButton');
+      expect(returnedComposable).toHaveProperty('isLoading');
+      expect(returnedComposable).toHaveProperty('handleSave');
+      expect(returnedComposable).toHaveProperty('modelData');
+      expect(returnedComposable).toHaveProperty('schemaBackend');
+      expect(returnedComposable).toHaveProperty('errorData');
     });
   });
 
@@ -460,8 +457,8 @@ describe('useFormBusinessController', () => {
 
       mockFormRef.value = mockForm;
 
-      const newStore = useFormBusinessController();
-      await newStore.handleSave();
+      const newComposable = useFormBusinessController();
+      await newComposable.handleSave();
 
       expect(mockForm.onValidate).toHaveBeenCalled();
     });
@@ -488,8 +485,8 @@ describe('useFormBusinessController', () => {
 
       mockFormRef.value = mockForm;
 
-      const newStore = useFormBusinessController();
-      await newStore.handleSave();
+      const newComposable = useFormBusinessController();
+      await newComposable.handleSave();
 
       expect(mockForm.onValidate).toHaveBeenCalled();
       expect(repositoryProfilesMockInstance.setProfileById).not.toHaveBeenCalled();

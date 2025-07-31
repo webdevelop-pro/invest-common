@@ -2,7 +2,7 @@ import {
   ref, computed, nextTick,
   toRaw, useTemplateRef,
 } from 'vue';
-import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
+import { storeToRefs } from 'pinia';
 import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/helpers/enums/routes';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useRouter } from 'vue-router';
@@ -13,7 +13,7 @@ import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repos
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { FormChild } from 'InvestCommon/types/form';
 
-export const useFormCustodianInformation = defineStore('useFormCustodianInformation', () => {
+export const useFormCustodianInformation = () => {
   const router = useRouter();
   const userProfileStore = useProfilesStore();
   const { selectedUserProfileId, selectedUserProfileType, selectedUserProfileData } = storeToRefs(userProfileStore);
@@ -91,8 +91,4 @@ export const useFormCustodianInformation = defineStore('useFormCustodianInformat
     errorData,
     modelData,
   };
-});
-
-if (import.meta.hot) {
-  import.meta.hot.accept(acceptHMRUpdate(useFormCustodianInformation, import.meta.hot));
-}
+};

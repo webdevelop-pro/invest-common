@@ -58,8 +58,12 @@ vi.mock('InvestCommon/helpers/enums/routes', () => ({
   ROUTE_DASHBOARD_ACCOUNT: 'ROUTE_DASHBOARD_ACCOUNT',
 }));
 
+vi.mock('UiKit/helpers/validation/general', () => ({
+  scrollToError: vi.fn(),
+}));
+
 describe('useFormPlanInformation', () => {
-  let store: ReturnType<typeof useFormPlanInformation>;
+  let composable: ReturnType<typeof useFormPlanInformation>;
   let mockProfilesStore: any;
   let mockRepositoryProfiles: any;
   let mockSessionStore: any;
@@ -128,7 +132,7 @@ describe('useFormPlanInformation', () => {
     vi.mocked(useSessionStore).mockReturnValue(mockSessionStore);
     vi.mocked(useHubspotForm).mockReturnValue(mockHubspotForm);
 
-    store = useFormPlanInformation();
+    composable = useFormPlanInformation();
   });
 
   afterEach(() => {
@@ -137,9 +141,9 @@ describe('useFormPlanInformation', () => {
 
   describe('initialization', () => {
     it('should initialize with correct default values', () => {
-      expect(store.backButtonText).toBe('Back to Profile Details');
-      expect(store.isLoading).toBe(false);
-      expect(store.isDisabledButton).toBe(false);
+      expect(composable.backButtonText.value).toBe('Back to Profile Details');
+      expect(composable.isLoading.value).toBe(false);
+      expect(composable.isDisabledButton.value).toBe(false);
     });
 
     it('should compute breadcrumbs correctly', () => {
@@ -157,19 +161,20 @@ describe('useFormPlanInformation', () => {
         },
       ];
 
-      expect(store.breadcrumbs).toEqual(expectedBreadcrumbs);
+      expect(composable.breadcrumbs.value).toEqual(expectedBreadcrumbs);
     });
 
     it('should return model data from selected user profile', () => {
-      expect(store.modelData).toEqual(mockProfilesStore.selectedUserProfileData.value.data);
+      expect(composable.modelData.value).toEqual(mockProfilesStore.selectedUserProfileData.value.data);
     });
   });
+
   describe('handleSave - success flow', () => {
     it('should save plan information successfully', async () => {
       mockFormRef.value.isValid = true;
       mockFormRef.value.onValidate = vi.fn();
 
-      await store.handleSave();
+      await composable.handleSave();
 
       expect(mockFormRef.value.onValidate).toHaveBeenCalled();
       expect(mockRepositoryProfiles.setProfileById).toHaveBeenCalledWith(
@@ -191,21 +196,21 @@ describe('useFormPlanInformation', () => {
     it('should set loading state during save operation', async () => {
       mockFormRef.value.isValid = true;
       mockRepositoryProfiles.setProfileById = vi.fn().mockImplementation(() => {
-        expect(store.isLoading).toBe(true);
+        expect(composable.isLoading.value).toBe(true);
         return Promise.resolve({});
       });
 
-      await store.handleSave();
+      await composable.handleSave();
 
-      expect(store.isLoading).toBe(false);
+      expect(composable.isLoading.value).toBe(false);
     });
 
     it('should handle loading state in finally block', async () => {
       mockFormRef.value.isValid = true;
       mockRepositoryProfiles.setProfileById = vi.fn().mockRejectedValue(new Error('API Error'));
 
-      await expect(store.handleSave()).rejects.toThrow('API Error');
-      expect(store.isLoading).toBe(false);
+      await expect(composable.handleSave()).rejects.toThrow('API Error');
+      expect(composable.isLoading.value).toBe(false);
     });
   });
 
@@ -214,7 +219,7 @@ describe('useFormPlanInformation', () => {
       mockFormRef.value.isValid = false;
       mockFormRef.value.onValidate = vi.fn();
 
-      await store.handleSave();
+      await composable.handleSave();
 
       expect(mockFormRef.value.onValidate).toHaveBeenCalled();
       expect(mockRepositoryProfiles.setProfileById).not.toHaveBeenCalled();
@@ -226,7 +231,7 @@ describe('useFormPlanInformation', () => {
       mockFormRef.value.isValid = false;
       mockFormRef.value.onValidate = vi.fn();
 
-      await store.handleSave();
+      await composable.handleSave();
 
       expect(mockRepositoryProfiles.setProfileById).not.toHaveBeenCalled();
       expect(mockHubspotForm.submitFormToHubspot).not.toHaveBeenCalled();
@@ -240,20 +245,20 @@ describe('useFormPlanInformation', () => {
       const apiError = new Error('API Error');
       mockRepositoryProfiles.setProfileById = vi.fn().mockRejectedValue(apiError);
 
-      await expect(store.handleSave()).rejects.toThrow('API Error');
+      await expect(composable.handleSave()).rejects.toThrow('API Error');
 
       expect(mockFormRef.value.onValidate).toHaveBeenCalled();
       expect(mockRepositoryProfiles.setProfileById).toHaveBeenCalled();
       expect(mockHubspotForm.submitFormToHubspot).not.toHaveBeenCalled();
       expect(mockRouter.push).not.toHaveBeenCalled();
-      expect(store.isLoading).toBe(false);
+      expect(composable.isLoading.value).toBe(false);
     });
 
     it('should not submit to HubSpot when API fails', async () => {
       mockFormRef.value.isValid = true;
       mockRepositoryProfiles.setProfileById = vi.fn().mockRejectedValue(new Error('API Error'));
 
-      await expect(store.handleSave()).rejects.toThrow('API Error');
+      await expect(composable.handleSave()).rejects.toThrow('API Error');
 
       expect(mockHubspotForm.submitFormToHubspot).not.toHaveBeenCalled();
     });
@@ -262,7 +267,7 @@ describe('useFormPlanInformation', () => {
       mockFormRef.value.isValid = true;
       mockRepositoryProfiles.setProfileById = vi.fn().mockRejectedValue(new Error('API Error'));
 
-      await expect(store.handleSave()).rejects.toThrow('API Error');
+      await expect(composable.handleSave()).rejects.toThrow('API Error');
 
       expect(mockRouter.push).not.toHaveBeenCalled();
     });
@@ -272,7 +277,7 @@ describe('useFormPlanInformation', () => {
     it('should navigate to account page after successful save', async () => {
       mockFormRef.value.isValid = true;
 
-      await store.handleSave();
+      await composable.handleSave();
 
       expect(mockRouter.push).toHaveBeenCalledWith({
         name: 'ROUTE_DASHBOARD_ACCOUNT',
@@ -285,7 +290,7 @@ describe('useFormPlanInformation', () => {
     it('should refresh profile data after successful save', async () => {
       mockFormRef.value.isValid = true;
 
-      await store.handleSave();
+      await composable.handleSave();
 
       expect(mockRepositoryProfiles.getProfileById).toHaveBeenCalledWith('individual', '123');
     });
@@ -295,9 +300,27 @@ describe('useFormPlanInformation', () => {
       mockProfilesStore.selectedUserProfileType.value = 'business';
       mockProfilesStore.selectedUserProfileId.value = '789';
 
-      await store.handleSave();
+      await composable.handleSave();
 
       expect(mockRepositoryProfiles.getProfileById).toHaveBeenCalledWith('business', '789');
+    });
+  });
+
+  describe('computed properties', () => {
+    it('should compute errorData from setProfileByIdState', () => {
+      mockRepositoryProfiles.setProfileByIdState.value = { 
+        error: { data: { responseJson: 'test error' } } 
+      };
+
+      expect(composable.errorData.value).toBe('test error');
+    });
+
+    it('should compute schemaBackend from getProfileByIdOptionsState', () => {
+      mockRepositoryProfiles.getProfileByIdOptionsState.value = { 
+        data: { schema: { test: 'schema' } } 
+      };
+
+      expect(composable.schemaBackend.value).toEqual({ schema: { test: 'schema' } });
     });
   });
 });

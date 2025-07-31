@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useGlobalLoader } from 'InvestCommon/store/useGlobalLoader';
-import { storeToRefs } from 'pinia';
 import VLayoutForm from 'InvestCommon/shared/layouts/VLayoutForm.vue';
 import { useFormBusinessController } from './store/useFormBusinessController';
 import VFormPartialBusinessController from './components/VFormPartialBusinessController.vue';
@@ -8,15 +7,10 @@ import VFormPartialBusinessController from './components/VFormPartialBusinessCon
 const globalLoader = useGlobalLoader();
 globalLoader.hide();
 
-const formStore = useFormBusinessController();
 const {
   backButtonText, breadcrumbs, isLoading, isDisabledButton,
-  modelData, schemaBackend, errorData,
-} = storeToRefs(formStore);
-
-const handleSave = () => {
-  formStore.handleSave();
-};
+  modelData, schemaBackend, errorData, handleSave,
+} = useFormBusinessController();
 
 const props = defineProps({
   trust: Boolean,
