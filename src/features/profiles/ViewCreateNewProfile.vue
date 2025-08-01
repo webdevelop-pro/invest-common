@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useFormCreateNewProfile } from './store/useFormCreateNewProfile';
-import { useGlobalLoader } from 'InvestCommon/store/useGlobalLoader';
+import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import { defineAsyncComponent, hydrateOnVisible } from 'vue';
 import VLayoutForm from 'InvestCommon/shared/layouts/VLayoutForm.vue';
 

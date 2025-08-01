@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useGlobalLoader } from 'InvestCommon/store/useGlobalLoader';
+import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { DashboardInvestmentTabTypes } from './utils';
 import VBreadcrumbs from 'UiKit/components/VBreadcrumb/VBreadcrumbsList.vue';

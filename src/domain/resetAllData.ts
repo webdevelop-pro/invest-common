@@ -8,14 +8,10 @@ import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository'
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useRepositoryFiler } from 'InvestCommon/data/filer/filer.repository';
 import { useFundingStore } from 'InvestCommon/store/useFunding';
-import { useProfileWalletTransactionStore } from 'InvestCommon/store/useProfileWallet/useProfileWalletTransaction';
-import { useProfileWalletStore } from 'InvestCommon/store/useProfileWallet/useProfileWallet';
 import { useProfileEvmWalletTransactionStore } from 'InvestCommon/store/useProfileEvmWallet/useProfileEvmWalletTransaction';
 import { useProfileEvmWalletStore } from 'InvestCommon/store/useProfileEvmWallet/useProfileEvmWallet';
 import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
-import { usePlaidStore } from 'InvestCommon/store/usePlaid';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
-import { useAccreditationStore } from 'InvestCommon/store/useAccreditation';
 import { useAuthStore } from 'InvestCommon/store/useAuth';
 import { useFilerStore } from 'InvestCommon/store/useFiler';
 import { cookiesOptions } from 'InvestCommon/global/index';
@@ -29,13 +25,9 @@ function clearAllCookies() {
 
 export const resetAllData = () => {
   useFundingStore().resetAll();
-  useProfileWalletTransactionStore().resetAll();
-  useProfileWalletStore().resetAll();
   useProfileEvmWalletTransactionStore().resetAll();
   useProfileEvmWalletStore().resetAll();
   useUserProfilesStore().resetAll();
-  usePlaidStore().resetAll();
-  useAccreditationStore().resetAll();
   useAuthStore().resetAll();
   useFilerStore().resetAll();
   clearAllCookies();

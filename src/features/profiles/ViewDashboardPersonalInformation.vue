@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useGlobalLoader } from 'InvestCommon/store/useGlobalLoader';
+import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import VFormPartialPersonalInformation from 'InvestCommon/components/forms/VFormPartialPersonalInformation.vue';
 import VLayoutForm from 'InvestCommon/shared/layouts/VLayoutForm.vue';
 import { useFormPersonalInformation } from './store/useFormPersonalInformation';

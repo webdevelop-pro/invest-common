@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { useGlobalLoader } from 'InvestCommon/store/useGlobalLoader';
-import { storeToRefs } from 'pinia';
+import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import { useFormFinancialInformationAndKyc } from './store/useFormFinancialInformationAndKyc';
 import VLayoutForm from 'InvestCommon/shared/layouts/VLayoutForm.vue';
 import VFormPartialPersonalInformation from 'InvestCommon/components/forms/VFormPartialPersonalInformation.vue';
@@ -11,15 +10,11 @@ import VFormPartialUnderstandingOfRisks from 'InvestCommon/components/forms/VFor
 const globalLoader = useGlobalLoader();
 globalLoader.hide();
 
-const formStore = useFormFinancialInformationAndKyc();
 const {
   backButtonText, breadcrumbs, isLoading, isDisabledButton,
-  modelData, schemaBackend, errorData,
-} = storeToRefs(formStore);
+  modelData, schemaBackend, errorData, handleSave,
+} = useFormFinancialInformationAndKyc();
 
-const handleSave = () => {
-  formStore.handleSave();
-};
 </script>
 
 <template>

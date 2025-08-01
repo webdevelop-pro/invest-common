@@ -250,7 +250,7 @@ export const useNotifications = defineStore('notifications', () => {
     if (!id) {
       return;
     }
-    notificationsRepository.markAsReadById(id);
+    await notificationsRepository.markAsReadById(id);
   };
 
   return {

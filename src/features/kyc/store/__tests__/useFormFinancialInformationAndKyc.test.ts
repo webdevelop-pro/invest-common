@@ -128,14 +128,14 @@ vi.mock('vue', async () => {
 });
 
 describe('useFormFinancialInformationAndKyc', () => {
-  let store: ReturnType<typeof useFormFinancialInformationAndKyc>;
+  let composable: ReturnType<typeof useFormFinancialInformationAndKyc>;
 
   beforeEach(() => {
     setActivePinia(createPinia());
     vi.clearAllMocks();
     mockRepositoryProfiles.setProfileByIdState = ref({ loading: false, error: null, data: undefined });
     mockRepositoryProfiles.getProfileByIdOptionsState = ref({ loading: false, error: null, data: { schema: {} } });
-    store = useFormFinancialInformationAndKyc();
+    composable = useFormFinancialInformationAndKyc();
   });
 
   afterEach(() => {
@@ -148,20 +148,20 @@ describe('useFormFinancialInformationAndKyc', () => {
       mockFinancialInfoFormRef.value.isValid = true;
       mockInvestmentObjectivesFormRef.value.isValid = true;
       mockUnderstandingRisksFormRef.value.isValid = true;
-      expect(store.isDisabledButton).toBe(false);
+      expect(composable.isDisabledButton.value).toBe(false);
     });
     it('should be invalid when any form is invalid', () => {
       mockPersonalFormRef.value.isValid = false;
-      expect(store.isDisabledButton).toBe(true);
+      expect(composable.isDisabledButton.value).toBe(true);
       mockPersonalFormRef.value.isValid = true;
       mockFinancialInfoFormRef.value.isValid = false;
-      expect(store.isDisabledButton).toBe(true);
+      expect(composable.isDisabledButton.value).toBe(true);
       mockFinancialInfoFormRef.value.isValid = true;
       mockInvestmentObjectivesFormRef.value.isValid = false;
-      expect(store.isDisabledButton).toBe(true);
+      expect(composable.isDisabledButton.value).toBe(true);
       mockInvestmentObjectivesFormRef.value.isValid = true;
       mockUnderstandingRisksFormRef.value.isValid = false;
-      expect(store.isDisabledButton).toBe(true);
+      expect(composable.isDisabledButton.value).toBe(true);
     });
   });
 
@@ -178,7 +178,7 @@ describe('useFormFinancialInformationAndKyc', () => {
     });
 
     it('should save successfully when all forms are valid', async () => {
-      await store.handleSave();
+      await composable.handleSave();
       expect(mockPersonalFormRef.value.onValidate).toHaveBeenCalled();
       expect(mockFinancialInfoFormRef.value.onValidate).toHaveBeenCalled();
       expect(mockInvestmentObjectivesFormRef.value.onValidate).toHaveBeenCalled();
@@ -202,25 +202,25 @@ describe('useFormFinancialInformationAndKyc', () => {
         name: ROUTE_DASHBOARD_ACCOUNT,
         params: { profileId: '123' },
       });
-      expect(store.isLoading).toBe(false);
+      expect(composable.isLoading.value).toBe(false);
     });
 
     it('should not save and should scroll to error if any form is invalid', async () => {
       mockPersonalFormRef.value.isValid = false;
-      await store.handleSave();
+      await composable.handleSave();
       expect(mockPersonalFormRef.value.onValidate).toHaveBeenCalled();
       expect(mockFinancialInfoFormRef.value.onValidate).toHaveBeenCalled();
       expect(mockInvestmentObjectivesFormRef.value.onValidate).toHaveBeenCalled();
       expect(mockUnderstandingRisksFormRef.value.onValidate).toHaveBeenCalled();
       expect(mockRepositoryProfiles.setProfileById).not.toHaveBeenCalled();
-      expect(store.isLoading).toBe(false);
+      expect(composable.isLoading.value).toBe(false);
     });
 
     it('should handle setProfileById error gracefully', async () => {
       mockRepositoryProfiles.setProfileById.mockRejectedValue(new Error('fail'));
-      await expect(store.handleSave()).rejects.toThrow('fail');
+      await expect(composable.handleSave()).rejects.toThrow('fail');
       expect(mockRepositoryProfiles.setProfileById).toHaveBeenCalled();
-      expect(store.isLoading).toBe(false);
+      expect(composable.isLoading.value).toBe(false);
     });
 
     it('should handle KYC and Escrow creation only if no errors', async () => {
@@ -229,7 +229,7 @@ describe('useFormFinancialInformationAndKyc', () => {
       mockProfilesStore.selectedUserProfileData.value = {
         data: { id: 'profile123', type: 'individual' }, user_id: 'user123', id: 'profile123', escrow_id: null,
       };
-      await store.handleSave();
+      await composable.handleSave();
       expect(mockKycRepository.handlePlaidKyc).toHaveBeenCalled();
       expect(mockAccreditationRepository.createEscrow).toHaveBeenCalledWith('user123', 'profile123');
     });
@@ -238,13 +238,13 @@ describe('useFormFinancialInformationAndKyc', () => {
       mockProfilesStore.selectedUserProfileData.value = {
         data: { id: 'profile123', type: 'individual' }, user_id: 'user123', id: 'profile123', escrow_id: 'escrow123' as any,
       };
-      await store.handleSave();
+      await composable.handleSave();
       expect(mockAccreditationRepository.createEscrow).not.toHaveBeenCalled();
     });
 
     it('should not call hubspotHandle if setProfileByIdState has error', async () => {
       mockRepositoryProfiles.setProfileByIdState.value.error = { data: { responseJson: 'error' } } as any;
-      await store.handleSave();
+      await composable.handleSave();
       expect(mockSubmitFormToHubspot).not.toHaveBeenCalled();
     });
   });

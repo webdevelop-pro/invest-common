@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useGlobalLoader } from 'InvestCommon/store/useGlobalLoader';
+import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import VLayoutForm from 'InvestCommon/shared/layouts/VLayoutForm.vue';
 import { useFormEntityInformation } from './store/useFormEntityInformation';
 import VFormPartialEntityInformation from './components/VFormPartialEntityInformation.vue';

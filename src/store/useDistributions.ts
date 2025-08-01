@@ -1,11 +1,20 @@
-import { computed, ref } from 'vue';
+import { computed, ref, toRaw } from 'vue';
 import { generalErrorHandling } from 'UiKit/helpers/generalErrorHandling';
 import { fetchGetDistributions } from 'InvestCommon/services/api/distributions';
 import { IDistributionsData, IDistributionsMeta } from 'InvestCommon/types/api/distributions';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
-import { transformDistributionsData } from 'InvestCommon/helpers/transformInvestData';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useOfferStore } from './useOffer';
+
+const transformDistributionsData = (data: IDistributionsData[], offersData: IInvest[]) => (
+  data.map((investItem) => {
+    const investment = toRaw(offersData.find((offerItem) => offerItem.id === investItem.investment_id));
+    return {
+      ...investItem,
+      investment,
+    } as IDistributionsData;
+  })
+);
 
 export const useDistributionsStore = defineStore('distributions', () => {
   const profilesStore = useProfilesStore();

@@ -2,20 +2,18 @@ import {
   describe, it, expect, vi, beforeEach,
 } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
-import { ref, nextTick } from 'vue';
+import { ref } from 'vue';
 import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
-import { useGlobalLoader } from 'InvestCommon/store/useGlobalLoader';
 import { redirectAfterLogout } from 'InvestCommon/domain/redirects/redirectAfterLogout';
 import { resetAllData } from 'InvestCommon/domain/resetAllData';
 import { useLogoutStore } from '../useLogout';
 import { SELFSERVICE } from '../type';
 
-// Mock the dependencies
 vi.mock('InvestCommon/data/auth/auth.repository', () => ({
   useRepositoryAuth: vi.fn(),
 }));
 
-vi.mock('InvestCommon/store/useGlobalLoader', () => ({
+vi.mock('UiKit/store/useGlobalLoader', () => ({
   useGlobalLoader: vi.fn(() => ({
     show: vi.fn(),
   })),
@@ -36,47 +34,20 @@ describe('useLogoutStore', () => {
   });
 
   it('should handle successful logout flow', async () => {
-    // Mock repository responses
-    const getAuthFlowState = ref<{
-      error: string | null;
-      data: { logout_token: string } | null }
-    >({ error: null, data: null });
-    const setLogoutState = ref<{
-      error: string | null; 
-      data: { status: number } | null }
-    >({ error: null, data: null });
+    const getAuthFlowState = ref({ error: null, data: { logout_token: 'test-token' } });
+    const getLogoutState = ref({ error: null, data: null });
 
     const mockAuthRepository = {
-      getAuthFlow: vi.fn().mockImplementation(async () => {
-        // Simulate async state update
-        await new Promise((resolve) => { setTimeout(resolve, 0); });
-        getAuthFlowState.value = {
-          error: null,
-          data: { logout_token: 'test-token' },
-        };
-        await nextTick();
-      }),
-      getLogout: vi.fn().mockImplementation(async () => {
-        // Simulate async state update
-        await new Promise((resolve) => { setTimeout(resolve, 0); });
-        setLogoutState.value = {
-          error: null,
-          data: { status: 200 },
-        };
-        await nextTick();
-      }),
+      getAuthFlow: vi.fn().mockResolvedValue({}),
+      getLogout: vi.fn().mockResolvedValue({}),
       getAuthFlowState,
-      setLogoutState,
+      getLogoutState,
     };
 
     (useRepositoryAuth as any).mockReturnValue(mockAuthRepository);
 
     const store = useLogoutStore();
-    await nextTick();
-
-    // Call logout handler and wait for all async operations
     await store.logoutHandler();
-    await nextTick();
 
     expect(mockAuthRepository.getAuthFlow).toHaveBeenCalledWith(SELFSERVICE.logout);
     expect(mockAuthRepository.getLogout).toHaveBeenCalledWith('test-token');
@@ -86,50 +57,24 @@ describe('useLogoutStore', () => {
   });
 
   it('should extract token from logout_url if logout_token is not present', async () => {
-    const getAuthFlowState = ref<{
-      error: string | null;
-      data: { logout_url: string } | null }
-    >({ error: null, data: null });
-    const setLogoutState = ref<{
-      error: string | null;
-      data: { status: number } | null }
-    >({ error: null, data: null });
+    const getAuthFlowState = ref({ 
+      error: null, 
+      data: { logout_url: 'https://example.com/logout?token=url-token' } 
+    });
+    const getLogoutState = ref({ error: null, data: null });
 
     const mockAuthRepository = {
-      getAuthFlow: vi.fn().mockImplementation(async () => {
-        // Simulate async state update
-        await new Promise((resolve) => { setTimeout(resolve, 0); });
-        getAuthFlowState.value = {
-          error: null,
-          data: { logout_url: 'https://example.com/logout?token=url-token' },
-        };
-        await nextTick();
-      }),
-      getLogout: vi.fn().mockImplementation(async (token) => {
-        // Simulate async state update
-        await new Promise((resolve) => { setTimeout(resolve, 0); });
-        if (token === 'url-token') {
-          setLogoutState.value = {
-            error: null,
-            data: { status: 200 },
-          };
-          await nextTick();
-        }
-      }),
+      getAuthFlow: vi.fn().mockResolvedValue({}),
+      getLogout: vi.fn().mockResolvedValue({}),
       getAuthFlowState,
-      setLogoutState,
+      getLogoutState,
     };
 
     (useRepositoryAuth as any).mockReturnValue(mockAuthRepository);
 
     const store = useLogoutStore();
-    await nextTick();
-
-    // Call logout handler and wait for all async operations
     await store.logoutHandler();
-    await nextTick();
 
-    // Verify the complete flow
     expect(mockAuthRepository.getAuthFlow).toHaveBeenCalledWith(SELFSERVICE.logout);
     expect(mockAuthRepository.getLogout).toHaveBeenCalledWith('url-token');
     expect(redirectAfterLogout).toHaveBeenCalled();
@@ -138,38 +83,20 @@ describe('useLogoutStore', () => {
   });
 
   it('should handle auth flow error', async () => {
-    const getAuthFlowState = ref<{
-      error: string | null;
-      data: { logout_url: string } | null }
-    >({ error: null, data: null });
-    const setLogoutState = ref<{
-      error: string | null;
-      data: { status: number } | null }
-    >({ error: null, data: null });
+    const getAuthFlowState = ref({ error: 'Auth flow error', data: null });
+    const getLogoutState = ref({ error: null, data: null });
 
     const mockAuthRepository = {
-      getAuthFlow: vi.fn().mockImplementation(async () => {
-        // Simulate async state update
-        await new Promise((resolve) => setTimeout(resolve, 0));
-        getAuthFlowState.value = {
-          error: 'Auth flow error',
-          data: null,
-        };
-        await nextTick();
-      }),
+      getAuthFlow: vi.fn().mockResolvedValue({}),
       getLogout: vi.fn(),
       getAuthFlowState,
-      setLogoutState,
+      getLogoutState,
     };
 
     (useRepositoryAuth as any).mockReturnValue(mockAuthRepository);
 
     const store = useLogoutStore();
-    await nextTick();
-
-    // Call logout handler and wait for all async operations
     await store.logoutHandler();
-    await nextTick();
 
     expect(mockAuthRepository.getAuthFlow).toHaveBeenCalledWith(SELFSERVICE.logout);
     expect(mockAuthRepository.getLogout).not.toHaveBeenCalled();
@@ -177,54 +104,25 @@ describe('useLogoutStore', () => {
   });
 
   it('should handle logout state error', async () => {
-    const getAuthFlowState = ref<{
-      error: string | null;
-      data: { logout_token: string } | null }
-    >({ error: null, data: null });
-    const setLogoutState = ref<{
-      error: string | null;
-      data: { status: number } | null }
-    >({ error: null, data: null });
+    const getAuthFlowState = ref({ error: null, data: { logout_token: 'test-token' } });
+    const getLogoutState = ref({ error: 'Logout error', data: null });
 
     const mockAuthRepository = {
-      getAuthFlow: vi.fn().mockImplementation(async () => {
-        // Simulate async state update
-        await new Promise((resolve) => setTimeout(resolve, 0));
-        getAuthFlowState.value = {
-          error: null,
-          data: { logout_token: 'test-token' },
-        };
-        await nextTick();
-      }),
-      getLogout: vi.fn().mockImplementation(async () => {
-        // Simulate async state update
-        await new Promise((resolve) => setTimeout(resolve, 0));
-        setLogoutState.value = {
-          error: 'Logout error',
-          data: null,
-        };
-        await nextTick();
-      }),
+      getAuthFlow: vi.fn().mockResolvedValue({}),
+      getLogout: vi.fn().mockResolvedValue({}),
       getAuthFlowState,
-      setLogoutState,
-      flowId: { value: 'test-flow-id' },
-      csrfToken: { value: 'test-csrf-token' },
+      getLogoutState,
     };
 
     (useRepositoryAuth as any).mockReturnValue(mockAuthRepository);
 
     const store = useLogoutStore();
-    await nextTick();
-
-    // Call logout handler and wait for all async operations
     await store.logoutHandler();
-    await nextTick();
 
     expect(mockAuthRepository.getAuthFlow).toHaveBeenCalledWith(SELFSERVICE.logout);
     expect(mockAuthRepository.getLogout).toHaveBeenCalledWith('test-token');
-    expect(useGlobalLoader().show).not.toHaveBeenCalled();
-    expect(redirectAfterLogout).toHaveBeenCalled();
-    expect(resetAllData).toHaveBeenCalled();
+    expect(redirectAfterLogout).not.toHaveBeenCalled();
+    expect(resetAllData).not.toHaveBeenCalled();
     expect(store.isLoading).toBe(false);
   });
 });

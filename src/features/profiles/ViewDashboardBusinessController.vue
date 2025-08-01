@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useGlobalLoader } from 'InvestCommon/store/useGlobalLoader';
+import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import VLayoutForm from 'InvestCommon/shared/layouts/VLayoutForm.vue';
 import { useFormBusinessController } from './store/useFormBusinessController';
 import VFormPartialBusinessController from './components/VFormPartialBusinessController.vue';

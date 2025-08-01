@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useGlobalLoader } from 'InvestCommon/store/useGlobalLoader';
+import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import { useFormBackgroundInformation } from './store/useFormBackgroundInformation';
 import VLayoutForm from 'InvestCommon/shared/layouts/VLayoutForm.vue';
 import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';

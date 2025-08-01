@@ -10,9 +10,8 @@ import {
 } from 'InvestCommon/helpers/enums/routes';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import {
-  useAccreditationStore, useAuthStore, useFilerStore, useFundingStore, useInvestmentsStore,
-  usePlaidStore,
-  useProfileWalletStore, useProfileWalletTransactionStore, useUserProfilesStore,
+  useAuthStore, useFilerStore, useFundingStore, useInvestmentsStore,
+  useProfileWalletTransactionStore, useUserProfilesStore,
   useGlobalLoader,
 } from 'InvestCommon/store';
 import env from 'InvestCommon/global/index';
@@ -300,11 +299,8 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
   const resetAll = () => {
     useFundingStore().resetAll();
     useProfileWalletTransactionStore().resetAll();
-    useProfileWalletStore().resetAll();
     useUserProfilesStore().resetAll();
-    usePlaidStore().resetAll();
     useInvestmentsStore().resetAll();
-    useAccreditationStore().resetAll();
     useAuthStore().resetAll();
     useFilerStore().resetAll();
     // useRepositoryProfiles().reset();
