@@ -22,11 +22,10 @@ const {
   isAlertType,
   isAlertText,
   alertTitle,
-  isWalletAlert,
+  isWalletError,
   isTopTextShow,
   alertButtonText,
   FUNDING_TAB_INFO,
-  isSdira,
   updateData,
   onAlertButtonClick,
 } = useWalletMain();
@@ -58,14 +57,14 @@ onBeforeMount(() => {
       </template>
     </VAlert>
     <div
-      v-if="!isWalletAlert"
+      v-if="!isWalletError"
       class="dashboard-wallet__content"
     >
       <div class="dashboard-wallet__transactions">
         <DashboardWalletTransactions
           :profile-id="selectedUserProfileId"
           :logged-in="userLoggedIn"
-          :is-error="isAlertShow || isSdira"
+          :is-error="isAlertShow || selectedUserProfileData.isTypeSdira"
         />
       </div>
       <div class="dashboard-wallet__bank-accounts">

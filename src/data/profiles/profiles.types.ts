@@ -263,6 +263,11 @@ export interface IBackgroundInfo {
 }
 
 export interface IProfileFormatted extends IProfileIndividual {
+  isTypeIndividual: boolean;
+  isTypeEntity: boolean;
+  isTypeTrust: boolean;
+  isTypeSdira: boolean;
+  isTypeSolo401k: boolean;
   isKycApproved: boolean;
   isKycInProgress: boolean;
   isKycPending: boolean;

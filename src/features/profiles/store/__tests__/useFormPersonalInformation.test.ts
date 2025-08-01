@@ -110,6 +110,7 @@ describe('useFormPersonalInformation', () => {
   let mockRouter: any;
   let mockProfilesStore: any;
   let mockRepositoryProfiles: any;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let mockSessionStore: any;
   let mockAccreditationRepository: any;
   let mockHubspotForm: any;

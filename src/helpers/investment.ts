@@ -60,7 +60,8 @@ export const getInvestmentOfferImage = (
 
 export const getIsInvestmentOfferDefaultImage = (
   investment: IInvest | null,
-): boolean => !(investment?.offer?.image_link_id || investment?.offer?.image?.meta_data || investment?.offer?.image?.url);
+): boolean => !(investment?.offer?.image_link_id || investment?.offer?.image?.meta_data
+    || investment?.offer?.image?.url);
 
 export const getDistributionTagBackground = (status: string | undefined): string => {
   if (status === 'success') return '#D9FFEE';

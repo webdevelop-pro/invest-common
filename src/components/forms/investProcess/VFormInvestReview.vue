@@ -27,7 +27,7 @@ const investmentsStore = useInvestmentsStore();
 const { setReviewData, isSetReviewLoading } = storeToRefs(investmentsStore);
 const { submitFormToHubspot } = useHubspotForm('23d573ec-3714-4fdb-97c2-a3b688d5008f');
 const walletRepository = useRepositoryWallet();
-const { getWalletState } = storeToRefs(walletRepository);
+const { getWalletState, canLoadWalletData } = storeToRefs(walletRepository);
 const fundingSource = computed(() => getWalletState.value.data?.funding_source || []);
 
 const fundingStore = useFundingStore();
@@ -100,7 +100,7 @@ investmentsStore.$onAction(
 );
 
 watch(() => fundingSourceId.value, () => {
-  if (fundingSourceId.value > 0) {
+  if ((fundingSourceId.value > 0) && canLoadWalletData.value) {
     walletRepository.getWalletByProfile(profileId);
   }
 }, { immediate: true });

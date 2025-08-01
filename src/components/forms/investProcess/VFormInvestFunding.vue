@@ -69,7 +69,7 @@ const {
 const { submitFormToHubspot } = useHubspotForm('b27d194e-cbab-4c53-9d60-1065be6425be');
 
 const walletRepository = useRepositoryWallet();
-const { getWalletState, walletId } = storeToRefs(walletRepository);
+const { getWalletState, walletId, canLoadWalletData } = storeToRefs(walletRepository);
 const fundingSource = computed(() => getWalletState.value.data?.funding_source || []);
 
 const profileEvmWalletStore = useProfileEvmWalletStore();
@@ -278,7 +278,7 @@ watch(() => model, () => {
 
 onBeforeMount(() => {
   if (userLoggedIn.value) {
-    walletRepository.getWalletByProfile(selectedUserProfileId.value);
+    if (canLoadWalletData.value) walletRepository.getWalletByProfile(selectedUserProfileId.value);
     profileEvmWalletStore.getEvmWalletByProfileId(selectedUserProfileId.value);
   }
 });

@@ -1,5 +1,5 @@
 import { computed } from 'vue';
-import { acceptHMRUpdate, defineStore } from 'pinia';
+import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import env from 'InvestCommon/global';
 import { toasterErrorHandling } from 'InvestCommon/data/repository/error/toasterErrorHandling';
@@ -10,8 +10,16 @@ import { WalletFormatter } from './formatter/wallet.formatter';
 import {
   ITransactionDataResponse, IWalletDataFormatted, IWalletDataResponse,
 } from './wallet.types';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 
 export const useRepositoryWallet = defineStore('repository-wallet', () => {
+
+    const userProfileStore = useProfilesStore();
+    const { selectedUserProfileData, selectedUserProfileId } = storeToRefs(userProfileStore);
+    const userSessionStore = useSessionStore();
+    const { userLoggedIn } = storeToRefs(userSessionStore);
+
   const apiClient = new ApiClient(env.WALLET_URL);
 
   const getWalletState = createActionState<IWalletDataFormatted>();
@@ -200,16 +208,15 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
 
       Object.assign(wallet, fields);
 
-      if (fields?.inc_balance !== undefined) {
-        wallet.pending_incoming_balance = fields.inc_balance;
-      }
-      if (fields?.out_balance !== undefined) {
-        wallet.pending_outcoming_balance = fields.out_balance;
-      }
-
       getWalletState.value.data = new WalletFormatter(wallet as any).format();
     }
   };
+
+  const selectedIdAsDataIs = computed(() => selectedUserProfileData.value.id === selectedUserProfileId.value);
+  const canLoadWalletData = computed(() => (
+    !selectedUserProfileData.value.isTypeSdira && selectedIdAsDataIs.value && userLoggedIn.value
+    &&  selectedUserProfileData.value.isKycApproved && (selectedUserProfileId.value > 0)
+    && !getWalletState.value.loading && (selectedUserProfileId.value > 0)));
 
   const resetAll = () => {
     getWalletState.value = { loading: false, error: null, data: undefined };
@@ -234,6 +241,7 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
     createLinkExchangeState,
     createLinkProcessState,
     deleteLinkedAccountState,
+    canLoadWalletData,
     getWalletByProfile,
     getTransactions,
     addBankAccount,

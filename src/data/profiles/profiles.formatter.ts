@@ -3,12 +3,34 @@ import {
   IProfileFormatted,
 } from './profiles.types';
 import { InvestKycTypes, AccreditationTypes } from 'InvestCommon/types/api/invest';
+import { PROFILE_TYPES } from 'InvestCommon/global/investment.json';
 
 export class ProfileFormatter {
   private profile: IProfileIndividual;
 
   constructor(profile: IProfileIndividual) {
     this.profile = profile;
+  }
+
+  // Profile Type boolean properties
+  get isTypeIndividual() {
+    return this.profile.type === PROFILE_TYPES.INDIVIDUAL;
+  }
+
+  get isTypeEntity() {
+    return this.profile.type === PROFILE_TYPES.ENTITY;
+  }
+
+  get isTypeTrust() {
+    return this.profile.type === PROFILE_TYPES.TRUST;
+  }
+
+  get isTypeSdira() {
+    return this.profile.type === PROFILE_TYPES.SDIRA;
+  }
+
+  get isTypeSolo401k() {
+    return this.profile.type === PROFILE_TYPES.SOLO401K;
   }
 
   // KYC Status boolean properties
@@ -72,6 +94,11 @@ export class ProfileFormatter {
   format(): IProfileFormatted {
     return {
       ...this.profile,
+      isTypeIndividual: this.isTypeIndividual,
+      isTypeEntity: this.isTypeEntity,
+      isTypeTrust: this.isTypeTrust,
+      isTypeSdira: this.isTypeSdira,
+      isTypeSolo401k: this.isTypeSolo401k,
       isKycApproved: this.isKycApproved,
       isKycInProgress: this.isKycInProgress,
       isKycPending: this.isKycPending,

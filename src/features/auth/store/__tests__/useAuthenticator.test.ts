@@ -81,6 +81,7 @@ vi.mock('UiKit/helpers/general', () => ({
 }));
 
 describe('useAuthenticator Store', () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let store: ReturnType<typeof useAuthenticatorStore>;
   let mockAuthRepository: ReturnType<typeof useRepositoryAuth>;
 

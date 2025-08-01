@@ -154,6 +154,7 @@ vi.mock('ajv/dist/types/json-schema', () => ({
 describe('useFormBackgroundInformation', () => {
   let composable: ReturnType<typeof useFormBackgroundInformation>;
   let mockRouter: any;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let mockHubspotForm: any;
   let mockScrollToError: any;
 
