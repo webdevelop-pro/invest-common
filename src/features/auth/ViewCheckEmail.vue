@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import VFormAuthVerification from './components/VFormAuthVerification.vue';
-import { useGlobalLoader } from 'InvestCommon/store';
+import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 
 useGlobalLoader().hide();
 </script>

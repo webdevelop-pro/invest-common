@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useGlobalLoader } from 'InvestCommon/store';
+import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import VLayoutForm from 'InvestCommon/shared/layouts/VLayoutForm.vue';
 import { useFormTrustInformation } from './store/useFormTrustInformation';
 import VFormPartialTrustInformation from './components/VFormPartialTrustInformation.vue';

@@ -11,8 +11,7 @@ import {
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import {
   useAuthStore, useFilerStore, useFundingStore, useInvestmentsStore,
-  useProfileWalletTransactionStore, useUserProfilesStore,
-  useGlobalLoader,
+  useUserProfilesStore,
 } from 'InvestCommon/store';
 import env from 'InvestCommon/global/index';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
@@ -298,7 +297,6 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
 
   const resetAll = () => {
     useFundingStore().resetAll();
-    useProfileWalletTransactionStore().resetAll();
     useUserProfilesStore().resetAll();
     useInvestmentsStore().resetAll();
     useAuthStore().resetAll();
@@ -339,7 +337,7 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
       if (queryParams) navigateWithQueryParams(urlSignin, queryParams);
       else navigateWithQueryParams(urlSignin);
     }
-    useGlobalLoader().hide();
+    // useGlobalLoader().hide();
   };
 
   // LOGOUT

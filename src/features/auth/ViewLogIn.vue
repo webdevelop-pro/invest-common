@@ -2,7 +2,7 @@
 import VFormAuthSocial from './components/VFormAuthSocial.vue';
 import VFormAuthLogIn from './components/VFormAuthLogIn.vue';
 import VSeparator from 'UiKit/components/Base/VSeparator/VSeparator.vue';
-import { useGlobalLoader } from 'InvestCommon/store';
+import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import { useLoginStore } from './store/useLogin';
 import { onMounted } from 'vue';
 

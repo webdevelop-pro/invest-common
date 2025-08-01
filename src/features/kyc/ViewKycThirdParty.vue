@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useGlobalLoader } from 'InvestCommon/store';
+import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import { onMounted } from 'vue';
 import { useKycThirdParty } from './store/useKycThirdParty';
 
