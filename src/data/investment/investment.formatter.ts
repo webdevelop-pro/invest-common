@@ -3,9 +3,11 @@ import {
   InvestmentStatuses,
   InvestFundingStatuses,
   IInvestmentFormatted,
+  InvestStepTypes,
 } from './investment.types';
 import { OfferFormatter } from 'InvestCommon/data/offer/offer.formatter';
 import { IOfferFormatted } from 'InvestCommon/data/offer/offer.types';
+import { IOffer } from 'InvestCommon/types/api/offers';
 
 // Currency formatter function
 const defaultInstance = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 });
@@ -40,76 +42,76 @@ const getTimeFormat = (fullDate: string) => {
 };
 
 export class InvestmentFormatter {
-  private investment: IInvestment;
+  private investment: IInvestment | null;
 
-  constructor(investment: IInvestment) {
-    this.investment = investment;
+  constructor(investment?: IInvestment) {
+    this.investment = investment || this.createDefaultInvestment();
   }
 
   get amountFormatted() {
-    return currency(this.investment.amount);
+    return currency(this.investment?.amount);
   }
 
   get amountFormattedZero() {
-    return currency(this.investment.amount, 0);
+    return currency(this.investment?.amount, 0);
   }
 
   get amountWithSign() {
-    return `- ${currency(this.investment.amount, 0)}`;
+    return `- ${currency(this.investment?.amount, 0)}`;
   }
 
   get numberOfSharesFormatted() {
-    return this.investment.number_of_shares.toLocaleString('en-US');
+    return this.investment?.number_of_shares?.toLocaleString('en-US') || '0';
   }
 
   get pricePerShareFormatted() {
-    return currency(this.investment.price_per_share);
+    return currency(this.investment?.price_per_share);
   }
 
   get createdAtFormatted(): string {
-    return this.investment.created_at
+    return this.investment?.created_at
       ? formatToFullDate(new Date(this.investment.created_at).toISOString())
       : '-';
   }
 
   get createdAtTime(): string {
-    return this.investment.created_at
+    return this.investment?.created_at
       ? getTimeFormat(this.investment.created_at.toString())
       : '-';
   }
 
   get submitedAtFormatted(): string {
-    return this.investment.submited_at
+    return this.investment?.submited_at
       ? formatToFullDate(new Date(this.investment.submited_at).toISOString())
       : '-';
   }
 
   get submitedAtTime(): string {
-    return this.investment.submited_at
+    return this.investment?.submited_at
       ? getTimeFormat(this.investment.submited_at.toString())
       : '-';
   }
 
   get paymentDataCreatedAtFormatted(): string {
-    return this.investment.payment_data?.created_at
+    return this.investment?.payment_data?.created_at
       ? formatToFullDate(new Date(this.investment.payment_data.created_at).toISOString())
       : '-';
   }
 
   get paymentDataCreatedAtTime(): string {
-    return this.investment.payment_data?.created_at
+    return this.investment?.payment_data?.created_at
       ? getTimeFormat(this.investment.payment_data.created_at.toString())
       : '-';
   }
 
   get paymentDataUpdatedAtFormatted(): string {
-    return this.investment.payment_data?.updated_at
+    return this.investment?.payment_data?.updated_at
       ? formatToFullDate(new Date(this.investment.payment_data.updated_at).toISOString())
       : '-';
   }
 
   get paymentDataUpdatedAtTime(): string {
-    return this.investment.payment_data?.updated_at
+    return this.investment?.payment_data?.updated_at
       ? getTimeFormat(this.investment.payment_data.updated_at.toString())
       : '-';
   }
@@ -129,15 +131,15 @@ export class InvestmentFormatter {
       [InvestFundingStatuses.error]: 'Error',
     };
 
-    return statusMap[this.investment.funding_status] || 'Unknown';
+    return statusMap[this.investment?.funding_status as InvestFundingStatuses] || 'N/A';
   }
 
   get fundingTypeFormatted() {
-    return this.investment.funding_type ? capitalizeFirstLetter(this.investment.funding_type) : '-';
+    return this.investment?.funding_type ? capitalizeFirstLetter(this.investment.funding_type) : '-';
   }
 
   get isFundingTypeWire() {
-    return this.investment.funding_type === 'wire';
+    return this.investment?.funding_type === 'wire';
   }
 
   get statusFormatted() {
@@ -149,53 +151,96 @@ export class InvestmentFormatter {
     };
 
     return {
-      text: statusMap[this.investment.status]?.text || 'Unknown',
-      color: statusMap[this.investment.status]?.color || 'gray',
+      text: statusMap[this.investment?.status as InvestmentStatuses]?.text || 'N/A',
+      color: statusMap[this.investment?.status as InvestmentStatuses]?.color || 'gray',
     };
   }
 
 
 
   get offerFormatted() {
-    if (!this.investment.offer) return undefined;
-
-    const offerFormatter = new OfferFormatter(this.investment.offer);
+    const offerFormatter = new OfferFormatter(this.investment?.offer);
     return offerFormatter.format();
   }
 
   get isActive() {
-    return this.investment.status === InvestmentStatuses.confirmed
-           || this.investment.status === InvestmentStatuses.legally_confirmed;
+    return this.investment?.status === InvestmentStatuses.confirmed
+           || this.investment?.status === InvestmentStatuses.legally_confirmed;
   }
 
   get isCompleted() {
-    return this.investment.status === InvestmentStatuses.successfully_closed;
+    return this.investment?.status === InvestmentStatuses.successfully_closed;
   }
 
   get isCancelled() {
-    return this.investment.status === InvestmentStatuses.cancelled_after_investment;
+    return this.investment?.status === InvestmentStatuses.cancelled_after_investment;
   }
 
   get isPending() {
-    return this.investment.funding_status === InvestFundingStatuses.in_progress
-           || this.investment.funding_status === InvestFundingStatuses.initialize;
+    return this.investment?.funding_status === InvestFundingStatuses.in_progress
+           || this.investment?.funding_status === InvestFundingStatuses.initialize;
   }
 
   get isFundingClickable() {
-    const isLeggalyConfirmed = this.investment.status === InvestmentStatuses.legally_confirmed;
-    const isConfirmed = this.investment.status === InvestmentStatuses.confirmed;
+    const isLeggalyConfirmed = this.investment?.status === InvestmentStatuses.legally_confirmed;
+    const isConfirmed = this.investment?.status === InvestmentStatuses.confirmed;
     if (!this.isFundingTypeWire && !isLeggalyConfirmed) return false;
     if (this.isFundingTypeWire && !isLeggalyConfirmed && !isConfirmed) return false;
-    if (!this.isFundingTypeWire && (this.investment.funding_status === InvestFundingStatuses.none)) return false;
-    if (this.investment.funding_status === InvestFundingStatuses.creation_error) return false;
-    if (this.investment.funding_status === InvestFundingStatuses.sent_back_pending) return false;
-    if (this.investment.funding_status === InvestFundingStatuses.sent_back_settled) return false;
+    if (!this.isFundingTypeWire && (this.investment?.funding_status === InvestFundingStatuses.none)) return false;
+    if (this.investment?.funding_status === InvestFundingStatuses.creation_error) return false;
+    if (this.investment?.funding_status === InvestFundingStatuses.sent_back_pending) return false;
+    if (this.investment?.funding_status === InvestFundingStatuses.sent_back_settled) return false;
     return true;
+  }
+
+  private createDefaultInvestment(): IInvestment {
+    return {
+      closed_at: new Date(),
+      id: 0,
+      offer: {} as IOffer, // Will be handled by OfferFormatter
+      profile_id: 0,
+      user_id: 0,
+      price_per_share: 0,
+      number_of_shares: 0,
+      amount: 0,
+      step: InvestStepTypes.amount,
+      status: InvestmentStatuses.confirmed,
+      created_at: new Date(),
+      submited_at: new Date(),
+      funding_type: 'wire' as any,
+      funding_status: InvestFundingStatuses.none,
+      signature_data: {
+        created_at: '',
+        signature_id: '',
+        entity_id: '',
+        provider: '',
+        ip_address: '',
+        user_browser: '',
+        signed_by_investor: false,
+      },
+      escrow_data: {
+        pr_name: '',
+        transaction_id: '',
+        pr_approval_date: '',
+        pr_approval_status: '',
+      },
+      payment_data: {
+        account_type: '',
+        account_number: '',
+        routing_number: '',
+        account_holder_name: '',
+        transaction_id: '',
+      },
+      payment_type: '',
+      escrow_type: '',
+      entity_id: '',
+      transaction_ref: '',
+    };
   }
 
   format(): IInvestmentFormatted {
     return {
-      ...this.investment,
+      ...this.investment!,
       amountFormatted: this.amountFormatted,
       amountFormattedZero: this.amountFormattedZero,
       amountWithSign: this.amountWithSign,
@@ -213,7 +258,7 @@ export class InvestmentFormatter {
       fundingTypeFormatted: this.fundingTypeFormatted,
       isFundingTypeWire: this.isFundingTypeWire,
       statusFormatted: this.statusFormatted,
-      offer: this.offerFormatted || this.investment.offer as IOfferFormatted,
+      offer: this.offerFormatted,
       isActive: this.isActive,
       isCompleted: this.isCompleted,
       isCancelled: this.isCancelled,
