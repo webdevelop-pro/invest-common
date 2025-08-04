@@ -1,22 +1,20 @@
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import { toasterErrorHandling } from 'InvestCommon/data/repository/error/toasterErrorHandling';
 import {
-  IInvestUnconfirmed, IInvestConfirm, IInvestDocumentSign,
+  IInvestUnconfirmed, IInvestConfirm,
   IInvestFunding,
 } from 'InvestCommon/types/api/invest';
 import env from 'InvestCommon/global';
-import { v4 as uuidv4 } from 'uuid';
 import { createActionState } from 'InvestCommon/data/repository/repository';
 import { storeToRefs, acceptHMRUpdate, defineStore } from 'pinia';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { InvestmentFormatter } from 'InvestCommon/data/investment/investment.formatter';
 import { IInvestmentFormatted, IInvestment, IInvestmentsData } from 'InvestCommon/data/investment/investment.types';
 
-const { INVESTMENT_URL, ESIGN_URL } = env;
+const { INVESTMENT_URL } = env;
 
 export const useRepositoryInvestment = defineStore('repositoryInvestment', () => {
   const apiClient = new ApiClient(INVESTMENT_URL);
-  const esignApiClient = new ApiClient(ESIGN_URL);
 
   // Create action states for each function
   const getInvestmentsState = createActionState<IInvestmentsData>();
@@ -26,8 +24,6 @@ export const useRepositoryInvestment = defineStore('repositoryInvestment', () =>
   const setAmountState = createActionState<{number_of_shares: number}>();
   const setOwnershipState = createActionState<{step: string}>();
   const setSignatureState = createActionState<any>();
-  const setDocumentState = createActionState<IInvestDocumentSign>();
-  const getDocumentState = createActionState<Blob>();
   const setFundingState = createActionState<any>();
   const setReviewState = createActionState<IInvestConfirm>();
   const cancelInvestState = createActionState<any>();
@@ -173,44 +169,7 @@ export const useRepositoryInvestment = defineStore('repositoryInvestment', () =>
     }
   };
 
-  const setDocument = async (slug: string, investId: string, profileId: string) => {
-    try {
-      setDocumentState.value.loading = true;
-      setDocumentState.value.error = null;
-      const response = await esignApiClient.post(`/auth/create_document/${slug}/esign/${investId}/${profileId}`);
-      setDocumentState.value.data = response.data as IInvestDocumentSign;
-      return response.data as IInvestDocumentSign;
-    } catch (err) {
-      setDocumentState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to set document');
-      throw err;
-    } finally {
-      setDocumentState.value.loading = false;
-    }
-  };
 
-  const getDocument = async (investId: string) => {
-    try {
-      getDocumentState.value.loading = true;
-      getDocumentState.value.error = null;
-      const response = await esignApiClient.get(`/auth/get_document/${investId}`, {
-        headers: {
-          'Content-Type': 'application/pdf',
-          accept: 'application/pdf',
-          'X-Request-ID': uuidv4() as string,
-        },
-        type: 'blob',
-      });
-      getDocumentState.value.data = response.data as Blob;
-      return response.data as Blob;
-    } catch (err) {
-      getDocumentState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to get document');
-      throw err;
-    } finally {
-      getDocumentState.value.loading = false;
-    }
-  };
 
   const setFunding = async (slug: string, id: string, profileId: string, fundingData: IInvestFunding) => {
     try {
@@ -334,8 +293,6 @@ export const useRepositoryInvestment = defineStore('repositoryInvestment', () =>
     setAmountState.value = { loading: false, error: null, data: undefined };
     setOwnershipState.value = { loading: false, error: null, data: undefined };
     setSignatureState.value = { loading: false, error: null, data: undefined };
-    setDocumentState.value = { loading: false, error: null, data: undefined };
-    getDocumentState.value = { loading: false, error: null, data: undefined };
     setFundingState.value = { loading: false, error: null, data: undefined };
     setReviewState.value = { loading: false, error: null, data: undefined };
     cancelInvestState.value = { loading: false, error: null, data: undefined };
@@ -354,8 +311,6 @@ export const useRepositoryInvestment = defineStore('repositoryInvestment', () =>
     setAmountState,
     setOwnershipState,
     setSignatureState,
-    setDocumentState,
-    getDocumentState,
     setFundingState,
     setReviewState,
     cancelInvestState,
@@ -372,8 +327,6 @@ export const useRepositoryInvestment = defineStore('repositoryInvestment', () =>
     setAmount,
     setOwnership,
     setSignature,
-    setDocument,
-    getDocument,
     setFunding,
     setReview,
     cancelInvest,

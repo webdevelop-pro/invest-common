@@ -6,6 +6,7 @@ import { FilerFormatter } from 'InvestCommon/data/filer/filer.formatter';
 import { IFilerItemFormatted } from 'InvestCommon/data/filer/filer.type';
 import { useRepositoryFiler } from 'InvestCommon/data/filer/filer.repository';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
+import { useRepositoryEsign } from 'InvestCommon/data/esign/esign.repository';
 
 export interface UseInvestmentDocumentsOptions {
   investmentId: string;
@@ -24,7 +25,10 @@ export const useInvestmentDocuments = (options: UseInvestmentDocumentsOptions): 
   const { investmentId } = options;
 
   const investmentRepository = useRepositoryInvestment();
-  const { getInvestOneState, getDocumentState } = storeToRefs(investmentRepository);
+  const { getInvestOneState } = storeToRefs(investmentRepository);
+  
+  const esignRepository = useRepositoryEsign();
+  const { getDocumentState } = storeToRefs(esignRepository);
 
   const filerRepository = useRepositoryFiler();
   const { getFilesState, getPublicFilesState } = storeToRefs(filerRepository);
@@ -98,7 +102,7 @@ export const useInvestmentDocuments = (options: UseInvestmentDocumentsOptions): 
     const isSubscriptionAgreement = doc?.name === 'Subscription Agreement';
     if (isSubscriptionAgreement && investmentId) {
       loadingDocId.value = doc.id;
-      await investmentRepository.getDocument(investmentId);
+      await esignRepository.getDocument(investmentId);
 
       // Create URL from Blob for opening in new window
       if (getDocumentState.value.data) {

@@ -38,12 +38,15 @@ vi.mock('InvestCommon/data/filer/filer.formatter', () => ({
 }));
 
 const mockInvestmentRepository = {
-  getDocument: vi.fn().mockResolvedValue(new Blob(['test'], { type: 'application/pdf' })),
   getInvestOneState: ref({
     loading: false,
     error: null,
     data: { id: '123', submited_at: '2024-01-10T10:00:00Z', offer: { id: 'offer-123' } },
   }),
+};
+
+const mockEsignRepository = {
+  getDocument: vi.fn().mockResolvedValue(new Blob(['test'], { type: 'application/pdf' })),
   getDocumentState: ref({ loading: false, error: null, data: null as Blob | null }),
 };
 
@@ -56,6 +59,10 @@ const mockFilerRepository = {
 
 vi.mock('InvestCommon/data/investment/investment.repository', () => ({
   useRepositoryInvestment: vi.fn(() => mockInvestmentRepository),
+}));
+
+vi.mock('InvestCommon/data/esign/esign.repository', () => ({
+  useRepositoryEsign: vi.fn(() => mockEsignRepository),
 }));
 
 vi.mock('InvestCommon/data/filer/filer.repository', () => ({
@@ -130,11 +137,11 @@ describe('useInvestmentDocuments', () => {
         user_id: 0,
       };
 
-      mockInvestmentRepository.getDocumentState.value.data = new Blob(['test'], { type: 'application/pdf' });
+      mockEsignRepository.getDocumentState.value.data = new Blob(['test'], { type: 'application/pdf' });
 
       await composable.onDocumentClick(subscriptionDoc);
 
-      expect(mockInvestmentRepository.getDocument).toHaveBeenCalledWith('test-123');
+      expect(mockEsignRepository.getDocument).toHaveBeenCalledWith('test-123');
       expect(mockCreateObjectURL).toHaveBeenCalled();
       expect(mockWindowOpen).toHaveBeenCalledWith(expect.any(String), '_blank');
       expect(composable.loadingDocId.value).toBeUndefined();
@@ -163,13 +170,13 @@ describe('useInvestmentDocuments', () => {
 
       await composable.onDocumentClick(regularDoc);
 
-      expect(mockInvestmentRepository.getDocument).not.toHaveBeenCalled();
+      expect(mockEsignRepository.getDocument).not.toHaveBeenCalled();
       expect(mockCreateObjectURL).not.toHaveBeenCalled();
       expect(mockWindowOpen).not.toHaveBeenCalled();
     });
 
     it('should handle document fetch error', async () => {
-      mockInvestmentRepository.getDocument.mockRejectedValueOnce(new Error('Fetch failed'));
+      mockEsignRepository.getDocument.mockRejectedValueOnce(new Error('Fetch failed'));
 
       const subscriptionDoc: IFilerItemFormatted = {
         id: 0,

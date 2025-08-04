@@ -2,12 +2,15 @@ import { ref } from 'vue';
 import { generalErrorHandling } from 'UiKit/helpers/generalErrorHandling';
 import {
   fetchGetInvestOne, fetchSetInvest, fetchSetAmount, fetchSetOwnership, fetchSetSignature,
-  fetchSetDocument, fetchSetFunding, fetchSetReview, fetchCancelInvest, fetchGetDocument,
+  fetchSetFunding, fetchSetReview, fetchCancelInvest,
   fetchSetAmountOptions,
   fetchSetOwnershipOptions,
   fetchSetFundingOptions,
   fetchSetCancelOptions,
 } from 'InvestCommon/services/api/invest';
+import {
+  fetchSetDocument, fetchGetDocument,
+} from 'InvestCommon/services/api/esign';
 import {
   IInvest, IInvestConfirm, IInvestDocumentSign, IInvestFunding,
 } from 'InvestCommon/types/api/invest';
