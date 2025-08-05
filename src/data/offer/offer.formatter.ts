@@ -34,8 +34,8 @@ const capitalizeFirstLetter = (str: string) => str.charAt(0).toUpperCase() + str
 export class OfferFormatter {
   private offer: IOffer;
 
-  constructor(offer: IOffer) {
-    this.offer = offer;
+  constructor(offer?: IOffer) {
+    this.offer = offer || this.createDefaultOffer();
   }
 
   get amountRaisedFormatted() {
@@ -155,6 +155,60 @@ export class OfferFormatter {
       || this.offer.status === OfferStatuses.closed_successfully
       || this.offer.status === OfferStatuses.closed_unsuccessfully
     );
+  }
+
+  private createDefaultOffer(): IOffer {
+    return {
+      id: 0,
+      amount_raised: 0,
+      approved_at: '',
+      close_at: '',
+      confirmed_shares: 0,
+      image: {
+        bucket_path: '',
+        filename: '',
+        id: 0,
+        meta_data: {
+          big: '',
+          small: '',
+          medium: '',
+          size: 0,
+        },
+        name: '',
+        updated_at: '',
+        url: '',
+      },
+      min_investment: 0,
+      name: '',
+      legal_name: '',
+      price_per_share: 0,
+      seo_description: '',
+      seo_title: '',
+      slug: '',
+      description: '',
+      highlights: '',
+      status: 'draft',
+      subscribed_shares: 0,
+      title: '',
+      total_shares: 0,
+      valuation: 0,
+      documents: [],
+      website: '',
+      security_type: '',
+      city: '',
+      state: '',
+      data: {
+        wire_to: '',
+        swift_id: '',
+        custodian: '',
+        account_number: '',
+        routing_number: '',
+        apy: '',
+        distribution_frequency: '',
+        investment_strategy: '',
+        estimated_hold_period: '',
+      },
+    };
   }
 
   format(): IOfferFormatted {

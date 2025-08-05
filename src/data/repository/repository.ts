@@ -7,8 +7,8 @@ export type ActionState<T> = {
 };
 
 // Utility function to create action states
-export const createActionState = <T>() => ref<ActionState<T>>({
-  data: undefined,
+export const createActionState = <T>(defaultData?: T) => ref<ActionState<T>>({
+  data: defaultData,
   loading: false,
   error: null,
 });

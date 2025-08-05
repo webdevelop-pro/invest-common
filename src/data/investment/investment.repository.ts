@@ -18,7 +18,7 @@ export const useRepositoryInvestment = defineStore('repositoryInvestment', () =>
 
   // Create action states for each function
   const getInvestmentsState = createActionState<IInvestmentsData>();
-  const getInvestOneState = createActionState<IInvestmentFormatted>();
+  const getInvestOneState = createActionState<IInvestmentFormatted>(new InvestmentFormatter().format());
   const getInvestUnconfirmedState = createActionState<IInvestUnconfirmed>();
   const setInvestState = createActionState<IInvestment>();
   const setAmountState = createActionState<{number_of_shares: number}>();
