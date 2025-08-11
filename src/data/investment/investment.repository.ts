@@ -10,6 +10,7 @@ import { storeToRefs, acceptHMRUpdate, defineStore } from 'pinia';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { InvestmentFormatter } from 'InvestCommon/data/investment/investment.formatter';
 import { IInvestmentFormatted, IInvestment, IInvestmentsData } from 'InvestCommon/data/investment/investment.types';
+import { ref } from 'vue';
 
 const { INVESTMENT_URL } = env;
 
@@ -20,6 +21,7 @@ export const useRepositoryInvestment = defineStore('repositoryInvestment', () =>
   const getInvestmentsState = createActionState<IInvestmentsData>();
   const getInvestOneState = createActionState<IInvestmentFormatted>(new InvestmentFormatter().format());
   const getInvestUnconfirmedState = createActionState<IInvestUnconfirmed>();
+  const getInvestUnconfirmedOne = ref<IInvestmentFormatted>(new InvestmentFormatter().format());
   const setInvestState = createActionState<IInvestment>();
   const setAmountState = createActionState<{number_of_shares: number}>();
   const setOwnershipState = createActionState<{step: string}>();
@@ -77,13 +79,29 @@ export const useRepositoryInvestment = defineStore('repositoryInvestment', () =>
     }
   };
 
-  const getInvestUnconfirmed = async () => {
+
+  const getInvestUnconfirmed = async (slug: string, profileId: number | string) => {
     try {
       getInvestUnconfirmedState.value.loading = true;
       getInvestUnconfirmedState.value.error = null;
       const response = await apiClient.get('/auth/investment/unconfirmed');
-      getInvestUnconfirmedState.value.data = response.data as IInvestUnconfirmed;
-      return response.data as IInvestUnconfirmed;
+      const rawData = response.data as IInvestUnconfirmed;
+      
+      // Format investments if data array exists
+      const formattedData = rawData.data && Array.isArray(rawData.data)
+        ? {
+          ...rawData,
+          data: rawData.data.map((investment: any) => new InvestmentFormatter(investment as IInvestment).format()),
+        }
+        : rawData;
+
+      // Find the specific investment by slug and profile ID
+      getInvestUnconfirmedOne.value = formattedData.data?.find(
+        (investment: any) => investment?.offer?.slug === slug && Number(investment?.profile_id) === Number(profileId)
+      );
+
+      getInvestUnconfirmedState.value.data = formattedData;
+      return getInvestUnconfirmedState.value.data || null;
     } catch (err) {
       getInvestUnconfirmedState.value.error = err as Error;
       toasterErrorHandling(err, 'Failed to fetch unconfirmed investments');
@@ -300,6 +318,7 @@ export const useRepositoryInvestment = defineStore('repositoryInvestment', () =>
     setOwnershipOptionsState.value = { loading: false, error: null, data: undefined };
     setFundingOptionsState.value = { loading: false, error: null, data: undefined };
     setCancelOptionsState.value = { loading: false, error: null, data: undefined };
+    getInvestUnconfirmedOne.value = new InvestmentFormatter().format();
   };
 
   return {
@@ -318,6 +337,7 @@ export const useRepositoryInvestment = defineStore('repositoryInvestment', () =>
     setOwnershipOptionsState,
     setFundingOptionsState,
     setCancelOptionsState,
+    getInvestUnconfirmedOne,
 
     // Functions
     getInvestments,

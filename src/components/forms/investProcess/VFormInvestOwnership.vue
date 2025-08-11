@@ -5,8 +5,6 @@ import {
   ref,
 } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { useInvestmentsStore } from 'InvestCommon/store/useInvestments';
-import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { ROUTE_INVEST_SIGNATURE, ROUTE_INVEST_AMOUNT } from 'InvestCommon/helpers/enums/routes';
 import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
@@ -22,7 +20,9 @@ import { InvestKycTypes } from 'InvestCommon/types/api/invest';
 import { PROFILE_TYPES } from 'InvestCommon/global/investment.json';
 import { FormChild } from 'InvestCommon/types/form';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
+import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
 
+// Async components
 const VFormProfileEntity = defineAsyncComponent({
   loader: () => import('InvestCommon/features/profiles/components/VFormProfileEntity.vue'),
   hydrate: hydrateOnVisible(),
@@ -43,145 +43,117 @@ const VFormPartialPersonalInformation = defineAsyncComponent({
   loader: () => import('InvestCommon/components/forms/VFormPartialPersonalInformation.vue'),
   hydrate: hydrateOnVisible(),
 });
-
 const VAlert = defineAsyncComponent({
   loader: () => import('UiKit/components/VAlert.vue'),
   hydrate: hydrateOnVisible(),
 });
 
+// Store setup
 const router = useRouter();
 const route = useRoute();
-const userProfilesStore = useUserProfilesStore();
-const { isSetProfileByIdError } = storeToRefs(userProfilesStore);
-const investmentsStore = useInvestmentsStore();
 const useRepositoryProfilesStore = useRepositoryProfiles();
-const { setProfileState, getProfileByIdOptionsState } = storeToRefs(useRepositoryProfilesStore);
-const {
-  setOwnershipData, isSetOwnershipLoading, isSetSignatureLoading, isSetOwnershipError,
-} = storeToRefs(investmentsStore);
+const { setProfileState, getProfileByIdOptionsState, setProfileByIdState } = storeToRefs(useRepositoryProfilesStore);
 const profilesStore = useProfilesStore();
 const { selectedUserProfileData, selectedUserProfileType, selectedUserProfileId } = storeToRefs(profilesStore);
+const investmentRepository = useRepositoryInvestment();
+const { setOwnershipState } = storeToRefs(investmentRepository);
 
-const isAlertShow = computed(() => (selectedUserProfileData.value?.kyc_status !== InvestKycTypes.approved));
+// Profile type mapping for cleaner logic
+const PROFILE_FORM_MAP = {
+  [PROFILE_TYPES.INDIVIDUAL]: 'individualFormChild',
+  [PROFILE_TYPES.ENTITY]: 'entityFormChild',
+  [PROFILE_TYPES.SDIRA]: 'sdiraFormChild',
+  [PROFILE_TYPES.SOLO401K]: 'soloFormChild',
+  [PROFILE_TYPES.TRUST]: 'trustFormChild',
+} as const;
+
+// Template refs
+const formRefs = {
+  individualFormChild: useTemplateRef<FormChild>('individualFormChild'),
+  entityFormChild: useTemplateRef<FormChild>('entityFormChild'),
+  sdiraFormChild: useTemplateRef<FormChild>('sdiraFormChild'),
+  soloFormChild: useTemplateRef<FormChild>('soloFormChild'),
+  trustFormChild: useTemplateRef<FormChild>('trustFormChild'),
+};
+
+// Helper function to get current form ref based on profile type
+const getCurrentFormRef = () => {
+  const profileType = selectedUserProfileType.value?.toLowerCase();
+  if (!profileType) return null;
+  const formKey = PROFILE_FORM_MAP[profileType as keyof typeof PROFILE_FORM_MAP];
+  return formKey ? formRefs[formKey] : null;
+};
+
+// Computed properties
+const isAlertShow = computed(() => selectedUserProfileData.value?.kyc_status !== InvestKycTypes.approved);
 const isAlertText = computed(() => 'You need to pass KYC before you can make investment with this profile.');
-
-const individualFormRef = useTemplateRef<FormChild>('individualFormChild');
-const entityTypeFormRef = useTemplateRef<FormChild>('entityFormChild');
-const sdiraTypeFormRef = useTemplateRef<FormChild>('sdiraFormChild');
-const soloTypeFormRef = useTemplateRef<FormChild>('soloFormChild');
-const trustTypeFormRef = useTemplateRef<FormChild>('trustFormChild');
-
 const errorData = computed(() => setProfileState.value.error?.data?.responseJson);
 const schemaBackend = computed(() => getProfileByIdOptionsState.value.data);
 
-const childFormIsValid = computed(() => {
-  if (selectedUserProfileType.value.toLowerCase() === PROFILE_TYPES.INDIVIDUAL) {
-    return individualFormRef.value?.isValid;
-  }
-  if (selectedUserProfileType.value.toLowerCase() === PROFILE_TYPES.ENTITY) {
-    return entityTypeFormRef.value?.isValid;
-  }
-  if (selectedUserProfileType.value.toLowerCase() === PROFILE_TYPES.SDIRA) {
-    return sdiraTypeFormRef.value?.isValid;
-  }
-  if (selectedUserProfileType.value.toLowerCase() === PROFILE_TYPES.SOLO401K) {
-    return soloTypeFormRef.value?.isValid;
-  }
-  if (selectedUserProfileType.value.toLowerCase() === PROFILE_TYPES.TRUST) {
-    return trustTypeFormRef.value?.isValid;
-  }
-  return true;
-});
-const childFormModel = computed(() => {
-  if (selectedUserProfileType.value.toLowerCase() === PROFILE_TYPES.INDIVIDUAL) {
-    return individualFormRef.value?.model;
-  }
-  if (selectedUserProfileType.value.toLowerCase() === PROFILE_TYPES.ENTITY) {
-    return entityTypeFormRef.value?.model;
-  }
-  if (selectedUserProfileType.value.toLowerCase() === PROFILE_TYPES.SDIRA) {
-    return sdiraTypeFormRef.value?.model;
-  }
-  if (selectedUserProfileType.value.toLowerCase() === PROFILE_TYPES.SOLO401K) {
-    return soloTypeFormRef.value?.model;
-  }
-  if (selectedUserProfileType.value.toLowerCase() === PROFILE_TYPES.TRUST) {
-    return trustTypeFormRef.value?.model;
-  }
-  return {};
-});
-const onValidate = () => {
-  if (selectedUserProfileType.value.toLowerCase() === PROFILE_TYPES.INDIVIDUAL) {
-    individualFormRef.value?.onValidate();
-  }
-  if (selectedUserProfileType.value.toLowerCase() === PROFILE_TYPES.ENTITY) {
-    entityTypeFormRef.value?.onValidate();
-  }
-  if (selectedUserProfileType.value.toLowerCase() === PROFILE_TYPES.SDIRA) {
-    sdiraTypeFormRef.value?.onValidate();
-  }
-  if (selectedUserProfileType.value.toLowerCase() === PROFILE_TYPES.SOLO401K) {
-    soloTypeFormRef.value?.onValidate();
-  }
-  if (selectedUserProfileType.value.toLowerCase() === PROFILE_TYPES.TRUST) {
-    trustTypeFormRef.value?.onValidate();
-  }
-};
-
-const isLoading = ref(false);
+// Simplified computed properties using helper function
+const childFormIsValid = computed(() => getCurrentFormRef()?.value?.isValid ?? true);
+const childFormModel = computed(() => getCurrentFormRef()?.value?.model ?? {});
 const isValid = computed(() => childFormIsValid.value);
-const isDisabledButton = computed(() => (!isValid.value || isAlertShow.value));
+const isDisabledButton = computed(() => !isValid.value || isAlertShow.value);
 const dataUserData = computed(() => selectedUserProfileData.value?.data);
 
-const { slug, id, profileId } = route.params;
+// Route params with type safety
+const slug = route.params.slug as string;
+const id = route.params.id as string;
+const profileId = route.params.profileId as string;
 
+// State
+const isLoading = ref(false);
+
+// Validation function
+const onValidate = () => {
+  getCurrentFormRef()?.value?.onValidate();
+};
+
+// Main handler
 const continueHandler = async () => {
   const model = { ...childFormModel.value };
   onValidate();
+  
   if (!isValid.value) {
     nextTick(() => scrollToError('VFormInvestProcessOwnership'));
     return;
   }
 
   isLoading.value = true;
-  await userProfilesStore.setProfileById(
-    model,
-    selectedUserProfileType.value,
-    selectedUserProfileId.value,
-  );
-  if (!isSetProfileByIdError.value) {
-    await investmentsStore.setOwnership(slug as string, id as string, String(selectedUserProfileId.value));
+  
+  try {
+    if (!selectedUserProfileType.value || !selectedUserProfileId.value) {
+      console.error('Profile type or ID is missing');
+      return;
+    }
+    
+    await useRepositoryProfilesStore.setProfileById(
+      model,
+      selectedUserProfileType.value,
+      selectedUserProfileId.value,
+    );
+    
+    if (!setProfileByIdState.value.error) {
+      await investmentRepository.setOwnership(slug, id, String(selectedUserProfileId.value));
+    }
+
+    if (setOwnershipState.value.error) return;
+    
+    await useRepositoryProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
+    
+    if (setOwnershipState.value.data) {
+      router.push({ name: ROUTE_INVEST_SIGNATURE });
+    }
+  } finally {
+    isLoading.value = false;
   }
-
-  if (isSetOwnershipError.value) return;
-  userProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
-  if (setOwnershipData.value) {
-    router.push({
-      name: ROUTE_INVEST_SIGNATURE,
-    });
-
-    // submitFormToHubspot({
-    //   email: userAccountData.value?.email,
-    //   firstname: model.first_name,
-    //   lastname: model.last_name,
-    //   invest_middle_name: model.middle_name,
-    //   date_of_birth: model.dob,
-    //   phone: model.phone,
-    //   invest_snn: model.ssn,
-    //   invest_address_1: model.address1,
-    //   invest_address_2: model.address2,
-    //   city: model.city,
-    //   state: model.state,
-    //   zip_code: model.zip_code,
-    //   country: model.country,
-    // });
-  }
-
-  isLoading.value = false;
 };
 
 const onAlertButtonClick = () => {
-  navigateWithQueryParams(urlProfileAccount(selectedUserProfileId.value));
+  if (selectedUserProfileId.value) {
+    navigateWithQueryParams(urlProfileAccount(selectedUserProfileId.value));
+  }
 };
 </script>
 
@@ -194,6 +166,7 @@ const onAlertButtonClick = () => {
         />
       </FormCol>
     </FormRow>
+    
     <FormRow v-if="isAlertShow">
       <FormCol>
         <VAlert
@@ -213,7 +186,9 @@ const onAlertButtonClick = () => {
         </VAlert>
       </FormCol>
     </FormRow>
+    
     <template v-else>
+      <!-- Individual Profile Form -->
       <template v-if="selectedUserProfileType === PROFILE_TYPES.INDIVIDUAL">
         <div class="invest-form-ownership__subtitle is--h3__title">
           Personal Information
@@ -226,6 +201,8 @@ const onAlertButtonClick = () => {
           :error-data="errorData"
         />
       </template>
+      
+      <!-- Other Profile Forms -->
       <VFormProfileEntity
         v-if="selectedUserProfileType === PROFILE_TYPES.ENTITY"
         ref="entityFormChild"
@@ -284,7 +261,7 @@ const onAlertButtonClick = () => {
         </VButton>
         <VButton
           :disabled="isDisabledButton"
-          :loading="isSetOwnershipLoading || isSetSignatureLoading"
+          :loading="setOwnershipState.loading"
           size="large"
           data-testid="button"
           @click="continueHandler"

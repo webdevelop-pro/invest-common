@@ -247,7 +247,7 @@ export interface ISignature {
 
 export interface IInvestUnconfirmed {
   count: number;
-  data: IInvest[];
+  data: IInvestmentFormatted[];
 }
 
 export interface IInvestData {

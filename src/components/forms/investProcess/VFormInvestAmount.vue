@@ -1,11 +1,8 @@
 <script setup lang="ts">
 import {
-  ref, computed, watch, reactive, nextTick,
+  computed, watch, nextTick,
 } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { useInvestmentsStore } from 'InvestCommon/store/useInvestments';
-import { useOfferStore } from 'InvestCommon/store/useOffer';
-import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import { currency } from 'InvestCommon/helpers/currency';
 import {
@@ -18,28 +15,20 @@ import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { storeToRefs } from 'pinia';
-import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
-import { isEmpty } from 'InvestCommon/helpers/general';
+
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { scrollToError } from 'UiKit/helpers/validation/general';
 import { urlOfferSingle } from 'InvestCommon/global/links';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
+import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
+import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
 
 const { submitFormToHubspot } = useHubspotForm('749740b1-d955-4158-b949-b68e13a59e5b');
 
-const investmentsStore = useInvestmentsStore();
-const {
-  setAmountData, isGetAmountLoading, isSetSignatureLoading, setAmountOptionsData,
-  isGetAmountError, setAmountErrorData,
-} = storeToRefs(investmentsStore);
-const offerStore = useOfferStore();
-const {
-  getUnconfirmedOfferData,
-} = storeToRefs(offerStore);
-const profilesStore = useProfilesStore();
-const { selectedUserProfileData } = storeToRefs(profilesStore);
 const userSessionStore = useSessionStore();
 const { userSessionTraits } = storeToRefs(userSessionStore);
+const investmentRepository = useRepositoryInvestment();
+const { setAmountOptionsState, setAmountState, getInvestUnconfirmedOne } = storeToRefs(investmentRepository);
 
 const router = useRouter();
 const route = useRoute();
@@ -48,43 +37,54 @@ const route = useRoute();
 type FormModel = {
   number_of_shares: number;
 }
-const model = reactive({} as FormModel);
-const sharesAmount = computed(() => numberFormatter(model.number_of_shares || 0));
-const price = computed(() => (getUnconfirmedOfferData.value?.offer?.price_per_share || 0));
-const numberOfShares = computed(() => getUnconfirmedOfferData.value?.number_of_shares);
-const totalShares = computed(() => getUnconfirmedOfferData.value?.offer?.total_shares || 1000);
-const subscribedShares = computed(() => getUnconfirmedOfferData.value?.offer?.subscribed_shares || 10);
+const price = computed(() => (getInvestUnconfirmedOne.value?.offer?.price_per_share || 0));
+const numberOfShares = computed(() => getInvestUnconfirmedOne.value?.number_of_shares);
+const totalShares = computed(() => getInvestUnconfirmedOne.value?.offer?.total_shares || 1000);
+const subscribedShares = computed(() => getInvestUnconfirmedOne.value?.offer?.subscribed_shares || 10);
 const maxInvestment = computed(() => (totalShares.value - subscribedShares.value));
-const minInvestment = computed(() => (getUnconfirmedOfferData.value?.offer?.min_investment || 10));
-const numberOfSharesRule = computed(() => ({
-  type: 'number',
-  minimum: minInvestment.value,
-  maximum: maxInvestment.value,
-  errorMessage: {
-    minimum: `${minInvestment.value} share(s) is minimum`,
-    maximum: `${maxInvestment.value} share(s) is maximum`,
-  },
-}));
+const minInvestment = computed(() => (getInvestUnconfirmedOne.value?.offer?.min_investment || 10));
 
-const schema = computed(() => ({
+// Dynamic schema with computed validation rules
+const schemaFrontend = computed(() => ({
+  $schema: 'http://json-schema.org/draft-07/schema#',
   definitions: {
     AmountStep: {
       properties: {
-        number_of_shares: numberOfSharesRule.value,
+        number_of_shares: {
+          type: 'number',
+          minimum: minInvestment.value,
+          maximum: maxInvestment.value,
+          errorMessage: {
+            minimum: `${minInvestment.value} share(s) is minimum`,
+            maximum: `${maxInvestment.value} share(s) is maximum`,
+          },
+        },
       },
+      required: ['number_of_shares'],
       type: 'object',
     },
   },
   $ref: '#/definitions/AmountStep',
 } as unknown as JSONSchemaType<FormModel>));
 
-let validator = new PrecompiledValidator<FormModel>(setAmountOptionsData.value, schema.value);
-const validation = ref<unknown>();
-const isValid = computed(() => isEmpty(validation.value || {}));
-// new end
+// Use form validation composable
+const {
+  model,
+  validation,
+  isValid,
+  onValidate,
+} = useFormValidation<FormModel>(
+  schemaFrontend,
+  undefined,
+  {},
+);
 
-const totalInvestments12Months = ref(selectedUserProfileData.value?.total_investments_12_months ?? 0);
 
+const errorData = computed(() => setAmountState.value.error?.data?.responseJson);
+const schemaBackend = computed(() => setAmountOptionsState.value.data);
+
+// Computed values
+const sharesAmount = computed(() => numberFormatter(model.number_of_shares || 0));
 const investmentAmount = computed(() => sharesAmount.value * price.value);
 
 const isLeftLessThanMin = computed(() => (((maxInvestment.value - sharesAmount.value) < minInvestment.value)
@@ -95,10 +95,6 @@ const isBtnDisabled = computed(() => (
   || isLeftLessThanMin.value
 ));
 
-const onValidate = () => {
-  validation.value = validator.getFormValidationErrors(model);
-};
-
 const continueHandler = async () => {
   onValidate();
   if (!isValid.value) {
@@ -107,10 +103,10 @@ const continueHandler = async () => {
   }
 
   const { slug, id, profileId } = route.params;
-  await investmentsStore.setAmount(slug as string, id as string, profileId as string, sharesAmount.value);
+  await investmentRepository.setAmount(slug as string, id as string, profileId as string, sharesAmount.value);
 
-  if (isGetAmountError.value) return;
-  if (setAmountData.value) {
+  if (setAmountState.value.error) return;
+  if (setAmountState.value.data) {
     router.push({
       name: ROUTE_INVEST_OWNERSHIP,
     });
@@ -123,23 +119,9 @@ const continueHandler = async () => {
   }
 };
 
-watch(() => selectedUserProfileData.value, (data) => {
-  if (data) {
-    totalInvestments12Months.value = data.total_investments_12_months ?? 0;
-  }
-});
 
-watch(() => setAmountOptionsData.value, () => {
-  validator = new PrecompiledValidator<FormModel>(setAmountOptionsData.value, schema.value);
-});
-watch(() => schema.value, () => {
-  validator = new PrecompiledValidator<FormModel>(setAmountOptionsData.value, schema.value);
-}, { deep: true });
 
-watch(() => model, () => {
-  if (!isValid.value) onValidate();
-}, { deep: true });
-
+// Watch for number of shares changes from offer data
 watch(() => numberOfShares.value, () => {
   if (numberOfShares.value) model.number_of_shares = numberOfShares.value;
 }, { immediate: true });
@@ -156,9 +138,9 @@ const investmentAmountShow = computed(() => (
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="setAmountOptionsData"
-          :schema-front="schema"
-          :error-text="setAmountErrorData?.number_of_shares"
+          :schema-back="schemaBackend"
+          :schema-front="schemaFrontend"
+          :error-text="errorData?.number_of_shares"
           path="number_of_shares"
           label="Amount of Shares"
         >
@@ -212,7 +194,7 @@ const investmentAmountShow = computed(() => (
       <VButton
         :disabled="isBtnDisabled"
         size="large"
-        :loading="isGetAmountLoading || isSetSignatureLoading"
+        :loading="setAmountState.loading"
         @click="continueHandler"
       >
         Continue
