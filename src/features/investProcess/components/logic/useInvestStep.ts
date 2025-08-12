@@ -11,6 +11,7 @@ import {
 } from 'InvestCommon/helpers/enums/routes';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
 
+
 interface Props {
   title?: string;
   stepNumber: number;
@@ -65,6 +66,7 @@ export function useInvestStep(props: Props) {
   const sessionStore = useSessionStore();
   const { userLoggedIn } = storeToRefs(sessionStore);
   const investmentRepository = useRepositoryInvestment();
+  const { getInvestUnconfirmedOne } = storeToRefs(investmentRepository);
 
   // Extract route params once with better type safety
   const routeParams = computed(() => {
@@ -99,7 +101,10 @@ export function useInvestStep(props: Props) {
   onBeforeMount(async () => {
     if (userLoggedIn.value && routeParams.value.slug) {
       try {
-        investmentRepository.getInvestUnconfirmed(routeParams.value.slug, routeParams.value.profileId);
+        await investmentRepository.getInvestUnconfirmed(routeParams.value.slug, routeParams.value.profileId);
+        if (!getInvestUnconfirmedOne.value) {
+          router.push('/dashboard/error/404');
+        }
       } catch (error) {
         console.error('Failed to fetch offer:', error);
       }

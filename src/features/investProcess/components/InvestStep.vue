@@ -5,17 +5,22 @@ import { useInvestStep } from './logic/useInvestStep';
 interface Props {
   title?: string;
   stepNumber: number;
+  isLoading?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   title: '',
+  isLoading: false,
 });
 
 const { currentTab, isRouteValid, steps } = useInvestStep(props);
 </script>
 
 <template>
-  <div class="InvestStep invest-step is--no-margin">
+  <div
+    class="InvestStep invest-step is--no-margin"
+    :class="{ 'is--loading': isLoading }"
+  >
     <div
       v-if="isRouteValid"
       class="wd-container invest-step__container"
@@ -47,7 +52,13 @@ const { currentTab, isRouteValid, steps } = useInvestStep(props);
 
 <style lang="scss">
 .invest-step {
+  $root: &;
+
   width: 100%;
+
+  &.is--loading {
+    cursor: wait !important;
+  }
 
   &__container {
     gap: 40px;
@@ -104,6 +115,11 @@ const { currentTab, isRouteValid, steps } = useInvestStep(props);
     @media screen and (max-width: $tablet) {
       width: 100%;
       gap: 20px;
+    }
+
+    #{$root}.is--loading & {
+      opacity: 0.5;
+      pointer-events: none;
     }
   }
 

@@ -33,6 +33,7 @@ const {
     <InvestStep
       title="Investment Information"
       :step-number="1"
+      :is-loading="setAmountState.loading"
     >
       <div class="FormInvestAmount form-invest-amount">
         <FormRow>

@@ -75,7 +75,10 @@ export function useInvestOwnership() {
   const profileId = route.params.profileId as string;
 
   // State
-  const isLoading = ref(false);
+  const isLoadingLocal = ref(false);
+
+  const isLoading = computed(() =>
+    setProfileState.value.loading || isLoadingLocal.value);
 
   // Validation function
   const onValidate = () => {
@@ -92,7 +95,7 @@ export function useInvestOwnership() {
       return;
     }
 
-    isLoading.value = true;
+    isLoadingLocal.value = true;
     
     try {
       if (!selectedUserProfileType.value || !selectedUserProfileId.value) {
@@ -118,7 +121,7 @@ export function useInvestOwnership() {
         router.push({ name: ROUTE_INVEST_SIGNATURE });
       }
     } finally {
-      isLoading.value = false;
+      isLoadingLocal.value = false;
     }
   };
 

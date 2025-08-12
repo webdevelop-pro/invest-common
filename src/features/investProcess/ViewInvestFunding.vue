@@ -1,0 +1,145 @@
+<script setup lang="ts">
+import { useInvestFunding } from 'InvestCommon/features/investProcess/logic/useInvestFunding';
+import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
+import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
+import VButton from 'UiKit/components/Base/VButton/VButton.vue';
+import VFormSelect from 'UiKit/components/Base/VForm/VFormSelect.vue';
+import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
+import arrowLeft from 'UiKit/assets/images/arrow-left.svg';
+import InvestStep from 'InvestCommon/features/investProcess/components/InvestStep.vue';
+
+const {
+  model,
+  validation,
+  componentData,
+  selectOptions,
+  selectErrors,
+  isBtnDisabled,
+  currentComponent,
+  currentProps,
+  continueHandler,
+  setFundingState,
+  id,
+  slug,
+  profileId,
+  ROUTE_INVEST_SIGNATURE,
+  urlOfferSingle,
+  schemaBackend,
+  schemaInvestmentFunding,
+} = useInvestFunding();
+</script>
+
+<template>
+  <div class="ViewInvestFunding view-invest-funding is--no-margin">
+    <InvestStep
+      title="Funding"
+      :step-number="4"
+    >
+      <div class="FormInvestFunding form-invest-funding">
+        <FormRow>
+          <FormCol>
+            <VFormGroup
+              v-slot="VFormGroupProps"
+              :model="model"
+              :validation="validation"
+              :schema-back="schemaBackend"
+              :schema-front="schemaInvestmentFunding"
+              :error-text="selectErrors"
+              path="funding_type"
+              label="Funding Method"
+            >
+              <VFormSelect
+                v-model="model.funding_type"
+                :is-error="VFormGroupProps.isFieldError"
+                item-label="text"
+                item-value="value"
+                placeholder="Select"
+                size="large"
+                name="funding-type"
+                :loading="(selectOptions?.length === 0)"
+                :options="selectOptions"
+              />
+            </VFormGroup>
+          </FormCol>
+        </FormRow>
+
+        <KeepAlive>
+          <component
+            :is="currentComponent"
+            v-bind="currentProps"
+            v-model="componentData"
+          />
+        </KeepAlive>
+
+        <div class="form-invest-funding__footer">
+          <VButton
+            variant="link"
+            size="large"
+            as="router-link"
+            :to="{ name: ROUTE_INVEST_SIGNATURE, params: { slug, id, profileId } }"
+          >
+            <arrowLeft
+              alt="arrow left"
+              class="form-invest-funding__back-icon"
+            />
+            Back
+          </VButton>
+          <div class="form-invest-funding__btn">
+            <VButton
+              variant="outlined"
+              size="large"
+              as="a"
+              :href="urlOfferSingle(slug as string)"
+            >
+              Cancel
+            </VButton>
+            <VButton
+              :disabled="isBtnDisabled"
+              :loading="setFundingState.loading"
+              size="large"
+              @click="continueHandler"
+            >
+              Continue
+            </VButton>
+          </div>
+        </div>
+      </div>
+    </InvestStep>
+  </div>
+</template>
+
+<style lang="scss">
+@use 'UiKit/styles/_variables.scss' as *;
+
+.view-invest-funding {
+  width: 100%;
+  padding-top: $header-height;
+}
+
+.form-invest-funding {
+  &__btn {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+
+    @media screen and (max-width: $tablet){
+      flex-direction: column;
+    }
+  }
+
+  &__footer {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+
+    @media screen and (max-width: $tablet){
+      flex-direction: column;
+      gap: 12px;
+    }
+  }
+
+  &__back-icon {
+    width: 20px;
+  }
+}
+</style>

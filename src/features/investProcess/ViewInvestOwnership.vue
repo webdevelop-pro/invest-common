@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineAsyncComponent, hydrateOnVisible } from 'vue';
+import { defineAsyncComponent, ref, watch } from 'vue';
 import { ROUTE_INVEST_AMOUNT } from 'InvestCommon/helpers/enums/routes';
 import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
 import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
@@ -9,37 +9,36 @@ import VProfileSelectList from 'InvestCommon/features/profiles/VProfileSelectLis
 import { useInvestOwnership } from 'InvestCommon/features/investProcess/logic/useInvestOwnership';
 import { urlOfferSingle } from 'InvestCommon/global/links';
 import InvestStep from 'InvestCommon/features/investProcess/components/InvestStep.vue';
+import VFormPartialPersonalInformationSkeleton from 'InvestCommon/components/forms/VFormPartialPersonalInformationSkeleton.vue';
 
 // Async components
 const VFormProfileEntity = defineAsyncComponent({
   loader: () => import('InvestCommon/features/profiles/components/VFormProfileEntity.vue'),
-  hydrate: hydrateOnVisible(),
+  loadingComponent: VFormPartialPersonalInformationSkeleton,
 });
 const VFormProfileSDIRA = defineAsyncComponent({
   loader: () => import('InvestCommon/features/profiles/components/VFormProfileSDIRA.vue'),
-  hydrate: hydrateOnVisible(),
+  loadingComponent: VFormPartialPersonalInformationSkeleton,
 });
 const VFormProfileSolo = defineAsyncComponent({
   loader: () => import('InvestCommon/features/profiles/components/VFormProfileSolo.vue'),
-  hydrate: hydrateOnVisible(),
+  loadingComponent: VFormPartialPersonalInformationSkeleton,
 });
 const VFormProfileTrust = defineAsyncComponent({
   loader: () => import('InvestCommon/features/profiles/components/VFormProfileTrust.vue'),
-  hydrate: hydrateOnVisible(),
+  loadingComponent: VFormPartialPersonalInformationSkeleton,
 });
 const VFormPartialPersonalInformation = defineAsyncComponent({
   loader: () => import('InvestCommon/components/forms/VFormPartialPersonalInformation.vue'),
-  hydrate: hydrateOnVisible(),
+  loadingComponent: VFormPartialPersonalInformationSkeleton,
 });
 const VAlert = defineAsyncComponent({
   loader: () => import('UiKit/components/VAlert.vue'),
-  hydrate: hydrateOnVisible(),
 });
 
 const {
   PROFILE_TYPES,
   selectedUserProfileType,
-  setOwnershipState,
   isAlertShow,
   isAlertText,
   errorData,
@@ -53,6 +52,18 @@ const {
   continueHandler,
   onAlertButtonClick,
 } = useInvestOwnership();
+
+// Add loading state for profile switching
+const isProfileSwitching = ref(false);
+
+// Watch for profile type changes to show loading skeleton
+watch(selectedUserProfileType, () => {
+  isProfileSwitching.value = true;
+  // Hide loading after a short delay to ensure smooth transition
+  setTimeout(() => {
+    isProfileSwitching.value = false;
+  }, 100);
+});
 </script>
 
 <template>
@@ -60,6 +71,7 @@ const {
     <InvestStep
       title="Ownership"
       :step-number="2"
+      :is-loading="isLoading"
     >
       <div class="VFormInvestProcessOwnership invest-form-ownership-wrap">
         <FormRow>
@@ -91,53 +103,61 @@ const {
         </FormRow>
         
         <template v-else>
-          <!-- Individual Profile Form -->
-          <template v-if="selectedUserProfileType === PROFILE_TYPES.INDIVIDUAL">
-            <div class="invest-form-ownership__subtitle is--h3__title">
-              Personal Information
-            </div>
-            <VFormPartialPersonalInformation
-              ref="individualFormChild"
+          <!-- Show loading skeleton during profile switching -->
+          <VFormPartialPersonalInformationSkeleton 
+            v-if="isProfileSwitching" 
+          />
+          
+          <!-- Show profile forms when not switching -->
+          <template v-else>
+            <!-- Individual Profile Form -->
+            <template v-if="selectedUserProfileType === PROFILE_TYPES.INDIVIDUAL">
+              <div class="invest-form-ownership__subtitle is--h3__title">
+                Personal Information
+              </div>
+              <VFormPartialPersonalInformation
+                ref="individualFormChild"
+                :model-data="dataUserData"
+                :loading="isLoading"
+                :schema-backend="schemaBackend"
+                :error-data="errorData"
+              />
+            </template>
+            
+            <!-- Other Profile Forms -->
+            <VFormProfileEntity
+              v-if="selectedUserProfileType === PROFILE_TYPES.ENTITY"
+              ref="entityFormChild"
+              :model-data="dataUserData"
+              :loading="isLoading"
+              :schema-backend="schemaBackend"
+              :error-data="errorData"
+            />
+            <VFormProfileSDIRA
+              v-if="selectedUserProfileType === PROFILE_TYPES.SDIRA"
+              ref="sdiraFormChild"
+              :model-data="dataUserData"
+              :loading="isLoading"
+              :schema-backend="schemaBackend"
+              :error-data="errorData"
+            />
+            <VFormProfileSolo
+              v-if="selectedUserProfileType === PROFILE_TYPES.SOLO401K"
+              ref="soloFormChild"
+              :model-data="dataUserData"
+              :loading="isLoading"
+              :schema-backend="schemaBackend"
+              :error-data="errorData"
+            />
+            <VFormProfileTrust
+              v-if="selectedUserProfileType === PROFILE_TYPES.TRUST"
+              ref="trustFormChild"
               :model-data="dataUserData"
               :loading="isLoading"
               :schema-backend="schemaBackend"
               :error-data="errorData"
             />
           </template>
-          
-          <!-- Other Profile Forms -->
-          <VFormProfileEntity
-            v-if="selectedUserProfileType === PROFILE_TYPES.ENTITY"
-            ref="entityFormChild"
-            :model-data="dataUserData"
-            :loading="isLoading"
-            :schema-backend="schemaBackend"
-            :error-data="errorData"
-          />
-          <VFormProfileSDIRA
-            v-if="selectedUserProfileType === PROFILE_TYPES.SDIRA"
-            ref="sdiraFormChild"
-            :model-data="dataUserData"
-            :loading="isLoading"
-            :schema-backend="schemaBackend"
-            :error-data="errorData"
-          />
-          <VFormProfileSolo
-            v-if="selectedUserProfileType === PROFILE_TYPES.SOLO401K"
-            ref="soloFormChild"
-            :model-data="dataUserData"
-            :loading="isLoading"
-            :schema-backend="schemaBackend"
-            :error-data="errorData"
-          />
-          <VFormProfileTrust
-            v-if="selectedUserProfileType === PROFILE_TYPES.TRUST"
-            ref="trustFormChild"
-            :model-data="dataUserData"
-            :loading="isLoading"
-            :schema-backend="schemaBackend"
-            :error-data="errorData"
-          />
         </template>
 
         <div class="invest-form-ownership__footer">
@@ -164,7 +184,7 @@ const {
             </VButton>
             <VButton
               :disabled="isDisabledButton"
-              :loading="setOwnershipState.loading"
+              :loading="isLoading"
               size="large"
               data-testid="button"
               @click="continueHandler"
