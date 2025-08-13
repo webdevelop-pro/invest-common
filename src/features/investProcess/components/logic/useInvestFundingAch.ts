@@ -16,6 +16,7 @@ export type FormModelInvestmentFundingAch = {
   accountType: string;
   accountNumber: string;
   routingNumber: string;
+  authorizeDebit: boolean;
 }
 
 const schema = {
@@ -27,8 +28,13 @@ const schema = {
         accountType: accountTypeRule,
         accountNumber: accountNumberRule,
         routingNumber: routingNumbeRuler,
+        authorizeDebit: {
+          type: 'boolean',
+          const: true,
+          errorMessage: 'You must authorize the debit to continue',
+        },
       },
-      required: ['accountHolderName', 'accountType', 'accountNumber', 'routingNumber'],
+      required: ['accountHolderName', 'accountType', 'accountNumber', 'routingNumber', 'authorizeDebit'],
       errorMessage: errorMessageRule,
     },
   },
@@ -58,9 +64,12 @@ export function useInvestFundingAch(
 
   // Emit form updates
   const emitFormUpdate = () => {
+    // Create a copy of the model without authorizeDebit before sending
+    const { authorizeDebit, ...modelToSend } = model;
+    
     emit('update:modelValue', {
       isInvalid: !isValid.value,
-      ...model,
+      ...modelToSend,
     });
   };
 

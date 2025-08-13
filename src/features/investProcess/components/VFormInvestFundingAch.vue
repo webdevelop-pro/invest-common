@@ -4,6 +4,7 @@ import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
 import VFormSelect from 'UiKit/components/Base/VForm/VFormSelect.vue';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
+import VFormCheckbox from 'UiKit/components/Base/VForm/VFormCheckbox.vue';
 import { useInvestFundingAch } from './logic/useInvestFundingAch';
 
 const props = defineProps({
@@ -121,6 +122,24 @@ const { model, validation, schema, ACCOUNT_TYPES } = useInvestFundingAch(props, 
             allow-integer-only
             @update:model-value="model.routingNumber = $event"
           />
+        </VFormGroup>
+      </FormCol>
+    </FormRow>
+
+    <FormRow>
+      <FormCol>
+        <VFormGroup
+          :model="model"
+          :validation="validation"
+          :schema-front="schema"
+          :error-text="errorData?.authorizeDebit"
+          path="authorizeDebit"
+        >
+          <VFormCheckbox
+            v-model="model.authorizeDebit"
+          >
+            I authorize the platform to debit my bank account for this investment.
+          </VFormCheckbox>
         </VFormGroup>
       </FormCol>
     </FormRow>
