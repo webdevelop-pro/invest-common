@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
-import { useRouter } from 'vue-router';
+import { useRouter, type RouteLocationRaw } from 'vue-router';
 import VBreadcrumbs from 'UiKit/components/VBreadcrumb/VBreadcrumbsList.vue';
 import type { IBreadcrumb } from 'UiKit/components/VBreadcrumb/VBreadcrumbsList.vue';
 import { PropType } from 'vue';
@@ -8,7 +8,10 @@ import arrowLeft from 'UiKit/assets/images/arrow-left.svg';
 
 const props = defineProps({
   buttonText: String,
-  buttonRoute: String,
+  buttonRoute: {
+    type: [String, Object] as PropType<RouteLocationRaw>,
+    default: undefined,
+  },
   breadcrumbs: Object as PropType<IBreadcrumb[]>,
   isDisabledButton: {
     type: Boolean,

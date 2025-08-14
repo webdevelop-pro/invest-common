@@ -9,8 +9,8 @@ globalLoader.hide();
 
 const {
   backButtonText, breadcrumbs, isLoading, isDisabledButton,
-  modelData, schemaBackend, errorData, isLoadingFields,
-  handleSave,
+  backButtonRoute,
+  modelData, schemaBackend, errorData, isLoadingFields, handleSave,
 } = useFormCustodianInformation();
 </script>
 
@@ -21,6 +21,7 @@ const {
       :breadcrumbs="breadcrumbs"
       :is-disabled-button="isDisabledButton"
       :is-loading="isLoading"
+      :button-route="backButtonRoute"
       @save="handleSave"
     >
       <div class="view-dashboard-custodian-information__header is--h1__title">

@@ -93,7 +93,7 @@ describe('useInvestmentTopInfo', () => {
             value: '$5,000,000',
           },
           {
-            text: 'Closed Date:',
+            text: 'Close Date:',
             value: '2024-12-31',
           },
         ];

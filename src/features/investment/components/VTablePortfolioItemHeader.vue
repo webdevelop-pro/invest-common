@@ -30,20 +30,14 @@ const profileType = computed(() => selectedUserProfileData.value?.type || '');
   <VTableRow
     class="VTableItemHeader v-table-item-header"
   >
-    <VTableCell>
+    <VTableCell v-highlight="search">
       <router-link
         :to="{ name: ROUTE_INVESTMENT_DOCUMENTS, params: { profileId: selectedUserProfileId, id: item.id } }"
-        class="v-table-item-header__document-icon"
+        class="v-table-item-header__link is--link-1"
         @click.stop
       >
-        <expand
-          alt="expand icon"
-          class="v-table-item-header__expand-icon"
-        />
+        {{ item.id }}
       </router-link>
-    </VTableCell>
-    <VTableCell v-highlight="search">
-      {{ item.id }}
     </VTableCell>
     <VTableCell>
       <div class="v-table-item-header__table-offer is--body">
@@ -70,7 +64,13 @@ const profileType = computed(() => selectedUserProfileData.value?.type || '');
       {{ item.submitedAtFormatted }}
     </VTableCell>
     <VTableCell class="v-table-item-header__amount is--color-black is--h5__title">
-      {{ item.amountFormattedZero }}
+      <router-link
+        :to="{ name: ROUTE_INVESTMENT_DOCUMENTS, params: { profileId: selectedUserProfileId, id: item.id } }"
+        class="v-table-item-header__link is--link-1"
+        @click.stop
+      >
+        {{ item.amountFormattedZero }}
+      </router-link>
     </VTableCell>
     <VTableCell class="v-table-item-header__ownership">
       {{ profileType.charAt(0).toUpperCase() + profileType.slice(1) }}
@@ -105,8 +105,12 @@ const profileType = computed(() => selectedUserProfileData.value?.type || '');
   color: $gray-80;
   cursor: pointer !important;
 
-  &__document-icon {
-    display: block;
+  &__link {
+    color: $gray-80;
+    text-decoration: none;
+    &:hover {
+      color: $primary !important;
+    }
   }
 
   &__table-funded {

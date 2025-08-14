@@ -11,6 +11,7 @@ globalLoader.hide();
 
 const {
   backButtonText, breadcrumbs, isLoading, isDisabledButton,
+  backButtonRoute,
   modelData, schemaBackend, errorData, handleSave,
 } = useFormFinancialInformation();
 </script>
@@ -22,6 +23,7 @@ const {
       :breadcrumbs="breadcrumbs"
       :is-disabled-button="isDisabledButton"
       :is-loading="isLoading"
+      :button-route="backButtonRoute"
       @save="handleSave"
     >
       <div class="view-dashboard-financial-information__header is--h1__title">

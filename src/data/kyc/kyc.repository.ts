@@ -1,4 +1,4 @@
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import env from 'InvestCommon/global';
@@ -31,6 +31,7 @@ export const useRepositoryKyc = defineStore('repository-kyc', () => {
   const kycToken = ref<IKycTokenResponse | null>(null);
   const tokenState = createActionState<IKycTokenResponse>();
   const isPlaidLoading = ref(false);
+  const isPlaidDone = ref(false);
 
   // Computed
   const hasValidToken = computed(() => {
@@ -61,6 +62,7 @@ export const useRepositoryKyc = defineStore('repository-kyc', () => {
     if (!selectedUserProfileData.value?.id) return;
 
     isPlaidLoading.value = true;
+    isPlaidDone.value = false;
     try {
       await createToken(id || selectedUserProfileData.value.id);
       if (kycToken.value && kycToken.value.link_token) {
@@ -72,17 +74,17 @@ export const useRepositoryKyc = defineStore('repository-kyc', () => {
             token: kycToken.value?.link_token,
             onSuccess: () => {
               isPlaidLoading.value = false;
-              usersStore.updateUserSelectedAccount();
-              if (IS_STATIC_SITE) {
-                window.location.href = urlProfilePortfolio(selectedUserProfileId.value);
-              } else {
-                const { pushTo } = useRedirect();
-                const router = useRouter();
-                router.push(pushTo({
-                  name: ROUTE_DASHBOARD_PORTFOLIO,
-                  params: { profileId: selectedUserProfileId.value },
-                }));
-              }
+              isPlaidDone.value = true;
+              // if (IS_STATIC_SITE) {
+              //   window.location.href = urlProfilePortfolio(selectedUserProfileId.value);
+              // } else {
+              //   const { pushTo } = useRedirect();
+              //   const router = useRouter();
+              //   router.push(pushTo({
+              //     name: ROUTE_DASHBOARD_PORTFOLIO,
+              //     params: { profileId: selectedUserProfileId.value },
+              //   }));
+              // }
             },
             onLoad: () => {
               console.log('plaid own onload event');
@@ -112,11 +114,16 @@ export const useRepositoryKyc = defineStore('repository-kyc', () => {
     tokenState.value = { loading: false, error: null, data: undefined };
   };
 
+  watch(() => selectedUserProfileData.value.kyc_status, () => {
+    isPlaidDone.value = false;
+  });
+
   return {
     kycToken,
     hasValidToken,
     tokenState,
     isPlaidLoading,
+    isPlaidDone,
     createToken,
     handlePlaidKyc,
     resetAll,

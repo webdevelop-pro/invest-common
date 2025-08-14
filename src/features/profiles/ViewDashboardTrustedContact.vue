@@ -12,6 +12,7 @@ globalLoader.hide();
 
 const {
   backButtonText, breadcrumbs, isLoading, isDisabledButton,
+  backButtonRoute,
   model, schemaBackend, errorData, validation, schemaFrontend,
   isLoadingFields, handleSave,
 } = useFormTrustedContact();
@@ -25,6 +26,7 @@ const {
       :breadcrumbs="breadcrumbs"
       :is-disabled-button="isDisabledButton"
       :is-loading="isLoading"
+      :button-route="backButtonRoute"
       @save="handleSave"
     >
       <div class="view-dashboard-trusted-contact__header is--h1__title">
@@ -148,7 +150,7 @@ const {
               <VFormInput
                 :model-value="model.beneficiary?.phone"
                 :is-error="VFormGroupProps.isFieldError"
-                placeholder="Phone number"
+                placeholder="+1 (___) ___ - ____"
                 name="phone"
                 size="large"
                 mask="+#(###)###-####"

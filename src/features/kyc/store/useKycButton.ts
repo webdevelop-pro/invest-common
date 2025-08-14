@@ -24,7 +24,7 @@ export const useKycButton = defineStore('useKycButton', () => {
   const userSessionStore = useSessionStore();
   const { userLoggedIn } = storeToRefs(userSessionStore);
   const useRepositoryKycStore = useRepositoryKyc();
-  const { isPlaidLoading } = storeToRefs(useRepositoryKycStore);
+  const { isPlaidLoading, isPlaidDone } = storeToRefs(useRepositoryKycStore);
 
   /* * Loading State * */
   const isLoading = ref(true);
@@ -105,6 +105,7 @@ export const useKycButton = defineStore('useKycButton', () => {
     isButtonLoading,
     isButtonDisabled,
     showContactUs,
+    isPlaidDone,
   };
 });
 

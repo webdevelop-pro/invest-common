@@ -5,6 +5,7 @@ import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import VTooltip from 'UiKit/components/VTooltip.vue';
 import arrowRight from 'UiKit/assets/images/arrow-right.svg?component';
 import { useAccreditationButton } from './store/useAccreditationButton';
+import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 
 const accreditationButtonStore = useAccreditationButton();
 const { data, tagBackground } = storeToRefs(accreditationButtonStore);
@@ -12,11 +13,21 @@ const { data, tagBackground } = storeToRefs(accreditationButtonStore);
 const onClick = () => {
   accreditationButtonStore.onClick();
 };
+
+defineProps({
+  isLoading: Boolean,
+});
 </script>
 
 <template>
+  <VSkeleton
+    v-if="isLoading"
+    height="22px"
+    width="100px"
+    class="dashboard-top-info__skeleton"
+  />
   <div
-    v-if="data"
+    v-else-if="data"
     class="VAccreditationButton v-accreditation-button"
     :class="data.class"
   >

@@ -8,7 +8,6 @@ import VTableToolbar from 'InvestCommon/components/VTableToolbar.vue';
 import { useDashboardPortfolioStore } from './store/useDashboardPortfolio';
 
 const portfolioTableHeader = [
-  { text: '' },
   { text: 'ID' },
   { text: 'Offer' },
   { text: 'Date' },

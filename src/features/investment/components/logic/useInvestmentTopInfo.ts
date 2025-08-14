@@ -27,8 +27,8 @@ export function useInvestmentTopInfo(props: UseInvestmentTopInfoProps) {
 
   const infoData = computed(() => ([
     {
-      text: 'Created Date:',
-      value: getInvestOneData.value?.createdAtFormatted,
+      text: 'Ownership:',
+      value: profileType.value.charAt(0).toUpperCase() + profileType.value.slice(1),
     },
     {
       text: 'Funding Type:',
@@ -36,20 +36,21 @@ export function useInvestmentTopInfo(props: UseInvestmentTopInfoProps) {
       funding: getInvestOneData.value?.isFundingClickable,
     },
     {
-      text: 'Security Type:',
-      value: getInvestOneData.value?.offer?.securityTypeFormatted,
+      text: 'Created Date:',
+      value: getInvestOneData.value?.createdAtFormatted,
     },
     {
-      text: 'Ownership:',
-      value: profileType.value.charAt(0).toUpperCase() + profileType.value.slice(1),
+      text: 'Security Type:',
+      value: getInvestOneData.value?.offer?.securityTypeFormatted,
     },
     {
       text: 'Valuation:',
       value: getInvestOneData.value?.offer?.valuationFormatted,
     },
     {
-      text: 'Closed Date:',
+      text: 'Close Date:',
       value: getInvestOneData.value?.offer?.closeAtFormatted,
+      tooltip: 'Closing offer date may vary depending on factors such as property type, financing conditions, buyer readiness, or legal requirements.',
     },
   ]));
 

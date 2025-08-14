@@ -12,6 +12,7 @@ import file from 'UiKit/assets/images/file.svg';
 import timeline from 'UiKit/assets/images/timeline.svg';
 import { VTableCell, VTableRow } from 'UiKit/components/Base/VTable';
 import { IInvestmentFormatted } from 'InvestCommon/data/investment/investment.types';
+import VTooltip from 'UiKit/components/VTooltip.vue';
 
 const props = defineProps({
   item: {
@@ -29,7 +30,12 @@ const { selectedUserProfileId } = storeToRefs(profilesStore);
 const router = useRouter();
 const route = useRoute();
 
-const queryPopupCancelInvestment = computed(() => (route.query.popup === 'cancel'));
+const queryPopupCancelInvestment = computed(() => route.query.popup === 'cancel');
+const documentsLink = computed(() => ({
+  name: ROUTE_INVESTMENT_DOCUMENTS,
+  params: { profileId: selectedUserProfileId.value, id: props.item.id },
+  query: { 'document-tab': 'Investment-agreements' },
+}));
 
 const onTimelineClick = () => {
   router.push({
@@ -37,23 +43,38 @@ const onTimelineClick = () => {
     params: { profileId: selectedUserProfileId.value, id: props.item.id },
   });
 };
+
 const onCancelInvestmentClick = () => {
   emit('onCancelInvestmentClick');
 };
 
-watch(() => [queryPopupCancelInvestment.value], () => {
-  if (queryPopupCancelInvestment.value) {
-    setTimeout(() => onCancelInvestmentClick(), 400);
+// Simplified watch with immediate execution
+watch(queryPopupCancelInvestment, (shouldShow) => {
+  if (shouldShow) {
+    setTimeout(onCancelInvestmentClick, 400);
   }
 }, { immediate: true });
+
+// Info data structure for cleaner rendering
+const infoData = computed(() => [
+  {
+    labels: ['Number of Shares:', 'Price per Share:'],
+    values: [props.item?.numberOfSharesFormatted, props.item?.pricePerShareFormatted],
+    tooltips: [null, null],
+  },
+  {
+    labels: ['Security Type:', 'Close Date:'],
+    values: [props.item?.offer?.securityTypeFormatted, props.item?.offer?.closeAtFormatted],
+    tooltips: [null, 'Closing offer date may vary depending on factors such as property type, financing conditions, buyer readiness, or legal requirements.'],
+  },
+]);
 </script>
 
 <template>
   <VTableRow class="VTableItemContent v-table-item-content">
-    <VTableCell
-      :colspan="colspan"
-    >
+    <VTableCell :colspan="colspan">
       <div class="v-table-item-content__cell">
+        <!-- Documents Section -->
         <div class="v-table-item-content__documents">
           <VSkeleton
             v-if="loading"
@@ -61,98 +82,72 @@ watch(() => [queryPopupCancelInvestment.value], () => {
             width="180px"
             class="v-table-item-content__skeleton"
           />
-          <template v-else>
-            <VButton
-              as="router-link"
-              :to="{ name: ROUTE_INVESTMENT_DOCUMENTS, params: { profileId: selectedUserProfileId, id: item.id } }"
-              size="small"
-              variant="outlined"
-              color="secondary"
-              icon-placement="left"
-              class="v-table-item-content__document-button"
-            >
-              <file
-                alt="file icon"
-                class="v-table-item-content__document-icon"
-              />
-              <span class="v-table-item-content__document-text">Investment Documents</span>
-            </VButton>
-          </template>
+          <VButton
+            v-else
+            as="router-link"
+            :to="documentsLink"
+            size="small"
+            variant="outlined"
+            color="secondary"
+            icon-placement="left"
+            class="v-table-item-content__document-button"
+          >
+            <file
+              alt="file icon"
+              class="v-table-item-content__document-icon"
+            />
+            <span class="v-table-item-content__document-text">Investment Documents</span>
+          </VButton>
         </div>
+
+        <!-- Info Section -->
         <div class="v-table-item-content__info">
-          <div class="v-table-item-content__info-column">
+          <div
+            v-for="(section, sectionIndex) in infoData"
+            :key="sectionIndex"
+            class="v-table-item-content__info-column"
+          >
             <div class="v-table-item-content__info-col">
-              <span class="v-table-item-content__text is--h6__title">
-                Number of Shares:
-              </span>
-              <span class="v-table-item-content__text is--h6__title">
-                Price per Share:
+              <span
+                v-for="label in section.labels"
+                :key="label"
+                class="v-table-item-content__text is--h6__title"
+              >
+                {{ label }}
               </span>
             </div>
             <div class="v-table-item-content__info-col">
-              <VSkeleton
-                v-if="loading"
-                height="18px"
-                width="50px"
-                class="v-table-item-content__skeleton"
-              />
-              <span
-                v-else
-                class="v-table-item-content__value is--body"
-              >
-                {{ item?.numberOfSharesFormatted }}
-              </span>
-              <VSkeleton
-                v-if="loading"
-                height="18px"
-                width="50px"
-                class="v-table-item-content__skeleton"
-              />
-              <span
-                v-else
-                class="v-table-item-content__value is--body"
-              >
-                {{ item?.pricePerShareFormatted }}
-              </span>
-            </div>
-          </div>
-          <div class="v-table-item-content__info-column">
-            <div class="v-table-item-content__info-col">
-              <span class="v-table-item-content__text is--h6__title">
-                Security Type:
-              </span>
-              <span class="v-table-item-content__text is--h6__title">
-                Close Date:
-              </span>
-            </div>
-            <div class="v-table-item-content__info-col">
-              <VSkeleton
-                v-if="loading"
-                height="18px"
-                width="50px"
-                class="v-table-item-content__skeleton"
-              />
-              <span
-                v-else
-                class="v-table-item-content__value is--body"
-              >
-                {{ item?.offer?.securityTypeFormatted }}
-              </span>
-              <VSkeleton
-                v-if="loading"
-                height="18px"
-                width="50px"
-                class="v-table-item-content__skeleton"
-              />
-              <span
-                v-else
-                class="v-table-item-content__value is--body"
-              >
-                {{ item?.offer?.closeAtFormatted }}
-              </span>
+              <template v-for="(value, index) in section.values" :key="value">
+                <VSkeleton
+                  v-if="loading"
+                  height="18px"
+                  width="50px"
+                  class="v-table-item-content__skeleton"
+                />
+                <VTooltip
+                  v-else-if="section.tooltips[index]"
+                >
+                  <span
+                    class="v-table-item-content__value is--body"
+                  >
+                    {{ value }}
+                  </span>
+                  <template #content>
+                    {{ section.tooltips[index] }}
+                  </template>
+                </VTooltip>
+                <span
+                  v-else
+                  class="v-table-item-content__value is--body"
+                >
+                  {{ value }}
+                </span>
+              </template>
             </div>
           </div>
         </div>
+
+        <!-- Actions Section -->
         <div class="v-table-item-content__actions">
           <div
             class="v-table-item-content__timeline is--link-regular"
@@ -181,12 +176,14 @@ watch(() => [queryPopupCancelInvestment.value], () => {
 
 <style lang="scss">
 @use 'UiKit/styles/_transitions.scss' as *;
+
 .v-table-item-content {
   background-color: $gray-10;
 
   &.is--open {
     animation: slideDown 0.3s ease;
   }
+  
   &:not(.is--open) {
     animation: slideUp 0.3s ease;
   }
@@ -236,14 +233,6 @@ watch(() => [queryPopupCancelInvestment.value], () => {
     display: flex !important;
   }
 
-  &__info-item {
-    align-self: center;
-    min-width: 218px;
-    display: flex;
-    gap: 12px;
-    align-items: center;
-  }
-
   &__timeline {
     cursor: pointer;
     display: flex;
@@ -258,6 +247,9 @@ watch(() => [queryPopupCancelInvestment.value], () => {
 
   &__value {
     color: $gray-80;
+    text-align: start;
+    width: 100%;
+    display: inline-block;
   }
 
   &__document-text {

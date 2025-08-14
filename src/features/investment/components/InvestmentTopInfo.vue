@@ -9,6 +9,7 @@ import externalLink from 'UiKit/assets/images/external-link.svg';
 import { urlOfferSingle } from 'InvestCommon/global/links';
 import VImage from 'UiKit/components/Base/VImage/VImage.vue';
 import { useInvestmentTopInfo } from './logic/useInvestmentTopInfo';
+import VTooltip from 'UiKit/components/VTooltip.vue';
 
 const VDialogContactUs = defineAsyncComponent({
   loader: () => import('InvestCommon/components/dialogs/VDialogContactUs.vue'),
@@ -182,29 +183,36 @@ const {
           size="small"
           class="investment-top-info__info-wrap"
         >
-          <span
+          <VTooltip
             v-for="(info, infoIndex) in infoData"
             :key="infoIndex"
-            class="investment-top-info__info-item"
+            :disabled="!info.tooltip"
           >
-            <span class="investment-top-info__info-text is--small-2">
-              {{ info.text }}
-            </span>
-            <VSkeleton
-              v-if="getInvestOneState.loading"
-              height="18px"
-              width="50px"
-              class="investment-top-info__skeleton"
-            />
             <span
-              v-else
-              class="investment-top-info__info-value is--small"
-              :class="{ 'is--link-regular': info.funding }"
-              @click.prevent="onFundingType"
+              class="investment-top-info__info-item"
             >
-              {{ info.value }}
+              <span class="investment-top-info__info-text is--small-2">
+                {{ info.text }}
+              </span>
+              <VSkeleton
+                v-if="getInvestOneState.loading"
+                height="18px"
+                width="50px"
+                class="investment-top-info__skeleton"
+              />
+              <span
+                v-else
+                class="investment-top-info__info-value is--small"
+                :class="{ 'is--link-regular': info.funding }"
+                @click.prevent="onFundingType"
+              >
+                {{ info.value }}
+              </span>
             </span>
-          </span>
+            <template #content>
+              {{ info.tooltip }}
+            </template>
+          </VTooltip>
         </InfoSlot>
       </div>
     </div>
@@ -395,6 +403,7 @@ const {
   &__info-text {
     color: $gray-70;
     min-width: 79px;
+    text-align: initial;
   }
 
   &__back-icon {

@@ -9,6 +9,7 @@ globalLoader.hide();
 
 const {
   backButtonText, breadcrumbs, isLoading, isDisabledButton,
+  backButtonRoute,
   modelData, schemaBackend, errorData, handleSave,
 } = useFormBusinessController();
 
@@ -26,6 +27,7 @@ const title = props.trust ? 'Grantor Infotmation' : 'Business Controller Informa
       :breadcrumbs="breadcrumbs"
       :is-disabled-button="isDisabledButton"
       :is-loading="isLoading"
+      :button-route="backButtonRoute"
       @save="handleSave"
     >
       <div class="view-dashboard-business-controller__header is--h1__title">

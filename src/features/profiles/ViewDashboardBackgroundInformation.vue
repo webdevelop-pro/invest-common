@@ -14,6 +14,7 @@ globalLoader.hide();
 
 const {
   backButtonText, breadcrumbs, isLoading, isDisabledButton,
+  backButtonRoute,
   model, schemaBackend, errorData, validation, schemaFrontend,
   isLoadingFields, optionsEmployment, isAdditionalFields, handleSave,
 } = useFormBackgroundInformation();
@@ -28,6 +29,7 @@ const {
       :breadcrumbs="breadcrumbs"
       :is-disabled-button="isDisabledButton"
       :is-loading="isLoading"
+      :button-route="backButtonRoute"
       @save="handleSave"
     >
       <div class="form-background-information__header is--h1__title">

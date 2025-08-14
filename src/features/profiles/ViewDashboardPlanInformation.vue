@@ -9,6 +9,7 @@ globalLoader.hide();
 
 const {
   backButtonText, breadcrumbs, isLoading, isDisabledButton,
+  backButtonRoute,
   modelData, schemaBackend, errorData, handleSave,
 } = useFormPlanInformation();
 
@@ -21,6 +22,7 @@ const {
       :breadcrumbs="breadcrumbs"
       :is-disabled-button="isDisabledButton"
       :is-loading="isLoading"
+      :button-route="backButtonRoute"
       @save="handleSave"
     >
       <div class="view-dashboard-plan-information__header is--h1__title">

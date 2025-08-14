@@ -9,6 +9,7 @@ globalLoader.hide();
 
 const {
   backButtonText, breadcrumbs, isLoading, isDisabledButton,
+  backButtonRoute,
   readOnly, modelData, schemaBackend, errorData, handleSave,
 } = useFormPersonalInformation();
 </script>
@@ -17,6 +18,7 @@ const {
   <div class="ViewDashboardPersonalInformation view-dashboard-personal-information is--no-margin">
     <VLayoutForm
       :button-text="backButtonText"
+      :button-route="backButtonRoute"
       :breadcrumbs="breadcrumbs"
       :is-disabled-button="isDisabledButton"
       :is-loading="isLoading"

@@ -23,16 +23,16 @@ export const useFormEntityInformation = () => {
   const { userSessionTraits } = storeToRefs(userSessionStore);
 
   const backButtonText = ref('Back to Profile Details');
-  const accountRoute = computed(() => (
+  const backButtonRoute = computed(() => (
     { name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } }));
   const breadcrumbs = computed(() => [
     {
       text: 'Dashboard',
-      to: accountRoute.value,
+      to: backButtonRoute.value,
     },
     {
       text: 'Profile Details',
-      to: accountRoute.value,
+      to: backButtonRoute.value,
     },
     {
       text: 'Entity Information',
@@ -83,6 +83,7 @@ export const useFormEntityInformation = () => {
 
   return {
     backButtonText,
+    backButtonRoute,
     breadcrumbs,
     isDisabledButton,
     isLoading,
