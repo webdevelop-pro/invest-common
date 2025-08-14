@@ -129,14 +129,18 @@ const { model, validation, schema, ACCOUNT_TYPES } = useInvestFundingAch(props, 
     <FormRow>
       <FormCol>
         <VFormGroup
+          v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
           :schema-front="schema"
           :error-text="errorData?.authorizeDebit"
           path="authorizeDebit"
+          class="is--margin-top-15"
         >
           <VFormCheckbox
             v-model="model.authorizeDebit"
+            :is-error="VFormGroupProps.isFieldError"
+            has-asterisk
           >
             I authorize the platform to debit my bank account for this investment.
           </VFormCheckbox>
