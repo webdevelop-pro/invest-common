@@ -18,6 +18,7 @@ const {
   setReviewState,
   investorName,
   fundingSourceDataToShow,
+  isSsnHidden,
   confirmInvest,
   urlOfferSingle,
 } = useInvestReview();
@@ -109,6 +110,7 @@ const {
           <FormCol col2>
             <VFormGroup label="SSN">
               <VFormInput
+                v-if="!isSsnHidden"
                 :model-value="selectedUserProfileData?.data?.ssn"
                 name="ssn"
                 mask="###-##-####"
@@ -116,6 +118,12 @@ const {
                 readonly
                 size="large"
                 data-testid="ssn"
+              />
+              <VFormInput
+                v-else
+                model-value="********"
+                readonly
+                size="large"
               />
             </VFormGroup>
           </FormCol>

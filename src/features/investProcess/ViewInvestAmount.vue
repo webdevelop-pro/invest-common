@@ -134,7 +134,8 @@ const {
   &__limit-info {
     font-size: 12px;
     margin-top: 5px;
-    color: $red;
+    color: $red-dark;
+    opacity: 1;
   }
 
   &__info {

@@ -101,8 +101,8 @@ export function useInvestStep(props: Props) {
   onBeforeMount(async () => {
     if (userLoggedIn.value && routeParams.value.slug) {
       try {
-        await investmentRepository.getInvestUnconfirmed(routeParams.value.slug, routeParams.value.profileId);
-        if (!getInvestUnconfirmedOne.value) {
+        const res = await investmentRepository.getInvestUnconfirmed(routeParams.value.slug, routeParams.value.profileId);
+        if (!res) {
           router.push('/dashboard/error/404');
         }
       } catch (error) {

@@ -43,6 +43,11 @@ export class APIError extends Error {
       const uiMessage = responseJson.ui?.messages?.find((m: any) => m.type === 'error')?.text;
       const uiNodeMessage = responseJson.ui?.nodes?.find((node: any) => node.messages?.some((m: any) => m.type === 'error'))?.messages?.find((m: any) => m.type === 'error')?.text;
 
+      // Handle case where __error__ is an array and combine messages
+      if (Array.isArray(responseJson.__error__)) {
+        return responseJson.__error__.join('; ');
+      }
+      
       return responseJson.__error__
             || responseJson.message
             || uiMessage

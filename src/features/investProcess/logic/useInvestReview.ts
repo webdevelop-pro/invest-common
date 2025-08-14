@@ -31,6 +31,7 @@ export function useInvestReview() {
     const { first_name, middle_name, last_name } = selectedUserProfileData.value?.data || {};
     return [first_name, middle_name, last_name].filter(Boolean).join(' ');
   });
+  const isSsnHidden = computed(() => selectedUserProfileData.value?.data?.is_full_ssn_provided === true);
 
   const fundingSourceDataToShow = computed(() => {
     const fundingType = getInvestUnconfirmedOne.value?.funding_type;
@@ -82,6 +83,7 @@ export function useInvestReview() {
     // Computed properties
     investorName,
     fundingSourceDataToShow,
+    isSsnHidden,
     
     // Methods
     confirmInvest,

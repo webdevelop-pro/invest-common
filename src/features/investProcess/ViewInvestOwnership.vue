@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineAsyncComponent, ref, watch } from 'vue';
+import { defineAsyncComponent, ref, watch, nextTick } from 'vue';
 import { ROUTE_INVEST_AMOUNT } from 'InvestCommon/helpers/enums/routes';
 import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
 import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
@@ -53,17 +53,30 @@ const {
   onAlertButtonClick,
 } = useInvestOwnership();
 
-// Add loading state for profile switching
+// Enhanced loading state for profile switching
 const isProfileSwitching = ref(false);
+const previousProfileType = ref<string | undefined>('');
+const showSkeleton = ref(false);
 
 // Watch for profile type changes to show loading skeleton
-watch(selectedUserProfileType, () => {
-  isProfileSwitching.value = true;
-  // Hide loading after a short delay to ensure smooth transition
-  setTimeout(() => {
-    isProfileSwitching.value = false;
-  }, 100);
-});
+watch(selectedUserProfileType, async (newType, oldType) => {
+  // Only trigger switching if we have a previous type and it's different
+  if (oldType && oldType !== newType) {
+    isProfileSwitching.value = true;
+    showSkeleton.value = true;
+    
+    // Wait for the next tick to ensure smooth transition
+    await nextTick();
+    
+    // Add a small delay to ensure the skeleton is visible
+    setTimeout(() => {
+      showSkeleton.value = false;
+      isProfileSwitching.value = false;
+    }, 150);
+  }
+  
+  previousProfileType.value = newType;
+}, { immediate: true });
 </script>
 
 <template>
@@ -104,60 +117,75 @@ watch(selectedUserProfileType, () => {
         
         <template v-else>
           <!-- Show loading skeleton during profile switching -->
-          <VFormPartialPersonalInformationSkeleton 
-            v-if="isProfileSwitching" 
-          />
-          
-          <!-- Show profile forms when not switching -->
-          <template v-else>
-            <!-- Individual Profile Form -->
-            <template v-if="selectedUserProfileType === PROFILE_TYPES.INDIVIDUAL">
-              <div class="invest-form-ownership__subtitle is--h3__title">
-                Personal Information
-              </div>
-              <VFormPartialPersonalInformation
-                ref="individualFormChild"
-                :model-data="dataUserData"
-                :loading="isLoading"
-                :schema-backend="schemaBackend"
-                :error-data="errorData"
-              />
-            </template>
+          <Transition
+            name="profile-switch"
+            mode="out-in"
+          >
+            <VFormPartialPersonalInformationSkeleton 
+              v-if="showSkeleton" 
+              key="skeleton"
+            />
             
-            <!-- Other Profile Forms -->
-            <VFormProfileEntity
-              v-if="selectedUserProfileType === PROFILE_TYPES.ENTITY"
-              ref="entityFormChild"
-              :model-data="dataUserData"
-              :loading="isLoading"
-              :schema-backend="schemaBackend"
-              :error-data="errorData"
-            />
-            <VFormProfileSDIRA
-              v-if="selectedUserProfileType === PROFILE_TYPES.SDIRA"
-              ref="sdiraFormChild"
-              :model-data="dataUserData"
-              :loading="isLoading"
-              :schema-backend="schemaBackend"
-              :error-data="errorData"
-            />
-            <VFormProfileSolo
-              v-if="selectedUserProfileType === PROFILE_TYPES.SOLO401K"
-              ref="soloFormChild"
-              :model-data="dataUserData"
-              :loading="isLoading"
-              :schema-backend="schemaBackend"
-              :error-data="errorData"
-            />
-            <VFormProfileTrust
-              v-if="selectedUserProfileType === PROFILE_TYPES.TRUST"
-              ref="trustFormChild"
-              :model-data="dataUserData"
-              :loading="isLoading"
-              :schema-backend="schemaBackend"
-              :error-data="errorData"
-            />
-          </template>
+            <!-- Show profile forms when not switching -->
+            <div
+              v-else-if="selectedUserProfileType"
+              key="forms"
+              class="invest-form-ownership__forms"
+            >
+              <!-- Individual Profile Form -->
+              <template v-if="selectedUserProfileType === PROFILE_TYPES.INDIVIDUAL">
+                <div class="invest-form-ownership__subtitle is--h3__title">
+                  Personal Information
+                </div>
+                <VFormPartialPersonalInformation
+                  key="individual"
+                  ref="individualFormChild"
+                  :model-data="dataUserData || {}"
+                  :loading="isLoading"
+                  :schema-backend="schemaBackend || {}"
+                  :error-data="errorData || {}"
+                />
+              </template>
+              
+              <!-- Other Profile Forms -->
+              <VFormProfileEntity
+                v-else-if="selectedUserProfileType === PROFILE_TYPES.ENTITY"
+                key="entity"
+                ref="entityFormChild"
+                :model-data="dataUserData || {}"
+                :loading="isLoading"
+                :schema-backend="schemaBackend || {}"
+                :error-data="errorData || {}"
+              />
+              <VFormProfileSDIRA
+                v-else-if="selectedUserProfileType === PROFILE_TYPES.SDIRA"
+                key="sdira"
+                ref="sdiraFormChild"
+                :model-data="dataUserData || {}"
+                :loading="isLoading"
+                :schema-backend="schemaBackend || {}"
+                :error-data="errorData || {}"
+              />
+              <VFormProfileSolo
+                v-else-if="selectedUserProfileType === PROFILE_TYPES.SOLO401K"
+                key="solo"
+                ref="soloFormChild"
+                :model-data="dataUserData || {}"
+                :loading="isLoading"
+                :schema-backend="schemaBackend || {}"
+                :error-data="errorData || {}"
+              />
+              <VFormProfileTrust
+                v-else-if="selectedUserProfileType === PROFILE_TYPES.TRUST"
+                key="trust"
+                ref="trustFormChild"
+                :model-data="dataUserData || {}"
+                :loading="isLoading"
+                :schema-backend="schemaBackend || {}"
+                :error-data="errorData || {}"
+              />
+            </div>
+          </Transition>
         </template>
 
         <div class="invest-form-ownership__footer">
@@ -236,5 +264,37 @@ watch(selectedUserProfileType, () => {
     margin-bottom: 20px;
     margin-top: 12px;
   }
+
+  &__forms {
+    min-height: 600px;
+  }
+}
+
+// Smooth transitions for profile switching
+.profile-switch-enter-active,
+.profile-switch-leave-active,
+.profile-form-enter-active,
+.profile-form-leave-active {
+  transition: all 0.3s ease-in-out;
+}
+
+.profile-switch-enter-from {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.profile-switch-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.profile-form-enter-from {
+  opacity: 0;
+  transform: translateY(5px);
+}
+
+.profile-form-leave-to {
+  opacity: 0;
+  transform: translateY(-5px);
 }
 </style>

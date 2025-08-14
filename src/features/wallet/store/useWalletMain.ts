@@ -40,7 +40,7 @@ export function useWalletMain() {
   const isWalletCreated = computed(() => (
     getWalletState.value.data?.isWalletStatusCreated && !isWalletError.value));
   const isError = computed(() => (
-    selectedUserProfileData.value.isKycDeclined || isWalletError.value));
+    selectedUserProfileData.value.isKycDeclined || isWalletError.value || selectedUserProfileData.value.isTypeSdira));
 
   const isAlertShow = computed(() => (
     (isKYCNeedToPass.value || isKYCInProgress.value || isWalletCreated.value || isError.value)
@@ -80,7 +80,7 @@ export function useWalletMain() {
   });
 
   const updateData = async () => {
-    if (canLoadWalletData.value) {
+    if (canLoadWalletData.value && !getWalletState.value.loading && !getWalletState.value.error) {
       await walletRepository.getWalletByProfile(selectedUserProfileId.value);
     }
   };
