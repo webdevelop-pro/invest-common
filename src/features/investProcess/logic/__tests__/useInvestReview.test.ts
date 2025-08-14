@@ -153,7 +153,6 @@ describe('useInvestReview', () => {
 
   describe('action listener behavior', () => {
     it('should handle successful setReview action', async () => {
-      const composable = useInvestReview();
 
       (mockInvestmentRepository.setReviewState as any).value = { 
         loading: false, 
@@ -193,7 +192,6 @@ describe('useInvestReview', () => {
     });
 
     it('should not handle non-setReview actions', () => {
-      const composable = useInvestReview();
 
       if (actionCallback) {
         actionCallback({
@@ -211,7 +209,6 @@ describe('useInvestReview', () => {
     });
 
     it('should not handle setReview action without investment data', () => {
-      const composable = useInvestReview();
 
       (mockInvestmentRepository.setReviewState as any).value = { loading: false, data: null };
 

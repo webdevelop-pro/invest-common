@@ -66,7 +66,6 @@ export function useInvestStep(props: Props) {
   const sessionStore = useSessionStore();
   const { userLoggedIn } = storeToRefs(sessionStore);
   const investmentRepository = useRepositoryInvestment();
-  const { getInvestUnconfirmedOne } = storeToRefs(investmentRepository);
 
   // Extract route params once with better type safety
   const routeParams = computed(() => {
@@ -101,7 +100,10 @@ export function useInvestStep(props: Props) {
   onBeforeMount(async () => {
     if (userLoggedIn.value && routeParams.value.slug) {
       try {
-        const res = await investmentRepository.getInvestUnconfirmed(routeParams.value.slug, routeParams.value.profileId);
+        const res = await investmentRepository.getInvestUnconfirmed(
+          routeParams.value.slug,
+          routeParams.value.profileId,
+        );
         if (!res) {
           router.push('/dashboard/error/404');
         }

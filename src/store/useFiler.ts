@@ -6,11 +6,11 @@ import {
 } from 'InvestCommon/services/api/filer';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { IFilerItem } from 'InvestCommon/types/api/filer.type';
-import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
+import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 
 export const useFilerStore = defineStore('filer', () => {
-  const userProfileStore = useUserProfilesStore();
-  const { getUserData } = storeToRefs(userProfileStore);
+  const useRepositoryProfilesStore = useRepositoryProfiles();
+  const { getUserState } = storeToRefs(useRepositoryProfilesStore);
 
   const isGetFilesLoading = ref(false);
   const isGetFilesError = ref(false);
@@ -116,7 +116,7 @@ export const useFilerStore = defineStore('filer', () => {
     await postSignurl({
       filename: file.name,
       mime: file.type,
-      user_id: Number(getUserData.value?.id),
+      user_id: Number(getUserState.value.data?.id),
       path: `/${objectName}/${objectId}`,
     });
     if (postSignurlError.value) {
@@ -126,7 +126,7 @@ export const useFilerStore = defineStore('filer', () => {
       const uploadData = {
         objectName,
         objectId,
-        userId: getUserData.value?.id,
+        userId: getUserState.value.data?.id,
         url: postSignurlData.value?.url,
         fileId: postSignurlData.value?.meta?.id,
       };

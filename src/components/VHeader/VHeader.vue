@@ -8,8 +8,8 @@ import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import { urlSignin, urlSignup } from 'InvestCommon/global/links';
 import VHeader from 'UiKit/components/VHeader/VHeader.vue';
-import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import { MenuItem } from 'InvestCommon/types/global'; // Use shared MenuItem type
+import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 
 const VHeaderProfile = defineAsyncComponent({
   loader: () => import('./VHeaderProfile.vue'),
@@ -31,12 +31,12 @@ const props = defineProps({
 
 const sessionStore = useSessionStore();
 const { userLoggedIn } = storeToRefs(sessionStore);
-const userProfilesStore = useUserProfilesStore();
-const { isGetUserLoading } = storeToRefs(userProfilesStore);
+const useRepositoryProfilesStore = useRepositoryProfiles();
+const { getUserState } = storeToRefs(useRepositoryProfilesStore);
 // Use props.path directly, no need for ref unless it is updated elsewhere
 const isMobileSidebarOpen = defineModel<boolean>();
 
-const isLoading = computed(() => isGetUserLoading.value);
+const isLoading = computed(() => getUserState.value.loading);
 const isSignUpPage = computed(() => props.path?.includes('signup'));
 const isSignInPage = computed(() => props.path?.includes('signin'));
 const isRecoveryPage = computed(() => props.path?.includes('forgot'));

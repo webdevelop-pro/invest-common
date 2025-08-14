@@ -4,7 +4,6 @@ import {
   ref,
   defineAsyncComponent,
 } from 'vue';
-import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
 import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
@@ -19,6 +18,7 @@ import { filterSchema } from 'UiKit/helpers/validation/general';
 import { createFormModel } from 'UiKit/helpers/model';
 import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
 import { isEmpty } from 'UiKit/helpers/general';
+import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 
 interface FormModelAccount {
   first_name: string;
@@ -33,10 +33,13 @@ const props = defineProps({
   readOnly: Boolean,
 });
 
-const userProfilesStore = useUserProfilesStore();
-const {
-  setUserErrorData, setUserOptionsData, isSetUserLoading,
-} = storeToRefs(userProfilesStore);
+const useRepositoryProfilesStore = useRepositoryProfiles();
+const { setUserState, setUserOptionsState } = storeToRefs(useRepositoryProfilesStore);
+
+
+const errorData = computed(() => setUserState.value.error?.data?.responseJson);
+const schemaBackend = computed(() => setUserOptionsState.value.data);
+
 const isDialogContactUsOpen = ref(false);
 
 const VDialogContactUs = defineAsyncComponent({
@@ -65,7 +68,7 @@ const schema = {
 const model = reactive<FormModelAccount>({});
 const formModel = createFormModel(schema);
 let validator = new PrecompiledValidator<FormModelAccount>(
-  filterSchema(setUserOptionsData.value, formModel),
+  filterSchema(schemaBackend.value, formModel),
   schema,
 );
 const validation = ref<unknown>();
@@ -91,9 +94,9 @@ watch(() => model, () => {
   if (!isValid.value) onValidate();
 }, { deep: true });
 
-watch(() => [setUserOptionsData.value, schema], () => {
+watch(() => [schemaBackend.value, schema], () => {
   validator = new PrecompiledValidator<FormModelAccount>(
-    filterSchema(setUserOptionsData.value, formModel),
+    filterSchema(schemaBackend.value, formModel),
     schema,
   );
 });
@@ -110,9 +113,9 @@ watch(() => [setUserOptionsData.value, schema], () => {
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="setUserOptionsData"
+          :schema-back="schemaBackend"
           :schema-front="schema"
-          :error-text="setUserErrorData?.first_name"
+          :error-text="errorData?.first_name"
           path="first_name"
           label="First Name"
           data-testid="first-name-group"
@@ -125,7 +128,7 @@ watch(() => [setUserOptionsData.value, schema], () => {
             size="large"
             data-testid="first-name"
             :readonly="readOnly"
-            :loading="isSetUserLoading"
+            :loading="setUserState.loading"
             @update:model-value="model.first_name = $event"
           />
         </VFormGroup>
@@ -136,9 +139,9 @@ watch(() => [setUserOptionsData.value, schema], () => {
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="setUserOptionsData"
+          :schema-back="schemaBackend"
           :schema-front="schema"
-          :error-text="setUserErrorData?.middle_name"
+          :error-text="errorData?.middle_name"
           path="middle_name"
           label="Middle Name"
           data-testid="middle-name-group"
@@ -151,7 +154,7 @@ watch(() => [setUserOptionsData.value, schema], () => {
             size="large"
             data-testid="middle-name"
             :readonly="readOnly"
-            :loading="isSetUserLoading"
+            :loading="setUserState.loading"
             @update:model-value="model.middle_name = $event"
           />
         </VFormGroup>
@@ -162,9 +165,9 @@ watch(() => [setUserOptionsData.value, schema], () => {
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="setUserOptionsData"
+          :schema-back="schemaBackend"
           :schema-front="schema"
-          :error-text="setUserErrorData?.last_name"
+          :error-text="errorData?.last_name"
           path="last_name"
           label="Last Name"
           data-testid="last-name-group"
@@ -177,7 +180,7 @@ watch(() => [setUserOptionsData.value, schema], () => {
             size="large"
             data-testid="last-name"
             :readonly="readOnly"
-            :loading="isSetUserLoading"
+            :loading="setUserState.loading"
             @update:model-value="model.last_name = $event"
           />
         </VFormGroup>
@@ -189,9 +192,9 @@ watch(() => [setUserOptionsData.value, schema], () => {
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="setUserOptionsData"
+          :schema-back="schemaBackend"
           :schema-front="schema"
-          :error-text="setUserErrorData?.email"
+          :error-text="errorData?.email"
           path="email"
           label="Email"
           data-testid="email-group"
@@ -202,7 +205,7 @@ watch(() => [setUserOptionsData.value, schema], () => {
             name="email"
             size="large"
             readonly
-            :loading="isSetUserLoading"
+            :loading="setUserState.loading"
             @update:model-value="model.email = $event"
           />
         </VFormGroup>
@@ -222,9 +225,9 @@ watch(() => [setUserOptionsData.value, schema], () => {
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="setUserOptionsData"
+          :schema-back="schemaBackend"
           :schema-front="schema"
-          :error-text="setUserErrorData?.phone"
+          :error-text="errorData?.phone"
           path="phone"
           label="Phone number"
           data-testid="phone-group"
@@ -239,7 +242,7 @@ watch(() => [setUserOptionsData.value, schema], () => {
             size="large"
             data-testid="phone"
             :readonly="readOnly"
-            :loading="isSetUserLoading"
+            :loading="setUserState.loading"
             @update:model-value="model.phone = $event"
           />
         </VFormGroup>

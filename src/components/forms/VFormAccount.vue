@@ -3,7 +3,6 @@ import {
   ref, computed, useTemplateRef,
   nextTick,
 } from 'vue';
-import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
@@ -16,6 +15,7 @@ import VFormPartialAccount from './VFormPartialAccount.vue';
 import { ROUTE_SETTINGS_MFA } from 'InvestCommon/helpers/enums/routes';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
+import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 
 const { toast } = useToast();
 
@@ -27,8 +27,8 @@ const TOAST_OPTIONS = {
 const personalFormRef = useTemplateRef<FormChild>('personalFormChild');
 
 const router = useRouter();
-const userIdentityStore = useUserProfilesStore();
-const { isSetUserLoading, isSetUserError } = storeToRefs(userIdentityStore);
+const useRepositoryProfilesStore = useRepositoryProfiles();
+const { setUserState } = storeToRefs(useRepositoryProfilesStore);
 const profilesStore = useProfilesStore();
 const { selectedUserProfileId } = storeToRefs(profilesStore);
 const userSessionStore = useSessionStore();
@@ -38,7 +38,7 @@ const { submitFormToHubspot } = useHubspotForm(env.HUBSPOT_FORM_ID_ACCOUNT);
 
 const isLoading = ref(false);
 const isValid = computed(() => (personalFormRef.value?.isValid));
-const isDisabledButton = computed(() => (!isValid.value || isSetUserLoading.value));
+const isDisabledButton = computed(() => (!isValid.value || setUserState.value.loading));
 
 const saveHandler = async () => {
   personalFormRef.value?.onValidate();
@@ -50,12 +50,12 @@ const saveHandler = async () => {
   isLoading.value = true;
   const model = { ...personalFormRef.value?.model };
   delete model.email;
-  await userIdentityStore.setUser(model);
-  if (isSetUserError.value) {
+  await useRepositoryProfilesStore.setUser(model);
+  if (setUserState.value.error) {
     isLoading.value = false;
     return;
   }
-  await userIdentityStore.getUser();
+  await useRepositoryProfilesStore.getUser();
   isLoading.value = false;
   submitFormToHubspot({
     ...personalFormRef.value?.model,

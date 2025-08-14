@@ -36,7 +36,7 @@ const props = defineProps({
   optionsCountry: Array,
   optionsState: Array,
   trust: Boolean,
-  errorData: Object as PropType<any>,
+  errorData: Object,
   schemaBackend: Object,
   loading: Boolean,
 });

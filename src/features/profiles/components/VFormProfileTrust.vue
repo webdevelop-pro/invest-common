@@ -8,9 +8,9 @@ import VFormPartialBeneficialOwnership from './VFormPartialBeneficialOwnership.v
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 
 const props = defineProps({
-  modelData: Object as PropType<Record<string, any>>,
+  modelData: Object as PropType<Record<string, unknown>>,
   errorData: Object,
-  schemaBackend: Object as PropType<JSONSchemaType<any> | undefined>,
+  schemaBackend: Object as PropType<JSONSchemaType<unknown> | undefined>,
   loading: Boolean,
   showDocument: Boolean,
 });

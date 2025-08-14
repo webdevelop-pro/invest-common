@@ -18,6 +18,7 @@ import {
   ROUTE_DASHBOARD_CUSTODIAN_INFO,
   ROUTE_DASHBOARD_PLAN_INFO,
 } from 'InvestCommon/helpers/enums/routes';
+import { IUserDataIndividual } from '@/data/profiles/profiles.types';
 
 // Utility functions
 const formatBoolean = (value: boolean | undefined) => value === undefined ? undefined : value ? 'Yes' : 'No';
@@ -40,7 +41,7 @@ const formatPhoneNumber = (phoneNumber: string | undefined): string | undefined 
   return `${countryCode}(${areaCode}) ${middlePart}-${lastPart}`;
 };
 
-const formatName = (profileData: any) => {
+const formatName = (profileData: IUserDataIndividual) => {
   if (!profileData) return 'N/A';
   const parts = [
     profileData?.first_name,
@@ -50,7 +51,7 @@ const formatName = (profileData: any) => {
   return parts.join(' ') || 'N/A';
 };
 
-const formatAddress = (profileData: any) => {
+const formatAddress = (profileData: IUserDataIndividual) => {
   if (!profileData) return 'N/A';
   const parts = [
     profileData?.address1,
@@ -65,7 +66,9 @@ const formatAddress = (profileData: any) => {
 
 // Store setup
 const profilesStore = useProfilesStore();
-const { selectedUserProfileType, selectedUserProfileId, selectedUserProfileData, selectedUserProfileRiskAcknowledged } = storeToRefs(profilesStore);
+const {
+  selectedUserProfileType, selectedUserProfileId, selectedUserProfileData, selectedUserProfileRiskAcknowledged,
+} = storeToRefs(profilesStore);
 const useRepositoryProfilesStore = useRepositoryProfiles();
 const { getProfileByIdState } = storeToRefs(useRepositoryProfilesStore);
 

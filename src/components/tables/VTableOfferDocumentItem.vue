@@ -4,17 +4,12 @@ import {
   PropType, defineAsyncComponent, ref,
 } from 'vue';
 import { IInvestmentDocuments } from 'InvestCommon/types/api/invest';
-// import { useInvestmentsStore } from 'InvestCommon/store/useInvestments';
-// import { storeToRefs } from 'pinia';
 import file from 'UiKit/assets/images/file.svg';
 import { VTableCell, VTableRow } from 'UiKit/components/Base/VTable';
 
 const VBadge = defineAsyncComponent({
   loader: () => import('UiKit/components/Base/VBadge/VBadge.vue'),
 });
-
-// const investmentsStore = useInvestmentsStore();
-// const { getDocumentData, isGetDocumentLoading } = storeToRefs(investmentsStore);
 
 const props = defineProps({
   data: Object as PropType<IInvestmentDocuments>,
