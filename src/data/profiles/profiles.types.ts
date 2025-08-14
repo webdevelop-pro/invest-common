@@ -113,6 +113,7 @@ export interface IUserDataIndividual {
   account_number?: string;
   full_account_name?: string;
   ein?: string;
+  is_full_ssn_provided: boolean;
 }
 
 export interface IProfileIndividual {
