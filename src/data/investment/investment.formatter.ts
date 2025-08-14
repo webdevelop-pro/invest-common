@@ -6,7 +6,6 @@ import {
   InvestStepTypes,
 } from './investment.types';
 import { OfferFormatter } from 'InvestCommon/data/offer/offer.formatter';
-import { IOfferFormatted } from 'InvestCommon/data/offer/offer.types';
 import { IOffer } from 'InvestCommon/types/api/offers';
 
 // Currency formatter function

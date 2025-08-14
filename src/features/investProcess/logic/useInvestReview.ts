@@ -1,0 +1,92 @@
+import { computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
+import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
+import { ROUTE_INVEST_THANK } from 'InvestCommon/helpers/enums/routes';
+import { storeToRefs } from 'pinia';
+import { urlOfferSingle } from 'InvestCommon/global/links';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
+import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
+
+export function useInvestReview() {
+  const globalLoader = useGlobalLoader();
+  globalLoader.hide();
+
+  const route = useRoute();
+  const router = useRouter();
+  const { slug, id, profileId } = route.params;
+
+  const profilesStore = useProfilesStore();
+  const { selectedUserProfileData } = storeToRefs(profilesStore);
+  const userSessionStore = useSessionStore();
+  const { userSessionTraits } = storeToRefs(userSessionStore);
+  const investmentRepository = useRepositoryInvestment();
+  const { getInvestUnconfirmedOne, setReviewState } = storeToRefs(investmentRepository);
+
+  const { submitFormToHubspot } = useHubspotForm('23d573ec-3714-4fdb-97c2-a3b688d5008f');
+
+  // Computed properties
+  const investorName = computed(() => {
+    const { first_name, middle_name, last_name } = selectedUserProfileData.value?.data || {};
+    return [first_name, middle_name, last_name].filter(Boolean).join(' ');
+  });
+
+  const fundingSourceDataToShow = computed(() => {
+    const fundingType = getInvestUnconfirmedOne.value?.funding_type;
+    if (!fundingType) return '';
+    
+    if (fundingType.toLowerCase().includes('wallet')) {
+      return fundingType.charAt(0).toUpperCase() + fundingType.slice(1);
+    }
+    return fundingType.toUpperCase();
+  });
+
+  const confirmInvest = async () => {
+    await investmentRepository.setReview(slug as string, id as string, profileId as string);
+  };
+
+  // Handle successful investment review
+  investmentRepository.$onAction(({ name, after }) => {
+    after(() => {
+      if (name === 'setReview' && setReviewState.value.data?.investment) {
+        const investment = setReviewState.value.data.investment;
+        
+        router.push({
+          name: ROUTE_INVEST_THANK,
+          params: { id: investment.id },
+        });
+
+        submitFormToHubspot({
+          email: userSessionTraits.value?.email,
+          investment_id: investment.id,
+          offer_name: getInvestUnconfirmedOne.value?.offer?.name,
+          offer_slug: getInvestUnconfirmedOne.value?.offer?.slug,
+          investment_status: investment.status,
+        });
+      }
+    });
+  });
+
+  return {
+    // Route params
+    slug,
+    id,
+    profileId,
+    
+    // Store data
+    selectedUserProfileData,
+    getInvestUnconfirmedOne,
+    setReviewState,
+    
+    // Computed properties
+    investorName,
+    fundingSourceDataToShow,
+    
+    // Methods
+    confirmInvest,
+    
+    // Utilities
+    urlOfferSingle,
+  };
+}

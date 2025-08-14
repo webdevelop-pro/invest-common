@@ -1,4 +1,3 @@
-import { useOfferStore } from 'InvestCommon/store/useOffer';
 import { useRoute, useRouter } from 'vue-router';
 import {
   computed, onBeforeMount, onMounted, ref, watch,
@@ -10,6 +9,8 @@ import {
   ROUTE_INVEST_AMOUNT, ROUTE_INVEST_FUNDING, ROUTE_INVEST_OWNERSHIP, ROUTE_INVEST_REVIEW,
   ROUTE_INVEST_SIGNATURE,
 } from 'InvestCommon/helpers/enums/routes';
+import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
+
 
 interface Props {
   title?: string;
@@ -62,9 +63,10 @@ const steps = [
 export function useInvestStep(props: Props) {
   const route = useRoute();
   const router = useRouter();
-  const offerStore = useOfferStore();
   const sessionStore = useSessionStore();
   const { userLoggedIn } = storeToRefs(sessionStore);
+  const investmentRepository = useRepositoryInvestment();
+  const { getInvestUnconfirmedOne } = storeToRefs(investmentRepository);
 
   // Extract route params once with better type safety
   const routeParams = computed(() => {
@@ -99,7 +101,10 @@ export function useInvestStep(props: Props) {
   onBeforeMount(async () => {
     if (userLoggedIn.value && routeParams.value.slug) {
       try {
-        await offerStore.getUnconfirmedOfferOne(routeParams.value.slug);
+        await investmentRepository.getInvestUnconfirmed(routeParams.value.slug, routeParams.value.profileId);
+        if (!getInvestUnconfirmedOne.value) {
+          router.push('/dashboard/error/404');
+        }
       } catch (error) {
         console.error('Failed to fetch offer:', error);
       }

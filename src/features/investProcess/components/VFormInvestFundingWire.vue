@@ -1,12 +1,7 @@
 <script setup lang="ts">
-import { useOfferStore } from 'InvestCommon/store/useOffer';
-import { storeToRefs } from 'pinia';
-import { computed } from 'vue';
-
-const offerStore = useOfferStore();
-const { getUnconfirmedOfferData } = storeToRefs(offerStore);
-
-const data = computed(() => getUnconfirmedOfferData.value?.offer);
+defineProps({
+  offer: Object,
+});
 </script>
 
 <template>
@@ -18,37 +13,37 @@ const data = computed(() => getUnconfirmedOfferData.value?.offer);
       <span class="form-invest-funding-wire__text-title is--h6__title">
         Wire to:
       </span>
-      {{ data?.data?.wire_to }}
+      {{ offer?.data?.wire_to }}
     </div>
     <div class="form-invest-funding-wire__row">
       <span class="form-invest-funding-wire__text-title is--h6__title">
         Routing Number:
       </span>
-      {{ data?.data?.routing_number }}
+      {{ offer?.data?.routing_number }}
     </div>
     <div class="form-invest-funding-wire__row">
       <span class="form-invest-funding-wire__text-title is--h6__title">
         Account Number:
       </span>
-      {{ data?.data?.account_number }}
+      {{ offer?.data?.account_number }}
     </div>
     <div class="form-invest-funding-wire__row">
       <span class="form-invest-funding-wire__text-title is--h6__title">
         Custodian / Account Name:
       </span>
-      {{ data?.data?.custodian }}
+      {{ offer?.data?.custodian }}
     </div>
     <div class="form-invest-funding-wire__row">
       <span class="form-invest-funding-wire__text-title is--h6__title">
         FFCT:
       </span>
-      Offer {{ data?.id }}, {{ data?.legal_name }}
+      Offer {{ offer?.id }}, {{ offer?.legal_name }}
     </div>
     <div class="form-invest-funding-wire__row">
       <span class="form-invest-funding-wire__text-title is--h6__title">
         SWIFT ID:
       </span>
-      {{ data?.data?.swift_id }}
+      {{ offer?.data?.swift_id }}
     </div>
   </div>
 </template>
