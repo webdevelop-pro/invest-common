@@ -13,6 +13,7 @@ export interface IOfferFormatted extends IOffer {
   closeAtFormatted: string;
   isDefaultImage: boolean;
   offerFundedPercent: number;
+  isClosingSoon: boolean;
   imageBig: string;
   imageSmall: string;
   imageMedium: string;

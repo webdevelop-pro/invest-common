@@ -14,7 +14,7 @@ import { ref } from 'vue';
 
 const { INVESTMENT_URL } = env;
 
-export const useRepositoryInvestment = defineStore('repositoryInvestment', () => {
+export const useRepositoryInvestment = defineStore('repository-investment', () => {
   const apiClient = new ApiClient(INVESTMENT_URL);
 
   // Create action states for each function

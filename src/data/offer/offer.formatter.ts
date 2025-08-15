@@ -109,6 +109,10 @@ export class OfferFormatter {
     return Math.ceil(percent);
   }
 
+  get isClosingSoon(): boolean {
+    return this.offerFundedPercent > 90;
+  }
+
   get isDefaultImage(): boolean {
     return !(this.offer?.image_link_id);
   }
@@ -223,6 +227,7 @@ export class OfferFormatter {
       closeAtFormatted: this.closeAtFormatted,
       isDefaultImage: this.isDefaultImage,
       offerFundedPercent: this.offerFundedPercent,
+      isClosingSoon: this.isClosingSoon,
       imageBig: this.getOfferImage('big'),
       imageSmall: this.getOfferImage('small'),
       imageMedium: this.getOfferImage('medium'),

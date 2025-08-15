@@ -7,6 +7,7 @@ import { computed } from 'vue';
 export type MenuItem = {
   to?: string;
   href?: string;
+  active?: boolean;
   text: string;
   children?: MenuItem[];
 }
