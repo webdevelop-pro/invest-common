@@ -7,16 +7,14 @@ import { useOffersDetailsContent } from './logic/useOffersDetailsContent';
 import { navigateWithQueryParams } from 'InvestCommon/helpers/general';
 import { urlSignin } from 'InvestCommon/global/links';
 import { useRoute } from 'vitepress';
+import OffersComments from './OffersComments.vue';
 
-const OffersComments = defineAsyncComponent({
-  loader: () => import('./OffersComments.vue'),
-});
+// const OffersComments = defineAsyncComponent({
+//   loader: () => import('./OffersComments.vue'),
+// });
 
 const VButton = defineAsyncComponent({
   loader: () => import('UiKit/components/Base/VButton/VButton.vue'),
-});
-const VSkeleton = defineAsyncComponent({
-  loader: () => import('UiKit/components/Base/VSkeleton/VSkeleton.vue'),
 });
 
 const props = defineProps({
@@ -130,15 +128,10 @@ const signInHandler = () => {
     <VTabsContent
       :value="tabOptions[3].value"
     >
-      <VSkeleton
-        v-if="loading"
-        height="22px"
-        width="100%"
-      />
       <OffersComments
-        v-else
         :offer-id="offer.id"
         :offer-name="offer.name"
+        :loading="loading"
       />
     </VTabsContent>
   </VTabs>

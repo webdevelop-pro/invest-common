@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 import VFormComments from './VFormComments.vue';
 import VCommentItems from 'UiKit/components/VComment/VCommentItems.vue';
 import { storeToRefs } from 'pinia';
@@ -7,7 +6,7 @@ import { computed, onBeforeMount } from 'vue';
 import type { IOfferComment } from 'InvestCommon/types/api/offers';
 import { useRepositoryOffer } from 'InvestCommon/data/offer/offer.repository';
 
-defineProps({
+const props = defineProps({
   offerId: {
     type: Number,
     required: true,
@@ -16,6 +15,10 @@ defineProps({
     type: String,
     required: true,
   },
+  loading: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 
@@ -23,6 +26,8 @@ const offerRepository = useRepositoryOffer();
 const { getOfferCommentsState, setOfferCommentOptionsState } = storeToRefs(offerRepository);
 
 const comments = computed<IOfferComment[]>(() => getOfferCommentsState.value.data?.data || []);
+const isLoading = computed(() => (
+  props.loading || getOfferCommentsState.value.loading || setOfferCommentOptionsState.value.loading));
 
 onBeforeMount(() => {
   if (!setOfferCommentOptionsState.value.data) offerRepository.setOfferCommentOptions()
@@ -39,16 +44,12 @@ onBeforeMount(() => {
     <VFormComments
       :offer-id="offerId"
       :offer-name="offerName"
-    />
-    <VSkeleton
-      v-if="getOfferCommentsState.loading"
-      height="22px"
-      width="100%"
-      class="offer-comments__skeleton"
+      :loading="isLoading"
     />
     <VCommentItems
-      v-else-if="comments && comments.length > 0"
+      v-if="(comments && comments.length > 0) || isLoading"
       :comments="comments"
+      :loading="isLoading"
     />
     <p
       v-else

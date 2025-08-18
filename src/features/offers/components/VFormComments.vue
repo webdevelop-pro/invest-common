@@ -15,6 +15,10 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  loading: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const {
@@ -51,6 +55,7 @@ const {
         placeholder="Ask a question"
         name="question"
         size="large"
+        :loading="loading"
         @update:model-value="model.comment = $event"
       />
     </VFormGroup>
@@ -67,13 +72,14 @@ const {
           v-if="!isAuth"
           class="is--margin-top-0"
           size="large"
+          :loading="loading"
           @click="signInHandler"
         >
           Sign in
         </VButton>
         <VButton
           v-else
-          :loading="setOfferCommentState.loading || setOfferCommentOptionsState.loading"
+          :loading="loading || setOfferCommentState.loading || setOfferCommentOptionsState.loading"
           :disabled="isDisabledButton"
           size="large"
           @click="sendQuestion"

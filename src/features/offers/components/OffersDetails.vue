@@ -112,14 +112,7 @@ const { breadcrumbsList, tags, carouselFiles, frontmatter } = useOffersDetails(o
           class="is--lt-desktop-show is--margin-top-40"
           @invest="emit('invest')"
         />
-        <VSkeleton
-          v-if="!offer"
-          height="22px"
-          width="100%"
-          class="offer-details__content"
-        />
         <OffersDetailsContent
-          v-else
           :offer="offer"
           :loading="loading"
           class="offer-details__content"
