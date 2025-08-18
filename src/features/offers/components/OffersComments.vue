@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { useOfferStore } from 'InvestCommon/store/useOffer';
 import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
-import VFormComments from 'InvestCommon/components/forms/VFormComments.vue';
+import VFormComments from './VFormComments.vue';
 import VCommentItems from 'UiKit/components/VComment/VCommentItems.vue';
 import { storeToRefs } from 'pinia';
-import { onBeforeMount } from 'vue';
+import { computed, onBeforeMount } from 'vue';
+import type { IOfferComment } from 'InvestCommon/types/api/offers';
+import { useRepositoryOffer } from 'InvestCommon/data/offer/offer.repository';
 
 defineProps({
   offerId: {
@@ -17,11 +18,15 @@ defineProps({
   },
 });
 
-const offerStore = useOfferStore();
-const { isGetOfferCommentsLoading, getOfferCommentsData: comments } = storeToRefs(offerStore);
 
-// onMounted(() => void offerStore.getOfferComments(props.offerId));
-onBeforeMount(() => offerStore.setOfferCommentOptions());
+const offerRepository = useRepositoryOffer();
+const { getOfferCommentsState, setOfferCommentOptionsState } = storeToRefs(offerRepository);
+
+const comments = computed<IOfferComment[]>(() => getOfferCommentsState.value.data?.data || []);
+
+onBeforeMount(() => {
+  if (!setOfferCommentOptionsState.value.data) offerRepository.setOfferCommentOptions()
+});
 </script>
 
 <template>
@@ -36,7 +41,7 @@ onBeforeMount(() => offerStore.setOfferCommentOptions());
       :offer-name="offerName"
     />
     <VSkeleton
-      v-if="isGetOfferCommentsLoading"
+      v-if="getOfferCommentsState.loading"
       height="22px"
       width="100%"
       class="offer-comments__skeleton"

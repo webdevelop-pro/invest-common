@@ -1,24 +1,19 @@
 <script setup lang="ts">
-
-import { IOffer } from 'InvestCommon/types/api/offers';
-import { currency } from 'InvestCommon/helpers/currency';
-import { useOfferStore } from 'InvestCommon/store/useOffer';
+import { IOfferFormatted } from 'InvestCommon/data/offer/offer.types';
 import { PropType, computed } from 'vue';
-import { storeToRefs } from 'pinia';
 import { urlContactUs } from 'InvestCommon/global/links';
-import { useClipboard } from '@vueuse/core';
 import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 import share from 'UiKit/assets/images/share.svg';
 import file from 'UiKit/assets/images/file.svg';
 import OffersDetailsBtn from './OffersDetailsBtn.vue';
 import VProgress from 'UiKit/components/Base/VProgress/VProgress.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
-import { useRepositoryFiler } from 'InvestCommon/data/filer/filer.repository';
-import { FilerFormatter } from 'InvestCommon/data/filer/filer.formatter';
+import VTooltip from 'UiKit/components/VTooltip.vue';
+import { useOffersDetailsSide } from './logic/useOffersDetailsSide';
 
 const props = defineProps({
   offer: {
-    type: Object as PropType<IOffer>,
+    type: Object as PropType<IOfferFormatted>,
   },
   loading: {
     type: Boolean,
@@ -27,61 +22,8 @@ const props = defineProps({
 });
 defineEmits(['invest']);
 
-const offerStore = useOfferStore();
-const filerRepository = useRepositoryFiler();
-const { getFilesState, getPublicFilesState } = storeToRefs(filerRepository);
-
-
-const filesFormatted = computed(() => (
-  FilerFormatter.getFormattedInvestmentDocuments(getFilesState.value.data, getPublicFilesState.value.data)));
-
-const { copy, copied } = useClipboard({ legacy: true });
-
-const isSharesReached = computed(() => (
-  (props.offer?.total_shares || 0) - (props.offer?.subscribed_shares || 0) < props.offer?.min_investment
-));
-
-const amountPercent = computed(() => offerStore.getOfferFundedPercent(props.offer));
-
-const readOnlyInfo = computed(() => ([
-  {
-    title: 'Share Price:',
-    text: currency(props.offer?.price_per_share),
-  },
-  {
-    title: 'Pre-Money Valuation:',
-    text: currency(props.offer?.valuation, 0),
-  },
-  {
-    title: 'Security Type:',
-    text: props.offer?.security_type,
-  },
-  {
-    title: 'Interest Rate:',
-    text: props.offer?.data?.apy,
-  },
-  {
-    title: 'Distribution Frequency:',
-    text: props.offer?.data?.distribution_frequency,
-  },
-  {
-    title: 'Investment Strategy:',
-    text: props.offer?.data?.investment_strategy,
-  },
-  {
-    title: 'Estimated Hold Period:',
-    text: props.offer?.data?.estimated_hold_period,
-  },
-]));
-
-const investmentDocUrl = computed(() => {
-  const filterDoc = filesFormatted.value.filter((doc) => (doc.name.toLowerCase().includes('investment agreement')))[0];
-  return filterDoc?.url;
-});
-
-const onShareClick = () => {
-  copy(window?.location?.href);
-};
+const offerRef = computed(() => props.offer);
+const { readOnlyInfo, investmentDocUrl, onShareClick, copied } = useOffersDetailsSide(offerRef);
 </script>
 
 <template>
@@ -103,7 +45,7 @@ const onShareClick = () => {
     </div>
     <div class="offer-details-side__progress-wrap">
       <VProgress
-        :model-value="amountPercent"
+        :model-value="offer?.offerFundedPercent"
         with-text
       />
     </div>
@@ -127,6 +69,16 @@ const onShareClick = () => {
               width="100px"
               class="offer-details-side__side-details-value is--body"
             />
+            <VTooltip
+              v-else-if="item.tooltip"
+            >
+              <span class="offer-details-side__side-details-value is--body">
+                {{ item.text }}
+              </span>
+              <template #content>
+                {{ item.tooltip }}
+              </template>
+            </VTooltip>
             <span
               v-else
               class="offer-details-side__side-details-value is--body"
@@ -160,11 +112,11 @@ const onShareClick = () => {
             Min investment:
           </span>
           <span class="offer-details-side__min-invest-value is--h4__title">
-            {{ currency(offer?.min_investment * offer?.price_per_share, 0) }}
+            {{ offer?.minInvestmentFormatted }}
           </span>
         </div>
         <OffersDetailsBtn
-          :is-shares-reached="isSharesReached"
+          :is-shares-reached="offer?.isSharesReached || false"
           :loading="loading"
           class="offer-details-side__button"
           @invest="$emit('invest')"

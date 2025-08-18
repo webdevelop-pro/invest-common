@@ -72,8 +72,8 @@ describe('useInvestmentTopInfo', () => {
       it('should format info data correctly', () => {
         const expectedInfoData = [
           {
-            text: 'Created Date:',
-            value: '2024-01-15',
+            text: 'Ownership:',
+            value: 'Individual',
           },
           {
             text: 'Funding Type:',
@@ -81,12 +81,12 @@ describe('useInvestmentTopInfo', () => {
             funding: true,
           },
           {
-            text: 'Security Type:',
-            value: 'Equity',
+            text: 'Created Date:',
+            value: '2024-01-15',
           },
           {
-            text: 'Ownership:',
-            value: 'Individual',
+            text: 'Security Type:',
+            value: 'Equity',
           },
           {
             text: 'Valuation:',
@@ -95,6 +95,7 @@ describe('useInvestmentTopInfo', () => {
           {
             text: 'Close Date:',
             value: '2024-12-31',
+            tooltip: 'Closing offer date may vary depending on factors such as property type, financing conditions, buyer readiness, or legal requirements.',
           },
         ];
 
@@ -106,7 +107,7 @@ describe('useInvestmentTopInfo', () => {
           investmentId: '123',
           profileData: {
             id: '456',
-            type: 'individual',
+            type: 'company',
             data: {
               first_name: 'John',
               last_name: 'Doe',
@@ -114,7 +115,19 @@ describe('useInvestmentTopInfo', () => {
           },
         });
 
-        expect(composableWithCompany.infoData.value[3].value).toBe('Individual');
+        expect(composableWithCompany.infoData.value[0].value).toBe('Company');
+      });
+
+      it('should set funding property based on isFundingClickable', () => {
+        mockGetInvestOneState.value.data = {
+          ...mockGetInvestOneState.value.data,
+          isFundingClickable: false,
+        };
+
+        const composableWithNonClickableFunding = useInvestmentTopInfo(props);
+        const fundingItem = composableWithNonClickableFunding.infoData.value.find(item => item.text === 'Funding Type:');
+        
+        expect(fundingItem?.funding).toBe(false);
       });
     });
   });
@@ -126,6 +139,21 @@ describe('useInvestmentTopInfo', () => {
       expect(mockPush).toHaveBeenCalledWith({
         name: ROUTE_DASHBOARD_PORTFOLIO,
         params: { profileId: '456' },
+        query: { id: '123' },
+      });
+    });
+
+    it('should handle missing profile data gracefully', () => {
+      const composableWithoutProfile = useInvestmentTopInfo({
+        investmentId: '123',
+        profileData: undefined,
+      });
+
+      composableWithoutProfile.onBackClick();
+
+      expect(mockPush).toHaveBeenCalledWith({
+        name: ROUTE_DASHBOARD_PORTFOLIO,
+        params: { profileId: undefined },
         query: { id: '123' },
       });
     });

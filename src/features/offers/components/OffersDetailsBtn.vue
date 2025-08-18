@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { InvestKycTypes } from 'InvestCommon/types/api/invest';
+import { useRoute } from 'vitepress';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { storeToRefs } from 'pinia';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
-import { urlProfileKYC, urlSignin } from 'InvestCommon/global/links';
+import { urlSignin } from 'InvestCommon/global/links';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
+import { useKycButton } from 'InvestCommon/features/kyc/store/useKycButton';
 
 const props = defineProps({
   isSharesReached: {
@@ -21,38 +22,34 @@ defineEmits(['invest']);
 const userSessionStore = useSessionStore();
 const { userLoggedIn } = storeToRefs(userSessionStore);
 const profilesStore = useProfilesStore();
-const { selectedUserProfileId, selectedUserIndividualProfile } = storeToRefs(profilesStore);
+const { selectedUserProfileData } = storeToRefs(profilesStore);
+const kycButtonStore = useKycButton();
+const route = useRoute();
 
-const isAuth = computed(() => userLoggedIn.value);
-const kycStatus = computed(() => (selectedUserIndividualProfile.value?.kyc_status ?? InvestKycTypes.none));
 const showInvestBtn = computed(() => (
-  kycStatus.value === InvestKycTypes.approved
+  selectedUserProfileData.value?.isKycApproved
   || props.isSharesReached
 ));
 const showKYCBtn = computed(() => (
-  kycStatus.value === InvestKycTypes.new
+  selectedUserProfileData.value?.isKycNew
   && !props.isSharesReached
 ));
 
-const query = computed(() => (
-  (window && window?.location?.search) ? new URLSearchParams(window?.location?.search).get('redirect') : null));
-
 const signInHandler = () => {
-  navigateWithQueryParams(urlSignin, query.value);
+  const redirect = `${route.path}${window.location.search}${window.location.hash}`;
+  navigateWithQueryParams(urlSignin, { redirect });
 };
 
+
 const startKycHandler = () => {
-  // if (selectedUserProfileShowKycInitForm.value) {
-  navigateWithQueryParams(urlProfileKYC(selectedUserProfileId.value));
-  // } else await plaidStore.handlePlaidKyc();
-  // TODO
+  kycButtonStore.onClick();
 };
 </script>
 
 <template>
   <div class="OffersDetailsBtn offer-details-btn">
     <VButton
-      v-if="!isAuth"
+      v-if="!userLoggedIn"
       size="large"
       class="offer-details-btn__btn"
       @click="signInHandler"
@@ -78,13 +75,13 @@ const startKycHandler = () => {
     </VButton>
     <p
       v-else
-      class="offer-details-btn__kyc-info is--small"
+      class="offer-details-btn__info is--small"
     >
       You haven't passed KYC!
     </p>
     <p
       v-if="isSharesReached && showInvestBtn"
-      class="offer-details-btn__kyc-info is--small"
+      class="offer-details-btn__info is--small"
     >
       Offer already reached subscription
     </p>
@@ -97,7 +94,7 @@ const startKycHandler = () => {
     width: 100%;
   }
 
-  &__kyc-info {
+  &__info {
     margin-top: 8px;
     color: $gray-70;
   }

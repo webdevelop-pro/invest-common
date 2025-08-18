@@ -19,7 +19,7 @@ const offerRepository = useRepositoryOffer();
 const { getOffersState } = storeToRefs(offerRepository);
 
 const offers = computed(() => getOffersState.value.data?.data || []);
-const offersClosed = computed(() => offers.value.filter((item) => item.status === 'Successfully Closed'));
+const offersClosed = computed(() => offers.value.filter((item) => item.isStatusClosedSuccessfully));
 const showClosed = computed(() => ((offersClosed.value?.length || 0) > 0));
 
 useGlobalLoader().hide();

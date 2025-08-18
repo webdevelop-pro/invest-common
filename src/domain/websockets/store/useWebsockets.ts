@@ -5,11 +5,11 @@ import { useWebSocket } from '@vueuse/core';
 import env from 'InvestCommon/global/index';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 import { useRepositoryNotifications } from 'InvestCommon/data/notifications/notifications.repository';
-import { useOfferStore } from 'InvestCommon/store/useOffer';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
+import { useRepositoryOffer } from 'InvestCommon/data/offer/offer.repository';
 
 const { NOTIFICATION_URL } = env;
 
@@ -29,7 +29,7 @@ export const useDomainWebSocketStore = defineStore('domainWebsockets', () => {
   const repositoryWallet = useRepositoryWallet();
   const repositoryNotifications = useRepositoryNotifications();
   const repositoryInvestment = useRepositoryInvestment();
-  const offerStore = useOfferStore();
+  const repositoryOffer = useRepositoryOffer();
 
   const handleInternalMessage = (notification: INotification) => {
     switch (notification.data.obj) {
@@ -42,10 +42,9 @@ export const useDomainWebSocketStore = defineStore('domainWebsockets', () => {
         break;
       case 'investment':
         repositoryInvestment.updateNotificationData(notification);
-        offerStore.updateNotificationData(notification);
         break;
       case 'offer':
-        offerStore.updateNotificationData(notification);
+        repositoryOffer.updateNotificationData(notification);
         break;
       default:
         // Optionally handle unknown types

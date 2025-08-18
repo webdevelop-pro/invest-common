@@ -12,11 +12,18 @@ export interface IOfferFormatted extends IOffer {
   approvedAtFormatted: string;
   closeAtFormatted: string;
   isDefaultImage: boolean;
+  minInvestment: number;
+  minInvestmentFormatted: string;
   offerFundedPercent: number;
   isClosingSoon: boolean;
+  isSharesReached: boolean;
   imageBig: string;
   imageSmall: string;
   imageMedium: string;
+  isNew: boolean;
+  tagText: string;
+  tagBackground: string;
+  showTag: boolean;
   isStatusNew: boolean;
   isStatusDraft: boolean;
   isStatusLegalReview: boolean;

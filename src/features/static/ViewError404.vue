@@ -32,7 +32,7 @@ const VErrorPageNotFound404 = defineAsyncComponent({
 </script>
 
 <template>
-  <div class="view404 view-404">
+  <div class="ViewError404 view-404">
     <VErrorPageNotFound404 />
   </div>
 </template>

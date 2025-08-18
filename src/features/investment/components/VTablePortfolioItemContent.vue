@@ -117,7 +117,10 @@ const infoData = computed(() => [
               </span>
             </div>
             <div class="v-table-item-content__info-col">
-              <template v-for="(value, index) in section.values" :key="value">
+              <template
+                v-for="(value, index) in section.values"
+                :key="value"
+              >
                 <VSkeleton
                   v-if="loading"
                   height="18px"

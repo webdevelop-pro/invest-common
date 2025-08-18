@@ -28,10 +28,11 @@ export function useFormValidation<T extends object>(
 
   // Memoize schema values to avoid unnecessary recalculations
   const currentSchema = computed(() => unref(schema));
-  const formModel = computed(() => createFormModel(currentSchema.value) || {});
   const currentSchemaBackend = computed(() => (
     schemaBackend ? unref(schemaBackend) : undefined));
-  const schemaObject = computed(() => getFilteredObject(currentSchemaBackend.value, formModel.value) || {});
+  const formModel = computed(() => createFormModel(currentSchemaBackend.value || currentSchema.value) || {});
+  const schemaObject = computed(() => (
+    getFilteredObject(currentSchemaBackend.value || currentSchema.value, formModel.value) || {}));
 
   // Create validator with memoization
   const validator = computed(() => {

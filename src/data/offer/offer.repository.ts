@@ -5,10 +5,10 @@ import {
 } from 'InvestCommon/types/api/offers';
 import env from 'InvestCommon/global';
 import { createActionState } from 'InvestCommon/data/repository/repository';
-import { storeToRefs, acceptHMRUpdate, defineStore } from 'pinia';
+import { acceptHMRUpdate, defineStore } from 'pinia';
 import { OfferFormatter } from 'InvestCommon/data/offer/offer.formatter';
 import { IOfferFormatted } from 'InvestCommon/data/offer/offer.types';
-import { ref } from 'vue';
+import { INotification } from 'InvestCommon/data/notifications/notifications.types';
 
 const { OFFER_URL } = env;
 
@@ -113,9 +113,8 @@ export const useRepositoryOffer = defineStore('repository-offer', () => {
       setOfferCommentOptionsState.value.loading = true;
       setOfferCommentOptionsState.value.error = null;
       const response = await apiClient.options('/auth/comment');
-      const optionsData = response.data;
-      setOfferCommentOptionsState.value.data = optionsData;
-      return optionsData;
+      setOfferCommentOptionsState.value.data = response.data;
+      return response.data;
     } catch (err) {
       setOfferCommentOptionsState.value.error = err as Error;
       toasterErrorHandling(err, 'Failed to fetch offer comment options');
@@ -133,6 +132,31 @@ export const useRepositoryOffer = defineStore('repository-offer', () => {
     return Math.ceil(percent);
   };
 
+  const updateNotificationData = (notification: INotification) => {
+    const { fields } = notification.data;
+    const objectId = fields?.object_id;
+    Object.assign(getOfferOneState.value.data, fields);  
+    getOfferOneState.value.data = new OfferFormatter(getOfferOneState.value.data).format();
+
+    if (!getOffersState.value.data) {
+      getOffersState.value.data = [];
+    }
+    const index = getOffersState.value.data?.findIndex((t) => t.id === objectId);
+    Object.assign(getOffersState.value.data[index], fields);
+    Object.assign(
+      getOffersState.value.data[index], 
+      new OfferFormatter(getOffersState.value.data[index]).format()
+    );
+  };
+
+  const resetAll = () => {
+    getOffersState.value = { loading: false, error: null, data: undefined };
+    getOfferOneState.value = { loading: false, error: null, data: undefined };
+    getOfferCommentsState.value = { loading: false, error: null, data: undefined };
+    setOfferCommentState.value = { loading: false, error: null, data: undefined };
+    setOfferCommentOptionsState.value = { loading: false, error: null, data: undefined };
+  };
+
   return {
     // Actions
     getOffers,
@@ -141,6 +165,8 @@ export const useRepositoryOffer = defineStore('repository-offer', () => {
     setOfferComment,
     setOfferCommentOptions,
     getOfferFundedPercent,
+    updateNotificationData,
+    resetAll,
 
     // States
     getOffersState,

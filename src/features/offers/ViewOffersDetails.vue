@@ -8,12 +8,46 @@ import {
 } from 'vue';
 import { useData, useRoute } from 'vitepress';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
-import { defaultInvestSteps } from './utils';
 import env from 'InvestCommon/global/index';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
 import { useRepositoryOffer } from 'InvestCommon/data/offer/offer.repository';
+import { useRepositoryFiler } from 'InvestCommon/data/filer/filer.repository';
+
+const defaultInvestSteps = {
+  [InvestStepTypes.amount]: {
+    title: 'Investment',
+    value: InvestStepTypes.amount,
+    done: false,
+    to: 'amount',
+  },
+  [InvestStepTypes.ownership]: {
+    title: 'Ownership',
+    value: InvestStepTypes.ownership,
+    done: false,
+    to: 'ownership',
+  },
+  [InvestStepTypes.signature]: {
+    title: 'Signature',
+    value: InvestStepTypes.signature,
+    done: false,
+    to: 'signature',
+  },
+  [InvestStepTypes.funding]: {
+    title: 'Funding',
+    value: InvestStepTypes.funding,
+    done: false,
+    to: 'funding',
+  },
+  [InvestStepTypes.review]: {
+    title: 'Confirmation',
+    value: InvestStepTypes.review,
+    done: false,
+    to: 'review',
+  },
+};
+
 
 const { params } = useData();
 
@@ -26,8 +60,7 @@ const { getOfferOneState } = storeToRefs(offerRepository);
 
 const investmentRepository = useRepositoryInvestment();
 const { setInvestState, getInvestUnconfirmedOne } = storeToRefs(investmentRepository);
-
-const unconfirmedOffer = computed(() => getInvestUnconfirmedOne.value);
+const filerRepository = useRepositoryFiler();
 
 const investSteps = computed(() => defaultInvestSteps);
 const offer = ref(params.value?.data || null);
@@ -35,17 +68,17 @@ const offer = ref(params.value?.data || null);
 const offerLoading = ref(true);
 
 const investHandler = async () => {
-  if (!unconfirmedOffer.value) {
+  if (!getInvestUnconfirmedOne.value) {
     await investmentRepository.setInvest(params.value?.slug as string, selectedUserProfileId.value, 0);
 
     if (setInvestState.value.data) {
       getInvestUnconfirmedOne.value = setInvestState.value.data;
       navigateWithQueryParams(`${env.FRONTEND_URL_DASHBOARD}/invest/${params.value?.slug}/amount/${setInvestState.value.data.id}/${selectedUserProfileId.value}`);
     }
-  } else if (unconfirmedOffer.value) {
-    const { step }: { step: InvestStepTypes } = unconfirmedOffer.value;
+  } else if (getInvestUnconfirmedOne.value) {
+    const { step }: { step: InvestStepTypes } = getInvestUnconfirmedOne.value;
     const name = Object.keys(investSteps.value).includes(step) ? investSteps.value[step].to : 'amount';
-    navigateWithQueryParams(`${env.FRONTEND_URL_DASHBOARD}/invest/${params.value?.slug}/${name}/${unconfirmedOffer.value.id}/${selectedUserProfileId.value}`);
+    navigateWithQueryParams(`${env.FRONTEND_URL_DASHBOARD}/invest/${params.value?.slug}/${name}/${getInvestUnconfirmedOne.value.id}/${selectedUserProfileId.value}`);
   }
 };
 
@@ -82,8 +115,10 @@ watch(() => getOfferOneState.value.data, (newValue) => {
 watch(() => offer.value?.id, () => {
   if (offer.value?.id !== 0) {
     offerRepository.getOfferComments(offer.value?.id);
+    filerRepository.getPublicFiles(offer.value?.id, 'offer');
+    filerRepository.getFiles(offer.value?.id, 'offer');
   }
-});
+}, { immediate: true });
 </script>
 
 <template>

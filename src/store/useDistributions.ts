@@ -1,24 +1,10 @@
-import { computed, ref, toRaw } from 'vue';
+import { computed, ref } from 'vue';
 import { generalErrorHandling } from 'UiKit/helpers/generalErrorHandling';
 import { fetchGetDistributions } from 'InvestCommon/services/api/distributions';
 import { IDistributionsData, IDistributionsMeta } from 'InvestCommon/types/api/distributions';
-import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
-import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
-import { useOfferStore } from './useOffer';
-
-const transformDistributionsData = (data: IDistributionsData[], offersData: IInvest[]) => (
-  data.map((investItem) => {
-    const investment = toRaw(offersData.find((offerItem) => offerItem.id === investItem.investment_id));
-    return {
-      ...investItem,
-      investment,
-    } as IDistributionsData;
-  })
-);
+import { acceptHMRUpdate, defineStore } from 'pinia';
 
 export const useDistributionsStore = defineStore('distributions', () => {
-  const profilesStore = useProfilesStore();
-  const { selectedUserProfileId } = storeToRefs(profilesStore);
 
   const isGetDistributionsLoading = ref(false);
   const isGetDistributionsError = ref(false);
@@ -33,12 +19,7 @@ export const useDistributionsStore = defineStore('distributions', () => {
       generalErrorHandling(error);
     });
     if (response) {
-      const offerStore = useOfferStore();
-      const { getInvestmentsData } = storeToRefs(offerStore);
-      await offerStore.getConfirmedOffers(selectedUserProfileId.value);
-      if (getInvestmentsData.value) {
-        getDistributionsData.value = transformDistributionsData(response.data, getInvestmentsData.value?.data);
-      }
+      getDistributionsData.value = response.data
       getDistributionsMeta.value = response.meta;
     }
     isGetDistributionsLoading.value = false;

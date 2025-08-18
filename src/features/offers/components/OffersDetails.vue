@@ -1,20 +1,10 @@
 <script setup lang="ts">
-
-import { IOffer } from 'InvestCommon/types/api/offers';
-import { useOfferStore } from 'InvestCommon/store/useOffer';
-import {
-  PropType, computed, defineAsyncComponent, hydrateOnVisible, watch,
-} from 'vue';
-import { storeToRefs } from 'pinia';
-import { useBreadcrumbs } from 'UiKit/composables/useBreadcrumbs';
-import { useData } from 'vitepress';
+import { IOfferFormatted } from 'InvestCommon/data/offer/offer.types';
+import { PropType, computed, defineAsyncComponent, hydrateOnVisible } from 'vue';
 import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 import OfferDetailsSide from './OffersDetailsSide.vue';
 import OffersDetailsContent from './OffersDetailsContent.vue';
-import env from 'InvestCommon/global';
-import { useRepositoryFiler } from 'InvestCommon/data/filer/filer.repository';
-
-const { FILER_URL } = env;
+import { useOffersDetails } from './logic/useOffersDetails';
 
 const VBadge = defineAsyncComponent({
   loader: () => import('UiKit/components/Base/VBadge/VBadge.vue'),
@@ -23,24 +13,13 @@ const VBreadcrumbs = defineAsyncComponent({
   loader: () => import('UiKit/components/VBreadcrumb/VBreadcrumbsList.vue'),
   hydrate: hydrateOnVisible(),
 });
-const VImage = defineAsyncComponent({
-  loader: () => import('UiKit/components/Base/VImage/VImage.vue'),
-});
 const VCarousel = defineAsyncComponent({
   loader: () => import('UiKit/components/VCarousel.vue'),
 });
-const VVideoEmbedded = defineAsyncComponent({
-  loader: () => import('UiKit/components/VVideoEmbedded/VVideoEmbedded.vue'),
-});
-
-const { page, frontmatter } = useData();
-const breadcrumbsList = computed(() => (
-  useBreadcrumbs(page, frontmatter)
-));
 
 const props = defineProps({
   offer: {
-    type: Object as PropType<IOffer> | undefined,
+    type: Object as PropType<IOfferFormatted> | undefined,
   },
   loading: {
     type: Boolean,
@@ -49,44 +28,8 @@ const props = defineProps({
 });
 const emit = defineEmits(['invest']);
 
-const tags = [
-  'Fintech',
-  'E-Commerce',
-  'Network Security',
-];
-
-const offerStore = useOfferStore();
-const { isGetOfferOneLoading } = storeToRefs(offerStore);
-const filerRepository = useRepositoryFiler();
-const { getFilesState, getPublicFilesState } = storeToRefs(filerRepository);
-
-const isLoading = computed(() => (
-  getPublicFilesState.value.loading || getFilesState.value.loading || isGetOfferOneLoading.value));
-
-const filesData = computed(() => getPublicFilesState.value.data);
-const videoSrc = computed(() => props.offer?.data?.video);
-const imageID = computed(() => props.offer?.image_link_id);
-const documentsMedia = computed(() => filesData.value?.entities?.media?.entities || {});
-const documentsMediaArray = computed(() => Object.values(documentsMedia.value) || []);
-const documentsMediaFormatted = computed(() => documentsMediaArray.value?.map((item) => {
-  if (item?.url) return { image: item?.url };
-  return null;
-}) || []);
-const carouselFiles = computed(() => {
-  const array = documentsMediaFormatted.value;
-  if (videoSrc.value) array.unshift({ video: videoSrc.value });
-  if (!((array.length === 1) && videoSrc.value) && (imageID.value > 0)) {
-    array.push({ image: `${FILER_URL}/public/files/${imageID.value}?size=big`, thumb: `${FILER_URL}/public/files/${imageID.value}?size=small` });
-  }
-  return array;
-});
-
-watch(() => props.offer?.id, () => {
-  if (props.offer?.id) {
-    filerRepository.getPublicFiles(props.offer?.id, 'offer');
-    filerRepository.getFiles(props.offer?.id, 'offer');
-  }
-}, { immediate: true });
+const offerRef = computed(() => props.offer);
+const { breadcrumbsList, tags, carouselFiles, frontmatter } = useOffersDetails(offerRef);
 </script>
 
 <template>
