@@ -116,7 +116,7 @@ watch(() => offer.value?.id, () => {
   if (offer.value?.id !== 0) {
     offerRepository.getOfferComments(offer.value?.id);
     filerRepository.getPublicFiles(offer.value?.id, 'offer');
-    filerRepository.getFiles(offer.value?.id, 'offer');
+    if (userLoggedIn.value) filerRepository.getFiles(offer.value?.id, 'offer');
   }
 }, { immediate: true });
 </script>
