@@ -26,5 +26,5 @@ export const urlProfileAccount = (profileId: number) => `${env.FRONTEND_URL_DASH
 export const urlProfileKYC = (profileId: number) => `${env.FRONTEND_URL_DASHBOARD}/profile/${profileId}/kyc`;
 export const urlProfilePortfolio = (profileId: number) => `${env.FRONTEND_URL_DASHBOARD}/profile/${profileId}/portfolio`;
 export const urlProfile = () => `${env.FRONTEND_URL_DASHBOARD}/profile`;
-export const urlOfferSingle = (slug: string) => `${env.FRONTEND_URL_STATIC}/offers/${slug}`;
+export const urlOfferSingle = (slug: string) => `${env.FRONTEND_URL_STATIC}/${slug}`;
 export const urlBlogSingle = (slug: string) => `${env.FRONTEND_URL_STATIC}/resource-center/${slug}`;

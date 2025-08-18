@@ -11,10 +11,11 @@ import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { InvestmentFormatter } from 'InvestCommon/data/investment/investment.formatter';
 import { IInvestmentFormatted, IInvestment, IInvestmentsData } from 'InvestCommon/data/investment/investment.types';
 import { ref } from 'vue';
+import { INotification } from 'InvestCommon/data/notifications/notifications.types';
 
 const { INVESTMENT_URL } = env;
 
-export const useRepositoryInvestment = defineStore('repositoryInvestment', () => {
+export const useRepositoryInvestment = defineStore('repository-investment', () => {
   const apiClient = new ApiClient(INVESTMENT_URL);
 
   // Create action states for each function
@@ -321,6 +322,23 @@ export const useRepositoryInvestment = defineStore('repositoryInvestment', () =>
     getInvestUnconfirmedOne.value = new InvestmentFormatter().format();
   };
 
+  const updateNotificationData = (notification: INotification) => {
+    const { fields } = notification.data;
+    const objectId = fields?.object_id;
+    Object.assign(getInvestOneState.value.data, fields);  
+    getInvestOneState.value.data = new InvestmentFormatter(getInvestOneState.value.data).format();
+
+    if (!getInvestmentsState.value.data) {
+      getInvestmentsState.value.data = [];
+    }
+    const index = getInvestmentsState.value.data?.findIndex((t) => t.id === objectId);
+    Object.assign(getInvestmentsState.value.data[index], fields);
+    Object.assign(
+      getInvestmentsState.value.data[index], 
+      new InvestmentFormatter(getInvestmentsState.value.data[index]).format()
+    );
+  };
+
   return {
     // States
     getInvestmentsState,
@@ -355,6 +373,7 @@ export const useRepositoryInvestment = defineStore('repositoryInvestment', () =>
     setFundingOptions,
     setCancelOptions,
     resetAll,
+    updateNotificationData,
   };
 });
 

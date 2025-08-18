@@ -109,8 +109,48 @@ export class OfferFormatter {
     return Math.ceil(percent);
   }
 
+  get isClosingSoon(): boolean {
+    return this.offerFundedPercent > 90;
+  }
+
+  get isSharesReached(): boolean {
+    return (this.offer.total_shares - this.offer.subscribed_shares) < this.offer.min_investment;
+  }
+
   get isDefaultImage(): boolean {
     return !(this.offer?.image_link_id);
+  }
+
+  get minInvestment(): number {
+    const minShares = this.offer.min_investment || 0;
+    const pricePerShare = this.offer.price_per_share || 0;
+    return minShares * pricePerShare;
+  }
+
+  get minInvestmentFormatted(): string {
+    return currency(this.minInvestment, 0);
+  }
+
+  get isNew(): boolean {
+    const approvedAt = this.offer.approved_at;
+    if (!approvedAt) return false;
+    const approvedDate = new Date(approvedAt);
+    const now = new Date();
+    const diffMs = now.getTime() - approvedDate.getTime();
+    const diffDays = diffMs / (1000 * 3600 * 24);
+    return diffDays < 2;
+  }
+
+  get tagText(): string {
+    return this.isClosingSoon ? '🔥 Closing Soon' : 'New';
+  }
+
+  get tagBackground(): string {
+    return this.isClosingSoon ? 'is--background-yellow-light' : 'is--background-secondary-light';
+  }
+
+  get showTag(): boolean {
+    return this.isClosingSoon || this.isNew;
   }
 
   get isStatusNew(): boolean {
@@ -222,10 +262,18 @@ export class OfferFormatter {
       approvedAtFormatted: this.approvedAtFormatted,
       closeAtFormatted: this.closeAtFormatted,
       isDefaultImage: this.isDefaultImage,
+      minInvestment: this.minInvestment,
+      minInvestmentFormatted: this.minInvestmentFormatted,
       offerFundedPercent: this.offerFundedPercent,
+      isClosingSoon: this.isClosingSoon,
+      isSharesReached: this.isSharesReached,
       imageBig: this.getOfferImage('big'),
       imageSmall: this.getOfferImage('small'),
       imageMedium: this.getOfferImage('medium'),
+      tagText: this.tagText,
+      tagBackground: this.tagBackground,
+      showTag: this.showTag,
+      isNew: this.isNew,
       isStatusNew: this.isStatusNew,
       isStatusDraft: this.isStatusDraft,
       isStatusLegalReview: this.isStatusLegalReview,

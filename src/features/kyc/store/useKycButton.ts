@@ -5,17 +5,14 @@ import {
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { InvestKycTypes } from 'InvestCommon/types/api/invest';
 import { KycTextStatuses } from 'InvestCommon/data/kyc/kyc.types';
-import { useRouter } from 'vue-router';
 import { ROUTE_SUBMIT_KYC } from 'InvestCommon/helpers/enums/routes';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
-import { urlContactUs } from 'InvestCommon/global/links';
+import { urlContactUs, urlProfileKYC } from 'InvestCommon/global/links';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useRepositoryKyc } from 'InvestCommon/data/kyc/kyc.repository';
 import { PROFILE_TYPES } from 'InvestCommon/global/investment.json';
 
 export const useKycButton = defineStore('useKycButton', () => {
-  const router = useRouter();
-
   const userProfilesStore = useProfilesStore();
   const {
     selectedUserProfileData, selectedUserProfileId, isSelectedProfileLoading, selectedUserProfileShowKycInitForm,
@@ -81,10 +78,8 @@ export const useKycButton = defineStore('useKycButton', () => {
 
   const handleKycClick = async () => {
     if (selectedUserProfileShowKycInitForm.value) {
-      void router.push({
-        name: ROUTE_SUBMIT_KYC,
-        params: { profileId: kycProfileId.value },
-      });
+      const to = urlProfileKYC(kycProfileId.value);
+      window.location.href = to;
     } else {
       await useRepositoryKycStore.handlePlaidKyc(kycProfileId.value);
     }

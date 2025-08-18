@@ -33,7 +33,10 @@ const shouldShowTooltip = computed(() =>
 
 onMounted(async () => {
   await nextTick();
-  isTextOverflowing.value = checkTextOverflow();
+  // Add a small delay to ensure layout is stable
+  setTimeout(() => {
+    isTextOverflowing.value = checkTextOverflow();
+  }, 50);
 });
 
 const onDocumentClick = async () => {
