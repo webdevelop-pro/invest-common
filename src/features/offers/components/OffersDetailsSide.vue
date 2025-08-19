@@ -51,6 +51,15 @@ const { readOnlyInfo, investmentDocUrl, onShareClick, copied } = useOffersDetail
     </div>
     <div class="offer-details-side__side-card">
       <div class="offer-details-side__side-details">
+        <template v-if="loading">
+          <VSkeleton
+            v-for="i in 4"
+            :key="i"
+            height="26px"
+            width="100%"
+            class="offer-details-side__side-details-info"
+          />
+        </template>
         <template
           v-for="(item, index) in readOnlyInfo"
           :key="index"

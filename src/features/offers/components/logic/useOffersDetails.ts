@@ -16,11 +16,11 @@ export function useOffersDetails(offerRef: Ref<IOfferFormatted | undefined>) {
   const breadcrumbsList = computed(() => [
     {
       text: 'Home',
-      to: urlHome,
+      href: urlHome,
     },
     {
       text: 'Explore',
-      to: urlOffers,
+      href: urlOffers,
     },
     {
       text: offerRef.value?.name || 'Offer Details',

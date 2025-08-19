@@ -5,6 +5,8 @@ import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 import OfferDetailsSide from './OffersDetailsSide.vue';
 import OffersDetailsContent from './OffersDetailsContent.vue';
 import { useOffersDetails } from './logic/useOffersDetails';
+import VCarousel from 'UiKit/components/VCarousel.vue';
+import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 
 const VBadge = defineAsyncComponent({
   loader: () => import('UiKit/components/Base/VBadge/VBadge.vue'),
@@ -12,9 +14,6 @@ const VBadge = defineAsyncComponent({
 const VBreadcrumbs = defineAsyncComponent({
   loader: () => import('UiKit/components/VBreadcrumb/VBreadcrumbsList.vue'),
   hydrate: hydrateOnVisible(),
-});
-const VCarousel = defineAsyncComponent({
-  loader: () => import('UiKit/components/VCarousel.vue'),
 });
 
 const props = defineProps({
@@ -30,6 +29,8 @@ const emit = defineEmits(['invest']);
 
 const offerRef = computed(() => props.offer);
 const { breadcrumbsList, tags, carouselFiles, frontmatter } = useOffersDetails(offerRef);
+
+useGlobalLoader().hide();
 </script>
 
 <template>

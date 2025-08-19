@@ -82,7 +82,6 @@ const investHandler = async () => {
   }
 };
 
-useGlobalLoader().hide();
 const route = useRoute();
 
 watch(
