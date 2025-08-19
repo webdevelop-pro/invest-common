@@ -1,5 +1,5 @@
-import { ref, computed } from 'vue';
-import { acceptHMRUpdate, defineStore } from 'pinia';
+import { computed } from 'vue';
+import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import env from 'InvestCommon/global';
 import { globalErrorHandling } from 'InvestCommon/data/repository/error/globalErrorHandling';
@@ -10,8 +10,16 @@ import { WalletFormatter } from './formatter/wallet.formatter';
 import {
   ITransactionDataResponse, IWalletDataFormatted, IWalletDataResponse,
 } from './wallet.types';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 
 export const useRepositoryWallet = defineStore('repository-wallet', () => {
+
+    const userProfileStore = useProfilesStore();
+    const { selectedUserProfileData, selectedUserProfileId } = storeToRefs(userProfileStore);
+    const userSessionStore = useSessionStore();
+    const { userLoggedIn } = storeToRefs(userSessionStore);
+
   const apiClient = new ApiClient(env.WALLET_URL);
 
   const getWalletState = createActionState<IWalletDataFormatted>();
@@ -173,33 +181,42 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
   };
 
   const updateNotificationData = (notification: INotification) => {
-    const objectId = notification.data.fields.object_id;
-    if (notification.data.obj === 'transaction') {
-      const list = getTransactionsState.value.data;
-      if (list && objectId !== undefined) {
-        const item = list.find((itemLocal: { id: number }) => itemLocal.id === objectId);
-        if (item && notification.data.fields) {
-          Object.assign(item, notification.data.fields);
-          const formatted = new TransactionFormatter(item).format();
-          Object.assign(item, formatted);
-        }
+    const { obj, fields } = notification.data;
+    const objectId = fields?.object_id;
+
+    if (obj === 'transaction') {
+      if (!objectId || !fields) return;
+      if (!getTransactionsState.value.data) {
+        getTransactionsState.value.data = [];
       }
-      if ((walletId.value > 0)) {
-        getTransactions(walletId.value);
+      const index = getTransactionsState.value.data?.findIndex((t) => t.id === objectId);
+
+      if (index !== -1) {
+        Object.assign(getTransactionsState.value.data[index], fields);
+        Object.assign(
+          getTransactionsState.value.data[index], 
+          new TransactionFormatter(getTransactionsState.value.data[index]).format()
+      );
+      } else {
+        const newItem = { ...fields, id: fields.object_id };
+        Object.assign(newItem, new TransactionFormatter(newItem).format());
+        getTransactionsState.value.data?.unshift(newItem);
       }
-    } else if (notification.data.obj === 'wallet') {
-      let temp = getWalletState.value.data;
-      Object.assign(temp, notification.data.fields);
-      if (notification.data.fields?.inc_balance !== undefined) {
-        temp.pending_incoming_balance = notification.data.fields.inc_balance;
-      }
-      if (notification.data.fields?.out_balance !== undefined) {
-        temp.pending_outcoming_balance = notification.data.fields.out_balance;
-      }
-      const formatted = new WalletFormatter(temp as any).format();
-      getWalletState.value.data = formatted;
+    } else if (obj === 'wallet') {
+      const wallet = getWalletState.value.data;
+      if (!wallet) return;
+
+      Object.assign(wallet, fields);
+
+      getWalletState.value.data = new WalletFormatter(wallet as any).format();
     }
   };
+
+  const selectedIdAsDataIs = computed(() => selectedUserProfileData.value.id === selectedUserProfileId.value);
+  const canLoadWalletData = computed(() => (
+    !selectedUserProfileData.value.isTypeSdira && selectedIdAsDataIs.value && userLoggedIn.value
+    &&  selectedUserProfileData.value.isKycApproved && (selectedUserProfileId.value > 0)
+    && !getWalletState.value.loading && (selectedUserProfileId.value > 0)));
 
   const resetAll = () => {
     getWalletState.value = { loading: false, error: null, data: undefined };
@@ -224,6 +241,7 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
     createLinkExchangeState,
     createLinkProcessState,
     deleteLinkedAccountState,
+    canLoadWalletData,
     getWalletByProfile,
     getTransactions,
     addBankAccount,

@@ -97,6 +97,8 @@ watch(() => currentTab.value, () => {
       <VTabs
         v-model="currentTab"
         :default-value="tabs[0].value"
+        tabs-to-url
+        query-key="document-tab"
         variant="secondary"
         class="v-table-documents__tabs"
       >

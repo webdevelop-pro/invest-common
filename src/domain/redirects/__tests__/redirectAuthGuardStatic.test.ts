@@ -3,7 +3,6 @@ import {
 } from 'vitest';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
-import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import { nextTick } from 'vue';
 import { urlSignin, urlAuthenticator } from 'InvestCommon/global/links';
 import { redirectAuthGuardStatic } from '../redirectAuthGuardStatic';

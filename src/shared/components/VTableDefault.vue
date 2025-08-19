@@ -3,7 +3,7 @@ import {
   VTable, VTableBody, VTableCell, VTableRow,
   VTableEmpty, VTableHead, VTableHeader,
 } from 'UiKit/components/Base/VTable';
-import { computed, PropType, TransitionGroup } from 'vue';
+import { computed } from 'vue';
 import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 
 interface IHead {
@@ -42,7 +42,10 @@ const headerLength = computed(() => props.colspan ?? (props.header?.length || 0)
       </VTableRow>
     </VTableHeader>
     <!-- Loading State -->
-    <VTableBody v-show="loading" key="loading">
+    <VTableBody
+      v-show="loading"
+      key="loading"
+    >
       <template
         v-for="index in loadingRowLength"
         :key="`loading-${index}`"
@@ -63,11 +66,17 @@ const headerLength = computed(() => props.colspan ?? (props.header?.length || 0)
       </template>
     </VTableBody>
     <!-- Data Slot -->
-    <VTableBody v-show="data && data.length > 0" key="data">
+    <VTableBody
+      v-show="data && data.length > 0"
+      key="data"
+    >
       <slot name="default" />
     </VTableBody>
     <!-- Empty State -->
-    <VTableBody v-show="data.length === 0" key="empty">
+    <VTableBody
+      v-show="data.length === 0"
+      key="empty"
+    >
       <VTableEmpty :colspan="headerLength">
         <slot name="empty">
           No data available.

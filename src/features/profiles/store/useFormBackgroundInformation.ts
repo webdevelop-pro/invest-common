@@ -1,10 +1,9 @@
-/* eslint-disable no-use-before-define */
 import {
   ref, computed, nextTick,
   toRaw, watch,
   reactive,
 } from 'vue';
-import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
+import { storeToRefs } from 'pinia';
 import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/helpers/enums/routes';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useRouter } from 'vue-router';
@@ -21,7 +20,7 @@ import {
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { checkObjectAndDeleteNotRequiredFields } from 'InvestCommon/helpers/general';
 
-export const useFormBackgroundInformation = defineStore('useFormBackgroundInformation', () => {
+export const useFormBackgroundInformation = () => {
   const router = useRouter();
   const userProfileStore = useProfilesStore();
   const { selectedUserProfileId, selectedUserProfileType, selectedUserProfileData } = storeToRefs(userProfileStore);
@@ -31,16 +30,16 @@ export const useFormBackgroundInformation = defineStore('useFormBackgroundInform
   const { userSessionTraits } = storeToRefs(userSessionStore);
 
   const backButtonText = ref('Back to Profile Details');
-  const accountRoute = computed(() => (
+  const backButtonRoute = computed(() => (
     { name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } }));
   const breadcrumbs = computed(() => [
     {
       text: 'Dashboard',
-      to: accountRoute.value,
+      to: backButtonRoute.value,
     },
     {
       text: 'Profile Details',
-      to: accountRoute.value,
+      to: backButtonRoute.value,
     },
     {
       text: 'Your Background Information',
@@ -244,13 +243,27 @@ export const useFormBackgroundInformation = defineStore('useFormBackgroundInform
   };
 
   watch(() => selectedUserProfileData.value?.data.employment, () => {
-    if (dataEmploymentData.value?.type && model.employment) model.employment.type = dataEmploymentData.value?.type;
-    if (dataEmploymentData.value?.employer_name && model.employment) model.employment.employer_name = dataEmploymentData.value?.employer_name;
-    if (dataEmploymentData.value?.title && model.employment) model.employment.title = dataEmploymentData.value?.title;
-    if (dataEmploymentData.value?.address1 && model.employment) model.employment.address1 = dataEmploymentData.value?.address1;
-    if (dataEmploymentData.value?.address2 && model.employment) model.employment.address2 = dataEmploymentData.value?.address2;
-    if (dataEmploymentData.value?.city && model.employment) model.employment.city = dataEmploymentData.value?.city;
-    if (dataEmploymentData.value?.zip_code && model.employment) model.employment.zip_code = dataEmploymentData.value?.zip_code;
+    if (dataEmploymentData.value?.type && model.employment) {
+      model.employment.type = dataEmploymentData.value?.type;
+    }
+    if (dataEmploymentData.value?.employer_name && model.employment) {
+      model.employment.employer_name = dataEmploymentData.value?.employer_name;
+    }
+    if (dataEmploymentData.value?.title && model.employment){
+      model.employment.title = dataEmploymentData.value?.title;
+    }
+    if (dataEmploymentData.value?.address1 && model.employment) {
+      model.employment.address1 = dataEmploymentData.value?.address1;
+    }
+    if (dataEmploymentData.value?.address2 && model.employment) {
+      model.employment.address2 = dataEmploymentData.value?.address2;
+    }
+    if (dataEmploymentData.value?.city && model.employment) {
+      model.employment.city = dataEmploymentData.value?.city;
+    }
+    if (dataEmploymentData.value?.zip_code && model.employment) {
+      model.employment.zip_code = dataEmploymentData.value?.zip_code;
+    }
   }, { deep: true, immediate: true });
 
   watch(() => selectedUserProfileData.value?.data.finra_affiliated, () => {
@@ -303,6 +316,7 @@ export const useFormBackgroundInformation = defineStore('useFormBackgroundInform
 
   return {
     backButtonText,
+    backButtonRoute,
     breadcrumbs,
     isDisabledButton,
     isLoading,
@@ -316,8 +330,4 @@ export const useFormBackgroundInformation = defineStore('useFormBackgroundInform
     validation,
     isAdditionalFields,
   };
-});
-
-if (import.meta.hot) {
-  import.meta.hot.accept(acceptHMRUpdate(useFormBackgroundInformation, import.meta.hot));
-}
+};

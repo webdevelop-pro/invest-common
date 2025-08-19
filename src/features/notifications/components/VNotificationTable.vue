@@ -105,7 +105,10 @@ const onApplyFilter = (items: IVFilter[]) => {
       size="small"
       :colspan="2"
     >
-      <template v-for="(item, index) in data" :key="item.id">
+      <template
+        v-for="item in data"
+        :key="item.id"
+      >
         <VNotificationTableItem
           :data="item"
           :search="search"

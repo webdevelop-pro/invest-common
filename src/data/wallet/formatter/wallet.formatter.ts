@@ -1,4 +1,3 @@
-import { currency } from 'InvestCommon/helpers/currency';
 import {
   WalletTypes, IWalletDataFormatted,
 } from '../wallet.types';

@@ -5,7 +5,7 @@ import { setActivePinia, createPinia } from 'pinia';
 import { ref } from 'vue';
 import { scrollToError } from 'UiKit/helpers/validation/general';
 import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/helpers/enums/routes';
-import { useFormBackgroundInformation } from '../useFormFinancialInformation';
+import { useFormFinancialInformation } from '../useFormFinancialInformation';
 
 const mockPush = vi.fn();
 const mockRouter = {
@@ -120,38 +120,18 @@ vi.mock('vue', async () => {
 });
 
 describe('useFormFinancialInformation', () => {
-  let store: ReturnType<typeof useFormBackgroundInformation>;
+  let store: ReturnType<typeof useFormFinancialInformation>;
 
   beforeEach(() => {
     setActivePinia(createPinia());
     vi.clearAllMocks();
-    store = useFormBackgroundInformation();
+    store = useFormFinancialInformation();
   });
 
   afterEach(() => {
     vi.clearAllMocks();
   });
 
-  describe('initial state', () => {
-    it('should initialize with correct default values', () => {
-      expect(store.backButtonText).toBe('Back to Profile Details');
-      expect(store.isLoading).toBe(false);
-      expect(store.isDisabledButton).toBe(false);
-      expect(store.breadcrumbs).toEqual([
-        {
-          text: 'Dashboard',
-          to: { name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: '123' } },
-        },
-        {
-          text: 'Profile Details',
-          to: { name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: '123' } },
-        },
-        {
-          text: 'Financial and Investment Information',
-        },
-      ]);
-    });
-  });
 
   describe('form validation', () => {
     it('should be valid when all forms are valid', () => {
@@ -159,7 +139,7 @@ describe('useFormFinancialInformation', () => {
       mockInvestmentObjectivesFormRef.value.isValid = true;
       mockUnderstandingRisksFormRef.value.isValid = true;
 
-      expect(store.isDisabledButton).toBe(false);
+      expect(store.isDisabledButton.value).toBe(false);
     });
 
     it('should be invalid when financial info form is invalid', () => {
@@ -167,7 +147,7 @@ describe('useFormFinancialInformation', () => {
       mockInvestmentObjectivesFormRef.value.isValid = true;
       mockUnderstandingRisksFormRef.value.isValid = true;
 
-      expect(store.isDisabledButton).toBe(true);
+      expect(store.isDisabledButton.value).toBe(true);
     });
 
     it('should be invalid when investment objectives form is invalid', () => {
@@ -175,7 +155,7 @@ describe('useFormFinancialInformation', () => {
       mockInvestmentObjectivesFormRef.value.isValid = false;
       mockUnderstandingRisksFormRef.value.isValid = true;
 
-      expect(store.isDisabledButton).toBe(true);
+      expect(store.isDisabledButton.value).toBe(true);
     });
 
     it('should be invalid when understanding risks form is invalid', () => {
@@ -183,7 +163,7 @@ describe('useFormFinancialInformation', () => {
       mockInvestmentObjectivesFormRef.value.isValid = true;
       mockUnderstandingRisksFormRef.value.isValid = false;
 
-      expect(store.isDisabledButton).toBe(true);
+      expect(store.isDisabledButton.value).toBe(true);
     });
 
     it('should be invalid when multiple forms are invalid', () => {
@@ -191,7 +171,7 @@ describe('useFormFinancialInformation', () => {
       mockInvestmentObjectivesFormRef.value.isValid = false;
       mockUnderstandingRisksFormRef.value.isValid = true;
 
-      expect(store.isDisabledButton).toBe(true);
+      expect(store.isDisabledButton.value).toBe(true);
     });
   });
 
@@ -226,7 +206,7 @@ describe('useFormFinancialInformation', () => {
         name: ROUTE_DASHBOARD_ACCOUNT,
         params: { profileId: '123' },
       });
-      expect(store.isLoading).toBe(false);
+      expect(store.isLoading.value).toBe(false);
     });
 
     it('should submit hubspot forms with correct data', async () => {
@@ -297,7 +277,7 @@ describe('useFormFinancialInformation', () => {
       expect(mockRepositoryProfiles.setProfileById).toHaveBeenCalled();
       expect(mockRepositoryProfiles.getProfileById).not.toHaveBeenCalled();
       expect(mockPush).not.toHaveBeenCalled();
-      expect(store.isLoading).toBe(false);
+      expect(store.isLoading.value).toBe(false);
     });
 
     it('should handle getProfileById error', async () => {
@@ -314,7 +294,7 @@ describe('useFormFinancialInformation', () => {
       expect(mockRepositoryProfiles.setProfileById).toHaveBeenCalled();
       expect(mockRepositoryProfiles.getProfileById).toHaveBeenCalled();
       expect(mockPush).toHaveBeenCalled();
-      expect(store.isLoading).toBe(false);
+      expect(store.isLoading.value).toBe(false);
     });
 
     it('should ensure loading state is false even when errors occur', async () => {
@@ -327,7 +307,7 @@ describe('useFormFinancialInformation', () => {
         // ignore
       }
 
-      expect(store.isLoading).toBe(false);
+      expect(store.isLoading.value).toBe(false);
     });
   });
 

@@ -1,9 +1,8 @@
 import {
   describe, it, expect, vi, beforeEach, afterEach,
 } from 'vitest';
-import { setActivePinia, createPinia } from 'pinia';
 import { ref, nextTick } from 'vue';
-import { ROUTE_DASHBOARD_ACCOUNT } from '../../../../helpers/enums/routes';
+import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/helpers/enums/routes';
 import { useFormEntityInformation } from '../useFormEntityInformation';
 
 const mockFormRef = ref<any>(null);
@@ -89,11 +88,9 @@ vi.mock('InvestCommon/types/form', () => ({
 }));
 
 describe('useFormEntityInformation', () => {
-  let store: ReturnType<typeof useFormEntityInformation>;
+  let composable: ReturnType<typeof useFormEntityInformation>;
 
   beforeEach(() => {
-    setActivePinia(createPinia());
-
     mockFormRef.value = {
       isValid: true,
       model: {
@@ -113,7 +110,7 @@ describe('useFormEntityInformation', () => {
     mockGetProfileById.mockResolvedValue(undefined);
     mockSubmitFormToHubspot.mockClear();
 
-    store = useFormEntityInformation();
+    composable = useFormEntityInformation();
   });
 
   afterEach(() => {
@@ -122,12 +119,12 @@ describe('useFormEntityInformation', () => {
 
   describe('Initialization', () => {
     it('should initialize with correct default values', () => {
-      expect(store.backButtonText).toBe('Back to Profile Details');
-      expect(store.isLoading).toBe(false);
+      expect(composable.backButtonText.value).toBe('Back to Profile Details');
+      expect(composable.isLoading.value).toBe(false);
     });
 
     it('should compute breadcrumbs correctly', () => {
-      expect(store.breadcrumbs).toEqual([
+      expect(composable.breadcrumbs.value).toEqual([
         {
           text: 'Dashboard',
           to: { name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: '123' } },
@@ -143,7 +140,7 @@ describe('useFormEntityInformation', () => {
     });
 
     it('should compute model data correctly', () => {
-      expect(store.modelData).toEqual({
+      expect(composable.modelData.value).toEqual({
         entity_name: 'Test Entity',
         entity_type: 'corporation',
         tax_id: '123456789',
@@ -159,7 +156,7 @@ describe('useFormEntityInformation', () => {
     it('should not proceed when form validation fails', async () => {
       mockFormRef.value.isValid = false;
 
-      await store.handleSave();
+      await composable.handleSave();
 
       expect(mockSetProfileById).not.toHaveBeenCalled();
       expect(mockSubmitFormToHubspot).not.toHaveBeenCalled();
@@ -186,7 +183,7 @@ describe('useFormEntityInformation', () => {
 
       await nextTick();
 
-      await store.handleSave();
+      await composable.handleSave();
 
       expect(mockSetProfileById).toHaveBeenCalledWith(
         {
@@ -217,11 +214,11 @@ describe('useFormEntityInformation', () => {
 
       await nextTick();
 
-      const savePromise = store.handleSave();
-      expect(store.isLoading).toBe(true);
+      const savePromise = composable.handleSave();
+      expect(composable.isLoading.value).toBe(true);
 
       await savePromise;
-      expect(store.isLoading).toBe(false);
+      expect(composable.isLoading.value).toBe(false);
     });
   });
 
@@ -230,7 +227,7 @@ describe('useFormEntityInformation', () => {
       mockSetProfileById.mockRejectedValue(new Error('API Error'));
 
       try {
-        await store.handleSave();
+        await composable.handleSave();
       } catch (error) {
         // Expected error
       }
@@ -246,7 +243,7 @@ describe('useFormEntityInformation', () => {
       // For now, we'll test validation failure instead
       mockFormRef.value.isValid = false;
 
-      await store.handleSave();
+      await composable.handleSave();
 
       expect(mockSetProfileById).not.toHaveBeenCalled();
       expect(mockSubmitFormToHubspot).not.toHaveBeenCalled();
@@ -258,19 +255,19 @@ describe('useFormEntityInformation', () => {
       mockSetProfileById.mockRejectedValue(new Error('API Error'));
 
       try {
-        await store.handleSave();
+        await composable.handleSave();
       } catch (error) {
         // Expected error
       }
 
-      expect(store.isLoading).toBe(false);
+      expect(composable.isLoading.value).toBe(false);
     });
 
     it('should not submit to hubspot when setProfileById has error', async () => {
       mockSetProfileById.mockRejectedValue(new Error('API Error'));
 
       try {
-        await store.handleSave();
+        await composable.handleSave();
       } catch (error) {
         // Expected error
       }
@@ -288,7 +285,7 @@ describe('useFormEntityInformation', () => {
         model: {},
       };
 
-      await store.handleSave();
+      await composable.handleSave();
 
       expect(mockOnValidate).toHaveBeenCalled();
     });
@@ -306,7 +303,7 @@ describe('useFormEntityInformation', () => {
 
       await nextTick();
 
-      await store.handleSave();
+      await composable.handleSave();
 
       expect(mockSetProfileById).toHaveBeenCalledWith(
         {
@@ -333,7 +330,7 @@ describe('useFormEntityInformation', () => {
 
       await nextTick();
 
-      await store.handleSave();
+      await composable.handleSave();
 
       expect(mockSubmitFormToHubspot).toHaveBeenCalledWith({
         email: 'test@example.com',
@@ -346,7 +343,7 @@ describe('useFormEntityInformation', () => {
       mockSetProfileById.mockRejectedValue(new Error('API Error'));
 
       try {
-        await store.handleSave();
+        await composable.handleSave();
       } catch (error) {
         // Expected error
       }
@@ -363,7 +360,7 @@ describe('useFormEntityInformation', () => {
         model: { entity_name: 'Test' },
       };
 
-      await store.handleSave();
+      await composable.handleSave();
 
       expect(mockPush).toHaveBeenCalledWith({
         name: ROUTE_DASHBOARD_ACCOUNT,
@@ -374,7 +371,7 @@ describe('useFormEntityInformation', () => {
     it('should not navigate when validation fails', async () => {
       mockFormRef.value.isValid = false;
 
-      await store.handleSave();
+      await composable.handleSave();
 
       expect(mockPush).not.toHaveBeenCalled();
     });
@@ -389,7 +386,7 @@ describe('useFormEntityInformation', () => {
     it('should call getProfileById after successful setProfileById', async () => {
       mockFormRef.value.isValid = true;
 
-      await store.handleSave();
+      await composable.handleSave();
 
       expect(mockSetProfileById).toHaveBeenCalled();
       expect(mockGetProfileById).toHaveBeenCalledWith('individual', '123');
@@ -406,7 +403,7 @@ describe('useFormEntityInformation', () => {
 
       await nextTick();
 
-      await store.handleSave();
+      await composable.handleSave();
 
       expect(mockSetProfileById).not.toHaveBeenCalled();
       expect(mockGetProfileById).not.toHaveBeenCalled();
@@ -424,7 +421,7 @@ describe('useFormEntityInformation', () => {
       await nextTick();
 
       try {
-        await store.handleSave();
+        await composable.handleSave();
       } catch (error) {
         // Expected error
       }

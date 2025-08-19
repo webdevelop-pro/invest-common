@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import { ref, computed } from 'vue';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { ApiClient } from 'InvestCommon/data/service/apiClient';

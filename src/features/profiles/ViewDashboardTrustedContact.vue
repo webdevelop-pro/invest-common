@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { useGlobalLoader } from 'InvestCommon/store/useGlobalLoader';
-import { storeToRefs } from 'pinia';
+import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import VLayoutForm from 'InvestCommon/shared/layouts/VLayoutForm.vue';
 import { useFormTrustedContact } from './store/useFormTrustedContact';
 import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
@@ -11,16 +10,13 @@ import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 const globalLoader = useGlobalLoader();
 globalLoader.hide();
 
-const formStore = useFormTrustedContact();
 const {
   backButtonText, breadcrumbs, isLoading, isDisabledButton,
+  backButtonRoute,
   model, schemaBackend, errorData, validation, schemaFrontend,
-  isLoadingFields,
-} = storeToRefs(formStore);
+  isLoadingFields, handleSave,
+} = useFormTrustedContact();
 
-const handleSave = () => {
-  formStore.handleSave();
-};
 </script>
 
 <template>
@@ -30,6 +26,7 @@ const handleSave = () => {
       :breadcrumbs="breadcrumbs"
       :is-disabled-button="isDisabledButton"
       :is-loading="isLoading"
+      :button-route="backButtonRoute"
       @save="handleSave"
     >
       <div class="view-dashboard-trusted-contact__header is--h1__title">
@@ -153,7 +150,7 @@ const handleSave = () => {
               <VFormInput
                 :model-value="model.beneficiary?.phone"
                 :is-error="VFormGroupProps.isFieldError"
-                placeholder="Phone number"
+                placeholder="+1 (___) ___ - ____"
                 name="phone"
                 size="large"
                 mask="+#(###)###-####"

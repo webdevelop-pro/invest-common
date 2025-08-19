@@ -2,7 +2,6 @@
 import {
   ref, watch, computed, nextTick,
   reactive,
-  onMounted,
 } from 'vue';
 import { checkStrength, scorePassword } from 'InvestCommon/helpers/calculatePasswordStrength';
 import { useAuthStore } from 'InvestCommon/store/useAuth';

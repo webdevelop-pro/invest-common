@@ -1,4 +1,3 @@
-/* eslint-disable no-use-before-define */
 import {
   AccreditationTypes, InvestKycTypes, IKycData, IAccreditationData, IOwnership,
 } from '../../types/api/invest';
@@ -114,6 +113,7 @@ export interface IUserDataIndividual {
   account_number?: string;
   full_account_name?: string;
   ein?: string;
+  is_full_ssn_provided: boolean;
 }
 
 export interface IProfileIndividual {
@@ -212,7 +212,7 @@ export interface IUserIdentityResponse {
   data: IBackgroundInfo;
   last_login: string;
   created_at: string;
-  profiles: IProfileIndividual[];
+  profiles: IProfileFormatted[];
 }
 
 export interface IProfileList {
@@ -261,4 +261,26 @@ export interface IBackgroundInfo {
     explanation: string;
     is_accredited: boolean;
   };
+}
+
+export interface IProfileFormatted extends IProfileIndividual {
+  isTypeIndividual: boolean;
+  isTypeEntity: boolean;
+  isTypeTrust: boolean;
+  isTypeSdira: boolean;
+  isTypeSolo401k: boolean;
+  isKycApproved: boolean;
+  isKycInProgress: boolean;
+  isKycPending: boolean;
+  isKycDeclined: boolean;
+  isKycNew: boolean;
+  isKycNone: boolean;
+  isAccreditationApproved: boolean;
+  isAccreditationInProgress: boolean;
+  isAccreditationPending: boolean;
+  isAccreditationDeclined: boolean;
+  isAccreditationNew: boolean;
+  isAccreditationInfoRequired: boolean;
+  isAccreditationExpired: boolean;
+  isCanCallKycPlaid: boolean;
 }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { PropType, computed } from 'vue';
+import { computed } from 'vue';
 import { useVFormProfileSolo } from './logic/useVFormProfileSolo';
 import VFormPartialPersonalInformation from 'InvestCommon/components/forms/VFormPartialPersonalInformation.vue';
 import VFormPartialPlanInformation from './VFormPartialPlanInformation.vue';

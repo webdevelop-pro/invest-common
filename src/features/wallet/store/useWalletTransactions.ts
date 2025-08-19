@@ -1,5 +1,5 @@
 import { ref, computed, watch } from 'vue';
-import { defineStore, storeToRefs, acceptHMRUpdate } from 'pinia';
+import { storeToRefs } from 'pinia';
 import { WalletAddTransactionTypes } from 'InvestCommon/data/wallet/wallet.types';
 import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository';
 
@@ -25,8 +25,10 @@ export function useWalletTransactions() {
     (walletData.value?.pendingOutcomingBalance ?? 0) > 0
   ));
   const isLoading = ref(true);
-  const isCanLoadFunds = computed(() => (walletData.value?.isSomeLinkedBankAccount && !walletData.value?.isWalletStatusAnyError));
-  const isCanWithdraw = computed(() => walletData.value?.isSomeLinkedBankAccount && !walletData.value?.isCurrentBalanceZero);
+  const isCanLoadFunds = computed(() => (
+    walletData.value?.isSomeLinkedBankAccount && !walletData.value?.isWalletStatusAnyError));
+  const isCanWithdraw = computed(() => (
+    walletData.value?.isSomeLinkedBankAccount && !walletData.value?.isCurrentBalanceZero));
 
   // Watch for notification changes to update loading state
   watch(() => [getTransactionsState.value.loading, getWalletState.value.loading], () => {

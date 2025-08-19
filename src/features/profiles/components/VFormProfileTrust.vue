@@ -6,12 +6,11 @@ import VFormPartialTrustInformation from './VFormPartialTrustInformation.vue';
 import VFormPartialBusinessController from './VFormPartialBusinessController.vue';
 import VFormPartialBeneficialOwnership from './VFormPartialBeneficialOwnership.vue';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
-import { FormModelPersonalInformation, FormModelEntityInformation, FormModelBusinessController } from 'InvestCommon/types/form';
 
 const props = defineProps({
-  modelData: Object as PropType<Record<string, any>>,
+  modelData: Object as PropType<Record<string, unknown>>,
   errorData: Object,
-  schemaBackend: Object as PropType<JSONSchemaType<any> | undefined>,
+  schemaBackend: Object as PropType<JSONSchemaType<unknown> | undefined>,
   loading: Boolean,
   showDocument: Boolean,
 });

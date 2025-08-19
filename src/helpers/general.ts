@@ -1,5 +1,4 @@
 export function isEmpty(obj: object) {
-  // eslint-disable-next-line
   for (const prop of Object.keys(obj)) {
     return false;
   }
@@ -58,7 +57,6 @@ export function urlize(input: string): string {
   let urlFriendlyString = input.toLowerCase().replace(/\s+/g, '-');
 
   // Remove any characters that are not alphanumeric or hyphens
-  // eslint-disable-next-line
   urlFriendlyString = urlFriendlyString.replace(/[^a-z0-9\-]/g, '');
 
   // Remove any consecutive hyphens

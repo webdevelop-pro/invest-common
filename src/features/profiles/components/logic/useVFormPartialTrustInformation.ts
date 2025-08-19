@@ -27,7 +27,7 @@ export const useVFormPartialTrustInformation = (
 ) => {
   let modelLocal = reactive<FormModelTrustInformation>({
     ein: modelData.value?.ein,
-    is_use_ein: modelData.value?.is_use_ein,
+    is_use_ein: modelData.value?.is_use_ein || (modelData.value?.ein ? 'Yes' : 'No'),
     type: modelData.value?.type,
     owner_title: modelData.value?.owner_title,
     name: modelData.value?.name,
@@ -64,7 +64,8 @@ export const useVFormPartialTrustInformation = (
     $ref: '#/definitions/Trust',
   } as unknown as JSONSchemaType<FormModelTrustInformation>));
 
-  const schemaBackendLocal = computed(() => (schemaBackend.value ? structuredClone(toRaw(schemaBackend.value)) : undefined));
+  const schemaBackendLocal = computed(() => (
+    schemaBackend.value ? structuredClone(toRaw(schemaBackend.value)) : undefined));
 
   const {
     model,

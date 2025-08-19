@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { formatToDate } from 'InvestCommon/helpers/formatters/formatToDate';
-import {
-  PropType, computed, ref, onMounted, nextTick,
-} from 'vue';
+import { PropType, ref } from 'vue';
 import VBadge from 'UiKit/components/Base/VBadge/VBadge.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import arrowRight from 'UiKit/assets/images/arrow-right.svg';
@@ -13,7 +11,6 @@ import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 
 const notificationsStore = useNotifications();
 
-const routerRef = ref<any>(null);
 const isLoading = ref(false);
 
 const props = defineProps({
@@ -23,50 +20,16 @@ const props = defineProps({
   loading: Boolean,
 });
 
-const isExternalLink = computed(() => {
-  if (+props.isStaticSite) {
-    return true;
-  }
-
-  // If buttonHref starts with "http" it's definitely an external URL
-  return typeof props.data?.buttonTo === 'string' && props.data?.buttonTo?.startsWith('http');
-});
-
 const onMarkAsRead = async () => {
   isLoading.value = true;
   await notificationsStore.markAsReadById(props.data?.id);
   isLoading.value = false;
 };
 
-const initRouter = async () => {
-  if (!isExternalLink.value) {
-    try {
-      const { useRouter } = await import('vue-router');
-      routerRef.value = useRouter();
-    } catch (e) {
-      // Silently fail in test environment
-      console.debug('vue-router not available:', e);
-    }
-  }
-};
-
-// onMounted(() => {
-//   initRouter();
-// });
-
 const onButtonClick = async () => {
   await onMarkAsRead();
   notificationsStore.onSidebarToggle(false);
-
-  // if (!isExternalLink.value) {
-  //   routerRef.value?.push(props.data?.buttonTo);
-  // } else {
-  //   window.location.href = props.data?.buttonHref;
-  // }
-  nextTick(() => {
-    console.log(props.data?.buttonHref)
-    window.location.href = props.data?.buttonHref;
-  });
+  window.location.href = props.data?.buttonHref;
 };
 
 const onMessageClick = () => {

@@ -2,7 +2,7 @@ import {
   ref, computed, useTemplateRef,
   nextTick,
 } from 'vue';
-import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
+import { storeToRefs } from 'pinia';
 import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/helpers/enums/routes';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useRouter } from 'vue-router';
@@ -13,7 +13,7 @@ import { scrollToError } from 'UiKit/helpers/validation/general';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 
-export const useFormPlanInformation = defineStore('useFormPlanInformation', () => {
+export const useFormPlanInformation = () => {
   const router = useRouter();
   const userProfileStore = useProfilesStore();
   const { selectedUserProfileId, selectedUserProfileType, selectedUserProfileData } = storeToRefs(userProfileStore);
@@ -23,16 +23,16 @@ export const useFormPlanInformation = defineStore('useFormPlanInformation', () =
   const { userSessionTraits } = storeToRefs(userSessionStore);
 
   const backButtonText = ref('Back to Profile Details');
-  const accountRoute = computed(() => (
+  const backButtonRoute = computed(() => (
     { name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } }));
   const breadcrumbs = computed(() => [
     {
       text: 'Dashboard',
-      to: accountRoute.value,
+      to: backButtonRoute.value,
     },
     {
       text: 'Profile Details',
-      to: accountRoute.value,
+      to: backButtonRoute.value,
     },
     {
       text: 'Plan Information',
@@ -81,6 +81,7 @@ export const useFormPlanInformation = defineStore('useFormPlanInformation', () =
 
   return {
     backButtonText,
+    backButtonRoute,
     breadcrumbs,
     isDisabledButton,
     isLoading,
@@ -89,8 +90,4 @@ export const useFormPlanInformation = defineStore('useFormPlanInformation', () =
     schemaBackend,
     errorData,
   };
-});
-
-if (import.meta.hot) {
-  import.meta.hot.accept(acceptHMRUpdate(useFormPlanInformation, import.meta.hot));
-}
+};

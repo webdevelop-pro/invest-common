@@ -1,19 +1,20 @@
-import { storeToRefs } from 'pinia';
+// import { storeToRefs } from 'pinia';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
 import {
-  urlSignin, urlSignup, urlAuthenticator, urlForgot, urlCheckEmail,
-  urlProfile,
+  urlAuthenticator,
+  // urlSignin, urlSignup, urlForgot, urlCheckEmail,
+  // urlProfile,
 } from 'InvestCommon/global/links';
-import { navigateWithQueryParams } from 'UiKit/helpers/general';
+// import { navigateWithQueryParams } from 'UiKit/helpers/general';
 
-const pagesToRedirectIfLoggedIn = [
-  urlSignin, urlSignup, urlAuthenticator, urlForgot, urlCheckEmail,
-];
+// const pagesToRedirectIfLoggedIn = [
+//   urlSignin, urlSignup, urlAuthenticator, urlForgot, urlCheckEmail,
+// ];
 
 export const redirectAuthGuardStatic = async () => {
   const userSessionStore = useSessionStore();
-  const { userLoggedIn } = storeToRefs(userSessionStore);
+  // const { userLoggedIn } = storeToRefs(userSessionStore);
 
   try {
     // Skip session check if we're on the authenticator page

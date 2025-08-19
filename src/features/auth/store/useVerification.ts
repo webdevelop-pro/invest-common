@@ -52,7 +52,8 @@ export const useVerificationStore = defineStore('verification', () => {
     $ref: '#/definitions/Auth',
   } as unknown as JSONSchemaType<FormModelVerification>));
 
-  const schemaBackend = computed(() => (getSchemaState.value.data ? structuredClone(toRaw(getSchemaState.value.data)) : null));
+  const schemaBackend = computed(() => (
+    getSchemaState.value.data ? structuredClone(toRaw(getSchemaState.value.data)) : null));
 
   const {
     model, validation, isValid, onValidate,

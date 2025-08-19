@@ -34,7 +34,6 @@ vi.mock('pinia', async () => {
     ...actual,
     storeToRefs: (store: any) => {
       const refs: any = {};
-      // eslint-disable-next-line no-restricted-syntax
       for (const key in store) {
         if (typeof store[key] === 'function') {
           refs[key] = store[key];

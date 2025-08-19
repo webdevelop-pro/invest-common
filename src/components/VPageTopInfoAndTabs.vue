@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { PropType } from 'vue';
 import {
-  VTabs, VTabsContent, VTabsList, VTabsTrigger,
+  VTabs, VTabsList, VTabsTrigger,
 } from 'UiKit/components/Base/VTabs';
 
 interface ITab {
@@ -44,7 +44,10 @@ defineProps({
             :value="item.value"
           >
             {{ item.label }}
-            <template v-if="item.subTitle" #subtitle>
+            <template
+              v-if="item.subTitle"
+              #subtitle
+            >
               {{ item.subTitle }}
             </template>
           </VTabsTrigger>

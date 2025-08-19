@@ -3,7 +3,6 @@ import VFormAuthSocial from './components/VFormAuthSocial.vue';
 import VFormAuthSignUp from './components/VFormAuthSignUp.vue';
 import VSeparator from 'UiKit/components/Base/VSeparator/VSeparator.vue';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
-import { computed } from 'vue';
 import { useSignupStore } from './store/useSignup';
 import { storeToRefs } from 'pinia';
 

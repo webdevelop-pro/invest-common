@@ -5,7 +5,6 @@ import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import VFormSelect from 'UiKit/components/Base/VForm/VFormSelect.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
-import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { useVFormPartialCustodian, FormModelSdira } from './logic/useVFormPartialCustodian';
 
 const props = defineProps({

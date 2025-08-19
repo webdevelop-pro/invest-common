@@ -3,7 +3,7 @@ import {
   VTable, VTableBody, VTableCell, VTableRow,
   VTableEmpty, VTableHead, VTableHeader,
 } from 'UiKit/components/Base/VTable';
-import { computed, PropType } from 'vue';
+import { computed } from 'vue';
 import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 
 interface IHead {

@@ -10,12 +10,9 @@ import {
 } from 'InvestCommon/helpers/enums/routes';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import {
-  useAccreditationStore, useAuthStore, useFilerStore, useFundingStore, useInvestmentsStore,
-  usePlaidStore,
-  useProfileWalletStore, useProfileWalletTransactionStore, useUserProfilesStore,
-  useGlobalLoader,
+  useAuthStore, useFilerStore,
 } from 'InvestCommon/store';
-import env, { cookiesOptions } from 'InvestCommon/global/index';
+import env from 'InvestCommon/global/index';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import {
   urlOffers, urlSignin, urlCheckEmail, urlProfile,
@@ -26,9 +23,9 @@ import { oryErrorHandling } from 'UiKit/helpers/api/oryErrorHandling';
 import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 import { SELFSERVICE } from 'InvestCommon/helpers/enums/auth';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
-import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
-import { useRepositoryNotifications } from 'InvestCommon/data/notifications/notifications.repository';
-import { useRepositoryAccreditation } from 'InvestCommon/data/accreditation/accreditation.repository';
+// import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
+// import { useRepositoryNotifications } from 'InvestCommon/data/notifications/notifications.repository';
+// import { useRepositoryAccreditation } from 'InvestCommon/data/accreditation/accreditation.repository';
 
 const { IS_STATIC_SITE } = env;
 
@@ -288,7 +285,6 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
 
     loading.value = false;
     if (!setSettingsErrorData.value) {
-      // eslint-disable-next-line no-use-before-define
       getSession();
       authStore.fetchAuthHandler(url);
     }
@@ -299,13 +295,6 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
   }
 
   const resetAll = () => {
-    useFundingStore().resetAll();
-    useProfileWalletTransactionStore().resetAll();
-    useProfileWalletStore().resetAll();
-    useUserProfilesStore().resetAll();
-    usePlaidStore().resetAll();
-    useInvestmentsStore().resetAll();
-    useAccreditationStore().resetAll();
     useAuthStore().resetAll();
     useFilerStore().resetAll();
     // useRepositoryProfiles().reset();
@@ -344,7 +333,7 @@ export const useAuthLogicStore = defineStore('authLogic', () => {
       if (queryParams) navigateWithQueryParams(urlSignin, queryParams);
       else navigateWithQueryParams(urlSignin);
     }
-    useGlobalLoader().hide();
+    // useGlobalLoader().hide();
   };
 
   // LOGOUT

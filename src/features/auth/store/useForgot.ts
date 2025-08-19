@@ -38,7 +38,8 @@ export const useForgotStore = defineStore('forgot', () => {
     $ref: '#/definitions/Auth',
   } as unknown as JSONSchemaType<FormModelForgot>));
 
-  const schemaBackend = computed(() => (getSchemaState.value.data ? structuredClone(toRaw(getSchemaState.value.data)) : null));
+  const schemaBackend = computed(() => (
+    getSchemaState.value.data ? structuredClone(toRaw(getSchemaState.value.data)) : null));
 
   const {
     model, validation, isValid, onValidate,

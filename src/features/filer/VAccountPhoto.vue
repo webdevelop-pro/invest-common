@@ -3,7 +3,6 @@ import { PropType } from 'vue';
 import VAvatar from 'UiKit/components/VAvatar.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import pen from 'UiKit/assets/images/pen.svg?component';
-import env from 'InvestCommon/global';
 import { useAccountPhoto } from './logic/useAccountPhoto';
 
 const props = defineProps({
@@ -25,9 +24,7 @@ const {
   FILER_URL,
   refFiles,
   filesUploadError,
-  imageFile,
   isLoading,
-  onUpload,
   onClick,
   onFileChange,
 } = useAccountPhoto(props, emit);

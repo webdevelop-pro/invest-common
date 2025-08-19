@@ -132,7 +132,6 @@ export function useVFormPartialBeneficialOwnership(
 
   watch(() => model.beneficial_owners_number, () => {
     const items: FormPartialBeneficialOwnershipItem[] = [];
-    // eslint-disable-next-line no-plusplus
     for (let i = 0; i < model.beneficial_owners_number; i++) {
       items.push({ ...defItem });
     }

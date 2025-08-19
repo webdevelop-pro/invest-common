@@ -2,7 +2,7 @@ import {
   describe, it, expect, vi, beforeEach, afterEach,
 } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
-import { ref } from 'vue';
+import { ref, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
@@ -10,7 +10,7 @@ import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryAccreditation } from 'InvestCommon/data/accreditation/accreditation.repository';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import { scrollToError } from 'UiKit/helpers/validation/general';
-import { ROUTE_DASHBOARD_ACCOUNT } from '../../../../helpers/enums/routes';
+import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/helpers/enums/routes';
 import { useFormPersonalInformation } from '../useFormPersonalInformation';
 
 const mockRouterInstance = {
@@ -84,174 +84,266 @@ vi.mock('InvestCommon/types/form', () => ({
   FormChild: vi.fn(),
 }));
 
+const mockFormRef = {
+  value: {
+    isValid: false,
+    onValidate: vi.fn(),
+    model: {
+      first_name: 'John',
+      last_name: 'Doe',
+      email: 'john@example.com',
+      dob: '1990-01-01',
+    },
+  },
+};
+
+vi.mock('vue', async () => {
+  const actual = await vi.importActual('vue');
+  return {
+    ...actual,
+    useTemplateRef: vi.fn(() => mockFormRef),
+  };
+});
+
 describe('useFormPersonalInformation', () => {
-  let store: ReturnType<typeof useFormPersonalInformation>;
+  let composable: ReturnType<typeof useFormPersonalInformation>;
   let mockRouter: any;
   let mockProfilesStore: any;
   let mockRepositoryProfiles: any;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let mockSessionStore: any;
   let mockAccreditationRepository: any;
   let mockHubspotForm: any;
-  let mockScrollToError: any;
 
   beforeEach(() => {
     setActivePinia(createPinia());
 
     mockRouter = vi.mocked(useRouter)();
-    mockProfilesStore = vi.mocked(useProfilesStore)();
-    mockRepositoryProfiles = vi.mocked(useRepositoryProfiles)();
+    mockProfilesStore = {
+      selectedUserProfileId: ref('123'),
+      selectedUserProfileType: ref('individual'),
+      selectedUserProfileData: ref({
+        data: {
+          first_name: 'John',
+          last_name: 'Doe',
+          email: 'john@example.com',
+        },
+        user_id: 'user123',
+        id: 'profile123',
+        escrow_id: null,
+      }),
+    };
+    mockRepositoryProfiles = {
+      setProfileByIdState: ref({ error: null }),
+      getProfileByIdOptionsState: ref({ data: { schema: 'test-schema' } }),
+      setProfileById: vi.fn().mockResolvedValue({}),
+      getProfileById: vi.fn().mockResolvedValue({}),
+    };
     mockSessionStore = vi.mocked(useSessionStore)();
-    mockAccreditationRepository = vi.mocked(useRepositoryAccreditation)();
-    mockHubspotForm = vi.mocked(useHubspotForm)();
-    mockScrollToError = vi.mocked(scrollToError);
+    mockAccreditationRepository = {
+      createEscrow: vi.fn().mockResolvedValue({}),
+    };
+    mockHubspotForm = {
+      submitFormToHubspot: vi.fn(),
+    };
 
-    vi.clearAllMocks();
+    vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStore);
+    vi.mocked(useRepositoryProfiles).mockReturnValue(mockRepositoryProfiles);
+    vi.mocked(useRepositoryAccreditation).mockReturnValue(mockAccreditationRepository);
+    vi.mocked(useHubspotForm).mockReturnValue(mockHubspotForm);
 
-    store = useFormPersonalInformation();
+    mockFormRef.value.onValidate.mockClear();
+    
+    mockRouter.currentRoute.value.query = {};
+
+    composable = useFormPersonalInformation();
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
-  describe('Initialization', () => {
-    it('should initialize with correct default values', () => {
-      expect(store.backButtonText).toBe('Back to Profile Details');
-      expect(store.isLoading).toBe(false);
-      expect(store.readOnly).toBeUndefined();
-      expect(store.isAccreditation).toBeUndefined();
-    });
-  });
-
   describe('Computed properties', () => {
     it('should compute isDisabledButton based on form validity', () => {
-      expect(store.isDisabledButton).toBe(true);
+      expect(composable.isDisabledButton.value).toBe(true);
+    });
+
+    it('should enable button when form is valid', () => {
+      mockFormRef.value.isValid = true;
+      const newComposable = useFormPersonalInformation();
+      expect(newComposable.isDisabledButton.value).toBe(false);
     });
 
     it('should handle readOnly query parameter', () => {
       mockRouter.currentRoute.value.query.readOnly = 'true';
-      const newStore = useFormPersonalInformation();
-      expect(newStore.readOnly).toBe('true');
+      const newComposable = useFormPersonalInformation();
+      expect(newComposable.readOnly.value).toBe(true);
     });
 
     it('should handle accreditation query parameter', () => {
       mockRouter.currentRoute.value.query.accreditation = 'true';
-      const newStore = useFormPersonalInformation();
-      expect(newStore.isAccreditation).toBe('true');
+      const newComposable = useFormPersonalInformation();
+      expect(newComposable.isAccreditation.value).toBe('true');
+    });
+
+    it('should return correct breadcrumbs', () => {
+      expect(composable.breadcrumbs.value).toEqual([
+        {
+          text: 'Dashboard',
+          to: { name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: '123' } },
+        },
+        {
+          text: 'Profile Details',
+          to: { name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: '123' } },
+        },
+        {
+          text: 'Personal Information',
+        },
+      ]);
+    });
+
+    it('should return correct model data', () => {
+      expect(composable.modelData.value).toEqual({
+        first_name: 'John',
+        last_name: 'Doe',
+        email: 'john@example.com',
+      });
+    });
+
+    it('should return correct schema backend', () => {
+      expect(composable.schemaBackend.value).toEqual({ schema: 'test-schema' });
     });
   });
 
   describe('handleSave - Validation failure', () => {
     it('should not proceed when form validation fails', async () => {
-      await store.handleSave();
+      mockFormRef.value.isValid = false;
+      
+      await composable.handleSave();
+      await nextTick();
 
-      expect(mockScrollToError).toHaveBeenCalledWith('ViewDashboardPersonalInformation');
+      expect(mockFormRef.value.onValidate).toHaveBeenCalled();
+      expect(scrollToError).toHaveBeenCalledWith('ViewDashboardPersonalInformation');
       expect(mockRepositoryProfiles.setProfileById).not.toHaveBeenCalled();
     });
   });
 
   describe('handleSave - Success scenarios', () => {
     beforeEach(() => {
-      mockRepositoryProfiles.setProfileById.mockResolvedValue(undefined);
-      mockRepositoryProfiles.getProfileById.mockResolvedValue(undefined);
+      mockFormRef.value.isValid = true;
+      mockRepositoryProfiles.setProfileById = vi.fn().mockResolvedValue({});
+      mockRepositoryProfiles.getProfileById = vi.fn().mockResolvedValue(undefined);
     });
 
     it('should save profile successfully and navigate to account page', async () => {
-      await store.handleSave();
+      await composable.handleSave();
 
-      expect(mockRepositoryProfiles.setProfileById).not.toHaveBeenCalled();
-      expect(mockHubspotForm.submitFormToHubspot).not.toHaveBeenCalled();
-      expect(mockRepositoryProfiles.getProfileById).not.toHaveBeenCalled();
-      expect(mockRouter.push).not.toHaveBeenCalled();
-      expect(mockScrollToError).toHaveBeenCalledWith('ViewDashboardPersonalInformation');
+      expect(mockRepositoryProfiles.setProfileById).toHaveBeenCalledWith(
+        mockFormRef.value.model,
+        'individual',
+        '123'
+      );
+      expect(mockHubspotForm.submitFormToHubspot).toHaveBeenCalledWith({
+        ...mockFormRef.value.model,
+        email: 'john@example.com',
+        date_of_birth: mockFormRef.value.model.dob,
+      });
+      expect(mockRepositoryProfiles.getProfileById).toHaveBeenCalledWith('individual', '123');
+      expect(mockRouter.push).toHaveBeenCalledWith({
+        name: ROUTE_DASHBOARD_ACCOUNT,
+        params: { profileId: '123' }
+      });
     });
 
     it('should create escrow when profile has no escrow_id', async () => {
-      await store.handleSave();
+      await composable.handleSave();
 
-      expect(mockAccreditationRepository.createEscrow).not.toHaveBeenCalled();
-      expect(mockScrollToError).toHaveBeenCalledWith('ViewDashboardPersonalInformation');
+      expect(mockAccreditationRepository.createEscrow).toHaveBeenCalledWith('user123', 'profile123');
     });
 
     it('should not create escrow when profile already has escrow_id', async () => {
       mockProfilesStore.selectedUserProfileData.value.escrow_id = 'existing-escrow';
 
-      await store.handleSave();
+      await composable.handleSave();
 
       expect(mockAccreditationRepository.createEscrow).not.toHaveBeenCalled();
-      expect(mockScrollToError).toHaveBeenCalledWith('ViewDashboardPersonalInformation');
     });
 
     it('should navigate to accreditation upload when isAccreditation is true', async () => {
       mockRouter.currentRoute.value.query.accreditation = 'true';
-      const newStore = useFormPersonalInformation();
+      const newComposable = useFormPersonalInformation();
 
-      await newStore.handleSave();
+      await newComposable.handleSave();
 
-      expect(mockRouter.push).not.toHaveBeenCalled();
-      expect(mockScrollToError).toHaveBeenCalledWith('ViewDashboardPersonalInformation');
+      expect(mockRouter.push).toHaveBeenCalledWith({
+        name: 'ROUTE_ACCREDITATION_UPLOAD',
+        params: { profileId: '123' }
+      });
     });
 
     it('should handle escrow creation error gracefully', async () => {
-      await store.handleSave();
+      mockAccreditationRepository.createEscrow = vi.fn().mockRejectedValue(new Error('Escrow creation failed'));
 
-      expect(mockAccreditationRepository.createEscrow).not.toHaveBeenCalled();
-      expect(mockHubspotForm.submitFormToHubspot).not.toHaveBeenCalled();
-      expect(mockRouter.push).not.toHaveBeenCalled();
-      expect(mockScrollToError).toHaveBeenCalledWith('ViewDashboardPersonalInformation');
+      await composable.handleSave();
+
+      expect(mockAccreditationRepository.createEscrow).toHaveBeenCalled();
+      expect(mockHubspotForm.submitFormToHubspot).toHaveBeenCalled();
+      expect(mockRouter.push).toHaveBeenCalled();
     });
   });
 
   describe('handleSave - Error scenarios', () => {
-    it('should not proceed with hubspot submission and navigation when setProfileById fails', async () => {
-      await store.handleSave();
+    beforeEach(() => {
+      mockFormRef.value.isValid = true;
+      mockRepositoryProfiles.setProfileById = vi.fn().mockResolvedValue({});
+    });
 
-      expect(mockRepositoryProfiles.setProfileById).not.toHaveBeenCalled();
+    it('should not proceed with hubspot submission and navigation when setProfileById fails', async () => {
+      mockRepositoryProfiles.setProfileById = vi.fn().mockImplementation(() => {
+        mockRepositoryProfiles.setProfileByIdState.value = { error: { data: { responseJson: 'API Error' } } };
+        return Promise.resolve();
+      });
+
+      await composable.handleSave();
+
+      expect(mockRepositoryProfiles.setProfileById).toHaveBeenCalled();
       expect(mockHubspotForm.submitFormToHubspot).not.toHaveBeenCalled();
       expect(mockRepositoryProfiles.getProfileById).not.toHaveBeenCalled();
       expect(mockRouter.push).not.toHaveBeenCalled();
-      expect(mockScrollToError).toHaveBeenCalledWith('ViewDashboardPersonalInformation');
+      expect(composable.isLoading.value).toBe(false);
     });
 
     it('should not proceed when setProfileByIdState has error', async () => {
-      await store.handleSave();
+      mockRepositoryProfiles.setProfileByIdState.value = { error: { data: { responseJson: 'Error' } } };
 
-      expect(mockRepositoryProfiles.setProfileById).not.toHaveBeenCalled();
+      await composable.handleSave();
+
+      expect(mockRepositoryProfiles.setProfileById).toHaveBeenCalled();
       expect(mockHubspotForm.submitFormToHubspot).not.toHaveBeenCalled();
       expect(mockRepositoryProfiles.getProfileById).not.toHaveBeenCalled();
       expect(mockRouter.push).not.toHaveBeenCalled();
-      expect(mockScrollToError).toHaveBeenCalledWith('ViewDashboardPersonalInformation');
     });
 
     it('should set loading state correctly during save operation', async () => {
-      await store.handleSave();
-
-      expect(store.isLoading).toBe(false);
+      const savePromise = composable.handleSave();
+      
+      expect(composable.isLoading.value).toBe(true);
+      
+      await savePromise;
+      
+      expect(composable.isLoading.value).toBe(false);
     });
 
     it('should set loading to false even when error occurs', async () => {
-      mockRepositoryProfiles.setProfileById.mockRejectedValue(new Error('API Error'));
+      mockRepositoryProfiles.setProfileById = vi.fn().mockImplementation(() => {
+        mockRepositoryProfiles.setProfileByIdState.value = { error: { data: { responseJson: 'API Error' } } };
+        return Promise.resolve();
+      });
 
-      await store.handleSave();
+      await composable.handleSave();
 
-      expect(store.isLoading).toBe(false);
-    });
-  });
-
-  describe('Return values', () => {
-    it('should return all expected properties', () => {
-      const returnedStore = useFormPersonalInformation();
-
-      expect(returnedStore).toHaveProperty('backButtonText');
-      expect(returnedStore).toHaveProperty('breadcrumbs');
-      expect(returnedStore).toHaveProperty('isDisabledButton');
-      expect(returnedStore).toHaveProperty('isLoading');
-      expect(returnedStore).toHaveProperty('handleSave');
-      expect(returnedStore).toHaveProperty('readOnly');
-      expect(returnedStore).toHaveProperty('isAccreditation');
-      expect(returnedStore).toHaveProperty('modelData');
-      expect(returnedStore).toHaveProperty('schemaBackend');
-      expect(returnedStore).toHaveProperty('errorData');
+      expect(composable.isLoading.value).toBe(false);
+      expect(mockRepositoryProfiles.setProfileById).toHaveBeenCalled();
     });
   });
 });

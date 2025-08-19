@@ -2,7 +2,7 @@ import {
   ref, computed, nextTick,
   toRaw, useTemplateRef,
 } from 'vue';
-import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
+import { storeToRefs } from 'pinia';
 import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/helpers/enums/routes';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useRouter } from 'vue-router';
@@ -15,7 +15,7 @@ import { FormChild } from 'InvestCommon/types/form';
 import { useRepositoryAccreditation } from 'InvestCommon/data/accreditation/accreditation.repository';
 import { useRepositoryKyc } from 'InvestCommon/data/kyc/kyc.repository';
 
-export const useFormFinancialInformationAndKyc = defineStore('useFormFinancialInformationAndKyc', () => {
+export const useFormFinancialInformationAndKyc = () => {
   const router = useRouter();
   const userProfileStore = useProfilesStore();
   const { selectedUserProfileId, selectedUserProfileType, selectedUserProfileData } = storeToRefs(userProfileStore);
@@ -108,7 +108,10 @@ export const useFormFinancialInformationAndKyc = defineStore('useFormFinancialIn
       if (!tokenState.value.error && !setProfileByIdState.value.error
     && selectedUserProfileData.value?.user_id && selectedUserProfileData.value?.id
     && !selectedUserProfileData.value?.escrow_id) {
-        await accreditationRepository.createEscrow(selectedUserProfileData.value?.user_id, selectedUserProfileData.value?.id);
+        await accreditationRepository.createEscrow(
+          selectedUserProfileData.value?.user_id,
+          selectedUserProfileData.value?.id
+        );
       }
       isLoading.value = false;
       if (!setProfileByIdState.value.error) hubspotHandle();
@@ -130,8 +133,4 @@ export const useFormFinancialInformationAndKyc = defineStore('useFormFinancialIn
     schemaBackend,
     errorData,
   };
-});
-
-if (import.meta.hot) {
-  import.meta.hot.accept(acceptHMRUpdate(useFormFinancialInformationAndKyc, import.meta.hot));
-}
+};

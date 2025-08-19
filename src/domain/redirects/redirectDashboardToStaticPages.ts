@@ -1,4 +1,4 @@
-import { NavigationGuardNext, RouteLocationNormalized } from 'vue-router';
+import { RouteLocationNormalized } from 'vue-router';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import env from 'InvestCommon/global';
 

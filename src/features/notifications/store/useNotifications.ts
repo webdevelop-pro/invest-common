@@ -28,7 +28,8 @@ export const useNotifications = defineStore('notifications', () => {
     if (getAllState.value.loading || markAllAsReadState.value.loading) {
       isLoading.value = true;
     // Stop loading if we have data, empty array, or an error
-    } else if (Array.isArray(formattedNotifications.value) || getAllState.value.error || markAllAsReadState.value.error) {
+    } else if (Array.isArray(formattedNotifications.value) || getAllState.value.error
+      || markAllAsReadState.value.error) {
       setTimeout(() => {
         isLoading.value = false;
       }, 500);
@@ -250,7 +251,7 @@ export const useNotifications = defineStore('notifications', () => {
     if (!id) {
       return;
     }
-    notificationsRepository.markAsReadById(id);
+    await notificationsRepository.markAsReadById(id);
   };
 
   return {

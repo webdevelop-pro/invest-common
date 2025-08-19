@@ -53,7 +53,6 @@ const {
   validation,
   isValid,
   onValidate,
-  schemaObject,
 } = useFormValidation<FormModelFinancialSituation>(
   schemaFrontend,
   props.schemaBackend,

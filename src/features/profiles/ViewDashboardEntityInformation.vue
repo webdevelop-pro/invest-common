@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { useGlobalLoader } from 'InvestCommon/store/useGlobalLoader';
-import { storeToRefs } from 'pinia';
+import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import VLayoutForm from 'InvestCommon/shared/layouts/VLayoutForm.vue';
 import { useFormEntityInformation } from './store/useFormEntityInformation';
 import VFormPartialEntityInformation from './components/VFormPartialEntityInformation.vue';
@@ -8,15 +7,11 @@ import VFormPartialEntityInformation from './components/VFormPartialEntityInform
 const globalLoader = useGlobalLoader();
 globalLoader.hide();
 
-const formStore = useFormEntityInformation();
 const {
   backButtonText, breadcrumbs, isLoading, isDisabledButton,
-  modelData, schemaBackend, errorData,
-} = storeToRefs(formStore);
-
-const handleSave = () => {
-  formStore.handleSave();
-};
+  backButtonRoute,
+  modelData, schemaBackend, errorData, handleSave,
+} = useFormEntityInformation();
 </script>
 
 <template>
@@ -26,6 +21,7 @@ const handleSave = () => {
       :breadcrumbs="breadcrumbs"
       :is-disabled-button="isDisabledButton"
       :is-loading="isLoading"
+      :button-route="backButtonRoute"
       @save="handleSave"
     >
       <div class="view-dashboard-entity-information__header is--h1__title">

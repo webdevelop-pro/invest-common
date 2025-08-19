@@ -3,7 +3,6 @@ import {
   watch, nextTick,
 } from 'vue';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
-import { AccreditationTypes } from 'InvestCommon/types/api/invest';
 import { useRouter } from 'vue-router';
 import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/helpers/enums/routes';
 import { descriptionFileRule, errorMessageRule, noteFileRule } from 'UiKit/helpers/validation/rules';
@@ -90,15 +89,13 @@ export const useAccreditationUpload = defineStore('useAccreditationUpload', () =
   {} as FormModelAccreditationFileInput,
   );
 
-  const isCreateAccreditation = computed(() => selectedUserProfileData.value?.accreditation_status === 'new');
-
   const isAccreditationCanUpload = computed(() => {
     if (!selectedUserProfileData.value) {
       return false;
     }
     return (
-      selectedUserProfileData.value.accreditation_status !== AccreditationTypes.pending
-      && selectedUserProfileData.value.accreditation_status !== AccreditationTypes.approved
+      selectedUserProfileData.value.isAccreditationPending
+      && selectedUserProfileData.value.isAccreditationApproved
     );
   });
 
@@ -125,7 +122,7 @@ export const useAccreditationUpload = defineStore('useAccreditationUpload', () =
       await Promise.all(promises);
 
       if (selectedUserProfileData.value?.id && accreditationNote.value) {
-        if (isCreateAccreditation.value) {
+        if (selectedUserProfileData.value.isAccreditationNew) {
           await accreditationRepository.create(
             selectedUserProfileData.value?.id,
             accreditationNote.value,
@@ -244,7 +241,6 @@ export const useAccreditationUpload = defineStore('useAccreditationUpload', () =
     accreditationNote,
     accreditationDescriptions,
     filesUploadError,
-    isCreateAccreditation,
     isAccreditationCanUpload,
   };
 });

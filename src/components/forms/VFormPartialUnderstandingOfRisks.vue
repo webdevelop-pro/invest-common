@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import {
-  watch, PropType, computed, toRaw,
+  watch, PropType,
 } from 'vue';
-import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
 import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import VFormCheckbox from 'UiKit/components/Base/VForm/VFormCheckbox.vue';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
-import { storeToRefs } from 'pinia';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { FormModelUnderstandRisks } from 'InvestCommon/types/form';
@@ -20,11 +18,6 @@ const props = defineProps({
   schemaBackend: Object,
   loading: Boolean,
 });
-
-const userIdentityStore = useUserProfilesStore();
-const {
-  setProfileByIdErrorData, getProfileByIdOptionsData,
-} = storeToRefs(userIdentityStore);
 
 const schemaFrontend = {
   $schema: 'http://json-schema.org/draft-07/schema#',
@@ -105,9 +98,9 @@ watch(() => props.modelData, (newModelData) => {
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="getProfileByIdOptionsData"
+          :schema-back="schemaBackend"
           :schema-front="schemaFrontend"
-          :error-text="setProfileByIdErrorData?.educational_materials"
+          :error-text="errorData?.educational_materials"
           path="educational_materials"
           data-testid="educational-materials-group"
         >
@@ -130,9 +123,9 @@ watch(() => props.modelData, (newModelData) => {
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="getProfileByIdOptionsData"
+          :schema-back="schemaBackend"
           :schema-front="schemaFrontend"
-          :error-text="setProfileByIdErrorData?.cancelation_restrictions"
+          :error-text="errorData?.cancelation_restrictions"
           path="cancelation_restrictions"
           data-testid="cancelation-restrictions-group"
         >
@@ -155,9 +148,9 @@ watch(() => props.modelData, (newModelData) => {
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="getProfileByIdOptionsData"
+          :schema-back="schemaBackend"
           :schema-front="schemaFrontend"
-          :error-text="setProfileByIdErrorData?.resell_difficulties"
+          :error-text="errorData?.resell_difficulties"
           path="resell_difficulties"
           data-testid="resell-difficulties-group"
         >
@@ -180,9 +173,9 @@ watch(() => props.modelData, (newModelData) => {
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="getProfileByIdOptionsData"
+          :schema-back="schemaBackend"
           :schema-front="schemaFrontend"
-          :error-text="setProfileByIdErrorData?.risk_involved"
+          :error-text="errorData?.risk_involved"
           path="risk_involved"
           data-testid="risk-involved-group"
         >
@@ -205,9 +198,9 @@ watch(() => props.modelData, (newModelData) => {
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="getProfileByIdOptionsData"
+          :schema-back="schemaBackend"
           :schema-front="schemaFrontend"
-          :error-text="setProfileByIdErrorData?.no_legal_advices_from_company"
+          :error-text="errorData?.no_legal_advices_from_company"
           path="no_legal_advices_from_company"
           data-testid="no_legal_advices_from_company-group"
         >
@@ -231,9 +224,9 @@ watch(() => props.modelData, (newModelData) => {
           v-slot="VFormGroupProps"
           :model="model"
           :validation="validation"
-          :schema-back="getProfileByIdOptionsData"
+          :schema-back="schemaBackend"
           :schema-front="schemaFrontend"
-          :error-text="setProfileByIdErrorData?.consent_plaid"
+          :error-text="errorData?.consent_plaid"
           path="consent_plaid"
           data-testid="consent-plaid-group"
         >

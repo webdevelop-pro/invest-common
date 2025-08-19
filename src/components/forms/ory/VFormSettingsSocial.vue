@@ -12,7 +12,7 @@ import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 
 const authLogicStore = useAuthLogicStore();
 const authStore = useAuthStore();
-const { getFlowData, setSettingsErrorData } = storeToRefs(authStore);
+const { getFlowData } = storeToRefs(authStore);
 const userSessionStore = useSessionStore();
 const { userSession } = storeToRefs(userSessionStore);
 

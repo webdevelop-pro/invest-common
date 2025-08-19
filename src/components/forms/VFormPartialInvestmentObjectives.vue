@@ -11,7 +11,7 @@ import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { FormModelInvestmentObjectives } from 'InvestCommon/types/form';
 import { numberFormatter } from 'InvestCommon/helpers/numberFormatter';
-import { getOptions, createFormModel } from 'UiKit/helpers/model';
+import { getOptions } from 'UiKit/helpers/model';
 import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
 
 const props = defineProps({
@@ -81,6 +81,10 @@ watch(() => props.modelData, (newModelData) => {
     }
   });
 }, { deep: true, immediate: true });
+
+const yearsExporience = computed(() => (
+  model.investment_objectives.years_experience ? String(model.investment_objectives.years_experience) : undefined
+));
 </script>
 
 <template>
@@ -128,7 +132,7 @@ watch(() => props.modelData, (newModelData) => {
           label="Investment Years Experience"
         >
           <VFormInput
-            :model-value="model.investment_objectives.years_experience ? String(model.investment_objectives.years_experience) : undefined"
+            :model-value="yearsExporience"
             :is-error="VFormGroupProps.isFieldError"
             size="large"
             placeholder="10"

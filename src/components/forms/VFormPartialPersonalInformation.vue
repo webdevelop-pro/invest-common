@@ -17,41 +17,54 @@ import { FormModelPersonalInformation } from 'InvestCommon/types/form';
 import { getOptions } from 'UiKit/helpers/model';
 import VFormCombobox from 'UiKit/components/Base/VForm/VFormCombobox.vue';
 import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
+import { IUserDataIndividual } from '@/data/profiles/profiles.types';
 
 const props = defineProps({
-  modelData: Object as PropType<FormModelPersonalInformation>,
+  modelData: Object as PropType<IUserDataIndividual>,
   readOnly: Boolean,
   errorData: Object,
   schemaBackend: Object,
   loading: Boolean,
 });
 
-const schemaFrontend = {
-  $schema: 'http://json-schema.org/draft-07/schema#',
-  definitions: {
-    Individual: {
-      properties: {
-        first_name: firstNameRule,
-        last_name: lastNameRule,
-        middle_name: middleNameRule,
-        dob: dobRule,
-        address1: address1Rule,
-        address2: address2Rule,
-        city: cityRule,
-        state: stateRule,
-        zip_code: zipRule,
-        country: countryRuleObject,
-        phone: phoneRule,
-        citizenship: citizenshipRule,
-        ssn: ssnRule,
+const isSsnHidden = computed(() => props.modelData?.is_full_ssn_provided === true);
+
+const schemaFrontend = computed(() => {
+  const properties = {
+    first_name: firstNameRule,
+    last_name: lastNameRule,
+    middle_name: middleNameRule,
+    dob: dobRule,
+    address1: address1Rule,
+    address2: address2Rule,
+    city: cityRule,
+    state: stateRule,
+    zip_code: zipRule,
+    country: countryRuleObject,
+    phone: phoneRule,
+    citizenship: citizenshipRule,
+    ssn: ssnRule,
+  };
+
+  const required = [
+    'citizenship', 'address1', 'dob', 'phone', 'city', 'state', 
+    'zip_code', 'country', 'first_name', 'last_name',
+    ...(isSsnHidden.value ? [] : ['ssn'])
+  ];
+
+  return {
+    $schema: 'http://json-schema.org/draft-07/schema#',
+    definitions: {
+      Individual: {
+        properties,
+        type: 'object',
+        errorMessage: errorMessageRule,
+        required,
       },
-      type: 'object',
-      errorMessage: errorMessageRule,
-      required: ['citizenship', 'address1', 'dob', 'phone', 'city', 'state', 'zip_code', 'country', 'ssn', 'first_name', 'last_name'],
     },
-  },
-  $ref: '#/definitions/Individual',
-} as unknown as JSONSchemaType<FormModelPersonalInformation>;
+    $ref: '#/definitions/Individual',
+  } as unknown as JSONSchemaType<FormModelPersonalInformation>;
+});
 
 const schemaBackendLocal = computed(() => (props.schemaBackend ? structuredClone(toRaw(props.schemaBackend)) : null));
 
@@ -77,7 +90,7 @@ watch(() => props.modelData, (newModelData) => {
   // Define the fields to sync
   const fields = [
     'first_name', 'last_name', 'middle_name', 'dob', 'address1', 'address2',
-    'city', 'state', 'zip_code', 'country', 'phone', 'ssn', 'citizenship',
+    'city', 'state', 'zip_code', 'country', 'phone', 'citizenship',
   ] as const;
 
   // Update model with new data, only if the value exists
@@ -86,6 +99,15 @@ watch(() => props.modelData, (newModelData) => {
       model[field] = newModelData[field];
     }
   });
+
+  // Handle SSN field conditionally
+  if (isSsnHidden.value) {
+    // Remove SSN from model if it's hidden
+    delete model.ssn;
+  } else if (newModelData.ssn !== undefined && newModelData.ssn !== null) {
+    // Only set SSN if it's not hidden and has a value
+    model.ssn = newModelData.ssn;
+  }
 }, { deep: true, immediate: true });
 </script>
 
@@ -269,6 +291,7 @@ watch(() => props.modelData, (newModelData) => {
           data-testid="ssn-group"
         >
           <VFormInput
+            v-if="!isSsnHidden"
             :model-value="model.ssn"
             :is-error="VFormGroupProps.isFieldError"
             placeholder="XXX-XX-XXXX"
@@ -280,6 +303,12 @@ watch(() => props.modelData, (newModelData) => {
             :readonly="readOnly"
             :loading="loading"
             @update:model-value="model.ssn = $event"
+          />
+          <VFormInput
+            v-else
+            model-value="********"
+            readonly
+            size="large"
           />
         </VFormGroup>
       </FormCol>

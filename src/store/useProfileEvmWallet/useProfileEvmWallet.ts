@@ -86,8 +86,12 @@ export const useProfileEvmWalletStore = defineStore('Evmwallet', () => {
   };
 
   const updateNotificationData = (notification: INotification) => {
-    if (notification.data.fields?.balance) getEvmWalletByProfileIdData.value.balance = notification.data.fields?.balance;
-    if (notification.data.fields?.balances) getEvmWalletByProfileIdData.value.balances = notification.data.fields?.balances;
+    if (notification.data.fields?.balance) {
+      getEvmWalletByProfileIdData.value.balance = notification.data.fields?.balance;
+    }
+    if (notification.data.fields?.balances) {
+      getEvmWalletByProfileIdData.value.balances = notification.data.fields?.balances;
+    }
     if (notification.data.fields?.inc_balance !== undefined) {
       getEvmWalletByProfileIdData.value.pending_incoming_balance = notification.data.fields.inc_balance;
     }

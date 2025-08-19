@@ -72,7 +72,7 @@ export const useProfilesStore = defineStore('profiles', () => {
     selectedUserProfileShowKycInitFormIndividual.value));
 
   const isTrustRevocable = computed(() => (
-    (selectedUserProfileType.value.toLowerCase() === PROFILE_TYPES.TRUST) && selectedUserProfileData.value?.type?.toLowerCase().includes('revocable')));
+    (selectedUserProfileType.value?.toLowerCase() === PROFILE_TYPES.TRUST) && selectedUserProfileData.value?.data?.type?.toLowerCase().includes('revocable')));
 
   const init = async () => {
     if (!userLoggedIn.value) {

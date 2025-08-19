@@ -6,8 +6,10 @@ import { globalErrorHandling } from 'InvestCommon/data/repository/error/globalEr
 import { createActionState } from 'InvestCommon/data/repository/repository';
 import {
   IProfileData, IUserIdentityResponse, IProfileIndividual, ISchema,
+  IProfileFormatted,
 } from './profiles.types';
 import { INotification } from '../notifications/notifications.types';
+import { ProfileFormatter } from './profiles.formatter';
 
 export const useRepositoryProfiles = defineStore('repository-profiles', () => {
   // Dependencies
@@ -18,7 +20,7 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
 
   // Action states
   const setProfileByIdState = createActionState<IProfileIndividual>();
-  const getProfileByIdState = createActionState<IProfileIndividual>();
+  const getProfileByIdState = createActionState<IProfileFormatted>();
   const getProfileByIdOptionsState = createActionState<IProfileIndividual>();
   const setProfileState = createActionState<IProfileData>();
   const getUserState = createActionState<IUserIdentityResponse>();
@@ -71,7 +73,7 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
       getProfileByIdState.value.loading = true;
       getProfileByIdState.value.error = null;
       const response = await apiClient.get<IProfileIndividual>(`/auth/profile/${type}/${id}`);
-      getProfileByIdState.value.data = response.data;
+      getProfileByIdState.value.data = new ProfileFormatter(response.data).format();
       return getProfileByIdState.value.data;
     } catch (err) {
       getProfileByIdState.value.error = err as Error;
@@ -119,7 +121,14 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
       getUserState.value.loading = true;
       getUserState.value.error = null;
       const response = await apiClient.get<IUserIdentityResponse>('/auth/user');
-      getUserState.value.data = response.data;
+
+      // Format the profiles array while keeping the original response structure
+      getUserState.value.data = {
+        ...response.data,
+        profiles: response.data.profiles.map(profile => {
+          return new ProfileFormatter(profile).format();
+        })
+      };
       return getUserState.value.data;
     } catch (err) {
       getUserState.value.error = err as Error;

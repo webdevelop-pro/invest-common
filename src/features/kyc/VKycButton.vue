@@ -5,20 +5,32 @@ import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import VTooltip from 'UiKit/components/VTooltip.vue';
 import arrowRight from 'UiKit/assets/images/arrow-right.svg?component';
 import { useKycButton } from './store/useKycButton';
+import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 
 const kycButtonStore = useKycButton();
 const {
   data, tagBackground, isButtonLoading, isButtonDisabled, showContactUs,
+  isPlaidDone,
 } = storeToRefs(kycButtonStore);
 
 const handleClick = () => {
   kycButtonStore.onClick();
 };
+
+defineProps({
+  isLoading: Boolean,
+});
 </script>
 
 <template>
+  <VSkeleton
+    v-if="isLoading || isPlaidDone"
+    height="22px"
+    width="100px"
+    class="dashboard-top-info__skeleton"
+  />
   <div
-    v-if="data"
+    v-else-if="data"
     class="VKycButton v-kyc-button"
     :class="data.class"
   >

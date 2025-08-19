@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { useGlobalLoader } from 'InvestCommon/store';
-import { storeToRefs } from 'pinia';
+import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import VLayoutForm from 'InvestCommon/shared/layouts/VLayoutForm.vue';
 import { useFormTrustInformation } from './store/useFormTrustInformation';
 import VFormPartialTrustInformation from './components/VFormPartialTrustInformation.vue';
@@ -8,15 +7,11 @@ import VFormPartialTrustInformation from './components/VFormPartialTrustInformat
 const globalLoader = useGlobalLoader();
 globalLoader.hide();
 
-const formStore = useFormTrustInformation();
 const {
   backButtonText, breadcrumbs, isLoading, isDisabledButton,
-  modelData, schemaBackend, errorData,
-} = storeToRefs(formStore);
-
-const handleSave = () => {
-  formStore.handleSave();
-};
+  backButtonRoute,
+  modelData, schemaBackend, errorData, handleSave,
+} = useFormTrustInformation();
 </script>
 
 <template>
@@ -26,6 +21,7 @@ const handleSave = () => {
       :breadcrumbs="breadcrumbs"
       :is-disabled-button="isDisabledButton"
       :is-loading="isLoading"
+      :button-route="backButtonRoute"
       @save="handleSave"
     >
       <div class="view-dashboard-trust-information__header is--h1__title">

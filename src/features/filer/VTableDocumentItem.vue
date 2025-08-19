@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { PropType, ref } from 'vue';
+import { PropType, ref, computed, nextTick, onMounted } from 'vue';
 import VBadge from 'UiKit/components/Base/VBadge/VBadge.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import file from 'UiKit/assets/images/file.svg';
 import download from 'UiKit/assets/images/download.svg';
 import { VTableCell, VTableRow } from 'UiKit/components/Base/VTable';
 import { IFilerItemFormatted } from 'InvestCommon/data/filer/filer.type';
+import VTooltip from 'UiKit/components/VTooltip.vue';
 
 const props = defineProps({
   data: Object as PropType<IFilerItemFormatted>,
@@ -17,6 +18,26 @@ const props = defineProps({
 const emit = defineEmits(['click']);
 
 const isLoading = ref(false);
+const nameElementRef = ref<HTMLElement>();
+const isTextOverflowing = ref(false);
+
+const checkTextOverflow = () => {
+  if (!nameElementRef.value) return false;
+  const element = nameElementRef.value;
+  return element.scrollWidth > element.clientWidth;
+};
+
+const shouldShowTooltip = computed(() => 
+  props.data?.name && isTextOverflowing.value
+);
+
+onMounted(async () => {
+  await nextTick();
+  // Add a small delay to ensure layout is stable
+  setTimeout(() => {
+    isTextOverflowing.value = checkTextOverflow();
+  }, 50);
+});
 
 const onDocumentClick = async () => {
   emit('click', props.data);
@@ -41,9 +62,34 @@ const onDocumentClick = async () => {
           alt="file icon"
           class="v-table-document-item__icon"
         />
-        <div v-highlight="search">
+        <VTooltip v-if="shouldShowTooltip">
+          <div
+            ref="nameElementRef"
+            v-highlight="search"
+            class="v-table-document-item__name"
+          >
+            {{ data?.name }}
+          </div>
+          <template #content>
+            <div v-highlight="search">
+              {{ data?.name }}
+            </div>
+          </template>
+        </VTooltip>
+        <div
+          v-else
+          ref="nameElementRef"
+          v-highlight="search"
+          class="v-table-document-item__name"
+        >
           {{ data?.name }}
         </div>
+        <VBadge
+          v-if="data?.isNew"
+          class="is--background-red-light"
+        >
+          New
+        </VBadge>
       </div>
     </VTableCell>
     <VTableCell class="v-table-document-item__tags">
@@ -51,12 +97,6 @@ const onDocumentClick = async () => {
         :class="data?.tagColor"
       >
         {{ data?.typeFormatted }}
-      </VBadge>
-      <VBadge
-        v-if="data?.isNew"
-        class="is--background-red-light"
-      >
-        New
       </VBadge>
     </VTableCell>
     <VTableCell class="v-table-document-item__date-wrap is--small">
@@ -103,13 +143,20 @@ const onDocumentClick = async () => {
     width: 20px;
     height: 20px;
     color: $gray-70;
-    margin-right: 16px;
     flex-shrink: 0;
   }
 
   &__name-wrap {
     display: flex;
     align-items: center;
+    gap: 16px;
+  }
+
+  &__name {
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   &__download-icon {

@@ -1,7 +1,6 @@
 import {
   describe, it, expect, vi, beforeEach, afterEach,
 } from 'vitest';
-import { setActivePinia, createPinia } from 'pinia';
 import { ref } from 'vue';
 import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/helpers/enums/routes';
 import { useFormTrustInformation } from '../useFormTrustInformation';
@@ -86,11 +85,9 @@ vi.mock('InvestCommon/global', () => ({
 }));
 
 describe('useFormTrustInformation', () => {
-  let store: ReturnType<typeof useFormTrustInformation>;
+  let composable: ReturnType<typeof useFormTrustInformation>;
 
   beforeEach(() => {
-    setActivePinia(createPinia());
-
     mockFormRef.value = {
       isValid: true,
       model: {
@@ -109,7 +106,7 @@ describe('useFormTrustInformation', () => {
     mockGetProfileById.mockResolvedValue(undefined);
     mockSubmitFormToHubspot.mockClear();
 
-    store = useFormTrustInformation();
+    composable = useFormTrustInformation();
   });
 
   afterEach(() => {
@@ -118,13 +115,13 @@ describe('useFormTrustInformation', () => {
 
   describe('initial state', () => {
     it('should initialize with correct default values', () => {
-      expect(store.backButtonText).toBe('Back to Profile Details');
-      expect(store.isLoading).toBe(false);
-      expect(store.isDisabledButton).toBe(false);
+      expect(composable.backButtonText.value).toBe('Back to Profile Details');
+      expect(composable.isLoading.value).toBe(false);
+      expect(composable.isDisabledButton.value).toBe(false);
     });
 
     it('should have correct breadcrumbs', () => {
-      expect(store.breadcrumbs).toEqual([
+      expect(composable.breadcrumbs.value).toEqual([
         {
           text: 'Dashboard',
           to: { name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: '123' } },
@@ -140,7 +137,7 @@ describe('useFormTrustInformation', () => {
     });
 
     it('should return model data from selected user profile', () => {
-      expect(store.modelData).toEqual({
+      expect(composable.modelData.value).toEqual({
         trust_information: {
           trust_name: 'Test Trust',
           trust_address: '123 Trust St',
@@ -154,16 +151,16 @@ describe('useFormTrustInformation', () => {
   });
 
   describe('handleSave', () => {
-    let handleSaveStore: any;
+    let handleSaveComposable: any;
 
     beforeEach(() => {
-      handleSaveStore = useFormTrustInformation();
+      handleSaveComposable = useFormTrustInformation();
     });
 
     it('should validate form before saving', async () => {
       mockFormRef.value.isValid = true;
 
-      await handleSaveStore.handleSave();
+      await handleSaveComposable.handleSave();
 
       expect(mockFormRef.value.onValidate).toHaveBeenCalled();
     });
@@ -171,7 +168,7 @@ describe('useFormTrustInformation', () => {
     it('should not save when form is invalid', async () => {
       mockFormRef.value.isValid = false;
 
-      await handleSaveStore.handleSave();
+      await handleSaveComposable.handleSave();
 
       expect(mockSetProfileById).not.toHaveBeenCalled();
     });
@@ -179,7 +176,7 @@ describe('useFormTrustInformation', () => {
     it('should save form data when valid', async () => {
       mockFormRef.value.isValid = true;
 
-      await store.handleSave();
+      await composable.handleSave();
 
       expect(mockSetProfileById).toHaveBeenCalledWith(
         {
@@ -198,7 +195,7 @@ describe('useFormTrustInformation', () => {
     it('should submit form to Hubspot after successful save', async () => {
       mockFormRef.value.isValid = true;
 
-      await handleSaveStore.handleSave();
+      await handleSaveComposable.handleSave();
 
       expect(mockSubmitFormToHubspot).toHaveBeenCalledWith({
         email: 'test@example.com',
@@ -214,7 +211,7 @@ describe('useFormTrustInformation', () => {
     it('should refresh profile data after successful save', async () => {
       mockFormRef.value.isValid = true;
 
-      await handleSaveStore.handleSave();
+      await handleSaveComposable.handleSave();
 
       expect(mockGetProfileById).toHaveBeenCalledWith('individual', '123');
     });
@@ -222,7 +219,7 @@ describe('useFormTrustInformation', () => {
     it('should navigate to account page after successful save', async () => {
       mockFormRef.value.isValid = true;
 
-      await handleSaveStore.handleSave();
+      await handleSaveComposable.handleSave();
 
       expect(mockPush).toHaveBeenCalledWith({
         name: ROUTE_DASHBOARD_ACCOUNT,
@@ -237,12 +234,12 @@ describe('useFormTrustInformation', () => {
       mockSetProfileById.mockRejectedValue(mockError);
 
       try {
-        await handleSaveStore.handleSave();
+        await handleSaveComposable.handleSave();
       } catch (error) {
         // Expected error
       }
 
-      expect(handleSaveStore.isLoading).toBe(false);
+      expect(handleSaveComposable.isLoading.value).toBe(false);
     });
 
     it('should ensure loading is false even if error occurs', async () => {
@@ -251,12 +248,12 @@ describe('useFormTrustInformation', () => {
       mockSetProfileById.mockRejectedValue(new Error('Save failed'));
 
       try {
-        await handleSaveStore.handleSave();
+        await handleSaveComposable.handleSave();
       } catch (error) {
         // Expected error
       }
 
-      expect(handleSaveStore.isLoading).toBe(false);
+      expect(handleSaveComposable.isLoading.value).toBe(false);
     });
   });
 });

@@ -2,7 +2,7 @@ import {
   ref, computed, useTemplateRef,
   nextTick,
 } from 'vue';
-import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
+import { storeToRefs } from 'pinia';
 import { ROUTE_DASHBOARD_ACCOUNT, ROUTE_ACCREDITATION_UPLOAD } from 'InvestCommon/helpers/enums/routes';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useRouter } from 'vue-router';
@@ -14,7 +14,7 @@ import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repos
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryAccreditation } from 'InvestCommon/data/accreditation/accreditation.repository';
 
-export const useFormPersonalInformation = defineStore('useFormPersonalInformation', () => {
+export const useFormPersonalInformation = () => {
   const router = useRouter();
   const userProfileStore = useProfilesStore();
   const { selectedUserProfileId, selectedUserProfileType, selectedUserProfileData } = storeToRefs(userProfileStore);
@@ -25,16 +25,16 @@ export const useFormPersonalInformation = defineStore('useFormPersonalInformatio
   const accreditationRepository = useRepositoryAccreditation();
 
   const backButtonText = ref('Back to Profile Details');
-  const accountRoute = computed(() => (
+  const backButtonRoute = computed(() => (
     { name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } }));
   const breadcrumbs = computed(() => [
     {
       text: 'Dashboard',
-      to: accountRoute.value,
+      to: backButtonRoute.value,
     },
     {
       text: 'Profile Details',
-      to: accountRoute.value,
+      to: backButtonRoute.value,
     },
     {
       text: 'Personal Information',
@@ -43,7 +43,7 @@ export const useFormPersonalInformation = defineStore('useFormPersonalInformatio
 
   const isLoading = ref(false);
 
-  const readOnly = computed(() => router.currentRoute.value.query.readOnly);
+  const readOnly = computed(() => Boolean(router.currentRoute.value.query.readOnly));
   const isAccreditation = computed(() => router.currentRoute.value.query.accreditation);
   const { submitFormToHubspot } = useHubspotForm(env.HUBSPOT_FORM_ID_PERSONAL_INFORMATION);
 
@@ -103,6 +103,7 @@ export const useFormPersonalInformation = defineStore('useFormPersonalInformatio
 
   return {
     backButtonText,
+    backButtonRoute,
     breadcrumbs,
     isDisabledButton,
     isLoading,
@@ -113,8 +114,4 @@ export const useFormPersonalInformation = defineStore('useFormPersonalInformatio
     schemaBackend,
     errorData,
   };
-});
-
-if (import.meta.hot) {
-  import.meta.hot.accept(acceptHMRUpdate(useFormPersonalInformation, import.meta.hot));
-}
+};

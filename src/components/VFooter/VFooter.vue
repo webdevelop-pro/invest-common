@@ -66,8 +66,6 @@ const TOAST_OPTIONS = {
   variant: 'success',
 };
 
-const currentYear = new Date().getFullYear();
-
 const contactList = computed(() => ([
   {
     address1: 'USA',

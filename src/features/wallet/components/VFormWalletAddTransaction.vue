@@ -24,9 +24,7 @@ const transactionTypeComputed = computed(() => props.transactionType);
 const {
   model,
   validation,
-  isValid,
   isDisabledButton,
-  onValidate,
   saveHandler,
   cancelHandler,
   titile,

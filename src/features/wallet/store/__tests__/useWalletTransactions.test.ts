@@ -6,6 +6,21 @@ import { ref, nextTick } from 'vue';
 import { WalletAddTransactionTypes } from 'InvestCommon/data/wallet/wallet.types';
 import { useWalletTransactions } from '../useWalletTransactions';
 
+// Mock useProfilesStore to prevent router dependency issues
+vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
+  useProfilesStore: vi.fn(() => ({
+    selectedUserProfileData: ref({}),
+    selectedUserProfileId: ref(0),
+  })),
+}));
+
+// Mock useSessionStore to prevent router dependency issues
+vi.mock('InvestCommon/domain/session/store/useSession', () => ({
+  useSessionStore: vi.fn(() => ({
+    userLoggedIn: ref(false),
+  })),
+}));
+
 describe('useWalletTransactions composable', () => {
   let composable: ReturnType<typeof useWalletTransactions>;
 

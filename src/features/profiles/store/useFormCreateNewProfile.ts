@@ -142,10 +142,6 @@ export const useFormCreateNewProfile = () => {
       zip_code: model?.zip_code,
       country: model?.country,
     });
-    useHubspotForm(env.HUBSPOT_FORM_ID_IDENTIFICATION).submitFormToHubspot({
-      email: userSessionTraits.value?.email,
-      ...model.type_of_identification,
-    });
     if (selectedType.value.toLowerCase() === profileTypes.ENTITY) {
       useHubspotForm(env.HUBSPOT_FORM_ID_ENTITY_INFORMATION).submitFormToHubspot({
         email: userSessionTraits.value?.email,
@@ -198,6 +194,7 @@ export const useFormCreateNewProfile = () => {
     }
   };
 
+
   const handlerCreateEscrow = async () => {
     const model = { ...childFormModel.value };
     await useRepositoryProfilesStore.setProfile(
@@ -222,22 +219,10 @@ export const useFormCreateNewProfile = () => {
   const handlerCheckIndividualEscrow = async () => {
     const model = { ...childFormModel.value };
     if (!isIndividualEscrow.value) {
-      await useRepositoryProfilesStore.setProfileById(
-        personalFormModel.value,
-        selectedUserIndividualProfile.value?.type,
-        selectedUserProfileId.value,
+      await accreditationRepository.createEscrow(
+        selectedUserProfileData.value?.user_id,
+        selectedUserIndividualProfile.value?.id,
       );
-      if (!setProfileByIdState.value.error) {
-        await accreditationRepository.createEscrow(
-          selectedUserProfileData.value?.user_id,
-          selectedUserIndividualProfile.value?.id,
-        );
-        useHubspotForm(env.HUBSPOT_FORM_ID_PERSONAL_INFORMATION).submitFormToHubspot({
-          email: userSessionTraits.value?.email,
-          ...model,
-          date_of_birth: model?.dob,
-        });
-      }
     }
     if (!accreditationRepository.createEscrowState.value.error) {
       await useRepositoryProfilesStore.setProfile(
@@ -266,6 +251,16 @@ export const useFormCreateNewProfile = () => {
     isLoading.value = true;
 
     try {
+      await useRepositoryProfilesStore.setProfileById(
+          personalFormModel.value,
+          selectedUserIndividualProfile.value?.type,
+          selectedUserProfileId.value,
+      );
+
+      if (setProfileByIdState.value.error) {
+        return;
+      }
+
       if (isProfileAktAsIndividual.value) {
         await handlerCheckIndividualEscrow();
       } else {

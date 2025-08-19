@@ -5,11 +5,11 @@ import { useWebSocket } from '@vueuse/core';
 import env from 'InvestCommon/global/index';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 import { useRepositoryNotifications } from 'InvestCommon/data/notifications/notifications.repository';
-import { useInvestmentsStore } from 'InvestCommon/store/useInvestments';
-import { useOfferStore } from 'InvestCommon/store/useOffer';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository';
+import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
+import { useRepositoryOffer } from 'InvestCommon/data/offer/offer.repository';
 
 const { NOTIFICATION_URL } = env;
 
@@ -28,8 +28,8 @@ export const useDomainWebSocketStore = defineStore('domainWebsockets', () => {
   const repositoryProfiles = useRepositoryProfiles();
   const repositoryWallet = useRepositoryWallet();
   const repositoryNotifications = useRepositoryNotifications();
-  const investmentsStore = useInvestmentsStore();
-  const offerStore = useOfferStore();
+  const repositoryInvestment = useRepositoryInvestment();
+  const repositoryOffer = useRepositoryOffer();
 
   const handleInternalMessage = (notification: INotification) => {
     switch (notification.data.obj) {
@@ -41,11 +41,10 @@ export const useDomainWebSocketStore = defineStore('domainWebsockets', () => {
         repositoryWallet.updateNotificationData(notification);
         break;
       case 'investment':
-        investmentsStore.updateNotificationData(notification);
-        offerStore.updateNotificationData(notification);
+        repositoryInvestment.updateNotificationData(notification);
         break;
       case 'offer':
-        offerStore.updateNotificationData(notification);
+        repositoryOffer.updateNotificationData(notification);
         break;
       default:
         // Optionally handle unknown types

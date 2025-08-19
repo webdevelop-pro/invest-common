@@ -5,10 +5,10 @@ import { storeToRefs } from 'pinia';
 import VAvatar from 'UiKit/components/VAvatar.vue';
 import { VDropdownMenuItem } from 'UiKit/components/Base/VDropdownMenu';
 import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
-import { useUserProfilesStore } from 'InvestCommon/store/useUserProfiles';
 import NotificationsSidebarButton from 'InvestCommon/features/notifications/VNotificationsSidebarButton.vue';
 import env from 'InvestCommon/global';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
+import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 
 const { IS_STATIC_SITE, FILER_URL } = env;
 
@@ -28,15 +28,16 @@ const userSessionStore = useSessionStore();
 const { userSessionTraits } = storeToRefs(userSessionStore);
 const useDialogsStore = useDialogs();
 const { isDialogLogoutOpen } = storeToRefs(useDialogsStore);
-const userProfileStore = useUserProfilesStore();
-const { getUserData } = storeToRefs(userProfileStore);
+
+const useRepositoryProfilesStore = useRepositoryProfiles();
+const { getUserState } = storeToRefs(useRepositoryProfilesStore);
 
 const userEmail = computed(() => userSessionTraits.value?.email);
 
 const onLogout = () => {
   isDialogLogoutOpen.value = true;
 };
-const imageID = computed(() => getUserData.value?.image_link_id);
+const imageID = computed(() => getUserState.value.data?.image_link_id);
 </script>
 
 <template>

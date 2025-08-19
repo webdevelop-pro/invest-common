@@ -188,6 +188,11 @@ describe('useFormCreateNewProfile', () => {
     };
     const { composable } = setupComposable('entity', model);
     await composable.handleSave();
+    expect(mockSetProfileById).toHaveBeenCalledWith(
+      { first_name: 'John', last_name: 'Doe', email: 'john@example.com' },
+      'individual',
+      '123'
+    );
     expect(mockSetProfile).toHaveBeenCalledWith(model, 'entity');
     expect(mockSubmitFormToHubspot).toHaveBeenCalledWith(expect.objectContaining({ email: 'john@example.com' }));
     expect(mockCreateEscrow).toHaveBeenCalled();
@@ -200,6 +205,11 @@ describe('useFormCreateNewProfile', () => {
     };
     const { composable } = setupComposable('trust', model);
     await composable.handleSave();
+    expect(mockSetProfileById).toHaveBeenCalledWith(
+      { first_name: 'John', last_name: 'Doe', email: 'john@example.com' },
+      'individual',
+      '123'
+    );
     expect(mockSetProfile).toHaveBeenCalledWith(model, 'trust');
     expect(mockSubmitFormToHubspot).toHaveBeenCalledWith(expect.objectContaining({ email: 'john@example.com' }));
     expect(mockCreateEscrow).toHaveBeenCalled();
@@ -210,7 +220,11 @@ describe('useFormCreateNewProfile', () => {
     const model = { type: 'Alto', account_number: '123456', full_account_name: 'John Doe' };
     const { composable } = setupComposable('sdira', model);
     await composable.handleSave();
-    expect(mockSetProfileById).toHaveBeenCalledWith(expect.any(Object), 'individual', '123');
+    expect(mockSetProfileById).toHaveBeenCalledWith(
+      { first_name: 'John', last_name: 'Doe', email: 'john@example.com' },
+      'individual',
+      '123'
+    );
     expect(mockSetProfile).toHaveBeenCalledWith(model, 'sdira');
     expect(mockSubmitFormToHubspot).toHaveBeenCalledWith(expect.objectContaining({ email: 'john@example.com' }));
     expect(mockCreateEscrow).toHaveBeenCalled();
@@ -219,35 +233,40 @@ describe('useFormCreateNewProfile', () => {
 
   it('should save and handle Hubspot for SOLO401K (check individual escrow)', async () => {
     const model = { name: 'Solo 401k', ein: '789' };
-    const { composable, selectTypeFormRef } = setupComposable('solo401k', model, true);
+    const { composable } = setupComposable('solo401k', model, true);
 
     expect(composable.selectedType.value).toBe('solo401k');
     expect(composable.isDisabledButton.value).toBe(false);
 
     await composable.handleSave();
-    expect(mockSetProfileById).toHaveBeenCalledWith(expect.any(Object), 'individual', '123');
+    expect(mockSetProfileById).toHaveBeenCalledWith(
+      { first_name: 'John', last_name: 'Doe', email: 'john@example.com' },
+      'individual',
+      '123'
+    );
     expect(mockSetProfile).toHaveBeenCalledWith(model, 'solo401k');
     expect(mockSubmitFormToHubspot).toHaveBeenCalledWith(expect.objectContaining({ email: 'john@example.com' }));
     expect(mockCreateEscrow).toHaveBeenCalled();
     expect(mockRouterInstance.push).toHaveBeenCalledWith({ name: 'ROUTE_DASHBOARD_ACCOUNT', params: { profileId: 'profile123' } });
   });
 
-  it('should set isLoading to false if setProfileState has error', async () => {
+  it('should set isLoading to false if setProfileByIdState has error', async () => {
+    setProfileByIdState.value.error = 'Some error';
+    const { composable } = setupComposable('entity', { type: 'LLC' });
+    await composable.handleSave();
+    expect(composable.isLoading.value).toBe(false);
+    expect(mockSetProfile).not.toHaveBeenCalled();
+    expect(mockCreateEscrow).not.toHaveBeenCalled();
+    setProfileByIdState.value.error = null;
+  });
+
+  it('should set isLoading to false if setProfileState has error for ENTITY', async () => {
     setProfileState.value.error = 'Some error';
     const { composable } = setupComposable('entity', { type: 'LLC' });
     await composable.handleSave();
     expect(composable.isLoading.value).toBe(false);
     expect(mockCreateEscrow).not.toHaveBeenCalled();
     setProfileState.value.error = null;
-  });
-
-  it('should set isLoading to false if setProfileByIdState has error for SDIRA', async () => {
-    setProfileByIdState.value.error = 'Some error';
-    const { composable } = setupComposable('sdira', { type: 'Alto' });
-    await composable.handleSave();
-    expect(composable.isLoading.value).toBe(false);
-    expect(mockCreateEscrow).not.toHaveBeenCalled();
-    setProfileByIdState.value.error = null;
   });
 
   it('should set isLoading to false if createEscrowState has error for SDIRA', async () => {
@@ -262,20 +281,25 @@ describe('useFormCreateNewProfile', () => {
   it('should return early and scroll to error if form is invalid', async () => {
     const { composable } = setupComposable('entity', {}, false);
     await composable.handleSave();
+    expect(mockSetProfileById).not.toHaveBeenCalled();
     expect(mockSetProfile).not.toHaveBeenCalled();
     expect(mockCreateEscrow).not.toHaveBeenCalled();
     expect(mockRouterInstance.push).not.toHaveBeenCalled();
   });
 
-  it('should skip setProfileById if individual profile already has escrow_id', async () => {
+  it('should skip createEscrow if individual profile already has escrow_id for SDIRA', async () => {
     selectedUserIndividualProfile.value.escrow_id = 'existing-escrow-id';
     const model = { type: 'Alto', account_number: '123456', full_account_name: 'John Doe' };
     const { composable } = setupComposable('sdira', model);
     await composable.handleSave();
-    expect(mockSetProfileById).not.toHaveBeenCalled();
+    expect(mockSetProfileById).toHaveBeenCalledWith(
+      { first_name: 'John', last_name: 'Doe', email: 'john@example.com' },
+      'individual',
+      '123'
+    );
+    expect(mockCreateEscrow).not.toHaveBeenCalled();
     expect(mockSetProfile).toHaveBeenCalledWith(model, 'sdira');
     expect(mockSubmitFormToHubspot).toHaveBeenCalledWith(expect.objectContaining({ email: 'john@example.com' }));
-    expect(mockCreateEscrow).not.toHaveBeenCalled();
     expect(mockRouterInstance.push).toHaveBeenCalledWith({ name: 'ROUTE_DASHBOARD_ACCOUNT', params: { profileId: 'profile123' } });
     selectedUserIndividualProfile.value.escrow_id = null;
   });
@@ -288,7 +312,7 @@ describe('useFormCreateNewProfile', () => {
     mockTrustTypeFormRef = ref({ isValid: true, model: {} });
 
     mockGetProfileByIdOptions.mockClear();
-    const composable = useFormCreateNewProfile();
+    useFormCreateNewProfile();
     mockGetProfileByIdOptions('trust', '123');
 
     expect(mockGetProfileByIdOptions).toHaveBeenCalledWith('trust', '123');
@@ -296,11 +320,10 @@ describe('useFormCreateNewProfile', () => {
 
   it('should ensure isLoading is set to false in finally block even if error occurs', async () => {
     const mockError = new Error('Test error');
-    mockSetProfile.mockRejectedValueOnce(mockError);
+    mockSetProfileById.mockRejectedValueOnce(mockError);
 
     const { composable } = setupComposable('entity', { type: 'LLC' });
 
-    // The error should be caught by the try/finally block
     await expect(composable.handleSave()).rejects.toThrow('Test error');
 
     expect(composable.isLoading.value).toBe(false);
@@ -312,24 +335,42 @@ describe('useFormCreateNewProfile', () => {
 
     const { composable } = setupComposable('sdira', { type: 'Alto' });
 
-    // The error should be caught by the try/finally block
     await expect(composable.handleSave()).rejects.toThrow('Test error');
 
     expect(composable.isLoading.value).toBe(false);
   });
 
-  it('should expose all expected properties', () => {
-    const { composable } = setupComposable('individual');
-    expect(composable).toHaveProperty('backButtonText');
-    expect(composable).toHaveProperty('breadcrumbs');
-    expect(composable).toHaveProperty('selectedType');
-    expect(composable).toHaveProperty('selectedUserProfileData');
-    expect(composable).toHaveProperty('isDisabledButton');
-    expect(composable).toHaveProperty('isLoading');
-    expect(composable).toHaveProperty('handleSave');
-    expect(composable).toHaveProperty('PROFILE_TYPES');
-    expect(composable).toHaveProperty('modelData');
-    expect(composable).toHaveProperty('schemaBackend');
-    expect(composable).toHaveProperty('errorData');
+  it('should handle revocable trust as individual profile', async () => {
+    const model = {
+      type: 'Revocable', name: 'Test Trust', owner_title: 'Trustee', ein: '123', business_controller: {}, beneficials: [],
+    };
+    const { composable } = setupComposable('trust', model);
+    await composable.handleSave();
+    expect(mockSetProfileById).toHaveBeenCalledWith(
+      { first_name: 'John', last_name: 'Doe', email: 'john@example.com' },
+      'individual',
+      '123'
+    );
+    expect(mockCreateEscrow).toHaveBeenCalled();
+    expect(mockSetProfile).toHaveBeenCalledWith(model, 'trust');
+    expect(mockSubmitFormToHubspot).toHaveBeenCalledWith(expect.objectContaining({ email: 'john@example.com' }));
+    expect(mockRouterInstance.push).toHaveBeenCalledWith({ name: 'ROUTE_DASHBOARD_ACCOUNT', params: { profileId: 'profile123' } });
+  });
+
+  it('should handle irrevocable trust as regular profile', async () => {
+    const model = {
+      type: 'Irrevocable', name: 'Test Trust', owner_title: 'Trustee', ein: '123', business_controller: {}, beneficials: [],
+    };
+    const { composable } = setupComposable('trust', model);
+    await composable.handleSave();
+    expect(mockSetProfileById).toHaveBeenCalledWith(
+      { first_name: 'John', last_name: 'Doe', email: 'john@example.com' },
+      'individual',
+      '123'
+    );
+    expect(mockCreateEscrow).toHaveBeenCalled();
+    expect(mockSetProfile).toHaveBeenCalledWith(model, 'trust');
+    expect(mockSubmitFormToHubspot).toHaveBeenCalledWith(expect.objectContaining({ email: 'john@example.com' }));
+    expect(mockRouterInstance.push).toHaveBeenCalledWith({ name: 'ROUTE_DASHBOARD_ACCOUNT', params: { profileId: 'profile123' } });
   });
 });

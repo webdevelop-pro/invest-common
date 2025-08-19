@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   describe, it, expect, vi, beforeEach, afterEach,
 } from 'vitest';
@@ -6,7 +7,7 @@ import { nextTick, ref } from 'vue';
 import { InvestKycTypes } from 'InvestCommon/types/api/invest';
 import { KycTextStatuses } from 'InvestCommon/data/kyc/kyc.types';
 import { ROUTE_SUBMIT_KYC } from 'InvestCommon/helpers/enums/routes';
-import { urlContactUs } from 'InvestCommon/global/links';
+import { urlContactUs, urlProfileKYC } from 'InvestCommon/global/links';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useRepositoryKyc } from 'InvestCommon/data/kyc/kyc.repository';
@@ -38,6 +39,12 @@ const mockKycRepository = {
 vi.mock('InvestCommon/data/kyc/kyc.repository', () => ({
   useRepositoryKyc: vi.fn(() => mockKycRepository),
 }));
+
+// Mock window.location.href
+Object.defineProperty(window, 'location', {
+  value: { href: 'http://localhost:3000/' },
+  writable: true,
+});
 
 vi.mock('InvestCommon/domain/websockets/store/useWebsockets', () => ({
   useDomainWebSocketStore: () => ({
@@ -329,16 +336,16 @@ describe('useKycButton', () => {
   });
 
   describe('handleKycClick logic', () => {
-    it('should call router.push when selectedUserProfileShowKycInitForm is true', async () => {
+    it('should navigate to KYC page when selectedUserProfileShowKycInitForm is true', async () => {
       mockProfilesStore.selectedUserProfileShowKycInitForm.value = true;
       mockProfilesStore.selectedUserProfileType.value = PROFILE_TYPES.SDIRA;
       mockProfilesStore.selectedUserIndividualProfile.value = { id: 555 } as any;
       const store = useKycButton();
+      const hrefSpy = vi.spyOn(window.location, 'href', 'set');
+      
       await store.onClick();
-      expect(mockPush).toHaveBeenCalledWith({
-        name: ROUTE_SUBMIT_KYC,
-        params: { profileId: 555 },
-      });
+      
+      expect(hrefSpy).toHaveBeenCalledWith(urlProfileKYC(555));
       expect(mockKycRepository.handlePlaidKyc).not.toHaveBeenCalled();
     });
     it('should call handlePlaidKyc when selectedUserProfileShowKycInitForm is false', async () => {
@@ -346,9 +353,10 @@ describe('useKycButton', () => {
       mockProfilesStore.selectedUserProfileType.value = PROFILE_TYPES.SDIRA;
       mockProfilesStore.selectedUserIndividualProfile.value = { id: 777 } as any;
       const store = useKycButton();
+      const originalHref = window.location.href;
       await store.onClick();
       expect(mockKycRepository.handlePlaidKyc).toHaveBeenCalledWith(777);
-      expect(mockPush).not.toHaveBeenCalled();
+      expect(window.location.href).toBe(originalHref);
     });
   });
 });

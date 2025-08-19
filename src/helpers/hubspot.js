@@ -1,6 +1,5 @@
 import { nanoid } from 'nanoid';
 
-/* eslint-disable */
 export function setHSPageView(path) {
   var _hsq = window._hsq = window._hsq || [];
   _hsq.push(['setPath', path]);

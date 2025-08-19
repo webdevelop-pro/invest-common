@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   describe, it, expect, vi, beforeEach, afterEach,
 } from 'vitest';
@@ -9,7 +10,7 @@ import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repos
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import { scrollToError } from 'UiKit/helpers/validation/general';
-import { ROUTE_DASHBOARD_ACCOUNT } from '../../../../helpers/enums/routes';
+import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/helpers/enums/routes';
 import { useFormCustodianInformation } from '../useFormCustodianInformation';
 
 const mockFormRef = ref<any>(null);
@@ -89,9 +90,10 @@ vi.mock('InvestCommon/domain/session/store/useSession', () => ({
   })),
 }));
 
+const mockSubmitFormToHubspot = vi.fn();
 vi.mock('InvestCommon/composable/useHubspotForm', () => ({
   useHubspotForm: vi.fn((formId: string) => ({
-    submitFormToHubspot: vi.fn(),
+    submitFormToHubspot: mockSubmitFormToHubspot,
   })),
 }));
 
@@ -116,7 +118,7 @@ const makeFormChild = (isValid = true, model = {}, onValidate = vi.fn()) => ({
 });
 
 describe('useFormCustodianInformation', () => {
-  let store: ReturnType<typeof useFormCustodianInformation>;
+  let composable: ReturnType<typeof useFormCustodianInformation>;
   let mockRouter: any;
   let mockProfilesStore: any;
   let mockRepositoryProfiles: any;
@@ -135,12 +137,13 @@ describe('useFormCustodianInformation', () => {
     mockScrollToError = vi.mocked(scrollToError);
 
     vi.clearAllMocks();
+    mockSubmitFormToHubspot.mockClear();
 
     setProfileByIdState.value = { error: null };
 
     mockFormRef.value = makeFormChild(false, {}, vi.fn());
 
-    store = useFormCustodianInformation();
+    composable = useFormCustodianInformation();
   });
 
   afterEach(() => {
@@ -149,12 +152,12 @@ describe('useFormCustodianInformation', () => {
 
   describe('Initialization', () => {
     it('should initialize with correct default values', () => {
-      expect(store.backButtonText).toBe('Back to Profile Details');
-      expect(store.isLoading).toBe(false);
+      expect(composable.backButtonText.value).toBe('Back to Profile Details');
+      expect(composable.isLoading.value).toBe(false);
     });
 
     it('should compute breadcrumbs correctly', () => {
-      expect(store.breadcrumbs).toEqual([
+      expect(composable.breadcrumbs.value).toEqual([
         {
           text: 'Dashboard',
           to: { name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: '123' } },
@@ -170,7 +173,7 @@ describe('useFormCustodianInformation', () => {
     });
 
     it('should compute model data correctly', () => {
-      expect(store.modelData).toEqual({
+      expect(composable.modelData.value).toEqual({
         full_account_name: 'John Doe IRA',
         type: 'self-directed',
         account_number: '123456789',
@@ -178,7 +181,7 @@ describe('useFormCustodianInformation', () => {
     });
 
     it('should compute schema backend correctly', () => {
-      expect(store.schemaBackend).toEqual({
+      expect(composable.schemaBackend.value).toEqual({
         full_account_name: 'John Doe IRA',
         type: 'self-directed',
         account_number: '123456789',
@@ -189,47 +192,47 @@ describe('useFormCustodianInformation', () => {
   describe('Computed properties', () => {
     it('should compute isDisabledButton based on form validity', () => {
       mockFormRef.value = makeFormChild(false, {}, vi.fn());
-      const newStore = useFormCustodianInformation();
-      expect(newStore.isDisabledButton).toBe(true);
+      const newComposable = useFormCustodianInformation();
+      expect(newComposable.isDisabledButton.value).toBe(true);
     });
 
     it('should enable button when form is valid', () => {
       mockFormRef.value = makeFormChild(true, {}, vi.fn());
-      const newStore = useFormCustodianInformation();
-      expect(newStore.isDisabledButton).toBe(false);
+      const newComposable = useFormCustodianInformation();
+      expect(newComposable.isDisabledButton.value).toBe(false);
     });
 
     it('should handle undefined form child', () => {
       mockFormRef.value = null;
-      const newStore = useFormCustodianInformation();
-      expect(newStore.isDisabledButton).toBe(true);
+      const newComposable = useFormCustodianInformation();
+      expect(newComposable.isDisabledButton.value).toBe(true);
     });
 
     it('should handle undefined model data', () => {
       selectedUserProfileData.value = { data: undefined } as any;
-      const newStore = useFormCustodianInformation();
-      expect(newStore.modelData).toBeUndefined();
+      const newComposable = useFormCustodianInformation();
+      expect(newComposable.modelData.value).toBeUndefined();
     });
 
     it('should handle null schema backend data', () => {
       getProfileByIdOptionsState.value.data = null as any;
-      const newStore = useFormCustodianInformation();
-      expect(newStore.schemaBackend).toBeNull();
+      const newComposable = useFormCustodianInformation();
+      expect(newComposable.schemaBackend.value).toBeNull();
     });
 
     it('should handle loading state', () => {
       getProfileByIdOptionsState.value.loading = true;
-      const newStore = useFormCustodianInformation();
-      expect(newStore.isLoadingFields).toBe(true);
+      const newComposable = useFormCustodianInformation();
+      expect(newComposable.isLoadingFields.value).toBe(true);
     });
   });
 
   describe('handleSave - Validation failure', () => {
     it('should not proceed when form validation fails', async () => {
       mockFormRef.value = makeFormChild(false, {}, vi.fn());
-      const newStore = useFormCustodianInformation();
+      const newComposable = useFormCustodianInformation();
 
-      await newStore.handleSave();
+      await newComposable.handleSave();
 
       expect(mockScrollToError).toHaveBeenCalledWith('ViewDashboardCustodianInformation');
       expect(mockRepositoryProfiles.setProfileById).not.toHaveBeenCalled();
@@ -241,18 +244,18 @@ describe('useFormCustodianInformation', () => {
     it('should call onValidate when form is invalid', async () => {
       const mockOnValidate = vi.fn();
       mockFormRef.value = makeFormChild(false, {}, mockOnValidate);
-      const newStore = useFormCustodianInformation();
+      const newComposable = useFormCustodianInformation();
 
-      await newStore.handleSave();
+      await newComposable.handleSave();
 
       expect(mockOnValidate).toHaveBeenCalled();
     });
 
     it('should handle undefined form child in validation', async () => {
       mockFormRef.value = null;
-      const newStore = useFormCustodianInformation();
+      const newComposable = useFormCustodianInformation();
 
-      await newStore.handleSave();
+      await newComposable.handleSave();
 
       expect(mockScrollToError).toHaveBeenCalledWith('ViewDashboardCustodianInformation');
       expect(mockRepositoryProfiles.setProfileById).not.toHaveBeenCalled();
@@ -263,6 +266,7 @@ describe('useFormCustodianInformation', () => {
     beforeEach(() => {
       mockRepositoryProfiles.setProfileById.mockResolvedValue(undefined);
       mockRepositoryProfiles.getProfileById.mockResolvedValue(undefined);
+      setProfileByIdState.value = { error: null };
       mockFormRef.value = makeFormChild(true, {
         full_account_name: 'John Doe IRA',
         type: 'self-directed',
@@ -271,9 +275,9 @@ describe('useFormCustodianInformation', () => {
     });
 
     it('should save profile successfully and navigate to account page', async () => {
-      const newStore = useFormCustodianInformation();
+      const newComposable = useFormCustodianInformation();
 
-      await newStore.handleSave();
+      await newComposable.handleSave();
 
       expect(mockRepositoryProfiles.setProfileById).toHaveBeenCalledWith(
         {
@@ -289,8 +293,7 @@ describe('useFormCustodianInformation', () => {
 
       expect(vi.mocked(useHubspotForm)).toHaveBeenCalledWith('test-custodian-hubspot-form-id');
 
-      const hubspotFormMock = vi.mocked(useHubspotForm).mock.results[0].value;
-      expect(hubspotFormMock.submitFormToHubspot).toHaveBeenCalledWith({
+      expect(mockSubmitFormToHubspot).toHaveBeenCalledWith({
         email: 'john@example.com',
         full_account_name: 'John Doe IRA',
         type: 'self-directed',
@@ -305,13 +308,13 @@ describe('useFormCustodianInformation', () => {
     });
 
     it('should set loading state during save operation', async () => {
-      const newStore = useFormCustodianInformation();
+      const newComposable = useFormCustodianInformation();
 
-      const savePromise = newStore.handleSave();
-      expect(newStore.isLoading).toBe(true);
+      const savePromise = newComposable.handleSave();
+      expect(newComposable.isLoading.value).toBe(true);
 
       await savePromise;
-      expect(newStore.isLoading).toBe(false);
+      expect(newComposable.isLoading.value).toBe(false);
     });
 
     it('should call onValidate before saving', async () => {
@@ -321,18 +324,18 @@ describe('useFormCustodianInformation', () => {
         type: 'self-directed',
         account_number: '123456789',
       }, mockOnValidate);
-      const newStore = useFormCustodianInformation();
+      const newComposable = useFormCustodianInformation();
 
-      await newStore.handleSave();
+      await newComposable.handleSave();
 
       expect(mockOnValidate).toHaveBeenCalled();
     });
 
     it('should handle empty model data', async () => {
       mockFormRef.value = makeFormChild(true, {}, vi.fn());
-      const newStore = useFormCustodianInformation();
+      const newComposable = useFormCustodianInformation();
 
-      await newStore.handleSave();
+      await newComposable.handleSave();
 
       expect(mockRepositoryProfiles.setProfileById).toHaveBeenCalledWith(
         {},
@@ -343,9 +346,9 @@ describe('useFormCustodianInformation', () => {
 
     it('should handle undefined model data', async () => {
       mockFormRef.value = makeFormChild(true, undefined, vi.fn());
-      const newStore = useFormCustodianInformation();
+      const newComposable = useFormCustodianInformation();
 
-      await newStore.handleSave();
+      await newComposable.handleSave();
 
       expect(mockRepositoryProfiles.setProfileById).toHaveBeenCalledWith(
         {},
@@ -366,22 +369,22 @@ describe('useFormCustodianInformation', () => {
 
     it('should not submit to Hubspot when setProfileById fails', async () => {
       setProfileByIdState.value.error = 'Some error occurred' as any;
-      const newStore = useFormCustodianInformation();
+      const newComposable = useFormCustodianInformation();
 
-      await newStore.handleSave();
+      await newComposable.handleSave();
 
       expect(mockRepositoryProfiles.setProfileById).toHaveBeenCalled();
-      expect(mockHubspotForm.submitFormToHubspot).not.toHaveBeenCalled();
+      expect(mockSubmitFormToHubspot).not.toHaveBeenCalled();
       expect(mockRepositoryProfiles.getProfileById).toHaveBeenCalled();
       expect(mockRouter.push).toHaveBeenCalled();
     });
 
     it('should handle setProfileById rejection', async () => {
       mockRepositoryProfiles.setProfileById.mockRejectedValue(new Error('Network error'));
-      const newStore = useFormCustodianInformation();
+      const newComposable = useFormCustodianInformation();
 
-      await expect(newStore.handleSave()).rejects.toThrow('Network error');
-      expect(newStore.isLoading).toBe(false);
+      await expect(newComposable.handleSave()).rejects.toThrow('Network error');
+      expect(newComposable.isLoading.value).toBe(false);
     });
 
     it('should handle getProfileById rejection', async () => {
@@ -394,26 +397,25 @@ describe('useFormCustodianInformation', () => {
         account_number: '123456789',
       }, mockOnValidate);
 
-      const newStore = useFormCustodianInformation();
+      const newComposable = useFormCustodianInformation();
 
-      // Since getProfileById is not awaited, the promise should resolve
-      await newStore.handleSave();
+      await newComposable.handleSave();
 
-      expect(newStore.isLoading).toBe(false);
+      expect(newComposable.isLoading.value).toBe(false);
       expect(mockOnValidate).toHaveBeenCalled();
       expect(mockRepositoryProfiles.getProfileById).toHaveBeenCalledWith('individual', '123');
     });
 
     it('should ensure loading state is reset on error', async () => {
       mockRepositoryProfiles.setProfileById.mockRejectedValue(new Error('Network error'));
-      const newStore = useFormCustodianInformation();
+      const newComposable = useFormCustodianInformation();
 
       try {
-        await newStore.handleSave();
+        await newComposable.handleSave();
       } catch (error) {
       }
 
-      expect(newStore.isLoading).toBe(false);
+      expect(newComposable.isLoading.value).toBe(false);
     });
   });
 });
