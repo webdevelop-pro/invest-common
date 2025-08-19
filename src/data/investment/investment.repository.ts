@@ -1,5 +1,5 @@
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
-import { toasterErrorHandling } from 'InvestCommon/data/repository/error/toasterErrorHandling';
+import { toasterErrorHandlingAnalytics } from 'InvestCommon/data/repository/error/toasterErrorHandlingAnalytics';
 import {
   IInvestUnconfirmed, IInvestConfirm,
   IInvestFunding,
@@ -54,7 +54,7 @@ export const useRepositoryInvestment = defineStore('repository-investment', () =
       return formattedData;
     } catch (err) {
       getInvestmentsState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to fetch investments');
+      toasterErrorHandlingAnalytics(err, 'Failed to fetch investments');
       throw err;
     } finally {
       getInvestmentsState.value.loading = false;
@@ -73,7 +73,7 @@ export const useRepositoryInvestment = defineStore('repository-investment', () =
       return formattedData;
     } catch (err) {
       getInvestOneState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to fetch investment');
+      toasterErrorHandlingAnalytics(err, 'Failed to fetch investment');
       throw err;
     } finally {
       getInvestOneState.value.loading = false;
@@ -105,7 +105,7 @@ export const useRepositoryInvestment = defineStore('repository-investment', () =
       return getInvestUnconfirmedState.value.data || null;
     } catch (err) {
       getInvestUnconfirmedState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to fetch unconfirmed investments');
+      toasterErrorHandlingAnalytics(err, 'Failed to fetch unconfirmed investments');
       throw err;
     } finally {
       getInvestUnconfirmedState.value.loading = false;
@@ -123,7 +123,7 @@ export const useRepositoryInvestment = defineStore('repository-investment', () =
       return response.data as IInvestment;
     } catch (err) {
       setInvestState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to set investment');
+      toasterErrorHandlingAnalytics(err, 'Failed to set investment');
       throw err;
     } finally {
       setInvestState.value.loading = false;
@@ -141,7 +141,7 @@ export const useRepositoryInvestment = defineStore('repository-investment', () =
       return response.data as {number_of_shares: number};
     } catch (err) {
       setAmountState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to set amount');
+      toasterErrorHandlingAnalytics(err, 'Failed to set amount');
       throw err;
     } finally {
       setAmountState.value.loading = false;
@@ -157,7 +157,7 @@ export const useRepositoryInvestment = defineStore('repository-investment', () =
       return response.data as {step: string};
     } catch (err) {
       setOwnershipState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to set ownership');
+      toasterErrorHandlingAnalytics(err, 'Failed to set ownership');
       throw err;
     } finally {
       setOwnershipState.value.loading = false;
@@ -181,7 +181,7 @@ export const useRepositoryInvestment = defineStore('repository-investment', () =
       return response.data;
     } catch (err) {
       setSignatureState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to set signature');
+      toasterErrorHandlingAnalytics(err, 'Failed to set signature');
       throw err;
     } finally {
       setSignatureState.value.loading = false;
@@ -199,7 +199,7 @@ export const useRepositoryInvestment = defineStore('repository-investment', () =
       return response.data;
     } catch (err) {
       setFundingState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to set funding');
+      toasterErrorHandlingAnalytics(err, 'Failed to set funding');
       throw err;
     } finally {
       setFundingState.value.loading = false;
@@ -215,7 +215,7 @@ export const useRepositoryInvestment = defineStore('repository-investment', () =
       return response.data as IInvestConfirm;
     } catch (err) {
       setReviewState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to set review');
+      toasterErrorHandlingAnalytics(err, 'Failed to set review');
       throw err;
     } finally {
       setReviewState.value.loading = false;
@@ -233,7 +233,7 @@ export const useRepositoryInvestment = defineStore('repository-investment', () =
       return response.data;
     } catch (err) {
       cancelInvestState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to cancel investment');
+      toasterErrorHandlingAnalytics(err, 'Failed to cancel investment');
       throw err;
     } finally {
       cancelInvestState.value.loading = false;
@@ -249,7 +249,7 @@ export const useRepositoryInvestment = defineStore('repository-investment', () =
       return response.data;
     } catch (err) {
       setAmountOptionsState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to get amount options');
+      toasterErrorHandlingAnalytics(err, 'Failed to get amount options');
       throw err;
     } finally {
       setAmountOptionsState.value.loading = false;
@@ -265,7 +265,7 @@ export const useRepositoryInvestment = defineStore('repository-investment', () =
       return response.data;
     } catch (err) {
       setOwnershipOptionsState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to get ownership options');
+      toasterErrorHandlingAnalytics(err, 'Failed to get ownership options');
       throw err;
     } finally {
       setOwnershipOptionsState.value.loading = false;
@@ -281,7 +281,7 @@ export const useRepositoryInvestment = defineStore('repository-investment', () =
       return response.data;
     } catch (err) {
       setFundingOptionsState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to get funding options');
+      toasterErrorHandlingAnalytics(err, 'Failed to get funding options');
       throw err;
     } finally {
       setFundingOptionsState.value.loading = false;
@@ -297,7 +297,7 @@ export const useRepositoryInvestment = defineStore('repository-investment', () =
       return response.data;
     } catch (err) {
       setCancelOptionsState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to get cancel options');
+      toasterErrorHandlingAnalytics(err, 'Failed to get cancel options');
       throw err;
     } finally {
       setCancelOptionsState.value.loading = false;

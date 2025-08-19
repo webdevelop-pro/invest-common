@@ -4,7 +4,7 @@ export interface APIErrorData {
   statusCode: number;
   responseJson: any;
   stack: string;
-  httpRequest?: {
+  httpRequest: {
     method: string;
     url: string;
     path: string;
@@ -34,13 +34,13 @@ export class APIError extends Error {
       responseJson: null,
       stack: this.stack || '',
       httpRequest: httpRequest || {
-        method: 'UNKNOWN',
-        url: 'UNKNOWN',
-        path: 'UNKNOWN',
-        userAgent: 'UNKNOWN',
+        method: '',
+        url: '',
+        path: '',
+        userAgent: '',
         referer: '',
-        remoteIp: 'UNKNOWN',
-        protocol: 'UNKNOWN',
+        remoteIp: '',
+        protocol: '',
       },
     };
 

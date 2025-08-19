@@ -11,8 +11,8 @@ vi.mock('UiKit/components/Base/VToast/use-toast', () => ({
   useToast: () => ({ toast: toastMock }),
 }));
 
-vi.mock('InvestCommon/data/repository/error/globalErrorHandling', () => ({
-  globalErrorHandling: vi.fn(),
+vi.mock('InvestCommon/data/repository/error/toasterErrorHandlingAnalytics', () => ({
+  toasterErrorHandlingAnalytics: vi.fn(),
 }));
 
 describe('useKycThirdParty', () => {

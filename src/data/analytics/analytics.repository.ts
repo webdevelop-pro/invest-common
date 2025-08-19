@@ -8,7 +8,6 @@ const { ANALYTIC_URL } = env;
 export const useRepositoryAnalytics = () => {
   const apiClient = new ApiClient(ANALYTIC_URL);
 
-  // Create action state for setMessage function
   const setMessageState = createActionState<IAnalyticsResponse>();
 
   const setMessage = async (messageData: IAnalyticsMessage): Promise<IAnalyticsResponse> => {
@@ -16,7 +15,6 @@ export const useRepositoryAnalytics = () => {
       setMessageState.value.loading = true;
       setMessageState.value.error = null;
 
-      // Add time if not provided
       const payload = {
         ...messageData,
         time: messageData.time || new Date().toISOString(),

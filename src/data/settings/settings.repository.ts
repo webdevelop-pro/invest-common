@@ -1,5 +1,5 @@
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
-import { globalErrorHandling } from 'UiKit/helpers/api/globalErrorHandling';
+import { toasterErrorHandlingAnalytics } from 'UiKit/helpers/api/toasterErrorHandlingAnalytics';
 import env from 'InvestCommon/global';
 import { createActionState } from 'UiKit/helpers/api/repository';
 import {
@@ -31,7 +31,7 @@ export const useRepositoryAuth = () => {
       return response.data;
     } catch (err) {
       getAllSessionState.value.error = err as Error;
-      globalErrorHandling(err, 'Failed to get all sessions');
+      toasterErrorHandlingAnalytics(err, 'Failed to get all sessions');
       throw err;
     } finally {
       getAllSessionState.value.loading = false;
@@ -47,7 +47,7 @@ export const useRepositoryAuth = () => {
       return response.data;
     } catch (err) {
       deleteAllSessionState.value.error = err as Error;
-      globalErrorHandling(err, 'Failed to delete all sessions');
+      toasterErrorHandlingAnalytics(err, 'Failed to delete all sessions');
       throw err;
     } finally {
       deleteAllSessionState.value.loading = false;
@@ -63,7 +63,7 @@ export const useRepositoryAuth = () => {
       return response.data;
     } catch (err) {
       deleteOneSessionState.value.error = err as Error;
-      globalErrorHandling(err, 'Failed to delete session');
+      toasterErrorHandlingAnalytics(err, 'Failed to delete session');
       throw err;
     } finally {
       deleteOneSessionState.value.loading = false;
@@ -79,7 +79,7 @@ export const useRepositoryAuth = () => {
       return response.data;
     } catch (err) {
       getAuthFlowState.value.error = err as Error;
-      globalErrorHandling(err, 'Failed to get auth flow');
+      toasterErrorHandlingAnalytics(err, 'Failed to get auth flow');
       throw err;
     } finally {
       getAuthFlowState.value.loading = false;
@@ -98,7 +98,7 @@ export const useRepositoryAuth = () => {
       return response.data;
     } catch (err) {
       setSettingsState.value.error = err as Error;
-      globalErrorHandling(err, 'Failed to set settings');
+      toasterErrorHandlingAnalytics(err, 'Failed to set settings');
       throw err;
     } finally {
       setSettingsState.value.loading = false;
@@ -114,7 +114,7 @@ export const useRepositoryAuth = () => {
       return response.data;
     } catch (err) {
       getSettingsState.value.error = err as Error;
-      globalErrorHandling(err, 'Failed to get settings');
+      toasterErrorHandlingAnalytics(err, 'Failed to get settings');
       throw err;
     } finally {
       getSettingsState.value.loading = false;

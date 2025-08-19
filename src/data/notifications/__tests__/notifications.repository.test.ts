@@ -1,12 +1,11 @@
 import { setActivePinia, createPinia } from 'pinia';
-import { globalErrorHandling } from 'InvestCommon/data/repository/error/globalErrorHandling';
+import { toasterErrorHandlingAnalytics } from 'InvestCommon/data/repository/error/toasterErrorHandlingAnalytics';
 import {
   describe, it, expect, beforeEach, vi,
 } from 'vitest';
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import { useRepositoryNotifications } from '../notifications.repository';
 
-// Mock ApiClient
 vi.mock('InvestCommon/data/service/apiClient', () => ({
   ApiClient: vi.fn().mockImplementation(() => ({
     get: vi.fn().mockImplementation(() => Promise.resolve({ data: [] })),
@@ -14,12 +13,10 @@ vi.mock('InvestCommon/data/service/apiClient', () => ({
   })),
 }));
 
-// Mock toaster error handling
-vi.mock('InvestCommon/data/repository/error/globalErrorHandling', () => ({
-  globalErrorHandling: vi.fn(),
+vi.mock('InvestCommon/data/repository/error/toasterErrorHandlingAnalytics', () => ({
+  toasterErrorHandlingAnalytics: vi.fn(),
 }));
 
-// Mock createActionState
 vi.mock('InvestCommon/data/repository/repository', () => ({
   createActionState: vi.fn().mockImplementation(() => ({
     value: {
@@ -30,7 +27,6 @@ vi.mock('InvestCommon/data/repository/repository', () => ({
   })),
 }));
 
-// Mock NotificationFormatter
 vi.mock('../notifications.formatter', () => ({
   NotificationFormatter: vi.fn().mockImplementation((notification) => ({
     format: () => ({
@@ -90,7 +86,7 @@ describe('Notifications Repository', () => {
     expect(store.getAllState.value.loading).toBe(false);
     expect(store.getAllState.value.error).toBeNull();
     expect(store.getAllState.value.data).toEqual(mockNotifications);
-    expect(globalErrorHandling).not.toHaveBeenCalled();
+    expect(toasterErrorHandlingAnalytics).not.toHaveBeenCalled();
   });
 
   it('should handle fetch error', async () => {
@@ -106,7 +102,7 @@ describe('Notifications Repository', () => {
     await expect(store.getAll()).rejects.toThrow(mockError);
     expect(store.getAllState.value.error).toBe(mockError);
     expect(store.getAllState.value.loading).toBe(false);
-    expect(globalErrorHandling).toHaveBeenCalledWith(expect.any(Object), 'Failed to fetch notifications');
+    expect(toasterErrorHandlingAnalytics).toHaveBeenCalledWith(expect.any(Object), 'Failed to fetch notifications');
   });
 
   it('should mark all notifications as read', async () => {
@@ -132,7 +128,7 @@ describe('Notifications Repository', () => {
     ]);
     expect(store.markAllAsReadState.value.loading).toBe(false);
     expect(store.markAllAsReadState.value.error).toBeNull();
-    expect(globalErrorHandling).not.toHaveBeenCalled();
+    expect(toasterErrorHandlingAnalytics).not.toHaveBeenCalled();
   });
 
   it('should handle mark all as read error', async () => {
@@ -148,7 +144,7 @@ describe('Notifications Repository', () => {
     await expect(store.markAllAsRead()).rejects.toThrow(mockError);
     expect(store.markAllAsReadState.value.error).toBe(mockError);
     expect(store.markAllAsReadState.value.loading).toBe(false);
-    expect(globalErrorHandling).toHaveBeenCalledWith(expect.any(Object), 'Failed to mark all notifications as read');
+    expect(toasterErrorHandlingAnalytics).toHaveBeenCalledWith(expect.any(Object), 'Failed to mark all notifications as read');
   });
 
   it('should mark single notification as read', async () => {
@@ -174,7 +170,7 @@ describe('Notifications Repository', () => {
     ]);
     expect(store.markAsReadByIdState.value.loading).toBe(false);
     expect(store.markAsReadByIdState.value.error).toBeNull();
-    expect(globalErrorHandling).not.toHaveBeenCalled();
+    expect(toasterErrorHandlingAnalytics).not.toHaveBeenCalled();
   });
 
   it('should handle mark single notification as read error', async () => {
@@ -190,7 +186,7 @@ describe('Notifications Repository', () => {
     await expect(store.markAsReadById(1)).rejects.toThrow(mockError);
     expect(store.markAsReadByIdState.value.error).toBe(mockError);
     expect(store.markAsReadByIdState.value.loading).toBe(false);
-    expect(globalErrorHandling).toHaveBeenCalledWith(expect.any(Object), 'Failed to mark notification as read');
+    expect(toasterErrorHandlingAnalytics).toHaveBeenCalledWith(expect.any(Object), 'Failed to mark notification as read');
   });
 
   it('should format notifications correctly', () => {
@@ -245,7 +241,6 @@ describe('Notifications Repository', () => {
   it('should reset all data correctly', () => {
     const store = useRepositoryNotifications();
 
-    // Set some initial state
     store.notifications = [{ id: 1, type: 'test', status: 'unread' }];
     store.getAllState.value = { loading: true, error: new Error('test'), data: [{ id: 1 }] };
     store.markAllAsReadState.value = { loading: true, error: new Error('test'), data: undefined };
@@ -262,7 +257,6 @@ describe('Notifications Repository', () => {
   it('should reset data correctly', () => {
     const store = useRepositoryNotifications();
 
-    // Set some initial state
     store.notifications = [{ id: 1, type: 'test', status: 'unread' }];
     store.getAllState.value.data = [{ id: 1 }];
     store.getAllState.value.loading = true;

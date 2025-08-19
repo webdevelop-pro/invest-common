@@ -2,7 +2,7 @@ import {
   describe, it, expect, beforeEach, vi,
 } from 'vitest';
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
-import { globalErrorHandling } from 'InvestCommon/data/repository/error/globalErrorHandling';
+import { toasterErrorHandlingAnalytics } from 'InvestCommon/data/repository/error/toasterErrorHandlingAnalytics';
 import { AccreditationTypes } from 'InvestCommon/types/api/invest';
 import { useRepositoryAccreditation } from '../accreditation.repository';
 
@@ -15,8 +15,8 @@ vi.mock('InvestCommon/data/service/apiClient', () => ({
 }));
 
 // Mock toaster error handling
-vi.mock('InvestCommon/data/repository/error/globalErrorHandling', () => ({
-  globalErrorHandling: vi.fn(),
+vi.mock('InvestCommon/data/repository/error/toasterErrorHandlingAnalytics', () => ({
+  toasterErrorHandlingAnalytics: vi.fn(),
 }));
 
 describe('Accreditation Repository', () => {
@@ -43,7 +43,7 @@ describe('Accreditation Repository', () => {
     expect(repository.getAllState.value.data).toEqual(mockAccreditation);
     expect(repository.getAllState.value.loading).toBe(false);
     expect(repository.getAllState.value.error).toBeNull();
-    expect(globalErrorHandling).not.toHaveBeenCalled();
+    expect(toasterErrorHandlingAnalytics).not.toHaveBeenCalled();
   });
 
   it('should handle fetch error', async () => {
@@ -59,7 +59,7 @@ describe('Accreditation Repository', () => {
     await expect(repository.getAll(123)).rejects.toThrow(mockError);
     expect(repository.getAllState.value.error).toBe(mockError);
     expect(repository.getAllState.value.loading).toBe(false);
-    expect(globalErrorHandling).toHaveBeenCalledWith(expect.any(Object), 'Failed to fetch accreditation data');
+    expect(toasterErrorHandlingAnalytics).toHaveBeenCalledWith(expect.any(Object), 'Failed to fetch accreditation data');
   });
 
   it('should create accreditation successfully', async () => {
@@ -76,7 +76,7 @@ describe('Accreditation Repository', () => {
     expect(result).toEqual(mockResponse);
     expect(repository.createState.value.loading).toBe(false);
     expect(repository.createState.value.error).toBeNull();
-    expect(globalErrorHandling).not.toHaveBeenCalled();
+    expect(toasterErrorHandlingAnalytics).not.toHaveBeenCalled();
   });
 
   it('should update accreditation successfully', async () => {
@@ -93,7 +93,7 @@ describe('Accreditation Repository', () => {
     expect(result).toEqual(mockResponse);
     expect(repository.updateState.value.loading).toBe(false);
     expect(repository.updateState.value.error).toBeNull();
-    expect(globalErrorHandling).not.toHaveBeenCalled();
+    expect(toasterErrorHandlingAnalytics).not.toHaveBeenCalled();
   });
 
   it('should upload document successfully', async () => {
@@ -111,7 +111,7 @@ describe('Accreditation Repository', () => {
     expect(result).toEqual(mockResponse);
     expect(repository.uploadDocumentState.value.loading).toBe(false);
     expect(repository.uploadDocumentState.value.error).toBeNull();
-    expect(globalErrorHandling).not.toHaveBeenCalled();
+    expect(toasterErrorHandlingAnalytics).not.toHaveBeenCalled();
   });
 
   it('should create escrow successfully', async () => {
@@ -128,7 +128,7 @@ describe('Accreditation Repository', () => {
     expect(result).toEqual(mockResponse);
     expect(repository.createEscrowState.value.loading).toBe(false);
     expect(repository.createEscrowState.value.error).toBeNull();
-    expect(globalErrorHandling).not.toHaveBeenCalled();
+    expect(toasterErrorHandlingAnalytics).not.toHaveBeenCalled();
   });
 
   it('should handle create accreditation error', async () => {
@@ -144,7 +144,7 @@ describe('Accreditation Repository', () => {
     await expect(repository.create(123, 'Test note')).rejects.toThrow(mockError);
     expect(repository.createState.value.error).toBe(mockError);
     expect(repository.createState.value.loading).toBe(false);
-    expect(globalErrorHandling).toHaveBeenCalledWith(expect.any(Object), 'Failed to create accreditation');
+    expect(toasterErrorHandlingAnalytics).toHaveBeenCalledWith(expect.any(Object), 'Failed to create accreditation');
   });
 
   it('should handle update accreditation error', async () => {
@@ -160,7 +160,7 @@ describe('Accreditation Repository', () => {
     await expect(repository.update(123, 'Updated note')).rejects.toThrow(mockError);
     expect(repository.updateState.value.error).toBe(mockError);
     expect(repository.updateState.value.loading).toBe(false);
-    expect(globalErrorHandling).toHaveBeenCalledWith(expect.any(Object), 'Failed to update accreditation');
+    expect(toasterErrorHandlingAnalytics).toHaveBeenCalledWith(expect.any(Object), 'Failed to update accreditation');
   });
 
   it('should handle upload document error', async () => {
@@ -177,7 +177,7 @@ describe('Accreditation Repository', () => {
     await expect(repository.uploadDocument(123, 456, formData)).rejects.toThrow(mockError);
     expect(repository.uploadDocumentState.value.error).toBe(mockError);
     expect(repository.uploadDocumentState.value.loading).toBe(false);
-    expect(globalErrorHandling).toHaveBeenCalledWith(expect.any(Object), 'Failed to upload accreditation document');
+    expect(toasterErrorHandlingAnalytics).toHaveBeenCalledWith(expect.any(Object), 'Failed to upload accreditation document');
   });
 
   it('should handle create escrow error', async () => {
@@ -193,7 +193,7 @@ describe('Accreditation Repository', () => {
     await expect(repository.createEscrow(123, 456)).rejects.toThrow(mockError);
     expect(repository.createEscrowState.value.error).toBe(mockError);
     expect(repository.createEscrowState.value.loading).toBe(false);
-    expect(globalErrorHandling).toHaveBeenCalledWith(mockError, 'Failed to create escrow');
+    expect(toasterErrorHandlingAnalytics).toHaveBeenCalledWith(mockError, 'Failed to create escrow');
   });
 
   it('should verify loading states during operations', async () => {

@@ -1,6 +1,7 @@
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 import { useRepositoryAnalytics } from 'InvestCommon/data/analytics/analytics.repository';
 import { ErrorResponse } from './handlers/errorHandler';
+import { AnalyticsLogLevel } from 'InvestCommon/data/analytics/analytics.type';
 
 const { toast } = useToast();
 
@@ -10,18 +11,17 @@ const TOAST_OPTIONS = {
   variant: 'error',
 };
 
-export const globalErrorHandling = async (errorResponse: ErrorResponse, comment: string) => {
-  console.log(errorResponse.data)
+export const toasterErrorHandlingAnalytics = async (errorResponse: ErrorResponse, comment: string) => {
   // Send error to analytics before showing toast
   try {
     const analytics = useRepositoryAnalytics();
     await analytics.setMessage({
       time: errorResponse.data.timestamp,
-      level: 'error',
+      level: AnalyticsLogLevel.ERROR,
       message: errorResponse.message,
       error: comment || 'Unknown error',
       data: {
-        component: 'globalErrorHandling',
+        component: 'toasterErrorHandlingAnalytics',
         caller: ['error-handling'],
         stack: [errorResponse.stack],
         serviceContext: {

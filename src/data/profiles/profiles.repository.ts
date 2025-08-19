@@ -2,7 +2,7 @@ import { ref, computed } from 'vue';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import env from 'InvestCommon/global';
-import { globalErrorHandling } from 'InvestCommon/data/repository/error/globalErrorHandling';
+import { toasterErrorHandlingAnalytics } from 'InvestCommon/data/repository/error/toasterErrorHandlingAnalytics';
 import { createActionState } from 'InvestCommon/data/repository/repository';
 import {
   IProfileData, IUserIdentityResponse, IProfileIndividual, ISchema,
@@ -45,7 +45,7 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
       return getProfileOptionsState.value.data;
     } catch (err) {
       getProfileOptionsState.value.error = err as Error;
-      globalErrorHandling(err, 'Failed to fetch profile options');
+      toasterErrorHandlingAnalytics(err, 'Failed to fetch profile options');
       throw err;
     } finally {
       getProfileOptionsState.value.loading = false;
@@ -61,7 +61,7 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
       return setProfileState.value.data;
     } catch (err) {
       setProfileState.value.error = err as Error;
-      globalErrorHandling(err, 'Failed to set profile');
+      toasterErrorHandlingAnalytics(err, 'Failed to set profile');
       throw err;
     } finally {
       setProfileState.value.loading = false;
@@ -77,7 +77,7 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
       return getProfileByIdState.value.data;
     } catch (err) {
       getProfileByIdState.value.error = err as Error;
-      globalErrorHandling(err, 'Failed to fetch profile by ID');
+      toasterErrorHandlingAnalytics(err, 'Failed to fetch profile by ID');
       throw err;
     } finally {
       getProfileByIdState.value.loading = false;
@@ -93,7 +93,7 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
       return getProfileByIdOptionsState.value.data;
     } catch (err) {
       getProfileByIdOptionsState.value.error = err as Error;
-      globalErrorHandling(err, 'Failed to fetch profile by ID options');
+      toasterErrorHandlingAnalytics(err, 'Failed to fetch profile by ID options');
       throw err;
     } finally {
       getProfileByIdOptionsState.value.loading = false;
@@ -109,7 +109,7 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
       return setProfileByIdState.value.data;
     } catch (err) {
       setProfileByIdState.value.error = err as Error;
-      globalErrorHandling(err, 'Failed to update profile');
+      toasterErrorHandlingAnalytics(err, 'Failed to update profile');
       throw err;
     } finally {
       setProfileByIdState.value.loading = false;
@@ -132,7 +132,7 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
       return getUserState.value.data;
     } catch (err) {
       getUserState.value.error = err as Error;
-      globalErrorHandling(err, 'Failed to fetch user data');
+      toasterErrorHandlingAnalytics(err, 'Failed to fetch user data');
       throw err;
     } finally {
       getUserState.value.loading = false;
@@ -148,7 +148,7 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
       return setUserState.value.data;
     } catch (err) {
       setUserState.value.error = err as Error;
-      globalErrorHandling(err, 'Failed to update user data');
+      toasterErrorHandlingAnalytics(err, 'Failed to update user data');
       throw err;
     } finally {
       setUserState.value.loading = false;
@@ -164,7 +164,7 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
       return setUserOptionsState.value.data;
     } catch (err) {
       setUserOptionsState.value.error = err as Error;
-      globalErrorHandling(err, 'Failed to fetch user options');
+      toasterErrorHandlingAnalytics(err, 'Failed to fetch user options');
       throw err;
     } finally {
       setUserOptionsState.value.loading = false;
@@ -186,7 +186,7 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
       return updateUserDataState.value.data;
     } catch (err) {
       updateUserDataState.value.error = err as Error;
-      globalErrorHandling(err, 'Failed to update user data');
+      toasterErrorHandlingAnalytics(err, 'Failed to update user data');
       throw err;
     } finally {
       updateUserDataState.value.loading = false;
