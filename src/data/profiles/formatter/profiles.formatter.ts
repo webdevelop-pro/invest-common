@@ -1,7 +1,7 @@
 import {
   IProfileIndividual,
   IProfileFormatted,
-} from './profiles.types';
+} from '../profiles.types';
 import { InvestKycTypes, AccreditationTypes } from 'InvestCommon/types/api/invest';
 import { PROFILE_TYPES } from 'InvestCommon/global/investment.json';
 

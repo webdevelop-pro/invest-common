@@ -42,7 +42,7 @@ const saveHandler = () => {
 
 <template>
   <div
-    class="LayoutBackButton layout-back-button"
+    class="VLayoutForm layout-back-button"
     :class="{ 'is--loading': isLoading }"
   >
     <div class="is--container layout-back-button__container">

@@ -1,104 +1,32 @@
 <script setup lang="ts">
-import {
-  watch, PropType, computed, reactive,
-  ref,
-  defineAsyncComponent,
-} from 'vue';
+import { PropType } from 'vue';
 import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
 import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
-import { storeToRefs } from 'pinia';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
-import { JSONSchemaType } from 'ajv/dist/types/json-schema';
-import {
-  emailRule, errorMessageRule, firstNameRule, lastNameRule,
-  middleNameRule, phoneRule,
-} from 'UiKit/helpers/validation/rules';
-import { filterSchema } from 'UiKit/helpers/validation/general';
-import { createFormModel } from 'UiKit/helpers/model';
-import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
-import { isEmpty } from 'UiKit/helpers/general';
-import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
-
-interface FormModelAccount {
-  first_name: string;
-  last_name: string;
-  middle_name?: string;
-  email: string;
-  phone?: string;
-}
+import { useAccountForm, FormModelAccount } from './logic/useAccountForm';
 
 const props = defineProps({
   modelData: Object as PropType<FormModelAccount>,
   readOnly: Boolean,
 });
 
-const useRepositoryProfilesStore = useRepositoryProfiles();
-const { setUserState, setUserOptionsState } = storeToRefs(useRepositoryProfilesStore);
-
-
-const errorData = computed(() => setUserState.value.error?.data?.responseJson);
-const schemaBackend = computed(() => setUserOptionsState.value.data);
-
-const isDialogContactUsOpen = ref(false);
-
-const VDialogContactUs = defineAsyncComponent({
-  loader: () => import('InvestCommon/components/dialogs/VDialogContactUs.vue'),
-});
-
-const schema = {
-  $schema: 'http://json-schema.org/draft-07/schema#',
-  definitions: {
-    Individual: {
-      properties: {
-        first_name: firstNameRule,
-        last_name: lastNameRule,
-        middle_name: middleNameRule,
-        email: emailRule,
-        phone: phoneRule,
-      },
-      type: 'object',
-      errorMessage: errorMessageRule,
-      required: ['first_name', 'last_name', 'email'],
-    },
-  },
-  $ref: '#/definitions/Individual',
-} as unknown as JSONSchemaType<FormModelAccount>;
-
-const model = reactive<FormModelAccount>({});
-const formModel = createFormModel(schema);
-let validator = new PrecompiledValidator<FormModelAccount>(
-  filterSchema(schemaBackend.value, formModel),
+const {
+  model,
+  validation,
+  isValid,
+  onValidate,
+  validator,
+  errorData,
+  schemaBackend,
   schema,
-);
-const validation = ref<unknown>();
-const isValid = computed(() => isEmpty(validation.value || {}));
-
-const onValidate = () => {
-  validation.value = validator.getFormValidationErrors(model);
-};
+  isDialogContactUsOpen,
+  VDialogContactUs,
+  setUserState,
+} = useAccountForm(props);
 
 defineExpose({
   model, validation, validator, isValid, onValidate,
-});
-
-watch(() => props.modelData, () => {
-  if (props.modelData?.first_name) model.first_name = props.modelData?.first_name;
-  if (props.modelData?.last_name) model.last_name = props.modelData?.last_name;
-  if (props.modelData?.middle_name) model.middle_name = props.modelData?.middle_name;
-  if (props.modelData?.email) model.email = props.modelData?.email;
-  if (props.modelData?.phone) model.phone = props.modelData?.phone;
-}, { deep: true, immediate: true });
-
-watch(() => model, () => {
-  if (!isValid.value) onValidate();
-}, { deep: true });
-
-watch(() => [schemaBackend.value, schema], () => {
-  validator = new PrecompiledValidator<FormModelAccount>(
-    filterSchema(schemaBackend.value, formModel),
-    schema,
-  );
 });
 </script>
 
@@ -213,7 +141,11 @@ watch(() => [schemaBackend.value, schema], () => {
           If you need to change your email
           <a
             class="is--link-2"
+            role="button"
+            tabindex="0"
             @click.prevent="isDialogContactUsOpen = true"
+            @keydown.enter.prevent="isDialogContactUsOpen = true"
+            @keydown.space.prevent="isDialogContactUsOpen = true"
           >
             contact us
           </a>

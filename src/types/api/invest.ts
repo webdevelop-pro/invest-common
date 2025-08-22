@@ -295,14 +295,6 @@ export interface IInvestKyc {
   kyc_status: InvestKycTypes;
 }
 
-export interface IUserIdentityResponse {
-  id: number;
-  data: IBackgroundInfo;
-  last_login: string;
-  created_at: string;
-  profiles: IProfileIndividual[];
-}
-
 export enum InvestmentDocumentsTypes {
   agreement = 'agreement',
   tax_document = 'tax document',

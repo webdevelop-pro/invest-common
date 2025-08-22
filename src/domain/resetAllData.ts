@@ -9,6 +9,8 @@ import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository'
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useRepositoryFiler } from 'InvestCommon/data/filer/filer.repository';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
+import { useRepositorySettings } from 'InvestCommon/data/settings/settings.repository';
+import { useRepositoryOffer } from 'InvestCommon/data/offer/offer.repository';
 
 import { useProfileEvmWalletTransactionStore } from 'InvestCommon/store/useProfileEvmWallet/useProfileEvmWalletTransaction';
 import { useProfileEvmWalletStore } from 'InvestCommon/store/useProfileEvmWallet/useProfileEvmWallet';
@@ -38,4 +40,6 @@ export const resetAllData = () => {
   useRepositoryWallet().resetAll();
   useRepositoryFiler().resetAll();
   useRepositoryInvestment().resetAll();
+  useRepositorySettings().resetAll();
+  useRepositoryOffer().resetAll();
 };

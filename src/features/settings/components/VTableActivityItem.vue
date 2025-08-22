@@ -6,10 +6,11 @@ import VTooltip from 'UiKit/components/VTooltip.vue';
 
 interface IActivityItem {
   date: string;
-  status: string;
+  time: string;
   ip: string;
-  device: string;
   browser: string;
+  id: string;
+  current?: boolean;
 }
 
 defineProps({

@@ -1,46 +1,50 @@
 <script setup lang="ts">
-import { SELFSERVICE } from 'InvestCommon/helpers/enums/auth';
+import { SELFSERVICE } from 'InvestCommon/features/settings/utils';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
 import VImage from 'UiKit/components/Base/VImage/VImage.vue';
 import {
-  computed, nextTick, onMounted, reactive, ref, watch,
+  computed, nextTick, onMounted, ref,
 } from 'vue';
-import { useAuthLogicStore } from 'InvestCommon/store/useAuthLogic';
-import { useAuthStore } from 'InvestCommon/store/useAuth';
-import { storeToRefs } from 'pinia';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
-import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
-import { isEmpty } from 'UiKit/helpers/general';
 import { scrollToError } from 'UiKit/helpers/validation/general';
 import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
+import { useRepositorySettings } from 'InvestCommon/data/settings/settings.repository';
+import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
+import { useToast } from 'UiKit/components/Base/VToast/use-toast';
+import { storeToRefs } from 'pinia';
 
 const emit = defineEmits(['close']);
 
-const authLogicStore = useAuthLogicStore();
-const authStore = useAuthStore();
-const { getFlowData, setSettingsErrorData, isGetFlowLoading } = storeToRefs(authStore);
+const settingsRepository = useRepositorySettings();
+const { flowId, csrfToken, setSettingsState, getAuthFlowState } = storeToRefs(settingsRepository);
+
+const { toast } = useToast();
 
 const qrOnMounted = ref(false);
+const isLoading = ref(false);
 
 const totpQR = computed(() => {
-  const tokenItem = getFlowData.value?.ui?.nodes?.find((item) => item.attributes.id === 'totp_qr');
+  const tokenItem = getAuthFlowState.value.data?.ui?.nodes?.find((item) => item.attributes.id === 'totp_qr');
   return tokenItem?.attributes?.src ?? '';
 });
 const totpSecret = computed(() => {
-  const tokenItem = getFlowData.value?.ui?.nodes?.find((item) => item.attributes.id === 'totp_secret_key');
+  const tokenItem = getAuthFlowState.value.data?.ui?.nodes?.find((item) => item.attributes.id === 'totp_secret_key');
   return tokenItem?.attributes?.text?.text ?? '';
 });
 
+const errorData = computed(() => (setSettingsState.value.error?.data?.responseJson));
+
 const totpCodeError = computed(() => {
-  const tokenItem = setSettingsErrorData.value?.ui?.nodes?.find((item) => item.attributes.name === 'totp_code');
+  const tokenItem = errorData.value?.ui?.nodes?.find((item) => item.attributes.name === 'totp_code');
   return tokenItem?.messages?.[0]?.text;
 });
 
 type FormModelTOTP = {
   totp_code: number;
 }
+
 const schema = {
   $schema: 'http://json-schema.org/draft-07/schema#',
   definitions: {
@@ -55,33 +59,59 @@ const schema = {
   $ref: '#/definitions/Auth',
 } as unknown as JSONSchemaType<FormModelTOTP>;
 
-const model = reactive<FormModelTOTP>({});
-const validator = new PrecompiledValidator<FormModelTOTP>(schema);
-const validation = ref<unknown>();
-const isValid = computed(() => isEmpty(validation.value || {}));
 
-const onValidate = () => {
-  validation.value = validator.getFormValidationErrors(model);
-};
+const {
+  model,
+  validation,
+  isValid,
+  onValidate,
+} = useFormValidation(
+  schema,
+  undefined,
+  {} as FormModelTOTP,
+);
 
 const onSave = async () => {
   onValidate();
   if (!isValid.value) {
     nextTick(() => scrollToError('VFormSettingsTOTP'));
+    return;
   }
+    isLoading.value = true;
+    try {
+      if (!flowId.value) await settingsRepository.getAuthFlow(SELFSERVICE.settings);
+      
+      if (getAuthFlowState.value.error) {
+        isLoading.value = false;
+        return;
+      }
 
-  await authLogicStore.setSettingsTOTP(SELFSERVICE.settings, { totp_code: model.totp_code.toString(), method: 'totp' });
-  if (!setSettingsErrorData.value) emit('close');
+      await settingsRepository.setSettings(flowId.value, {
+        method: 'totp',
+        totp_code: model.totp_code?.toString() || '',
+        csrf_token: csrfToken.value,
+      }, onSave); // Pass resetHandler as callback for retry after session refresh
+
+      if (!setSettingsState.value.error) {
+        settingsRepository.getAuthFlow(SELFSERVICE.settings);
+        toast({
+          title: 'Submitted',
+          description: 'Setup confirmed',
+          variant: 'success',
+        });
+        emit('close');
+      }
+    } catch (error) {
+      console.error('Recovery failed:', error);
+    } finally {
+      isLoading.value = false;
+    }
 };
 
-watch(() => model, () => {
-  if (!isValid.value) onValidate();
-}, { deep: true });
-
 onMounted(async () => {
-  await authStore.fetchAuthHandler(SELFSERVICE.settings);
+  await settingsRepository.getAuthFlow(SELFSERVICE.settings);
   qrOnMounted.value = totpQR.value;
-  setSettingsErrorData.value = null;
+  setSettingsState.value.error = null;
 });
 </script>
 
@@ -91,14 +121,14 @@ onMounted(async () => {
       Scan the QR code with your authenticator app to get 6-digit code
     </p>
     <p
-      v-if="(qrOnMounted !== totpQR) && !isGetFlowLoading"
+      v-if="(qrOnMounted !== totpQR) && !getAuthFlowState.loading"
       class="is--color-red is--small"
     >
       QR code and secret key were updated. Please refresh it in your authenticator app
     </p>
     <div class="form-settings-totp__content  is--margin-top-20">
       <VSkeleton
-        v-if="isGetFlowLoading"
+        v-if="getAuthFlowState.loading"
         height="112px"
         width="112px"
         class="form-settings-totp__skeleton"
@@ -148,8 +178,14 @@ onMounted(async () => {
     <p class="is--color-gray-80 is--margin-top-30">
       Or use the Authenticator secret key:
     </p>
+    <VSkeleton
+      v-if="getAuthFlowState.loading"
+      height="76px"
+      width="100%"
+      class="form-settings-totp__skeleton"
+    />
     <div
-      v-if="totpSecret"
+      v-else-if="totpSecret"
       class="form-settings-totp__input-wrap is--margin-top-20"
     >
       <VFormGroup
@@ -157,7 +193,7 @@ onMounted(async () => {
         class="form-settings-totp__input"
       >
         <VSkeleton
-          v-if="isGetFlowLoading"
+          v-if="getAuthFlowState.loading"
           height="48px"
           width="100%"
         />
@@ -177,6 +213,8 @@ onMounted(async () => {
   &__qr {
     max-width: 112px;
     width: 100%;
+    height: 100%;
+    max-height: 112px;;
   }
 
   &__right {

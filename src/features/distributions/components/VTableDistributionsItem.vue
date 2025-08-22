@@ -8,7 +8,7 @@ import { IInvest } from 'InvestCommon/types/api/invest';
 import { useRoute } from 'vue-router';
 
 const route = useRoute();
-const queryId = computed(() => Number(route.query.id));
+const queryId = computed(() => Number(route.query?.id));
 const props = defineProps({
   item: {
     type: Object as PropType<IInvest>,

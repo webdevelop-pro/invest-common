@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import VFormSettingsTOTP from 'InvestCommon/components/forms/ory/VFormSettingsTOTP.vue';
+import VFormSettingsTOTP from './VFormSettingsTOTP.vue';
 import {
   VDialogContent, VDialogHeader, VDialogTitle, VDialog, VDialogFooter,
 } from 'UiKit/components/Base/VDialog';

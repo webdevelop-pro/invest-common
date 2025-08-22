@@ -24,7 +24,7 @@ export const useLoginRefreshStore = defineStore('loginRefresh', () => {
   const { getSchemaState, setLoginState, getAuthFlowState } = storeToRefs(authRepository);
   const userSessionStore = useSessionStore();
   const useDialogsStore = useDialogs();
-  const { isDialogRefreshSessionOpen } = storeToRefs(useDialogsStore);
+  const { completeSessionRefresh } = useDialogsStore; // Direct access, not storeToRefs
 
   // Query parameters handling
   const queryParams = computed(() => {
@@ -96,10 +96,11 @@ export const useLoginRefreshStore = defineStore('loginRefresh', () => {
 
       if (setLoginState.value.data?.session) {
         userSessionStore.updateSession(setLoginState.value.data.session);
-        isDialogRefreshSessionOpen.value = false;
+        completeSessionRefresh(true); // Success - complete the session refresh
       }
     } catch (error) {
       console.error('Login failed:', error);
+      completeSessionRefresh(false); // Failure - complete with false
     } finally {
       isLoading.value = false;
     }
@@ -120,8 +121,15 @@ export const useLoginRefreshStore = defineStore('loginRefresh', () => {
         provider,
         method: 'oidc',
       });
+
+      // Complete session refresh after successful social login
+      if (setLoginState.value.data?.session) {
+        userSessionStore.updateSession(setLoginState.value.data.session);
+        completeSessionRefresh(true); // Success
+      }
     } catch (error) {
       console.error('Social login failed:', error);
+      completeSessionRefresh(false); // Failure
     } finally {
       isLoading.value = false;
     }
