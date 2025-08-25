@@ -15,11 +15,12 @@ const TOAST_OPTIONS = {
   variant: 'error',
 };
 
-export const oryErrorHandling = (
+export const oryErrorHandling = async (
   error: IErrorGeneric,
   flowType: FlowType,
   resetFlow: () => void,
   comment: string,
+  onSessionRefresh?: () => void,
 ) => {
   const { toast } = useToast();
   const responseJson = error?.data?.responseJson;
@@ -62,9 +63,16 @@ export const oryErrorHandling = (
       navigateWithQueryParams(urlAuthenticator);
       return;
     case 'session_refresh_required': // We need to re-authenticate to perform this action
-      // window.location.href = err.response?.data.redirect_browser_to
-      useDialogs().showRefreshSession();
-      // todo make more general
+      // Show refresh session dialog and wait for completion
+      try {
+        const success = await useDialogs().showRefreshSession();
+        if (success && onSessionRefresh) {
+          // Execute callback after successful session refresh
+          onSessionRefresh();
+        }
+      } catch (refreshError) {
+        console.error('Session refresh failed:', refreshError);
+      }
       break;
     case 'browser_location_change_required': // Ory Kratos asked us to point the user to this URL.
       if (responseJson.redirect_browser_to.includes('aal2')) navigateWithQueryParams(urlAuthenticator);

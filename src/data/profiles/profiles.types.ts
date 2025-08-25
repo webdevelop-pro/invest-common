@@ -207,12 +207,21 @@ export interface IProfile {
   wallet_id: number;
 }
 
-export interface IUserIdentityResponse {
+export interface IUser {
   id: number;
-  data: IBackgroundInfo;
-  last_login: string;
+  first_name: string;
+  last_name: string;
+  phone: string;
   created_at: string;
+  updated_at: string;
+  image_link_id: string;
   profiles: IProfileFormatted[];
+}
+
+export interface IUserFormatted extends IUser {
+  fullName: string;
+  createdAtFormattedShortMonth: string;
+  phoneFormatted?: string;
 }
 
 export interface IProfileList {

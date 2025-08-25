@@ -5,11 +5,13 @@ import env from 'InvestCommon/global';
 import { toasterErrorHandlingAnalytics } from 'InvestCommon/data/repository/error/toasterErrorHandlingAnalytics';
 import { createActionState } from 'InvestCommon/data/repository/repository';
 import {
-  IProfileData, IUserIdentityResponse, IProfileIndividual, ISchema,
+  IProfileData, IUser, IProfileIndividual, ISchema,
   IProfileFormatted,
 } from './profiles.types';
+import { UserFormatter } from './formatter/user.formatter';
+import { IUserFormatted } from './profiles.types';
 import { INotification } from '../notifications/notifications.types';
-import { ProfileFormatter } from './profiles.formatter';
+import { ProfileFormatter } from './formatter/profiles.formatter';
 
 export const useRepositoryProfiles = defineStore('repository-profiles', () => {
   // Dependencies
@@ -23,7 +25,7 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
   const getProfileByIdState = createActionState<IProfileFormatted>();
   const getProfileByIdOptionsState = createActionState<IProfileIndividual>();
   const setProfileState = createActionState<IProfileData>();
-  const getUserState = createActionState<IUserIdentityResponse>();
+  const getUserState = createActionState<IUserFormatted>();
   const setUserState = createActionState<IProfileData>();
   const setUserOptionsState = createActionState<any>();
   const updateUserDataState = createActionState<any>();
@@ -120,15 +122,8 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
     try {
       getUserState.value.loading = true;
       getUserState.value.error = null;
-      const response = await apiClient.get<IUserIdentityResponse>('/auth/user');
-
-      // Format the profiles array while keeping the original response structure
-      getUserState.value.data = {
-        ...response.data,
-        profiles: response.data.profiles.map(profile => {
-          return new ProfileFormatter(profile).format();
-        })
-      };
+      const response = await apiClient.get<IUser>('/auth/user');
+      getUserState.value.data = new UserFormatter(response.data).format();
       return getUserState.value.data;
     } catch (err) {
       getUserState.value.error = err as Error;

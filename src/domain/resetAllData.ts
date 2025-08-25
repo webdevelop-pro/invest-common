@@ -9,9 +9,12 @@ import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository'
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useRepositoryFiler } from 'InvestCommon/data/filer/filer.repository';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
+import { useRepositorySettings } from 'InvestCommon/data/settings/settings.repository';
+import { useRepositoryOffer } from 'InvestCommon/data/offer/offer.repository';
+import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
+import { useRepositoryDistributions } from 'InvestCommon/data/distributions/distributions.repository';
+import { useRepositoryEsign } from 'InvestCommon/data/esign/esign.repository';
 
-import { useProfileEvmWalletTransactionStore } from 'InvestCommon/store/useProfileEvmWallet/useProfileEvmWalletTransaction';
-import { useProfileEvmWalletStore } from 'InvestCommon/store/useProfileEvmWallet/useProfileEvmWallet';
 import { useAuthStore } from 'InvestCommon/store/useAuth';
 import { useFilerStore } from 'InvestCommon/store/useFiler';
 import { cookiesOptions } from 'InvestCommon/global/index';
@@ -24,8 +27,6 @@ function clearAllCookies() {
 }
 
 export const resetAllData = () => {
-  useProfileEvmWalletTransactionStore().resetAll();
-  useProfileEvmWalletStore().resetAll();
   useAuthStore().resetAll();
   useFilerStore().resetAll();
   clearAllCookies();
@@ -38,4 +39,9 @@ export const resetAllData = () => {
   useRepositoryWallet().resetAll();
   useRepositoryFiler().resetAll();
   useRepositoryInvestment().resetAll();
+  useRepositorySettings().resetAll();
+  useRepositoryOffer().resetAll();
+  useRepositoryEvm().resetAll();
+  useRepositoryDistributions().resetAll();
+  useRepositoryEsign().resetAll();
 };

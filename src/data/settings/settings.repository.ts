@@ -1,37 +1,38 @@
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
-import { toasterErrorHandlingAnalytics } from 'UiKit/helpers/api/toasterErrorHandlingAnalytics';
 import env from 'InvestCommon/global';
-import { createActionState } from 'UiKit/helpers/api/repository';
-import {
-  ISession, IAuthFlow, ILogoutFlow,
-} from './auth.type';
+import { ISession, IAuthFlow, ILogoutFlow } from './settings.types';
+import { SessionFormatter } from './session.formatter';
+import type { ISessionFormatted } from './settings.types';
+import { createActionState } from 'InvestCommon/data/repository/repository';
+import { oryErrorHandling } from 'InvestCommon/data/repository/error/oryErrorHandling';
+import { computed } from 'vue';
+import { acceptHMRUpdate, defineStore } from 'pinia';
 
-const { AUTH_URL } = env;
+const { KRATOS_URL } = env;
 
-// https://github.com/ory/kratos-selfservice-ui-react-nextjs/blob/master/pages/login.tsx
-
-export const useRepositoryAuth = () => {
-  const apiClient = new ApiClient(AUTH_URL);
+export const useRepositorySettings = defineStore('repository-settings', () => {
+  const apiClient = new ApiClient(KRATOS_URL);
 
   // Create action states for each function
   const getAuthFlowState = createActionState<ILogoutFlow>();
 
   const getSettingsState = createActionState<IAuthFlow>();
   const setSettingsState = createActionState<IAuthFlow>();
-  const getAllSessionState = createActionState<ISession[]>();
+  const getAllSessionState = createActionState<ISessionFormatted[]>();
   const deleteAllSessionState = createActionState<undefined>();
-  const deleteOneSessionState = createActionState<undefined>();
+  const deleteOneSessionState = createActionState<string>();
 
   const getAllSession = async () => {
     try {
       getAllSessionState.value.loading = true;
       getAllSessionState.value.error = null;
       const response = await apiClient.get('/sessions');
-      getAllSessionState.value.data = response.data;
-      return response.data;
+      const formatted = (response.data as ISession[]).map((s) => new SessionFormatter(s).format());
+      getAllSessionState.value.data = formatted;
+      return formatted;
     } catch (err) {
       getAllSessionState.value.error = err as Error;
-      toasterErrorHandlingAnalytics(err, 'Failed to get all sessions');
+      oryErrorHandling(err, 'session', () => {}, 'Failed to get all sessions');
       throw err;
     } finally {
       getAllSessionState.value.loading = false;
@@ -47,7 +48,7 @@ export const useRepositoryAuth = () => {
       return response.data;
     } catch (err) {
       deleteAllSessionState.value.error = err as Error;
-      toasterErrorHandlingAnalytics(err, 'Failed to delete all sessions');
+      oryErrorHandling(err, 'session', () => {}, 'Failed to delete all sessions');
       throw err;
     } finally {
       deleteAllSessionState.value.loading = false;
@@ -58,12 +59,13 @@ export const useRepositoryAuth = () => {
     try {
       deleteOneSessionState.value.loading = true;
       deleteOneSessionState.value.error = null;
-      const response = await apiClient.delete(`/sessions/${id}`);
-      deleteOneSessionState.value.data = response.data;
-      return response.data;
+      const response = await apiClient.delete(`/sessions/${id}`, { type: 'text' });
+      const result = response.data || 'Session deleted';
+      deleteOneSessionState.value.data = result;
+      return result;
     } catch (err) {
       deleteOneSessionState.value.error = err as Error;
-      toasterErrorHandlingAnalytics(err, 'Failed to delete session');
+      oryErrorHandling(err, 'session', () => {}, 'Failed to delete session');
       throw err;
     } finally {
       deleteOneSessionState.value.loading = false;
@@ -76,29 +78,32 @@ export const useRepositoryAuth = () => {
       getAuthFlowState.value.error = null;
       const response = await apiClient.get(url, { params: query });
       getAuthFlowState.value.data = response.data;
-      return response.data;
+      return response;
     } catch (err) {
       getAuthFlowState.value.error = err as Error;
-      toasterErrorHandlingAnalytics(err, 'Failed to get auth flow');
+      oryErrorHandling(err, 'session', () => {}, 'Failed to get auth flow');
       throw err;
     } finally {
       getAuthFlowState.value.loading = false;
     }
   };
 
-  const setSettings = async (flowId: string, data: any, csrf_token: string) => {
+  const setSettings = async (flowId: string, body: object, callback: () => void) => {
     try {
       setSettingsState.value.loading = true;
       setSettingsState.value.error = null;
-      const response = await apiClient.post(`/self-service/settings?flow=${flowId}`, {
-        ...data,
-        csrf_token,
-      });
+      const response = await apiClient.post(`/self-service/settings?flow=${flowId}`, body);
       setSettingsState.value.data = response.data;
       return response.data;
     } catch (err) {
       setSettingsState.value.error = err as Error;
-      toasterErrorHandlingAnalytics(err, 'Failed to set settings');
+      await oryErrorHandling(
+        err, 
+        'session', 
+        () => getAuthFlow('/self-service/settings/browser'),
+        'Failed to set settings',
+        callback,
+      );
       throw err;
     } finally {
       setSettingsState.value.loading = false;
@@ -114,11 +119,33 @@ export const useRepositoryAuth = () => {
       return response.data;
     } catch (err) {
       getSettingsState.value.error = err as Error;
-      toasterErrorHandlingAnalytics(err, 'Failed to get settings');
+      oryErrorHandling(err, 'session', () => {}, 'Failed to get settings');
       throw err;
     } finally {
       getSettingsState.value.loading = false;
     }
+  };
+
+  const flowId = computed(() => getAuthFlowState.value.data?.id || '');
+
+  const csrfToken = computed(() => {
+    // const res = getSignupData.value?.ui || getAuthFlowState.value.data.ui;
+    const res = getAuthFlowState.value.data.ui;
+    if (res) {
+      const tokenItem = res.nodes.find((item: { attributes: { name: string; }; }) => (
+        item.attributes.name === 'csrf_token'));
+      return tokenItem?.attributes.value ?? '';
+    }
+    return '';
+  });
+
+  const resetAll = () => {
+    getAuthFlowState.value = { loading: false, error: null, data: undefined };
+    getSettingsState.value = { loading: false, error: null, data: undefined };
+    setSettingsState.value = { loading: false, error: null, data: undefined };
+    getAllSessionState.value = { loading: false, error: null, data: undefined };
+    deleteAllSessionState.value = { loading: false, error: null, data: undefined };
+    deleteOneSessionState.value = { loading: false, error: null, data: undefined };
   };
 
   return {
@@ -129,6 +156,8 @@ export const useRepositoryAuth = () => {
     getAllSessionState,
     deleteAllSessionState,
     deleteOneSessionState,
+    flowId,
+    csrfToken,
 
     // Functions
     getAllSession,
@@ -137,5 +166,12 @@ export const useRepositoryAuth = () => {
     getAuthFlow,
     setSettings,
     getSettings,
+    resetAll,
   };
-};
+});
+
+
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useRepositorySettings, import.meta.hot));
+}
+

@@ -1,6 +1,5 @@
 import { FundingTypes } from 'InvestCommon/helpers/enums/general';
 import { IOffer } from './offers';
-import { IProfileIndividual } from './user';
 
 export enum InvestStepTypes {
   amount = 'amount',
@@ -293,14 +292,6 @@ export interface IAccreditation {
 export interface IInvestKyc {
   kyc_data: IKycData[];
   kyc_status: InvestKycTypes;
-}
-
-export interface IUserIdentityResponse {
-  id: number;
-  data: IBackgroundInfo;
-  last_login: string;
-  created_at: string;
-  profiles: IProfileIndividual[];
 }
 
 export enum InvestmentDocumentsTypes {

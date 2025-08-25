@@ -74,6 +74,9 @@ export const useFormPersonalInformation = () => {
 
       if (!setProfileByIdState.value.error && selectedUserProfileData.value?.user_id
         && selectedUserProfileData.value?.id && !selectedUserProfileData.value?.escrow_id) {
+
+        useRepositoryProfilesStore.setUser({ phone: model?.phone });
+        useRepositoryProfilesStore.getUser();
         try {
           await accreditationRepository.createEscrow(
             selectedUserProfileData.value?.user_id,

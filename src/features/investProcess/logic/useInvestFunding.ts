@@ -2,7 +2,6 @@ import {
   ref, computed, watch, nextTick, onBeforeMount,
 } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { useProfileEvmWalletStore } from 'InvestCommon/store/useProfileEvmWallet/useProfileEvmWallet';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
@@ -16,6 +15,7 @@ import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository';
+import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import InvestFormFundingAch from 'InvestCommon/features/investProcess/components/VFormInvestFundingAch.vue';
@@ -49,11 +49,8 @@ export function useInvestFunding() {
 
   const walletRepository = useRepositoryWallet();
   const { getWalletState, walletId, canLoadWalletData } = storeToRefs(walletRepository);
-
-  const profileEvmWalletStore = useProfileEvmWalletStore();
-  const {
-    isEvmWalletStatusAnyError, evmWalletId,
-  } = storeToRefs(profileEvmWalletStore);
+  const evmRepository = useRepositoryEvm();
+  const { getEvmWalletState, evmWalletId, canLoadEvmWalletData } = storeToRefs(evmRepository);
 
   const profilesStore = useProfilesStore();
   const { selectedUserProfileData, selectedUserProfileId } = storeToRefs(profilesStore);
@@ -116,11 +113,11 @@ export function useInvestFunding() {
   );
 
   const hasEvmWallet = computed(() => 
-    evmWalletId.value > 0 && !isEvmWalletStatusAnyError.value
+    evmWalletId.value > 0 && !(getEvmWalletState.value.data?.isStatusAnyError || getEvmWalletState.value.error)
   );
 
   const notEnoughEvmWalletFunds = computed(() => 
-    (getInvestUnconfirmedOne.value?.amount || 0) > profileEvmWalletStore.evmTotalBalance
+    (getInvestUnconfirmedOne.value?.amount || 0) > getEvmWalletState.value.data?.totalBalance
   );
 
   const selectOptions = computed(() => {
@@ -142,8 +139,8 @@ export function useInvestFunding() {
     if (hasEvmWallet.value) {
       options.push({
         value: FundingTypes.cryptoWallet,
-        text: `Crypto Wallet (${currency(profileEvmWalletStore.evmTotalBalance)})`,
-        disabled: profileEvmWalletStore.evmTotalBalance === 0,
+        text: `Crypto Wallet (${currency(getEvmWalletState.value.data?.totalBalance)})`,
+        disabled: getEvmWalletState.value.data?.totalBalance === 0,
       });
     }
     
@@ -291,7 +288,9 @@ export function useInvestFunding() {
       if (canLoadWalletData.value) {
         walletRepository.getWalletByProfile(selectedUserProfileId.value);
       }
-      profileEvmWalletStore.getEvmWalletByProfileId(selectedUserProfileId.value);
+      if (canLoadEvmWalletData.value) {
+        evmRepository.getEvmWalletByProfile(selectedUserProfileId.value);
+      }
     }
   });
 

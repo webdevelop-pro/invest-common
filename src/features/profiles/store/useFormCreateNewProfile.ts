@@ -261,6 +261,9 @@ export const useFormCreateNewProfile = () => {
         return;
       }
 
+      useRepositoryProfilesStore.setUser({ phone: personalFormModel.value?.phone });
+      useRepositoryProfilesStore.getUser();
+
       if (isProfileAktAsIndividual.value) {
         await handlerCheckIndividualEscrow();
       } else {
