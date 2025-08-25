@@ -105,6 +105,9 @@ export const useFormFinancialInformationAndKyc = () => {
         selectedUserProfileId.value,
       );
       if (!setProfileByIdState.value.error) await useRepositoryKycStore.handlePlaidKyc();
+
+      useRepositoryProfilesStore.setUser({ phone: fields?.phone });
+      useRepositoryProfilesStore.getUser();
       if (!tokenState.value.error && !setProfileByIdState.value.error
     && selectedUserProfileData.value?.user_id && selectedUserProfileData.value?.id
     && !selectedUserProfileData.value?.escrow_id) {

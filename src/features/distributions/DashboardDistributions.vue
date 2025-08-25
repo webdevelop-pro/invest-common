@@ -9,6 +9,7 @@ import { storeToRefs } from 'pinia';
 import DashboardDistributionsSummary from './components/DashboardDistributionsSummary.vue';
 import { useRepositoryDistributions } from 'InvestCommon/data/distributions/distributions.repository';
 
+// todo: need to refactor
 
 const DISTRIBUTIONS_TAB_INFO = {
   title: 'Your Total Assets',

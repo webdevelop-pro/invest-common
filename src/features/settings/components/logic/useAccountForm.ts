@@ -1,5 +1,5 @@
 import {
-  watch, PropType, computed,
+  watch, computed,
   ref, defineAsyncComponent,
 } from 'vue';
 import { storeToRefs } from 'pinia';
@@ -14,7 +14,6 @@ import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
 export interface FormModelAccount {
   first_name: string;
   last_name: string;
-  middle_name?: string;
   email: string;
   phone?: string;
 }
@@ -38,7 +37,6 @@ export function useAccountForm(props: UseAccountFormProps) {
         properties: {
           first_name: firstNameRule,
           last_name: lastNameRule,
-          middle_name: middleNameRule,
           email: emailRule,
           phone: phoneRule,
         },
@@ -72,7 +70,6 @@ export function useAccountForm(props: UseAccountFormProps) {
   watch(() => props.modelData, () => {
     if (props.modelData?.first_name) model.first_name = props.modelData?.first_name;
     if (props.modelData?.last_name) model.last_name = props.modelData?.last_name;
-    if (props.modelData?.middle_name) model.middle_name = props.modelData?.middle_name;
     if (props.modelData?.email) model.email = props.modelData?.email;
     if (props.modelData?.phone) model.phone = props.modelData?.phone;
   }, { deep: true, immediate: true });

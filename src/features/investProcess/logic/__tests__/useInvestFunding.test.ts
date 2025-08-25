@@ -7,7 +7,7 @@ import { useRouter, useRoute } from 'vue-router';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
-import { useProfileEvmWalletStore } from 'InvestCommon/store/useProfileEvmWallet/useProfileEvmWallet';
+import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository';
@@ -34,8 +34,8 @@ vi.mock('InvestCommon/composable/useFormValidation', () => ({
   useFormValidation: vi.fn(),
 }));
 
-vi.mock('InvestCommon/store/useProfileEvmWallet/useProfileEvmWallet', () => ({
-  useProfileEvmWalletStore: vi.fn(),
+vi.mock('InvestCommon/data/evm/evm.repository', () => ({
+  useRepositoryEvm: vi.fn(),
 }));
 
 vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
@@ -65,11 +65,14 @@ const mockData = {
     isValid: ref(true),
     onValidate: vi.fn(),
   },
-  profileEvmWallet: {
-    evmTotalBalance: 5000,
+  evmWallet: {
+    getEvmWalletState: ref({
+      data: { totalBalance: 5000, isStatusAnyError: false },
+      error: null,
+    }),
     evmWalletId: ref(1),
-    isEvmWalletStatusAnyError: ref(false),
-    getEvmWalletByProfileId: vi.fn(),
+    canLoadEvmWalletData: ref(true),
+    getEvmWalletByProfile: vi.fn(),
   },
   profiles: {
     selectedUserProfileData: ref({
@@ -133,11 +136,16 @@ describe('useInvestFunding', () => {
     };
     (useFormValidation as any).mockReturnValue(formValidationMock);
     
-    (useProfileEvmWalletStore as any).mockReturnValue(mockData.profileEvmWallet);
+    (useRepositoryEvm as any).mockReturnValue(mockData.evmWallet);
     (useProfilesStore as any).mockReturnValue(mockData.profiles);
     (useSessionStore as any).mockReturnValue(mockData.session);
     (useRepositoryWallet as any).mockReturnValue(mockData.wallet);
     (useRepositoryInvestment as any).mockReturnValue(mockData.investment);
+    
+    // Reset mock data to initial state
+    mockData.investment.getInvestUnconfirmedOne.value.amount = 5000;
+    mockData.wallet.getWalletState.value.data.totalBalance = 10000;
+    mockData.evmWallet.getEvmWalletState.value.data.totalBalance = 5000;
   });
 
   describe('computed properties', () => {
@@ -173,6 +181,9 @@ describe('useInvestFunding', () => {
         
         expect(composable.isBtnDisabled.value).toBe(expected);
       });
+      
+      // Reset the amount back to the original value to avoid affecting other tests
+      mockData.investment.getInvestUnconfirmedOne.value.amount = 5000;
     });
 
     it('should determine current component and props', () => {
@@ -201,34 +212,34 @@ describe('useInvestFunding', () => {
     it('should return appropriate errors for different scenarios', () => {
       const composable = useInvestFunding();
       
-             const errorTests = [
-         {
-           type: FundingTypes.cryptoWallet,
-           amount: 6000,
-           expected: ['Crypto wallet does not have enough funds'],
-         },
-         {
-           type: FundingTypes.wallet,
-           amount: 15000,
-           expected: ['Wallet does not have enough funds'],
-         },
-         {
-           type: FundingTypes.wallet,
-           amount: 5000,
-           backendError: { wallet: ['Backend error'] },
-           expected: ['Backend error'],
-         },
-       ];
-       
-       errorTests.forEach(({ type, amount, backendError, expected }) => {
-         mockData.formValidation.model.funding_type = type;
-         if (amount !== undefined) mockData.investment.getInvestUnconfirmedOne.value.amount = amount;
-         if (backendError !== undefined) {
-           (mockData.investment.setFundingState.value as any).error = { data: { responseJson: backendError } };
-         }
-         
-         expect(composable.selectErrors.value).toEqual(expected);
-       });
+      const errorTests = [
+        {
+          type: FundingTypes.cryptoWallet,
+          amount: 6000,
+          expected: ['Crypto wallet does not have enough funds'],
+        },
+        {
+          type: FundingTypes.wallet,
+          amount: 15000,
+          expected: ['Wallet does not have enough funds'],
+        },
+        {
+          type: FundingTypes.wallet,
+          amount: 5000,
+          backendError: { wallet: ['Backend error'] },
+          expected: ['Backend error'],
+        },
+      ];
+      
+      errorTests.forEach(({ type, amount, backendError, expected }) => {
+        mockData.formValidation.model.funding_type = type;
+        if (amount !== undefined) mockData.investment.getInvestUnconfirmedOne.value.amount = amount;
+        if (backendError !== undefined) {
+          (mockData.investment.setFundingState.value as any).error = { data: { responseJson: backendError } };
+        }
+        
+        expect(composable.selectErrors.value).toEqual(expected);
+      });
     });
   });
 
@@ -271,10 +282,10 @@ describe('useInvestFunding', () => {
             funding_type: FundingTypes.cryptoWallet,
           },
         },
-                 {
-           type: '1' as any, // External funding source
-           expectedData: { funding_source_id: 1, funding_type: FundingTypes.wallet },
-         },
+        {
+          type: '1' as any, // External funding source
+          expectedData: { funding_source_id: 1, funding_type: FundingTypes.wallet },
+        },
       ];
       
       for (const test of fundingTests) {
@@ -326,7 +337,6 @@ describe('useInvestFunding', () => {
     });
   });
 
-
   describe('watchers and lifecycle', () => {
     it('should watch for funding type changes', async () => {
       const composable = useInvestFunding();
@@ -346,7 +356,7 @@ describe('useInvestFunding', () => {
       const composable = useInvestFunding();
       
       mockData.wallet.getWalletState.value.data.totalBalance = 0;
-      mockData.profileEvmWallet.evmTotalBalance = 0;
+      mockData.evmWallet.getEvmWalletState.value.data.totalBalance = 0;
       
       const options = composable.selectOptions.value;
       expect(options[2].disabled).toBe(true); // Wallet
@@ -354,6 +364,9 @@ describe('useInvestFunding', () => {
       
       mockData.wallet.getWalletState.value.data.isWalletStatusAnyError = true;
       expect(composable.hasWallet.value).toBe(false);
+      
+      mockData.evmWallet.getEvmWalletState.value.data.isStatusAnyError = true;
+      expect(composable.hasEvmWallet.value).toBe(false);
       
       (mockData.investment.setFundingState.value as any).error = { data: { responseJson: { field: 'Error' } } };
       expect(composable.errorData.value).toEqual({ field: 'Error' });

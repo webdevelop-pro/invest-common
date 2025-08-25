@@ -3,13 +3,13 @@ import { toasterErrorHandling } from 'InvestCommon/data/repository/error/toaster
 import env from 'InvestCommon/global';
 import { createActionState } from 'InvestCommon/data/repository/repository';
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { IDistributionFormatted, IDistributions, IDistributionsMeta } from 'InvestCommon/data/distributions/distributions.types';
+import { IDistributions, IDistributionsMeta } from 'InvestCommon/data/distributions/distributions.types';
 import { ref, computed } from 'vue';
 
 const { DISTRIBUTIONS_URL } = env;
 
 export const useRepositoryDistributions = defineStore('repository-distributions', () => {
-  const apiClient = new ApiClient(env['DISTRIBUTIONS_URL'] as string);
+  const apiClient = new ApiClient(DISTRIBUTIONS_URL);
 
   // Create action states for each function
   const getDistributionsState = createActionState<IDistributions>();

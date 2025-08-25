@@ -36,7 +36,7 @@ defineExpose({
       Personal Information
     </h2>
     <FormRow>
-      <FormCol col3>
+      <FormCol col2>
         <VFormGroup
           v-slot="VFormGroupProps"
           :model="model"
@@ -62,33 +62,7 @@ defineExpose({
         </VFormGroup>
       </FormCol>
 
-      <FormCol col3>
-        <VFormGroup
-          v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackend"
-          :schema-front="schema"
-          :error-text="errorData?.middle_name"
-          path="middle_name"
-          label="Middle Name"
-          data-testid="middle-name-group"
-        >
-          <VFormInput
-            :model-value="model.middle_name"
-            :is-error="VFormGroupProps.isFieldError"
-            placeholder="Middle Name"
-            name="middle-name"
-            size="large"
-            data-testid="middle-name"
-            :readonly="readOnly"
-            :loading="setUserState.loading"
-            @update:model-value="model.middle_name = $event"
-          />
-        </VFormGroup>
-      </FormCol>
-
-      <FormCol col3>
+      <FormCol col2>
         <VFormGroup
           v-slot="VFormGroupProps"
           :model="model"

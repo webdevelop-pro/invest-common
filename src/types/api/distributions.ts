@@ -1,3 +1,0 @@
-import { IInvest } from './invest';
-
-

@@ -1,6 +1,5 @@
 import { FundingTypes } from 'InvestCommon/helpers/enums/general';
 import { IOffer } from './offers';
-import { IProfileIndividual } from './user';
 
 export enum InvestStepTypes {
   amount = 'amount',

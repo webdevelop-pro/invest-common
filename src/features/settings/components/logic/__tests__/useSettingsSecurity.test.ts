@@ -2,22 +2,18 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
 import { ref, nextTick } from 'vue';
 
-// Mock the session store
 vi.mock('InvestCommon/domain/session/store/useSession', () => ({
   useSessionStore: vi.fn()
 }));
 
-// Mock the settings repository
 vi.mock('InvestCommon/data/settings/settings.repository', () => ({
   useRepositorySettings: vi.fn()
 }));
 
-// Mock SessionFormatter
 vi.mock('InvestCommon/data/settings/session.formatter', () => ({
   SessionFormatter: vi.fn()
 }));
 
-// Mock Vue lifecycle hooks
 vi.mock('vue', async () => {
   const actual = await vi.importActual('vue');
   return {
@@ -37,7 +33,6 @@ describe('useSettingsSecurity', () => {
     setActivePinia(createPinia());
     vi.clearAllMocks();
     
-    // Setup mock implementations
     const mockUserSessionRef = ref({
       id: 'session-123',
       authenticated_at: '2024-01-01T10:00:00Z',
@@ -83,7 +78,6 @@ describe('useSettingsSecurity', () => {
 
     mockUserSession = mockUserSessionRef;
 
-    // Get the mocked functions and set their return values
     const { useSessionStore } = await import('InvestCommon/domain/session/store/useSession');
     const { useRepositorySettings } = await import('InvestCommon/data/settings/settings.repository');
     const { SessionFormatter } = await import('InvestCommon/data/settings/session.formatter');
@@ -95,10 +89,8 @@ describe('useSettingsSecurity', () => {
 
     vi.mocked(useRepositorySettings).mockReturnValue(mockSettingsRepository);
     
-    // Create a mock SessionFormatter that reacts to userSession changes
     const mockSessionFormatter = {
       format: vi.fn().mockImplementation(() => {
-        // Get the current userSession value to make the mock reactive
         const currentUserSession = mockUserSession.value;
         return {
           devicesFormatted: [
@@ -122,7 +114,6 @@ describe('useSettingsSecurity', () => {
     vi.mocked(SessionFormatter).mockImplementation(() => mockSessionFormatter as any);
 
     vi.mocked(onMounted).mockImplementation((fn: any) => {
-      // Execute the function immediately for testing
       if (fn) fn();
     });
     
@@ -133,7 +124,7 @@ describe('useSettingsSecurity', () => {
     it('should format current session and mark first item as current', () => {
       const activityBody = composable.activityBody.value;
       
-      expect(activityBody).toHaveLength(2); // current + other sessions
+      expect(activityBody).toHaveLength(2);
       expect(activityBody[0].current).toBe(true);
       expect(activityBody[0].id).toBe('session-123');
       expect(activityBody[1].id).toBe('device-456');
@@ -183,7 +174,6 @@ describe('useSettingsSecurity', () => {
     it('should react to user session changes', async () => {
       const initialActivityBody = composable.activityBody.value;
       
-      // Change user session
       mockUserSession.value = {
         id: 'session-new',
         authenticated_at: '2024-01-02T10:00:00Z',
@@ -205,7 +195,6 @@ describe('useSettingsSecurity', () => {
     it('should react to all sessions data changes', async () => {
       const initialActivityBody = composable.activityBody.value;
       
-      // Change other sessions data
       mockSettingsRepository.getAllSessionState.value.data = [
         {
           id: 'session-updated',

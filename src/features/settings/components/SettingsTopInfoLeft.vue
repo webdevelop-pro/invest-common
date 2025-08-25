@@ -3,6 +3,7 @@ import { computed } from 'vue';
 import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 import { storeToRefs } from 'pinia';
 import VAvatar from 'UiKit/components/VAvatar.vue';
+import VAvatarUpload from 'InvestCommon/features/filer/VAvatarUpload.vue';
 import env from 'InvestCommon/global';
 import pen from 'UiKit/assets/images/pen.svg?component';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
@@ -10,6 +11,7 @@ import { ROUTE_SETTINGS_ACCOUNT_DETAILS } from 'InvestCommon/helpers/enums/route
 import { useBreakpoints } from 'UiKit/composables/useBreakpoints';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 
 const { FILER_URL } = env;
 
@@ -18,6 +20,8 @@ const { userSessionTraits } = storeToRefs(userSessionStore);
 const useRepositoryProfilesStore = useRepositoryProfiles();
 const { getUserState } = storeToRefs(useRepositoryProfilesStore);
 const { isTablet } = storeToRefs(useBreakpoints());
+const profilesStore = useProfilesStore();
+const { selectedUserProfileId } = storeToRefs(profilesStore);
 
 const isLoading = computed(() => getUserState.value.loading);
 const imageID = computed(() => getUserState.value.data?.image_link_id);
@@ -25,9 +29,11 @@ const imageID = computed(() => getUserState.value.data?.image_link_id);
 
 <template>
   <div class="SettingsTopInfoLeft settings-top-info-left">
-    <VAvatar
+    <VAvatarUpload
       size="x-large"
       :src="imageID > 0 ? `${FILER_URL}/auth/files/${imageID}?size=medium` : undefined"
+      :user-id="selectedUserProfileId"
+      :image-id="imageID"
       alt="avatar image"
       class="settings-top-info-left__avatar is--gt-tablet-show"
     />

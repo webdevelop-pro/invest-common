@@ -1,81 +1,26 @@
 <script setup lang="ts">
-import {
-  computed, defineAsyncComponent, onMounted, ref, watch,
-} from 'vue';
-import { SELFSERVICE } from 'InvestCommon/features/settings/utils';
+import { defineAsyncComponent, onMounted } from 'vue';
 import VAlert from 'UiKit/components/VAlert.vue';
 import VSwitch from 'UiKit/components/VSwitch.vue';
-import { navigateWithQueryParams } from 'UiKit/helpers/general';
-import { urlResetPassword } from 'InvestCommon/global/links';
-import { useRepositorySettings } from 'InvestCommon/data/settings/settings.repository';
-import { useToast } from 'UiKit/components/Base/VToast/use-toast';
-import { storeToRefs } from 'pinia';
+import { useSettingsMfa } from './logic/useSettingsMfa';
 
 const VDialogMfa = defineAsyncComponent({
   loader: () => import('./VDialogMfa.vue'),
 });
 
-const settingsRepository = useRepositorySettings();
-const { flowId, csrfToken, setSettingsState, getAuthFlowState } = storeToRefs(settingsRepository);
+const {
+  isDialogMfaOpen,
+  isMfaEnabled,
+  mfaSwitchText,
+  mfaInfoText,
+  onResetPasswordClick,
+  onMfaClick,
+  initializeMfa,
+} = useSettingsMfa();
 
-const { toast } = useToast();
-
-const isDialogMfaOpen = ref(false);
-
-
-const totpUnlink = computed(() => {
-  const tokenItem = getAuthFlowState.value.data?.ui?.nodes?.find((item: any) => item.attributes.name === 'totp_unlink');
-  return tokenItem;
+onMounted(() => {
+  initializeMfa();
 });
-
-const isMfaEnabled = ref(false);
-const mfaSwitchText = computed(() => (
-  isMfaEnabled.value ? 'Multi-factor authentication is now enabled.' : 'Enable multi-factor authentication'));
-const mfaInfoText = computed(() => (
-  isMfaEnabled.value ? 'Your account is protected with an extra layer of security.' : 'An extra level of protection to your account during login'));
-
-const onResetPasswordClick = () => {
-  navigateWithQueryParams(urlResetPassword);
-};
-
-onMounted(async () => {
-  if (!getAuthFlowState.value.data) {
-    settingsRepository.getAuthFlow(SELFSERVICE.settings);
-  }
-});
-
-const onMfaClick = async () => {
-  if (isMfaEnabled.value && !totpUnlink.value) {
-    // open MFA dialog
-    isDialogMfaOpen.value = true;
-  } else if (totpUnlink.value) {
-    // unlink
-    await settingsRepository.setSettings(flowId.value, {
-        method: 'totp',
-        totp_unlink: true,
-        csrf_token: csrfToken.value,
-    }, onMfaClick);
-    await settingsRepository.getAuthFlow(SELFSERVICE.settings);
-
-      if (!setSettingsState.value.error) {
-        toast({
-          title: 'Submitted',
-          description: 'Unlinked',
-          variant: 'success',
-        });
-      }
-  }
-};
-
-watch(() => isDialogMfaOpen.value, () => {
-  if (!isDialogMfaOpen.value) {
-    isMfaEnabled.value = totpUnlink.value;
-  }
-});
-
-watch(() => totpUnlink.value, () => {
-  isMfaEnabled.value = totpUnlink.value;
-}, { immediate: true });
 </script>
 
 <template>

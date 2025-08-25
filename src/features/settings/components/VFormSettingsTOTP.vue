@@ -1,118 +1,31 @@
 <script setup lang="ts">
-import { SELFSERVICE } from 'InvestCommon/features/settings/utils';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
 import VImage from 'UiKit/components/Base/VImage/VImage.vue';
-import {
-  computed, nextTick, onMounted, ref,
-} from 'vue';
-import { JSONSchemaType } from 'ajv/dist/types/json-schema';
-import { scrollToError } from 'UiKit/helpers/validation/general';
 import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
-import { useRepositorySettings } from 'InvestCommon/data/settings/settings.repository';
-import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
-import { useToast } from 'UiKit/components/Base/VToast/use-toast';
-import { storeToRefs } from 'pinia';
+import { useVFormSettingsTOTP } from './logic/useVFormSettingsTOTP';
 
 const emit = defineEmits(['close']);
 
-const settingsRepository = useRepositorySettings();
-const { flowId, csrfToken, setSettingsState, getAuthFlowState } = storeToRefs(settingsRepository);
-
-const { toast } = useToast();
-
-const qrOnMounted = ref(false);
-const isLoading = ref(false);
-
-const totpQR = computed(() => {
-  const tokenItem = getAuthFlowState.value.data?.ui?.nodes?.find((item) => item.attributes.id === 'totp_qr');
-  return tokenItem?.attributes?.src ?? '';
-});
-const totpSecret = computed(() => {
-  const tokenItem = getAuthFlowState.value.data?.ui?.nodes?.find((item) => item.attributes.id === 'totp_secret_key');
-  return tokenItem?.attributes?.text?.text ?? '';
-});
-
-const errorData = computed(() => (setSettingsState.value.error?.data?.responseJson));
-
-const totpCodeError = computed(() => {
-  const tokenItem = errorData.value?.ui?.nodes?.find((item) => item.attributes.name === 'totp_code');
-  return tokenItem?.messages?.[0]?.text;
-});
-
-type FormModelTOTP = {
-  totp_code: number;
-}
-
-const schema = {
-  $schema: 'http://json-schema.org/draft-07/schema#',
-  definitions: {
-    Auth: {
-      properties: {
-        totp_code: {},
-      },
-      type: 'object',
-      required: ['totp_code'],
-    },
-  },
-  $ref: '#/definitions/Auth',
-} as unknown as JSONSchemaType<FormModelTOTP>;
-
-
 const {
+  qrOnMounted,
+  totpQR,
+  totpSecret,
+  totpCodeError,
   model,
   validation,
-  isValid,
-  onValidate,
-} = useFormValidation(
   schema,
-  undefined,
-  {} as FormModelTOTP,
-);
+  onSave,
+  getAuthFlowState,
+} = useVFormSettingsTOTP();
 
-const onSave = async () => {
-  onValidate();
-  if (!isValid.value) {
-    nextTick(() => scrollToError('VFormSettingsTOTP'));
-    return;
+const handleSave = async () => {
+  const success = await onSave();
+  if (success) {
+    emit('close');
   }
-    isLoading.value = true;
-    try {
-      if (!flowId.value) await settingsRepository.getAuthFlow(SELFSERVICE.settings);
-      
-      if (getAuthFlowState.value.error) {
-        isLoading.value = false;
-        return;
-      }
-
-      await settingsRepository.setSettings(flowId.value, {
-        method: 'totp',
-        totp_code: model.totp_code?.toString() || '',
-        csrf_token: csrfToken.value,
-      }, onSave); // Pass resetHandler as callback for retry after session refresh
-
-      if (!setSettingsState.value.error) {
-        settingsRepository.getAuthFlow(SELFSERVICE.settings);
-        toast({
-          title: 'Submitted',
-          description: 'Setup confirmed',
-          variant: 'success',
-        });
-        emit('close');
-      }
-    } catch (error) {
-      console.error('Recovery failed:', error);
-    } finally {
-      isLoading.value = false;
-    }
 };
-
-onMounted(async () => {
-  await settingsRepository.getAuthFlow(SELFSERVICE.settings);
-  qrOnMounted.value = totpQR.value;
-  setSettingsState.value.error = null;
-});
 </script>
 
 <template>
@@ -165,7 +78,7 @@ onMounted(async () => {
             :uppercase="false"
             data-testid="button"
             class="form-settings-totp__btn"
-            @click="onSave"
+            @click="handleSave"
           >
             Verify
           </VButton>

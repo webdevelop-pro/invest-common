@@ -1,0 +1,108 @@
+export enum EvmWalletStatusTypes {
+  created = 'created',
+  verified = 'verified',
+  error = 'error',
+  error_retry = 'error_retry',
+  error_document = 'error_document',
+  error_pending = 'error_pending',
+  error_suspended = 'error_suspended',
+}
+
+export enum EvmTransactionStatusTypes {
+  processed = 'processed',
+  pending = 'pending',
+  failed = 'failed',
+  cancelled = 'cancelled',
+  wait = 'wait',
+}
+
+export enum EvmTransactionTypes {
+  withdrawal = 'withdrawal',
+  deposit = 'deposit',
+  investment = 'investment',
+  distribution = 'distribution',
+  fee = 'fee',
+  market = 'market',
+  sale = 'sale',
+  return = 'return',
+}
+
+export interface IEvmWalletDataResponse {
+  id: number;
+  status: EvmWalletStatusTypes;
+  balance: number;
+  pending_incoming_balance: number;
+  pending_outcoming_balance: number;
+  address: string;
+  balances: Array<{
+    token: string;
+    amount: number;
+    symbol: string;
+  }>;
+}
+
+export interface IEvmWalletDataFormatted {
+  id: number;
+  status: EvmWalletStatusTypes;
+  balance: number;
+  pending_incoming_balance: number;
+  pending_outcoming_balance: number;
+  address: string;
+  balances: Array<{
+    token: string;
+    amount: number;
+    symbol: string;
+  }>;
+  isStatusCreated: boolean;
+  isStatusVerified: boolean;
+  isStatusError: boolean;
+  isStatusErrorRetry: boolean;
+  isStatusErrorDocument: boolean;
+  isStatusErrorPending: boolean;
+  isStatusErrorSuspended: boolean;
+  isStatusAnyError: boolean;
+  currentBalance: number;
+  totalBalance: number;
+}
+
+export interface IEvmTransactionDataResponse {
+  id: number;
+  status: EvmTransactionStatusTypes;
+  type: EvmTransactionTypes;
+  amount: {
+    value: string;
+    currency: string;
+  };
+  source_wallet_id: number;
+  dest_wallet_id: number;
+  entity_id: number;
+  updated_at: string;
+  created_at: string;
+}
+
+export interface IEvmTransactionDataFormatted {
+  id: number;
+  status: EvmTransactionStatusTypes;
+  type: EvmTransactionTypes;
+  amount: {
+    value: string;
+    currency: string;
+  };
+  source_wallet_id: number;
+  dest_wallet_id: number;
+  entity_id: number;
+  updated_at: string;
+  created_at: string;
+  isStatusPending: boolean;
+  isStatusProcessed: boolean;
+  isStatusFailed: boolean;
+  isStatusCancelled: boolean;
+  isTypeDeposit: boolean;
+  isTypeWithdraw: boolean;
+  isTypeInvestment: boolean;
+  isTypeDistribution: boolean;
+  isTypeFee: boolean;
+  isTypeSale: boolean;
+  isTypeReturn: boolean;
+  isTypeMarket: boolean;
+}

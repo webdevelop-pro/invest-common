@@ -6,9 +6,6 @@ export const useDialogs = defineStore('dialogs', () => {
 
   const isDialogRefreshSessionOpen = ref(false);
   
-  // Add event emitter for successful authentication
-  const onSessionRefreshed = ref<(() => void) | null>(null);
-  
   // Promise resolver for session refresh completion
   const sessionRefreshResolver = ref<((value: boolean) => void) | null>(null);
   

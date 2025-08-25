@@ -5,33 +5,29 @@ import {
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import { socials } from 'UiKit/utils/socials';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
+import VFormFooterSkeleton from 'UiKit/components/VForms/VFormFooterSkeleton.vue';
 
 const SocialLinks = defineAsyncComponent({
   loader: () => import('UiKit/components/VSocialLinks/VSocialLinks.vue'),
-
   hydrate: hydrateOnVisible(),
 });
 
 const VFooterText = defineAsyncComponent({
   loader: () => import('./VFooterText.vue'),
-
   hydrate: hydrateOnVisible(),
 });
 
 const VFooterMenu = defineAsyncComponent({
   loader: () => import('./VFooterMenu.vue'),
-
-  hydrate: hydrateOnVisible(),
 });
 
 const VFormFooterSubscribe = defineAsyncComponent({
   loader: () => import('UiKit/components/VForms/VFormFooterSubscribe.vue'),
-
+  loadingComponent: VFormFooterSkeleton,
   hydrate: hydrateOnVisible(),
 });
 const VFooterBottom = defineAsyncComponent({
   loader: () => import('UiKit/components/VFooter/VFooterBottom.vue'),
-
   hydrate: hydrateOnVisible(),
 });
 

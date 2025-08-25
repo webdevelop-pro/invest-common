@@ -63,6 +63,7 @@ export class SessionFormatter {
 }
 
 // Backward-compatible helper (optional)
-export const formatSessionDevices = (session: ISession): IActivityRow[] => new SessionFormatter(session).format().devicesFormatted;
+export const formatSessionDevices = (session: ISession): IActivityRow[] => (
+  new SessionFormatter(session).format().devicesFormatted);
 
 
