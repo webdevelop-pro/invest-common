@@ -8,6 +8,7 @@ import SettingsTopInfoLeft from './components/SettingsTopInfoLeft.vue';
 import SettingsSecurity from './components/SettingsSecurity.vue';
 import SettingsMfa from './components/SettingsMfa.vue';
 import { SettingsTabTypes } from './utils';
+// import VFormSettingsSocial from './components/VFormSettingsSocial.vue';
 
 const globalLoader = useGlobalLoader();
 globalLoader.hide();

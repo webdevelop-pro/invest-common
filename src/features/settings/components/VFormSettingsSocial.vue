@@ -1,50 +1,10 @@
 <script setup lang="ts">
-import { SELFSERVICE } from 'InvestCommon/helpers/enums/auth';
-import { socialSignin } from './utilsAuth';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
-import { computed, ref } from 'vue';
-import { useAuthLogicStore } from 'InvestCommon/store/useAuthLogic';
-import { useAuthStore } from 'InvestCommon/store/useAuth';
-import { storeToRefs } from 'pinia';
 import { capitalizeFirstLetter } from 'UiKit/helpers/text';
 import checkIcon from 'UiKit/assets/images/circle-check.svg';
-import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
+import { useSettingsSocial } from './logic/useSettingsSocial';
 
-const authLogicStore = useAuthLogicStore();
-const authStore = useAuthStore();
-const { getFlowData } = storeToRefs(authStore);
-const userSessionStore = useSessionStore();
-const { userSession } = storeToRefs(userSessionStore);
-
-const loadingProvider = ref();
-
-const oidcSocials = computed(() => getFlowData.value?.ui?.nodes?.filter((item) => item.group === 'oidc'));
-const loggedInSocial = computed(() => userSession.value?.authentication_methods?.filter((item) => item?.method === 'oidc'));
-
-const data = computed(() => {
-  const res: any[] = [];
-  oidcSocials.value?.forEach((item) => {
-    res.push({
-      ...socialSignin.find((social) => social?.provider === item?.attributes?.value),
-      linked: item.name === 'link',
-    });
-  });
-  loggedInSocial.value?.forEach((item) => {
-    res.push({
-      ...socialSignin.find((social) => social?.provider === item?.provider),
-      linked: true,
-      disabled: true,
-    });
-  });
-  return res;
-});
-
-const onSocialLoginHandler = async (provider: string, toLink: boolean) => {
-  loadingProvider.value = provider;
-  const dataToSend = toLink ? { link: provider } : { unlink: provider };
-  await authLogicStore.onSettingsSocial(SELFSERVICE.settings, dataToSend);
-  loadingProvider.value = null;
-};
+const { data, onSocialLoginHandler } = useSettingsSocial();
 </script>
 
 <template>
@@ -61,7 +21,6 @@ const onSocialLoginHandler = async (provider: string, toLink: boolean) => {
       <VButton
         variant="outlined"
         size="small"
-        :disabled="loadingProvider === item?.provider"
         :color="item?.linked ? 'secondary' : 'primary'"
         :class="item?.classes"
         @click.stop.prevent="onSocialLoginHandler(item?.provider, !item?.linked)"
@@ -129,6 +88,7 @@ const onSocialLoginHandler = async (provider: string, toLink: boolean) => {
     align-items: center;
     width: 190px;
     flex-shrink: 0;
+    justify-content: end;
 
     @media screen and (max-width: $desktop) {
       flex-direction: row-reverse;

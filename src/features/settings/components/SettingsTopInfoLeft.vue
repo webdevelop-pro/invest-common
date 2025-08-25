@@ -2,7 +2,6 @@
 import { computed } from 'vue';
 import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 import { storeToRefs } from 'pinia';
-import VAvatar from 'UiKit/components/VAvatar.vue';
 import VAvatarUpload from 'InvestCommon/features/filer/VAvatarUpload.vue';
 import env from 'InvestCommon/global';
 import pen from 'UiKit/assets/images/pen.svg?component';
@@ -25,6 +24,15 @@ const { selectedUserProfileId } = storeToRefs(profilesStore);
 
 const isLoading = computed(() => getUserState.value.loading);
 const imageID = computed(() => getUserState.value.data?.image_link_id);
+
+
+const onUploadId = async (id: string) => {
+  const body = {
+    image_link_id: id,
+  };
+  await useRepositoryProfilesStore.updateUserData(Number(getUserState.value.data?.id), body);
+  useRepositoryProfilesStore.getUser();
+};
 </script>
 
 <template>
@@ -36,6 +44,7 @@ const imageID = computed(() => getUserState.value.data?.image_link_id);
       :image-id="imageID"
       alt="avatar image"
       class="settings-top-info-left__avatar is--gt-tablet-show"
+      @upload-id="onUploadId"
     />
     <div class="settings-top-info-left__data">
       <VSkeleton
@@ -113,6 +122,7 @@ const imageID = computed(() => getUserState.value.data?.image_link_id);
 .settings-top-info-left {
   display: flex;
   gap: 20px;
+  align-items: flex-start;
 
   @media screen and (max-width: $tablet-xs) {
       flex-direction: column;
