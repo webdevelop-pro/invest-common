@@ -9,6 +9,7 @@ const props = defineProps({
   errorData: Object,
   schemaBackend: Object,
   loading: Boolean,
+  showSSN: Boolean,
 });
 
 const modelDataComputed = computed(() => props.modelData);
@@ -37,6 +38,7 @@ defineExpose({
       :loading="loadingComputed"
       :schema-backend="schemaBackendComputed"
       :error-data="errorDataComputed"
+      :show-ssn="showSSN"
     />
     <VFormPartialCustodian
       ref="custodianFormChild"

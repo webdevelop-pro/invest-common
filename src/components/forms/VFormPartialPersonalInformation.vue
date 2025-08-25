@@ -25,9 +25,10 @@ const props = defineProps({
   errorData: Object,
   schemaBackend: Object,
   loading: Boolean,
+  showSSN: Boolean,
 });
 
-const isSsnHidden = computed(() => props.modelData?.is_full_ssn_provided === true);
+const isSsnHidden = computed(() => (props.modelData?.is_full_ssn_provided === true) && !props.showSSN);
 
 const schemaFrontend = computed(() => {
   const properties = {

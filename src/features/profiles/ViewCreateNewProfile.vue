@@ -107,6 +107,7 @@ const handleSave = () => {
                 :schema-backend="schemaBackend || {}"
                 :error-data="errorData || {}"
                 show-document
+                show-ssn
               />
               <VFormProfileSDIRA
                 v-else-if="selectedType === PROFILE_TYPES.SDIRA"
@@ -116,6 +117,7 @@ const handleSave = () => {
                 :loading="isLoading"
                 :schema-backend="schemaBackend || {}"
                 :error-data="errorData || {}"
+                show-ssn
               />
               <VFormProfileSolo
                 v-else-if="selectedType === PROFILE_TYPES.SOLO401K"
@@ -126,6 +128,7 @@ const handleSave = () => {
                 :schema-backend="schemaBackend || {}"
                 :error-data="errorData || {}"
                 show-document
+                show-ssn
               />
               <VFormProfileTrust
                 v-else-if="selectedType === PROFILE_TYPES.TRUST"
@@ -136,6 +139,7 @@ const handleSave = () => {
                 :schema-backend="schemaBackend || {}"
                 :error-data="errorData || {}"
                 show-document
+                show-ssn
               />
             </Transition>
           </div>

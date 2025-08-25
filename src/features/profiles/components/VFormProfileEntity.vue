@@ -12,6 +12,7 @@ const props = defineProps({
   schemaBackend: Object,
   loading: Boolean,
   showDocument: Boolean,
+  showSSN: Boolean,
 });
 
 const modelDataComputed = computed(() => props.modelData);
@@ -53,6 +54,7 @@ defineExpose({
       :loading="loadingComputed"
       :schema-backend="schemaBackendComputed"
       :error-data="errorDataComputed"
+      :show-ssn="showSSN"
     />
     <VFormPartialEntityInformation
       ref="entityInfoFormChild"
