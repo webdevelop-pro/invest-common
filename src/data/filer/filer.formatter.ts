@@ -52,13 +52,13 @@ export class FilerFormatter {
   }
 
   static formatToFullDate = (ISOString: string) => {
-    if (!ISOString) return;
+    if (!ISOString) return '';
     return new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
       month: 'numeric',
       day: 'numeric',
     })
-      .format(new Date(ISOString));
+      .format(new Date(ISOString))
   };
 
   /**

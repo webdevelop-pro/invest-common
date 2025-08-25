@@ -2,7 +2,7 @@ import { computed } from 'vue';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import env from 'InvestCommon/global';
-import { toasterErrorHandling } from 'InvestCommon/data/repository/error/toasterErrorHandling';
+import { toasterErrorHandlingAnalytics } from 'InvestCommon/data/repository/error/toasterErrorHandlingAnalytics';
 import { createActionState } from 'InvestCommon/data/repository/repository';
 import { INotification } from 'InvestCommon/data/notifications/notifications.types';
 import { TransactionFormatter } from './formatter/transactions.formatter';
@@ -44,7 +44,7 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
       return formatted;
     } catch (err) {
       getWalletState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to fetch wallet');
+      toasterErrorHandlingAnalytics(err, 'Failed to fetch wallet');
       throw err;
     } finally {
       getWalletState.value.loading = false;
@@ -61,7 +61,7 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
       return response.data.items;
     } catch (err) {
       getTransactionsState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to fetch wallet transactions');
+      toasterErrorHandlingAnalytics(err, 'Failed to fetch wallet transactions');
       throw err;
     } finally {
       getTransactionsState.value.loading = false;
@@ -77,7 +77,7 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
       return response.data;
     } catch (err) {
       addBankAccountState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to add bank account');
+      toasterErrorHandlingAnalytics(err, 'Failed to add bank account');
       throw err;
     } finally {
       addBankAccountState.value.loading = false;
@@ -93,7 +93,7 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
       return response.data;
     } catch (err) {
       addTransactionState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to add transaction');
+      toasterErrorHandlingAnalytics(err, 'Failed to add transaction');
       throw err;
     } finally {
       addTransactionState.value.loading = false;
@@ -109,7 +109,7 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
       return response.data;
     } catch (err) {
       cancelTransactionState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to cancel transaction');
+      toasterErrorHandlingAnalytics(err, 'Failed to cancel transaction');
       throw err;
     } finally {
       cancelTransactionState.value.loading = false;
@@ -125,7 +125,7 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
       return response.data;
     } catch (err) {
       createLinkTokenState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to create link token');
+      toasterErrorHandlingAnalytics(err, 'Failed to create link token');
       throw err;
     } finally {
       createLinkTokenState.value.loading = false;
@@ -141,7 +141,7 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
       return response.data;
     } catch (err) {
       createLinkExchangeState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to exchange link token');
+      toasterErrorHandlingAnalytics(err, 'Failed to exchange link token');
       throw err;
     } finally {
       createLinkExchangeState.value.loading = false;
@@ -157,7 +157,7 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
       return response.data;
     } catch (err) {
       createLinkProcessState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to process link token');
+      toasterErrorHandlingAnalytics(err, 'Failed to process link token');
       throw err;
     } finally {
       createLinkProcessState.value.loading = false;
@@ -173,7 +173,7 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
       return response.data;
     } catch (err) {
       deleteLinkedAccountState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to delete linked account');
+      toasterErrorHandlingAnalytics(err, 'Failed to delete linked account');
       throw err;
     } finally {
       deleteLinkedAccountState.value.loading = false;

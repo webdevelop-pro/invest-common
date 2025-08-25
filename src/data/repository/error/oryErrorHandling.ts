@@ -3,7 +3,7 @@ import { urlAuthenticator, urlProfile, urlSignin } from 'InvestCommon/global/lin
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
-import { toasterErrorHandling } from './toasterErrorHandling';
+import { toasterErrorHandlingAnalytics } from './toasterErrorHandlingAnalytics';
 
 type FlowType = 'login' | 'registration' | 'settings' | 'recovery' | 'verification';
 
@@ -35,7 +35,7 @@ export const oryErrorHandling = async (
 
   if (!responseJson?.error?.id) {
     console.log('Ory error handling: no error id found', responseJson);
-    toasterErrorHandling(error, comment);
+    toasterErrorHandlingAnalytics(error, comment);
     return;
   }
 
@@ -116,6 +116,6 @@ export const oryErrorHandling = async (
       navigateWithQueryParams(urlSignin);
       break;
     default:
-      toasterErrorHandling(error, comment);
+      toasterErrorHandlingAnalytics(error, comment);
   }
 };

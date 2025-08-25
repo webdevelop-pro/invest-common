@@ -1,5 +1,5 @@
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
-import { toasterErrorHandling } from 'InvestCommon/data/repository/error/toasterErrorHandling';
+import { toasterErrorHandlingAnalytics } from 'InvestCommon/data/repository/error/toasterErrorHandlingAnalytics';
 import { IInvestDocumentSign } from 'InvestCommon/types/api/invest';
 import env from 'InvestCommon/global';
 import { v4 as uuidv4 } from 'uuid';
@@ -24,7 +24,7 @@ export const useRepositoryEsign = defineStore('repositoryEsign', () => {
       return response.data as IInvestDocumentSign;
     } catch (err) {
       setDocumentState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to set document');
+      toasterErrorHandlingAnalytics(err, 'Failed to set document');
       throw err;
     } finally {
       setDocumentState.value.loading = false;
@@ -47,7 +47,7 @@ export const useRepositoryEsign = defineStore('repositoryEsign', () => {
       return response.data as Blob;
     } catch (err) {
       getDocumentState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to get document');
+      toasterErrorHandlingAnalytics(err, 'Failed to get document');
       throw err;
     } finally {
       getDocumentState.value.loading = false;
