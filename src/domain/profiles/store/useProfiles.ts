@@ -9,6 +9,7 @@ import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repos
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { PROFILE_TYPES } from 'InvestCommon/global/investment.json';
 import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository';
+import { useLogoutStore } from 'InvestCommon/features/auth/store/useLogout';
 
 const { IS_STATIC_SITE } = env;
 
@@ -18,6 +19,7 @@ export const useProfilesStore = defineStore('profiles', () => {
   const userSessionStore = useSessionStore();
   const { userSession, userLoggedIn } = storeToRefs(userSessionStore);
   const cookies = useCookies();
+  const logoutStore = useLogoutStore();
 
   const useRepositoryProfilesStore = useRepositoryProfiles();
   const {
@@ -85,6 +87,13 @@ export const useProfilesStore = defineStore('profiles', () => {
   // if user is logged in and profile is not loaded, load it - step 1
   watch(() => userLoggedIn.value, async () => {
     init();
+  }, { immediate: true });
+
+  // if there is error in getUser (profiles) call logout - could happen if session expired
+  watch(() => getUserState.value.error, async () => {
+    if (getUserState.value.error) {
+      logoutStore.logoutHandler();
+    }
   }, { immediate: true });
 
   const setSelectedUserProfileById = (id: number) => {

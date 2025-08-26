@@ -22,9 +22,11 @@ export function useSettingsSecurity() {
 
   const activityBody = computed(() => {
     const currentSession = new SessionFormatter(userSession.value as ISession).format().devicesFormatted;
-    // Only mark as current if there are devices in the current session
+    // Mark all current session devices as current
     if (currentSession.length > 0) {
-      (currentSession[0] as IActivityRow).current = true;
+      currentSession.forEach((device: IActivityRow) => {
+        device.current = true;
+      });
     }
     const otherSessions = getAllSessionState.value.data?.flatMap((s: ISessionFormatted) => s.devicesFormatted) || [];
     return [...currentSession, ...otherSessions];

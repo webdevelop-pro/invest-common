@@ -5,10 +5,9 @@ import env from 'InvestCommon/global';
 import { toasterErrorHandling } from 'InvestCommon/data/repository/error/toasterErrorHandling';
 import { createActionState } from 'InvestCommon/data/repository/repository';
 import { INotification } from 'InvestCommon/data/notifications/notifications.types';
-import { EvmTransactionFormatter } from './formatter/transactions.formatter';
 import { EvmWalletFormatter } from './formatter/wallet.formatter';
 import {
-  IEvmTransactionDataResponse, IEvmWalletDataFormatted, IEvmWalletDataResponse,
+  IEvmWalletDataFormatted, IEvmWalletDataResponse,
 } from './evm.types';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
@@ -36,7 +35,9 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
       return formatted;
     } catch (err) {
       getEvmWalletState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to fetch EVM wallet');
+      if (err?.data?.statusCode !== 404) {
+        toasterErrorHandling(err, 'Failed to fetch EVM wallet');
+      }
       throw err;
     } finally {
       getEvmWalletState.value.loading = false;

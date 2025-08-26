@@ -4,6 +4,7 @@ import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 import { toasterErrorHandlingAnalytics } from './toasterErrorHandlingAnalytics';
+import { toasterErrorHandling } from './toasterErrorHandling';
 
 type FlowType = 'login' | 'registration' | 'settings' | 'recovery' | 'verification';
 
@@ -31,10 +32,11 @@ export const oryErrorHandling = async (
   // special case for 4000006 error id
   if (isCredentialsError) {
     error.message = 'Invalid email or password.';
+    toasterErrorHandling(error, comment);
+    return;
   }
 
   if (!responseJson?.error?.id) {
-    console.log('Ory error handling: no error id found', responseJson);
     toasterErrorHandlingAnalytics(error, comment);
     return;
   }

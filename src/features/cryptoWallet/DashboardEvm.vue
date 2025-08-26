@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {
-  computed, defineAsyncComponent, nextTick, watch,
+  computed, defineAsyncComponent, nextTick, onBeforeMount, watch,
 } from 'vue';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import DashboardTabsTopInfo from '@/views/Dashboard/components/DashboardTabsTopInfo.vue';
@@ -100,6 +100,10 @@ const { getProfileByIdState } = storeToRefs(useRepositoryProfilesStore);
       if (canLoadEvmWalletData.value) updateData();
     });
   });
+
+onBeforeMount(() => {
+  updateData();
+});
 </script>
 
 <template>
