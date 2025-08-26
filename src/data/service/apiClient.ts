@@ -8,7 +8,7 @@ export class ApiClient {
   private pendingRequests = new Map<string, Promise<any>>();
 
   constructor(private baseURL: string = '') {
-    this.baseURL = baseURL || window.location.origin;
+    this.baseURL = baseURL || (typeof window !== 'undefined' ? window.location.origin : '');
   }
 
   private async executeRequest<T>(url: string, config: RequestConfig): Promise<ApiResponse<T>> {
@@ -42,9 +42,9 @@ export class ApiClient {
       method: config.method || 'GET',
       url: fullUrl,
       path: new URL(fullUrl).pathname,
-      userAgent: navigator.userAgent,
-      referer: document.referrer,
-      protocol: window.location.protocol.replace(':', ''),
+      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : '',
+      referer: typeof document !== 'undefined' ? document.referrer : '',
+      protocol: typeof window !== 'undefined' ? window.location.protocol.replace(':', '') : '',
     };
 
     try {

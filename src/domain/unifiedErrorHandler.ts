@@ -45,12 +45,12 @@ export const setupUnifiedErrorHandler = (config: ErrorHandlerConfig) => {
           serviceContext: {
             httpRequest: {
               method: 'GET',
-              url: window.location.href,
-              path: window.location.pathname,
-              userAgent: navigator.userAgent,
-              referer: document.referrer || '-',
+              url: typeof window !== 'undefined' ? window.location.href : '',
+              path: typeof window !== 'undefined' ? window.location.pathname : '',
+              userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : '',
+              referer: typeof document !== 'undefined' ? document.referrer || '-' : '-',
               remoteIp: '-',
-              protocol: window.location.protocol
+              protocol: typeof window !== 'undefined' ? window.location.protocol : ''
             },
             service_name: serviceName
           }
