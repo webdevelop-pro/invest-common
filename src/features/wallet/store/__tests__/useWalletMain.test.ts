@@ -54,7 +54,7 @@ vi.mock('InvestCommon/data/profiles/profiles.repository', () => ({
   }),
 }));
 
-vi.mock('InvestCommon/global/links', () => ({
+vi.mock('InvestCommon/domain/config/links.ts', () => ({
   urlContactUs: 'https://test/contact-us',
 }));
 

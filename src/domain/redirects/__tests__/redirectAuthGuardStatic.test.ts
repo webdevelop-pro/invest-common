@@ -27,7 +27,7 @@ vi.mock('pinia', () => ({
   })),
 }));
 
-vi.mock('InvestCommon/global/links', () => ({
+vi.mock('InvestCommon/domain/config/links.ts', () => ({
   urlSignin: '/signin',
   urlSignup: '/signup',
   urlAuthenticator: '/authenticator',

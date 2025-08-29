@@ -48,7 +48,7 @@ vi.mock('UiKit/composables/useHubspotForm', () => ({
   useHubspotForm: vi.fn(),
 }));
 
-vi.mock('InvestCommon/global', () => ({
+vi.mock('InvestCommon/domain/config/env', () => ({
   default: {
     HUBSPOT_FORM_ID_PLAN_INFO: 'test-hubspot-form-id',
   },

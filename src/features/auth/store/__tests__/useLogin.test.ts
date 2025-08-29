@@ -8,7 +8,7 @@ import { SELFSERVICE } from '../type';
 import { useLoginStore } from '../useLogin';
 
 // Mock environment variables
-vi.mock('InvestCommon/global', () => ({
+vi.mock('InvestCommon/domain/config/env', () => ({
   default: {
     FRONTEND_URL_STATIC: 'http://localhost:3000',
   },

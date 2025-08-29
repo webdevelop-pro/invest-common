@@ -92,7 +92,7 @@ vi.mock('UiKit/composables/useHubspotForm', () => ({
   useHubspotForm: vi.fn(() => ({ submitFormToHubspot: mockSubmitFormToHubspot })),
 }));
 
-vi.mock('InvestCommon/global', () => ({
+vi.mock('InvestCommon/domain/config/env', () => ({
   default: {
     HUBSPOT_FORM_ID_PERSONAL_INFORMATION: 'personal',
     HUBSPOT_FORM_ID_IDENTIFICATION: 'identification',

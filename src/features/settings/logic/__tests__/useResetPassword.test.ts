@@ -5,7 +5,7 @@ import { ROUTE_SETTINGS_MFA } from 'InvestCommon/domain/config/enums/routes';
 import { useResetPassword } from '../useResetPassword';
 
 // Mock dependencies
-vi.mock('InvestCommon/global/links', () => ({
+vi.mock('InvestCommon/domain/config/links.ts', () => ({
   urlSettings: vi.fn((profileId: string) => `/settings/${profileId}`)
 }));
 

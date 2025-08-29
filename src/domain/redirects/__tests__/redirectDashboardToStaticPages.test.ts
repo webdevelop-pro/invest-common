@@ -9,7 +9,7 @@ vi.mock('UiKit/helpers/general', () => ({
   navigateWithQueryParams: vi.fn(),
 }));
 
-vi.mock('InvestCommon/global', () => ({
+vi.mock('InvestCommon/domain/config/env', () => ({
   default: {
     FRONTEND_URL_STATIC: 'https://static.example.com',
   },

@@ -5,7 +5,7 @@ import { ROUTE_SETTINGS_MFA } from 'InvestCommon/domain/config/enums/routes';
 import { scrollToError } from 'UiKit/helpers/validation/general';
 import { useSettingsAccountDetails } from '../useSettingsAccountDetails';
 
-vi.mock('InvestCommon/global', () => ({
+vi.mock('InvestCommon/domain/config/env', () => ({
   default: { HUBSPOT_FORM_ID_ACCOUNT: 'test-hubspot-form-id' }
 }));
 

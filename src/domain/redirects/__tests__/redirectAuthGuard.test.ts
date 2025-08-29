@@ -26,7 +26,7 @@ vi.mock('InvestCommon/domain/resetAllData', () => ({
   resetAllData: vi.fn(),
 }));
 
-vi.mock('InvestCommon/global', () => ({
+vi.mock('InvestCommon/domain/config/env', () => ({
   default: {
     FRONTEND_URL: 'http://localhost:3000',
   },

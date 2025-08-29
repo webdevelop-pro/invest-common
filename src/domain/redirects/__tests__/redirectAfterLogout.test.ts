@@ -9,7 +9,7 @@ vi.mock('UiKit/helpers/general', () => ({
   navigateWithQueryParams: vi.fn(),
 }));
 
-vi.mock('InvestCommon/global/links', () => ({
+vi.mock('InvestCommon/domain/config/links.ts', () => ({
   urlOffers: '/offers',
   urlSignin: '/signin',
 }));
