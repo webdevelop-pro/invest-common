@@ -9,7 +9,7 @@ import { storeToRefs } from 'pinia';
 const forgotStore = useForgotStore();
 const {
   model, isDisabledButton, setRecoveryState,
-  isLoading, isFieldRequired, getErrorText,
+  isLoading,
 } = storeToRefs(forgotStore);
 
 const onSubmit = () => {
@@ -25,8 +25,8 @@ const onSubmit = () => {
   >
     <VFormGroup
       v-slot="VFormGroupProps"
-      :required="isFieldRequired('email')"
-      :error-text="getErrorText('email', setRecoveryState.error?.data?.responseJson)"
+      :required="forgotStore.isFieldRequired('email')"
+      :error-text="forgotStore.getErrorText('email', setRecoveryState.error?.data?.responseJson)"
       label="Email Address"
       class="forgot-form__input"
     >

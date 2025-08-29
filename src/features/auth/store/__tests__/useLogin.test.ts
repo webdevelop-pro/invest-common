@@ -57,7 +57,7 @@ vi.mock('UiKit/helpers/general', () => {
   };
 });
 
-vi.mock('InvestCommon/composable/useFormValidation', () => ({
+vi.mock('UiKit/helpers/validation/useFormValidation', () => ({
   useFormValidation: vi.fn(() => {
     const model = ref({ email: '', password: '' });
     const isValid = ref(true);
@@ -72,7 +72,7 @@ vi.mock('InvestCommon/composable/useFormValidation', () => ({
       validation.value = {
         email: !emailValid ? ['Invalid email format'] : [],
         password: !passwordValid ? ['Password must be at least 8 characters'] : [],
-      };
+      } as any;
     });
 
     // Make model values accessible through getters
@@ -91,7 +91,15 @@ vi.mock('InvestCommon/composable/useFormValidation', () => ({
       validation,
       isValid,
       onValidate,
-    };
+      scrollToError: vi.fn(),
+      formErrors: ref({}),
+      isFieldRequired: vi.fn(),
+      getErrorText: vi.fn(),
+      getOptions: vi.fn(),
+      getReferenceType: vi.fn(),
+      resetValidation: vi.fn(),
+      schemaObject: ref({}),
+    } as any;
   }),
 }));
 
@@ -115,7 +123,7 @@ describe('useLogin Store', () => {
       getLoginState: ref({ data: { requested_aal: 'aal1' }, error: null }),
     };
 
-    vi.mocked(useRepositoryAuth).mockReturnValue(mockAuthRepo);
+    vi.mocked(useRepositoryAuth).mockReturnValue(mockAuthRepo as any);
     store = useLoginStore();
     mockAuthRepository = useRepositoryAuth();
   });
@@ -160,7 +168,7 @@ describe('useLogin Store', () => {
         required: ['email', 'password'],
       };
 
-      useRepositoryAuth().getSchemaState.value = { data: backendSchema };
+      (useRepositoryAuth() as any).getSchemaState.value = { data: backendSchema as any } as any;
 
       // Test with invalid data
       store.model.email = 'invalid';
@@ -186,9 +194,9 @@ describe('useLogin Store', () => {
 
       const mockSession = { id: 'test-session' };
       vi.mocked(useRepositoryAuth).mockReturnValueOnce({
-        ...useRepositoryAuth(),
+        ...(useRepositoryAuth() as any),
         setLoginState: { value: { error: null, data: { session: mockSession } } },
-      });
+      } as any);
 
       await store.loginPasswordHandler();
       expect(store.isLoading).toBe(false);
@@ -202,9 +210,9 @@ describe('useLogin Store', () => {
       };
 
       vi.mocked(useRepositoryAuth).mockReturnValueOnce({
-        ...useRepositoryAuth(),
-        getAuthFlowState: { value: { error: 'Test error' } },
-      });
+        ...(useRepositoryAuth() as any),
+        getAuthFlowState: { value: { error: new Error('Test error') } },
+      } as any);
 
       await store.loginPasswordHandler();
       expect(store.isLoading).toBe(false);
@@ -229,10 +237,10 @@ describe('useLogin Store', () => {
       };
 
       const mockAuthRepo = {
-        ...useRepositoryAuth(),
+        ...(useRepositoryAuth() as any),
         setLoginState: { value: { error: browserLocationChangeResponse, data: null } },
-      };
-      vi.mocked(useRepositoryAuth).mockReturnValue(mockAuthRepo);
+      } as any;
+      vi.mocked(useRepositoryAuth).mockReturnValue(mockAuthRepo as any);
 
       await store.loginPasswordHandler();
 
@@ -249,8 +257,8 @@ describe('useLogin Store', () => {
       });
 
       // Mock successful auth flow
-      mockAuthRepository.getAuthFlowState.value = { error: null };
-      mockAuthRepository.setLoginState.value = { data: null, error: null };
+      mockAuthRepository.getAuthFlowState.value = { data: undefined, loading: false, error: null } as any;
+      mockAuthRepository.setLoginState.value = { data: null as any, loading: false, error: null } as any;
 
       await store.loginSocialHandler('google');
 
@@ -334,9 +342,9 @@ describe('useLogin Store', () => {
 
       // Mock getLogin response with aal2
       vi.mocked(useRepositoryAuth).mockReturnValueOnce({
-        ...useRepositoryAuth(),
+        ...(useRepositoryAuth() as any),
         getLoginState: { value: { data: { requested_aal: 'aal2' } } },
-      });
+      } as any);
 
       await store.onMountedHandler();
 
@@ -371,10 +379,10 @@ describe('useLogin Store', () => {
 
       // Mock getLogin response without aal2
       const mockAuthRepo = {
-        ...useRepositoryAuth(),
+        ...(useRepositoryAuth() as any),
         getLoginState: { value: { data: { requested_aal: 'aal1' } } },
-      };
-      vi.mocked(useRepositoryAuth).mockReturnValue(mockAuthRepo);
+      } as any;
+      vi.mocked(useRepositoryAuth).mockReturnValue(mockAuthRepo as any);
 
       await store.onMountedHandler();
 

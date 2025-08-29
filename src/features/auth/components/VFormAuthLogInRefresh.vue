@@ -4,14 +4,15 @@ import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
 import VFormInputPassword from 'UiKit/components/Base/VForm/VFormInputPassword.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { useLoginRefreshStore } from '../store/useLoginRefresh';
+import { storeToRefs } from 'pinia';
 
 const emit = defineEmits(['cancel']);
 
 const loginRefreshStore = useLoginRefreshStore();
 const {
   isLoading, model, isDisabledButton,
-  setLoginState, isFieldRequired, getErrorText,
-} = loginRefreshStore;
+  setLoginState,
+} = storeToRefs(loginRefreshStore);
 
 const loginHandler = async () => {
   loginRefreshStore.loginPasswordHandler();
@@ -27,8 +28,8 @@ const loginHandler = async () => {
     <div class="v-form-auth-login-refresh__wrap">
       <VFormGroup
         v-slot="VFormGroupProps"
-        :required="isFieldRequired('email')"
-        :error-text="getErrorText('email', setLoginState.error?.data?.responseJson)"
+        :required="loginRefreshStore.isFieldRequired('email')"
+        :error-text="loginRefreshStore.getErrorText('email', setLoginState.error?.data?.responseJson)"
         label="Email Address"
         class="v-form-auth-login-refresh__input"
         data-testid="email-group"
@@ -46,8 +47,8 @@ const loginHandler = async () => {
       </VFormGroup>
       <VFormGroup
         v-slot="VFormGroupProps"
-        :required="isFieldRequired('password')"
-        :error-text="getErrorText('password', setLoginState.error?.data?.responseJson)"
+        :required="loginRefreshStore.isFieldRequired('password')"
+        :error-text="loginRefreshStore.getErrorText('password', setLoginState.error?.data?.responseJson)"
         label="Password"
         class="v-form-auth-login-refresh__input"
         data-testid="password-group"

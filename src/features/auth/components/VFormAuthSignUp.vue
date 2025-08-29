@@ -17,7 +17,6 @@ const signupStore = useSignupStore();
 const {
   isLoading, model, isDisabledButton,
   setSignupState, queryFlow, checkbox,
-  isFieldRequired, getErrorText,
 } = storeToRefs(signupStore);
 
 const onLogin = () => {
@@ -45,8 +44,8 @@ onMounted(() => {
         <FormCol col2>
           <VFormGroup
             v-slot="VFormGroupProps"
-            :required="isFieldRequired('first_name')"
-            :error-text="getErrorText('first_name', setSignupState.error?.data?.responseJson)"
+            :required="signupStore.isFieldRequired('first_name')"
+            :error-text="signupStore.getErrorText('first_name', setSignupState.error?.data?.responseJson)"
             label="First Name"
             data-testid="first-name-group"
           >
@@ -66,8 +65,8 @@ onMounted(() => {
         <FormCol col2>
           <VFormGroup
             v-slot="VFormGroupProps"
-            :required="isFieldRequired('last_name')"
-            :error-text="getErrorText('last_name', setSignupState.error?.data?.responseJson)"
+            :required="signupStore.isFieldRequired('last_name')"
+            :error-text="signupStore.getErrorText('last_name', setSignupState.error?.data?.responseJson)"
             label="Last Name"
             data-testid="last-name-group"
           >
@@ -89,8 +88,8 @@ onMounted(() => {
       <div class="signup-form__input-wrap">
         <VFormGroup
           v-slot="VFormGroupProps"
-          :required="isFieldRequired('email')"
-          :error-text="getErrorText('email', setSignupState.error?.data?.responseJson)"
+          :required="signupStore.isFieldRequired('email')"
+          :error-text="signupStore.getErrorText('email', setSignupState.error?.data?.responseJson)"
           label="Email Address"
           data-testid="email-group"
         >
@@ -112,8 +111,8 @@ onMounted(() => {
       <div class="signup-form__input-wrap">
         <VFormGroup
           v-slot="VFormGroupProps"
-          :required="isFieldRequired('create_password')"
-          :error-text="getErrorText('create_password', setSignupState.error?.data?.responseJson)"
+          :required="signupStore.isFieldRequired('create_password')"
+          :error-text="signupStore.getErrorText('create_password', setSignupState.error?.data?.responseJson)"
           label="Create Password"
           data-testid="create-password-group"
         >
@@ -134,8 +133,8 @@ onMounted(() => {
       <div class="signup-form__input-wrap">
         <VFormGroup
           v-slot="VFormGroupProps"
-          :required="isFieldRequired('repeat_password')"
-          :error-text="getErrorText('repeat_password', setSignupState.error?.data?.responseJson)"
+          :required="signupStore.isFieldRequired('repeat_password')"
+          :error-text="signupStore.getErrorText('repeat_password', setSignupState.error?.data?.responseJson)"
           label="Confirm Password"
           data-testid="repeat-password-group"
         >

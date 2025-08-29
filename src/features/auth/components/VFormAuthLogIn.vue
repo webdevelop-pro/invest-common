@@ -10,7 +10,7 @@ import { useLoginStore } from '../store/useLogin';
 const loginStore = useLoginStore();
 const {
   isLoading, model, isDisabledButton,
-  setLoginState, isFieldRequired, getErrorText,
+  setLoginState,
 } = storeToRefs(loginStore);
 
 const onSignup = () => {
@@ -31,8 +31,8 @@ const loginHandler = async () => {
     <div class="login-form__wrap">
       <VFormGroup
         v-slot="VFormGroupProps"
-        :required="isFieldRequired('email')"
-        :error-text="getErrorText('email', setLoginState.error?.data?.responseJson)"
+        :required="loginStore.isFieldRequired('email')"
+        :error-text="loginStore.getErrorText('email', setLoginState.error?.data?.responseJson)"
         label="Email Address"
         class="login-form__input"
       >
@@ -49,8 +49,8 @@ const loginHandler = async () => {
       </VFormGroup>
       <VFormGroup
         v-slot="VFormGroupProps"
-        :required="isFieldRequired('password')"
-        :error-text="getErrorText('password', setLoginState.error?.data?.responseJson)"
+        :required="loginStore.isFieldRequired('password')"
+        :error-text="loginStore.getErrorText('password', setLoginState.error?.data?.responseJson)"
         label="Password"
         class="login-form__input"
         data-testid="password-group"

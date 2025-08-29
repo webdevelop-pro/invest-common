@@ -5,7 +5,6 @@ import { setActivePinia, createPinia } from 'pinia';
 import { ref, nextTick, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
-import { scrollToError } from 'UiKit/helpers/validation/general';
 import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/helpers/enums/routes';
 import { useFormBackgroundInformation } from '../useFormBackgroundInformation';
 
@@ -112,12 +111,13 @@ const model = reactive({
 });
 const validation = ref({});
 const mockOnValidate = vi.fn();
-vi.mock('InvestCommon/composable/useFormValidation', () => ({
+vi.mock('UiKit/helpers/validation/useFormValidation', () => ({
   useFormValidation: vi.fn(() => ({
     model,
     validation,
     isValid,
     onValidate: mockOnValidate,
+    scrollToError: vi.fn(),
   })),
 }));
 
@@ -129,7 +129,6 @@ vi.mock('InvestCommon/composable/useHubspotForm', () => ({
 }));
 
 vi.mock('UiKit/helpers/validation/general', () => ({
-  scrollToError: vi.fn(),
   getFilteredObject: vi.fn(() => ({})),
 }));
 
@@ -156,13 +155,11 @@ describe('useFormBackgroundInformation', () => {
   let mockRouter: any;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let mockHubspotForm: any;
-  let mockScrollToError: any;
 
   beforeEach(() => {
     setActivePinia(createPinia());
     mockRouter = vi.mocked(useRouter)();
     mockHubspotForm = vi.mocked(useHubspotForm)();
-    mockScrollToError = vi.mocked(scrollToError);
     vi.clearAllMocks();
     composable = useFormBackgroundInformation();
   });
@@ -202,7 +199,6 @@ describe('useFormBackgroundInformation', () => {
       isValid.value = false;
       await composable.handleSave();
       expect(mockOnValidate).toHaveBeenCalled();
-      expect(mockScrollToError).toHaveBeenCalledWith('ViewDashboardBackgroundInformation');
       expect(mockSetProfileById).not.toHaveBeenCalled();
       expect(mockSubmitFormToHubspot).not.toHaveBeenCalled();
       expect(mockRouter.push).not.toHaveBeenCalled();

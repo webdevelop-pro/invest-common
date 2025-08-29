@@ -28,6 +28,8 @@ vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
 const mockRepositoryProfiles = {
   setProfileById: vi.fn(),
   getProfileById: vi.fn(),
+  setUser: vi.fn(),
+  getUser: vi.fn(),
   setProfileByIdState: ref({ loading: false, error: null, data: undefined }),
   getProfileByIdOptionsState: ref({ loading: false, error: null, data: { schema: {} } }),
 };

@@ -30,8 +30,21 @@ vi.mock('InvestCommon/composable/useHubspotForm', () => ({
   useHubspotForm: vi.fn(),
 }));
 
-vi.mock('InvestCommon/composable/useFormValidation', () => ({
-  useFormValidation: vi.fn(),
+vi.mock('UiKit/helpers/validation/useFormValidation', () => ({
+  useFormValidation: vi.fn(() => ({
+    model: reactive({ funding_type: FundingTypes.ach }),
+    validation: ref({}),
+    isValid: ref(true),
+    onValidate: vi.fn(),
+    scrollToError: vi.fn(),
+    formErrors: ref({}),
+    isFieldRequired: vi.fn(),
+    getErrorText: vi.fn(),
+    getOptions: vi.fn(),
+    getReferenceType: vi.fn(),
+    resetValidation: vi.fn(),
+    schemaObject: ref({}),
+  })),
 }));
 
 vi.mock('InvestCommon/data/evm/evm.repository', () => ({
@@ -133,6 +146,14 @@ describe('useInvestFunding', () => {
       onValidate: vi.fn(() => {
         // This will be called by continueHandler, but we'll control isValid directly
       }),
+      scrollToError: vi.fn(),
+      formErrors: ref({}),
+      isFieldRequired: vi.fn(),
+      getErrorText: vi.fn(),
+      getOptions: vi.fn(),
+      getReferenceType: vi.fn(),
+      resetValidation: vi.fn(),
+      schemaObject: ref({}),
     };
     (useFormValidation as any).mockReturnValue(formValidationMock);
     

@@ -11,8 +11,7 @@ const authenticatorStore = useAuthenticatorStore();
 const logoutStore = useLogoutStore();
 const {
   model, isDisabledButton,
-  isLoading, isFieldRequired,
-  getErrorText, setLoginState,
+  isLoading, setLoginState,
 } = storeToRefs(authenticatorStore);
 
 onMounted(() => {
@@ -36,8 +35,8 @@ const onLogout = () => {
     <div class="form-auth-authenticator__wrap">
       <VFormGroup
         v-slot="VFormGroupProps"
-        :required="isFieldRequired('totp_code')"
-        :error-text="getErrorText('totp_code', setLoginState.error?.data?.responseJson)"
+        :required="logoutStore.isFieldRequired('totp_code')"
+        :error-text="logoutStore.getErrorText('totp_code', setLoginState.error?.data?.responseJson)"
         label="Authentication Code"
         class="form-auth-authenticator__input"
         data-testid="totp-code-group"

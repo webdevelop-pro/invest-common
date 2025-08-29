@@ -50,7 +50,7 @@ vi.mock('InvestCommon/composable/useHubspotForm', () => ({
   })),
 }));
 
-vi.mock('InvestCommon/composable/useFormValidation', () => ({
+vi.mock('UiKit/helpers/validation/useFormValidation', () => ({
   useFormValidation: vi.fn(() => {
     const model = ref({ totp_code: '' });
     const isValid = ref(true);
@@ -71,7 +71,15 @@ vi.mock('InvestCommon/composable/useFormValidation', () => ({
       validation,
       isValid,
       onValidate,
-    };
+      scrollToError: vi.fn(),
+      formErrors: ref({}),
+      isFieldRequired: vi.fn(),
+      getErrorText: vi.fn(),
+      getOptions: vi.fn(),
+      getReferenceType: vi.fn(),
+      resetValidation: vi.fn(),
+      schemaObject: ref({}),
+    } as any;
   }),
 }));
 
@@ -209,7 +217,7 @@ describe('useAuthenticator Store', () => {
   describe('Mount Handler', () => {
     it('should initialize auth flow on mount', async () => {
       const store = useAuthenticatorStore();
-      await store.onMoutedHandler();
+      await store.onMountedHandler();
       expect(mockAuthRepository.getAuthFlow).toHaveBeenCalledWith(`${SELFSERVICE.login}?aal=aal2`);
     });
   });
