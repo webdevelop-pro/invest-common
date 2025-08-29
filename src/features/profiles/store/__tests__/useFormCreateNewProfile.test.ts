@@ -57,6 +57,7 @@ const mockRepositoryProfiles = {
   getProfileByIdOptionsState,
   setProfileState,
   setProfileByIdState,
+  setUser: vi.fn(),
 };
 vi.mock('InvestCommon/data/profiles/profiles.repository', () => ({
   useRepositoryProfiles: vi.fn(() => mockRepositoryProfiles),

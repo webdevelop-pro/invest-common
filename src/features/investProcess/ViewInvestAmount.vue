@@ -14,17 +14,16 @@ const route = useRoute();
 
 const {
   model,
-  validation,
   maxInvestment,
   minInvestment,
   investmentAmountShow,
   errorData,
-  schemaBackend,
-  schemaFrontend,
   isLeftLessThanMin,
   isBtnDisabled,
   continueHandler,
   setAmountState,
+  isFieldRequired,
+  getErrorText,
 } = useInvestAmount();
 </script>
 
@@ -40,12 +39,9 @@ const {
           <FormCol col2>
             <VFormGroup
               v-slot="VFormGroupProps"
-              :model="model"
-              :validation="validation"
-              :schema-back="schemaBackend"
-              :schema-front="schemaFrontend"
-              :error-text="errorData?.number_of_shares"
-              path="number_of_shares"
+              :required="isFieldRequired('number_of_shares')"
+              :error-text="getErrorText('number_of_shares', errorData)"
+              data-testid="shares-amount-group"
               label="Amount of Shares"
             >
               <VFormInput
@@ -91,7 +87,7 @@ const {
             variant="outlined"
             size="large"
             as="a"
-            :href="urlOfferSingle(route.params.slug)"
+            :href="urlOfferSingle(route.params.slug as string)"
           >
             Cancel
           </VButton>

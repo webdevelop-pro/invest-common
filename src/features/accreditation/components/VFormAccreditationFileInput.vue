@@ -13,23 +13,21 @@ defineProps({
 
 const accreditationUploadStore = useAccreditationUpload();
 const {
-  model,
   allFiles,
-  validation,
-  schemaAccreditationFileInput,
-  uploadAccreditationDocumentErrorData,
 } = storeToRefs(accreditationUploadStore);
 
-const { onFilesChange, onFileRemove } = accreditationUploadStore;
+const { onFilesChange, onFileRemove, model, isFieldRequired, getErrorText } = accreditationUploadStore;
 </script>
 
 <template>
   <div class="VFormAccreditationFileInput v-form-accreditation-file-input">
     <VFormGroup
+      v-slot="VFormGroupProps"
       label="Upload Accreditation Documents"
       required
     >
       <VUploader
+        :is-error="VFormGroupProps.isFieldError"
         class="v-form-accreditation-file-input__field"
         @update:files="onFilesChange"
         @remove="onFileRemove"
@@ -41,11 +39,8 @@ const { onFilesChange, onFileRemove } = accreditationUploadStore;
         v-for="(file, index) in allFiles"
         :key="file.name"
         v-slot="VFormGroupProps"
-        :model="model"
-        :validation="validation"
-        :schema-front="schemaAccreditationFileInput"
-        :error-text="accreditationUploadStore.getErrorText(index + 1)"
-        :path="`description${index + 1}`"
+        :required="isFieldRequired(`description${index + 1}`)"
+        :error-text="getErrorText(`description${index + 1}`)"
         :label="`To process your documents faster, please provide additional
           details or explanations related to ${file.name}`"
         class="v-form-accreditation-file-input__description"
@@ -59,14 +54,12 @@ const { onFilesChange, onFileRemove } = accreditationUploadStore;
           @update:model-value="model[`description${index + 1}` as TFields] = $event"
         />
       </VFormGroup>
+      
       <VFormGroup
         v-slot="VFormGroupProps"
         class="v-form-accreditation-file-input__note"
-        :model="model"
-        :validation="validation"
-        :schema-front="schemaAccreditationFileInput"
-        :error-text="uploadAccreditationDocumentErrorData?.note"
-        path="note"
+        :required="isFieldRequired('note')"
+        :error-text="getErrorText(`note`)"
         label="To process your request faster, please describe your situation,
           write down all important details we should know about"
       >

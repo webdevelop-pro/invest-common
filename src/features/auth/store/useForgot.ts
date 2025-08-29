@@ -5,11 +5,9 @@ import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import { urlCheckEmail } from 'InvestCommon/global/links';
 import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
-import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
+import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { emailRule, errorMessageRule } from 'UiKit/helpers/validation/rules';
-import { scrollToError } from 'UiKit/helpers/validation/general';
-// import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import { SELFSERVICE } from './type';
 
 type FormModelForgot = {
@@ -41,9 +39,18 @@ export const useForgotStore = defineStore('forgot', () => {
   const schemaBackend = computed(() => (
     getSchemaState.value.data ? structuredClone(toRaw(getSchemaState.value.data)) : null));
 
+  const fieldsPaths = ['email'];
+
   const {
     model, validation, isValid, onValidate,
-  } = useFormValidation<FormModelForgot>(schemaFrontend.value, schemaBackend.value, {} as FormModelForgot);
+    scrollToError, formErrors, isFieldRequired, getErrorText,
+    getOptions, getReferenceType,
+  } = useFormValidation<FormModelForgot>(
+    schemaFrontend,
+    schemaBackend,
+    {} as FormModelForgot,
+    fieldsPaths
+  );
 
   const isLoading = ref(false);
   const isDisabledButton = computed(() => !isValid.value || isLoading.value);
@@ -101,6 +108,13 @@ export const useForgotStore = defineStore('forgot', () => {
     onValidate,
     isValid,
     recoveryHandler,
+    // Form validation helpers
+    formErrors,
+    isFieldRequired,
+    getErrorText,
+    getOptions,
+    getReferenceType,
+    scrollToError,
   };
 });
 

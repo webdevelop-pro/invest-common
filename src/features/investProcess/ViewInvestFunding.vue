@@ -10,7 +10,6 @@ import InvestStep from 'InvestCommon/features/investProcess/components/InvestSte
 
 const {
   model,
-  validation,
   componentData,
   selectOptions,
   selectErrors,
@@ -24,8 +23,7 @@ const {
   profileId,
   ROUTE_INVEST_SIGNATURE,
   urlOfferSingle,
-  schemaBackend,
-  schemaInvestmentFunding,
+  isFieldRequired,
 } = useInvestFunding();
 </script>
 
@@ -40,12 +38,9 @@ const {
           <FormCol>
             <VFormGroup
               v-slot="VFormGroupProps"
-              :model="model"
-              :validation="validation"
-              :schema-back="schemaBackend"
-              :schema-front="schemaInvestmentFunding"
+              :required="isFieldRequired('funding_type')"
               :error-text="selectErrors"
-              path="funding_type"
+              data-testid="funding-type-group"
               label="Funding Method"
             >
               <VFormSelect

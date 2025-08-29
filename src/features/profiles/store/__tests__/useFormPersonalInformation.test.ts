@@ -47,6 +47,8 @@ vi.mock('InvestCommon/data/profiles/profiles.repository', () => ({
   useRepositoryProfiles: vi.fn(() => ({
     setProfileById: vi.fn(),
     getProfileById: vi.fn(),
+    setUser: vi.fn(),
+    getUser: vi.fn(),
     setProfileByIdState: ref({ error: null }),
     getProfileByIdOptionsState: ref({ data: { schema: 'test-schema' } }),
   })),
@@ -118,6 +120,12 @@ describe('useFormPersonalInformation', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
 
+    // Mock DOM elements
+    const mockElement = {
+      scrollIntoView: vi.fn(),
+    };
+    document.querySelector = vi.fn(() => mockElement);
+
     mockRouter = vi.mocked(useRouter)();
     mockProfilesStore = {
       selectedUserProfileId: ref('123'),
@@ -138,6 +146,8 @@ describe('useFormPersonalInformation', () => {
       getProfileByIdOptionsState: ref({ data: { schema: 'test-schema' } }),
       setProfileById: vi.fn().mockResolvedValue({}),
       getProfileById: vi.fn().mockResolvedValue({}),
+      setUser: vi.fn(),
+      getUser: vi.fn(),
     };
     mockSessionStore = vi.mocked(useSessionStore)();
     mockAccreditationRepository = {
@@ -223,7 +233,7 @@ describe('useFormPersonalInformation', () => {
       await nextTick();
 
       expect(mockFormRef.value.onValidate).toHaveBeenCalled();
-      expect(scrollToError).toHaveBeenCalledWith('ViewDashboardPersonalInformation');
+      expect(document.querySelector).toHaveBeenCalledWith('.ViewDashboardPersonalInformation');
       expect(mockRepositoryProfiles.setProfileById).not.toHaveBeenCalled();
     });
   });

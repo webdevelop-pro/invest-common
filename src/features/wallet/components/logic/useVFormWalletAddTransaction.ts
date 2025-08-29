@@ -6,10 +6,9 @@ import { WalletAddTransactionTypes } from 'InvestCommon/data/wallet/wallet.types
 import { numberFormatter } from 'InvestCommon/helpers/numberFormatter';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
-import { scrollToError } from 'UiKit/helpers/validation/general';
 import { FormModelAddTransaction } from 'InvestCommon/types/form';
 import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository';
-import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
+import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 
 export function useVFormWalletAddTransaction(
   transactionType: ComputedRef<WalletAddTransactionTypes> | WalletAddTransactionTypes,
@@ -28,7 +27,7 @@ export function useVFormWalletAddTransaction(
   const schemaMaximumError = computed(() => (isTypeDeposit.value ? 'Maximum available is $1,000,000' : `Maximum available is $${maxWithdraw.value}`));
   const text = computed(() => (isTypeDeposit.value ? 'transaction is $1,000,000' : `available ${maxWithdraw.value}`));
 
-  const errorData = computed(() => addTransactionState.value.error?.data?.responseJson);
+  const errorData = computed(() => (addTransactionState.value.error as any)?.data?.responseJson);
 
   const schemaAddTransaction = computed(() => ({
     $schema: 'http://json-schema.org/draft-07/schema#',
@@ -57,6 +56,8 @@ export function useVFormWalletAddTransaction(
     $ref: '#/definitions/Individual',
   } as unknown as JSONSchemaType<FormModelAddTransaction>));
 
+  const fieldsPaths = ['amount', 'funding_source_id'];
+
   const schemaFrontend = schemaAddTransaction;
   // Pass undefined directly for backend schema
   const {
@@ -64,10 +65,13 @@ export function useVFormWalletAddTransaction(
     validation,
     isValid,
     onValidate,
+    scrollToError, formErrors, isFieldRequired, getErrorText,
+    getOptions, getReferenceType,
   } = useFormValidation<FormModelAddTransaction>(
     schemaFrontend,
     undefined,
     reactive({} as FormModelAddTransaction),
+    fieldsPaths
   );
 
   const isDisabledButton = computed(() => (!isValid.value || addTransactionState.value.loading));
@@ -122,5 +126,13 @@ export function useVFormWalletAddTransaction(
     addTransactionState,
     fundingSourceFormatted,
     numberFormatter,
+    
+    // Form validation helpers
+    formErrors,
+    isFieldRequired,
+    getErrorText,
+    getOptions,
+    getReferenceType,
+    scrollToError,
   };
 }

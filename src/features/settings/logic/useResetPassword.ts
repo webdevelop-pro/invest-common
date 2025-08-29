@@ -7,10 +7,9 @@ import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles
 import { useRepositorySettings } from 'InvestCommon/data/settings/settings.repository';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 import { ROUTE_SETTINGS_MFA } from 'InvestCommon/helpers/enums/routes';
-import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
+import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import { urlSettings } from 'InvestCommon/global/links';
-import { scrollToError } from 'UiKit/helpers/validation/general';
 import { errorMessageRule, passwordRule } from 'UiKit/helpers/validation/rules';
 import { SELFSERVICE } from 'InvestCommon/features/settings/utils';
 
@@ -25,7 +24,7 @@ export function useResetPassword() {
   const { toast } = useToast();
   const router = useRouter();
 
-  const errorData = computed(() => (setSettingsState.value.error?.data?.responseJson));
+  const errorData = computed(() => (setSettingsState.value.error as any)?.data?.responseJson);
 
   const schema = {
     $schema: 'http://json-schema.org/draft-07/schema#',
@@ -51,12 +50,16 @@ export function useResetPassword() {
     $ref: '#/definitions/Auth',
   } as unknown as JSONSchemaType<FormModelResetPassword>;
 
+  const fieldsPaths = ['create_password', 'repeat_password'];
+
   const {
     model,
     validation,
     isValid,
     onValidate,
-  } = useFormValidation(schema, undefined, {} as FormModelResetPassword);
+    scrollToError, formErrors, isFieldRequired, getErrorText,
+    getOptions, getReferenceType,
+  } = useFormValidation(schema, undefined, {} as FormModelResetPassword, fieldsPaths);
 
   const isLoading = ref(false);
   const isDisabledButton = computed(() => (!isValid.value || isLoading.value));
@@ -125,5 +128,13 @@ export function useResetPassword() {
     // Store references for template access
     setSettingsState,
     selectedUserProfileId,
+    
+    // Form validation helpers
+    formErrors,
+    isFieldRequired,
+    getErrorText,
+    getOptions,
+    getReferenceType,
+    scrollToError,
   };
 }

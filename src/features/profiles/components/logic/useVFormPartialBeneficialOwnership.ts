@@ -7,9 +7,7 @@ import {
   emailRule, errorMessageRule, firstNameRule, lastNameRule,
   phoneRule, ssnRule, stateRule, zipRule,
 } from 'UiKit/helpers/validation/rules';
-import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
-import { getOptions } from 'UiKit/helpers/model';
-import { getFieldSchema } from 'UiKit/helpers/validation/general';
+import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import type { FormPartialBeneficialOwnershipItem } from '../VFormPartialBeneficialOwnershipItem.vue';
 
 export interface FormModelBeneficialOwnership {
@@ -103,26 +101,27 @@ export function useVFormPartialBeneficialOwnership(
   const schemaBackendLocal = computed(() => (
     schemaBackend.value ? structuredClone(toRaw(schemaBackend.value)) : undefined));
 
+  const fieldsPaths = ['beneficial_owners_number'];
+
   const {
     model,
     validation,
     isValid,
     onValidate,
+    isFieldRequired,
+    getErrorText,
+    getOptions,
   } = useFormValidation<FormModelBeneficialOwnership>(
     getSchema(),
     schemaBackendLocal,
     {
       beneficials: [],
     },
+    fieldsPaths,
   );
 
-  const schemaObject = computed(() => getFieldSchema(
-    'beneficials.items',
-    schemaBackendLocal.value?.$ref,
-    schemaBackendLocal.value,
-  ));
-  const optionsCountry = computed(() => getOptions('properties.country', schemaObject));
-  const optionsState = computed(() => getOptions('properties.state', schemaObject));
+  const optionsCountry = computed(() => getOptions('beneficials.country'));
+  const optionsState = computed(() => getOptions('beneficials.state'));
 
   const modelExpose = computed(() => {
     const temp = { ...model };
@@ -141,11 +140,20 @@ export function useVFormPartialBeneficialOwnership(
   const title = computed(() => (trust.value ? 'Trustees/Protectors Information' : 'Beneficial Ownership Information'));
   const selectText = computed(() => (trust.value ? 'How many trustees and protectors does your trust have?' : 'How many Beneficial Owners who own 25% or more of this Legal Entity?'));
 
+  // Revalidate on any model change so field errors update live
+  watch(() => model, () => {
+    if (!isValid.value) {
+      onValidate();
+    }
+  }, { deep: true });
+
   return {
     model,
     validation,
     isValid,
     onValidate,
+    isFieldRequired,
+    getErrorText,
     options,
     optionsCountry,
     optionsState,

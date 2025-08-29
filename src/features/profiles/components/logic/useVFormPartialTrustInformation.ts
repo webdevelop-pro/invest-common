@@ -3,8 +3,7 @@ import {
 } from 'vue';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { errorMessageRule, documentRule } from 'UiKit/helpers/validation/rules';
-import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
-import { getOptions } from 'UiKit/helpers/model';
+import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 
 const yesNoOptions = [
   { value: 'Yes', text: 'Yes' },
@@ -67,19 +66,31 @@ export const useVFormPartialTrustInformation = (
   const schemaBackendLocal = computed(() => (
     schemaBackend.value ? structuredClone(toRaw(schemaBackend.value)) : undefined));
 
+  const fieldsPaths = [
+    'type',
+    'is_use_ein',
+    'ein',
+    'name',
+    'owner_title',
+    'trust_agreement_id',
+  ];
+
   const {
     model,
     validation,
     isValid,
     onValidate,
-    schemaObject,
+    isFieldRequired,
+    getErrorText,
+    getOptions,
   } = useFormValidation<FormModelTrustInformation>(
     schemaFrontend,
     schemaBackendLocal,
     modelLocal,
+    fieldsPaths,
   );
 
-  const optionsType = computed(() => getOptions('type', schemaObject));
+  const optionsType = computed(() => getOptions('type'));
 
   const modelExpose = computed(() => {
     const temp = { ...model };
@@ -112,6 +123,8 @@ export const useVFormPartialTrustInformation = (
     validation,
     isValid,
     onValidate,
+    isFieldRequired,
+    getErrorText,
     modelExpose,
     optionsType,
     yesNoOptions,

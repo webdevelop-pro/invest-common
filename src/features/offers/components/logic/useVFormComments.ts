@@ -4,10 +4,9 @@ import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import { urlSignin } from 'InvestCommon/global/links';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryOffer } from 'InvestCommon/data/offer/offer.repository';
-import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
+import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { getOptions } from 'UiKit/helpers/model';
 import { useRoute } from 'vitepress';
-import { scrollToError } from 'UiKit/helpers/validation/general';
 
 export type FormModelOfferComment = {
   comment: string;
@@ -23,8 +22,10 @@ export function useVFormComments(offerId: number) {
   const userSessionStore = useSessionStore();
   const { userLoggedIn } = storeToRefs(userSessionStore);
 
-  const errorData = computed(() => setOfferCommentState.value.error?.data?.responseJson);
+  const errorData = computed(() => (setOfferCommentState.value.error as any)?.data?.responseJson);
   const schemaBackend = computed(() => setOfferCommentOptionsState.value.data);
+
+  const fieldsPaths = ['comment', 'related'];
 
   const {
     model,
@@ -32,6 +33,8 @@ export function useVFormComments(offerId: number) {
     isValid,
     onValidate,
     schemaObject,
+    scrollToError, formErrors, isFieldRequired, getErrorText,
+    getOptions: getOptionsFromValidation, getReferenceType,
   } = useFormValidation<FormModelOfferComment>(
     undefined,
     schemaBackend,
@@ -39,6 +42,7 @@ export function useVFormComments(offerId: number) {
       offer_id: offerId,
       related: 'none',
     } as FormModelOfferComment,
+    fieldsPaths
   );
 
   const isDisabledButton = computed(() => (!isValid.value));
@@ -47,10 +51,10 @@ export function useVFormComments(offerId: number) {
 
   const relatedOptions = computed(() => getOptions('related', schemaObject));
   const relatedOptionsFormatted = computed(() => (
-    relatedOptions.value?.map((option) => ({ value: option.value, text: option.name })) || []
+    relatedOptions.value?.map((option: any) => ({ value: option.value, text: option.name })) || []
   ));
   const relatedOptionsFiltered = computed(() => (
-    relatedOptionsFormatted.value.filter((option) => option.value !== 'none')
+    relatedOptionsFormatted.value.filter((option: any) => option.value !== 'none')
   ));
 
   const isAuth = computed(() => userLoggedIn.value);
@@ -94,6 +98,14 @@ export function useVFormComments(offerId: number) {
     errorData,
     setOfferCommentState,
     setOfferCommentOptionsState,
+    
+    // Form validation helpers
+    formErrors,
+    isFieldRequired,
+    getErrorText,
+    getOptions: getOptionsFromValidation,
+    getReferenceType,
+    scrollToError,
   };
 }
 

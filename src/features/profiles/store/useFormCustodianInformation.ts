@@ -8,7 +8,6 @@ import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles
 import { useRouter } from 'vue-router';
 import env from 'InvestCommon/global';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
-import { scrollToError } from 'UiKit/helpers/validation/general';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { FormChild } from 'InvestCommon/types/form';
@@ -56,7 +55,12 @@ export const useFormCustodianInformation = () => {
   const handleSave = async () => {
     custodianRef.value?.onValidate();
     if (!isValid.value) {
-      nextTick(() => scrollToError('ViewDashboardCustodianInformation'));
+      nextTick(() => {
+        const element = document.querySelector('.ViewDashboardCustodianInformation');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      });
       return;
     }
 

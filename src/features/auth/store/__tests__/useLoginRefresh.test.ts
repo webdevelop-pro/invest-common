@@ -41,7 +41,7 @@ vi.mock('InvestCommon/domain/session/store/useSession', () => ({
   })),
 }));
 
-vi.mock('InvestCommon/composable/useFormValidation', () => ({
+vi.mock('UiKit/helpers/validation/useFormValidation', () => ({
   useFormValidation: vi.fn(() => {
     const model = ref({ email: '', password: '' });
     const isValid = ref(true);
@@ -64,13 +64,22 @@ vi.mock('InvestCommon/composable/useFormValidation', () => ({
       validation,
       isValid,
       onValidate,
-    };
+      scrollToError: vi.fn(),
+      formErrors: ref({}),
+      isFieldRequired: vi.fn(),
+      getErrorText: vi.fn(),
+      getOptions: vi.fn(),
+      getReferenceType: vi.fn(),
+      resetValidation: vi.fn(),
+      schemaObject: ref({}),
+    } as any;
   }),
 }));
 
 vi.mock('InvestCommon/domain/dialogs/store/useDialogs', () => ({
   useDialogs: vi.fn(() => ({
     isDialogRefreshSessionOpen: ref(false),
+    completeSessionRefresh: vi.fn(),
   })),
 }));
 

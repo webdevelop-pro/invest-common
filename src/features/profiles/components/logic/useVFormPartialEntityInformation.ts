@@ -3,8 +3,7 @@ import {
 } from 'vue';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { errorMessageRule, documentRule } from 'UiKit/helpers/validation/rules';
-import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
-import { getOptions } from 'UiKit/helpers/model';
+import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 
 export const yesNoOptions = [
   { value: 'Yes', text: 'Yes' },
@@ -72,19 +71,33 @@ export const useVFormPartialEntityInformation = (
 
   const schemaBackendLocal = computed(() => (schemaBackend.value ? structuredClone(toRaw(schemaBackend.value)) : null));
 
+  const fieldsPaths = [
+    'type',
+    'solely_for_investing',
+    'tax_exempts',
+    'name',
+    'owner_title',
+    'formation_document_id',
+    'organization_document_id',
+    'operating_agreement_id',
+  ];
+
   const {
     model,
     validation,
     isValid,
     onValidate,
-    schemaObject,
+    isFieldRequired,
+    getErrorText,
+    getOptions,
   } = useFormValidation<FormModelEntityInformation>(
     schemaFrontend,
     schemaBackendLocal,
     modelLocal,
+    fieldsPaths,
   );
 
-  const optionsType = computed(() => getOptions('type', schemaObject));
+  const optionsType = computed(() => getOptions('type'));
 
   const operatingAgreementLabel = computed(() => {
     const entityType = model.type;
@@ -123,6 +136,8 @@ export const useVFormPartialEntityInformation = (
     validation,
     isValid,
     onValidate,
+    isFieldRequired,
+    getErrorText,
     yesNoOptions,
     schemaFrontend,
     optionsType,

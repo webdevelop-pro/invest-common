@@ -124,6 +124,13 @@ describe('useFormFinancialInformation', () => {
 
   beforeEach(() => {
     setActivePinia(createPinia());
+    
+    // Mock DOM elements
+    const mockElement = {
+      scrollIntoView: vi.fn(),
+    };
+    document.querySelector = vi.fn(() => mockElement);
+    
     vi.clearAllMocks();
     store = useFormFinancialInformation();
   });
@@ -247,7 +254,7 @@ describe('useFormFinancialInformation', () => {
       expect(mockRepositoryProfiles.setProfileById).not.toHaveBeenCalled();
       expect(mockRepositoryProfiles.getProfileById).not.toHaveBeenCalled();
       expect(mockPush).not.toHaveBeenCalled();
-      expect(scrollToError).toHaveBeenCalledWith('ViewDashboardFinancialInformation');
+      expect(document.querySelector).toHaveBeenCalledWith('.ViewDashboardFinancialInformation');
     });
 
     it('should not submit hubspot forms when validation fails', async () => {

@@ -1,15 +1,14 @@
 <script setup lang="ts">
 import {
-  computed, nextTick, reactive, ref, watch,
+  computed, nextTick,
 } from 'vue';
 import { useAuthStore } from 'InvestCommon/store/useAuth';
 import { useAuthLogicStore } from 'InvestCommon/store/useAuthLogic';
 import { urlSignin } from 'InvestCommon/global/links';
 import { SELFSERVICE } from 'InvestCommon/helpers/enums/auth';
 import { storeToRefs } from 'pinia';
-import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
+import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { FormModelForgot, schemaForgot } from './utilsAuth';
-import { isEmpty } from 'InvestCommon/helpers/general';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
@@ -19,31 +18,12 @@ const authStore = useAuthStore();
 const { isSetRecoveryLoading, getSchemaData, setRecoveryErrorData } = storeToRefs(authStore);
 const authLogicStore = useAuthLogicStore();
 
-const model = reactive({
-} as FormModelForgot);
-
-let validator = new PrecompiledValidator<FormModelForgot>(
-  getSchemaData.value,
+const { model, validation, isValid, onValidate } = useFormValidation<FormModelForgot>(
   schemaForgot,
+  getSchemaData,
+  {} as FormModelForgot,
 );
-const validation = ref<unknown>();
-const isValid = computed(() => isEmpty(validation.value || {}));
 const isDisabledButton = computed(() => (!isValid.value || isSetRecoveryLoading.value));
-
-const onValidate = () => {
-  validation.value = validator.getFormValidationErrors(model);
-};
-
-watch(() => model, () => {
-  if (!isValid.value) onValidate();
-}, { deep: true });
-
-watch(() => getSchemaData.value, () => {
-  validator = new PrecompiledValidator<FormModelForgot>(
-    getSchemaData.value,
-    schemaForgot,
-  );
-});
 
 const recoveryHandler = async () => {
   onValidate();

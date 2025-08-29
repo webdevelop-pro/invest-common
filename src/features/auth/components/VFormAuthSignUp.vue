@@ -15,9 +15,8 @@ import { onMounted } from 'vue';
 
 const signupStore = useSignupStore();
 const {
-  isLoading, model, validation, isDisabledButton,
-  schemaBackend, schemaFrontend, setSignupState,
-  queryFlow, checkbox,
+  isLoading, model, isDisabledButton,
+  setSignupState, queryFlow, checkbox,
 } = storeToRefs(signupStore);
 
 const onLogin = () => {
@@ -45,13 +44,10 @@ onMounted(() => {
         <FormCol col2>
           <VFormGroup
             v-slot="VFormGroupProps"
-            :model="model"
-            :validation="validation"
-            :schema-back="schemaBackend"
-            :schema-front="schemaFrontend"
-            :error-text="setSignupState.error?.first_name"
-            path="first_name"
+            :required="signupStore.isFieldRequired('first_name')"
+            :error-text="signupStore.getErrorText('first_name', setSignupState.error?.data?.responseJson)"
             label="First Name"
+            data-testid="first-name-group"
           >
             <VFormInput
               :model-value="model.first_name"
@@ -69,13 +65,10 @@ onMounted(() => {
         <FormCol col2>
           <VFormGroup
             v-slot="VFormGroupProps"
-            :model="model"
-            :validation="validation"
-            :schema-back="schemaBackend"
-            :schema-front="schemaFrontend"
-            :error-text="setSignupState.error?.last_name"
-            path="last_name"
+            :required="signupStore.isFieldRequired('last_name')"
+            :error-text="signupStore.getErrorText('last_name', setSignupState.error?.data?.responseJson)"
             label="Last Name"
+            data-testid="last-name-group"
           >
             <VFormInput
               :model-value="model.last_name"
@@ -95,13 +88,10 @@ onMounted(() => {
       <div class="signup-form__input-wrap">
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackend"
-          :schema-front="schemaFrontend"
-          :error-text="setSignupState.error?.email"
-          path="email"
+          :required="signupStore.isFieldRequired('email')"
+          :error-text="signupStore.getErrorText('email', setSignupState.error?.data?.responseJson)"
           label="Email Address"
+          data-testid="email-group"
         >
           <VFormInput
             :model-value="model.email"
@@ -121,13 +111,10 @@ onMounted(() => {
       <div class="signup-form__input-wrap">
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackend"
-          :schema-front="schemaFrontend"
-          :error-text="setSignupState.error?.create_password"
-          path="create_password"
+          :required="signupStore.isFieldRequired('create_password')"
+          :error-text="signupStore.getErrorText('create_password', setSignupState.error?.data?.responseJson)"
           label="Create Password"
+          data-testid="create-password-group"
         >
           <VFormInputPassword
             :model-value="model.create_password"
@@ -146,13 +133,10 @@ onMounted(() => {
       <div class="signup-form__input-wrap">
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackend"
-          :schema-front="schemaFrontend"
-          :error-text="setSignupState.error?.repeat_password"
-          path="repeat_password"
+          :required="signupStore.isFieldRequired('repeat_password')"
+          :error-text="signupStore.getErrorText('repeat_password', setSignupState.error?.data?.responseJson)"
           label="Confirm Password"
+          data-testid="repeat-password-group"
         >
           <VFormInputPassword
             :model-value="model.repeat_password"

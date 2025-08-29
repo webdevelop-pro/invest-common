@@ -3,9 +3,8 @@ import {
 } from 'vue';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
-import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
+import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
-import { scrollToError } from 'UiKit/helpers/validation/general';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import { urlProfile } from 'InvestCommon/global/links';
@@ -49,9 +48,18 @@ export const useAuthenticatorStore = defineStore('authenticator', () => {
   const schemaBackend = computed(() => (
     getSchemaState.value.data ? structuredClone(toRaw(getSchemaState.value.data)) : null));
 
+  const fieldsPaths = ['totp_code'];
+
   const {
     model, validation, isValid, onValidate,
-  } = useFormValidation<FormModelTOTP>(schemaFrontend.value, schemaBackend.value, {} as FormModelTOTP);
+    scrollToError, formErrors, isFieldRequired, getErrorText,
+    getOptions, getReferenceType,
+  } = useFormValidation<FormModelTOTP>(
+    schemaFrontend,
+    schemaBackend,
+    {} as FormModelTOTP,
+    fieldsPaths
+  );
 
   const isLoading = ref(false);
   const isDisabledButton = computed(() => !isValid.value || isLoading.value);
@@ -104,7 +112,7 @@ export const useAuthenticatorStore = defineStore('authenticator', () => {
     }
   };
 
-  const onMoutedHandler = async () => {
+  const onMountedHandler = async () => {
     authRepository.getAuthFlow(`${SELFSERVICE.login}?aal=aal2`);
   };
 
@@ -119,9 +127,17 @@ export const useAuthenticatorStore = defineStore('authenticator', () => {
     totpHandler,
     onValidate,
     isValid,
-    onMoutedHandler,
+    onMountedHandler,
     navigateToProfile,
     getQueryParam,
+    // Form validation helpers
+    formErrors,
+    isFieldRequired,
+    getErrorText,
+    getOptions,
+    getReferenceType,
+    scrollToError,
+
   };
 });
 

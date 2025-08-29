@@ -7,7 +7,7 @@ import { useRouter, useRoute } from 'vue-router';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
-import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
+import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
 import { useInvestAmount } from '../useInvestAmount';
 
@@ -24,7 +24,7 @@ vi.mock('InvestCommon/composable/useHubspotForm', () => ({
   useHubspotForm: vi.fn(),
 }));
 
-vi.mock('InvestCommon/composable/useFormValidation', () => ({
+vi.mock('UiKit/helpers/validation/useFormValidation', () => ({
   useFormValidation: vi.fn(),
 }));
 
@@ -45,6 +45,12 @@ const mockFormValidation = {
   validation: ref({}),
   isValid: ref(true),
   onValidate: vi.fn(),
+  scrollToError: vi.fn(),
+  formErrors: ref({}),
+  isFieldRequired: vi.fn(),
+  getErrorText: vi.fn(),
+  getOptions: vi.fn(),
+  getReferenceType: vi.fn(),
 };
 
 const mockInvestmentRepository = {

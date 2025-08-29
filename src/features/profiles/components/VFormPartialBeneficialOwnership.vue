@@ -30,6 +30,8 @@ const {
   validation,
   isValid,
   onValidate,
+  isFieldRequired,
+  getErrorText,
   options,
   optionsCountry,
   optionsState,
@@ -59,12 +61,8 @@ defineExpose({
       <FormCol>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackendComputed"
-          :schema-front="getSchema()"
-          :error-text="errorDataComputed?.beneficial_owners_number"
-          path="beneficial_owners_number"
+          :required="isFieldRequired('beneficial_owners_number')"
+          :error-text="getErrorText('beneficial_owners_number', errorDataComputed as any)"
           :label="selectText"
           data-testid="beneficial-owners-number-group"
         >
@@ -100,6 +98,8 @@ defineExpose({
         :loading="loadingComputed"
         :schema-backend="schemaBackendComputed || {}"
         :error-data="errorDataComputed"
+        :is-field-required="isFieldRequired"
+        :get-error-text="getErrorText"
       />
     </template>
   </div>

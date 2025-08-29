@@ -10,12 +10,12 @@ import { storeToRefs } from 'pinia';
 const authenticatorStore = useAuthenticatorStore();
 const logoutStore = useLogoutStore();
 const {
-  model, validation, isDisabledButton,
-  isLoading, schemaFrontend,
+  model, isDisabledButton,
+  isLoading, setLoginState,
 } = storeToRefs(authenticatorStore);
 
 onMounted(() => {
-  authenticatorStore.onMoutedHandler();
+  authenticatorStore.onMountedHandler();
 });
 
 const totpHandler = () => {
@@ -35,21 +35,20 @@ const onLogout = () => {
     <div class="form-auth-authenticator__wrap">
       <VFormGroup
         v-slot="VFormGroupProps"
-        :model="model"
-        :validation="validation"
-        :schema-front="schemaFrontend"
-        path="totp_code"
+        :required="logoutStore.isFieldRequired('totp_code')"
+        :error-text="logoutStore.getErrorText('totp_code', setLoginState.error?.data?.responseJson)"
         label="Authentication Code"
         class="form-auth-authenticator__input"
+        data-testid="totp-code-group"
       >
         <VFormInput
           :model-value="model.totp_code"
           :is-error="VFormGroupProps.isFieldError"
           placeholder="Enter Authentication Code"
-          name="email"
+          name="totp_code"
           size="large"
-          type="email"
-          data-testid="email"
+          type="text"
+          data-testid="totp-code"
           @update:model-value="model.totp_code = $event"
         />
       </VFormGroup>

@@ -17,7 +17,7 @@ const props = defineProps({
   trust: Boolean,
 });
 
-const title = props.trust ? 'Grantor Infotmation' : 'Business Controller Information';
+const title = props.trust ? 'Grantor Information' : 'Business Controller Information';
 </script>
 
 <template>

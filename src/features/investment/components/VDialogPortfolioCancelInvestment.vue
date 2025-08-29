@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {
-  PropType,
+  PropType, type Ref,
 } from 'vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { PostLinkTypes } from 'InvestCommon/types/api/blog';
@@ -8,10 +8,11 @@ import VFormTextarea from 'UiKit/components/Base/VForm/VFormTextarea.vue';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import arrowLeft from 'UiKit/assets/images/arrow-left.svg';
 import { urlContactUs, urlBlogSingle } from 'InvestCommon/global/links';
-import {
-  VDialogContent, VDialogFooter, VDialog, VDialogTitle,
-  VDialogHeader,
-} from 'UiKit/components/Base/VDialog';
+import VDialogContent from 'UiKit/components/Base/VDialog/VDialogContent.vue';
+import VDialogFooter from 'UiKit/components/Base/VDialog/VDialogFooter.vue';
+import VDialog from 'UiKit/components/Base/VDialog/VDialog.vue';
+import VDialogTitle from 'UiKit/components/Base/VDialog/VDialogTitle.vue';
+import VDialogHeader from 'UiKit/components/Base/VDialog/VDialogHeader.vue';
 import { IInvestmentFormatted } from 'InvestCommon/data/investment/investment.types';
 import { usePortfolioCancelInvestment } from './logic/usePortfolioCancelInvestment';
 
@@ -26,15 +27,10 @@ const emit = defineEmits(['close']);
 const open = defineModel<boolean>();
 
 const {
-  model,
-  validation,
-  errorData,
-  schemaBackend,
-  isBtnDisabled,
-  cancelInvestState,
-  cancelInvestHandler,
-  onBackClick,
-} = usePortfolioCancelInvestment(props.investment, open, emit);
+  model, errorData, isBtnDisabled,
+  cancelInvestState, cancelInvestHandler,
+  onBackClick, isFieldRequired, getErrorText,
+} = usePortfolioCancelInvestment(props.investment, open as Ref<boolean>, emit);
 </script>
 
 <template>
@@ -81,18 +77,17 @@ const {
           <VFormGroup
             v-slot="VFormGroupProps"
             class="accreditation-file-input__note"
-            :model="model"
-            :validation="validation"
-            :schema-back="schemaBackend"
-            :error-text="errorData?.note"
-            path="cancelation_reason"
+            :required="isFieldRequired('cancelation_reason')"
+            :error-text="getErrorText('cancelation_reason', errorData)"
             label="Please let us know your cancellation reason"
+            data-testid="cancellation-reason-group"
           >
             <VFormTextarea
               :model-value="model.cancelation_reason"
               rows="3"
               :is-error="VFormGroupProps.isFieldError"
               placeholder="Cancellation Reason"
+              data-testid="cancellation-reason"
               @update:model-value="model.cancelation_reason = $event"
             />
           </VFormGroup>

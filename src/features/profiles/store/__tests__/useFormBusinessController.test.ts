@@ -117,6 +117,12 @@ describe('useFormBusinessController', () => {
     mockSessionStore = vi.mocked(useSessionStore)();
     mockScrollToError = vi.mocked(scrollToError);
 
+    // Mock DOM elements
+    const mockElement = {
+      scrollIntoView: vi.fn(),
+    };
+    document.querySelector = vi.fn(() => mockElement);
+
     vi.clearAllMocks();
 
     repositoryProfilesMockInstance.setProfileById.mockReset();
@@ -182,7 +188,7 @@ describe('useFormBusinessController', () => {
     it('should not proceed when form validation fails', async () => {
       await composable.handleSave();
 
-      expect(mockScrollToError).toHaveBeenCalledWith('ViewDashboardBusinessController');
+      expect(document.querySelector).toHaveBeenCalledWith('.ViewDashboardBusinessController');
       expect(repositoryProfilesMockInstance.setProfileById).not.toHaveBeenCalled();
       expect(hubspotFormMockInstance.submitFormToHubspot).not.toHaveBeenCalled();
       expect(repositoryProfilesMockInstance.getProfileById).not.toHaveBeenCalled();
@@ -193,7 +199,7 @@ describe('useFormBusinessController', () => {
       const newComposable = useFormBusinessController();
       await newComposable.handleSave();
 
-      expect(mockScrollToError).toHaveBeenCalledWith('ViewDashboardBusinessController');
+      expect(document.querySelector).toHaveBeenCalledWith('.ViewDashboardBusinessController');
       expect(repositoryProfilesMockInstance.setProfileById).not.toHaveBeenCalled();
     });
   });
@@ -491,7 +497,7 @@ describe('useFormBusinessController', () => {
 
       expect(mockForm.onValidate).toHaveBeenCalled();
       expect(repositoryProfilesMockInstance.setProfileById).not.toHaveBeenCalled();
-      expect(mockScrollToError).toHaveBeenCalledWith('ViewDashboardBusinessController');
+      expect(document.querySelector).toHaveBeenCalledWith('.ViewDashboardBusinessController');
     });
   });
 });

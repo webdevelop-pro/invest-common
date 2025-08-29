@@ -1,9 +1,6 @@
+import lodashIsEmpty from 'lodash/isEmpty';
 export function isEmpty(obj: object) {
-  for (const prop of Object.keys(obj)) {
-    return false;
-  }
-
-  return true;
+  return lodashIsEmpty(obj);
 }
 
 export function formatPhoneNumber(phoneNumber: string | undefined): string | undefined {

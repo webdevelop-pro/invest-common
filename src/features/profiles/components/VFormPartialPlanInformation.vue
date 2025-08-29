@@ -28,9 +28,10 @@ const {
   validation,
   isValid,
   onValidate,
+  isFieldRequired,
+  getErrorText,
   modelExpose,
   yesNoOptions,
-  schemaFrontend,
 } = useVFormPartialPlanInformation(
   modelDataComputed,
   schemaBackendComputed,
@@ -51,12 +52,8 @@ defineExpose({
       <FormCol>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackendComputed"
-          :schema-front="schemaFrontend"
-          :error-text="errorDataComputed?.name"
-          path="name"
+          :required="isFieldRequired('name')"
+          :error-text="getErrorText('name', errorDataComputed as any)"
           label="Name of the Solo 401(k)"
           data-testid="name-group"
         >
@@ -77,12 +74,8 @@ defineExpose({
       <FormCol>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackendComputed"
-          :schema-front="schemaFrontend"
-          :error-text="errorDataComputed?.is_use_ein"
-          path="is_use_ein"
+          :required="isFieldRequired('is_use_ein')"
+          :error-text="getErrorText('is_use_ein', errorDataComputed as any)"
           data-testid="is-use-ein-group"
           label="Does this Solo 401K use an EIN for tax filing?"
         >
@@ -99,12 +92,8 @@ defineExpose({
       <FormCol>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackendComputed"
-          :schema-front="schemaFrontend"
-          :error-text="errorDataComputed?.ein"
-          path="ein"
+          :required="isFieldRequired('ein')"
+          :error-text="getErrorText('ein', errorDataComputed as any)"
           label="EIN"
           data-testid="ein-group"
         >
@@ -127,12 +116,8 @@ defineExpose({
       <FormCol>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackendComputed"
-          :schema-front="schemaFrontend"
-          :error-text="errorDataComputed?.plan_document_id"
-          path="plan_document_id"
+          :required="isFieldRequired('plan_document_id')"
+          :error-text="getErrorText('plan_document_id', errorDataComputed as any)"
           label="Plan Document"
           data-testid="ein-group"
         >

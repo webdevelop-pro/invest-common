@@ -10,9 +10,8 @@ import {
 } from 'InvestCommon/helpers/enums/routes';
 import { numberFormatter } from 'InvestCommon/helpers/numberFormatter';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
-import { scrollToError } from 'UiKit/helpers/validation/general';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
-import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
+import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
 import { storeToRefs } from 'pinia';
 
@@ -65,16 +64,21 @@ export function useInvestAmount() {
     $ref: '#/definitions/AmountStep',
   } as unknown as JSONSchemaType<FormModel>));
 
+  const fieldsPaths = ['number_of_shares'];
+
   // Use form validation composable
   const {
     model,
     validation,
     isValid,
     onValidate,
+    scrollToError, formErrors, isFieldRequired, getErrorText,
+    getOptions, getReferenceType,
   } = useFormValidation<FormModel>(
     schemaFrontend,
     undefined,
     {},
+    fieldsPaths
   );
 
   const errorData = computed(() => setAmountState.value.error?.data?.responseJson);
@@ -155,5 +159,13 @@ export function useInvestAmount() {
     // Repository state
     setAmountState,
     setAmountOptionsState,
+    
+    // Form validation helpers
+    formErrors,
+    isFieldRequired,
+    getErrorText,
+    getOptions,
+    getReferenceType,
+    scrollToError,
   };
 } 

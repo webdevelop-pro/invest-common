@@ -9,7 +9,6 @@ import { useRouter } from 'vue-router';
 import { FormChild } from 'InvestCommon/types/form';
 import env from 'InvestCommon/global';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
-import { scrollToError } from 'UiKit/helpers/validation/general';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 
@@ -54,7 +53,12 @@ export const useFormBusinessController = () => {
   const handleSave = async () => {
     businessControllerFormRef.value?.onValidate();
     if (!isValid.value) {
-      nextTick(() => scrollToError('ViewDashboardBusinessController'));
+      nextTick(() => {
+        const element = document.querySelector('.ViewDashboardBusinessController');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      });
       return;
     }
 

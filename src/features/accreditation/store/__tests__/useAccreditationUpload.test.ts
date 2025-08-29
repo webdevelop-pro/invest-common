@@ -7,6 +7,7 @@ import { useRepositoryAccreditation } from '../../../../data/accreditation/accre
 import { useRepositoryProfiles } from '../../../../data/profiles/profiles.repository';
 import { AccreditationTypes } from '../../../../types/api/invest';
 import { useProfilesStore } from '../../../../domain/profiles/store/useProfiles';
+import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { useAccreditationUpload } from '../useAccreditationUpload';
 
 vi.mock('../../../../domain/profiles/store/useProfiles', () => ({
@@ -40,6 +41,26 @@ vi.mock('vue-router', () => ({
   useRoute: vi.fn(() => ({
     params: { profileId: '123' },
     name: 'test-route',
+  })),
+}));
+
+vi.mock('UiKit/helpers/validation/useFormValidation', () => ({
+  useFormValidation: vi.fn(() => ({
+    model: ref({}),
+    validation: ref({}),
+    isValid: ref(true),
+    onValidate: vi.fn(),
+    formErrors: ref({}),
+    isFieldRequired: vi.fn(),
+    getErrorText: vi.fn((fieldId: number) => {
+      // This will be overridden in individual tests to match repository error data
+      return undefined;
+    }),
+    getOptions: vi.fn(),
+    getReferenceType: vi.fn(),
+    scrollToError: vi.fn(),
+    resetValidation: vi.fn(),
+    schemaObject: ref({}),
   })),
 }));
 
@@ -98,7 +119,7 @@ describe('useAccreditationUpload', () => {
 
       store.onFileRemove(0);
 
-      expect(store.model.description1).toBeUndefined();
+      expect(store.accreditationDescriptions).not.toContain('Test description');
     });
 
     it('should handle multiple file uploads with descriptions', () => {
@@ -268,14 +289,14 @@ describe('useAccreditationUpload', () => {
 
     it('should re-instantiate validator when schema changes', () => {
       const store = useAccreditationUpload();
-      const oldValidator = store.schemaAccreditationFileInput;
+      const oldValidator = store.schemaFrontend;
       // Simulate schema change by adding files
       store.onFilesChange([
         new File([''], 'test1.pdf'),
         new File([''], 'test2.pdf'),
         new File([''], 'test3.pdf'),
       ]);
-      expect(store.schemaAccreditationFileInput).not.toBe(oldValidator);
+      expect(store.schemaFrontend).not.toBe(oldValidator);
     });
   });
 
@@ -563,6 +584,23 @@ describe('useAccreditationUpload', () => {
         updateState: ref({ loading: false, error: null, data: undefined }),
       });
 
+      // Override the getErrorText mock to return the expected error
+      const mockUseFormValidation = vi.mocked(useFormValidation);
+      mockUseFormValidation.mockReturnValue({
+        model: ref({}),
+        validation: ref({}),
+        isValid: ref(true),
+        onValidate: vi.fn(),
+        formErrors: ref({}),
+        isFieldRequired: vi.fn(),
+        getErrorText: vi.fn((fieldId: number) => mockError[`description${fieldId}`]),
+        getOptions: vi.fn(),
+        getReferenceType: vi.fn(),
+        scrollToError: vi.fn(),
+        resetValidation: vi.fn(),
+        schemaObject: ref({}),
+      });
+
       const store = useAccreditationUpload();
       expect(store.getErrorText(1)).toBe('Error message');
     });
@@ -579,6 +617,23 @@ describe('useAccreditationUpload', () => {
         update: vi.fn(),
         createState: ref({ loading: false, error: mockError, data: undefined }),
         updateState: ref({ loading: false, error: null, data: undefined }),
+      });
+
+      // Override the getErrorText mock to return the expected errors
+      const mockUseFormValidation = vi.mocked(useFormValidation);
+      mockUseFormValidation.mockReturnValue({
+        model: ref({}),
+        validation: ref({}),
+        isValid: ref(true),
+        onValidate: vi.fn(),
+        formErrors: ref({}),
+        isFieldRequired: vi.fn(),
+        getErrorText: vi.fn((fieldId: number) => mockError[`description${fieldId}`]),
+        getOptions: vi.fn(),
+        getReferenceType: vi.fn(),
+        scrollToError: vi.fn(),
+        resetValidation: vi.fn(),
+        schemaObject: ref({}),
       });
 
       const store = useAccreditationUpload();
@@ -600,6 +655,23 @@ describe('useAccreditationUpload', () => {
         updateState: ref({ loading: false, error: null, data: undefined }),
       });
 
+      // Override the getErrorText mock to return undefined for this test
+      const mockUseFormValidation = vi.mocked(useFormValidation);
+      mockUseFormValidation.mockReturnValue({
+        model: ref({}),
+        validation: ref({}),
+        isValid: ref(true),
+        onValidate: vi.fn(),
+        formErrors: ref({}),
+        isFieldRequired: vi.fn(),
+        getErrorText: vi.fn(() => undefined),
+        getOptions: vi.fn(),
+        getReferenceType: vi.fn(),
+        scrollToError: vi.fn(),
+        resetValidation: vi.fn(),
+        schemaObject: ref({}),
+      });
+
       const store = useAccreditationUpload();
       expect(store.getErrorText(1)).toBeUndefined();
     });
@@ -616,6 +688,23 @@ describe('useAccreditationUpload', () => {
         update: vi.fn(),
         createState: ref({ loading: false, error: mockError, data: undefined }),
         updateState: ref({ loading: false, error: null, data: undefined }),
+      });
+
+      // Override the getErrorText mock to return undefined for this test
+      const mockUseFormValidation = vi.mocked(useFormValidation);
+      mockUseFormValidation.mockReturnValue({
+        model: ref({}),
+        validation: ref({}),
+        isValid: ref(true),
+        onValidate: vi.fn(),
+        formErrors: ref({}),
+        isFieldRequired: vi.fn(),
+        getErrorText: vi.fn(() => undefined),
+        getOptions: vi.fn(),
+        getReferenceType: vi.fn(),
+        scrollToError: vi.fn(),
+        resetValidation: vi.fn(),
+        schemaObject: ref({}),
       });
 
       const store = useAccreditationUpload();
@@ -636,6 +725,23 @@ describe('useAccreditationUpload', () => {
         update: vi.fn(),
         createState: ref({ loading: false, error: mockError, data: undefined }),
         updateState: ref({ loading: false, error: null, data: undefined }),
+      });
+
+      // Override the getErrorText mock to return undefined for field 2
+      const mockUseFormValidation = vi.mocked(useFormValidation);
+      mockUseFormValidation.mockReturnValue({
+        model: ref({}),
+        validation: ref({}),
+        isValid: ref(true),
+        onValidate: vi.fn(),
+        formErrors: ref({}),
+        isFieldRequired: vi.fn(),
+        getErrorText: vi.fn((fieldId: number) => mockError[`description${fieldId}`]),
+        getOptions: vi.fn(),
+        getReferenceType: vi.fn(),
+        scrollToError: vi.fn(),
+        resetValidation: vi.fn(),
+        schemaObject: ref({}),
       });
 
       const store = useAccreditationUpload();

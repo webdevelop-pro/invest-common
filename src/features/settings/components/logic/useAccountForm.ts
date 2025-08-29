@@ -6,10 +6,10 @@ import { storeToRefs } from 'pinia';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import {
   emailRule, errorMessageRule, firstNameRule, lastNameRule,
-  middleNameRule, phoneRule,
+  phoneRule,
 } from 'UiKit/helpers/validation/rules';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
-import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
+import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 
 export interface FormModelAccount {
   first_name: string;
@@ -27,7 +27,7 @@ export function useAccountForm(props: UseAccountFormProps) {
   const useRepositoryProfilesStore = useRepositoryProfiles();
   const { setUserState, setUserOptionsState } = storeToRefs(useRepositoryProfilesStore);
 
-  const errorData = computed(() => setUserState.value.error?.data?.responseJson);
+  const errorData = computed(() => (setUserState.value.error as any)?.data?.responseJson);
   const schemaBackend = computed(() => setUserOptionsState.value.data);
 
   const schema = computed(() => ({
@@ -48,6 +48,8 @@ export function useAccountForm(props: UseAccountFormProps) {
     $ref: '#/definitions/UserUpdate',
   } as unknown as JSONSchemaType<FormModelAccount>));
 
+  const fieldsPaths = ['first_name', 'last_name', 'email', 'phone'];
+
   const isDialogContactUsOpen = ref(false);
 
   const VDialogContactUs = defineAsyncComponent({
@@ -60,10 +62,13 @@ export function useAccountForm(props: UseAccountFormProps) {
     isValid,
     onValidate,
     validator,
+    scrollToError, formErrors, isFieldRequired, getErrorText,
+    getOptions, getReferenceType,
   } = useFormValidation<FormModelAccount>(
     schema,
     schemaBackend,
     {} as FormModelAccount,
+    fieldsPaths
   );
 
   // Watch for model data changes and update form
@@ -91,5 +96,13 @@ export function useAccountForm(props: UseAccountFormProps) {
     isDialogContactUsOpen,
     VDialogContactUs,
     setUserState,
+    
+    // Form validation helpers
+    formErrors,
+    isFieldRequired,
+    getErrorText,
+    getOptions,
+    getReferenceType,
+    scrollToError,
   };
 }

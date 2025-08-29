@@ -10,8 +10,8 @@ import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
-import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
-import { scrollToError } from 'UiKit/helpers/validation/general';
+// @ts-ignore - path alias resolved by Vite/Vitest config
+import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { usePortfolioCancelInvestment } from '../usePortfolioCancelInvestment';
 
 // Mock dependencies
@@ -20,8 +20,8 @@ vi.mock('InvestCommon/data/investment/investment.repository', () => ({ useReposi
 vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({ useProfilesStore: vi.fn() }));
 vi.mock('InvestCommon/domain/session/store/useSession', () => ({ useSessionStore: vi.fn() }));
 vi.mock('InvestCommon/composable/useHubspotForm', () => ({ useHubspotForm: vi.fn() }));
-vi.mock('InvestCommon/composable/useFormValidation', () => ({ useFormValidation: vi.fn() }));
-vi.mock('UiKit/helpers/validation/general', () => ({ scrollToError: vi.fn() }));
+vi.mock('UiKit/helpers/validation/useFormValidation', () => ({ useFormValidation: vi.fn() }));
+// no direct mock for general scrollToError; we use the one provided by useFormValidation
 
 describe('usePortfolioCancelInvestment', () => {
   let mockRouter: any;
@@ -45,7 +45,8 @@ describe('usePortfolioCancelInvestment', () => {
     mockInvestmentRepository = {
       cancelInvest: vi.fn(),
       cancelInvestState: ref({ loading: false, error: null, data: null }),
-      setCancelOptionsState: ref({ loading: false, error: null, data: {} }),
+      setCancelOptionsState: ref({ loading: false, error: null, data: null }),
+      setCancelOptions: vi.fn(),
     };
     (vi.mocked(useRepositoryInvestment) as any).mockReturnValue(mockInvestmentRepository);
 
@@ -63,6 +64,7 @@ describe('usePortfolioCancelInvestment', () => {
       validation: ref({}),
       isValid: ref(false),
       onValidate: vi.fn(),
+      scrollToError: vi.fn(),
     };
     (vi.mocked(useFormValidation) as any).mockReturnValue(mockFormValidation);
 
@@ -106,7 +108,7 @@ describe('usePortfolioCancelInvestment', () => {
       await composable.cancelInvestHandler();
 
       expect(mockFormValidation.onValidate).toHaveBeenCalled();
-      expect(scrollToError).toHaveBeenCalledWith('VDialogPortfolioCancelInvestment');
+      expect(mockFormValidation.scrollToError).toHaveBeenCalledWith('VDialogPortfolioCancelInvestment');
       expect(mockInvestmentRepository.cancelInvest).not.toHaveBeenCalled();
     });
 
@@ -157,6 +159,30 @@ describe('usePortfolioCancelInvestment', () => {
 
       const composable = usePortfolioCancelInvestment(mockInvestment, mockOpen, mockEmit);
       expect(composable.errorData.value).toEqual(errorData);
+    });
+  });
+
+  describe('Open watcher', () => {
+    it('should fetch cancel options when dialog opens and schema is empty', async () => {
+      const composable = usePortfolioCancelInvestment(mockInvestment, mockOpen, mockEmit);
+      mockInvestmentRepository.setCancelOptions.mockResolvedValue(undefined);
+
+      mockOpen.value = true;
+      // allow watchers/microtasks to flush
+      await Promise.resolve();
+
+      expect(mockInvestmentRepository.setCancelOptions).toHaveBeenCalledWith('456');
+    });
+
+    it('should not fetch cancel options when schema already exists', async () => {
+      // pre-populate schema data
+      mockInvestmentRepository.setCancelOptionsState.value.data = {};
+      const composable = usePortfolioCancelInvestment(mockInvestment, mockOpen, mockEmit);
+
+      mockOpen.value = true;
+      await Promise.resolve();
+
+      expect(mockInvestmentRepository.setCancelOptions).not.toHaveBeenCalled();
     });
   });
 });

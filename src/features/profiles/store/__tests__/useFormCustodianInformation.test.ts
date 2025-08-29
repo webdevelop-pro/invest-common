@@ -129,6 +129,12 @@ describe('useFormCustodianInformation', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
 
+    // Mock DOM elements
+    const mockElement = {
+      scrollIntoView: vi.fn(),
+    };
+    document.querySelector = vi.fn(() => mockElement);
+
     mockRouter = vi.mocked(useRouter)();
     mockProfilesStore = vi.mocked(useProfilesStore)();
     mockRepositoryProfiles = vi.mocked(useRepositoryProfiles)();
@@ -234,7 +240,7 @@ describe('useFormCustodianInformation', () => {
 
       await newComposable.handleSave();
 
-      expect(mockScrollToError).toHaveBeenCalledWith('ViewDashboardCustodianInformation');
+      expect(document.querySelector).toHaveBeenCalledWith('.ViewDashboardCustodianInformation');
       expect(mockRepositoryProfiles.setProfileById).not.toHaveBeenCalled();
       expect(mockHubspotForm.submitFormToHubspot).not.toHaveBeenCalled();
       expect(mockRepositoryProfiles.getProfileById).not.toHaveBeenCalled();
@@ -257,7 +263,7 @@ describe('useFormCustodianInformation', () => {
 
       await newComposable.handleSave();
 
-      expect(mockScrollToError).toHaveBeenCalledWith('ViewDashboardCustodianInformation');
+      expect(document.querySelector).toHaveBeenCalledWith('.ViewDashboardCustodianInformation');
       expect(mockRepositoryProfiles.setProfileById).not.toHaveBeenCalled();
     });
   });

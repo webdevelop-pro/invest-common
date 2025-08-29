@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
 import { ref, reactive } from 'vue';
 import { ROUTE_SETTINGS_MFA } from 'InvestCommon/helpers/enums/routes';
-import { scrollToError } from 'UiKit/helpers/validation/general';
 import { useResetPassword } from '../useResetPassword';
 
 // Mock dependencies
@@ -54,18 +53,16 @@ const mockModel = reactive({
 const mockValidation = ref({});
 const mockIsValid = ref(true);
 const mockOnValidate = vi.fn();
+const mockScrollToError = vi.fn();
 
-vi.mock('InvestCommon/composable/useFormValidation', () => ({
+vi.mock('UiKit/helpers/validation/useFormValidation', () => ({
   useFormValidation: vi.fn(() => ({
     model: mockModel,
     validation: mockValidation,
     isValid: mockIsValid,
-    onValidate: mockOnValidate
+    onValidate: mockOnValidate,
+    scrollToError: mockScrollToError,
   }))
-}));
-
-vi.mock('UiKit/helpers/validation/general', () => ({
-  scrollToError: vi.fn()
 }));
 
 vi.mock('UiKit/helpers/validation/rules', () => ({
@@ -163,7 +160,7 @@ describe('useResetPassword', () => {
       await composable.resetHandler();
       
       expect(mockOnValidate).toHaveBeenCalled();
-      expect(scrollToError).toHaveBeenCalledWith('VFormResetPassword');
+      expect(mockScrollToError).toHaveBeenCalledWith('VFormResetPassword');
       expect(mockGetAuthFlow).not.toHaveBeenCalled();
       expect(mockSetSettings).not.toHaveBeenCalled();
     });

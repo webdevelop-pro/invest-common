@@ -25,7 +25,24 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue']);
 
-const { model, validation, schema, ACCOUNT_TYPES } = useInvestFundingAch(props, emit);
+const { 
+  model, 
+  validation, 
+  schema, 
+  ACCOUNT_TYPES,
+  isValid,
+  onValidate,
+  isFieldRequired,
+  getErrorText,
+  scrollToError
+} = useInvestFundingAch(props, emit);
+
+// Expose validation state to parent component
+defineExpose({
+  isValid,
+  onValidate,
+  scrollToError
+});
 </script>
 
 <template>
@@ -40,9 +57,10 @@ const { model, validation, schema, ACCOUNT_TYPES } = useInvestFundingAch(props, 
           :model="model"
           :validation="validation"
           :schema-front="schema"
-          :error-text="errorData?.accountHolderName"
+          :error-text="getErrorText('accountHolderName', errorData)"
           path="accountHolderName"
           label="Account Holder Name"
+          :required="isFieldRequired('accountHolderName')"
         >
           <VFormInput
             :model-value="model.accountHolderName"
@@ -61,9 +79,10 @@ const { model, validation, schema, ACCOUNT_TYPES } = useInvestFundingAch(props, 
           :model="model"
           :validation="validation"
           :schema-front="schema"
-          :error-text="errorData?.accountType"
+          :error-text="getErrorText('accountType', errorData)"
           path="accountType"
           label="Account Type"
+          :required="isFieldRequired('accountType')"
         >
           <VFormSelect
             v-model="model.accountType"
@@ -87,9 +106,10 @@ const { model, validation, schema, ACCOUNT_TYPES } = useInvestFundingAch(props, 
           :model="model"
           :validation="validation"
           :schema-front="schema"
-          :error-text="errorData?.accountNumber"
+          :error-text="getErrorText('accountNumber', errorData)"
           path="accountNumber"
           label="Account Number"
+          :required="isFieldRequired('accountNumber')"
         >
           <VFormInput
             :model-value="model.accountNumber"
@@ -109,9 +129,10 @@ const { model, validation, schema, ACCOUNT_TYPES } = useInvestFundingAch(props, 
           :model="model"
           :validation="validation"
           :schema-front="schema"
-          :error-text="errorData?.routingNumber"
+          :error-text="getErrorText('routingNumber', errorData)"
           path="routingNumber"
           label="Routing Number"
+          :required="isFieldRequired('routingNumber')"
         >
           <VFormInput
             :model-value="model.routingNumber"
@@ -133,9 +154,10 @@ const { model, validation, schema, ACCOUNT_TYPES } = useInvestFundingAch(props, 
           :model="model"
           :validation="validation"
           :schema-front="schema"
-          :error-text="errorData?.authorizeDebit"
+          :error-text="getErrorText('authorizeDebit', errorData)"
           path="authorizeDebit"
           class="is--margin-top-15"
+          :required="isFieldRequired('authorizeDebit')"
         >
           <VFormCheckbox
             v-model="model.authorizeDebit"

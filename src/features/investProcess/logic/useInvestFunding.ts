@@ -4,12 +4,11 @@ import {
 import { useRouter, useRoute } from 'vue-router';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
-import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
+import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { ROUTE_INVEST_REVIEW, ROUTE_INVEST_SIGNATURE } from 'InvestCommon/helpers/enums/routes';
 import { FundingTypes } from 'InvestCommon/helpers/enums/general';
 import { storeToRefs } from 'pinia';
 import { currency } from 'InvestCommon/helpers/currency';
-import { scrollToError } from 'UiKit/helpers/validation/general';
 import { urlOfferSingle } from 'InvestCommon/global/links';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
@@ -66,10 +65,13 @@ export function useInvestFunding() {
       FundingStep: {
         properties: { funding_type: {} },
         errorMessage: errorMessageRule,
+        required: ['funding_type'],
       },
     },
     $ref: '#/definitions/FundingStep',
   } as unknown as JSONSchemaType<FormModelInvestmentFunding>;
+
+  const fieldsPaths = ['funding_type'];
 
   const errorData = computed(() => (setFundingState.value.error as any)?.data?.responseJson);
   const schemaBackend = computed(() => setFundingOptionsState.value.data);
@@ -80,10 +82,13 @@ export function useInvestFunding() {
     validation,
     isValid,
     onValidate,
+    scrollToError, formErrors, isFieldRequired, getErrorText,
+    getOptions, getReferenceType,
   } = useFormValidation(
     schemaInvestmentFunding,
     schemaBackend,
-    {} as FormModelInvestmentFunding
+    {} as FormModelInvestmentFunding,
+    fieldsPaths
   );
 
   // Computed properties
@@ -109,7 +114,7 @@ export function useInvestFunding() {
   );
 
   const notEnoughWalletFunds = computed(() => 
-    (getInvestUnconfirmedOne.value?.amount || 0) > getWalletState.value.data?.totalBalance
+    (getInvestUnconfirmedOne.value?.amount || 0) > (getWalletState.value.data?.totalBalance || 0)
   );
 
   const hasEvmWallet = computed(() => 
@@ -117,7 +122,7 @@ export function useInvestFunding() {
   );
 
   const notEnoughEvmWalletFunds = computed(() => 
-    (getInvestUnconfirmedOne.value?.amount || 0) > getEvmWalletState.value.data?.totalBalance
+    (getInvestUnconfirmedOne.value?.amount || 0) > (getEvmWalletState.value.data?.totalBalance || 0)
   );
 
   const selectOptions = computed(() => {
@@ -139,8 +144,8 @@ export function useInvestFunding() {
     if (hasEvmWallet.value) {
       options.push({
         value: FundingTypes.cryptoWallet,
-        text: `Crypto Wallet (${currency(getEvmWalletState.value.data?.totalBalance)})`,
-        disabled: getEvmWalletState.value.data?.totalBalance === 0,
+        text: `Crypto Wallet (${currency(getEvmWalletState.value.data?.totalBalance || 0)})`,
+        disabled: (getEvmWalletState.value.data?.totalBalance || 0) === 0,
       });
     }
     
@@ -162,7 +167,7 @@ export function useInvestFunding() {
       }
     }
     
-    return [];
+    return getErrorText('funding_type', errorData.value);
   });
 
   const userName = computed(() => {
@@ -341,5 +346,13 @@ export function useInvestFunding() {
     ROUTE_INVEST_REVIEW,
     ROUTE_INVEST_SIGNATURE,
     urlOfferSingle,
+    
+    // Form validation helpers
+    formErrors,
+    isFieldRequired,
+    getErrorText,
+    getOptions,
+    getReferenceType,
+    scrollToError,
   };
 }

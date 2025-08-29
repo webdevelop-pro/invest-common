@@ -4,7 +4,7 @@ import {
 import { setActivePinia, createPinia } from 'pinia';
 import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
 import { ref, reactive, watch } from 'vue';
-import { useToast } from 'UiKit/components/Base/VToast/use-toast';
+// useToast will be mocked below; no direct import to avoid alias/type issues
 import { useVerificationStore } from '../useVerification';
 
 // Mock environment variables
@@ -32,7 +32,7 @@ vi.mock('InvestCommon/data/auth/auth.repository', () => {
   };
 });
 
-vi.mock('InvestCommon/composable/useFormValidation', () => ({
+vi.mock('UiKit/helpers/validation/useFormValidation', () => ({
   useFormValidation: vi.fn(() => {
     const model = reactive({ code: '' });
     const isValid = ref(true);
@@ -58,7 +58,15 @@ vi.mock('InvestCommon/composable/useFormValidation', () => ({
       validation,
       isValid,
       onValidate,
-    };
+      scrollToError: vi.fn(),
+      formErrors: ref({}),
+      isFieldRequired: vi.fn(),
+      getErrorText: vi.fn(),
+      getOptions: vi.fn(),
+      getReferenceType: vi.fn(),
+      resetValidation: vi.fn(),
+      schemaObject: ref({}),
+    } as any;
   }),
 }));
 
@@ -67,10 +75,7 @@ vi.mock('UiKit/helpers/general', () => ({
   navigateWithQueryParams: vi.fn().mockResolvedValue(undefined),
 }));
 
-// Mock scrollToError
-vi.mock('UiKit/helpers/validation/general', () => ({
-  scrollToError: vi.fn(),
-}));
+// No need to mock general scroll here; not asserted in tests
 
 // Mock the dependencies
 vi.mock('UiKit/components/Base/VToast/use-toast', () => ({
@@ -87,15 +92,8 @@ describe('useVerification Store', () => {
   let mockAuthRepository: ReturnType<typeof useRepositoryAuth>;
 
   beforeEach(() => {
-    const mockToast = vi.fn();
     setActivePinia(createPinia());
     vi.clearAllMocks();
-    (useToast as any).mockReturnValue({
-      toast: mockToast,
-      toasts: [],
-      dismiss: vi.fn(),
-      TOAST_REMOVE_DELAY: 10000,
-    });
 
     // Mock URL with query parameters
     Object.defineProperty(window, 'location', {
@@ -142,15 +140,8 @@ describe('useVerification Store', () => {
 
     it('should handle form validation with backend schema', async () => {
       // Mock backend schema
-      const backendSchema = {
-        type: 'object',
-        properties: {
-          code: { type: 'string', pattern: '^\\d{6}$' },
-        },
-        required: ['code'],
-      };
-
-      useRepositoryAuth().getSchemaState.value = { data: backendSchema };
+      const backendSchema = { id: 'schema-id', schema: '{}', url: 'http://example.com/schema' } as any;
+      (useRepositoryAuth() as any).getSchemaState.value = { data: backendSchema } as any;
 
       // Test with invalid data
       store.model.code = '12345';
@@ -169,7 +160,7 @@ describe('useVerification Store', () => {
       // Set up the model with a valid verification code
       store.model.code = '123456';
       await store.onValidate(); // Ensure validation is run
-      mockAuthRepository.setRecoveryState.value = { data: { state: 'success' }, error: null };
+      mockAuthRepository.setRecoveryState.value = { data: { id: 'id', type: 'browser', active: true, expires_at: '', issued_at: '', request_url: '', state: 'success', ui: { action: '', method: 'POST', nodes: [] }, messages: [] } as any, error: null } as any;
 
       await store.verificationHandler();
       expect(store.isLoading).toBe(false);
@@ -186,7 +177,7 @@ describe('useVerification Store', () => {
     it('should handle verification errors', async () => {
       store.model.code = '123456';
       await store.onValidate(); // Ensure validation is run
-      mockAuthRepository.setRecoveryState.value = { data: null, error: 'Verification failed' };
+      mockAuthRepository.setRecoveryState.value = { data: null as any, error: new Error('Verification failed') } as any;
 
       await store.verificationHandler();
       expect(store.isLoading).toBe(false);
