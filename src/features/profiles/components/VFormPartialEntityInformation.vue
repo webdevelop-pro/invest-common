@@ -31,8 +31,9 @@ const {
   validation,
   isValid,
   onValidate,
+  isFieldRequired,
+  getErrorText,
   yesNoOptions,
-  schemaFrontend,
   optionsType,
   operatingAgreementLabel,
 } = useVFormPartialEntityInformation(
@@ -58,12 +59,8 @@ defineExpose({
       <FormCol col3>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackendComputed"
-          :schema-front="schemaFrontend"
-          :error-text="errorDataComputed?.type"
-          path="type"
+          :required="isFieldRequired('type')"
+          :error-text="getErrorText('type', errorDataComputed as any)"
           label="Type of Entity"
           data-testid="type-group"
         >
@@ -85,12 +82,8 @@ defineExpose({
       <FormCol col3>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackendComputed"
-          :schema-front="schemaFrontend"
-          :error-text="errorDataComputed?.name"
-          path="name"
+          :required="isFieldRequired('name')"
+          :error-text="getErrorText('name', errorDataComputed as any)"
           label="Name of Entity"
           data-testid="name-group"
         >
@@ -109,12 +102,8 @@ defineExpose({
       <FormCol col3>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackendComputed"
-          :schema-front="schemaFrontend"
-          :error-text="errorDataComputed?.owner_title"
-          path="owner_title"
+          :required="isFieldRequired('owner_title')"
+          :error-text="getErrorText('owner_title', errorDataComputed as any)"
           label="Your Title within Entity"
           data-testid="owner-title-group"
         >
@@ -135,12 +124,8 @@ defineExpose({
       <FormCol>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackendComputed"
-          :schema-front="schemaFrontend"
-          :error-text="errorDataComputed?.solely_for_investing"
-          path="solely_for_investing"
+          :required="isFieldRequired('solely_for_investing')"
+          :error-text="getErrorText('solely_for_investing', errorDataComputed as any)"
           data-testid="solely-for-investing"
           label="Was this Entity created solely for investing on our platform?"
         >
@@ -157,12 +142,8 @@ defineExpose({
       <FormCol>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackendComputed"
-          :schema-front="schemaFrontend"
-          :error-text="errorDataComputed?.tax_exempts"
-          path="tax_exempts"
+          :required="isFieldRequired('tax_exempts')"
+          :error-text="getErrorText('tax_exempts', errorDataComputed as any)"
           data-testid="tax-exempts"
           label="Does your entity have Tax Exempt Status?"
         >
@@ -179,12 +160,8 @@ defineExpose({
       <FormCol col3>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackendComputed"
-          :schema-front="schemaFrontend"
-          :error-text="errorDataComputed?.operating_agreement_id"
-          path="operating_agreement_id"
+          :required="isFieldRequired('operating_agreement_id')"
+          :error-text="getErrorText('operating_agreement_id', errorDataComputed as any)"
           :label="operatingAgreementLabel"
           data-testid="operating-agreement-document-group"
         >
@@ -198,12 +175,8 @@ defineExpose({
       <FormCol col3>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackendComputed"
-          :schema-front="schemaFrontend"
-          :error-text="errorDataComputed?.organization_document_id"
-          path="organization_document_id"
+          :required="isFieldRequired('organization_document_id')"
+          :error-text="getErrorText('organization_document_id', errorDataComputed as any)"
           label="Organization Document"
           data-testid="organization-document-group"
         >
@@ -217,12 +190,8 @@ defineExpose({
       <FormCol col3>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackendComputed"
-          :schema-front="schemaFrontend"
-          :error-text="errorDataComputed?.formation_document_id"
-          path="formation_document_id"
+          :required="isFieldRequired('formation_document_id')"
+          :error-text="getErrorText('formation_document_id', errorDataComputed as any)"
           label="Formation Document"
           data-testid="entity-document-group"
         >

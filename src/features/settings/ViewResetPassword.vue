@@ -11,15 +11,15 @@ const {
   isDisabledButton,
   errorData,
   model,
-  validation,
-  schema,
   resetHandler,
   backButtonUrl,
+  isFieldRequired,
+  getErrorText,
 } = useResetPassword();
 </script>
 
 <template>
-  <div class="ViewForgot view-forgot">
+  <div class="ViewResetPassword view-forgot">
     <div class="view-forgot__wrap">
       <h1 class="view-forgot__title">
         Reset Password
@@ -34,11 +34,9 @@ const {
           <FormCol>
             <VFormGroup
               v-slot="VFormGroupProps"
-              :model="model"
-              :validation="validation"
-              :schema-front="schema"
-              :error-text="errorData?.create_password"
-              path="create_password"
+              :required="isFieldRequired('create_password')"
+              :error-text="getErrorText('create_password', errorData)"
+              data-testid="create-password-group"
               label="Enter Your New Password"
             >
               <VFormInputPassword
@@ -48,6 +46,7 @@ const {
                 name="createPassword"
                 size="large"
                 :show-strength="true"
+                data-testid="create-password"
                 @update:model-value="model.create_password = $event.trim()"
               />
             </VFormGroup>
@@ -57,11 +56,9 @@ const {
           <FormCol>
             <VFormGroup
               v-slot="VFormGroupProps"
-              :model="model"
-              :validation="validation"
-              :schema-front="schema"
-              :error-text="errorData?.repeat_password"
-              path="repeat_password"
+              :required="isFieldRequired('repeat_password')"
+              :error-text="getErrorText('repeat_password', errorData)"
+              data-testid="repeat-password-group"
               label="Confirm Your New Password"
             >
               <VFormInputPassword
@@ -70,6 +67,7 @@ const {
                 placeholder="Confirm New Password"
                 name="repeatPassword"
                 size="large"
+                data-testid="repeat-password"
                 @update:model-value="model.repeat_password = $event.trim()"
               />
             </VFormGroup>

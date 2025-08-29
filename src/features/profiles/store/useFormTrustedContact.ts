@@ -8,12 +8,11 @@ import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles
 import { useRouter } from 'vue-router';
 import env from 'InvestCommon/global';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
-import { scrollToError } from 'UiKit/helpers/validation/general';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
-import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
+import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import {
-  firstNameRule, lastNameRule, relationshipTypeRule, phoneRule, emailRule, dobRule, errorMessageRule,
+  relationshipTypeRule, phoneRule, emailRule, dobRule, errorMessageRule,
 } from 'UiKit/helpers/validation/rules';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 
@@ -27,20 +26,15 @@ export const useFormTrustedContact = () => {
   const { userSessionTraits } = storeToRefs(userSessionStore);
 
   const backButtonText = ref('Back to Profile Details');
-  const backButtonRoute = computed(() => (
-    { name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } }));
+  const backButtonRoute = computed(() => ({
+    name: ROUTE_DASHBOARD_ACCOUNT,
+    params: { profileId: selectedUserProfileId.value }
+  }));
+
   const breadcrumbs = computed(() => [
-    {
-      text: 'Dashboard',
-      to: backButtonRoute.value,
-    },
-    {
-      text: 'Profile Details',
-      to: backButtonRoute.value,
-    },
-    {
-      text: 'Trusted Contact',
-    },
+    { text: 'Dashboard', to: backButtonRoute.value },
+    { text: 'Profile Details', to: backButtonRoute.value },
+    { text: 'Trusted Contact' },
   ]);
 
   const isLoading = ref(false);
@@ -65,10 +59,10 @@ export const useFormTrustedContact = () => {
   const schemaFrontend = computed(() => ({
     $schema: 'http://json-schema.org/draft-07/schema#',
     definitions: {
-      TrustedContact: {
+      PersonalInformation: {
         properties: {
-          first_name: firstNameRule,
-          last_name: lastNameRule,
+          first_name: {},
+          last_name: {},
           relationship_type: relationshipTypeRule,
           phone: phoneRule,
           email: emailRule,
@@ -80,7 +74,7 @@ export const useFormTrustedContact = () => {
       },
       Individual: {
         properties: {
-          beneficiary: { type: 'object', $ref: '#/definitions/TrustedContact' },
+          beneficiary: { type: 'object', $ref: '#/definitions/PersonalInformation' },
         },
         type: 'object',
         errorMessage: errorMessageRule,
@@ -89,30 +83,39 @@ export const useFormTrustedContact = () => {
     $ref: '#/definitions/Individual',
   } as unknown as JSONSchemaType<FormModeTrustedContact>));
 
+
+  const fieldsPaths = ['beneficiary.first_name', 'beneficiary.last_name', 'beneficiary.relationship_type', 'beneficiary.phone', 'beneficiary.email', 'beneficiary.dob'];
+
   const {
-    model, validation, isValid, onValidate,
+    model, validation, onValidate,
+    formErrors, isFieldRequired, getErrorText,
+    scrollToError, isValid
   } = useFormValidation<FormModeTrustedContact>(
     schemaFrontend,
     schemaBackend,
-      {
-        beneficiary: {},
-      } as FormModeTrustedContact,
+    { beneficiary: {} } as FormModeTrustedContact,
+    fieldsPaths,
   );
-  const isDisabledButton = computed(() => (!isValid.value));
 
-  watch(() => selectedUserProfileData.value?.data?.beneficiary, () => {
-    if (selectedUserProfileData.value?.data?.beneficiary) {
-      const beneficiaryData = selectedUserProfileData.value.data.beneficiary;
-      model.beneficiary = {
-        first_name: beneficiaryData.first_name || '',
-        last_name: beneficiaryData.last_name || '',
-        relationship_type: beneficiaryData.relationship_type || '',
-        phone: beneficiaryData.phone || '',
-        email: beneficiaryData.email || '',
-        dob: beneficiaryData.dob || '',
-      };
-    }
-  }, { deep: true, immediate: true });
+  const isDisabledButton = computed(() => !isValid.value);
+
+  // Simplified watch function
+  watch(
+    () => selectedUserProfileData.value?.data?.beneficiary,
+    (beneficiaryData) => {
+      if (beneficiaryData) {
+        model.beneficiary = {
+          first_name: beneficiaryData.first_name || '',
+          last_name: beneficiaryData.last_name || '',
+          relationship_type: beneficiaryData.relationship_type || '',
+          phone: beneficiaryData.phone || '',
+          email: beneficiaryData.email || '',
+          dob: beneficiaryData.dob || '',
+        };
+      }
+    },
+    { immediate: true }
+  );
 
   const handleSave = async () => {
     onValidate();
@@ -124,9 +127,7 @@ export const useFormTrustedContact = () => {
     isLoading.value = true;
     try {
       await useRepositoryProfilesStore.setProfileById(
-        {
-          beneficiary: model.beneficiary,
-        },
+        { beneficiary: model.beneficiary },
         selectedUserProfileType.value,
         selectedUserProfileId.value,
       );
@@ -160,6 +161,9 @@ export const useFormTrustedContact = () => {
     schemaFrontend,
     errorData,
     validation,
+    formErrors,
+    isFieldRequired,
+    getErrorText,
   };
 };
 

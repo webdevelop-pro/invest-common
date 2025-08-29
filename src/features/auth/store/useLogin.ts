@@ -5,10 +5,9 @@ import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import { urlSignup, urlProfile, urlAuthenticator } from 'InvestCommon/global/links';
 import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
-import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
+import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { emailRule, errorMessageRule, passwordRule } from 'UiKit/helpers/validation/rules';
-import { scrollToError } from 'UiKit/helpers/validation/general';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { SELFSERVICE } from './type';
@@ -55,9 +54,18 @@ export const useLoginStore = defineStore('login', () => {
   const schemaBackend = computed(() => (
     getSchemaState.value.data ? structuredClone(toRaw(getSchemaState.value.data)) : null));
 
+  const fieldsPaths = ['email', 'password'];
+
   const {
     model, validation, isValid, onValidate,
-  } = useFormValidation<FormModelSignIn>(schemaFrontend.value, schemaBackend.value, {} as FormModelSignIn);
+    scrollToError, formErrors, isFieldRequired, getErrorText,
+    getOptions, getReferenceType,
+  } = useFormValidation<FormModelSignIn>(
+    schemaFrontend,
+    schemaBackend,
+    {} as FormModelSignIn,
+    fieldsPaths
+  );
 
   const isLoading = ref(false);
   const isDisabledButton = computed(() => !isValid.value || isLoading.value);
@@ -166,6 +174,13 @@ export const useLoginStore = defineStore('login', () => {
     isValid,
     getQueryParam,
     onMountedHandler,
+    // Form validation helpers
+    formErrors,
+    isFieldRequired,
+    getErrorText,
+    getOptions,
+    getReferenceType,
+    scrollToError,
   };
 });
 

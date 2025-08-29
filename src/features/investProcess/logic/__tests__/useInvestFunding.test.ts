@@ -6,7 +6,7 @@ import { ref, reactive, nextTick } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
-import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
+import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';

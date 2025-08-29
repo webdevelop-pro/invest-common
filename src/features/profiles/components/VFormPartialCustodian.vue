@@ -16,7 +16,6 @@ const props = defineProps({
 
 const modelDataComputed = computed(() => props.modelData);
 const errorDataComputed = computed(() => props.errorData);
-const schemaBackendComputed = computed(() => props.schemaBackend);
 const loadingComputed = computed(() => props.loading);
 
 const {
@@ -24,8 +23,9 @@ const {
   validation,
   isValid,
   onValidate,
+  isFieldRequired,
+  getErrorText,
   optionsCustodian,
-  schemaFrontend,
 } = useVFormPartialCustodian(
   modelDataComputed,
 );
@@ -44,12 +44,8 @@ defineExpose({
       <FormCol col2>
         <VFormGroup
           v-slot="{ isFieldError }"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackendComputed"
-          :schema-front="schemaFrontend"
-          :error-text="errorDataComputed?.type"
-          path="type"
+          :required="isFieldRequired('type')"
+          :error-text="getErrorText('type', errorDataComputed as any)"
           label="Custodian"
           data-testid="type-group"
         >
@@ -71,12 +67,8 @@ defineExpose({
       <FormCol col2>
         <VFormGroup
           v-slot="{ isFieldError }"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackendComputed"
-          :schema-front="schemaFrontend"
-          :error-text="errorDataComputed?.account_number"
-          path="account_number"
+          :required="isFieldRequired('account_number')"
+          :error-text="getErrorText('account_number', errorDataComputed as any)"
           label="Account Number"
           data-testid="account_number-group"
         >
@@ -96,12 +88,8 @@ defineExpose({
       <FormCol>
         <VFormGroup
           v-slot="{ isFieldError }"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackendComputed"
-          :schema-front="schemaFrontend"
-          :error-text="errorDataComputed?.full_account_name"
-          path="full_account_name"
+          :required="isFieldRequired('full_account_name')"
+          :error-text="getErrorText('full_account_name', errorDataComputed as any)"
           label="Full Account Name"
           data-testid="full-account-name-group"
         >

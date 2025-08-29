@@ -10,14 +10,28 @@ import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import {
   address1Rule, address2Rule, citizenshipRule, cityRule, countryRuleObject,
-  dobRule, errorMessageRule, firstNameRule, lastNameRule,
-  middleNameRule, phoneRule, ssnRule, stateRule, zipRule,
+  dobRule, errorMessageRule, phoneRule, ssnRule, stateRule, zipRule,
 } from 'UiKit/helpers/validation/rules';
-import { FormModelPersonalInformation } from 'InvestCommon/types/form';
-import { getOptions } from 'UiKit/helpers/model';
 import VFormCombobox from 'UiKit/components/Base/VForm/VFormCombobox.vue';
-import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
+import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { IUserDataIndividual } from '@/data/profiles/profiles.types';
+
+interface FormModelPersonalInformation {
+  first_name: string;
+  last_name: string;
+  middle_name?: string;
+  dob: string;
+  address1: string;
+  address2: string;
+  city: string;
+  state: string;
+  zip_code: string;
+  country: string;
+  phone: string;
+  citizenship: string;
+  ssn?: string;
+  ein?: string;
+}
 
 const props = defineProps({
   modelData: Object as PropType<IUserDataIndividual>,
@@ -32,9 +46,9 @@ const isSsnHidden = computed(() => (props.modelData?.is_full_ssn_provided === tr
 
 const schemaFrontend = computed(() => {
   const properties = {
-    first_name: firstNameRule,
-    last_name: lastNameRule,
-    middle_name: middleNameRule,
+    first_name: {},
+    last_name: {},
+    middle_name: {},
     dob: dobRule,
     address1: address1Rule,
     address2: address2Rule,
@@ -53,49 +67,52 @@ const schemaFrontend = computed(() => {
     ...(isSsnHidden.value ? [] : ['ssn'])
   ];
 
+  // Use helper function to get reference type
+  const referenceType = getReferenceType(props.schemaBackend);
+
   return {
     $schema: 'http://json-schema.org/draft-07/schema#',
     definitions: {
-      Individual: {
+      [referenceType]: {
         properties,
         type: 'object',
         errorMessage: errorMessageRule,
         required,
       },
     },
-    $ref: '#/definitions/Individual',
+    $ref: `#/definitions/${referenceType}`,
   } as unknown as JSONSchemaType<FormModelPersonalInformation>;
 });
 
 const schemaBackendLocal = computed(() => (props.schemaBackend ? structuredClone(toRaw(props.schemaBackend)) : null));
+const fieldsPaths = ['first_name', 'last_name', 'middle_name', 'dob', 'address1', 'address2', 'city', 'state', 'zip_code', 'country', 'phone', 'citizenship', 'ssn'];
 
 const {
-  model, validation, isValid, onValidate, schemaObject,
+  model, validation, onValidate,
+  formErrors, isFieldRequired, getErrorText,
+  scrollToError, getOptions, isValid,
+  getReferenceType,
 } = useFormValidation<FormModelPersonalInformation>(
   schemaFrontend,
   schemaBackendLocal,
   {} as FormModelPersonalInformation,
+  fieldsPaths,
 );
 
-const optionsCountry = computed(() => getOptions('country', schemaObject));
-const optionsState = computed(() => getOptions('state', schemaObject));
-const optionsCitizenship = computed(() => getOptions('citizenship', schemaObject));
+const optionsCountry = computed(() => getOptions('country'));
+const optionsState = computed(() => getOptions('state'));
+const optionsCitizenship = computed(() => getOptions('citizenship'));
 
 defineExpose({
   model, validation, isValid, onValidate,
+  scrollToError, formErrors,
 });
 
 watch(() => props.modelData, (newModelData) => {
   if (!newModelData) return;
 
-  // Define the fields to sync
-  const fields = [
-    'first_name', 'last_name', 'middle_name', 'dob', 'address1', 'address2',
-    'city', 'state', 'zip_code', 'country', 'phone', 'citizenship',
-  ] as const;
-
   // Update model with new data, only if the value exists
-  fields.forEach((field) => {
+  fieldsPaths.forEach((field) => {
     if (newModelData[field] !== undefined && newModelData[field] !== null) {
       model[field] = newModelData[field];
     }
@@ -118,12 +135,8 @@ watch(() => props.modelData, (newModelData) => {
       <FormCol col3>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackend"
-          :schema-front="schemaFrontend"
-          :error-text="errorData?.first_name"
-          path="first_name"
+          :required="isFieldRequired('first_name')"
+          :error-text="getErrorText('first_name', errorData as any)"
           label="First Name"
           data-testid="first-name-group"
         >
@@ -144,12 +157,8 @@ watch(() => props.modelData, (newModelData) => {
       <FormCol col3>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackend"
-          :schema-front="schemaFrontend"
-          :error-text="errorData?.middle_name"
-          path="middle_name"
+          :required="isFieldRequired('middle_name')"
+          :error-text="getErrorText('middle_name', errorData as any)"
           label="Middle Name"
           data-testid="middle-name-group"
         >
@@ -170,12 +179,8 @@ watch(() => props.modelData, (newModelData) => {
       <FormCol col3>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackend"
-          :schema-front="schemaFrontend"
-          :error-text="errorData?.last_name"
-          path="last_name"
+          :required="isFieldRequired('last_name')"
+          :error-text="getErrorText('last_name', errorData as any)"
           label="Last Name"
           data-testid="last-name-group"
         >
@@ -197,12 +202,8 @@ watch(() => props.modelData, (newModelData) => {
       <FormCol col-2>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackend"
-          :schema-front="schemaFrontend"
-          :error-text="errorData?.dob"
-          path="dob"
+          :required="isFieldRequired('dob')"
+          :error-text="getErrorText('dob', errorData as any)"
           label="Date of Birth"
           data-testid="dob-group"
         >
@@ -224,12 +225,8 @@ watch(() => props.modelData, (newModelData) => {
       <FormCol col-2>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackend"
-          :schema-front="schemaFrontend"
-          :error-text="errorData?.phone"
-          path="phone"
+          :required="isFieldRequired('phone')"
+          :error-text="getErrorText('phone', errorData as any)"
           label="Phone number"
           data-testid="phone-group"
         >
@@ -253,12 +250,8 @@ watch(() => props.modelData, (newModelData) => {
       <FormCol col2>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackend"
-          :schema-front="schemaFrontend"
-          :error-text="errorData?.citizenship"
-          path="citizenship"
+          :required="isFieldRequired('citizenship')"
+          :error-text="getErrorText('citizenship', errorData as any)"
           label="Citizenship"
           data-testid="citizenship-group"
         >
@@ -282,12 +275,8 @@ watch(() => props.modelData, (newModelData) => {
       <FormCol col2>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackend"
-          :schema-front="schemaFrontend"
-          :error-text="errorData?.ssn"
-          path="ssn"
+          :required="isFieldRequired('ssn')"
+          :error-text="getErrorText('ssn', errorData as any)"
           label="SSN"
           data-testid="ssn-group"
         >
@@ -321,12 +310,8 @@ watch(() => props.modelData, (newModelData) => {
       <FormCol col2>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackend"
-          :schema-front="schemaFrontend"
-          :error-text="errorData?.address1"
-          path="address1"
+          :required="isFieldRequired('address1')"
+          :error-text="getErrorText('address1', errorData as any)"
           label="Address 1"
           data-testid="address-1-group"
         >
@@ -347,12 +332,8 @@ watch(() => props.modelData, (newModelData) => {
       <FormCol col2>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackend"
-          :schema-front="schemaFrontend"
-          :error-text="errorData?.address2"
-          path="address2"
+          :required="isFieldRequired('address2')"
+          :error-text="getErrorText('address2', errorData as any)"
           label="Address 2"
           data-testid="address-2-group"
         >
@@ -375,12 +356,8 @@ watch(() => props.modelData, (newModelData) => {
       <FormCol col2>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackend"
-          :schema-front="schemaFrontend"
-          :error-text="errorData?.city"
-          path="city"
+          :required="isFieldRequired('city')"
+          :error-text="getErrorText('city', errorData as any)"
           label="City"
           data-testid="city-group"
         >
@@ -402,12 +379,8 @@ watch(() => props.modelData, (newModelData) => {
       <FormCol col2>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackend"
-          :schema-front="schemaFrontend"
-          :error-text="errorData?.state"
-          path="state"
+          :required="isFieldRequired('state')"
+          :error-text="getErrorText('state', errorData as any)"
           label="State"
           data-testid="state-group"
         >
@@ -432,12 +405,8 @@ watch(() => props.modelData, (newModelData) => {
       <FormCol col2>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackend"
-          :schema-front="schemaFrontend"
-          :error-text="errorData?.zip_code"
-          path="zip_code"
+          :required="isFieldRequired('zip_code')"
+          :error-text="getErrorText('zip_code', errorData as any)"
           label="Zip Code"
           data-testid="zip-group"
         >
@@ -461,12 +430,8 @@ watch(() => props.modelData, (newModelData) => {
       <FormCol col2>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackend"
-          :schema-front="schemaFrontend"
-          :error-text="errorData?.country"
-          path="country"
+          :required="isFieldRequired('country')"
+          :error-text="getErrorText('country', errorData as any)"
           label="Country"
           data-testid="country-group"
         >

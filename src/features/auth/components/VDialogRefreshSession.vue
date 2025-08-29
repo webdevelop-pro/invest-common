@@ -64,7 +64,6 @@ const onSocialClick = (event: MouseEvent) => {
 
 <style lang="scss">
 .v-dialog-refresh-session {
-  text-align: center;
   z-index: 1101;
 
   &__cancel {

@@ -7,7 +7,6 @@ import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import { useRouter } from 'vue-router';
 import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/helpers/enums/routes';
 import { FormChild } from 'InvestCommon/types/form';
-import { scrollToError } from 'UiKit/helpers/validation/general';
 import { PROFILE_TYPES as profileTypes } from 'InvestCommon/global/investment.json';
 import env from 'InvestCommon/global';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
@@ -244,7 +243,12 @@ export const useFormCreateNewProfile = () => {
   const handleSave = async () => {
     onValidate();
     if (!isValid.value) {
-      nextTick(() => scrollToError('ViewCreateNewProfile'));
+      nextTick(() => {
+        const element = document.querySelector('.ViewCreateNewProfile');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      });
       return;
     }
 

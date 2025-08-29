@@ -2,7 +2,7 @@ import { computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { SELECT_PROFILE_TYPES as selectTypes } from 'InvestCommon/utils';
-import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
+import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { errorMessageRule, typeProfileRule } from 'UiKit/helpers/validation/rules';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
@@ -37,15 +37,20 @@ export const useVFormProfileSelectType = () => {
   const schemaBackend = computed(() => getProfileByIdOptionsState.value.data);
   const errorData = computed(() => setProfileByIdState.value.error?.data?.responseJson);
 
+  const fieldsPaths = ['type_profile'];
+
   const {
     model,
     validation,
     isValid,
     onValidate,
+    isFieldRequired,
+    getErrorText,
   } = useFormValidation<FormModelCreateProfileSelectType>(
     schemaFrontend,
     schemaBackend,
     { type_profile: '' } as FormModelCreateProfileSelectType,
+    fieldsPaths,
   );
 
   return {
@@ -58,5 +63,7 @@ export const useVFormProfileSelectType = () => {
     validation,
     isValid,
     onValidate,
+    isFieldRequired,
+    getErrorText,
   };
 };

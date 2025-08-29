@@ -3,9 +3,8 @@ import {
 } from 'vue';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
-import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
+import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
-import { scrollToError } from 'UiKit/helpers/validation/general';
 import { codeRule, errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 import { SELFSERVICE } from './type';
@@ -55,9 +54,18 @@ export const useVerificationStore = defineStore('verification', () => {
   const schemaBackend = computed(() => (
     getSchemaState.value.data ? structuredClone(toRaw(getSchemaState.value.data)) : null));
 
+  const fieldsPaths = ['code'];
+
   const {
     model, validation, isValid, onValidate,
-  } = useFormValidation<FormModelVerification>(schemaFrontend.value, schemaBackend.value, {} as FormModelVerification);
+    scrollToError, formErrors, isFieldRequired, getErrorText,
+    getOptions, getReferenceType,
+  } = useFormValidation<FormModelVerification>(
+    schemaFrontend,
+    schemaBackend,
+    {} as FormModelVerification,
+    fieldsPaths
+  );
 
   const isLoading = ref(false);
   const isDisabledButton = computed(() => !isValid.value || isLoading.value);
@@ -126,6 +134,13 @@ export const useVerificationStore = defineStore('verification', () => {
     getQueryParam,
     flowId,
     email,
+    // Form validation helpers
+    formErrors,
+    isFieldRequired,
+    getErrorText,
+    getOptions,
+    getReferenceType,
+    scrollToError,
   };
 });
 

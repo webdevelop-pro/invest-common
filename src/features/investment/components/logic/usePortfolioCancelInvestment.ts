@@ -1,5 +1,5 @@
 import {
-  computed, nextTick, watch,
+  computed, nextTick, watch, type Ref,
 } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
@@ -8,8 +8,7 @@ import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { IInvestmentFormatted } from 'InvestCommon/data/investment/investment.types';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
-import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
-import { scrollToError } from 'UiKit/helpers/validation/general';
+import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import {
   ROUTE_DASHBOARD_PORTFOLIO,
 } from 'InvestCommon/helpers/enums/routes';
@@ -34,15 +33,20 @@ export const usePortfolioCancelInvestment = (
   const errorData = computed(() => setCancelOptionsState.value.error?.data?.responseJson);
   const schemaBackend = computed(() => setCancelOptionsState.value.data);
 
+  const fieldsPaths = ['cancelation_reason'];
+
   const {
     model,
     validation,
     isValid,
     onValidate,
+    scrollToError, formErrors, isFieldRequired, getErrorText,
+    getOptions, getReferenceType,
   } = useFormValidation<FormModel>(
     schemaBackend,
     undefined,
     {},
+    fieldsPaths
   );
 
   const { submitFormToHubspot } = useHubspotForm('0b39c12f-9416-42f6-ab71-9f13e6423859');
@@ -95,5 +99,12 @@ export const usePortfolioCancelInvestment = (
     cancelInvestState,
     cancelInvestHandler,
     onBackClick,
+    // Form validation helpers
+    formErrors,
+    isFieldRequired,
+    getErrorText,
+    getOptions,
+    getReferenceType,
+    scrollToError,
   };
 }; 

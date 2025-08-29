@@ -23,17 +23,17 @@ const transactionTypeComputed = computed(() => props.transactionType);
 
 const {
   model,
-  validation,
   isDisabledButton,
   saveHandler,
   cancelHandler,
   titile,
   text,
   errorData,
-  schemaAddTransaction,
   addTransactionState,
   fundingSourceFormatted,
   numberFormatter,
+  isFieldRequired,
+  getErrorText,
 } = useVFormWalletAddTransaction(transactionTypeComputed, () => emit('close'));
 </script>
 
@@ -44,11 +44,9 @@ const {
         <FormCol>
           <VFormGroup
             v-slot="VFormGroupProps"
-            :model="model"
-            :validation="validation"
-            :schema-front="schemaAddTransaction"
-            :error-text="errorData?.amount"
-            path="amount"
+            :required="isFieldRequired('amount')"
+            :error-text="getErrorText('amount', errorData)"
+            data-testid="amount-group"
             label="Amount"
             class="form-wallet-add-transaction__input"
           >
@@ -58,6 +56,7 @@ const {
               :model-value="model.amount ? String(model.amount) : undefined"
               name="amount"
               money-format
+              data-testid="amount"
               @update:model-value="model.amount = numberFormatter($event)"
             />
           </VFormGroup>
@@ -70,11 +69,9 @@ const {
         <FormCol>
           <VFormGroup
             v-slot="VFormGroupProps"
-            :model="model"
-            :validation="validation"
-            :schema-front="schemaAddTransaction"
-            :error-text="errorData?.funding_source_id"
-            path="funding_source_id"
+            :required="isFieldRequired('funding_source_id')"
+            :error-text="getErrorText('funding_source_id', errorData)"
+            data-testid="funding-source-group"
             label="Funding Source"
             class="form-wallet-add-transaction__input"
           >
@@ -87,6 +84,7 @@ const {
               item-value="id"
               dropdown-absolute
               :options="fundingSourceFormatted"
+              data-testid="funding-source"
               @update:model-value="model.funding_source_id = numberFormatter($event)"
             />
           </VFormGroup>

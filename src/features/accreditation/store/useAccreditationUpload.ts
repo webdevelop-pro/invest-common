@@ -11,7 +11,7 @@ import { FormModelAccreditationFileInput } from 'InvestCommon/types/form';
 import { useRepositoryAccreditation } from 'InvestCommon/data/accreditation/accreditation.repository';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
-import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
+import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 
 export const useAccreditationUpload = defineStore('useAccreditationUpload', () => {
   const router = useRouter();
@@ -61,7 +61,7 @@ export const useAccreditationUpload = defineStore('useAccreditationUpload', () =
     return V;
   });
 
-  const schemaAccreditationFileInput = computed(() => ({
+  const schemaFrontend = computed(() => ({
     $schema: 'http://json-schema.org/draft-07/schema#',
     definitions: {
       Individual: {
@@ -81,12 +81,19 @@ export const useAccreditationUpload = defineStore('useAccreditationUpload', () =
     },
     $ref: '#/definitions/Individual',
   } as unknown as JSONSchemaType<FormModelAccreditationFileInput>));
+  
+  // Define field paths for validation
+  const fieldsPaths = ['description1', 'description2', 'description3', 'description4', 'description5', 'description6', 'note'];
 
   const {
     model, validation, isValid, onValidate,
+    formErrors, isFieldRequired, getErrorText,
+    scrollToError, getOptions, getReferenceType,
   } = useFormValidation<FormModelAccreditationFileInput>(
-    schemaAccreditationFileInput.value,
-  {} as FormModelAccreditationFileInput,
+    schemaFrontend,
+    undefined,
+    {} as FormModelAccreditationFileInput,
+    fieldsPaths,
   );
 
   const isAccreditationCanUpload = computed(() => {
@@ -186,13 +193,13 @@ export const useAccreditationUpload = defineStore('useAccreditationUpload', () =
     validateTrigger.value = false;
   };
 
-  const getErrorText = (index: number) => {
-    const error = createState?.value?.error || updateState?.value?.error;
-    if (!error || !error[`description${index}`]) {
-      return undefined;
-    }
-    return error[`description${index}`];
-  };
+  // const getErrorText = (index: number) => {
+  //   const error = createState?.value?.error || updateState?.value?.error;
+  //   if (!error || !error[`description${index}`]) {
+  //     return undefined;
+  //   }
+  //   return error[`description${index}`];
+  // };
 
   watch([isAccreditationCanUpload], ([newValue]) => {
     if (!newValue) {
@@ -232,7 +239,7 @@ export const useAccreditationUpload = defineStore('useAccreditationUpload', () =
     model,
     allFiles,
     validation,
-    schemaAccreditationFileInput,
+    schemaFrontend,
     getErrorText,
     onFileRemove,
     uploadAccreditationDocumentErrorData,
@@ -242,6 +249,12 @@ export const useAccreditationUpload = defineStore('useAccreditationUpload', () =
     accreditationDescriptions,
     filesUploadError,
     isAccreditationCanUpload,
+    // Modern validation helpers
+    formErrors,
+    isFieldRequired,
+    scrollToError,
+    getOptions,
+    getReferenceType,
   };
 });
 

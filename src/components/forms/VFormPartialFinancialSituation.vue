@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { PropType, watch } from 'vue';
+import { PropType, watch, computed, toRaw } from 'vue';
 import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
 import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
@@ -8,7 +8,7 @@ import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { FormModelFinancialSituation } from 'InvestCommon/types/form';
 import { urlBlogSingle } from 'InvestCommon/global/links';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
-import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
+import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 
 const isAccreditedRadioOptions = [
   {
@@ -48,19 +48,25 @@ const schemaFrontend = {
   $ref: '#/definitions/Individual',
 } as unknown as JSONSchemaType<FormModelFinancialSituation>;
 
+const schemaBackendLocal = computed(() => (
+  props.schemaBackend ? structuredClone(toRaw(props.schemaBackend)) : undefined));
+const fieldsPaths = ['accredited_investor.is_accredited'];
 const {
   model,
   validation,
   isValid,
   onValidate,
+  isFieldRequired,
+  getErrorText,
 } = useFormValidation<FormModelFinancialSituation>(
   schemaFrontend,
-  props.schemaBackend,
+  schemaBackendLocal,
   {
     accredited_investor: {
       is_accredited: props.modelData?.accredited_investor?.is_accredited ?? false,
     },
   },
+  fieldsPaths,
 );
 
 defineExpose({
@@ -86,12 +92,9 @@ watch(() => props.modelData, (newModelData) => {
     <FormRow>
       <FormCol>
         <VFormGroup
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackend"
-          :schema-front="schemaFrontend"
-          :error-text="errorData?.accredited_investor?.is_accredited"
-          path="accredited_investor.is_accredited"
+          v-slot="VFormGroupProps"
+          :required="isFieldRequired('accredited_investor.is_accredited')"
+          :error-text="getErrorText('accredited_investor.is_accredited', errorData as any)"
           data-testid="is-accredited"
         >
           <div>
@@ -107,6 +110,7 @@ watch(() => props.modelData, (newModelData) => {
           </div>
           <VFormRadio
             :model-value="model.accredited_investor.is_accredited"
+            :is-error="VFormGroupProps.isFieldError"
             :options="isAccreditedRadioOptions"
             @update:model-value="model.accredited_investor.is_accredited = ($event === 'true')"
           />

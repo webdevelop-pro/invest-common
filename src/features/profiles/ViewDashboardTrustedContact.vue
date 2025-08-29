@@ -12,9 +12,8 @@ globalLoader.hide();
 
 const {
   backButtonText, breadcrumbs, isLoading, isDisabledButton,
-  backButtonRoute,
-  model, schemaBackend, errorData, validation, schemaFrontend,
-  isLoadingFields, handleSave,
+  backButtonRoute, model, errorData,
+  isLoadingFields, handleSave, getErrorText, isFieldRequired,
 } = useFormTrustedContact();
 
 </script>
@@ -37,12 +36,8 @@ const {
           <FormCol col3>
             <VFormGroup
               v-slot="VFormGroupProps"
-              :model="model"
-              :validation="validation"
-              :schema-back="schemaBackend"
-              :schema-front="schemaFrontend"
-              :error-text="errorData?.beneficiary?.relationship_type"
-              path="beneficiary.relationship_type"
+              :required="isFieldRequired('beneficiary.relationship_type')"
+              :error-text="getErrorText('beneficiary.relationship_type', errorData)"
               label="Relationship Type"
               data-testid="relationship-type-group"
             >
@@ -62,12 +57,8 @@ const {
           <FormCol col3>
             <VFormGroup
               v-slot="VFormGroupProps"
-              :model="model"
-              :validation="validation"
-              :schema-back="schemaBackend"
-              :schema-front="schemaFrontend"
-              :error-text="errorData?.beneficiary?.first_name"
-              path="beneficiary.first_name"
+              :required="isFieldRequired('beneficiary.first_name')"
+              :error-text="getErrorText('beneficiary.first_name', errorData)"
               label="First Name"
               data-testid="first-name-group"
             >
@@ -87,12 +78,8 @@ const {
           <FormCol col3>
             <VFormGroup
               v-slot="VFormGroupProps"
-              :model="model"
-              :validation="validation"
-              :schema-back="schemaBackend"
-              :schema-front="schemaFrontend"
-              :error-text="errorData?.beneficiary?.last_name"
-              path="beneficiary.last_name"
+              :required="isFieldRequired('beneficiary.last_name')"
+              :error-text="getErrorText('beneficiary.last_name', errorData)"
               label="Last Name"
               data-testid="last-name-group"
             >
@@ -113,12 +100,8 @@ const {
           <FormCol col3>
             <VFormGroup
               v-slot="VFormGroupProps"
-              :model="model"
-              :validation="validation"
-              :schema-back="schemaBackend"
-              :schema-front="schemaFrontend"
-              :error-text="errorData?.beneficiary?.dob"
-              path="beneficiary.dob"
+              :required="isFieldRequired('beneficiary.dob')"
+              :error-text="getErrorText('beneficiary.dob', errorData)"
               label="Date Of Birth"
               data-testid="dob-group"
             >
@@ -138,12 +121,8 @@ const {
           <FormCol col3>
             <VFormGroup
               v-slot="VFormGroupProps"
-              :model="model"
-              :validation="validation"
-              :schema-back="schemaBackend"
-              :schema-front="schemaFrontend"
-              :error-text="errorData?.beneficiary?.phone"
-              path="beneficiary.phone"
+              :required="isFieldRequired('beneficiary.phone')"
+              :error-text="getErrorText('beneficiary.phone', errorData)"
               label="Phone number"
               data-testid="phone-group"
             >
@@ -165,12 +144,8 @@ const {
           <FormCol col3>
             <VFormGroup
               v-slot="VFormGroupProps"
-              :model="model"
-              :validation="validation"
-              :schema-back="schemaBackend"
-              :schema-front="schemaFrontend"
-              :error-text="errorData?.beneficiary?.email"
-              path="beneficiary.email"
+              :required="isFieldRequired('beneficiary.email')"
+              :error-text="getErrorText('beneficiary.email', errorData)"
               label="Email address"
               data-testid="email-group"
             >

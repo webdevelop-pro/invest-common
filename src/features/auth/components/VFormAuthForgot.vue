@@ -8,8 +8,8 @@ import { storeToRefs } from 'pinia';
 
 const forgotStore = useForgotStore();
 const {
-  model, validation, schemaBackend, isDisabledButton, setRecoveryState,
-  isLoading, schemaFrontend,
+  model, isDisabledButton, setRecoveryState,
+  isLoading, isFieldRequired, getErrorText,
 } = storeToRefs(forgotStore);
 
 const onSubmit = () => {
@@ -25,12 +25,8 @@ const onSubmit = () => {
   >
     <VFormGroup
       v-slot="VFormGroupProps"
-      :model="model"
-      :validation="validation"
-      :schema-back="schemaBackend"
-      :schema-front="schemaFrontend"
-      :error-text="setRecoveryState?.error?.email"
-      path="email"
+      :required="isFieldRequired('email')"
+      :error-text="getErrorText('email', setRecoveryState.error?.data?.responseJson)"
       label="Email Address"
       class="forgot-form__input"
     >

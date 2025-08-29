@@ -14,10 +14,9 @@ const {
   totpSecret,
   totpCodeError,
   model,
-  validation,
-  schema,
   onSave,
   getAuthFlowState,
+  isFieldRequired,
 } = useVFormSettingsTOTP();
 
 const handleSave = async () => {
@@ -56,11 +55,9 @@ const handleSave = async () => {
         <div class="form-settings-totp__input-wrap">
           <VFormGroup
             v-slot="VFormGroupProps"
-            :model="model"
-            :validation="validation"
-            :schema-front="schema"
+            :required="isFieldRequired('totp_code')"
             :error-text="totpCodeError"
-            path="totp_code"
+            data-testid="totp-code-group"
             label="6-Digit Verification Code"
             class="form-settings-totp__input"
           >
@@ -70,6 +67,7 @@ const handleSave = async () => {
               placeholder="Enter Code"
               name="totp_code"
               size="large"
+              data-testid="totp-code"
               @update:model-value="model.totp_code = $event"
             />
           </VFormGroup>

@@ -3,7 +3,7 @@ import {
 } from 'vue';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { errorMessageRule, documentRule } from 'UiKit/helpers/validation/rules';
-import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
+import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 
 const yesNoOptions = [
   { value: 'Yes', text: 'Yes' },
@@ -62,15 +62,20 @@ export const useVFormPartialPlanInformation = (
     return backendSchema ? structuredClone(toRaw(backendSchema)) : null;
   });
 
+  const fieldsPaths = ['name', 'is_use_ein', 'ein', 'plan_document_id'];
+
   const {
     model,
     validation,
     isValid,
     onValidate,
+    isFieldRequired,
+    getErrorText,
   } = useFormValidation<FormModelPlanInformation>(
     schemaFrontend,
     schemaBackendLocal,
     modelLocal,
+    fieldsPaths,
   );
 
   const modelExpose = computed(() => {
@@ -99,6 +104,8 @@ export const useVFormPartialPlanInformation = (
     validation,
     isValid,
     onValidate,
+    isFieldRequired,
+    getErrorText,
     modelExpose,
     yesNoOptions,
     schemaFrontend,

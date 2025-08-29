@@ -18,11 +18,11 @@ const {
   onValidate,
   validator,
   errorData,
-  schemaBackend,
-  schema,
   isDialogContactUsOpen,
   VDialogContactUs,
   setUserState,
+  isFieldRequired,
+  getErrorText,
 } = useAccountForm(props);
 
 defineExpose({
@@ -39,14 +39,10 @@ defineExpose({
       <FormCol col2>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackend"
-          :schema-front="schema"
-          :error-text="errorData?.first_name"
-          path="first_name"
-          label="First Name"
+          :required="isFieldRequired('first_name')"
+          :error-text="getErrorText('first_name', errorData)"
           data-testid="first-name-group"
+          label="First Name"
         >
           <VFormInput
             :model-value="model.first_name"
@@ -65,14 +61,10 @@ defineExpose({
       <FormCol col2>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackend"
-          :schema-front="schema"
-          :error-text="errorData?.last_name"
-          path="last_name"
-          label="Last Name"
+          :required="isFieldRequired('last_name')"
+          :error-text="getErrorText('last_name', errorData)"
           data-testid="last-name-group"
+          label="Last Name"
         >
           <VFormInput
             :model-value="model.last_name"
@@ -92,14 +84,10 @@ defineExpose({
       <FormCol col-2>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackend"
-          :schema-front="schema"
-          :error-text="errorData?.email"
-          path="email"
-          label="Email"
+          :required="isFieldRequired('email')"
+          :error-text="getErrorText('email', errorData)"
           data-testid="email-group"
+          label="Email"
         >
           <VFormInput
             :model-value="model.email"
@@ -129,14 +117,10 @@ defineExpose({
       <FormCol col-2>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackend"
-          :schema-front="schema"
-          :error-text="errorData?.phone"
-          path="phone"
-          label="Phone number"
+          :required="isFieldRequired('phone')"
+          :error-text="getErrorText('phone', errorData)"
           data-testid="phone-group"
+          label="Phone number"
         >
           <VFormInput
             :model-value="model.phone"

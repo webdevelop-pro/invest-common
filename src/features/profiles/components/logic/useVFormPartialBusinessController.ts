@@ -8,8 +8,7 @@ import {
   emailRule, errorMessageRule, firstNameRule, lastNameRule,
   phoneRule, stateRule, zipRule,
 } from 'UiKit/helpers/validation/rules';
-import { getOptions } from 'UiKit/helpers/model';
-import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
+import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { FormModelPersonalInformation } from 'InvestCommon/types/form';
 
 export interface FormModelBusinessController {
@@ -74,12 +73,29 @@ export const useVFormPartialBusinessController = (
   const schemaBackendLocal = computed(() => (
     schemaBackend.value ? structuredClone(toRaw(schemaBackend.value)) : undefined));
 
+  const fieldsPaths = [
+    'business_controller.first_name',
+    'business_controller.last_name',
+    'business_controller.address1',
+    'business_controller.address2',
+    'business_controller.city',
+    'business_controller.state',
+    'business_controller.zip_code',
+    'business_controller.country',
+    'business_controller.phone',
+    'business_controller.email',
+    'business_controller.dob',
+    'different_owner',
+  ];
+
   const {
     model,
     validation,
     isValid,
     onValidate,
-    schemaObject,
+    isFieldRequired,
+    getErrorText,
+    getOptions,
   } = useFormValidation<FormModelBusinessController>(
     schemaFrontend,
     schemaBackendLocal,
@@ -98,11 +114,12 @@ export const useVFormPartialBusinessController = (
       },
       different_owner: false,
     },
+    fieldsPaths,
   );
 
   const sameData = ref(true);
-  const optionsCountry = computed(() => getOptions('business_controller.country', schemaObject));
-  const optionsState = computed(() => getOptions('business_controller.state', schemaObject));
+  const optionsCountry = computed(() => getOptions('business_controller.country'));
+  const optionsState = computed(() => getOptions('business_controller.state'));
 
   watch(modelData, (newModelData) => {
     if (!newModelData?.business_controller) return;
@@ -145,6 +162,8 @@ export const useVFormPartialBusinessController = (
     validation,
     isValid,
     onValidate,
+    isFieldRequired,
+    getErrorText,
     optionsCountry,
     optionsState,
     sameData,

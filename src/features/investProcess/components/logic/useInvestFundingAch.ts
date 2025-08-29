@@ -1,10 +1,9 @@
 import { nextTick, watch } from 'vue';
-import { scrollToError } from 'UiKit/helpers/validation/general';
 import {
   accountHolderNameRule, accountNumberRule, accountTypeRule, errorMessageRule, routingNumbeRuler,
 } from 'UiKit/helpers/validation/rules';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
-import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
+import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 
 export const ACCOUNT_TYPES = [
   { value: 'checking', text: 'Checking' },
@@ -56,10 +55,17 @@ export function useInvestFundingAch(
   props: UseInvestFundingAchProps,
   emit: UseInvestFundingAchEmits
 ) {
-  const { model, validation, isValid, onValidate } = useFormValidation<FormModelInvestmentFundingAch>(
+  const fieldsPaths = ['accountHolderName', 'accountType', 'accountNumber', 'routingNumber', 'authorizeDebit'];
+
+  const { 
+    model, validation, isValid, onValidate,
+    scrollToError, formErrors, isFieldRequired, getErrorText,
+    getOptions, getReferenceType,
+  } = useFormValidation<FormModelInvestmentFundingAch>(
     schema,
     undefined,
     {} as FormModelInvestmentFundingAch,
+    fieldsPaths
   );
 
   // Emit form updates
@@ -105,5 +111,12 @@ export function useInvestFundingAch(
     onValidate,
     schema,
     ACCOUNT_TYPES,
+    // Form validation helpers
+    formErrors,
+    isFieldRequired,
+    getErrorText,
+    getOptions,
+    getReferenceType,
+    scrollToError,
   };
 }

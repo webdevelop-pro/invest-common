@@ -8,12 +8,8 @@ import { urlForgot } from 'InvestCommon/global/links';
 
 const verificationStore = useVerificationStore();
 const {
-  model,
-  validation,
-  isLoading,
-  isDisabledButton,
-  setRecoveryState,
-  schemaFrontend,
+  model, isLoading, isDisabledButton,
+  setRecoveryState, isFieldRequired, getErrorText,
 } = storeToRefs(verificationStore);
 
 const verificationHandler = async () => {
@@ -29,13 +25,11 @@ const verificationHandler = async () => {
   >
     <VFormGroup
       v-slot="VFormGroupProps"
-      :model="model"
-      :validation="validation"
-      :schema-front="schemaFrontend"
-      :error-text="setRecoveryState?.code"
-      path="code"
+      :required="isFieldRequired('code')"
+      :error-text="getErrorText('code', setRecoveryState.error?.data?.responseJson)"
       label="Verification Code"
       class="verification-form__input"
+      data-testid="code-group"
     >
       <VFormInput
         :model-value="model.code"

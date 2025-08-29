@@ -9,7 +9,6 @@ import { useRouter } from 'vue-router';
 import { FormChild } from 'InvestCommon/types/form';
 import env from 'InvestCommon/global';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
-import { scrollToError } from 'UiKit/helpers/validation/general';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryAccreditation } from 'InvestCommon/data/accreditation/accreditation.repository';
@@ -59,7 +58,12 @@ export const useFormPersonalInformation = () => {
   const handleSave = async () => {
     personalFormRef.value?.onValidate();
     if (!isValid.value) {
-      nextTick(() => scrollToError('ViewDashboardPersonalInformation'));
+      nextTick(() => {
+        const element = document.querySelector('.ViewDashboardPersonalInformation');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      });
       return;
     }
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {
-  watch, PropType,
+  watch, PropType, computed, toRaw,
 } from 'vue';
 import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
 import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
@@ -9,7 +9,7 @@ import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { FormModelUnderstandRisks } from 'InvestCommon/types/form';
-import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
+import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 
 const props = defineProps({
   modelData: Object as PropType<FormModelUnderstandRisks>,
@@ -50,11 +50,26 @@ const schemaFrontend = {
   $ref: '#/definitions/Individual',
 } as unknown as JSONSchemaType<FormModelUnderstandRisks>;
 
+const schemaBackendLocal = computed(() => (props.schemaBackend ? structuredClone(toRaw(props.schemaBackend)) : null));
+const fieldsPaths = [
+  'educational_materials',
+  'cancelation_restrictions',
+  'resell_difficulties',
+  'risk_involved',
+  'no_legal_advices_from_company',
+  'consent_plaid',
+];
+
 const {
-  model, validation, isValid, onValidate,
+  model,
+  validation,
+  isValid,
+  onValidate,
+  isFieldRequired,
+  getErrorText,
 } = useFormValidation<FormModelUnderstandRisks>(
   schemaFrontend,
-  props.schemaBackend,
+  schemaBackendLocal,
   {
     risk_involved: props.modelData?.risk_involved || false,
     no_legal_advices_from_company: props.modelData?.no_legal_advices_from_company || false,
@@ -63,6 +78,7 @@ const {
     resell_difficulties: props.modelData?.resell_difficulties || false,
     consent_plaid: props.consentPlaid,
   } as FormModelUnderstandRisks,
+  fieldsPaths,
 );
 
 defineExpose({
@@ -71,15 +87,7 @@ defineExpose({
 
 watch(() => props.modelData, (newModelData) => {
   if (!newModelData) return;
-  const fields = [
-    'risk_involved',
-    'no_legal_advices_from_company',
-    'educational_materials',
-    'cancelation_restrictions',
-    'resell_difficulties',
-    'consent_plaid',
-  ] as const;
-  fields.forEach((field) => {
+  fieldsPaths.forEach((field) => {
     if (newModelData[field] !== undefined && newModelData[field] !== null) {
       model[field] = newModelData[field];
     }
@@ -96,12 +104,8 @@ watch(() => props.modelData, (newModelData) => {
       <FormCol>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackend"
-          :schema-front="schemaFrontend"
-          :error-text="errorData?.educational_materials"
-          path="educational_materials"
+          :required="isFieldRequired('educational_materials')"
+          :error-text="getErrorText('educational_materials', errorData as any)"
           data-testid="educational-materials-group"
         >
           <VFormCheckbox
@@ -121,12 +125,8 @@ watch(() => props.modelData, (newModelData) => {
       <FormCol>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackend"
-          :schema-front="schemaFrontend"
-          :error-text="errorData?.cancelation_restrictions"
-          path="cancelation_restrictions"
+          :required="isFieldRequired('cancelation_restrictions')"
+          :error-text="getErrorText('cancelation_restrictions', errorData as any)"
           data-testid="cancelation-restrictions-group"
         >
           <VFormCheckbox
@@ -146,12 +146,8 @@ watch(() => props.modelData, (newModelData) => {
       <FormCol>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackend"
-          :schema-front="schemaFrontend"
-          :error-text="errorData?.resell_difficulties"
-          path="resell_difficulties"
+          :required="isFieldRequired('resell_difficulties')"
+          :error-text="getErrorText('resell_difficulties', errorData as any)"
           data-testid="resell-difficulties-group"
         >
           <VFormCheckbox
@@ -171,12 +167,8 @@ watch(() => props.modelData, (newModelData) => {
       <FormCol>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackend"
-          :schema-front="schemaFrontend"
-          :error-text="errorData?.risk_involved"
-          path="risk_involved"
+          :required="isFieldRequired('risk_involved')"
+          :error-text="getErrorText('risk_involved', errorData as any)"
           data-testid="risk-involved-group"
         >
           <VFormCheckbox
@@ -196,12 +188,8 @@ watch(() => props.modelData, (newModelData) => {
       <FormCol>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackend"
-          :schema-front="schemaFrontend"
-          :error-text="errorData?.no_legal_advices_from_company"
-          path="no_legal_advices_from_company"
+          :required="isFieldRequired('no_legal_advices_from_company')"
+          :error-text="getErrorText('no_legal_advices_from_company', errorData as any)"
           data-testid="no_legal_advices_from_company-group"
         >
           <VFormCheckbox
@@ -222,12 +210,8 @@ watch(() => props.modelData, (newModelData) => {
       <FormCol>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackend"
-          :schema-front="schemaFrontend"
-          :error-text="errorData?.consent_plaid"
-          path="consent_plaid"
+          :required="isFieldRequired('consent_plaid')"
+          :error-text="getErrorText('consent_plaid', errorData as any)"
           data-testid="consent-plaid-group"
         >
           <VFormCheckbox

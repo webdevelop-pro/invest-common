@@ -32,12 +32,13 @@ const {
   validation,
   isValid,
   onValidate,
+  isFieldRequired,
+  getErrorText,
   optionsCountry,
   optionsState,
   sameData,
   title,
   checkboxText,
-  schemaFrontend,
 } = useVFormPartialBusinessController(
   modelDataComputed,
   personalDataComputed,
@@ -73,12 +74,8 @@ defineExpose({
         <FormCol col2>
           <VFormGroup
             v-slot="VFormGroupProps"
-            :model="model"
-            :validation="validation"
-            :schema-back="schemaBackendComputed"
-            :schema-front="schemaFrontend"
-            :error-text="errorDataComputed?.business_controller?.first_name"
-            path="business_controller.first_name"
+            :required="isFieldRequired('business_controller.first_name')"
+            :error-text="getErrorText('business_controller.first_name', errorDataComputed as any)"
             label="First Name"
             data-testid="first-name-group"
           >
@@ -98,12 +95,8 @@ defineExpose({
         <FormCol col2>
           <VFormGroup
             v-slot="VFormGroupProps"
-            :model="model"
-            :validation="validation"
-            :schema-back="schemaBackendComputed"
-            :schema-front="schemaFrontend"
-            :error-text="errorDataComputed?.business_controller?.last_name"
-            path="business_controller.last_name"
+            :required="isFieldRequired('business_controller.last_name')"
+            :error-text="getErrorText('business_controller.last_name', errorDataComputed as any)"
             label="Last Name"
             data-testid="last-name-group"
           >
@@ -124,12 +117,8 @@ defineExpose({
         <FormCol col-2>
           <VFormGroup
             v-slot="VFormGroupProps"
-            :model="model"
-            :validation="validation"
-            :schema-back="schemaBackendComputed"
-            :schema-front="schemaFrontend"
-            :error-text="errorDataComputed?.business_controller?.phone"
-            path="business_controller.phone"
+            :required="isFieldRequired('business_controller.phone')"
+            :error-text="getErrorText('business_controller.phone', errorDataComputed as any)"
             label="Phone number"
             data-testid="phone-group"
           >
@@ -150,12 +139,8 @@ defineExpose({
         <FormCol col-2>
           <VFormGroup
             v-slot="VFormGroupProps"
-            :model="model"
-            :validation="validation"
-            :schema-back="schemaBackendComputed"
-            :schema-front="schemaFrontend"
-            :error-text="errorDataComputed?.business_controller?.dob"
-            path="business_controller.dob"
+            :required="isFieldRequired('business_controller.dob')"
+            :error-text="getErrorText('business_controller.dob', errorDataComputed as any)"
             label="Date of Birth"
             data-testid="dob-group"
           >
@@ -177,12 +162,8 @@ defineExpose({
         <FormCol col2>
           <VFormGroup
             v-slot="VFormGroupProps"
-            :model="model"
-            :validation="validation"
-            :schema-back="schemaBackendComputed"
-            :schema-front="schemaFrontend"
-            :error-text="errorDataComputed?.business_controller?.address1"
-            path="business_controller.address1"
+            :required="isFieldRequired('business_controller.address1')"
+            :error-text="getErrorText('business_controller.address1', errorDataComputed as any)"
             label="Address 1"
             data-testid="address-1-group"
           >
@@ -202,12 +183,8 @@ defineExpose({
         <FormCol col2>
           <VFormGroup
             v-slot="VFormGroupProps"
-            :model="model"
-            :validation="validation"
-            :schema-back="schemaBackendComputed"
-            :schema-front="schemaFrontend"
-            :error-text="errorDataComputed?.business_controller?.address2"
-            path="business_controller.address2"
+            :required="isFieldRequired('business_controller.address2')"
+            :error-text="getErrorText('business_controller.address2', errorDataComputed as any)"
             label="Address 2"
             data-testid="address-2-group"
           >
@@ -229,12 +206,8 @@ defineExpose({
         <FormCol col2>
           <VFormGroup
             v-slot="VFormGroupProps"
-            :model="model"
-            :validation="validation"
-            :schema-back="schemaBackendComputed"
-            :schema-front="schemaFrontend"
-            :error-text="errorDataComputed?.business_controller?.city"
-            path="business_controller.city"
+            :required="isFieldRequired('business_controller.city')"
+            :error-text="getErrorText('business_controller.city', errorDataComputed as any)"
             label="City"
             data-testid="city-group"
           >
@@ -255,12 +228,8 @@ defineExpose({
         <FormCol col2>
           <VFormGroup
             v-slot="VFormGroupProps"
-            :model="model"
-            :validation="validation"
-            :schema-back="schemaBackendComputed"
-            :schema-front="schemaFrontend"
-            :error-text="errorDataComputed?.business_controller?.state"
-            path="business_controller.state"
+            :required="isFieldRequired('business_controller.state')"
+            :error-text="getErrorText('business_controller.state', errorDataComputed as any)"
             label="State"
             data-testid="state-group"
           >
@@ -285,12 +254,8 @@ defineExpose({
         <FormCol col2>
           <VFormGroup
             v-slot="VFormGroupProps"
-            :model="model"
-            :validation="validation"
-            :schema-back="schemaBackendComputed"
-            :schema-front="schemaFrontend"
-            :error-text="errorDataComputed?.business_controller?.zip_code"
-            path="business_controller.zip_code"
+            :required="isFieldRequired('business_controller.zip_code')"
+            :error-text="getErrorText('business_controller.zip_code', errorDataComputed as any)"
             label="Zip Code"
             data-testid="zip-group"
           >
@@ -313,12 +278,8 @@ defineExpose({
         <FormCol col2>
           <VFormGroup
             v-slot="VFormGroupProps"
-            :model="model"
-            :validation="validation"
-            :schema-back="schemaBackendComputed"
-            :schema-front="schemaFrontend"
-            :error-text="errorDataComputed?.business_controller?.country"
-            path="business_controller.country"
+            :required="isFieldRequired('business_controller.country')"
+            :error-text="getErrorText('business_controller.country', errorDataComputed as any)"
             label="Country"
             data-testid="country-group"
           >
@@ -341,12 +302,8 @@ defineExpose({
       <FormRow>
         <FormCol col2>
           <VFormGroup
-            :model="model"
-            :validation="validation"
-            :schema-back="schemaBackendComputed"
-            :schema-front="schemaFrontend"
-            :error-text="errorDataComputed?.business_controller?.email"
-            path="business_controller.email"
+            :required="isFieldRequired('business_controller.email')"
+            :error-text="getErrorText('business_controller.email', errorDataComputed as any)"
             label="Email"
             data-testid="email-group"
           >

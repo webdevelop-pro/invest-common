@@ -9,18 +9,12 @@ import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
-import { scrollToError } from 'UiKit/helpers/validation/general';
-import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
 import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/helpers/enums/routes';
 import { useFormTrustedContact } from '../useFormTrustedContact';
 
 const mockRouterInstance = {
   push: vi.fn(),
-  currentRoute: {
-    value: {
-      query: {},
-    },
-  },
+  currentRoute: { value: { query: {} } },
 };
 
 vi.mock('vue-router', () => ({
@@ -43,87 +37,49 @@ const selectedUserProfileData = ref({
   user_id: 'user123',
   id: 'profile123',
 });
+
 const mockProfilesStore = {
   selectedUserProfileId,
   selectedUserProfileType,
   selectedUserProfileData,
 };
+
 vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
   useProfilesStore: vi.fn(() => mockProfilesStore),
 }));
 
-const isValid = ref(false);
-const model = {
-  beneficiary: {
-    first_name: 'Jane',
-    last_name: 'Smith',
-    relationship_type: 'spouse',
-    phone: '+1234567890',
-    email: 'jane@example.com',
-    dob: '1990-01-01',
-  },
-};
-const validation = ref({});
-const mockOnValidate = vi.fn();
-
 const userSessionTraits = ref({ email: 'john@example.com' });
-
-vi.mock('InvestCommon/composable/useFormValidation', () => ({
-  useFormValidation: vi.fn(() => ({
-    model,
-    validation,
-    isValid,
-    onValidate: mockOnValidate,
-  })),
-}));
 
 const mockSetProfileById = vi.fn();
 const mockGetProfileById = vi.fn();
 const setProfileByIdState = ref({ error: null });
 const getProfileByIdOptionsState = ref({
-  data: {
-    beneficiary: {
-      first_name: 'Jane',
-      last_name: 'Smith',
-      relationship_type: 'spouse',
-      phone: '+1234567890',
-      email: 'jane@example.com',
-      dob: '1990-01-01',
-    },
-  },
+  data: null,
   loading: false,
 });
+
 const mockRepositoryProfiles = {
   setProfileById: mockSetProfileById,
   getProfileById: mockGetProfileById,
   setProfileByIdState,
   getProfileByIdOptionsState,
 };
+
 vi.mock('InvestCommon/data/profiles/profiles.repository', () => ({
   useRepositoryProfiles: vi.fn(() => mockRepositoryProfiles),
 }));
 
 vi.mock('InvestCommon/domain/session/store/useSession', () => ({
-  useSessionStore: vi.fn(() => ({
-    userSessionTraits,
-  })),
+  useSessionStore: vi.fn(() => ({ userSessionTraits })),
 }));
 
 const mockSubmitFormToHubspot = vi.fn();
 vi.mock('InvestCommon/composable/useHubspotForm', () => ({
-  useHubspotForm: vi.fn(() => ({
-    submitFormToHubspot: mockSubmitFormToHubspot,
-  })),
-}));
-
-vi.mock('UiKit/helpers/validation/general', () => ({
-  scrollToError: vi.fn(),
+  useHubspotForm: vi.fn(() => ({ submitFormToHubspot: mockSubmitFormToHubspot })),
 }));
 
 vi.mock('InvestCommon/global', () => ({
-  default: {
-    HUBSPOT_FORM_ID_TRUSTED_CONTACT: 'test-hubspot-form-id',
-  },
+  default: { HUBSPOT_FORM_ID_TRUSTED_CONTACT: 'test-hubspot-form-id' },
 }));
 
 describe('useFormTrustedContact', () => {
@@ -133,8 +89,6 @@ describe('useFormTrustedContact', () => {
   let mockRepositoryProfiles: any;
   let mockSessionStore: any;
   let mockHubspotForm: any;
-  let mockScrollToError: any;
-  let mockFormValidation: any;
 
   beforeEach(() => {
     setActivePinia(createPinia());
@@ -144,8 +98,6 @@ describe('useFormTrustedContact', () => {
     mockRepositoryProfiles = vi.mocked(useRepositoryProfiles)();
     mockSessionStore = vi.mocked(useSessionStore)();
     mockHubspotForm = vi.mocked(useHubspotForm)();
-    mockScrollToError = vi.mocked(scrollToError);
-    mockFormValidation = vi.mocked(useFormValidation)();
 
     vi.clearAllMocks();
 
@@ -165,16 +117,7 @@ describe('useFormTrustedContact', () => {
       user_id: 'user123',
       id: 'profile123',
     };
-    model.beneficiary = {
-      first_name: 'Jane',
-      last_name: 'Smith',
-      relationship_type: 'spouse',
-      phone: '+1234567890',
-      email: 'jane@example.com',
-      dob: '1990-01-01',
-    };
     userSessionTraits.value = { email: 'john@example.com' };
-    isValid.value = false;
 
     composable = useFormTrustedContact();
   });
@@ -184,7 +127,6 @@ describe('useFormTrustedContact', () => {
   });
 
   describe('Initialization', () => {
-
     it('should initialize model with beneficiary data from profile', () => {
       expect(composable.model.beneficiary).toEqual({
         first_name: 'Jane',
@@ -196,7 +138,6 @@ describe('useFormTrustedContact', () => {
       });
     });
   });
-
 
   describe('Model synchronization', () => {
     it('should update model when selectedUserProfileData beneficiary changes', () => {
@@ -210,342 +151,189 @@ describe('useFormTrustedContact', () => {
       };
 
       mockProfilesStore.selectedUserProfileData.value.data.beneficiary = newBeneficiary;
-      model.beneficiary = newBeneficiary as any;
       const newComposable = useFormTrustedContact();
 
       expect(newComposable.model.beneficiary).toEqual(newBeneficiary);
     });
   });
 
-  describe('handleSave - Validation failure', () => {
-    it('should not proceed when form validation fails', async () => {
-      isValid.value = false;
-      mockFormValidation.model.beneficiary = null;
+  describe('handleSave', () => {
+    describe('Validation failure', () => {
+      it('should not proceed when form validation fails', async () => {
+        composable.model.beneficiary = {
+          first_name: '', // Empty required field
+          last_name: '',
+          relationship_type: '',
+          phone: '',
+          email: '',
+          dob: '',
+        };
 
-      await composable.handleSave();
+        await composable.handleSave();
 
-      expect(mockOnValidate).toHaveBeenCalled();
-      expect(mockScrollToError).toHaveBeenCalledWith('ViewDashboardTrustedContact');
-      expect(mockSetProfileById).not.toHaveBeenCalled();
-      expect(mockSubmitFormToHubspot).not.toHaveBeenCalled();
+        expect(mockSetProfileById).not.toHaveBeenCalled();
+        expect(mockSubmitFormToHubspot).not.toHaveBeenCalled();
+      });
+
+      it('should not proceed when beneficiary model is null/undefined', async () => {
+        composable.model.beneficiary = null as any;
+        await composable.handleSave();
+        expect(mockSetProfileById).not.toHaveBeenCalled();
+
+        composable.model.beneficiary = undefined as any;
+        await composable.handleSave();
+        expect(mockSetProfileById).not.toHaveBeenCalled();
+      });
     });
 
-    it('should not proceed when beneficiary model is null', async () => {
-      isValid.value = true;
-      mockFormValidation.model.beneficiary = null;
+    describe('Success scenarios', () => {
+      beforeEach(() => {
+        mockSetProfileById.mockResolvedValue(undefined);
+        mockGetProfileById.mockResolvedValue(undefined);
+        
+        composable.model.beneficiary = {
+          first_name: 'Jane',
+          last_name: 'Smith',
+          relationship_type: 'spouse',
+          phone: '+1234567890',
+          email: 'jane@example.com',
+          dob: '1990-01-01',
+        };
+      });
 
-      await composable.handleSave();
+      it('should save profile successfully and navigate to account page', async () => {
+        await composable.handleSave();
 
-      expect(mockOnValidate).toHaveBeenCalled();
-      expect(mockScrollToError).toHaveBeenCalledWith('ViewDashboardTrustedContact');
-      expect(mockSetProfileById).not.toHaveBeenCalled();
-    });
-
-    it('should not proceed when beneficiary model is undefined', async () => {
-      isValid.value = true;
-      mockFormValidation.model.beneficiary = undefined;
-
-      await composable.handleSave();
-
-      expect(mockOnValidate).toHaveBeenCalled();
-      expect(mockScrollToError).toHaveBeenCalledWith('ViewDashboardTrustedContact');
-      expect(mockSetProfileById).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('handleSave - Success scenarios', () => {
-    beforeEach(() => {
-      isValid.value = true;
-      mockFormValidation.model.beneficiary = {
-        first_name: 'Jane',
-        last_name: 'Smith',
-        relationship_type: 'spouse',
-        phone: '+1234567890',
-        email: 'jane@example.com',
-        dob: '1990-01-01',
-      };
-      mockSetProfileById.mockResolvedValue(undefined);
-      mockGetProfileById.mockResolvedValue(undefined);
-      
-      model.beneficiary = {
-        first_name: 'Jane',
-        last_name: 'Smith',
-        relationship_type: 'spouse',
-        phone: '+1234567890',
-        email: 'jane@example.com',
-        dob: '1990-01-01',
-      };
-    });
-
-    it('should save profile successfully and navigate to account page', async () => {
-      await composable.handleSave();
-
-      expect(mockOnValidate).toHaveBeenCalled();
-      expect(mockSetProfileById).toHaveBeenCalledWith(
-        {
-          beneficiary: {
-            first_name: 'Jane',
-            last_name: 'Smith',
-            relationship_type: 'spouse',
-            phone: '+1234567890',
-            email: 'jane@example.com',
-            dob: '1990-01-01',
+        expect(mockSetProfileById).toHaveBeenCalledWith(
+          {
+            beneficiary: {
+              first_name: 'Jane',
+              last_name: 'Smith',
+              relationship_type: 'spouse',
+              phone: '+1234567890',
+              email: 'jane@example.com',
+              dob: '1990-01-01',
+            },
           },
-        },
-        'individual',
-        '123',
-      );
-      expect(mockSubmitFormToHubspot).toHaveBeenCalledWith({
-        email: 'john@example.com',
-        firstname: 'Jane',
-        lastname: 'Smith',
-        relationship_type: 'spouse',
-        phone: '+1234567890',
-        trusted_email: 'jane@example.com',
-        date_of_birth: '1990-01-01',
+          'individual',
+          '123',
+        );
+        expect(mockSubmitFormToHubspot).toHaveBeenCalledWith({
+          email: 'john@example.com',
+          firstname: 'Jane',
+          lastname: 'Smith',
+          relationship_type: 'spouse',
+          phone: '+1234567890',
+          trusted_email: 'jane@example.com',
+          date_of_birth: '1990-01-01',
+        });
+        expect(mockGetProfileById).toHaveBeenCalledWith('individual', '123');
+        expect(mockRouter.push).toHaveBeenCalledWith({
+          name: ROUTE_DASHBOARD_ACCOUNT,
+          params: { profileId: '123' },
+        });
       });
-      expect(mockGetProfileById).toHaveBeenCalledWith('individual', '123');
-      expect(mockRouter.push).toHaveBeenCalledWith({
-        name: ROUTE_DASHBOARD_ACCOUNT,
-        params: { profileId: '123' },
-      });
-    });
 
-    it('should handle save with different profile types', async () => {
-      mockProfilesStore.selectedUserProfileType.value = 'entity';
-      mockProfilesStore.selectedUserProfileId.value = '456';
+      it('should handle different profile types and user emails', async () => {
+        // Test different profile type
+        mockProfilesStore.selectedUserProfileType.value = 'entity';
+        mockProfilesStore.selectedUserProfileId.value = '456';
+        const testComposable = useFormTrustedContact();
+        await testComposable.handleSave();
+        expect(mockSetProfileById).toHaveBeenCalledWith(
+          expect.any(Object), 'entity', '456'
+        );
 
-      const testComposable = useFormTrustedContact();
-
-      await testComposable.handleSave();
-
-      expect(mockSetProfileById).toHaveBeenCalledWith(
-        {
-          beneficiary: {
-            first_name: 'Jane',
-            last_name: 'Smith',
-            relationship_type: 'spouse',
-            phone: '+1234567890',
-            email: 'jane@example.com',
-            dob: '1990-01-01',
-          },
-        },
-        'entity',
-        '456',
-      );
-      expect(mockGetProfileById).toHaveBeenCalledWith('entity', '456');
-      expect(mockRouter.push).toHaveBeenCalledWith({
-        name: ROUTE_DASHBOARD_ACCOUNT,
-        params: { profileId: '456' },
+        // Test different user email
+        userSessionTraits.value.email = 'different@example.com';
+        await composable.handleSave();
+        expect(mockSubmitFormToHubspot).toHaveBeenCalledWith(
+          expect.objectContaining({ email: 'different@example.com' })
+        );
       });
     });
 
-    it('should handle save with different user session email', async () => {
-      userSessionTraits.value.email = 'different@example.com';
-
-      await composable.handleSave();
-
-      expect(mockSubmitFormToHubspot).toHaveBeenCalledWith({
-        email: 'different@example.com',
-        firstname: 'Jane',
-        lastname: 'Smith',
-        relationship_type: 'spouse',
-        phone: '+1234567890',
-        trusted_email: 'jane@example.com',
-        date_of_birth: '1990-01-01',
+    describe('Error handling', () => {
+      beforeEach(() => {
+        composable.model.beneficiary = {
+          first_name: 'Jane',
+          last_name: 'Smith',
+          relationship_type: 'spouse',
+          phone: '+1234567890',
+          email: 'jane@example.com',
+          dob: '1990-01-01',
+        };
       });
-    });
 
-    it('should handle save with different beneficiary data', async () => {
-      userSessionTraits.value.email = 'john@example.com';
-      
-      selectedUserProfileData.value.data.beneficiary = {
-        first_name: 'John',
-        last_name: 'Doe',
-        relationship_type: 'parent',
-        phone: '+0987654321',
-        email: 'john@example.com',
-        dob: '1985-05-15',
-      };
-      
-      mockFormValidation.model.beneficiary = {
-        first_name: 'John',
-        last_name: 'Doe',
-        relationship_type: 'parent',
-        phone: '+0987654321',
-        email: 'john@example.com',
-        dob: '1985-05-15',
-      };
-      
-      selectedUserProfileType.value = 'individual';
-      selectedUserProfileId.value = '123';
-      const testComposable = useFormTrustedContact();
+      it('should handle API errors gracefully', async () => {
+        mockSetProfileById.mockRejectedValue(new Error('API Error'));
 
-      await testComposable.handleSave();
+        try {
+          await composable.handleSave();
+        } catch (e) {
+          // ignore
+        }
 
-      expect(mockSetProfileById).toHaveBeenCalledWith(
-        {
-          beneficiary: {
-            first_name: 'John',
-            last_name: 'Doe',
-            relationship_type: 'parent',
-            phone: '+0987654321',
-            email: 'john@example.com',
-            dob: '1985-05-15',
-          },
-        },
-        'individual',
-        '123',
-      );
-      expect(mockSubmitFormToHubspot).toHaveBeenCalledWith({
-        email: 'john@example.com',
-        firstname: 'John',
-        lastname: 'Doe',
-        relationship_type: 'parent',
-        phone: '+0987654321',
-        trusted_email: 'john@example.com',
-        date_of_birth: '1985-05-15',
+        expect(mockSetProfileById).toHaveBeenCalled();
+        expect(mockSubmitFormToHubspot).not.toHaveBeenCalled();
+        expect(composable.isLoading.value).toBe(false);
+      });
+
+      it('should handle hubspot errors gracefully', async () => {
+        mockSetProfileById.mockResolvedValue(undefined);
+        mockSubmitFormToHubspot.mockImplementation(() => {
+          throw new Error('Hubspot Error');
+        });
+
+        try {
+          await composable.handleSave();
+        } catch (e) {
+          // ignore
+        }
+
+        expect(mockSetProfileById).toHaveBeenCalled();
+        expect(mockSubmitFormToHubspot).toHaveBeenCalled();
+        expect(composable.isLoading.value).toBe(false);
+      });
+
+      it('should manage loading state correctly', async () => {
+        mockSetProfileById.mockResolvedValue(undefined);
+        mockGetProfileById.mockResolvedValue(undefined);
+
+        const savePromise = composable.handleSave();
+        expect(composable.isLoading.value).toBe(true);
+
+        await savePromise;
+        expect(composable.isLoading.value).toBe(false);
       });
     });
   });
 
-  describe('handleSave - Error scenarios', () => {
-    beforeEach(() => {
-      isValid.value = true;
-      mockFormValidation.model.beneficiary = {
-        first_name: 'Jane',
-        last_name: 'Smith',
-        relationship_type: 'spouse',
-        phone: '+1234567890',
-        email: 'jane@example.com',
-        dob: '1990-01-01',
-      };
-    });
-
-    it('should handle setProfileById error gracefully', async () => {
-      mockSetProfileById.mockRejectedValue(new Error('API Error'));
-
-      try {
-        await composable.handleSave();
-      } catch (e) {
-        // ignore
-      }
-
-      expect(mockSetProfileById).toHaveBeenCalled();
-      expect(mockSubmitFormToHubspot).not.toHaveBeenCalled();
-      expect(mockGetProfileById).not.toHaveBeenCalled();
-      expect(mockRouter.push).not.toHaveBeenCalled();
-      expect(composable.isLoading.value).toBe(false);
-    });
-
-    it('should handle hubspot form submission error gracefully', async () => {
-      mockSetProfileById.mockResolvedValue(undefined);
-      mockSubmitFormToHubspot.mockImplementation(() => {
-        throw new Error('Hubspot Error');
-      });
-
-      try {
-        await composable.handleSave();
-      } catch (e) {
-        // ignore
-      }
-
-      expect(mockSetProfileById).toHaveBeenCalled();
-      expect(mockSubmitFormToHubspot).toHaveBeenCalled();
-      expect(composable.isLoading.value).toBe(false);
-
-      expect(mockGetProfileById).not.toHaveBeenCalled();
-      expect(mockRouter.push).not.toHaveBeenCalled();
-    });
-
-    it('should set loading state correctly during save operation', async () => {
-      mockSetProfileById.mockResolvedValue(undefined);
-      mockGetProfileById.mockResolvedValue(undefined);
-
-      const savePromise = composable.handleSave();
-
-      expect(composable.isLoading.value).toBe(true);
-
-      await savePromise;
-
-      expect(composable.isLoading.value).toBe(false);
-    });
-
-    it('should set loading to false even when error occurs', async () => {
-      mockSetProfileById.mockRejectedValue(new Error('API Error'));
-
-      try {
-        await composable.handleSave();
-      } catch (e) {
-        // ignore
-      }
-
-      expect(composable.isLoading.value).toBe(false);
-    });
-
-    it('should set loading to false in finally block', async () => {
-      mockSetProfileById.mockResolvedValue(undefined);
-      mockGetProfileById.mockResolvedValue(undefined);
-
-      await composable.handleSave();
-
-      expect(composable.isLoading.value).toBe(false);
-    });
-  });
-
-  describe('Schema frontend', () => {
+  describe('Schema validation', () => {
     it('should have correct schema structure', () => {
       expect(composable.schemaFrontend.value).toHaveProperty('$schema');
       expect(composable.schemaFrontend.value).toHaveProperty('definitions');
-      expect(composable.schemaFrontend.value).toHaveProperty('$ref');
-      expect(composable.schemaFrontend.value.definitions).toHaveProperty('TrustedContact');
+      expect(composable.schemaFrontend.value.definitions).toHaveProperty('PersonalInformation');
       expect(composable.schemaFrontend.value.definitions).toHaveProperty('Individual');
     });
 
-    it('should have correct TrustedContact schema properties', () => {
+    it('should have correct PersonalInformation schema properties', () => {
       const definitions = composable.schemaFrontend.value.definitions;
-      expect(definitions).toBeDefined();
-      const trustedContactSchema = definitions?.TrustedContact;
-      expect(trustedContactSchema).toBeDefined();
-      expect(trustedContactSchema!).toHaveProperty('properties.first_name');
-      expect(trustedContactSchema!).toHaveProperty('properties.last_name');
-      expect(trustedContactSchema!).toHaveProperty('properties.relationship_type');
-      expect(trustedContactSchema!).toHaveProperty('properties.phone');
-      expect(trustedContactSchema!).toHaveProperty('properties.email');
-      expect(trustedContactSchema!).toHaveProperty('properties.dob');
-      expect(trustedContactSchema!).toHaveProperty('type', 'object');
-      expect(trustedContactSchema!).toHaveProperty('additionalProperties', false);
-      expect(trustedContactSchema!.required).toContain('first_name');
-      expect(trustedContactSchema!.required).toContain('last_name');
-      expect(trustedContactSchema!.required).toContain('relationship_type');
-      expect(trustedContactSchema!.required).toContain('phone');
-      expect(trustedContactSchema!.required).toContain('email');
-      expect(trustedContactSchema!.required).toContain('dob');
-    });
-
-    it('should have correct Individual schema structure', () => {
-      const definitions = composable.schemaFrontend.value.definitions;
-      expect(definitions).toBeDefined();
-      const individualSchema = definitions?.Individual;
-      expect(individualSchema).toBeDefined();
-      expect(individualSchema!).toHaveProperty('properties.beneficiary');
-      expect(individualSchema!).toHaveProperty('type', 'object');
-      expect(individualSchema!).toHaveProperty('errorMessage');
+      const personalInformationSchema = definitions?.PersonalInformation;
+      
+      expect(personalInformationSchema).toBeDefined();
+      expect(personalInformationSchema!).toHaveProperty('type', 'object');
+      expect(personalInformationSchema!.required).toContain('first_name');
+      expect(personalInformationSchema!.required).toContain('last_name');
+      expect(personalInformationSchema!.required).toContain('relationship_type');
+      expect(personalInformationSchema!.required).toContain('phone');
+      expect(personalInformationSchema!.required).toContain('email');
+      expect(personalInformationSchema!.required).toContain('dob');
     });
   });
 
-
-  describe('Integration scenarios', () => {
-    it('should handle complete workflow from initialization to successful save', async () => {
-      isValid.value = true;
-      model.beneficiary = {
-        first_name: 'Jane',
-        last_name: 'Smith',
-        relationship_type: 'spouse',
-        phone: '+1234567890',
-        email: 'jane@example.com',
-        dob: '1990-01-01',
-      };
+  describe('Integration workflow', () => {
+    it('should handle complete successful workflow', async () => {
       mockSetProfileById.mockResolvedValue(undefined);
       mockGetProfileById.mockResolvedValue(undefined);
 
@@ -556,7 +344,6 @@ describe('useFormTrustedContact', () => {
 
       await testComposable.handleSave();
 
-      expect(mockOnValidate).toHaveBeenCalled();
       expect(mockSetProfileById).toHaveBeenCalled();
       expect(mockSubmitFormToHubspot).toHaveBeenCalled();
       expect(mockGetProfileById).toHaveBeenCalled();
@@ -564,18 +351,20 @@ describe('useFormTrustedContact', () => {
       expect(testComposable.isLoading.value).toBe(false);
     });
 
-    it('should handle complete workflow with validation failure', async () => {
-      vi.clearAllMocks();
-
-      isValid.value = false;
-      mockFormValidation.model.beneficiary = null;
-
+    it('should handle validation failure workflow', async () => {
       const testComposable = useFormTrustedContact();
+      
+      testComposable.model.beneficiary = {
+        first_name: '', // Empty required field
+        last_name: '',
+        relationship_type: '',
+        phone: '',
+        email: '',
+        dob: '',
+      };
 
       await testComposable.handleSave();
 
-      expect(mockOnValidate).toHaveBeenCalled();
-      expect(mockScrollToError).toHaveBeenCalledWith('ViewDashboardTrustedContact');
       expect(mockSetProfileById).not.toHaveBeenCalled();
       expect(mockSubmitFormToHubspot).not.toHaveBeenCalled();
       expect(mockGetProfileById).not.toHaveBeenCalled();

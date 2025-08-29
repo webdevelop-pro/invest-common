@@ -3,8 +3,7 @@ import {
 } from 'vue';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
-import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
-import { getOptions } from 'UiKit/helpers/model';
+import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { storeToRefs } from 'pinia';
 
@@ -42,12 +41,16 @@ export const useVFormPartialCustodian = (
   const schemaBackendLocal = computed(() => (
     schemaBackend.value ? structuredClone(toRaw(schemaBackend.value)) : undefined));
 
+  const fieldsPaths = ['full_account_name', 'type', 'account_number'];
+
   const {
     model,
     validation,
     isValid,
     onValidate,
-    schemaObject,
+    isFieldRequired,
+    getErrorText,
+    getOptions,
   } = useFormValidation<FormModelSdira>(
     schemaFrontend,
     schemaBackendLocal,
@@ -56,9 +59,10 @@ export const useVFormPartialCustodian = (
       type: '',
       account_number: '',
     },
+    fieldsPaths,
   );
 
-  const optionsCustodian = computed(() => getOptions('type', schemaObject));
+  const optionsCustodian = computed(() => getOptions('type'));
 
   watch(modelData, (newModelData) => {
     if (!newModelData) return;
@@ -77,6 +81,8 @@ export const useVFormPartialCustodian = (
     validation,
     isValid,
     onValidate,
+    isFieldRequired,
+    getErrorText,
     optionsCustodian,
     schemaFrontend,
   };

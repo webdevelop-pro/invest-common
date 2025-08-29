@@ -2,9 +2,8 @@ import { ref, computed, nextTick, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { useRepositorySettings } from 'InvestCommon/data/settings/settings.repository';
-import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
+import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
-import { scrollToError } from 'UiKit/helpers/validation/general';
 import { SELFSERVICE } from 'InvestCommon/features/settings/utils';
 
 type FormModelTOTP = {
@@ -30,7 +29,7 @@ export function useSettingsTOTP() {
     return tokenItem?.attributes?.text?.text ?? '';
   });
 
-  const errorData = computed(() => (setSettingsState.value.error?.data?.responseJson));
+  const errorData = computed(() => (setSettingsState.value.error as any)?.data?.responseJson);
 
   const totpCodeError = computed(() => {
     const tokenItem = errorData.value?.ui?.nodes?.find((item) => item.attributes.name === 'totp_code');
@@ -51,15 +50,20 @@ export function useSettingsTOTP() {
     $ref: '#/definitions/Auth',
   } as unknown as JSONSchemaType<FormModelTOTP>;
 
+  const fieldsPaths = ['totp_code'];
+
   const {
     model,
     validation,
     isValid,
     onValidate,
+    scrollToError, formErrors, isFieldRequired, getErrorText,
+    getOptions, getReferenceType,
   } = useFormValidation(
     schema,
     undefined,
     {} as FormModelTOTP,
+    fieldsPaths
   );
 
   const onSave = async () => {
@@ -135,5 +139,13 @@ export function useSettingsTOTP() {
     // Store references for template access
     getAuthFlowState,
     setSettingsState,
+    
+    // Form validation helpers
+    formErrors,
+    isFieldRequired,
+    getErrorText,
+    getOptions,
+    getReferenceType,
+    scrollToError,
   };
 }

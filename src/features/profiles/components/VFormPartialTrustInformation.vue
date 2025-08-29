@@ -29,10 +29,11 @@ const {
   validation,
   isValid,
   onValidate,
+  isFieldRequired,
+  getErrorText,
   modelExpose,
   optionsType,
   yesNoOptions,
-  schemaFrontend,
 } = useVFormPartialTrustInformation(
   modelDataComputed,
   schemaBackendComputed,
@@ -53,12 +54,8 @@ defineExpose({
       <FormCol col3>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackendComputed"
-          :schema-front="schemaFrontend"
-          :error-text="errorDataComputed?.type"
-          path="type"
+          :required="isFieldRequired('type')"
+          :error-text="getErrorText('type', errorDataComputed as any)"
           label="Type of Trust"
           data-testid="type-group"
         >
@@ -80,12 +77,8 @@ defineExpose({
       <FormCol col3>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackendComputed"
-          :schema-front="schemaFrontend"
-          :error-text="errorDataComputed?.name"
-          path="name"
+          :required="isFieldRequired('name')"
+          :error-text="getErrorText('name', errorDataComputed as any)"
           label="Name of Trust"
           data-testid="name-group"
         >
@@ -104,12 +97,8 @@ defineExpose({
       <FormCol col3>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackendComputed"
-          :schema-front="schemaFrontend"
-          :error-text="errorDataComputed?.owner_title"
-          path="owner_title"
+          :required="isFieldRequired('owner_title')"
+          :error-text="getErrorText('owner_title', errorDataComputed as any)"
           label="Your Title within Trust"
           data-testid="owner-title-group"
         >
@@ -130,12 +119,8 @@ defineExpose({
       <FormCol>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackendComputed"
-          :schema-front="schemaFrontend"
-          :error-text="errorDataComputed?.is_use_ein"
-          path="is_use_ein"
+          :required="isFieldRequired('is_use_ein')"
+          :error-text="getErrorText('is_use_ein', errorDataComputed as any)"
           data-testid="is-use-ein-group"
           label="Does this Trust have an EIN"
         >
@@ -152,12 +137,8 @@ defineExpose({
       <FormCol>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackendComputed"
-          :schema-front="schemaFrontend"
-          :error-text="errorDataComputed?.ein"
-          path="ein"
+          :required="isFieldRequired('ein')"
+          :error-text="getErrorText('ein', errorDataComputed as any)"
           label="EIN"
           data-testid="ein-group"
         >
@@ -180,12 +161,8 @@ defineExpose({
       <FormCol>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackendComputed"
-          :schema-front="schemaFrontend"
-          :error-text="errorDataComputed?.trust_agreement_id"
-          path="trust_agreement_id"
+          :required="isFieldRequired('trust_agreement_id')"
+          :error-text="getErrorText('trust_agreement_id', errorDataComputed as any)"
           label="Trust Agreement"
           data-testid="trust-document-group"
         >

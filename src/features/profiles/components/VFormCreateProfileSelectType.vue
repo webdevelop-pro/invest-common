@@ -6,14 +6,14 @@ import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import { useVFormProfileSelectType } from './logic/useVFormProfileSelectType';
 
 const {
-  schemaBackend,
-  schemaFrontend,
   errorData,
   SELECT_PROFILE_TYPES,
   model,
   validation,
   isValid,
   onValidate,
+  isFieldRequired,
+  getErrorText,
 } = useVFormProfileSelectType();
 
 defineExpose({
@@ -30,12 +30,8 @@ defineExpose({
       <FormCol>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackend"
-          :schema-front="schemaFrontend"
-          :error-text="errorData"
-          path="type_profile"
+          :required="isFieldRequired('type_profile')"
+          :error-text="getErrorText('type_profile', errorData as any)"
           label="Choose which type of investment account you would like to create"
           data-testid="type-profile-group"
         >

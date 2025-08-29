@@ -15,8 +15,9 @@ globalLoader.hide();
 const {
   backButtonText, breadcrumbs, isLoading, isDisabledButton,
   backButtonRoute,
-  model, schemaBackend, errorData, validation, schemaFrontend,
+  model, errorData,
   isLoadingFields, optionsEmployment, isAdditionalFields, handleSave,
+  isFieldRequired, getErrorText,
 } = useFormBackgroundInformation();
 
 
@@ -40,12 +41,8 @@ const {
           <FormCol>
             <VFormGroup
               v-slot="VFormGroupProps"
-              :model="model"
-              :validation="validation"
-              :schema-back="schemaBackend"
-              :schema-front="schemaFrontend"
-              :error-text="errorData?.employment.type"
-              path="employment.type"
+              :required="isFieldRequired('employment.type')"
+              :error-text="getErrorText('employment.type', errorData)"
               label="Employment"
             >
               <VFormSelect
@@ -66,12 +63,8 @@ const {
             <FormCol col2>
               <VFormGroup
                 v-slot="VFormGroupProps"
-                :model="model"
-                :validation="validation"
-                :schema-back="schemaBackend"
-                :schema-front="schemaFrontend"
-                :error-text="errorData?.employment.employer_name"
-                path="employment.employer_name"
+                :required="isFieldRequired('employment.employer_name')"
+                :error-text="getErrorText('employment.employer_name', errorData)"
                 label="Employer Name"
               >
                 <VFormInput
@@ -90,12 +83,8 @@ const {
             <FormCol col2>
               <VFormGroup
                 v-slot="VFormGroupProps"
-                :model="model"
-                :validation="validation"
-                :schema-back="schemaBackend"
-                :schema-front="schemaFrontend"
-                :error-text="errorData?.employment.title"
-                path="employment.title"
+                :required="isFieldRequired('employment.title')"
+                :error-text="getErrorText('employment.title', errorData)"
                 label="Your Title/Role"
               >
                 <VFormInput
@@ -115,12 +104,8 @@ const {
             <FormCol col2>
               <VFormGroup
                 v-slot="VFormGroupProps"
-                :model="model"
-                :validation="validation"
-                :schema-back="schemaBackend"
-                :schema-front="schemaFrontend"
-                :error-text="errorData?.employment.address1"
-                path="employment.address1"
+                :required="isFieldRequired('employment.address1')"
+                :error-text="getErrorText('employment.address1', errorData)"
                 label="Address 1"
               >
                 <VFormInput
@@ -138,12 +123,8 @@ const {
             <FormCol col2>
               <VFormGroup
                 v-slot="VFormGroupProps"
-                :model="model"
-                :validation="validation"
-                :schema-back="schemaBackend"
-                :schema-front="schemaFrontend"
-                :error-text="errorData?.employment.address2"
-                path="employment.address2"
+                :required="isFieldRequired('employment.address2')"
+                :error-text="getErrorText('employment.address2', errorData)"
                 label="Address 2"
               >
                 <VFormInput
@@ -163,12 +144,8 @@ const {
             <FormCol col2>
               <VFormGroup
                 v-slot="VFormGroupProps"
-                :model="model"
-                :validation="validation"
-                :schema-back="schemaBackend"
-                :schema-front="schemaFrontend"
-                :error-text="errorData?.employment.city"
-                path="employment.city"
+                :required="isFieldRequired('employment.city')"
+                :error-text="getErrorText('employment.city', errorData)"
                 label="City"
               >
                 <VFormInput
@@ -188,12 +165,8 @@ const {
             <FormCol col2>
               <VFormGroup
                 v-slot="VFormGroupProps"
-                :model="model"
-                :validation="validation"
-                :schema-back="schemaBackend"
-                :schema-front="schemaFrontend"
-                :error-text="errorData?.employment.zip_code"
-                path="employment.zip_code"
+                :required="isFieldRequired('employment.zip_code')"
+                :error-text="getErrorText('employment.zip_code', errorData)"
                 label="Zip Code"
               >
                 <VFormInput
@@ -216,12 +189,8 @@ const {
           <FormCol>
             <VFormGroup
               v-slot="VFormGroupProps"
-              :model="model"
-              :validation="validation"
-              :schema-back="schemaBackend"
-              :schema-front="schemaFrontend"
-              :error-text="errorData?.finra_affiliated.member_association"
-              path="finra_affiliated.member_association"
+              :required="isFieldRequired('finra_affiliated.member_association')"
+              :error-text="getErrorText('finra_affiliated.member_association', errorData)"
               label="FINRA/SEC Affiliated"
             >
               <VFormCheckbox
@@ -239,12 +208,8 @@ const {
             <FormCol>
               <VFormGroup
                 v-slot="VFormGroupProps"
-                :model="model"
-                :validation="validation"
-                :schema-back="schemaBackend"
-                :schema-front="schemaFrontend"
-                :error-text="errorData?.finra_affiliated.correspondence"
-                path="finra_affiliated.correspondence"
+                :required="isFieldRequired('finra_affiliated.correspondence')"
+                :error-text="getErrorText('finra_affiliated.correspondence', errorData)"
               >
                 <VFormCheckbox
                   v-model="model.finra_affiliated.correspondence"
@@ -259,12 +224,8 @@ const {
             <FormCol col3>
               <VFormGroup
                 v-slot="VFormGroupProps"
-                :model="model"
-                :validation="validation"
-                :schema-back="schemaBackend"
-                :schema-front="schemaFrontend"
-                :error-text="errorData?.finra_affiliated.member_firm_name"
-                path="finra_affiliated.member_firm_name"
+                :required="isFieldRequired('finra_affiliated.member_firm_name')"
+                :error-text="getErrorText('finra_affiliated.member_firm_name', errorData)"
                 label="Member Firm Name"
               >
                 <VFormInput
@@ -282,12 +243,8 @@ const {
             <FormCol col3>
               <VFormGroup
                 v-slot="VFormGroupProps"
-                :model="model"
-                :validation="validation"
-                :schema-back="schemaBackend"
-                :schema-front="schemaFrontend"
-                :error-text="errorData?.finra_affiliated.compliance_contact_name"
-                path="finra_affiliated.compliance_contact_name"
+                :required="isFieldRequired('finra_affiliated.compliance_contact_name')"
+                :error-text="getErrorText('finra_affiliated.compliance_contact_name', errorData)"
                 label="Compliance Contact Name"
               >
                 <VFormInput
@@ -305,12 +262,8 @@ const {
             <FormCol col3>
               <VFormGroup
                 v-slot="VFormGroupProps"
-                :model="model"
-                :validation="validation"
-                :schema-back="schemaBackend"
-                :schema-front="schemaFrontend"
-                :error-text="errorData?.finra_affiliated.compliance_contant_email"
-                path="finra_affiliated.compliance_contant_email"
+                :required="isFieldRequired('finra_affiliated.compliance_contant_email')"
+                :error-text="getErrorText('finra_affiliated.compliance_contant_email', errorData)"
                 label="Compliance contact email"
               >
                 <VFormInput
@@ -330,12 +283,8 @@ const {
           <FormCol>
             <VFormGroup
               v-slot="VFormGroupProps"
-              :model="model"
-              :validation="validation"
-              :schema-back="schemaBackend"
-              :schema-front="schemaFrontend"
-              :error-text="errorData?.ten_percent_shareholder.shareholder_association"
-              path="ten_percent_shareholder.shareholder_association"
+              :required="isFieldRequired('ten_percent_shareholder.shareholder_association')"
+              :error-text="getErrorText('ten_percent_shareholder.shareholder_association', errorData)"
               label="10% Shareholder"
             >
               <VFormCheckbox
@@ -352,12 +301,8 @@ const {
             <FormCol>
               <VFormGroup
                 v-slot="VFormGroupProps"
-                :model="model"
-                :validation="validation"
-                :schema-back="schemaBackend"
-                :schema-front="schemaFrontend"
-                :error-text="errorData?.ten_percent_shareholder?.ticker_symbol_list"
-                path="ten_percent_shareholder.ticker_symbol_list"
+                :required="isFieldRequired('ten_percent_shareholder.ticker_symbol_list')"
+                :error-text="getErrorText('ten_percent_shareholder.ticker_symbol_list', errorData)"
                 label="Ticker symbol list"
               >
                 <VFormInput
@@ -377,12 +322,8 @@ const {
           <FormCol>
             <VFormGroup
               v-slot="VFormGroupProps"
-              :model="model"
-              :validation="validation"
-              :schema-back="schemaBackend"
-              :schema-front="schemaFrontend"
-              :error-text="errorData?.irs_backup_withholdingn"
-              path="irs_backup_withholding"
+              :required="isFieldRequired('irs_backup_withholding')"
+              :error-text="getErrorText('irs_backup_withholding', errorData)"
               label="IRS Backup Withholding"
             >
               <VFormCheckbox

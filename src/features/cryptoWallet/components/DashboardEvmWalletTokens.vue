@@ -10,7 +10,7 @@ import VTableWalletTokensItem from './VTableWalletTokensItem.vue';
 import env from 'InvestCommon/global';
 import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
 
-const props = defineProps({
+defineProps({
   profileId: {
     type: Number,
     required: true,

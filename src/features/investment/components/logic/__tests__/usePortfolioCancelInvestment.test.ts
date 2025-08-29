@@ -10,7 +10,7 @@ import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
-import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
+import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { scrollToError } from 'UiKit/helpers/validation/general';
 import { usePortfolioCancelInvestment } from '../usePortfolioCancelInvestment';
 

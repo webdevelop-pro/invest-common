@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { storeToRefs } from 'pinia';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
 import VFormInputPassword from 'UiKit/components/Base/VForm/VFormInputPassword.vue';
@@ -10,9 +9,9 @@ const emit = defineEmits(['cancel']);
 
 const loginRefreshStore = useLoginRefreshStore();
 const {
-  isLoading, model, validation, isDisabledButton,
-  schemaBackend, schemaFrontend, setLoginState,
-} = storeToRefs(loginRefreshStore);
+  isLoading, model, isDisabledButton,
+  setLoginState, isFieldRequired, getErrorText,
+} = loginRefreshStore;
 
 const loginHandler = async () => {
   loginRefreshStore.loginPasswordHandler();
@@ -28,14 +27,11 @@ const loginHandler = async () => {
     <div class="v-form-auth-login-refresh__wrap">
       <VFormGroup
         v-slot="VFormGroupProps"
-        :model="model"
-        :validation="validation"
-        :schema-back="schemaBackend"
-        :schema-front="schemaFrontend"
-        :error-text="setLoginState.error?.email"
-        path="email"
+        :required="isFieldRequired('email')"
+        :error-text="getErrorText('email', setLoginState.error?.data?.responseJson)"
         label="Email Address"
         class="v-form-auth-login-refresh__input"
+        data-testid="email-group"
       >
         <VFormInput
           :model-value="model.email"
@@ -50,14 +46,11 @@ const loginHandler = async () => {
       </VFormGroup>
       <VFormGroup
         v-slot="VFormGroupProps"
-        :model="model"
-        :validation="validation"
-        :schema-back="schemaBackend"
-        :schema-front="schemaFrontend"
-        :error-text="setLoginState.error?.password"
-        path="password"
+        :required="isFieldRequired('password')"
+        :error-text="getErrorText('password', setLoginState.error?.data?.responseJson)"
         label="Password"
         class="v-form-auth-login-refresh__input"
+        data-testid="password-group"
       >
         <VFormInputPassword
           :model-value="model.password"

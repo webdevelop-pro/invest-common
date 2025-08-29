@@ -4,7 +4,7 @@ import {
 import { setActivePinia, createPinia, defineStore } from 'pinia';
 import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
 import { ref } from 'vue';
-import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
+import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { useSignupStore } from '../useSignup';
 
 // Create a mock auth store

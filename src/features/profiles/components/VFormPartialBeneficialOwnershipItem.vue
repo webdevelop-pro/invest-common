@@ -39,6 +39,8 @@ const props = defineProps({
   errorData: Object,
   schemaBackend: Object,
   loading: Boolean,
+  isFieldRequired: Function as PropType<(fieldPath: string) => boolean>,
+  getErrorText: Function as PropType<(fieldPath: string, errorData: any) => any[]>,
 });
 
 const title = props.trust ? 'Trustee or Protector' : 'Beneficial Owner';
@@ -61,12 +63,8 @@ watch(() => model.value?.non_us, () => {
       <FormCol col3>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackend"
-          :schema-front="schema"
-          :error-text="errorData?.beneficials[itemIndex].first_name"
-          :path="`beneficials.${itemIndex}.first_name`"
+          :required="isFieldRequired(`beneficials.${itemIndex}.first_name`)"
+          :error-text="getErrorText(`beneficials.${itemIndex}.first_name`, errorData)"
           label="First Name"
           data-testid="first-name-group"
         >
@@ -85,12 +83,8 @@ watch(() => model.value?.non_us, () => {
       <FormCol col3>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackend"
-          :schema-front="schema"
-          :error-text="errorData?.beneficials[itemIndex].last_name"
-          :path="`beneficials.${itemIndex}.last_name`"
+          :required="isFieldRequired?.(`beneficials.${itemIndex}.last_name`)"
+          :error-text="getErrorText?.(`beneficials.${itemIndex}.last_name`, errorData)"
           label="Last Name"
           data-testid="last-name-group"
         >
@@ -108,12 +102,8 @@ watch(() => model.value?.non_us, () => {
       <FormCol col-3>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackend"
-          :schema-front="schema"
-          :error-text="errorData?.beneficials[itemIndex].dob"
-          :path="`beneficials.${itemIndex}.dob`"
+          :required="isFieldRequired?.(`beneficials.${itemIndex}.dob`)"
+          :error-text="getErrorText?.(`beneficials.${itemIndex}.dob`, errorData)"
           label="Date of Birth"
           data-testid="dob-group"
         >
@@ -140,14 +130,9 @@ watch(() => model.value?.non_us, () => {
         <FormCol col3>
           <VFormGroup
             v-slot="VFormGroupProps"
-            :model="model"
-            :validation="validation"
-            :schema-back="schemaBackend"
-            :schema-front="schema"
-            :error-text="errorData?.beneficials[itemIndex].ssn"
-            :path="`beneficials.${itemIndex}.ssn`"
+            required
+            :error-text="getErrorText?.(`beneficials.${itemIndex}.ssn`, errorData)"
             label="SSN"
-            :required="!model.non_us"
             data-testid="ssn-group"
           >
             <VFormInput
@@ -169,14 +154,9 @@ watch(() => model.value?.non_us, () => {
         <FormCol col3>
           <VFormGroup
             v-slot="VFormGroupProps"
-            :model="model"
-            :validation="validation"
-            :schema-back="schemaBackend"
-            :schema-front="schema"
-            :error-text="errorData?.beneficials[itemIndex].type_of_identification?.id_number"
-            :path="`beneficials.${itemIndex}.type_of_identification.id_number`"
+            required
+            :error-text="getErrorText?.(`beneficials.${itemIndex}.type_of_identification.id_number`, errorData)"
             label="Passport Series and Number"
-            :required="model.non_us"
             data-testid="id-number-group"
           >
             <VFormInput
@@ -193,14 +173,9 @@ watch(() => model.value?.non_us, () => {
         <FormCol col3>
           <VFormGroup
             v-slot="VFormGroupProps"
-            :model="model"
-            :validation="validation"
-            :schema-back="schemaBackend"
-            :schema-front="schema"
-            :error-text="errorData?.beneficials[itemIndex].type_of_identification?.country"
-            :path="`beneficials.${itemIndex}.type_of_identification.country`"
+            required
+            :error-text="getErrorText?.(`beneficials.${itemIndex}.type_of_identification.country`, errorData)"
             label="Country of Issue"
-            :required="model.non_us"
             data-testid="passport-country-group"
           >
             <VFormCombobox
@@ -224,14 +199,10 @@ watch(() => model.value?.non_us, () => {
     <FormRow>
       <FormCol col2>
         <VFormGroup
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackend"
-          :schema-front="schema"
-          :error-text="errorData?.beneficials[itemIndex].email"
-          :path="`beneficials.${itemIndex}.email`"
-          label="Email"
+          :required="isFieldRequired?.(`beneficials.${itemIndex}.email`)"
+          :error-text="getErrorText?.(`beneficials.${itemIndex}.email`, errorData)"
           data-testid="email-group"
+          label="Email"
         >
           <template #default="VFormGroupProps">
             <VFormInput
@@ -254,12 +225,8 @@ watch(() => model.value?.non_us, () => {
       <FormCol col-2>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackend"
-          :schema-front="schema"
-          :error-text="errorData?.beneficials[itemIndex].phone"
-          :path="`beneficials.${itemIndex}.phone`"
+          :required="isFieldRequired?.(`beneficials.${itemIndex}.phone`)"
+          :error-text="getErrorText?.(`beneficials.${itemIndex}.phone`, errorData)"
           label="Phone number"
           data-testid="phone-group"
         >
@@ -281,12 +248,8 @@ watch(() => model.value?.non_us, () => {
       <FormCol col2>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackend"
-          :schema-front="schema"
-          :error-text="errorData?.beneficials[itemIndex].address1"
-          :path="`beneficials.${itemIndex}.address1`"
+          :required="isFieldRequired?.(`beneficials.${itemIndex}.address1`)"
+          :error-text="getErrorText?.(`beneficials.${itemIndex}.address1`, errorData)"
           label="Address 1"
           data-testid="address-1-group"
         >
@@ -305,12 +268,8 @@ watch(() => model.value?.non_us, () => {
       <FormCol col2>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackend"
-          :schema-front="schema"
-          :error-text="errorData?.beneficials[itemIndex].address2"
-          :path="`beneficials.${itemIndex}.address2`"
+          :required="isFieldRequired?.(`beneficials.${itemIndex}.address2`)"
+          :error-text="getErrorText?.(`beneficials.${itemIndex}.address2`, errorData)"
           label="Address 2"
           data-testid="address-2-group"
         >
@@ -331,12 +290,8 @@ watch(() => model.value?.non_us, () => {
       <FormCol col2>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackend"
-          :schema-front="schema"
-          :error-text="errorData?.beneficials[itemIndex].city"
-          :path="`beneficials.${itemIndex}.city`"
+          :required="isFieldRequired?.(`beneficials.${itemIndex}.city`)"
+          :error-text="getErrorText?.(`beneficials.${itemIndex}.city`, errorData)"
           label="City"
           data-testid="city-group"
         >
@@ -356,12 +311,8 @@ watch(() => model.value?.non_us, () => {
       <FormCol col2>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackend"
-          :schema-front="schema"
-          :error-text="errorData?.beneficials[itemIndex].state"
-          :path="`beneficials.${itemIndex}.state`"
+          :required="isFieldRequired?.(`beneficials.${itemIndex}.state`)"
+          :error-text="getErrorText?.(`beneficials.${itemIndex}.state`, errorData)"
           label="State"
           data-testid="state-group"
         >
@@ -386,12 +337,8 @@ watch(() => model.value?.non_us, () => {
       <FormCol col2>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackend"
-          :schema-front="schema"
-          :error-text="errorData?.beneficials[itemIndex].zip_code"
-          :path="`beneficials.${itemIndex}.zip_code`"
+          :required="isFieldRequired?.(`beneficials.${itemIndex}.zip_code`)"
+          :error-text="getErrorText?.(`beneficials.${itemIndex}.zip_code`, errorData)"
           label="Zip Code"
           data-testid="zip-group"
         >
@@ -413,12 +360,8 @@ watch(() => model.value?.non_us, () => {
       <FormCol col2>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackend"
-          :schema-front="schema"
-          :error-text="errorData?.beneficials[itemIndex].country"
-          :path="`beneficials.${itemIndex}.country`"
+          :required="isFieldRequired?.(`beneficials.${itemIndex}.country`)"
+          :error-text="getErrorText?.(`beneficials.${itemIndex}.country`, errorData)"
           label="Country"
           data-testid="country-group"
         >

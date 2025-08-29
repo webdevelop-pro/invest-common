@@ -9,11 +9,9 @@ import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles
 import { useRouter } from 'vue-router';
 import env from 'InvestCommon/global';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
-import { scrollToError, getFilteredObject } from 'UiKit/helpers/validation/general';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
-import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
-import { getOptions } from 'UiKit/helpers/model';
+import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import {
   address1Rule, address2Rule, cityRule, emailRule, errorMessageRule, zipRule,
 } from 'UiKit/helpers/validation/rules';
@@ -88,10 +86,10 @@ export const useFormBackgroundInformation = () => {
     },
     finra_affiliated: {
       member_firm_name: selectedUserProfileData.value?.data?.finra_affiliated?.member_firm_name || '',
-      compliance_contact_name: selectedUserProfileData.value?.data.finra_affiliated?.compliance_contact_name || '',
-      compliance_contant_email: selectedUserProfileData.value?.data.finra_affiliated?.compliance_contant_email || '',
-      correspondence: selectedUserProfileData.value?.data.finra_affiliated?.correspondence || false,
-      member_association: selectedUserProfileData.value?.data.finra_affiliated?.member_association || false,
+      compliance_contact_name: selectedUserProfileData.value?.data?.finra_affiliated?.compliance_contact_name || '',
+      compliance_contant_email: selectedUserProfileData.value?.data?.finra_affiliated?.compliance_contant_email || '',
+      correspondence: selectedUserProfileData.value?.data?.finra_affiliated?.correspondence || false,
+      member_association: selectedUserProfileData.value?.data?.finra_affiliated?.member_association || false,
     },
     ten_percent_shareholder: {
       shareholder_association: dataShareholderData.value?.shareholder_association || false,
@@ -180,22 +178,49 @@ export const useFormBackgroundInformation = () => {
     $ref: '#/definitions/Individual',
   } as unknown as JSONSchemaType<FormModelBackgroundInformation>
   ));
+  const requiredFields = computed(() => {
+    const baseFields = [
+      'employment.type',
+      'employment.employer_name',
+      'employment.title',
+      'employment.address1',
+      'employment.address2',
+      'employment.city',
+      'employment.zip_code',
+      'finra_affiliated.member_association',
+      'ten_percent_shareholder.shareholder_association',
+      'ten_percent_shareholder.ticker_symbol_list',
+      'irs_backup_withholding',
+    ];
+
+    // Only include FINRA affiliated fields if member_association is true
+    if (modelLocal.finra_affiliated?.member_association) {
+      baseFields.push(
+        'finra_affiliated.correspondence',
+        'finra_affiliated.member_firm_name',
+        'finra_affiliated.compliance_contact_name',
+        'finra_affiliated.compliance_contant_email'
+      );
+    }
+
+    return baseFields;
+  });
+
   const {
     model, validation, isValid, onValidate,
+    isFieldRequired,
+    getErrorText,
+    getOptions,
+    scrollToError,
   } = useFormValidation<FormModelBackgroundInformation>(
     schemaFrontend,
     schemaBackend,
     modelLocal,
+    requiredFields.value,
   );
+
   const isDisabledButton = computed(() => (!isValid.value));
-  const formModel = {
-    employment: {},
-    finra_affiliated: {},
-    ten_percent_shareholder: {},
-    irs_backup_withholding: {},
-  };
-  const schemaObject = computed(() => getFilteredObject(schemaBackend.value, formModel) || {});
-  const optionsEmployment = computed(() => getOptions('employment.type', schemaObject));
+  const optionsEmployment = computed(() => getOptions('employment.type'));
 
   const handleSave = async () => {
     onValidate();
@@ -329,5 +354,7 @@ export const useFormBackgroundInformation = () => {
     schemaFrontend,
     validation,
     isAdditionalFields,
+    isFieldRequired,
+    getErrorText,
   };
 };

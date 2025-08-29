@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import {
-  ref, watch, computed, reactive, nextTick,
+  watch, computed, nextTick,
 } from 'vue';
-import { PrecompiledValidator } from 'UiKit/helpers/validation/PrecompiledValidator';
-import { isEmpty } from 'InvestCommon/helpers/general';
+import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
@@ -13,7 +12,6 @@ import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
 import { storeToRefs } from 'pinia';
 import env from 'InvestCommon/global';
-import { scrollToError } from 'UiKit/helpers/validation/general';
 import { emailRule, errorMessageRule, firstNameRule } from 'UiKit/helpers/validation/rules';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
@@ -86,23 +84,22 @@ const { submitFormToHubspot } = useHubspotForm(env.HUBSPOT_FORM_ID_CONTACT_US);
 const userSessionStore = useSessionStore();
 const { userSessionTraits } = storeToRefs(userSessionStore);
 
-let model = reactive({
-} as FormModelContactUs);
-
-const validator = new PrecompiledValidator<FormModelContactUs>(
+const fieldsPaths = ['name', 'email', 'subject', 'message'];
+const {
+  model,
+  isValid,
+  onValidate,
+  isFieldRequired,
+  getErrorText,
+  scrollToError,
+} = useFormValidation<FormModelContactUs>(
   schemaContactUs,
+  undefined,
+  {} as FormModelContactUs,
+  fieldsPaths
 );
-const validation = ref<unknown>();
-const isValid = computed(() => isEmpty(validation.value || {}));
+
 const isDisabledButton = computed(() => (!isValid.value));
-
-const onValidate = () => {
-  validation.value = validator.getFormValidationErrors(model);
-};
-
-watch(() => model, () => {
-  if (!isValid.value) onValidate();
-}, { deep: true });
 
 watch(() => [userSessionTraits.value?.first_name, userSessionTraits.value?.last_name], () => {
   if (userSessionTraits.value?.first_name || userSessionTraits.value?.last_name) {
@@ -125,11 +122,9 @@ watch(() => props.subject, () => {
 const onSubmit = async () => {
   onValidate();
   if (!isValid.value) {
-    nextTick(() => scrollToError('ContactUsForm'));
+    nextTick(() => scrollToError('VFormContactUs'));
     return;
   }
-
-  // action
 
   await submitFormToHubspot({
     ...model,
@@ -139,7 +134,7 @@ const onSubmit = async () => {
   });
 
   toast(TOAST_OPTIONS);
-  model = reactive({} as FormModelContactUs);
+  Object.assign(model, {} as FormModelContactUs);
   emit('close');
 };
 </script>
@@ -153,10 +148,8 @@ const onSubmit = async () => {
   >
     <VFormGroup
       v-slot="VFormGroupProps"
-      :model="model"
-      :validation="validation"
-      :schema-front="schemaContactUs"
-      path="name"
+      :required="isFieldRequired('name')"
+      :error-text="getErrorText('name')"
       label="Your Name"
       class="contact-us-form__input"
     >
@@ -174,10 +167,8 @@ const onSubmit = async () => {
 
     <VFormGroup
       v-slot="VFormGroupProps"
-      :model="model"
-      :validation="validation"
-      :schema-front="schemaContactUs"
-      path="email"
+      :required="isFieldRequired('email')"
+      :error-text="getErrorText('email')"
       label="Email Address"
       class="contact-us-form__input"
     >
@@ -195,10 +186,8 @@ const onSubmit = async () => {
 
     <VFormGroup
       v-slot="VFormGroupProps"
-      :model="model"
-      :validation="validation"
-      :schema-front="schemaContactUs"
-      path="subject"
+      :required="isFieldRequired('subject')"
+      :error-text="getErrorText('subject')"
       label="Subject"
       class="contact-us-form__input"
     >
@@ -219,10 +208,8 @@ const onSubmit = async () => {
     <VFormGroup
       v-slot="VFormGroupProps"
       class="contact-us-form__input"
-      :model="model"
-      :validation="validation"
-      :schema-front="schemaContactUs"
-      path="message"
+      :required="isFieldRequired('message')"
+      :error-text="getErrorText('message')"
       label="Message"
     >
       <VFormTextarea

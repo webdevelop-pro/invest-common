@@ -11,8 +11,7 @@ import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { FormModelInvestmentObjectives } from 'InvestCommon/types/form';
 import { numberFormatter } from 'InvestCommon/helpers/numberFormatter';
-import { getOptions } from 'UiKit/helpers/model';
-import { useFormValidation } from 'InvestCommon/composable/useFormValidation';
+import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 
 const props = defineProps({
   modelData: Object as PropType<FormModelInvestmentObjectives>,
@@ -49,8 +48,22 @@ const schemaFrontend = {
 
 const schemaBackendLocal = computed(() => (props.schemaBackend ? structuredClone(toRaw(props.schemaBackend)) : null));
 
+const fieldsPaths = [
+  'investment_objectives.duration',
+  'investment_objectives.importance_of_access',
+  'investment_objectives.objectives',
+  'investment_objectives.risk_comfort',
+  'investment_objectives.years_experience',
+];
+
 const {
-  model, validation, isValid, onValidate, schemaObject,
+  model,
+  validation,
+  isValid,
+  onValidate,
+  isFieldRequired,
+  getErrorText,
+  getOptions,
 } = useFormValidation<FormModelInvestmentObjectives>(
   schemaFrontend,
   schemaBackendLocal,
@@ -59,12 +72,13 @@ const {
       ...props.modelData?.investment_objectives,
     },
   } as FormModelInvestmentObjectives,
+  fieldsPaths,
 );
 
-const optionsDuration = computed(() => getOptions('investment_objectives.duration', schemaObject));
-const optionsAccess = computed(() => getOptions('investment_objectives.importance_of_access', schemaObject));
-const optionsObjectives = computed(() => getOptions('investment_objectives.objectives', schemaObject));
-const optionsRiskComfort = computed(() => getOptions('investment_objectives.risk_comfort', schemaObject));
+const optionsDuration = computed(() => getOptions('investment_objectives.duration'));
+const optionsAccess = computed(() => getOptions('investment_objectives.importance_of_access'));
+const optionsObjectives = computed(() => getOptions('investment_objectives.objectives'));
+const optionsRiskComfort = computed(() => getOptions('investment_objectives.risk_comfort'));
 
 defineExpose({
   model, validation, isValid, onValidate,
@@ -96,12 +110,8 @@ const yearsExporience = computed(() => (
       <FormCol>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackend"
-          :schema-front="schemaFrontend"
-          :error-text="errorData?.investment_objectives.objectives"
-          path="investment_objectives.objectives"
+          :required="isFieldRequired('investment_objectives.objectives')"
+          :error-text="getErrorText('investment_objectives.objectives', errorData as any)"
           label="Investment objectives"
         >
           <VFormSelect
@@ -123,12 +133,8 @@ const yearsExporience = computed(() => (
       <FormCol col2>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackend"
-          :schema-front="schemaFrontend"
-          :error-text="errorData?.investment_objectives.years_experience"
-          path="investment_objectives.years_experience"
+          :required="isFieldRequired('investment_objectives.years_experience')"
+          :error-text="getErrorText('investment_objectives.years_experience', errorData as any)"
           label="Investment Years Experience"
         >
           <VFormInput
@@ -147,12 +153,8 @@ const yearsExporience = computed(() => (
       <FormCol col2>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackend"
-          :schema-front="schemaFrontend"
-          :error-text="errorData?.investment_objectives.duration"
-          path="investment_objectives.duration"
+          :required="isFieldRequired('investment_objectives.duration')"
+          :error-text="getErrorText('investment_objectives.duration', errorData as any)"
           label="How long do you plan to invest"
         >
           <VFormSelect
@@ -174,12 +176,8 @@ const yearsExporience = computed(() => (
       <FormCol>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackend"
-          :schema-front="schemaFrontend"
-          :error-text="errorData?.investment_objectives.importance_of_access"
-          path="investment_objectives.importance_of_access"
+          :required="isFieldRequired('investment_objectives.importance_of_access')"
+          :error-text="getErrorText('investment_objectives.importance_of_access', errorData as any)"
           label="How important is it to have immediate access to your invested funds"
         >
           <VFormSelect
@@ -201,12 +199,8 @@ const yearsExporience = computed(() => (
       <FormCol>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :model="model"
-          :validation="validation"
-          :schema-back="schemaBackend"
-          :schema-front="schemaFrontend"
-          :error-text="errorData?.investment_objectives.risk_comfort"
-          path="investment_objectives.risk_comfort"
+          :required="isFieldRequired('investment_objectives.risk_comfort')"
+          :error-text="getErrorText('investment_objectives.risk_comfort', errorData as any)"
           label="How much risk are you comfortable with"
         >
           <VFormSelect

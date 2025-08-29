@@ -34,6 +34,9 @@ const {
   errorData,
   setOfferCommentState,
   setOfferCommentOptionsState,
+  isFieldRequired,
+  getErrorText,
+  formErrors,
 } = useVFormComments(props.offerId);
 </script>
 
@@ -41,11 +44,9 @@ const {
   <div class="VFormComments v-form-comments">
     <VFormGroup
       v-slot="VFormGroupProps"
-      :model="model"
-      :validation="validation"
-      :schema-back="schemaBackend"
-      :error-text="errorData?.comment"
-      path="comment"
+      :required="isFieldRequired('comment')"
+      :error-text="getErrorText('comment', errorData)"
+      data-testid="comment-group"
       label="Ask a Question"
       class="v-form-comments__comment-wrap"
     >
