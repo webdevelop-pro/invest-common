@@ -1,7 +1,7 @@
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import { toasterErrorHandlingAnalytics } from 'InvestCommon/data/repository/error/toasterErrorHandlingAnalytics';
 import { IAccreditationData } from 'InvestCommon/types/api/invest';
-import env from 'InvestCommon/global';
+import env from 'InvestCommon/domain/config/env';
 import { v4 as uuidv4 } from 'uuid';
 import { createActionState } from 'InvestCommon/data/repository/repository';
 

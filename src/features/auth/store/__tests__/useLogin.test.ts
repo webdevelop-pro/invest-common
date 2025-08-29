@@ -44,7 +44,7 @@ vi.mock('InvestCommon/domain/session/store/useSession', () => {
   };
 });
 
-vi.mock('InvestCommon/composable/useHubspotForm', () => ({
+vi.mock('UiKit/composables/useHubspotForm', () => ({
   useHubspotForm: vi.fn(() => ({
     submitFormToHubspot: vi.fn().mockResolvedValue(undefined),
   })),

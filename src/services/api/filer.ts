@@ -1,4 +1,4 @@
-import env from 'InvestCommon/global';
+import env from 'InvestCommon/domain/config/env';
 import { requiredFetchParams } from 'UiKit/helpers/api/requiredFetchParams';
 import { IFilerItem } from 'InvestCommon/types/api/filer.type';
 

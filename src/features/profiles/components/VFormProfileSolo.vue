@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useVFormProfileSolo } from './logic/useVFormProfileSolo';
-import VFormPartialPersonalInformation from 'InvestCommon/components/forms/VFormPartialPersonalInformation.vue';
+import VFormPartialPersonalInformation from 'InvestCommon/shared/components/forms/VFormPartialPersonalInformation.vue';
 import VFormPartialPlanInformation from './VFormPartialPlanInformation.vue';
 
 const props = defineProps({

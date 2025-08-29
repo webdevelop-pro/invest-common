@@ -1,7 +1,7 @@
 import { computed } from 'vue';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
-import env from 'InvestCommon/global';
+import env from 'InvestCommon/domain/config/env';
 import { toasterErrorHandlingAnalytics } from 'InvestCommon/data/repository/error/toasterErrorHandlingAnalytics';
 import { createActionState } from 'InvestCommon/data/repository/repository';
 import { INotification } from 'InvestCommon/data/notifications/notifications.types';

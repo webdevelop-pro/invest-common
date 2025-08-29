@@ -4,7 +4,7 @@ import { useRoute } from 'vitepress';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { storeToRefs } from 'pinia';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
-import { urlSignin } from 'InvestCommon/global/links';
+import { urlSignin } from 'InvestCommon/domain/config/links';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useKycButton } from 'InvestCommon/features/kyc/store/useKycButton';

@@ -7,7 +7,7 @@ import VTooltip from 'UiKit/components/VTooltip.vue';
 import plus from 'UiKit/assets/images/plus.svg';
 import VTableDefault from 'InvestCommon/shared/components/VTableDefault.vue';
 import VTableWalletTokensItem from './VTableWalletTokensItem.vue';
-import env from 'InvestCommon/global';
+import env from 'InvestCommon/domain/config/env';
 import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
 
 defineProps({

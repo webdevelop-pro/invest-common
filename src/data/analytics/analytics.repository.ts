@@ -1,6 +1,6 @@
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import { createActionState } from 'InvestCommon/data/repository/repository';
-import env from 'InvestCommon/global';
+import env from 'InvestCommon/domain/config/env';
 import { IAnalyticsMessage, IAnalyticsResponse } from './analytics.type';
 
 const { ANALYTIC_URL } = env;

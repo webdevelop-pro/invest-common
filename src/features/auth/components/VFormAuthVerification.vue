@@ -4,7 +4,7 @@ import { useVerificationStore } from '../store/useVerification';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
-import { urlForgot } from 'InvestCommon/global/links';
+import { urlForgot } from 'InvestCommon/domain/config/links';
 
 const verificationStore = useVerificationStore();
 const {

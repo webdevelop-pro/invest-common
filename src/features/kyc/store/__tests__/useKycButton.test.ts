@@ -6,13 +6,13 @@ import { createPinia, setActivePinia } from 'pinia';
 import { nextTick, ref } from 'vue';
 import { InvestKycTypes } from 'InvestCommon/types/api/invest';
 import { KycTextStatuses } from 'InvestCommon/data/kyc/kyc.types';
-import { ROUTE_SUBMIT_KYC } from 'InvestCommon/helpers/enums/routes';
-import { urlContactUs, urlProfileKYC } from 'InvestCommon/global/links';
+import { ROUTE_SUBMIT_KYC } from 'InvestCommon/domain/config/enums/routes';
+import { urlContactUs, urlProfileKYC } from 'InvestCommon/domain/config/links';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useRepositoryKyc } from 'InvestCommon/data/kyc/kyc.repository';
 import { useKycButton } from '../useKycButton';
-import { PROFILE_TYPES } from 'InvestCommon/global/investment.json';
+import { PROFILE_TYPES } from 'InvestCommon/domain/config/enums/profileTypes';
 
 const mockCookies = {
   get: vi.fn(),

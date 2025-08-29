@@ -1,16 +1,17 @@
-import { ref, computed, useTemplateRef, nextTick } from 'vue';
+import { ref, computed, useTemplateRef, nextTick, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
-import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
+import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { storeToRefs } from 'pinia';
-import { ROUTE_SETTINGS_MFA } from 'InvestCommon/helpers/enums/routes';
+import { ROUTE_SETTINGS_MFA } from 'InvestCommon/domain/config/enums/routes';
 import { scrollToError } from 'UiKit/helpers/validation/general';
 import { FormChild } from 'InvestCommon/types/form';
-import env from 'InvestCommon/global';
+import { useRepositoryFiler } from 'InvestCommon/data/filer/filer.repository';
+import env from 'InvestCommon/domain/config/env';
 
 export function useSettingsAccountDetails() {
   const globalLoader = useGlobalLoader();
@@ -20,6 +21,8 @@ export function useSettingsAccountDetails() {
   const { selectedUserProfileId } = storeToRefs(userProfileStore);
   const useRepositoryProfilesStore = useRepositoryProfiles();
   const { getUserState, setUserState } = storeToRefs(useRepositoryProfilesStore);
+  const filerRepository = useRepositoryFiler();
+  const { notificationFieldsState } = storeToRefs(filerRepository);
 
   const router = useRouter();
   const userSessionStore = useSessionStore();
@@ -51,9 +54,10 @@ export function useSettingsAccountDetails() {
   const backButtonRoute = computed(() => ({ 
     name: ROUTE_SETTINGS_MFA, 
     params: { profileId: selectedUserProfileId.value } 
-  }));
+  }))
 
   const onUploadId = async (id: string) => {
+    isLoading.value = true;
     const body = {
       image_link_id: id,
     };
@@ -81,6 +85,23 @@ export function useSettingsAccountDetails() {
     toast(TOAST_OPTIONS);
     router.push({ name: ROUTE_SETTINGS_MFA, params: { profileId: selectedUserProfileId.value } });
   };
+
+  let debounceTimeout: NodeJS.Timeout | null = null;
+  watch(notificationFieldsState, () => {
+    if (!getUserState.value.loading) {
+      // Clear any existing timeout
+      if (debounceTimeout) {
+        clearTimeout(debounceTimeout);
+      }
+      
+      // Set new timeout with 3 second delay
+      debounceTimeout = setTimeout(async () => {
+        await useRepositoryProfilesStore.getUser();
+        isLoading.value = false;
+        debounceTimeout = null; // Reset timeout reference
+      }, 3000);
+    }
+  }, { deep: true });
 
   return {
     // State

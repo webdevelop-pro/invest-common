@@ -1,6 +1,6 @@
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import { toasterErrorHandling } from 'InvestCommon/data/repository/error/toasterErrorHandling';
-import env from 'InvestCommon/global';
+import env from 'InvestCommon/domain/config/env';
 import { createActionState } from 'InvestCommon/data/repository/repository';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { IDistributions, IDistributionsMeta } from 'InvestCommon/data/distributions/distributions.types';

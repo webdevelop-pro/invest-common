@@ -7,8 +7,8 @@ import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
-import { urlProfile } from 'InvestCommon/global/links';
-import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
+import { urlProfile } from 'InvestCommon/domain/config/links';
+import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
 import { SELFSERVICE } from './type';
 
 type FormModelTOTP = {

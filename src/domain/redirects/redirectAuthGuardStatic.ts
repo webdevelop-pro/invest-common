@@ -5,7 +5,7 @@ import {
   urlAuthenticator,
   // urlSignin, urlSignup, urlForgot, urlCheckEmail,
   // urlProfile,
-} from 'InvestCommon/global/links';
+} from 'InvestCommon/domain/config/links';
 // import { navigateWithQueryParams } from 'UiKit/helpers/general';
 
 // const pagesToRedirectIfLoggedIn = [

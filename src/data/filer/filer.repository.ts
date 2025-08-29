@@ -1,9 +1,10 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
-import env from 'InvestCommon/global';
+import env from 'InvestCommon/domain/config/env';
 import { IFilerItem } from 'InvestCommon/types/api/filer.type';
 import { toasterErrorHandlingAnalytics } from 'InvestCommon/data/repository/error/toasterErrorHandlingAnalytics';
 import { createActionState } from 'InvestCommon/data/repository/repository';
+import { INotification } from 'InvestCommon/data/notifications/notifications.types';
 
 const { FILER_URL } = env;
 
@@ -37,6 +38,7 @@ export const useRepositoryFiler = defineStore('repository-filer', () => {
   const postSignurlState = createActionState<any>();
   const uploadFileState = createActionState<string>();
   const getImageByIdLinkState = createActionState<IFilerItem[]>();
+  const notificationFieldsState = createActionState<INotification['data']['fields']>();
 
   // Actions
   const getFiles = async (object_id: number | string, object_name: string) => {
@@ -109,11 +111,11 @@ export const useRepositoryFiler = defineStore('repository-filer', () => {
     }
   };
 
-  const getImageByIdLink = async (id: number | string) => {
+  const getImageByIdLink = async (id: number | string, size: string = 'small') => {
     try {
       getImageByIdLinkState.value.loading = true;
       getImageByIdLinkState.value.error = null;
-      const response = await apiClient.get<IFilerItem[]>(`/auth/files/${id}?size=small`);
+      const response = await apiClient.get<IFilerItem[]>(`/auth/files/${id}?size=${size}`);
       getImageByIdLinkState.value.data = response.data;
       return response.data;
     } catch (err) {
@@ -151,12 +153,36 @@ export const useRepositoryFiler = defineStore('repository-filer', () => {
     return true;
   };
 
+  const updateNotificationData = (notification: INotification) => {
+    const { fields } = notification.data;
+    const objectId = fields?.object_id;
+    
+    if (!fields || objectId === undefined) return;
+    
+    // Store notification fields in state for access from other parts
+    notificationFieldsState.value.data = fields;
+    notificationFieldsState.value.error = null;
+    
+    const updateStateArray = (stateArray: IFilerItem[] | undefined) => {
+      if (!stateArray) return;
+      const index = stateArray.findIndex((item) => item.id === objectId);
+      if (index !== -1) {
+        Object.assign(stateArray[index], fields);
+      }
+    };
+    
+    updateStateArray(getFilesState.value.data);
+    updateStateArray(getPublicFilesState.value.data);
+    updateStateArray(getImageByIdLinkState.value.data);
+  };
+
   const resetAll = () => {
     getFilesState.value = { loading: false, error: null, data: undefined };
     getPublicFilesState.value = { loading: false, error: null, data: undefined };
     postSignurlState.value = { loading: false, error: null, data: undefined };
     uploadFileState.value = { loading: false, error: null, data: undefined };
     getImageByIdLinkState.value = { loading: false, error: null, data: undefined };
+    notificationFieldsState.value = { loading: false, error: null, data: undefined };
   };
 
   return {
@@ -166,6 +192,7 @@ export const useRepositoryFiler = defineStore('repository-filer', () => {
     postSignurlState,
     uploadFileState,
     getImageByIdLinkState,
+    notificationFieldsState,
     // Actions
     getFiles,
     getPublicFiles,
@@ -174,6 +201,7 @@ export const useRepositoryFiler = defineStore('repository-filer', () => {
     getImageByIdLink,
     resetAll,
     uploadHandler,
+    updateNotificationData,
   };
 });
 

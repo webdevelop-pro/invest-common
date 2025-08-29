@@ -4,7 +4,7 @@ import {
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
 import { nextTick } from 'vue';
-import { urlSignin, urlAuthenticator } from 'InvestCommon/global/links';
+import { urlSignin, urlAuthenticator } from 'InvestCommon/domain/config/links';
 import { redirectAuthGuardStatic } from '../redirectAuthGuardStatic';
 
 vi.mock('InvestCommon/domain/session/store/useSession', () => ({

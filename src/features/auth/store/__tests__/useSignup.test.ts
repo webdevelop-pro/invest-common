@@ -42,7 +42,7 @@ vi.mock('InvestCommon/domain/session/store/useSession', () => ({
 
 // no mock for useFormValidation – use the real implementation
 
-vi.mock('InvestCommon/composable/useHubspotForm', () => ({
+vi.mock('UiKit/composables/useHubspotForm', () => ({
   useHubspotForm: vi.fn(() => ({
     submitFormToHubspot: vi.fn(),
   })),

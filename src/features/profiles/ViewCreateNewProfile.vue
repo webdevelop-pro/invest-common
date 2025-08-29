@@ -4,7 +4,7 @@ import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import { defineAsyncComponent, ref, watch, nextTick } from 'vue';
 import VLayoutForm from 'InvestCommon/shared/layouts/VLayoutForm.vue';
 import VFormCreateProfileSelectType from './components/VFormCreateProfileSelectType.vue';
-import VFormPartialPersonalInformationSkeleton from 'InvestCommon/components/forms/VFormPartialPersonalInformationSkeleton.vue';
+import VFormPartialPersonalInformationSkeleton from 'InvestCommon/shared/components/forms/VFormPartialPersonalInformationSkeleton.vue';
 
 const VFormProfileEntity = defineAsyncComponent({
   loader: () => import('./components/VFormProfileEntity.vue'),

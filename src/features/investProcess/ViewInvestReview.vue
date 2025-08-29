@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ROUTE_INVEST_FUNDING } from 'InvestCommon/helpers/enums/routes';
+import { ROUTE_INVEST_FUNDING } from 'InvestCommon/domain/config/enums/routes';
 import { useInvestReview } from './logic/useInvestReview';
 import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
 import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';

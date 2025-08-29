@@ -2,7 +2,7 @@ import { watch } from 'vue';
 import { INotification } from 'InvestCommon/data/notifications/notifications.types';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { useWebSocket } from '@vueuse/core';
-import env from 'InvestCommon/global/index';
+import env from 'InvestCommon/domain/config/env';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 import { useRepositoryNotifications } from 'InvestCommon/data/notifications/notifications.repository';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
@@ -10,6 +10,7 @@ import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repos
 import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
 import { useRepositoryOffer } from 'InvestCommon/data/offer/offer.repository';
+import { useRepositoryFiler } from 'InvestCommon/data/filer/filer.repository';
 
 const { NOTIFICATION_URL } = env;
 
@@ -30,6 +31,7 @@ export const useDomainWebSocketStore = defineStore('domainWebsockets', () => {
   const repositoryNotifications = useRepositoryNotifications();
   const repositoryInvestment = useRepositoryInvestment();
   const repositoryOffer = useRepositoryOffer();
+  const repositoryFiler = useRepositoryFiler();
 
   const handleInternalMessage = (notification: INotification) => {
     switch (notification.data.obj) {
@@ -45,6 +47,9 @@ export const useDomainWebSocketStore = defineStore('domainWebsockets', () => {
         break;
       case 'offer':
         repositoryOffer.updateNotificationData(notification);
+        break;
+      case 'filer':
+        repositoryFiler.updateNotificationData(notification);
         break;
       default:
         // Optionally handle unknown types

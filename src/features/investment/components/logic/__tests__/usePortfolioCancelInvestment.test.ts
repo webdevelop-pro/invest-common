@@ -5,11 +5,11 @@ import { setActivePinia, createPinia } from 'pinia';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { IInvestmentFormatted } from 'InvestCommon/data/investment/investment.types';
-import { ROUTE_DASHBOARD_PORTFOLIO } from 'InvestCommon/helpers/enums/routes';
+import { ROUTE_DASHBOARD_PORTFOLIO } from 'InvestCommon/domain/config/enums/routes';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
-import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
+import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
 // @ts-ignore - path alias resolved by Vite/Vitest config
 import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { usePortfolioCancelInvestment } from '../usePortfolioCancelInvestment';
@@ -19,7 +19,7 @@ vi.mock('vue-router', () => ({ useRouter: vi.fn() }));
 vi.mock('InvestCommon/data/investment/investment.repository', () => ({ useRepositoryInvestment: vi.fn() }));
 vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({ useProfilesStore: vi.fn() }));
 vi.mock('InvestCommon/domain/session/store/useSession', () => ({ useSessionStore: vi.fn() }));
-vi.mock('InvestCommon/composable/useHubspotForm', () => ({ useHubspotForm: vi.fn() }));
+vi.mock('UiKit/composables/useHubspotForm', () => ({ useHubspotForm: vi.fn() }));
 vi.mock('UiKit/helpers/validation/useFormValidation', () => ({ useFormValidation: vi.fn() }));
 // no direct mock for general scrollToError; we use the one provided by useFormValidation
 

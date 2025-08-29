@@ -3,7 +3,7 @@ import {
   IProfileFormatted,
 } from '../profiles.types';
 import { InvestKycTypes, AccreditationTypes } from 'InvestCommon/types/api/invest';
-import { PROFILE_TYPES } from 'InvestCommon/global/investment.json';
+import { PROFILE_TYPES } from 'InvestCommon/domain/config/enums/profileTypes';
 
 export class ProfileFormatter {
   private profile: IProfileIndividual;

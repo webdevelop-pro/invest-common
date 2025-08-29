@@ -1,12 +1,12 @@
 import { computed, type Ref } from 'vue';
 import { useData } from 'vitepress';
-import env from 'InvestCommon/global';
+import env from 'InvestCommon/domain/config/env';
 import { useRepositoryFiler } from 'InvestCommon/data/filer/filer.repository';
 import { storeToRefs } from 'pinia';
 import type { IOfferFormatted } from 'InvestCommon/data/offer/offer.types';
 import {
   urlHome, urlOffers, 
-} from 'InvestCommon/global/links';
+} from 'InvestCommon/domain/config/links';
 
 const { FILER_URL } = env;
 

@@ -4,7 +4,7 @@ import {
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
-import { urlSignin } from 'InvestCommon/global/links';
+import { urlSignin } from 'InvestCommon/domain/config/links';
 import { resetAllData } from 'InvestCommon/domain/resetAllData';
 import { redirectAuthGuard } from '../redirectAuthGuard';
 

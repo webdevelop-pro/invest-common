@@ -8,7 +8,7 @@ import {
 } from 'vue';
 import { useData, useRoute } from 'vitepress';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
-import env from 'InvestCommon/global/index';
+import env from 'InvestCommon/domain/config/env';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';

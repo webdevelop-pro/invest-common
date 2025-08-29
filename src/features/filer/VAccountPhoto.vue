@@ -16,6 +16,7 @@ const props = defineProps({
     type: Number,
     default: 0,
   },
+  loading: Boolean,
 });
 
 const emit = defineEmits(['upload-id']);
@@ -40,6 +41,7 @@ const {
         size="large"
         :src="(imageId > 0) ? `${FILER_URL}/auth/files/${imageId}?size=medium` : undefined"
         alt="avatar image"
+        :loading="isLoading || loading"
         class="v-account-photo__avatar"
       />
       <div>

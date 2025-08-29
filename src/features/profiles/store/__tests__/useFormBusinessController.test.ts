@@ -7,7 +7,7 @@ import { useRouter } from 'vue-router';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { scrollToError } from 'UiKit/helpers/validation/general';
-import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/helpers/enums/routes';
+import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/domain/config/enums/routes';
 import { useFormBusinessController } from '../useFormBusinessController';
 
 const mockFormRef = ref<any>(null);
@@ -86,7 +86,7 @@ vi.mock('InvestCommon/domain/session/store/useSession', () => ({
   })),
 }));
 
-vi.mock('InvestCommon/composable/useHubspotForm', () => ({
+vi.mock('UiKit/composables/useHubspotForm', () => ({
   useHubspotForm: vi.fn(() => hubspotFormMockInstance),
 }));
 

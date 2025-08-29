@@ -4,7 +4,7 @@ import {
 } from 'vue';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
-import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/helpers/enums/routes';
+import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/domain/config/enums/routes';
 import { descriptionFileRule, errorMessageRule, noteFileRule } from 'UiKit/helpers/validation/rules';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { FormModelAccreditationFileInput } from 'InvestCommon/types/form';

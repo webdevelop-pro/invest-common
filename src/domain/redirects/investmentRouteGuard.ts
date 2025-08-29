@@ -2,7 +2,7 @@ import { RouteLocationNormalized } from 'vue-router';
 import { computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
-import { usePageSeo } from 'InvestCommon/composable/usePageSeo';
+import { usePageSeo } from 'UiKit/composables/usePageSeo';
 
 const { setMetaData } = usePageSeo();
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useNotifications } from 'InvestCommon/features/notifications/store/useNotifications';
-import { ROUTE_NOTIFICATIONS } from 'InvestCommon/helpers/enums/routes';
+import { ROUTE_NOTIFICATIONS } from 'InvestCommon/domain/config/enums/routes';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { storeToRefs } from 'pinia';
 import arrowRight from 'UiKit/assets/images/arrow-right.svg';
@@ -9,7 +9,7 @@ import {
   VSheetFooter,
 } from 'UiKit/components/Base/VSheet';
 import { defineAsyncComponent } from 'vue';
-import { urlNotifications } from 'InvestCommon/global/links';
+import { urlNotifications } from 'InvestCommon/domain/config/links';
 
 const WdNotificationTable = defineAsyncComponent({
   loader: () => import('./VNotificationTable.vue'),

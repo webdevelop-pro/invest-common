@@ -4,7 +4,7 @@ import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
 import VFormInputPassword from 'UiKit/components/Base/VForm/VFormInputPassword.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
-import { urlForgot } from 'InvestCommon/global/links';
+import { urlForgot } from 'InvestCommon/domain/config/links';
 import { useLoginStore } from '../store/useLogin';
 
 const loginStore = useLoginStore();

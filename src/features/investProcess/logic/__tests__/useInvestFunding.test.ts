@@ -5,7 +5,7 @@ import { setActivePinia, createPinia } from 'pinia';
 import { ref, reactive, nextTick } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
-import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
+import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
 import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
@@ -13,7 +13,7 @@ import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
 import { FundingTypes } from 'InvestCommon/helpers/enums/general';
-import { ROUTE_INVEST_REVIEW } from 'InvestCommon/helpers/enums/routes';
+import { ROUTE_INVEST_REVIEW } from 'InvestCommon/domain/config/enums/routes';
 import { useInvestFunding } from '../useInvestFunding';
 
 
@@ -26,7 +26,7 @@ vi.mock('UiKit/store/useGlobalLoader', () => ({
   useGlobalLoader: vi.fn(),
 }));
 
-vi.mock('InvestCommon/composable/useHubspotForm', () => ({
+vi.mock('UiKit/composables/useHubspotForm', () => ({
   useHubspotForm: vi.fn(),
 }));
 

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { PropType, computed } from 'vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
-import { urlContactUs } from 'InvestCommon/global/links';
+import { urlContactUs } from 'InvestCommon/domain/config/links';
 import {
   VDialogContent, VDialogFooter, VDialogTitle, VDialog,
   VDialogHeader,

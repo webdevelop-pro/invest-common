@@ -9,7 +9,7 @@ import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
 import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import {
   urlTerms, urlPrivacy, urlBlog,
-} from 'InvestCommon/global/links';
+} from 'InvestCommon/domain/config/links';
 import { useSignupStore } from '../store/useSignup';
 import { onMounted } from 'vue';
 

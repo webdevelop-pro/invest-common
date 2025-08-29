@@ -3,7 +3,7 @@ import { computed, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { capitalizeFirstLetter } from 'UiKit/helpers/text';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
-import { ROUTE_CREATE_PROFILE } from 'InvestCommon/helpers/enums/routes';
+import { ROUTE_CREATE_PROFILE } from 'InvestCommon/domain/config/enums/routes';
 
 interface ISelectedProfile {
   text: string;

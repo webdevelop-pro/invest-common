@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
-import VPageTopInfoAndTabs from 'InvestCommon/components/VPageTopInfoAndTabs.vue';
+import VPageTopInfoAndTabs from 'InvestCommon/shared/components/VPageTopInfoAndTabs.vue';
 import { computed, PropType } from 'vue'
-import { ROUTE_SETTINGS_MFA, ROUTE_SETTINGS_SECURITY } from 'InvestCommon/helpers/enums/routes';
+import { ROUTE_SETTINGS_MFA, ROUTE_SETTINGS_SECURITY } from 'InvestCommon/domain/config/enums/routes';
 import { VTabsContent } from 'UiKit/components/Base/VTabs';
 import SettingsTopInfoLeft from './components/SettingsTopInfoLeft.vue';
 import SettingsSecurity from './components/SettingsSecurity.vue';

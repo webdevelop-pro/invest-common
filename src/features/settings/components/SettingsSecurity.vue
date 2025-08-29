@@ -3,7 +3,7 @@ import VTableDefault from 'InvestCommon/shared/components/VTableDefault.vue';
 import VTableActivityItem from './VTableActivityItem.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import circleExclamation from 'UiKit/assets/images/circle-exclamation.svg';
-import { urlContactUs } from 'InvestCommon/global/links';
+import { urlContactUs } from 'InvestCommon/domain/config/links';
 import { useSettingsSecurity } from './logic/useSettingsSecurity';
 
 const {

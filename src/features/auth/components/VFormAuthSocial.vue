@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 // Importing social icons
-import GoogleIcon from 'InvestCommon/assets/images/social-login/google1.svg?component';
-// import FacebookIcon from 'InvestCommon/assets/images/social-login/facebook1.svg?component';
-import GithubIcon from 'InvestCommon/assets/images/social-login/github1.svg?component';
-import LinkedinIcon from 'InvestCommon/assets/images/social-login/linkedin1.svg?component';
-import GoogleHoverIcon from 'InvestCommon/assets/images/social-login/google1-hover.svg?component';
-// import FacebookHoverIcon from 'InvestCommon/assets/images/social-login/facebook-hover.svg?component';
-import GithubHoverIcon from 'InvestCommon/assets/images/social-login/github1-hover.svg?component';
-import LinkedinHoverIcon from 'InvestCommon/assets/images/social-login/linkedin-hover.svg?component';
+import GoogleIcon from 'InvestCommon/shared/assets/images/social-login/google1.svg?component';
+// import FacebookIcon from 'InvestCommon/shared/assets/images/social-login/facebook1.svg?component';
+import GithubIcon from 'InvestCommon/shared/assets/images/social-login/github1.svg?component';
+import LinkedinIcon from 'InvestCommon/shared/assets/images/social-login/linkedin1.svg?component';
+import GoogleHoverIcon from 'InvestCommon/shared/assets/images/social-login/google1-hover.svg?component';
+// import FacebookHoverIcon from 'InvestCommon/shared/assets/images/social-login/facebook-hover.svg?component';
+import GithubHoverIcon from 'InvestCommon/shared/assets/images/social-login/github1-hover.svg?component';
+import LinkedinHoverIcon from 'InvestCommon/shared/assets/images/social-login/linkedin-hover.svg?component';
 
 const emit = defineEmits<{(e: 'click', provider: string): void;
 }>();

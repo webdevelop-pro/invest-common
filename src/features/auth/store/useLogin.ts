@@ -3,12 +3,12 @@ import {
 } from 'vue';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
-import { urlSignup, urlProfile, urlAuthenticator } from 'InvestCommon/global/links';
+import { urlSignup, urlProfile, urlAuthenticator } from 'InvestCommon/domain/config/links';
 import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
 import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { emailRule, errorMessageRule, passwordRule } from 'UiKit/helpers/validation/rules';
-import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
+import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { SELFSERVICE } from './type';
 

@@ -3,11 +3,11 @@ import {
 } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
-import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
+import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
 import { currency } from 'InvestCommon/helpers/currency';
 import {
   ROUTE_INVEST_OWNERSHIP,
-} from 'InvestCommon/helpers/enums/routes';
+} from 'InvestCommon/domain/config/enums/routes';
 import { numberFormatter } from 'InvestCommon/helpers/numberFormatter';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';

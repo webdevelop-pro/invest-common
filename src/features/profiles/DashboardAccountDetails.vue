@@ -2,10 +2,10 @@
 import DashboardTabsTopInfo from '@/views/Dashboard/components/DashboardTabsTopInfo.vue';
 import { storeToRefs } from 'pinia';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
-import { PROFILE_TYPES } from 'InvestCommon/global/investment.json';
+import { PROFILE_TYPES } from 'InvestCommon/domain/config/enums/profileTypes';
 import { computed } from 'vue';
 import DashboardAccountDetailsReadonlyForm from './components/DashboardAccountDetailsReadonlyForm.vue';
-import { urlContactUs } from 'InvestCommon/global/links';
+import { urlContactUs } from 'InvestCommon/domain/config/links';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { 
   ROUTE_DASHBOARD_PERSONAL_DETAILS,
@@ -17,7 +17,7 @@ import {
   ROUTE_DASHBOARD_BUSINESS_CONTROLLER,
   ROUTE_DASHBOARD_CUSTODIAN_INFO,
   ROUTE_DASHBOARD_PLAN_INFO,
-} from 'InvestCommon/helpers/enums/routes';
+} from 'InvestCommon/domain/config/enums/routes';
 import { IUserDataIndividual } from '@/data/profiles/profiles.types';
 
 // Utility functions

@@ -4,14 +4,14 @@ import {
 import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
-import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
+import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { IInvestmentFormatted } from 'InvestCommon/data/investment/investment.types';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
 import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import {
   ROUTE_DASHBOARD_PORTFOLIO,
-} from 'InvestCommon/helpers/enums/routes';
+} from 'InvestCommon/domain/config/enums/routes';
 
 type FormModel = {
   cancelation_reason: string;

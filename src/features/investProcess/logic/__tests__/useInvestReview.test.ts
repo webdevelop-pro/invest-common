@@ -6,10 +6,10 @@ import { ref, nextTick } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
-import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
+import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
-import { ROUTE_INVEST_THANK } from 'InvestCommon/helpers/enums/routes';
+import { ROUTE_INVEST_THANK } from 'InvestCommon/domain/config/enums/routes';
 import { useInvestReview } from '../useInvestReview';
 
 vi.mock('vue-router', () => ({
@@ -25,7 +25,7 @@ vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
   useProfilesStore: vi.fn(),
 }));
 
-vi.mock('InvestCommon/composable/useHubspotForm', () => ({
+vi.mock('UiKit/composables/useHubspotForm', () => ({
   useHubspotForm: vi.fn(),
 }));
 

@@ -3,7 +3,7 @@ import { toasterErrorHandlingAnalytics } from 'InvestCommon/data/repository/erro
 import {
   IOffer, IOfferData, IOfferCommentsResponse, IOfferCommentPayload,
 } from 'InvestCommon/types/api/offers';
-import env from 'InvestCommon/global';
+import env from 'InvestCommon/domain/config/env';
 import { createActionState } from 'InvestCommon/data/repository/repository';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { OfferFormatter } from 'InvestCommon/data/offer/offer.formatter';

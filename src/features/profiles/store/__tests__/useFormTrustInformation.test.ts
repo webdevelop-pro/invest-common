@@ -2,7 +2,7 @@ import {
   describe, it, expect, vi, beforeEach, afterEach,
 } from 'vitest';
 import { ref } from 'vue';
-import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/helpers/enums/routes';
+import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/domain/config/enums/routes';
 import { useFormTrustInformation } from '../useFormTrustInformation';
 
 const mockFormRef = ref<any>(null);
@@ -68,7 +68,7 @@ vi.mock('InvestCommon/domain/session/store/useSession', () => ({
   })),
 }));
 
-vi.mock('InvestCommon/composable/useHubspotForm', () => ({
+vi.mock('UiKit/composables/useHubspotForm', () => ({
   useHubspotForm: vi.fn(() => ({
     submitFormToHubspot: mockSubmitFormToHubspot,
   })),

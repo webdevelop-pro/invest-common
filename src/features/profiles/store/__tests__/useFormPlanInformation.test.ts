@@ -6,7 +6,7 @@ import { ref } from 'vue';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
-import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
+import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
 import { useFormPlanInformation } from '../useFormPlanInformation';
 
 const mockFormRef = ref<any>(null);
@@ -44,7 +44,7 @@ vi.mock('InvestCommon/domain/session/store/useSession', () => ({
   useSessionStore: vi.fn(),
 }));
 
-vi.mock('InvestCommon/composable/useHubspotForm', () => ({
+vi.mock('UiKit/composables/useHubspotForm', () => ({
   useHubspotForm: vi.fn(),
 }));
 

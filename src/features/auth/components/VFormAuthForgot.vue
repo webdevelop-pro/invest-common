@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { urlSignin } from 'InvestCommon/global/links';
+import { urlSignin } from 'InvestCommon/domain/config/links';
 import { useForgotStore } from '../store/useForgot';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';

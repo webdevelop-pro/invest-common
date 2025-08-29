@@ -88,7 +88,7 @@ vi.mock('InvestCommon/data/accreditation/accreditation.repository', () => ({
 }));
 
 const mockSubmitFormToHubspot = vi.fn();
-vi.mock('InvestCommon/composable/useHubspotForm', () => ({
+vi.mock('UiKit/composables/useHubspotForm', () => ({
   useHubspotForm: vi.fn(() => ({ submitFormToHubspot: mockSubmitFormToHubspot })),
 }));
 

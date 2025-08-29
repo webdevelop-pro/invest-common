@@ -53,7 +53,7 @@ export function useAccountForm(props: UseAccountFormProps) {
   const isDialogContactUsOpen = ref(false);
 
   const VDialogContactUs = defineAsyncComponent({
-    loader: () => import('InvestCommon/components/dialogs/VDialogContactUs.vue'),
+    loader: () => import('InvestCommon/shared/components/dialogs/VDialogContactUs.vue'),
   });
 
   const {

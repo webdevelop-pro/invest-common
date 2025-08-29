@@ -6,7 +6,7 @@ import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { storeToRefs } from 'pinia';
 import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
-import { ROUTE_INVESTMENT_DOCUMENTS, ROUTE_INVESTMENT_TIMELINE } from 'InvestCommon/helpers/enums/routes';
+import { ROUTE_INVESTMENT_DOCUMENTS, ROUTE_INVESTMENT_TIMELINE } from 'InvestCommon/domain/config/enums/routes';
 import { useRoute, useRouter } from 'vue-router';
 import file from 'UiKit/assets/images/file.svg';
 import timeline from 'UiKit/assets/images/timeline.svg';

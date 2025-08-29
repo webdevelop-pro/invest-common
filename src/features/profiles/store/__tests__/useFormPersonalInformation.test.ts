@@ -8,9 +8,9 @@ import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryAccreditation } from 'InvestCommon/data/accreditation/accreditation.repository';
-import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
+import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
 import { scrollToError } from 'UiKit/helpers/validation/general';
-import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/helpers/enums/routes';
+import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/domain/config/enums/routes';
 import { useFormPersonalInformation } from '../useFormPersonalInformation';
 
 const mockRouterInstance = {
@@ -66,7 +66,7 @@ vi.mock('InvestCommon/data/accreditation/accreditation.repository', () => ({
   })),
 }));
 
-vi.mock('InvestCommon/composable/useHubspotForm', () => ({
+vi.mock('UiKit/composables/useHubspotForm', () => ({
   useHubspotForm: vi.fn(() => ({
     submitFormToHubspot: vi.fn(),
   })),

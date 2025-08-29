@@ -4,13 +4,13 @@ import {
 import { setActivePinia, createPinia } from 'pinia';
 import { ref, nextTick } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { useHelloSign } from 'InvestCommon/composable/useHelloSign';
-import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
+import { useHelloSign } from 'UiKit/composables/useHelloSign';
+import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
 import { useRepositoryEsign } from 'InvestCommon/data/esign/esign.repository';
-import { ROUTE_INVEST_FUNDING } from 'InvestCommon/helpers/enums/routes';
+import { ROUTE_INVEST_FUNDING } from 'InvestCommon/domain/config/enums/routes';
 import { useInvestSignature } from '../useInvestSignature';
 
 vi.mock('vue-router', () => ({
@@ -18,11 +18,11 @@ vi.mock('vue-router', () => ({
   useRoute: vi.fn(),
 }));
 
-vi.mock('InvestCommon/composable/useHelloSign', () => ({
+vi.mock('UiKit/composables/useHelloSign', () => ({
   useHelloSign: vi.fn(),
 }));
 
-vi.mock('InvestCommon/composable/useHubspotForm', () => ({
+vi.mock('UiKit/composables/useHubspotForm', () => ({
   useHubspotForm: vi.fn(),
 }));
 

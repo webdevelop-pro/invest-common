@@ -2,7 +2,7 @@ import {
   describe, it, expect, vi, beforeEach, afterEach,
 } from 'vitest';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
-import { urlOffers, urlSignin } from 'InvestCommon/global/links';
+import { urlOffers, urlSignin } from 'InvestCommon/domain/config/links';
 import { redirectAfterLogout } from '../redirectAfterLogout';
 
 vi.mock('UiKit/helpers/general', () => ({

@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { urlOffers } from 'InvestCommon/global/links';
+import { urlOffers } from 'InvestCommon/domain/config/links';
 import DashboardTabsTopInfo from '@/views/Dashboard/components/DashboardTabsTopInfo.vue';
 import { storeToRefs } from 'pinia';
 import VTableDefault from 'InvestCommon/shared/components/VTableDefault.vue';
 import VTablePortfolioItem from './components/VTablePortfolioItem.vue';
-import VTableToolbar from 'InvestCommon/components/VTableToolbar.vue';
+import VTableToolbar from 'InvestCommon/shared/components/VTableToolbar.vue';
 import { useDashboardPortfolioStore } from './store/useDashboardPortfolio';
 
 const portfolioTableHeader = [

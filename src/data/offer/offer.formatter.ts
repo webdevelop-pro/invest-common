@@ -2,8 +2,8 @@ import {
   IOffer,
   OfferStatuses,
 } from 'InvestCommon/types/api/offers';
-import defaultImage from 'InvestCommon/assets/images/default.svg?url';
-import env from 'InvestCommon/global';
+import defaultImage from 'InvestCommon/shared/assets/images/default.svg?url';
+import env from 'InvestCommon/domain/config/env';
 import { IOfferFormatted } from './offer.types';
 
 // Currency formatter function

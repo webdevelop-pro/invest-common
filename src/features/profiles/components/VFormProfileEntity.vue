@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useVFormProfileEntity } from './logic/useVFormProfileEntity';
-import VFormPartialPersonalInformation from 'InvestCommon/components/forms/VFormPartialPersonalInformation.vue';
+import VFormPartialPersonalInformation from 'InvestCommon/shared/components/forms/VFormPartialPersonalInformation.vue';
 import VFormPartialEntityInformation from './VFormPartialEntityInformation.vue';
 import VFormPartialBusinessController from './VFormPartialBusinessController.vue';
 import VFormPartialBeneficialOwnership from './VFormPartialBeneficialOwnership.vue';

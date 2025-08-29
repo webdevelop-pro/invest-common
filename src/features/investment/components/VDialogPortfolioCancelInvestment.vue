@@ -7,7 +7,7 @@ import { PostLinkTypes } from 'InvestCommon/types/api/blog';
 import VFormTextarea from 'UiKit/components/Base/VForm/VFormTextarea.vue';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import arrowLeft from 'UiKit/assets/images/arrow-left.svg';
-import { urlContactUs, urlBlogSingle } from 'InvestCommon/global/links';
+import { urlContactUs, urlBlogSingle } from 'InvestCommon/domain/config/links';
 import VDialogContent from 'UiKit/components/Base/VDialog/VDialogContent.vue';
 import VDialogFooter from 'UiKit/components/Base/VDialog/VDialogFooter.vue';
 import VDialog from 'UiKit/components/Base/VDialog/VDialog.vue';

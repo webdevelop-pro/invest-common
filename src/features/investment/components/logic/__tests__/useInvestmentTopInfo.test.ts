@@ -2,7 +2,7 @@ import {
   describe, it, expect, vi, beforeEach,
 } from 'vitest';
 import { ref } from 'vue';
-import { ROUTE_DASHBOARD_PORTFOLIO } from 'InvestCommon/helpers/enums/routes';
+import { ROUTE_DASHBOARD_PORTFOLIO } from 'InvestCommon/domain/config/enums/routes';
 import { useInvestmentTopInfo, type UseInvestmentTopInfoProps } from '../useInvestmentTopInfo';
 
 const mockPush = vi.fn();

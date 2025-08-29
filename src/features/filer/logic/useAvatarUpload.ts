@@ -1,7 +1,7 @@
 import { ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRepositoryFiler } from 'InvestCommon/data/filer/filer.repository';
-import env from 'InvestCommon/global';
+import env from 'InvestCommon/domain/config/env';
 
 export function useAvatarUpload(props: any, emit: any) {
   const { FILER_URL } = env;

@@ -4,7 +4,7 @@ import {
   computed, ref, watch, PropType,
 } from 'vue';
 import VTableDefault from 'InvestCommon/shared/components/VTableDefault.vue';
-import FilterPagination from 'InvestCommon/components/VFilterPagination.vue';
+import FilterPagination from 'InvestCommon/shared/components/VFilterPagination.vue';
 import { VTabs, VTabsList, VTabsTrigger } from 'UiKit/components/Base/VTabs';
 import { IFilerItemFormatted } from 'InvestCommon/data/filer/filer.type';
 import VTableDocumentItem from 'InvestCommon/features/filer/VTableDocumentItem.vue';

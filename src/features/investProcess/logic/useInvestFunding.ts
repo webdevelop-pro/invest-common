@@ -3,13 +3,13 @@ import {
 } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
-import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
+import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
 import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
-import { ROUTE_INVEST_REVIEW, ROUTE_INVEST_SIGNATURE } from 'InvestCommon/helpers/enums/routes';
+import { ROUTE_INVEST_REVIEW, ROUTE_INVEST_SIGNATURE } from 'InvestCommon/domain/config/enums/routes';
 import { FundingTypes } from 'InvestCommon/helpers/enums/general';
 import { storeToRefs } from 'pinia';
 import { currency } from 'InvestCommon/helpers/currency';
-import { urlOfferSingle } from 'InvestCommon/global/links';
+import { urlOfferSingle } from 'InvestCommon/domain/config/links';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';

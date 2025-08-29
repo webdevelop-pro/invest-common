@@ -5,13 +5,13 @@ import {
 import { useRouter, useRoute } from 'vue-router';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
-import { ROUTE_INVEST_SIGNATURE } from 'InvestCommon/helpers/enums/routes';
+import { ROUTE_INVEST_SIGNATURE } from 'InvestCommon/domain/config/enums/routes';
 import { storeToRefs } from 'pinia';
 import { navigateWithQueryParams } from 'InvestCommon/helpers/general';
 import { scrollToError } from 'UiKit/helpers/validation/general';
-import { urlProfileAccount } from 'InvestCommon/global/links';
+import { urlProfileAccount } from 'InvestCommon/domain/config/links';
 import { InvestKycTypes } from 'InvestCommon/types/api/invest';
-import { PROFILE_TYPES } from 'InvestCommon/global/investment.json';
+import { PROFILE_TYPES } from 'InvestCommon/domain/config/enums/profileTypes';
 import { FormChild } from 'InvestCommon/types/form';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';

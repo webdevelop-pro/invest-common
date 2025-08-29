@@ -1,7 +1,7 @@
 import { computed, ref, watch } from 'vue';
 import { SELFSERVICE } from 'InvestCommon/features/settings/utils';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
-import { urlResetPassword } from 'InvestCommon/global/links';
+import { urlResetPassword } from 'InvestCommon/domain/config/links';
 import { useRepositorySettings } from 'InvestCommon/data/settings/settings.repository';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 import { storeToRefs } from 'pinia';

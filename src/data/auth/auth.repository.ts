@@ -1,7 +1,7 @@
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import { oryErrorHandling } from 'InvestCommon/data/repository/error/oryErrorHandling';
 import { toasterErrorHandlingAnalytics } from 'InvestCommon/data/repository/error/toasterErrorHandlingAnalytics';
-import env from 'InvestCommon/global';
+import env from 'InvestCommon/domain/config/env';
 import { SELFSERVICE } from 'InvestCommon/features/auth/store/type';
 import { createActionState } from 'InvestCommon/data/repository/repository';
 import { computed } from 'vue';

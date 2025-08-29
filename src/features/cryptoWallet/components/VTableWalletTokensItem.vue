@@ -2,7 +2,7 @@
 import { VTableCell, VTableRow } from 'UiKit/components/Base/VTable';
 import { PropType } from 'vue';
 import externalLink from 'UiKit/assets/images/external-link.svg';
-import env from 'InvestCommon/global';
+import env from 'InvestCommon/domain/config/env';
 
 interface ITableEvmWalletTransaction {
   name: string;

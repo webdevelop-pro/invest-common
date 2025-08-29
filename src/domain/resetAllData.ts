@@ -15,9 +15,8 @@ import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
 import { useRepositoryDistributions } from 'InvestCommon/data/distributions/distributions.repository';
 import { useRepositoryEsign } from 'InvestCommon/data/esign/esign.repository';
 
-import { useAuthStore } from 'InvestCommon/store/useAuth';
 import { useFilerStore } from 'InvestCommon/store/useFiler';
-import { cookiesOptions } from 'InvestCommon/global/index';
+import { cookiesOptions } from 'InvestCommon/domain/config/cookies';
 
 function clearAllCookies() {
   const cookies = useCookies();
@@ -27,7 +26,6 @@ function clearAllCookies() {
 }
 
 export const resetAllData = () => {
-  useAuthStore().resetAll();
   useFilerStore().resetAll();
   clearAllCookies();
   useSessionStore().resetAll();

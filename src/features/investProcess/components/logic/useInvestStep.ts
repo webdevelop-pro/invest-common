@@ -8,7 +8,7 @@ import { InvestStepTypes } from 'InvestCommon/types/api/invest';
 import {
   ROUTE_INVEST_AMOUNT, ROUTE_INVEST_FUNDING, ROUTE_INVEST_OWNERSHIP, ROUTE_INVEST_REVIEW,
   ROUTE_INVEST_SIGNATURE,
-} from 'InvestCommon/helpers/enums/routes';
+} from 'InvestCommon/domain/config/enums/routes';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
 
 

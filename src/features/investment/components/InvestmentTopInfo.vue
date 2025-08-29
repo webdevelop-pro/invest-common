@@ -6,13 +6,13 @@ import VBadge from 'UiKit/components/Base/VBadge/VBadge.vue';
 import InfoSlot from 'UiKit/components/VInfo/VInfoSlot.vue';
 import arrowLeft from 'UiKit/assets/images/arrow-left.svg';
 import externalLink from 'UiKit/assets/images/external-link.svg';
-import { urlOfferSingle } from 'InvestCommon/global/links';
+import { urlOfferSingle } from 'InvestCommon/domain/config/links';
 import VImage from 'UiKit/components/Base/VImage/VImage.vue';
 import { useInvestmentTopInfo } from './logic/useInvestmentTopInfo';
 import VTooltip from 'UiKit/components/VTooltip.vue';
 
 const VDialogContactUs = defineAsyncComponent({
-  loader: () => import('InvestCommon/components/dialogs/VDialogContactUs.vue'),
+  loader: () => import('InvestCommon/shared/components/dialogs/VDialogContactUs.vue'),
 });
 const VDialogPortfolioTransaction = defineAsyncComponent({
   loader: () => import('InvestCommon/features/investment/components/VDialogPortfolioTransaction.vue'),

@@ -3,12 +3,12 @@ import {
   nextTick,
 } from 'vue';
 import { storeToRefs } from 'pinia';
-import { ROUTE_DASHBOARD_ACCOUNT, ROUTE_ACCREDITATION_UPLOAD } from 'InvestCommon/helpers/enums/routes';
+import { ROUTE_DASHBOARD_ACCOUNT, ROUTE_ACCREDITATION_UPLOAD } from 'InvestCommon/domain/config/enums/routes';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useRouter } from 'vue-router';
 import { FormChild } from 'InvestCommon/types/form';
-import env from 'InvestCommon/global';
-import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
+import env from 'InvestCommon/domain/config/env';
+import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryAccreditation } from 'InvestCommon/data/accreditation/accreditation.repository';

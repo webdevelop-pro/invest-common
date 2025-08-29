@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { defineAsyncComponent, ref, watch, nextTick } from 'vue';
-import { ROUTE_INVEST_AMOUNT } from 'InvestCommon/helpers/enums/routes';
+import { ROUTE_INVEST_AMOUNT } from 'InvestCommon/domain/config/enums/routes';
 import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
 import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import arrowLeft from 'UiKit/assets/images/arrow-left.svg';
 import VProfileSelectList from 'InvestCommon/features/profiles/VProfileSelectList.vue';
 import { useInvestOwnership } from 'InvestCommon/features/investProcess/logic/useInvestOwnership';
-import { urlOfferSingle } from 'InvestCommon/global/links';
+import { urlOfferSingle } from 'InvestCommon/domain/config/links';
 import InvestStep from 'InvestCommon/features/investProcess/components/InvestStep.vue';
-import VFormPartialPersonalInformationSkeleton from 'InvestCommon/components/forms/VFormPartialPersonalInformationSkeleton.vue';
+import VFormPartialPersonalInformationSkeleton from 'InvestCommon/shared/components/forms/VFormPartialPersonalInformationSkeleton.vue';
 
 // Async components
 const VFormProfileEntity = defineAsyncComponent({
@@ -29,7 +29,7 @@ const VFormProfileTrust = defineAsyncComponent({
   loadingComponent: VFormPartialPersonalInformationSkeleton,
 });
 const VFormPartialPersonalInformation = defineAsyncComponent({
-  loader: () => import('InvestCommon/components/forms/VFormPartialPersonalInformation.vue'),
+  loader: () => import('InvestCommon/shared/components/forms/VFormPartialPersonalInformation.vue'),
   loadingComponent: VFormPartialPersonalInformationSkeleton,
 });
 const VAlert = defineAsyncComponent({

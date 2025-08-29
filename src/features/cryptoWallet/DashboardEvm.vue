@@ -6,7 +6,7 @@ import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles
 import DashboardTabsTopInfo from '@/views/Dashboard/components/DashboardTabsTopInfo.vue';
 import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
-import { urlContactUs } from 'InvestCommon/global/links';
+import { urlContactUs } from 'InvestCommon/domain/config/links';
 import DashboardEvmWalletTokens from './components/DashboardEvmWalletTokens.vue';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';

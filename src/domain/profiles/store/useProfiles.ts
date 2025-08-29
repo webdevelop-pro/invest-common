@@ -3,11 +3,12 @@ import {
 } from 'vue';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
-import env, { cookiesOptions } from 'InvestCommon/global/index';
+import env from 'InvestCommon/domain/config/env';
+import { cookiesOptions } from 'InvestCommon/domain/config/cookies';
 import { useCookies } from '@vueuse/integrations/useCookies';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
-import { PROFILE_TYPES } from 'InvestCommon/global/investment.json';
+import { PROFILE_TYPES } from 'InvestCommon/domain/config/enums/profileTypes';
 import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository';
 import { useLogoutStore } from 'InvestCommon/features/auth/store/useLogout';
 

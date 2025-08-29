@@ -1,6 +1,6 @@
 import { IInvest, InvestFundingStatuses, InvestmentStatuses } from 'InvestCommon/types/api/invest';
-import defaultImage from 'InvestCommon/assets/images/default.svg?url';
-import env from 'InvestCommon/global';
+import defaultImage from 'InvestCommon/shared/assets/images/default.svg?url';
+import env from 'InvestCommon/domain/config/env';
 
 const { FILER_URL } = env;
 

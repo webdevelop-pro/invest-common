@@ -6,10 +6,10 @@ import { FormModelResetPassword } from 'InvestCommon/types/form';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useRepositorySettings } from 'InvestCommon/data/settings/settings.repository';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
-import { ROUTE_SETTINGS_MFA } from 'InvestCommon/helpers/enums/routes';
+import { ROUTE_SETTINGS_MFA } from 'InvestCommon/domain/config/enums/routes';
 import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
-import { urlSettings } from 'InvestCommon/global/links';
+import { urlSettings } from 'InvestCommon/domain/config/links';
 import { errorMessageRule, passwordRule } from 'UiKit/helpers/validation/rules';
 import { SELFSERVICE } from 'InvestCommon/features/settings/utils';
 

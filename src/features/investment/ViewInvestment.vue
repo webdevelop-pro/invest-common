@@ -7,9 +7,9 @@ import { computed, PropType } from 'vue';
 import { storeToRefs } from 'pinia';
 import {
   ROUTE_DASHBOARD_ACCOUNT, ROUTE_DASHBOARD_PORTFOLIO, ROUTE_INVESTMENT_DOCUMENTS, ROUTE_INVESTMENT_TIMELINE,
-} from 'InvestCommon/helpers/enums/routes';
+} from 'InvestCommon/domain/config/enums/routes';
 import { useRoute, useRouter } from 'vue-router';
-import VPageTopInfoAndTabs from 'InvestCommon/components/VPageTopInfoAndTabs.vue';
+import VPageTopInfoAndTabs from 'InvestCommon/shared/components/VPageTopInfoAndTabs.vue';
 import { VTabsContent } from 'UiKit/components/Base/VTabs';
 import InvestmentDocuments from 'InvestCommon/features/investment/components/InvestmentDocuments.vue';
 import InvestmentTimeline from 'InvestCommon/features/investment/components/InvestmentTimeline.vue';

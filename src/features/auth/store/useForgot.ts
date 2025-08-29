@@ -3,7 +3,7 @@ import {
 } from 'vue';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
-import { urlCheckEmail } from 'InvestCommon/global/links';
+import { urlCheckEmail } from 'InvestCommon/domain/config/links';
 import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
 import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';

@@ -1,7 +1,7 @@
-import { urlContactUs } from 'InvestCommon/global/links';
+import { urlContactUs } from 'InvestCommon/domain/config/links';
 import {
   ROUTE_ACCREDITATION_UPLOAD,
-} from 'InvestCommon/helpers/enums/routes';
+} from 'InvestCommon/domain/config/enums/routes';
 import { AccreditationTypes, InvestKycTypes } from 'InvestCommon/types/api/invest';
 
 export enum DashboardInvestmentTabTypes {

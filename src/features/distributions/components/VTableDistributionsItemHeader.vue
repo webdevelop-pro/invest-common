@@ -8,7 +8,7 @@ import { storeToRefs } from 'pinia';
 import {
   getInvestmentOfferImage, getDistributionTagBackground,
 } from 'InvestCommon/helpers/investment';
-import { ROUTE_INVESTMENT_DOCUMENTS } from 'InvestCommon/helpers/enums/routes';
+import { ROUTE_INVESTMENT_DOCUMENTS } from 'InvestCommon/domain/config/enums/routes';
 import expand from 'UiKit/assets/images/expand.svg';
 import { IDistributionsData } from 'InvestCommon/types/api/distributions';
 import { VTableCell, VTableRow } from 'UiKit/components/Base/VTable';

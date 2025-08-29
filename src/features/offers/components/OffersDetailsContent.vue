@@ -5,7 +5,7 @@ import { VTabs, VTabsContent, VTabsList, VTabsTrigger } from 'UiKit/components/B
 import VTableDocuments from 'InvestCommon/shared/components/VTableDocuments.vue';
 import { useOffersDetailsContent } from './logic/useOffersDetailsContent';
 import { navigateWithQueryParams } from 'InvestCommon/helpers/general';
-import { urlSignin } from 'InvestCommon/global/links';
+import { urlSignin } from 'InvestCommon/domain/config/links';
 import { useRoute } from 'vitepress';
 import OffersComments from './OffersComments.vue';
 

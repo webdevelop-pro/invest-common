@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { mount, flushPromises } from '@vue/test-utils';
 import VAccountPhoto from '../VAccountPhoto.vue';
 import { ref } from 'vue';
-import env from 'InvestCommon/global';
+import env from 'InvestCommon/domain/config/env';
 
 vi.mock('InvestCommon/data/filer/filer.repository', () => ({
   useRepositoryFiler: () => ({

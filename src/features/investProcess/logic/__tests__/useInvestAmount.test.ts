@@ -5,7 +5,7 @@ import { setActivePinia, createPinia } from 'pinia';
 import { ref, reactive, nextTick } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
-import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
+import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
@@ -20,7 +20,7 @@ vi.mock('UiKit/store/useGlobalLoader', () => ({
   useGlobalLoader: vi.fn(),
 }));
 
-vi.mock('InvestCommon/composable/useHubspotForm', () => ({
+vi.mock('UiKit/composables/useHubspotForm', () => ({
   useHubspotForm: vi.fn(),
 }));
 

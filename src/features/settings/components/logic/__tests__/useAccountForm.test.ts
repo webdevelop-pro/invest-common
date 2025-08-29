@@ -28,7 +28,7 @@ vi.mock('InvestCommon/data/profiles/profiles.repository', () => ({
   useRepositoryProfiles: vi.fn(() => mockRepositoryProfiles),
 }));
 
-vi.mock('InvestCommon/components/dialogs/VDialogContactUs.vue', () => ({
+vi.mock('InvestCommon/shared/components/dialogs/VDialogContactUs.vue', () => ({
   default: {
     name: 'VDialogContactUs',
     template: '<div>Mock Dialog</div>',

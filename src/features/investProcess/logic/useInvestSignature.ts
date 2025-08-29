@@ -1,8 +1,8 @@
 import { computed, ref, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { useHelloSign } from 'InvestCommon/composable/useHelloSign';
-import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
-import { ROUTE_INVEST_FUNDING } from 'InvestCommon/helpers/enums/routes';
+import { useHelloSign } from 'UiKit/composables/useHelloSign';
+import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
+import { ROUTE_INVEST_FUNDING } from 'InvestCommon/domain/config/enums/routes';
 import { ISignature } from 'InvestCommon/types/api/invest';
 import { storeToRefs } from 'pinia';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';

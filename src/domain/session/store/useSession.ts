@@ -1,7 +1,7 @@
 import { computed, ref } from 'vue';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { useCookies } from '@vueuse/integrations/useCookies';
-import { cookiesOptions } from 'InvestCommon/global/index';
+import { cookiesOptions } from 'InvestCommon/domain/config/cookies';
 import { ISession } from '@/types/api/auth';
 
 export const useSessionStore = defineStore('userSession', () => {

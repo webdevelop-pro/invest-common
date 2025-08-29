@@ -1,8 +1,8 @@
-import linkedInIcon from 'InvestCommon/assets/images/social/linkedin1.svg?url';
-import facebookIcon from 'InvestCommon/assets/images/social/facebook1.svg?url';
-import instagramIcon from 'InvestCommon/assets/images/social/instagram1.svg?url';
-import githubIcon from 'InvestCommon/assets/images/social/github1.svg?url';
-import twitterIcon from 'InvestCommon/assets/images/social/x-twitter.svg?url';
+import linkedInIcon from 'InvestCommon/shared/assets/images/social/linkedin1.svg?url';
+import facebookIcon from 'InvestCommon/shared/assets/images/social/facebook1.svg?url';
+import instagramIcon from 'InvestCommon/shared/assets/images/social/instagram1.svg?url';
+import githubIcon from 'InvestCommon/shared/assets/images/social/github1.svg?url';
+import twitterIcon from 'InvestCommon/shared/assets/images/social/x-twitter.svg?url';
 
 export const LINKEDIN = {
   icon: linkedInIcon,

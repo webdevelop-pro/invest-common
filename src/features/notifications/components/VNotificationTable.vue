@@ -5,7 +5,7 @@ import VFilter, { IVFilter } from 'UiKit/components/VFilter/VFilter.vue';
 import { computed } from 'vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import check from 'UiKit/assets/images/check.svg';
-import FilterPagination from 'InvestCommon/components/VFilterPagination.vue';
+import FilterPagination from 'InvestCommon/shared/components/VFilterPagination.vue';
 import { VTabs, VTabsList, VTabsTrigger } from 'UiKit/components/Base/VTabs';
 import VTableDefault from 'InvestCommon/shared/components/VTableDefault.vue';
 import { useNotifications } from 'InvestCommon/features/notifications/store/useNotifications';

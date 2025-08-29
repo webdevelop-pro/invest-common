@@ -2,7 +2,7 @@ import { computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
-import { ROUTE_DASHBOARD_PORTFOLIO, ROUTE_INVESTMENT_TIMELINE } from 'InvestCommon/helpers/enums/routes';
+import { ROUTE_DASHBOARD_PORTFOLIO, ROUTE_INVESTMENT_TIMELINE } from 'InvestCommon/domain/config/enums/routes';
 import { storeToRefs } from 'pinia';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
 

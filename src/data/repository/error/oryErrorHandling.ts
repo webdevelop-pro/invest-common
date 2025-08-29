@@ -1,5 +1,5 @@
 import { IErrorGeneric } from 'InvestCommon/types/api/auth';
-import { urlAuthenticator, urlProfile, urlSignin } from 'InvestCommon/global/links';
+import { urlAuthenticator, urlProfile, urlSignin } from 'InvestCommon/domain/config/links';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';

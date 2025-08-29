@@ -8,8 +8,8 @@ import { useRouter } from 'vue-router';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
-import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
-import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/helpers/enums/routes';
+import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
+import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/domain/config/enums/routes';
 import { useFormTrustedContact } from '../useFormTrustedContact';
 
 const mockRouterInstance = {
@@ -74,7 +74,7 @@ vi.mock('InvestCommon/domain/session/store/useSession', () => ({
 }));
 
 const mockSubmitFormToHubspot = vi.fn();
-vi.mock('InvestCommon/composable/useHubspotForm', () => ({
+vi.mock('UiKit/composables/useHubspotForm', () => ({
   useHubspotForm: vi.fn(() => ({ submitFormToHubspot: mockSubmitFormToHubspot })),
 }));
 

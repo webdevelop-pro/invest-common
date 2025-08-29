@@ -4,7 +4,7 @@ import {
   IInvestUnconfirmed, IInvestConfirm,
   IInvestFunding,
 } from 'InvestCommon/types/api/invest';
-import env from 'InvestCommon/global';
+import env from 'InvestCommon/domain/config/env';
 import { createActionState } from 'InvestCommon/data/repository/repository';
 import { storeToRefs, acceptHMRUpdate, defineStore } from 'pinia';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';

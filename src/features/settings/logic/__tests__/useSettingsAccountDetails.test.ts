@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
 import { ref } from 'vue';
-import { ROUTE_SETTINGS_MFA } from 'InvestCommon/helpers/enums/routes';
+import { ROUTE_SETTINGS_MFA } from 'InvestCommon/domain/config/enums/routes';
 import { scrollToError } from 'UiKit/helpers/validation/general';
 import { useSettingsAccountDetails } from '../useSettingsAccountDetails';
 
@@ -40,7 +40,7 @@ vi.mock('InvestCommon/data/profiles/profiles.repository', () => ({
 }));
 
 const mockSubmitFormToHubspot = vi.fn().mockResolvedValue(undefined);
-vi.mock('InvestCommon/composable/useHubspotForm', () => ({
+vi.mock('UiKit/composables/useHubspotForm', () => ({
   useHubspotForm: vi.fn(() => ({ submitFormToHubspot: mockSubmitFormToHubspot }))
 }));
 

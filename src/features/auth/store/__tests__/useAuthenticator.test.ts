@@ -5,7 +5,7 @@ import { setActivePinia, createPinia } from 'pinia';
 import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
 import { ref } from 'vue';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
-// import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
+// import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
 import { SELFSERVICE } from '../type';
 import { useAuthenticatorStore } from '../useAuthenticator';
 
@@ -44,7 +44,7 @@ vi.mock('InvestCommon/domain/session/store/useSession', () => ({
   })),
 }));
 
-vi.mock('InvestCommon/composable/useHubspotForm', () => ({
+vi.mock('UiKit/composables/useHubspotForm', () => ({
   useHubspotForm: vi.fn(() => ({
     submitFormToHubspot: vi.fn().mockResolvedValue(undefined),
   })),

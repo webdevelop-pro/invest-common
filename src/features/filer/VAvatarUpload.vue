@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { PropType, ref } from 'vue';
+import { PropType, ref, computed } from 'vue';
 import VAvatar from 'UiKit/components/VAvatar.vue';
 import pen from 'UiKit/assets/images/pen.svg?component';
 import { useAvatarUpload } from './logic/useAvatarUpload';
@@ -15,6 +15,10 @@ const props = defineProps({
     type: Number,
     default: 0,
   },
+  loading: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const emit = defineEmits(['upload-id']);
@@ -22,10 +26,13 @@ const emit = defineEmits(['upload-id']);
 const {
   refFiles,
   filesUploadError,
-  isLoading,
+  isLoading: internalIsLoading,
   onClick,
   onFileChange,
 } = useAvatarUpload(props, emit);
+
+// Combine prop isLoading with internal loading state
+const isLoading = computed(() => props.loading || internalIsLoading.value);
 
 // Local loading state for button click
 const isButtonLoading = ref(false);
@@ -52,6 +59,7 @@ const handleButtonClick = async () => {
     <VAvatar
       :size="size"
       :src="src"
+      :loading="isLoading || isButtonLoading"
       alt="avatar image"
       class="v-account-upload__avatar"
     />

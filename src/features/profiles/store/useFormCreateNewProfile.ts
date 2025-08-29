@@ -3,12 +3,12 @@ import {
   nextTick, watch,
 } from 'vue';
 import { storeToRefs } from 'pinia';
-import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
+import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
 import { useRouter } from 'vue-router';
-import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/helpers/enums/routes';
+import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/domain/config/enums/routes';
 import { FormChild } from 'InvestCommon/types/form';
-import { PROFILE_TYPES as profileTypes } from 'InvestCommon/global/investment.json';
-import env from 'InvestCommon/global';
+import { PROFILE_TYPES as profileTypes } from 'InvestCommon/domain/config/enums/profileTypes';
+import env from 'InvestCommon/domain/config/env';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryAccreditation } from 'InvestCommon/data/accreditation/accreditation.repository';
@@ -96,6 +96,7 @@ export const useFormCreateNewProfile = () => {
     return {};
   });
   const onValidate = () => {
+    selectTypeFormRef.value?.onValidate();
     if (selectedType.value.toLowerCase() === profileTypes.ENTITY) {
       entityTypeFormRef.value?.onValidate();
     }

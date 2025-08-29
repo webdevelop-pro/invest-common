@@ -2,10 +2,10 @@
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import { useFormFinancialInformationAndKyc } from './store/useFormFinancialInformationAndKyc';
 import VLayoutForm from 'InvestCommon/shared/layouts/VLayoutForm.vue';
-import VFormPartialPersonalInformation from 'InvestCommon/components/forms/VFormPartialPersonalInformation.vue';
-import VFormPartialFinancialSituation from 'InvestCommon/components/forms/VFormPartialFinancialSituation.vue';
-import VFormPartialInvestmentObjectives from 'InvestCommon/components/forms/VFormPartialInvestmentObjectives.vue';
-import VFormPartialUnderstandingOfRisks from 'InvestCommon/components/forms/VFormPartialUnderstandingOfRisks.vue';
+import VFormPartialPersonalInformation from 'InvestCommon/shared/components/forms/VFormPartialPersonalInformation.vue';
+import VFormPartialFinancialSituation from 'InvestCommon/shared/components/forms/VFormPartialFinancialSituation.vue';
+import VFormPartialInvestmentObjectives from 'InvestCommon/shared/components/forms/VFormPartialInvestmentObjectives.vue';
+import VFormPartialUnderstandingOfRisks from 'InvestCommon/shared/components/forms/VFormPartialUnderstandingOfRisks.vue';
 
 const globalLoader = useGlobalLoader();
 globalLoader.hide();

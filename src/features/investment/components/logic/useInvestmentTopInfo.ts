@@ -1,7 +1,7 @@
 import { computed, ref } from 'vue';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
 import { useRouter } from 'vue-router';
-import { ROUTE_DASHBOARD_PORTFOLIO } from 'InvestCommon/helpers/enums/routes';
+import { ROUTE_DASHBOARD_PORTFOLIO } from 'InvestCommon/domain/config/enums/routes';
 import { storeToRefs } from 'pinia';
 
 export interface UseInvestmentTopInfoProps {

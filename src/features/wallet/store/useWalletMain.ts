@@ -1,7 +1,7 @@
 import { computed, watch, nextTick } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository';
-import { urlContactUs } from 'InvestCommon/global/links';
+import { urlContactUs } from 'InvestCommon/domain/config/links';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useRouter } from 'vue-router';

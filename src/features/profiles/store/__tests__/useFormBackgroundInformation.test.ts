@@ -4,8 +4,8 @@ import {
 import { setActivePinia, createPinia } from 'pinia';
 import { ref, nextTick, reactive } from 'vue';
 import { useRouter } from 'vue-router';
-import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
-import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/helpers/enums/routes';
+import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
+import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/domain/config/enums/routes';
 import { useFormBackgroundInformation } from '../useFormBackgroundInformation';
 
 const mockRouterInstance = {
@@ -122,7 +122,7 @@ vi.mock('UiKit/helpers/validation/useFormValidation', () => ({
 }));
 
 const mockSubmitFormToHubspot = vi.fn();
-vi.mock('InvestCommon/composable/useHubspotForm', () => ({
+vi.mock('UiKit/composables/useHubspotForm', () => ({
   useHubspotForm: vi.fn(() => ({
     submitFormToHubspot: mockSubmitFormToHubspot,
   })),

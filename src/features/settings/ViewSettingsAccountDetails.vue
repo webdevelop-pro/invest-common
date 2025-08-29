@@ -34,6 +34,7 @@ const {
         class="is--margin-top-40"
         :image-id="Number(getUserState.data?.image_link_id)"
         :user-id="Number(getUserState.data?.id)"
+        :loading="getUserState.loading"
         @upload-id="onUploadId"
       />
       <div class="is--margin-top-30 VFormAccount">

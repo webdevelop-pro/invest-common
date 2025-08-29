@@ -49,7 +49,7 @@ useGlobalLoader().hide();
 const videoSrc = ref<string | undefined>(undefined);
 
 onMounted(async () => {
-  const videoModule = await import('InvestCommon/assets/video/video-bg.mp4');
+  const videoModule = await import('InvestCommon/shared/assets/video/video-bg.mp4');
   videoSrc.value = videoModule.default as string;
 });
 </script>

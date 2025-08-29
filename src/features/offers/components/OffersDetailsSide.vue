@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { IOfferFormatted } from 'InvestCommon/data/offer/offer.types';
 import { PropType, computed } from 'vue';
-import { urlContactUs } from 'InvestCommon/global/links';
+import { urlContactUs } from 'InvestCommon/domain/config/links';
 import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 import share from 'UiKit/assets/images/share.svg';
 import file from 'UiKit/assets/images/file.svg';

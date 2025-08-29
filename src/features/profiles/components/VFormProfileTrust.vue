@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { PropType, computed } from 'vue';
 import { useVFormProfileTrust } from './logic/useVFormProfileTrust';
-import VFormPartialPersonalInformation from 'InvestCommon/components/forms/VFormPartialPersonalInformation.vue';
+import VFormPartialPersonalInformation from 'InvestCommon/shared/components/forms/VFormPartialPersonalInformation.vue';
 import VFormPartialTrustInformation from './VFormPartialTrustInformation.vue';
 import VFormPartialBusinessController from './VFormPartialBusinessController.vue';
 import VFormPartialBeneficialOwnership from './VFormPartialBeneficialOwnership.vue';

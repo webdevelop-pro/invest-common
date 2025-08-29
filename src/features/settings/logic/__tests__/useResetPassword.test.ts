@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
 import { ref, reactive } from 'vue';
-import { ROUTE_SETTINGS_MFA } from 'InvestCommon/helpers/enums/routes';
+import { ROUTE_SETTINGS_MFA } from 'InvestCommon/domain/config/enums/routes';
 import { useResetPassword } from '../useResetPassword';
 
 // Mock dependencies

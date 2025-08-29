@@ -6,10 +6,10 @@ import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { AccreditationTypes } from 'InvestCommon/types/api/invest';
 import { AccreditationTextStatuses } from 'InvestCommon/data/accreditation/accreditation.types';
 import { useRouter } from 'vue-router';
-import { ROUTE_ACCREDITATION_UPLOAD, ROUTE_DASHBOARD_PERSONAL_DETAILS } from 'InvestCommon/helpers/enums/routes';
+import { ROUTE_ACCREDITATION_UPLOAD, ROUTE_DASHBOARD_PERSONAL_DETAILS } from 'InvestCommon/domain/config/enums/routes';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
-import { PROFILE_TYPES } from 'InvestCommon/global/investment.json';
+import { PROFILE_TYPES } from 'InvestCommon/domain/config/enums/profileTypes';
 
 export const useAccreditationButton = defineStore('useAccreditationButton', () => {
   const router = useRouter();

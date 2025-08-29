@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useData } from 'vitepress';
-import ContactUsForm from 'InvestCommon/components/forms/VFormContactUs.vue';
+import ContactUsForm from 'InvestCommon/shared/components/forms/VFormContactUs.vue';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 
 const { frontmatter } = useData();

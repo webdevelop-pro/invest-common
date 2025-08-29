@@ -3,7 +3,7 @@ import {
 } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
 import { ref } from 'vue';
-import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/helpers/enums/routes';
+import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/domain/config/enums/routes';
 import { useFormFinancialInformationAndKyc } from '../useFormFinancialInformationAndKyc';
 
 const mockPush = vi.fn();
@@ -60,7 +60,7 @@ vi.mock('InvestCommon/data/accreditation/accreditation.repository', () => ({
 }));
 
 const mockSubmitFormToHubspot = vi.fn();
-vi.mock('InvestCommon/composable/useHubspotForm', () => ({
+vi.mock('UiKit/composables/useHubspotForm', () => ({
   useHubspotForm: vi.fn(() => ({
     submitFormToHubspot: mockSubmitFormToHubspot,
   })),

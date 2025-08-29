@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useVFormProfileSDIRA } from './logic/useVFormProfileSDIRA';
-import VFormPartialPersonalInformation from 'InvestCommon/components/forms/VFormPartialPersonalInformation.vue';
+import VFormPartialPersonalInformation from 'InvestCommon/shared/components/forms/VFormPartialPersonalInformation.vue';
 import VFormPartialCustodian from './VFormPartialCustodian.vue';
 
 const props = defineProps({

@@ -1,7 +1,7 @@
 import { ref, watch, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
-import { urlSignin } from 'InvestCommon/global/links';
+import { urlSignin } from 'InvestCommon/domain/config/links';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryOffer } from 'InvestCommon/data/offer/offer.repository';
 import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';

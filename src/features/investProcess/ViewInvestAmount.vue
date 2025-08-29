@@ -6,7 +6,7 @@ import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import InvestStep from 'InvestCommon/features/investProcess/components/InvestStep.vue';
-import { urlOfferSingle } from 'InvestCommon/global/links';
+import { urlOfferSingle } from 'InvestCommon/domain/config/links';
 import { useRoute } from 'vue-router';
 import { numberFormatter } from 'InvestCommon/helpers/numberFormatter';
 

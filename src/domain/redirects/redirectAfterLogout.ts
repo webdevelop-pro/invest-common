@@ -1,5 +1,5 @@
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
-import { urlOffers, urlSignin } from 'InvestCommon/global/links';
+import { urlOffers, urlSignin } from 'InvestCommon/domain/config/links';
 
 export const redirectAfterLogout = async () => {
   const pathname = window?.location?.pathname ?? '';

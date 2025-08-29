@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { defineAsyncComponent } from 'vue';
-import { ROUTE_INVEST_OWNERSHIP } from 'InvestCommon/helpers/enums/routes';
+import { ROUTE_INVEST_OWNERSHIP } from 'InvestCommon/domain/config/enums/routes';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import VFormCheckbox from 'UiKit/components/Base/VForm/VFormCheckbox.vue';
 import VBadge from 'UiKit/components/Base/VBadge/VBadge.vue';
 import arrowLeft from 'UiKit/assets/images/arrow-left.svg?component';
 import file from 'UiKit/assets/images/file.svg';
-import { urlTerms, urlPrivacy, urlOfferSingle } from 'InvestCommon/global/links';
+import { urlTerms, urlPrivacy, urlOfferSingle } from 'InvestCommon/domain/config/links';
 import InvestStep from 'InvestCommon/features/investProcess/components/InvestStep.vue';
 import { useInvestSignature } from './logic/useInvestSignature';
 

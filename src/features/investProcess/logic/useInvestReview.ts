@@ -2,10 +2,10 @@ import { computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
-import { useHubspotForm } from 'InvestCommon/composable/useHubspotForm';
-import { ROUTE_INVEST_THANK } from 'InvestCommon/helpers/enums/routes';
+import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
+import { ROUTE_INVEST_THANK } from 'InvestCommon/domain/config/enums/routes';
 import { storeToRefs } from 'pinia';
-import { urlOfferSingle } from 'InvestCommon/global/links';
+import { urlOfferSingle } from 'InvestCommon/domain/config/links';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
 

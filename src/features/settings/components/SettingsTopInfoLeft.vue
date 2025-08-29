@@ -1,16 +1,17 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
 import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 import { storeToRefs } from 'pinia';
 import VAvatarUpload from 'InvestCommon/features/filer/VAvatarUpload.vue';
-import env from 'InvestCommon/global';
+import env from 'InvestCommon/domain/config/env';
 import pen from 'UiKit/assets/images/pen.svg?component';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
-import { ROUTE_SETTINGS_ACCOUNT_DETAILS } from 'InvestCommon/helpers/enums/routes';
+import { ROUTE_SETTINGS_ACCOUNT_DETAILS } from 'InvestCommon/domain/config/enums/routes';
 import { useBreakpoints } from 'UiKit/composables/useBreakpoints';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
+import { useRepositoryFiler } from 'InvestCommon/data/filer/filer.repository';
 
 const { FILER_URL } = env;
 
@@ -21,12 +22,37 @@ const { getUserState } = storeToRefs(useRepositoryProfilesStore);
 const { isTablet } = storeToRefs(useBreakpoints());
 const profilesStore = useProfilesStore();
 const { selectedUserProfileId } = storeToRefs(profilesStore);
+const filerRepository = useRepositoryFiler();
+const { notificationFieldsState } = storeToRefs(filerRepository);
 
 const isLoading = computed(() => getUserState.value.loading);
 const imageID = computed(() => getUserState.value.data?.image_link_id);
+const isAvatarLoading = ref(false);
+const bodyId = ref(0);
+const avatarLoadingState = computed(() => isLoading.value || isAvatarLoading.value);
 
+// Add debounced watch to check notification fields state and call getUser if id matches
+// This ensures the callback is not called more than once every 3 seconds
+let debounceTimeout: NodeJS.Timeout | null = null;
+watch(notificationFieldsState, () => {
+  if (!getUserState.value.loading) {
+    // Clear any existing timeout
+    if (debounceTimeout) {
+      clearTimeout(debounceTimeout);
+    }
+    
+    // Set new timeout with 3 second delay
+    debounceTimeout = setTimeout(async () => {
+      await useRepositoryProfilesStore.getUser();
+      isAvatarLoading.value = false;
+      debounceTimeout = null; // Reset timeout reference
+    }, 3000);
+  }
+}, { deep: true });
 
 const onUploadId = async (id: string) => {
+  isAvatarLoading.value = true;
+  bodyId.value = Number(id);
   const body = {
     image_link_id: id,
   };
@@ -42,6 +68,7 @@ const onUploadId = async (id: string) => {
       :src="imageID > 0 ? `${FILER_URL}/auth/files/${imageID}?size=medium` : undefined"
       :user-id="selectedUserProfileId"
       :image-id="imageID"
+      :loading="avatarLoadingState"
       alt="avatar image"
       class="settings-top-info-left__avatar is--gt-tablet-show"
       @upload-id="onUploadId"
