@@ -34,12 +34,12 @@ const onLogout = () => {
   >
     <div class="form-auth-authenticator__wrap">
       <VFormGroup
-        v-slot="VFormGroupProps"
-        :required="logoutStore.isFieldRequired('totp_code')"
-        :error-text="logoutStore.getErrorText('totp_code', setLoginState.error?.data?.responseJson)"
-        label="Authentication Code"
-        class="form-auth-authenticator__input"
-        data-testid="totp-code-group"
+          v-slot="VFormGroupProps"
+          :required="authenticatorStore.isFieldRequired('totp_code')"
+          :error-text="authenticatorStore.getErrorText('totp_code', setLoginState.error?.data?.responseJson)"
+          label="Authentication Code"
+          class="form-auth-authenticator__input"
+          data-testid="totp-code-group"
       >
         <VFormInput
           :model-value="model.totp_code"
