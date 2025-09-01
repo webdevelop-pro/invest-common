@@ -43,8 +43,8 @@ const getTimeFormat = (fullDate: string) => {
 export class InvestmentFormatter {
   private investment: IInvestment | null;
 
-  constructor(investment?: IInvestment) {
-    this.investment = investment || this.createDefaultInvestment();
+  constructor(investment: IInvestment) {
+    this.investment = investment;
   }
 
   get amountFormatted() {
@@ -238,7 +238,8 @@ export class InvestmentFormatter {
   }
 
   format(): IInvestmentFormatted {
-    return {
+    // Create a proxy object that maintains reactivity for the offer property
+    const formattedInvestment = {
       ...this.investment!,
       amountFormatted: this.amountFormatted,
       amountFormattedZero: this.amountFormattedZero,
@@ -257,12 +258,20 @@ export class InvestmentFormatter {
       fundingTypeFormatted: this.fundingTypeFormatted,
       isFundingTypeWire: this.isFundingTypeWire,
       statusFormatted: this.statusFormatted,
-      offer: this.offerFormatted,
       isActive: this.isActive,
       isCompleted: this.isCompleted,
       isCancelled: this.isCancelled,
       isPending: this.isPending,
       isFundingClickable: this.isFundingClickable,
-    };
+    } as IInvestmentFormatted;
+
+    // Use a getter for the offer property to maintain reactivity
+    Object.defineProperty(formattedInvestment, 'offer', {
+      get: () => this.offerFormatted,
+      enumerable: true,
+      configurable: true,
+    });
+
+    return formattedInvestment;
   }
 }

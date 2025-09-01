@@ -53,13 +53,21 @@ export class UserFormatter {
   }
 
   format(): IUserFormatted {
-    return {
+    const formattedUser = {
       ...this.user,
-      profiles: this.formatProfiles(),
       fullName: this.fullName,
       createdAtFormattedShortMonth: this.createdAtFormattedShortMonth,
       phoneFormatted: this.phoneFormatted,
-    };
+    } as IUserFormatted;
+
+    // Use a getter for the profiles property to maintain reactivity
+    Object.defineProperty(formattedUser, 'profiles', {
+      get: () => this.formatProfiles(),
+      enumerable: true,
+      configurable: true,
+    });
+
+    return formattedUser;
   }
 }
 

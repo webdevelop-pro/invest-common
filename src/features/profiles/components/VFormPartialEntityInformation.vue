@@ -121,6 +121,30 @@ defineExpose({
       </FormCol>
     </FormRow>
     <FormRow>
+      <FormCol col3>
+        <VFormGroup
+          v-slot="VFormGroupProps"
+          :required="isFieldRequired('ein')"
+          :error-text="getErrorText('ein', errorDataComputed as any)"
+          label="EIN"
+          data-testid="ein-group"
+        >
+          <VFormInput
+            :model-value="model.ein"
+            :is-error="VFormGroupProps.isFieldError"
+            placeholder="XX-XXXXXXX"
+            name="ein"
+            size="large"
+            mask="##-#######"
+            disallow-special-chars
+            data-testid="ein"
+            :loading="loadingComputed"
+            @update:model-value="model.ein = $event"
+          />
+        </VFormGroup>
+      </FormCol>
+    </FormRow>
+    <FormRow>
       <FormCol>
         <VFormGroup
           v-slot="VFormGroupProps"

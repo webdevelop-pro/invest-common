@@ -19,6 +19,7 @@ export interface FormModelEntityInformation {
   formation_document_id?: number | string | undefined;
   organization_document_id?: number | string | undefined;
   operating_agreement_id?: number | string | undefined;
+  ein: string | undefined;
 }
 
 export const useVFormPartialEntityInformation = (
@@ -37,10 +38,11 @@ export const useVFormPartialEntityInformation = (
     formation_document_id: modelData.value?.formation_document_id,
     organization_document_id: modelData.value?.organization_document_id,
     operating_agreement_id: modelData.value?.operating_agreement_id,
+    ein: modelData.value?.ein,
   });
 
   const required = computed(() => {
-    const baseRequired = ['type', 'solely_for_investing', 'tax_exempts', 'name', 'owner_title'];
+    const baseRequired = ['type', 'solely_for_investing', 'tax_exempts', 'name', 'owner_title', 'ein'];
     if (showDocument.value) {
       baseRequired.push('operating_agreement_id', 'formation_document_id', 'organization_document_id');
     }
@@ -60,6 +62,7 @@ export const useVFormPartialEntityInformation = (
           formation_document_id: documentRule,
           organization_document_id: documentRule,
           operating_agreement_id: documentRule,
+          ein: {},
         },
         type: 'object',
         errorMessage: errorMessageRule,
@@ -80,6 +83,7 @@ export const useVFormPartialEntityInformation = (
     'formation_document_id',
     'organization_document_id',
     'operating_agreement_id',
+    'ein',
   ];
 
   const {
@@ -118,7 +122,8 @@ export const useVFormPartialEntityInformation = (
   watch(() => modelData.value, (newModelData) => {
     if (!newModelData) return;
     const fields = [
-      'solely_for_investing', 'tax_exempts', 'type', 'owner_title', 'name', 'formation_document_id', 'organization_document_id', 'operating_agreement_id',
+      'solely_for_investing', 'tax_exempts', 'type', 'owner_title', 'name', 'formation_document_id',
+      'organization_document_id', 'operating_agreement_id', 'ein',
     ] as const;
     fields.forEach((field) => {
       if (newModelData[field] !== undefined && newModelData[field] !== null) {
