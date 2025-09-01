@@ -3,20 +3,20 @@ import {
 } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
 import { ref } from 'vue';
-import { useRepositoryAccreditation } from '../../../../data/accreditation/accreditation.repository';
-import { useRepositoryProfiles } from '../../../../data/profiles/profiles.repository';
-import { AccreditationTypes } from '../../../../types/api/invest';
-import { useProfilesStore } from '../../../../domain/profiles/store/useProfiles';
+import { useRepositoryAccreditation } from 'InvestCommon/data/accreditation/accreditation.repository';
+import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
+import { AccreditationTypes } from 'InvestCommon/types/api/invest';
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { useAccreditationUpload } from '../useAccreditationUpload';
 
-vi.mock('../../../../domain/profiles/store/useProfiles', () => ({
+vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
   useProfilesStore: vi.fn(() => ({
     getProfileById: vi.fn(),
   })),
 }));
 
-vi.mock('../../../../data/profiles/profiles.repository', () => ({
+vi.mock('InvestCommon/data/profiles/profiles.repository', () => ({
   useRepositoryProfiles: vi.fn(() => ({
     getProfileById: vi.fn(),
     getProfileByIdState: ref({ loading: false, error: null, data: { id: '123', user_id: '456', accreditation_status: 'new' } }),
@@ -24,7 +24,7 @@ vi.mock('../../../../data/profiles/profiles.repository', () => ({
   })),
 }));
 
-vi.mock('../../../../data/accreditation/accreditation.repository', () => ({
+vi.mock('InvestCommon/data/accreditation/accreditation.repository', () => ({
   useRepositoryAccreditation: vi.fn(() => ({
     uploadDocument: vi.fn(),
     create: vi.fn(),
@@ -52,7 +52,7 @@ vi.mock('UiKit/helpers/validation/useFormValidation', () => ({
     onValidate: vi.fn(),
     formErrors: ref({}),
     isFieldRequired: vi.fn(),
-    getErrorText: vi.fn((fieldId: number) => {
+    getErrorText: vi.fn(() => {
       // This will be overridden in individual tests to match repository error data
       return undefined;
     }),

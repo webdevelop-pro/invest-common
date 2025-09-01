@@ -96,16 +96,17 @@ useGlobalLoader().hide();
               {{ offer?.website?.replace('https://', '')?.replace('/', '') }}
             </a>
           </div>
-          <div class="offer-details__tags-wrap">
+          <ul class="offer-details__tags-wrap">
             <VBadge
               v-for="(tag, index) in tags"
               :key="index"
               size="small"
+              as="li"
               itemprop="keywords"
             >
               {{ tag }}
             </VBadge>
-          </div>
+          </ul>
         </div>
         <OfferDetailsSide
           :loading="loading"
@@ -173,6 +174,7 @@ useGlobalLoader().hide();
     display: flex;
     align-items: center;
     gap: 12px;
+    padding-left: 0;
   }
 
   .is--left {

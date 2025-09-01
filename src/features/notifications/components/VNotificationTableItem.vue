@@ -21,15 +21,19 @@ const props = defineProps({
 });
 
 const onMarkAsRead = async () => {
+  if (!props.data?.id) return;
+  
   isLoading.value = true;
-  await notificationsStore.markAsReadById(props.data?.id);
+  await notificationsStore.markAsReadById(props.data.id);
   isLoading.value = false;
 };
 
 const onButtonClick = async () => {
+  if (!props.data?.buttonHref) return;
+  
   await onMarkAsRead();
   notificationsStore.onSidebarToggle(false);
-  window.location.href = props.data?.buttonHref;
+  window.location.href = props.data.buttonHref;
 };
 
 const onMessageClick = () => {
@@ -87,7 +91,12 @@ const onMessageClick = () => {
               :key="data?.content"
               v-highlight="search"
               class="v-table-notification-item__content is--body"
+              role="button"
+              tabindex="0"
+              :aria-label="`Click to view notification: ${data?.content || 'Notification'}`"
               @click="onMessageClick"
+              @keydown.enter="onMessageClick"
+              @keydown.space="onMessageClick"
               v-html="data?.content"
             />
           </VSkeleton>
@@ -116,7 +125,12 @@ const onMessageClick = () => {
       <span
         v-if="data?.isUnread"
         class="v-table-notification-item__dot"
+        role="button"
+        tabindex="0"
+        aria-label="Mark notification as read"
         @click.stop="onMarkAsRead"
+        @keydown.enter="onMarkAsRead"
+        @keydown.space="onMarkAsRead"
       />
     </VTableCell>
   </VTableRow>

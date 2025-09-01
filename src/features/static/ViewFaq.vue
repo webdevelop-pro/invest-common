@@ -20,7 +20,7 @@ useGlobalLoader().hide();
 <template>
   <div class="ViewFaq view-faq is--page">
     <div class="is--container is--flex-row">
-      <div class="view-faq__left">
+      <aside class="view-faq__left">
         <div class="with-default-distance is--sticky">
           <h1>
             {{ frontmatter.title }}
@@ -34,12 +34,12 @@ useGlobalLoader().hide();
             Contact Us
           </VButton>
         </div>
-      </div>
-      <div class="view-faq__right">
+      </aside>
+      <section class="view-faq__right">
         <VAccordionList
           :data="data"
         />
-      </div>
+      </section>
     </div>
   </div>
 </template>

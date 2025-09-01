@@ -20,7 +20,7 @@ useGlobalLoader().hide();
 <template>
   <div class="ViewHowItWorks view-how-it-works is--page">
     <div class="is--container is--flex-row">
-      <div class="view-how-it-works__left">
+      <aside class="view-how-it-works__left">
         <div class="is--sticky with-default-distance">
           <h1>
             {{ frontmatter.title }}
@@ -36,8 +36,8 @@ useGlobalLoader().hide();
             Start Investing
           </VButton>
         </div>
-      </div>
-      <div class="view-how-it-works__right">
+      </aside>
+      <section class="view-how-it-works__right">
         <VTimeline>
           <VTimelineItem
             v-for="(dataItem, index) in frontmatter.data"
@@ -84,7 +84,7 @@ useGlobalLoader().hide();
             </VTimelineCard>
           </VTimelineItem>
         </VTimeline>
-      </div>
+      </section>
     </div>
   </div>
 </template>

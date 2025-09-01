@@ -9,7 +9,6 @@ import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repos
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryAccreditation } from 'InvestCommon/data/accreditation/accreditation.repository';
 import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
-import { scrollToError } from 'UiKit/helpers/validation/general';
 import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/domain/config/enums/routes';
 import { useFormPersonalInformation } from '../useFormPersonalInformation';
 

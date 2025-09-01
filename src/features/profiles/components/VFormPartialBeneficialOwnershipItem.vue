@@ -40,7 +40,7 @@ const props = defineProps({
   schemaBackend: Object,
   loading: Boolean,
   isFieldRequired: Function as PropType<(fieldPath: string) => boolean>,
-  getErrorText: Function as PropType<(fieldPath: string, errorData: any) => any[]>,
+  getErrorText: Function as PropType<(fieldPath: string, errorData: unknown) => string[]>,
 });
 
 const title = props.trust ? 'Trustee or Protector' : 'Beneficial Owner';

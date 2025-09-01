@@ -26,7 +26,7 @@ const getComponentClass = (item: MenuItem) => {
 
 <template>
   <!-- eslint-disable vue/no-multiple-template-root -->
-  <div class="VFooterMenu v-footer-menu">
+  <nav class="VFooterMenu v-footer-menu">
     <ul class="v-footer-menu__menu-list">
       <li
         v-for="menuItem in menu"
@@ -64,7 +64,7 @@ const getComponentClass = (item: MenuItem) => {
         </div>
       </li>
     </ul>
-  </div>
+  </nav>
 </template>
 
 <style lang="scss">

@@ -23,8 +23,6 @@ const props = defineProps({
 
 const {
   model,
-  validation,
-  schemaBackend,
   isDisabledButton,
   disclosureCheckbox,
   relatedOptionsFiltered,
@@ -36,7 +34,6 @@ const {
   setOfferCommentOptionsState,
   isFieldRequired,
   getErrorText,
-  formErrors,
 } = useVFormComments(props.offerId);
 </script>
 

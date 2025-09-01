@@ -164,7 +164,7 @@ describe('usePortfolioCancelInvestment', () => {
 
   describe('Open watcher', () => {
     it('should fetch cancel options when dialog opens and schema is empty', async () => {
-      const composable = usePortfolioCancelInvestment(mockInvestment, mockOpen, mockEmit);
+      usePortfolioCancelInvestment(mockInvestment, mockOpen, mockEmit);
       mockInvestmentRepository.setCancelOptions.mockResolvedValue(undefined);
 
       mockOpen.value = true;
@@ -177,7 +177,7 @@ describe('usePortfolioCancelInvestment', () => {
     it('should not fetch cancel options when schema already exists', async () => {
       // pre-populate schema data
       mockInvestmentRepository.setCancelOptionsState.value.data = {};
-      const composable = usePortfolioCancelInvestment(mockInvestment, mockOpen, mockEmit);
+      usePortfolioCancelInvestment(mockInvestment, mockOpen, mockEmit);
 
       mockOpen.value = true;
       await Promise.resolve();

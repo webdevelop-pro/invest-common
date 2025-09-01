@@ -20,7 +20,7 @@ export const useRepositoryAnalytics = () => {
         time: messageData.time || new Date().toISOString(),
       };
 
-      // const response = await apiClient.post<IAnalyticsResponse>('/public/log', payload);
+      const response = await apiClient.post<IAnalyticsResponse>('/public/log', payload);
       setMessageState.value.data = response.data;
       return response.data;
     } catch (err) {
