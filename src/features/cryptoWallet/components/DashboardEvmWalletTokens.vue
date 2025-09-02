@@ -1,14 +1,13 @@
 <script setup lang="ts">
-import { computed } from 'vue';
 import { currency } from 'InvestCommon/helpers/currency';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
-import { storeToRefs } from 'pinia';
 import VTooltip from 'UiKit/components/VTooltip.vue';
 import plus from 'UiKit/assets/images/plus.svg';
 import VTableDefault from 'InvestCommon/shared/components/VTableDefault.vue';
 import VTableWalletTokensItem from './VTableWalletTokensItem.vue';
 import env from 'InvestCommon/domain/config/env';
-import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
+import { EvmTransactionTypes } from 'InvestCommon/data/evm/evm.types';
+import { useDashboardEvmWalletTokens } from './logic/useDashboardEvmWalletTokens';
 
 defineProps({
   profileId: {
@@ -22,19 +21,18 @@ defineProps({
   isError: Boolean,
 });
 
-  const evmRepository = useRepositoryEvm();
-  const { getEvmWalletState } = storeToRefs(evmRepository);
+const emit = defineEmits<{
+  (e: 'click', type: EvmTransactionTypes): void,
+}>();
 
-  const tableOptions = computed(() => getEvmWalletState.value.data?.balances);
-
-  const isShowIncomingBalance = computed(() => (
-    (getEvmWalletState.value.data?.pending_incoming_balance ?? 0) > 0
-  ));
-  const isShowOutgoingBalance = computed(() => (
-    (getEvmWalletState.value.data?.pending_outcoming_balance ?? 0) > 0
-  ));
-
-const isSkeleton = computed(() => (getEvmWalletState.value.loading));
+const {
+  getEvmWalletState,
+  tableOptions,
+  isShowIncomingBalance,
+  isShowOutgoingBalance,
+  canWithdraw,
+  isSkeleton,
+} = useDashboardEvmWalletTokens();
 </script>
 
 <template>
@@ -79,6 +77,7 @@ const isSkeleton = computed(() => (getEvmWalletState.value.loading));
           size="small"
           data-testid="funding-add-funds-btn"
           class="dashboard-evm-wallet-tokens__funds-button"
+          @click="emit('click', EvmTransactionTypes.deposit)"
         >
           <plus
             alt="plus icon"
@@ -89,8 +88,9 @@ const isSkeleton = computed(() => (getEvmWalletState.value.loading));
         <VButton
           size="small"
           variant="outlined"
-          data-testid="funding-withdraw-btn"
+          :disabled="!canWithdraw"
           class="dashboard-evm-wallet-tokens__funds-button"
+          @click="emit('click', EvmTransactionTypes.withdrawal)"
         >
           Withdraw
         </VButton>

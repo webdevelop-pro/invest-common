@@ -1,0 +1,143 @@
+import {
+  computed, reactive, watch, nextTick,
+} from 'vue';
+import { storeToRefs } from 'pinia';
+import { numberFormatter } from 'InvestCommon/helpers/numberFormatter';
+import { JSONSchemaType } from 'ajv/dist/types/json-schema';
+import { errorMessageRule } from 'UiKit/helpers/validation/rules';
+import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
+import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
+import { IEvmWithdrawRequestBody } from 'InvestCommon/data/evm/evm.types';
+
+export function useVFormFundsWithdraw(
+  emitClose?: () => void,
+) {
+  const evmRepository = useRepositoryEvm();
+  const { getEvmWalletState, withdrawFundsState } = storeToRefs(evmRepository);
+
+  const selectedToken = computed(() => (
+    getEvmWalletState.value.data?.balances?.find((item: any) => item.address === model.token)));
+  const maxWithdraw = computed(() => selectedToken.value?.amount);
+  const schemaMaximum = computed(() => maxWithdraw.value);
+  const schemaMaximumError = computed(() => `Maximum available is $${maxWithdraw.value}`);
+  const text = computed(() => `available ${maxWithdraw.value}`);
+
+  const errorData = computed(() => (withdrawFundsState.value.error as any)?.data?.responseJson);
+  const fieldsPaths = ['amount', 'token', 'to', 'wallet_id'];
+
+  const schemaAddTransaction = computed(() => ({
+    $schema: 'http://json-schema.org/draft-07/schema#',
+    definitions: {
+      Individual: {
+        properties: {
+          amount: {
+            type: 'number',
+            // maximum: schemaMaximum.value,
+            // errorMessage: {
+            //   maximum: schemaMaximumError.value,
+            //   minimum: 'Amount should be at least $1',
+            // },
+          },
+          token: {
+            type: 'string',
+          },
+          to: {
+            type: 'string',
+          },
+          wallet_id: {
+            type: 'number',
+          },
+        },
+        type: 'object',
+        required: fieldsPaths,
+        errorMessage: errorMessageRule,
+      },
+    },
+    $ref: '#/definitions/Individual',
+  } as unknown as JSONSchemaType<IEvmWithdrawRequestBody>));
+
+
+  const schemaFrontend = schemaAddTransaction;
+  // Pass undefined directly for backend schema
+  const {
+    model,
+    validation,
+    isValid,
+    onValidate,
+    scrollToError, formErrors, isFieldRequired, getErrorText,
+    getOptions, getReferenceType,
+  } = useFormValidation<IEvmWithdrawRequestBody>(
+    schemaFrontend,
+    undefined,
+    reactive({
+      wallet_id: getEvmWalletState.value.data?.id
+    } as IEvmWithdrawRequestBody),
+    fieldsPaths
+  );
+
+  const isDisabledButton = computed(() => (!isValid.value || withdrawFundsState.value.loading));
+
+  const saveHandler = async () => {
+    onValidate();
+    if (!isValid.value) {
+      nextTick(() => scrollToError('VFormWalletAddTransaction'));
+      return;
+    }
+    const data: IEvmWithdrawRequestBody = {
+      amount: Number(model.amount),
+      token: String(model.token),
+      to: String(model.to),
+      wallet_id: Number(model.wallet_id),
+    };
+    await evmRepository.withdrawFunds(data);
+    if (getEvmWalletState.value.error) return;
+    if (emitClose) emitClose();
+  };
+
+  const cancelHandler = () => {
+    if (emitClose) emitClose();
+  };
+
+  watch(() => getEvmWalletState.value.data, () => {
+    if (model.wallet_id) model.wallet_id = getEvmWalletState.value.data?.id;
+  }, { immediate: true });
+
+  const tokenFormatted = computed(() => (
+    getEvmWalletState.value.data?.balances?.map((item: any) => ({
+      text: `${item.name}: ${item.symbol}`,
+      id: `${item.address}`,
+    })) || []
+  ));
+
+  const tokenLastItem = computed(() => (
+    tokenFormatted.value[tokenFormatted.value.length - 1]
+  ));
+
+  watch(() => tokenFormatted.value, () => {
+    if (!model.token) model.token = String(tokenLastItem.value?.id || '');
+  }, { immediate: true });
+
+  return {
+    model,
+    validation,
+    isValid,
+    isDisabledButton,
+    onValidate,
+    saveHandler,
+    cancelHandler,
+    text,
+    errorData,
+    schemaAddTransaction,
+    tokenFormatted,
+    numberFormatter,
+    withdrawFundsState,
+    
+    // Form validation helpers
+    formErrors,
+    isFieldRequired,
+    getErrorText,
+    getOptions,
+    getReferenceType,
+    scrollToError,
+  };
+}

@@ -1,109 +1,45 @@
 <script setup lang="ts">
-import {
-  computed, defineAsyncComponent, nextTick, onBeforeMount, watch,
-} from 'vue';
-import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
+import { defineAsyncComponent } from 'vue';
 import DashboardTabsTopInfo from '@/views/Dashboard/components/DashboardTabsTopInfo.vue';
-import { storeToRefs } from 'pinia';
-import { useRouter } from 'vue-router';
-import { urlContactUs } from 'InvestCommon/domain/config/links';
 import DashboardEvmWalletTokens from './components/DashboardEvmWalletTokens.vue';
-import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
-import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
-import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
+import { useDashboardEvm, EVM_WALLET_TAB_INFO } from './logic/useDashboardEvm';
 
-const EVM_WALLET_TAB_INFO = {
-  title: 'Crypto Wallet',
-  text: `
-    Crypto wallet statuses and transactions
-  `,
-};
-
+const VDialogCryptoWallet = defineAsyncComponent({
+  loader: () => import('./components/VDialogCryptoWallet.vue'),
+});
 const VAlert = defineAsyncComponent({
   loader: () => import('UiKit/components/VAlert.vue'),
 });
 
-const router = useRouter();
-const profilesStore = useProfilesStore();
-const { selectedUserProfileId, selectedUserProfileData } = storeToRefs(profilesStore);
-const userSessionStore = useSessionStore();
-const { userLoggedIn } = storeToRefs(userSessionStore);
-const useRepositoryProfilesStore = useRepositoryProfiles();
-const { getProfileByIdState } = storeToRefs(useRepositoryProfilesStore);
+// Keep VAlert as a static import to preserve slot typings
+const {
+  // state
+  selectedUserProfileId,
+  selectedUserProfileData,
+  userLoggedIn,
 
-  const evmRepository = useRepositoryEvm();
-  const { getEvmWalletState, canLoadEvmWalletData } = storeToRefs(evmRepository);
+  // repository state
+  getEvmWalletState,
 
-    // KYC and wallet status logic
-  const isWalletError = computed(() => getEvmWalletState.value.data?.isStatusAnyError || getEvmWalletState.value.error);
-  const isKYCNeedToPass = computed(() => ((
-    selectedUserProfileData.value.isKycNone || selectedUserProfileData.value.isKycNew
-    || selectedUserProfileData.value.isKycPending) && !isWalletError.value));
-  const isKYCInProgress = computed(() => (
-    selectedUserProfileData.value.isKycInProgress && !isWalletError.value));
-  const isWalletCreated = computed(() => (
-    getEvmWalletState.value.data?.isStatusCreated && !isWalletError.value));
-  const isError = computed(() => (
-    selectedUserProfileData.value.isKycDeclined || isWalletError.value || selectedUserProfileData.value.isTypeSdira));
+  // ui constants
 
-  const isAlertShow = computed(() => (
-    (isKYCNeedToPass.value || isKYCInProgress.value || isWalletCreated.value || isError.value)
-    && !getProfileByIdState.value.loading
-  ));
+  // computed
+  isWalletError,
+  isAlertShow,
+  isTopTextShow,
+  isAlertType,
+  isAlertText,
+  alertTitle,
+  alertButtonText,
 
-  const isTopTextShow = computed(() => (
-    !isWalletError.value && !selectedUserProfileData.value.isKycDeclined
-  ));
+  // actions
+  onAlertButtonClick,
+  onTransactionClick,
 
-  const isAlertType = computed(() => {
-    if (isWalletCreated.value) return 'info';
-    return 'error';
-  });
-
-  const isAlertText = computed(() => {
-    if (isError.value) {
-      return `Unfortunately, we were not able to create a wallet for you. Please <a href="${urlContactUs}">contact us</a>\n    to resolve the issue.`;
-    }
-    if (isWalletCreated.value) {
-      return `This usually takes a few moments. If \n    it takes longer than expected, <a href="${urlContactUs}">contact us</a> for assistance.`;
-    }
-    if (isKYCNeedToPass.value) return `You need to <a href="/profile/${selectedUserProfileId.value}/kyc">pass KYC </a>\n    before you can make a transfer`;
-    if (isKYCInProgress.value) return `Your KYC is in progress. You need to pass KYC before you can make a transfer`;
-    return undefined;
-  });
-
-  const alertTitle = computed(() => {
-    if (isKYCNeedToPass.value) return 'Identity verification is needed. ';
-    if (isWalletCreated.value) return 'Your wallet is being created and verified.';
-    return undefined;
-  });
-
-  const alertButtonText = computed(() => {
-    if (isKYCNeedToPass.value) return 'Verify Identity';
-    return undefined;
-  });
-
-  const updateData = async () => {
-    if (canLoadEvmWalletData.value && !getEvmWalletState.value.loading && !getEvmWalletState.value.error) {
-      await evmRepository.getEvmWalletByProfile(selectedUserProfileId.value);
-    }
-  };
-
-  const onAlertButtonClick = () => {
-    if (isKYCNeedToPass.value) {
-      router.push({ name: 'ROUTE_SUBMIT_KYC', params: { profileId: selectedUserProfileId.value } });
-    }
-  };
-
-  watch(() => [selectedUserProfileData.value.id, selectedUserProfileData.value.kyc_status], () => {
-    nextTick(() => {
-      if (canLoadEvmWalletData.value) updateData();
-    });
-  });
-
-onBeforeMount(() => {
-  updateData();
-});
+  // dialog state
+  isDialogTransactionOpen,
+  transactiontType,
+} = useDashboardEvm();
 </script>
 
 <template>
@@ -136,9 +72,16 @@ onBeforeMount(() => {
           :profile-id="selectedUserProfileId"
           :logged-in="userLoggedIn"
           :is-error="isAlertShow || selectedUserProfileData.isTypeSdira"
+          @click="onTransactionClick"
         />
       </div>
     </div>
+
+    <VDialogCryptoWallet
+      v-model="isDialogTransactionOpen"
+      :transaction-type="transactiontType"
+      :data="getEvmWalletState.data"
+    />
   </div>
 </template>
 

@@ -7,7 +7,7 @@ import { createActionState } from 'InvestCommon/data/repository/repository';
 import { INotification } from 'InvestCommon/data/notifications/notifications.types';
 import { EvmWalletFormatter } from './formatter/wallet.formatter';
 import {
-  IEvmWalletDataFormatted, IEvmWalletDataResponse,
+  IEvmWalletDataFormatted, IEvmWalletDataResponse, IEvmWithdrawRequestBody,
 } from './evm.types';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
@@ -22,6 +22,7 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
   const apiClient = new ApiClient(env.EVM_URL);
 
   const getEvmWalletState = createActionState<IEvmWalletDataFormatted>();
+  const withdrawFundsState = createActionState<void>();
 
   const evmWalletId = computed(() => getEvmWalletState.value.data?.id || 0);
 
@@ -44,6 +45,24 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
     }
   };
 
+  const withdrawFunds = async (body: IEvmWithdrawRequestBody) => {
+    try {
+      withdrawFundsState.value.loading = true;
+      withdrawFundsState.value.error = null;
+      const response = await apiClient.post<IEvmWalletDataResponse>(`/auth/withdrawal`, body);
+      getEvmWalletState.value.data = response.data;
+      return getEvmWalletState.value.data;
+    } catch (err) {
+      withdrawFundsState.value.error = err as Error;
+      if (err?.data?.statusCode !== 404) {
+        toasterErrorHandling(err, 'Failed to fetch EVM wallet');
+      }
+      throw err;
+    } finally {
+      withdrawFundsState.value.loading = false;
+    }
+  };
+
 
     const updateNotificationData = (notification: INotification) => {
         const { fields } = notification.data;
@@ -63,13 +82,16 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
 
   const resetAll = () => {
     getEvmWalletState.value = { loading: false, error: null, data: undefined };
+    withdrawFundsState.value = { loading: false, error: null, data: undefined };
   };
 
   return {
     evmWalletId,
     getEvmWalletState,
+    withdrawFundsState,
     canLoadEvmWalletData,
     getEvmWalletByProfile,
+    withdrawFunds,
     resetAll,
     updateNotificationData,
   };

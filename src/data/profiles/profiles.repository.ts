@@ -196,11 +196,15 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
       const profile = profiles.find((item: { id: number }) => item.id === objectId);
       if (profile && notification.data.fields) {
         Object.assign(profile, notification.data.fields);
+        const formatted = new ProfileFormatter(profile).format();
+        Object.assign(profile, formatted);
       }
     }
     // Update in currently loaded profile if it matches
     if (getProfileByIdState.value?.data && getProfileByIdState.value.data.id === objectId && notification.data.fields) {
       Object.assign(getProfileByIdState.value.data, notification.data.fields);
+      const formatted = new ProfileFormatter(getProfileByIdState.value.data as unknown as IProfileIndividual).format();
+      Object.assign(getProfileByIdState.value.data, formatted);
     }
   };
 

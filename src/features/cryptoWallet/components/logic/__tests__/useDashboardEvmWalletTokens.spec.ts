@@ -1,0 +1,65 @@
+import { ref } from 'vue';
+import { describe, it, expect, beforeEach } from 'vitest';
+
+const getEvmWalletStateRef = ref({
+  data: {
+    balances: [],
+    pending_incoming_balance: 0,
+    pending_outcoming_balance: 0,
+  },
+  loading: false,
+});
+
+vi.mock('InvestCommon/data/evm/evm.repository', () => {
+  return {
+    useRepositoryEvm: () => ({ getEvmWalletState: getEvmWalletStateRef }),
+  };
+});
+
+import { useDashboardEvmWalletTokens } from '../useDashboardEvmWalletTokens';
+
+describe('useDashboardEvmWalletTokens', () => {
+  beforeEach(() => {
+    getEvmWalletStateRef.value = {
+      data: {
+        balances: [],
+        pending_incoming_balance: 0,
+        pending_outcoming_balance: 0,
+      },
+      loading: false,
+    };
+  });
+
+  it('exposes table options from wallet state', () => {
+    const { tableOptions } = useDashboardEvmWalletTokens();
+    expect(tableOptions.value).toEqual([]);
+    getEvmWalletStateRef.value.data.balances = [{ symbol: 'USDC' } as unknown as never];
+    expect(tableOptions.value?.length).toBe(1);
+  });
+
+  it('shows incoming/outgoing when positive values', () => {
+    const { isShowIncomingBalance, isShowOutgoingBalance } = useDashboardEvmWalletTokens();
+    expect(isShowIncomingBalance.value).toBe(false);
+    expect(isShowOutgoingBalance.value).toBe(false);
+    getEvmWalletStateRef.value.data.pending_incoming_balance = 1;
+    getEvmWalletStateRef.value.data.pending_outcoming_balance = 2;
+    expect(isShowIncomingBalance.value).toBe(true);
+    expect(isShowOutgoingBalance.value).toBe(true);
+  });
+
+  it('can withdraw when balances exist', () => {
+    const { canWithdraw } = useDashboardEvmWalletTokens();
+    expect(canWithdraw.value).toBe(false);
+    getEvmWalletStateRef.value.data.balances = [{} as never];
+    expect(canWithdraw.value).toBe(true);
+  });
+
+  it('reflects skeleton from loading state', () => {
+    const { isSkeleton } = useDashboardEvmWalletTokens();
+    expect(isSkeleton.value).toBe(false);
+    getEvmWalletStateRef.value.loading = true as unknown as boolean;
+    expect(isSkeleton.value).toBe(true);
+  });
+});
+
+

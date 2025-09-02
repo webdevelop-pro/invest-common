@@ -106,3 +106,10 @@ export interface IEvmTransactionDataFormatted {
   isTypeReturn: boolean;
   isTypeMarket: boolean;
 }
+
+export interface IEvmWithdrawRequestBody {
+  amount: number;
+  token: string; // token address or symbol depending on backend contract
+  to: string; // destination wallet address
+  wallet_id: number;
+}
