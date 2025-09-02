@@ -17,11 +17,11 @@ export const useDashboardEvmWalletTokens = () => {
   ));
 
   const canWithdraw = computed(() => (
-    getEvmWalletState.value.data?.balances.length > 0
+    getEvmWalletState.value.data?.balances?.length > 0
   ));
 
   const canExchange = computed(() => (
-    getEvmWalletState.value.data?.balances.length > 0
+    getEvmWalletState.value.data?.balances?.length > 0
   ));
 
   const isSkeleton = computed(() => (getEvmWalletState.value.loading));

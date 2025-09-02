@@ -60,7 +60,7 @@ describe('useVFormFundsExchange', () => {
       { text: 'USDC', id: '0xe2cCb3fc0153584e5C70c65849078b55597b4032' }
     ]);
     
-    expect(text.value).toBe('available 500');
+    expect(text.value).toBe('available 1000');
   });
 
   it('should validate form', async () => {
@@ -137,7 +137,7 @@ describe('useVFormFundsExchange', () => {
     // The maxExchange should be the amount of the selected token
     // This is tested indirectly through the text computed property
     const { text } = useVFormFundsExchange(mockEmitClose);
-    expect(text.value).toBe('available 500');
+    expect(text.value).toBe('available 1000');
   });
 
   it('should handle exchangeTokensState loading', () => {

@@ -105,15 +105,25 @@ export function useVFormFundsExchange(
     if (model.wallet_id) model.wallet_id = getEvmWalletState.value.data?.id;
   }, { immediate: true });
 
-  const tokenFormatted = computed(() => (
-    getEvmWalletState.value.data?.balances?.map((item: any) => ({
-      text: `${item.name}: ${item.symbol}`,
-      id: `${item.address}`,
-    })) || []
-  ));
+  const tokenFormatted = computed(() => {
+    const balances = getEvmWalletState.value.data?.balances || [];
+    const uniqueTokens = new Map();
+    
+    balances.forEach((item: any) => {
+      const key = `${item.name}:${item.symbol}`;
+      if (!uniqueTokens.has(key)) {
+        uniqueTokens.set(key, {
+          text: `${item.name}: ${item.symbol}`,
+          id: `${item.address}`,
+        });
+      }
+    });
+    
+    return Array.from(uniqueTokens.values());
+  });
 
   const tokenLastItem = computed(() => (
-    tokenFormatted.value[0]
+    tokenFormatted.value[tokenFormatted.value.length - 1] || null
   ));
 
   watch(() => tokenFormatted.value, () => {

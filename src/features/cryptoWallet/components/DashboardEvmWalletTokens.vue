@@ -172,6 +172,13 @@ const {
     display: flex;
     align-items: center;
     gap: 12px;
+    flex-wrap: wrap;
+    justify-content: end;
+    
+    @media screen and (max-width: $tablet) {
+      width: 100%;
+      justify-content: flex-start;
+    }
   }
 
   &__top-title {
