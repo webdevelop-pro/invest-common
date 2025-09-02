@@ -8,12 +8,15 @@ import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
 import { IEvmWithdrawRequestBody } from 'InvestCommon/data/evm/evm.types';
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 
 export function useVFormFundsWithdraw(
   emitClose?: () => void,
 ) {
   const evmRepository = useRepositoryEvm();
   const { getEvmWalletState, withdrawFundsState } = storeToRefs(evmRepository);
+    const profilesStore = useProfilesStore();
+    const { selectedUserProfileId } = storeToRefs(profilesStore);
 
   const selectedToken = computed(() => (
     getEvmWalletState.value.data?.balances?.find((item: any) => item.address === model.token)));
@@ -90,6 +93,8 @@ export function useVFormFundsWithdraw(
     };
     await evmRepository.withdrawFunds(data);
     if (getEvmWalletState.value.error) return;
+
+    evmRepository.getEvmWalletByProfile(selectedUserProfileId.value);
     if (emitClose) emitClose();
   };
 

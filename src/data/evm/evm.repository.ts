@@ -52,8 +52,8 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
       withdrawFundsState.value.loading = true;
       withdrawFundsState.value.error = null;
       const response = await apiClient.post<IEvmWalletDataResponse>(`/auth/withdrawal`, body);
-      getEvmWalletState.value.data = response.data;
-      return getEvmWalletState.value.data;
+      withdrawFundsState.value.data = response.data;
+      return withdrawFundsState.value.data;
     } catch (err) {
       withdrawFundsState.value.error = err as Error;
       if (err?.data?.statusCode !== 404) {
