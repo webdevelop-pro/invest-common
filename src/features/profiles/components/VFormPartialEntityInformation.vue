@@ -8,7 +8,7 @@ import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import VFormRadio from 'UiKit/components/Base/VForm/VFormRadio.vue';
 import VFormSelect from 'UiKit/components/Base/VForm/VFormSelect.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
-import VFormDocument from 'UiKit/components/Base/VForm/VFormDocument.vue';
+import VUploaderWithIds from 'InvestCommon/features/filer/VUploaderWithIds.vue';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { useVFormPartialEntityInformation, FormModelEntityInformation } from './logic/useVFormPartialEntityInformation';
 
@@ -189,10 +189,15 @@ defineExpose({
           :label="operatingAgreementLabel"
           data-testid="operating-agreement-document-group"
         >
-          <VFormDocument
+          <VUploaderWithIds
             :is-error="VFormGroupProps.isFieldError"
-            :loading="loadingComputed"
-            @upload-success="model.operating_agreement_id = $event"
+            :is-loading="loadingComputed"
+            :multiple="false"
+            :max-files="1"
+            accepted-file-types="application/pdf"
+            supported-files-text="PDF"
+            max-size-text="10MB"
+            @upload-success="model.operating_agreement_id = $event[0]"
           />
         </VFormGroup>
       </FormCol>
@@ -204,10 +209,15 @@ defineExpose({
           label="Organization Document"
           data-testid="organization-document-group"
         >
-          <VFormDocument
+          <VUploaderWithIds
             :is-error="VFormGroupProps.isFieldError"
-            :loading="loadingComputed"
-            @upload-success="model.organization_document_id = $event"
+            :is-loading="loadingComputed"
+            :multiple="false"
+            :max-files="1"
+            accepted-file-types="application/pdf"
+            supported-files-text="PDF"
+            max-size-text="10MB"
+            @upload-success="model.organization_document_id = $event[0]"
           />
         </VFormGroup>
       </FormCol>
@@ -219,10 +229,15 @@ defineExpose({
           label="Formation Document"
           data-testid="entity-document-group"
         >
-          <VFormDocument
+          <VUploaderWithIds
             :is-error="VFormGroupProps.isFieldError"
-            :loading="loadingComputed"
-            @upload-success="model.formation_document_id = $event"
+            :is-loading="loadingComputed"
+            :multiple="false"
+            :max-files="1"
+            accepted-file-types="application/pdf"
+            supported-files-text="PDF"
+            max-size-text="10MB"
+            @upload-success="model.formation_document_id = $event[0]"
           />
         </VFormGroup>
       </FormCol>

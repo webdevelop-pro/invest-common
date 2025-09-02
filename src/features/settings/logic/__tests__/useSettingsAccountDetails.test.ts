@@ -44,7 +44,7 @@ vi.mock('UiKit/composables/useHubspotForm', () => ({
   useHubspotForm: vi.fn(() => ({ submitFormToHubspot: mockSubmitFormToHubspot }))
 }));
 
-const mockToast = vi.fn();
+const mockToast = vi.hoisted(() => vi.fn());
 vi.mock('UiKit/components/Base/VToast/use-toast', () => ({
   useToast: vi.fn(() => ({ toast: mockToast }))
 }));

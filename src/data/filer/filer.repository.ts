@@ -37,7 +37,7 @@ export const useRepositoryFiler = defineStore('repository-filer', () => {
   const getPublicFilesState = createActionState<IFilerItem[]>();
   const postSignurlState = createActionState<any>();
   const uploadFileState = createActionState<string>();
-  const getImageByIdLinkState = createActionState<IFilerItem[]>();
+  const getFileByIdLinkState = createActionState<IFilerItem[]>();
   const notificationFieldsState = createActionState<INotification['data']['fields']>();
 
   // Actions
@@ -111,19 +111,22 @@ export const useRepositoryFiler = defineStore('repository-filer', () => {
     }
   };
 
-  const getImageByIdLink = async (id: number | string, size: string = 'small') => {
+  const getFileByIdLink = async (id: number | string, size?: string) => {
     try {
-      getImageByIdLinkState.value.loading = true;
-      getImageByIdLinkState.value.error = null;
-      const response = await apiClient.get<IFilerItem[]>(`/auth/files/${id}?size=${size}`);
-      getImageByIdLinkState.value.data = response.data;
+      getFileByIdLinkState.value.loading = true;
+      getFileByIdLinkState.value.error = null;
+      
+      // Only include size parameter if it's explicitly provided
+      const url = size ? `/auth/files/${id}?size=${size}` : `/auth/files/${id}`;
+      const response = await apiClient.get<IFilerItem[]>(url);
+      getFileByIdLinkState.value.data = response;
       return response.data;
     } catch (err) {
-      getImageByIdLinkState.value.error = err as Error;
+      getFileByIdLinkState.value.error = err as Error;
       toasterErrorHandlingAnalytics(err, 'Failed to fetch image by id');
       throw err;
     } finally {
-      getImageByIdLinkState.value.loading = false;
+      getFileByIdLinkState.value.loading = false;
     }
   };
 
@@ -173,7 +176,7 @@ export const useRepositoryFiler = defineStore('repository-filer', () => {
     
     updateStateArray(getFilesState.value.data);
     updateStateArray(getPublicFilesState.value.data);
-    updateStateArray(getImageByIdLinkState.value.data);
+    updateStateArray(getFileByIdLinkState.value.data);
   };
 
   const resetAll = () => {
@@ -181,7 +184,7 @@ export const useRepositoryFiler = defineStore('repository-filer', () => {
     getPublicFilesState.value = { loading: false, error: null, data: undefined };
     postSignurlState.value = { loading: false, error: null, data: undefined };
     uploadFileState.value = { loading: false, error: null, data: undefined };
-    getImageByIdLinkState.value = { loading: false, error: null, data: undefined };
+    getFileByIdLinkState.value = { loading: false, error: null, data: undefined };
     notificationFieldsState.value = { loading: false, error: null, data: undefined };
   };
 
@@ -191,14 +194,14 @@ export const useRepositoryFiler = defineStore('repository-filer', () => {
     getPublicFilesState,
     postSignurlState,
     uploadFileState,
-    getImageByIdLinkState,
+    getFileByIdLinkState,
     notificationFieldsState,
     // Actions
     getFiles,
     getPublicFiles,
     postSignurl,
     uploadFile,
-    getImageByIdLink,
+    getFileByIdLink,
     resetAll,
     uploadHandler,
     updateNotificationData,

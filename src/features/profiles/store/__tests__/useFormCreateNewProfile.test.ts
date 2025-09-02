@@ -142,7 +142,7 @@ const makeFormChild = (isValid = true, model = {}, onValidate = vi.fn()) => ({
 });
 
 const setupComposable = (type: string, childModel = {}, childIsValid = true) => {
-  mockSelectTypeFormRef = ref({ isValid: true, model: { type_profile: type } });
+  mockSelectTypeFormRef = ref({ isValid: true, model: { type_profile: type }, onValidate: vi.fn() });
   mockEntityTypeFormRef = makeFormChild(childIsValid, childModel, vi.fn());
   mockSdiraTypeFormRef = makeFormChild(childIsValid, childModel, vi.fn());
   mockSoloTypeFormRef = makeFormChild(childIsValid, childModel, vi.fn());
@@ -306,7 +306,7 @@ describe('useFormCreateNewProfile', () => {
   });
 
   it('should call getProfileByIdOptions on selectedType change', async () => {
-    mockSelectTypeFormRef = ref({ isValid: true, model: { type_profile: 'entity' } });
+    mockSelectTypeFormRef = ref({ isValid: true, model: { type_profile: 'entity' }, onValidate: vi.fn() });
     mockEntityTypeFormRef = ref({ isValid: true, model: { type: 'LLC' } });
     mockSdiraTypeFormRef = ref({ isValid: true, model: {} });
     mockSoloTypeFormRef = ref({ isValid: true, model: {} });

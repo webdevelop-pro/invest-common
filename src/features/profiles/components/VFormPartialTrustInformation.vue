@@ -6,7 +6,7 @@ import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import VFormRadio from 'UiKit/components/Base/VForm/VFormRadio.vue';
 import VFormSelect from 'UiKit/components/Base/VForm/VFormSelect.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
-import VFormDocument from 'UiKit/components/Base/VForm/VFormDocument.vue';
+import VUploaderWithIds from 'InvestCommon/features/filer/VUploaderWithIds.vue';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { useVFormPartialTrustInformation, FormModelTrustInformation } from './logic/useVFormPartialTrustInformation';
 
@@ -166,10 +166,15 @@ defineExpose({
           label="Trust Agreement"
           data-testid="trust-document-group"
         >
-          <VFormDocument
+          <VUploaderWithIds
             :is-error="VFormGroupProps.isFieldError"
-            :loading="loadingComputed"
-            @upload-success="model.trust_agreement_id = $event"
+            :is-loading="loadingComputed"
+            :multiple="false"
+            :max-files="1"
+            accepted-file-types="application/pdf"
+            supported-files-text="PDF"
+            max-size-text="10MB"
+            @upload-success="model.trust_agreement_id = $event[0]"
           />
         </VFormGroup>
       </FormCol>

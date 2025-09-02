@@ -5,7 +5,7 @@ import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
 import VFormRadio from 'UiKit/components/Base/VForm/VFormRadio.vue';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
-import VFormDocument from 'UiKit/components/Base/VForm/VFormDocument.vue';
+import VUploaderWithIds from 'InvestCommon/features/filer/VUploaderWithIds.vue';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { useVFormPartialPlanInformation, FormModelPlanInformation } from './logic/useVFormPartialPlanInformation';
 
@@ -121,10 +121,15 @@ defineExpose({
           label="Plan Document"
           data-testid="ein-group"
         >
-          <VFormDocument
+          <VUploaderWithIds
             :is-error="VFormGroupProps.isFieldError"
-            :loading="loadingComputed"
-            @upload-success="model.plan_document_id = $event"
+            :is-loading="loadingComputed"
+            :multiple="false"
+            :max-files="1"
+            accepted-file-types="application/pdf"
+            supported-files-text="PDF"
+            max-size-text="10MB"
+            @upload-success="model.plan_document_id = $event[0]"
           />
         </VFormGroup>
       </FormCol>
