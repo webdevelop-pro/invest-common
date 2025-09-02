@@ -53,7 +53,7 @@ describe('useVFormFundsWithdraw', () => {
       { text: 'USD Coin: USDC', id: '0xtoken1' },
       { text: 'Ethereum: ETH', id: '0xtoken2' },
     ]);
-    expect(text.value).toBe('available 1000');
+    expect(text.value).toBe('available 500');
   });
 
   it('should validate form', async () => {

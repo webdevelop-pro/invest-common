@@ -31,6 +31,7 @@ const {
   isShowIncomingBalance,
   isShowOutgoingBalance,
   canWithdraw,
+  canExchange,
   isSkeleton,
 } = useDashboardEvmWalletTokens();
 </script>
@@ -93,6 +94,15 @@ const {
           @click="emit('click', EvmTransactionTypes.withdrawal)"
         >
           Withdraw
+        </VButton>
+        <VButton
+          size="small"
+          variant="outlined"
+          :disabled="!canExchange"
+          class="dashboard-evm-wallet-tokens__funds-button"
+          @click="emit('click', EvmTransactionTypes.exchange)"
+        >
+          Exchange
         </VButton>
       </div>
     </div>

@@ -1,18 +1,13 @@
 <script setup lang="ts">
 import { EvmTransactionTypes } from 'InvestCommon/data/evm/evm.types';
-import { computed, defineAsyncComponent, PropType, ref, watch } from 'vue';
+import { computed, PropType, ref, watch } from 'vue';
 import VDialog from 'UiKit/components/Base/VDialog/VDialog.vue';
 import VDialogContent from 'UiKit/components/Base/VDialog/VDialogContent.vue';
 import VDialogHeader from 'UiKit/components/Base/VDialog/VDialogHeader.vue';
 import VDialogTitle from 'UiKit/components/Base/VDialog/VDialogTitle.vue';
-
-const VFormFundsAdd = defineAsyncComponent({
-  loader: () => import('./VFormFundsAdd.vue'),
-});
-
-const VFormFundsWithdraw = defineAsyncComponent({
-  loader: () => import('./VFormFundsWithdraw.vue'),
-});
+import VFormFundsAdd from './VFormFundsAdd.vue';
+import VFormFundsWithdraw from './VFormFundsWithdraw.vue';
+import VFormFundsExchange from './VFormFundsExchange.vue';
 
 const open = defineModel<boolean>();
 const props = defineProps({
@@ -24,10 +19,16 @@ const props = defineProps({
 });
 
 const isTypeDeposit = ref((props.transactionType === EvmTransactionTypes.deposit));
-const titile = computed(() => (isTypeDeposit.value ? 'Add Funds' : 'Withdraw'));
+const isTypeExchange = ref((props.transactionType === EvmTransactionTypes.exchange));
+const titile = computed(() => {
+  if (isTypeDeposit.value) return 'Add Funds';
+  if (isTypeExchange.value) return 'Exchange Tokens';
+  return 'Withdraw';
+});
 
 watch(() => props.transactionType, (newVal: EvmTransactionTypes) => {
   isTypeDeposit.value = newVal === EvmTransactionTypes.deposit;
+  isTypeExchange.value = newVal === EvmTransactionTypes.exchange;
 });
 </script>
 
@@ -50,6 +51,12 @@ watch(() => props.transactionType, (newVal: EvmTransactionTypes) => {
         v-if="isTypeDeposit"
         class="is--margin-top-20"
         :data="data"
+      />
+      <VFormFundsExchange
+        v-else-if="isTypeExchange"
+        class="is--margin-top-20"
+        :data="data"
+        @close="open = false"
       />
       <VFormFundsWithdraw
         v-else

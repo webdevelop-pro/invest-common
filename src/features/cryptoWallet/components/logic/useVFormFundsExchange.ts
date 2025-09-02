@@ -7,41 +7,45 @@ import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
-import { IEvmWithdrawRequestBody } from 'InvestCommon/data/evm/evm.types';
+import { IEvmExchangeRequestBody } from 'InvestCommon/data/evm/evm.types';
 
-export function useVFormFundsWithdraw(
+export function useVFormFundsExchange(
   emitClose?: () => void,
 ) {
   const evmRepository = useRepositoryEvm();
-  const { getEvmWalletState, withdrawFundsState } = storeToRefs(evmRepository);
+  const { getEvmWalletState, exchangeTokensState } = storeToRefs(evmRepository);
 
-  const selectedToken = computed(() => (
-    getEvmWalletState.value.data?.balances?.find((item: any) => item.address === model.token)));
-  const maxWithdraw = computed(() => selectedToken.value?.amount);
-  const schemaMaximum = computed(() => maxWithdraw.value);
-  const schemaMaximumError = computed(() => `Maximum available is $${maxWithdraw.value}`);
-  const text = computed(() => `available ${maxWithdraw.value}`);
+  const selectedFromToken = computed(() => (
+    getEvmWalletState.value.data?.balances?.find((item: any) => item.address === model.from)));
+  const maxExchange = computed(() => selectedFromToken.value?.amount);
+  const schemaMaximum = computed(() => maxExchange.value);
+  const schemaMaximumError = computed(() => `Maximum available is $${maxExchange.value}`);
+  const text = computed(() => `available ${maxExchange.value}`);
 
-  const errorData = computed(() => (withdrawFundsState.value.error as any)?.data?.responseJson);
-  const fieldsPaths = ['amount', 'token', 'to', 'wallet_id'];
+  const tokenToFormatted = computed(() => (
+    [{ text: 'USDC', id: '0xe2cCb3fc0153584e5C70c65849078b55597b4032' }]
+  ));
 
-  const schemaAddTransaction = computed(() => ({
+  const errorData = computed(() => (exchangeTokensState.value.error as any)?.data?.responseJson);
+  const fieldsPaths = ['from', 'to', 'amount', 'wallet_id'];
+
+  const schemaExchangeTransaction = computed(() => ({
     $schema: 'http://json-schema.org/draft-07/schema#',
     definitions: {
       Individual: {
         properties: {
+          from: {
+            type: 'string',
+          },
+          to: {
+            type: 'string',
+          },
           amount: {
             type: 'number',
             // maximum: schemaMaximum.value,
             // errorMessage: {
             //   maximum: schemaMaximumError.value,
             // },
-          },
-          token: {
-            type: 'string',
-          },
-          to: {
-            type: 'string',
           },
           wallet_id: {
             type: 'number',
@@ -53,10 +57,9 @@ export function useVFormFundsWithdraw(
       },
     },
     $ref: '#/definitions/Individual',
-  } as unknown as JSONSchemaType<IEvmWithdrawRequestBody>));
+  } as unknown as JSONSchemaType<IEvmExchangeRequestBody>));
 
-
-  const schemaFrontend = schemaAddTransaction;
+  const schemaFrontend = schemaExchangeTransaction;
   // Pass undefined directly for backend schema
   const {
     model,
@@ -65,30 +68,31 @@ export function useVFormFundsWithdraw(
     onValidate,
     scrollToError, formErrors, isFieldRequired, getErrorText,
     getOptions, getReferenceType,
-  } = useFormValidation<IEvmWithdrawRequestBody>(
+  } = useFormValidation<IEvmExchangeRequestBody>(
     schemaFrontend,
     undefined,
     reactive({
-      wallet_id: getEvmWalletState.value.data?.id
-    } as IEvmWithdrawRequestBody),
+      wallet_id: getEvmWalletState.value.data?.id,
+      to: tokenToFormatted.value[0].id,
+    } as IEvmExchangeRequestBody),
     fieldsPaths
   );
 
-  const isDisabledButton = computed(() => (!isValid.value || withdrawFundsState.value.loading));
+  const isDisabledButton = computed(() => (!isValid.value || exchangeTokensState.value.loading));
 
   const saveHandler = async () => {
     onValidate();
     if (!isValid.value) {
-      nextTick(() => scrollToError('VFormWalletAddTransaction'));
+      nextTick(() => scrollToError('VFormWalletExchangeTransaction'));
       return;
     }
-    const data: IEvmWithdrawRequestBody = {
-      amount: Number(model.amount),
-      token: String(model.token),
+    const data: IEvmExchangeRequestBody = {
+      from: String(model.from),
       to: String(model.to),
+      amount: Number(model.amount),
       wallet_id: Number(model.wallet_id),
     };
-    await evmRepository.withdrawFunds(data);
+    await evmRepository.exchangeTokens(data);
     if (getEvmWalletState.value.error) return;
     if (emitClose) emitClose();
   };
@@ -113,7 +117,7 @@ export function useVFormFundsWithdraw(
   ));
 
   watch(() => tokenFormatted.value, () => {
-    if (!model.token) model.token = String(tokenLastItem.value?.id || '');
+    if (!model.from) model.from = String(tokenLastItem.value?.id || '');
   }, { immediate: true });
 
   return {
@@ -126,10 +130,11 @@ export function useVFormFundsWithdraw(
     cancelHandler,
     text,
     errorData,
-    schemaAddTransaction,
+    schemaExchangeTransaction,
     tokenFormatted,
+    tokenToFormatted,
     numberFormatter,
-    withdrawFundsState,
+    exchangeTokensState,
     
     // Form validation helpers
     formErrors,

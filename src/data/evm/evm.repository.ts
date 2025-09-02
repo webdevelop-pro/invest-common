@@ -8,6 +8,7 @@ import { INotification } from 'InvestCommon/data/notifications/notifications.typ
 import { EvmWalletFormatter } from './formatter/wallet.formatter';
 import {
   IEvmWalletDataFormatted, IEvmWalletDataResponse, IEvmWithdrawRequestBody,
+  IEvmExchangeRequestBody, IEvmExchangeResponse,
 } from './evm.types';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
@@ -23,6 +24,7 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
 
   const getEvmWalletState = createActionState<IEvmWalletDataFormatted>();
   const withdrawFundsState = createActionState<void>();
+  const exchangeTokensState = createActionState<IEvmExchangeResponse>();
 
   const evmWalletId = computed(() => getEvmWalletState.value.data?.id || 0);
 
@@ -55,11 +57,27 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
     } catch (err) {
       withdrawFundsState.value.error = err as Error;
       if (err?.data?.statusCode !== 404) {
-        toasterErrorHandling(err, 'Failed to fetch EVM wallet');
+        toasterErrorHandling(err, 'Failed to withdraw funds');
       }
       throw err;
     } finally {
       withdrawFundsState.value.loading = false;
+    }
+  };
+
+  const exchangeTokens = async (body: IEvmExchangeRequestBody) => {
+    try {
+      exchangeTokensState.value.loading = true;
+      exchangeTokensState.value.error = null;
+      const response = await apiClient.post<IEvmExchangeResponse>(`/auth/exchange`, body);
+      exchangeTokensState.value.data = response.data;
+      return response.data;
+    } catch (err) {
+      exchangeTokensState.value.error = err as Error;
+      toasterErrorHandling(err, 'Failed to exchange tokens');
+      throw err;
+    } finally {
+      exchangeTokensState.value.loading = false;
     }
   };
 
@@ -83,15 +101,18 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
   const resetAll = () => {
     getEvmWalletState.value = { loading: false, error: null, data: undefined };
     withdrawFundsState.value = { loading: false, error: null, data: undefined };
+    exchangeTokensState.value = { loading: false, error: null, data: undefined };
   };
 
   return {
     evmWalletId,
     getEvmWalletState,
     withdrawFundsState,
+    exchangeTokensState,
     canLoadEvmWalletData,
     getEvmWalletByProfile,
     withdrawFunds,
+    exchangeTokens,
     resetAll,
     updateNotificationData,
   };

@@ -19,12 +19,7 @@ export enum EvmTransactionStatusTypes {
 export enum EvmTransactionTypes {
   withdrawal = 'withdrawal',
   deposit = 'deposit',
-  investment = 'investment',
-  distribution = 'distribution',
-  fee = 'fee',
-  market = 'market',
-  sale = 'sale',
-  return = 'return',
+  exchange = 'exchange',
 }
 
 export interface IEvmWalletDataResponse {
@@ -112,4 +107,22 @@ export interface IEvmWithdrawRequestBody {
   token: string; // token address or symbol depending on backend contract
   to: string; // destination wallet address
   wallet_id: number;
+}
+
+export interface IEvmExchangeRequestBody {
+  from: string; // source token address or symbol
+  to: string; // destination token address or symbol
+  amount: number; // amount to exchange
+  wallet_id: number;
+}
+
+export interface IEvmExchangeResponse {
+  transaction_id: string;
+  from_token: string;
+  to_token: string;
+  from_amount: number;
+  to_amount: number;
+  exchange_rate: number;
+  status: EvmTransactionStatusTypes;
+  estimated_gas_fee?: number;
 }

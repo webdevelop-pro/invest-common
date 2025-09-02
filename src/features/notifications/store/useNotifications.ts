@@ -45,15 +45,21 @@ export const useNotifications = defineStore('notifications', () => {
   const notificationUnreadLength = computed(() => notificationUnreadData.value.length);
 
   /* * Loading All Data * */
-  const canLoadAllData = computed(() => userLoggedIn.value);
   const conditionToLoadAllData = computed(() => (
-    !getAllState.value.loading && (formattedNotifications.value.length === 0) && !getAllState.value.error));
+    !getAllState.value.loading && (formattedNotifications.value.length === 0)
+    && !getAllState.value.error && userLoggedIn.value));
 
   const loadData = () => {
-    if (canLoadAllData.value && conditionToLoadAllData.value) {
+    if (conditionToLoadAllData.value) {
       notificationsRepository.getAll();
     }
   };
+
+  watch(() => conditionToLoadAllData.value, () => {
+    if (!getAllState.value.data && conditionToLoadAllData.value) {
+      loadData();
+    }
+  });
 
   /* * Page Settings * */
   const filterSettings = ref([
