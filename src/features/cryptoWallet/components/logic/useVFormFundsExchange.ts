@@ -8,15 +8,12 @@ import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
 import { IEvmExchangeRequestBody, IEvmWalletBalances } from 'InvestCommon/data/evm/evm.types';
-import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 
 export function useVFormFundsExchange(
   emitClose?: () => void,
 ) {
   const evmRepository = useRepositoryEvm();
   const { getEvmWalletState, exchangeTokensState } = storeToRefs(evmRepository);
-  const profilesStore = useProfilesStore();
-  const { selectedUserProfileId } = storeToRefs(profilesStore);
 
   const selectedToken = computed(() => (
     getEvmWalletState.value.data?.balances?.find((item: IEvmWalletBalances) => item.address === model.from)));
@@ -96,7 +93,7 @@ export function useVFormFundsExchange(
     await evmRepository.exchangeTokens(data);
     if (getEvmWalletState.value.error) return;
     
-    evmRepository.getEvmWalletByProfile(selectedUserProfileId.value);
+    // evmRepository.getEvmWalletByProfile(selectedUserProfileId.value);
     if (emitClose) emitClose();
   };
 
@@ -126,7 +123,7 @@ export function useVFormFundsExchange(
   });
 
   const tokenLastItem = computed(() => (
-    tokenFormatted.value[tokenFormatted.value.length - 1] || null
+    tokenFormatted.value[0] || null
   ));
 
   watch(() => tokenFormatted.value, () => {

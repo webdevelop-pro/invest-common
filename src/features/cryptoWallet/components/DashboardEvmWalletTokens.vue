@@ -4,6 +4,7 @@ import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import VTooltip from 'UiKit/components/VTooltip.vue';
 import VTableDefault from 'InvestCommon/shared/components/VTableDefault.vue';
 import VTableWalletTokensItem from './VTableWalletTokensItem.vue';
+import VTableWalletTransactionsItem from './VTableWalletTransactionsItem.vue';
 import env from 'InvestCommon/domain/config/env';
 import { EvmTransactionTypes } from 'InvestCommon/data/evm/evm.types';
 import { useDashboardEvmWalletTokens } from './logic/useDashboardEvmWalletTokens';
@@ -27,6 +28,7 @@ const emit = defineEmits<{
 const {
   getEvmWalletState,
   tableOptions,
+  transactionsOptions,
   isShowIncomingBalance,
   isShowOutgoingBalance,
   isSkeleton,
@@ -56,7 +58,7 @@ const {
             class="dashboard-evm-wallet-tokens__balance-incoming is--small"
             aria-label="Pending incoming balance"
           >
-            + {{ currency(getEvmWalletState.data?.pending_incoming_balance) }}
+            + {{ currency(getEvmWalletState.data?.pendingIncomingBalance) }}
           </span>
           <span v-if="isShowOutgoingBalance">|</span>
           <VTooltip
@@ -67,7 +69,7 @@ const {
               class="dashboard-evm-wallet-tokens__balance-outcoming is--small"
               aria-label="Pending outgoing balance"
             >
-              - {{ currency(getEvmWalletState.data?.pending_outcoming_balance) }}
+              - {{ currency(getEvmWalletState.data?.pendingOutcomingBalance) }}
             </span>
             <template #content>
               Pending investment
@@ -86,8 +88,8 @@ const {
           @click="button.transactionType ? emit('click', button.transactionType) : null"
         >
           <component
-            v-if="button.icon"
             :is="button.icon"
+            v-if="button.icon"
             alt="plus icon"
             class="dashboard-evm-wallet-tokens__button-icon"
           />
@@ -115,6 +117,36 @@ const {
         />
         <template #empty>
           You have no tokens yet
+        </template>
+      </VTableDefault>
+
+
+      <div class="dashboard-evm-wallet-tokens__content-top is--h6__title is--margin-top-40">
+        <span>Latest Transactions:</span>
+        <VButton
+          variant="link"
+          size="small"
+          class="dashboard-evm-wallet-tokens__view-all"
+        >
+          View All
+        </VButton>
+      </div>
+      <VTableDefault
+        class="investment-documents__table"
+        size="small"
+        :data="transactionsOptions || []"
+        :loading="isSkeleton && !isError"
+        :loading-row-length="5"
+        :colspan="5"
+      >
+        <VTableWalletTransactionsItem
+          v-for="(item, index) in transactionsOptions"
+          :key="index"
+          :data="item"
+          size="small"
+        />
+        <template #empty>
+          You have no transactions yet
         </template>
       </VTableDefault>
     </div>
@@ -204,7 +236,8 @@ const {
   &__content-top {
     display: flex;
     padding-bottom: 8px;
-    align-items: flex-start;
+    align-items: center;
+    justify-content: space-between;
     gap: 10px;
     align-self: stretch;
     color: $gray-70;

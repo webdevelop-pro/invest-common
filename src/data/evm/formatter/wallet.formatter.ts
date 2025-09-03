@@ -1,4 +1,8 @@
-import { IEvmWalletDataResponse, IEvmWalletDataFormatted, EvmWalletStatusTypes, IEvmWalletBalances } from '../evm.types';
+import {
+  IEvmWalletDataResponse, IEvmWalletDataFormatted, EvmWalletStatusTypes, IEvmWalletBalances,
+  IEvmTransactionDataFormatted,
+} from '../evm.types';
+import { EvmTransactionFormatter } from './transactions.formatter';
 
 export class EvmWalletFormatter {
   private data: IEvmWalletDataResponse;
@@ -49,11 +53,11 @@ export class EvmWalletFormatter {
   }
 
   get pendingIncomingBalance() {
-    return Number(this.data.pending_incoming_balance) || 0;
+    return Number(this.data.inc_balance) || 0;
   }
 
   get pendingOutcomingBalance() {
-    return Number(this.data.pending_outcoming_balance) || 0;
+    return Number(this.data.out_balance) || 0;
   }
 
   format(): IEvmWalletDataFormatted {
@@ -65,7 +69,13 @@ export class EvmWalletFormatter {
       amount: Number(b.amount ?? 0),
       symbol: String(b.symbol ?? ''),
       name: b.name ? String(b.name) : undefined,
+      icon: b.icon ? String(b.icon) : undefined,
     }));
+
+    // Format transactions using the transaction formatter
+    const formattedTransactions: IEvmTransactionDataFormatted[] = this.data.transactions.map(transaction => 
+      new EvmTransactionFormatter(transaction).format()
+    );
 
     return {
       ...(this.data as any),
@@ -80,6 +90,9 @@ export class EvmWalletFormatter {
       isStatusAnyError: this.isStatusAnyError,
       currentBalance: this.currentBalance,
       totalBalance: this.totalBalance,
+      pendingIncomingBalance: this.pendingIncomingBalance,
+      pendingOutcomingBalance: this.pendingOutcomingBalance,
+      formattedTransactions,
     };
   }
 }

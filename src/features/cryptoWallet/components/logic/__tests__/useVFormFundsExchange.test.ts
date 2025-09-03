@@ -61,7 +61,7 @@ describe('useVFormFundsExchange', () => {
       { text: 'USDC', id: '0xe2cCb3fc0153584e5C70c65849078b55597b4032' }
     ]);
     
-    expect(text.value).toBe('available 1000');
+    expect(text.value).toBe('available 500');
   });
 
   it('should validate form', async () => {
@@ -132,6 +132,6 @@ describe('useVFormFundsExchange', () => {
     model.from = '0xtoken1';
     
     const { text } = useVFormFundsExchange(mockEmitClose);
-    expect(text.value).toBe('available 1000');
+    expect(text.value).toBe('available 500');
   });
 });

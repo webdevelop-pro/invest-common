@@ -4,8 +4,8 @@ import { describe, it, expect, beforeEach } from 'vitest';
 const getEvmWalletStateRef = ref({
   data: {
     balances: [],
-    pending_incoming_balance: 0,
-    pending_outcoming_balance: 0,
+    pendingIncomingBalance: 0,
+    pendingOutcomingBalance: 0,
   },
   loading: false,
 });
@@ -23,8 +23,8 @@ describe('useDashboardEvmWalletTokens', () => {
     getEvmWalletStateRef.value = {
       data: {
         balances: [],
-        pending_incoming_balance: 0,
-        pending_outcoming_balance: 0,
+        pendingIncomingBalance: 0,
+        pendingOutcomingBalance: 0,
       },
       loading: false,
     };
@@ -41,8 +41,8 @@ describe('useDashboardEvmWalletTokens', () => {
     const { isShowIncomingBalance, isShowOutgoingBalance } = useDashboardEvmWalletTokens();
     expect(isShowIncomingBalance.value).toBe(false);
     expect(isShowOutgoingBalance.value).toBe(false);
-    getEvmWalletStateRef.value.data.pending_incoming_balance = 1;
-    getEvmWalletStateRef.value.data.pending_outcoming_balance = 2;
+    getEvmWalletStateRef.value.data.pendingIncomingBalance = 1;
+    getEvmWalletStateRef.value.data.pendingOutcomingBalance = 2;
     expect(isShowIncomingBalance.value).toBe(true);
     expect(isShowOutgoingBalance.value).toBe(true);
   });

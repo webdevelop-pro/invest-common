@@ -28,19 +28,32 @@ export type IEvmWalletBalancesMap = Record<string, {
   amount: number | string;
   symbol: string;
   name?: string;
+  icon?: string;
 }>;
+
+export interface IEvmWalletBalances {
+  address: string;
+  amount: number;
+  symbol: string;
+  name?: string;
+  icon?: string;
+}
 
 export interface IEvmWalletDataResponse {
   id: number;
   status: EvmWalletStatusTypes;
-  balance: number;
-  pending_incoming_balance: number;
-  pending_outcoming_balance: number;
+  balance: string;
+  inc_balance: number;
+  out_balance: number;
   address: string;
   balances: IEvmWalletBalancesMap;
+  transactions: IEvmTransactionDataResponse[];
+  created_at: string;
+  updated_at: string;
 }
 
-export interface IEvmWalletDataFormatted extends IEvmWalletDataResponse {
+export interface IEvmWalletDataFormatted extends Omit<IEvmWalletDataResponse, 'balances'> {
+  balances: IEvmWalletBalances[];
   isStatusCreated: boolean;
   isStatusVerified: boolean;
   isStatusError: boolean;
@@ -51,6 +64,9 @@ export interface IEvmWalletDataFormatted extends IEvmWalletDataResponse {
   isStatusAnyError: boolean;
   currentBalance: number;
   totalBalance: number;
+  pendingIncomingBalance: number;
+  pendingOutcomingBalance: number;
+  formattedTransactions: IEvmTransactionDataFormatted[];
 }
 
 export interface IEvmWalletAmount {
@@ -60,14 +76,14 @@ export interface IEvmWalletAmount {
 
 export interface IEvmTransactionDataResponse {
   id: number;
+  user_id: number;
+  dest_wallet_id: number | null;
+  source_wallet_id: number | null;
+  investment_id: number | null;
   status: EvmTransactionStatusTypes;
-  type: EvmTransactionTypes;
-  amount: IEvmWalletAmount;
-  source_wallet_id: number;
-  dest_wallet_id: number;
-  entity_id: number;
-  updated_at: string;
+  transaction_tx: string;
   created_at: string;
+  updated_at: string;
 }
 
 export interface IEvmTransactionDataFormatted extends IEvmTransactionDataResponse {
@@ -75,14 +91,13 @@ export interface IEvmTransactionDataFormatted extends IEvmTransactionDataRespons
   isStatusProcessed: boolean;
   isStatusFailed: boolean;
   isStatusCancelled: boolean;
-  isTypeDeposit: boolean;
-  isTypeWithdraw: boolean;
-  isTypeInvestment: boolean;
-  isTypeDistribution: boolean;
-  isTypeFee: boolean;
-  isTypeSale: boolean;
-  isTypeReturn: boolean;
-  isTypeMarket: boolean;
+  isStatusWait: boolean;
+  submitted_at_date: string;
+  submitted_at_time: string;
+  updated_at_date: string;
+  updated_at_time: string;
+  statusColor?: string;
+  statusText?: string;
 }
 
 export interface IEvmWithdrawRequestBody {

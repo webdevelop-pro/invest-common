@@ -3,12 +3,14 @@ import { VTableCell, VTableRow } from 'UiKit/components/Base/VTable';
 import { PropType } from 'vue';
 import externalLink from 'UiKit/assets/images/external-link.svg';
 import env from 'InvestCommon/domain/config/env';
+import VImage from 'UiKit/components/Base/VImage/VImage.vue';
 
 interface ITableEvmWalletTransaction {
   name: string;
   amount: string;
   symbol: string;
   address: string;
+  icon?: string;
 }
 
 defineProps({
@@ -22,6 +24,17 @@ defineProps({
   <VTableRow
     class="VTableWalletTokensItem v-table-wallet-tokens-item"
   >
+    <VTableCell>
+      <div class="v-table-wallet-tokens-item__table-image-wrap">
+        <VImage
+          v-if="data?.icon"
+          :src="data.icon"
+          :alt="`${data.name} token icon`"
+          fit="cover"
+          class="v-table-wallet-tokens-item__table-image"
+        />
+      </div>
+    </VTableCell>
     <VTableCell>
       {{ data?.name }}
     </VTableCell>
@@ -63,6 +76,7 @@ defineProps({
 
 <style lang="scss">
 @use 'UiKit/styles/_colors.scss' as *;
+@use 'UiKit/styles/_variables.scss' as variables;
 
 .v-table-wallet-tokens-item {
 
@@ -73,6 +87,21 @@ defineProps({
 
   &__table-type {
     display: flex;
+  }
+
+  &__table-image-wrap {
+    width: 25px;
+    height: 25px;
+    background-color: $primary-light;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  &__table-image {
+    width: 100%;
+    height: 100%;
   }
 
   &__link-icon {

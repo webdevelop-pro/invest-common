@@ -23,7 +23,7 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
   const apiClient = new ApiClient(env.EVM_URL);
 
   const getEvmWalletState = createActionState<IEvmWalletDataFormatted>();
-  const withdrawFundsState = createActionState<void>();
+  const withdrawFundsState = createActionState<IEvmWalletDataResponse>();
   const exchangeTokensState = createActionState<IEvmExchangeResponse>();
 
   const evmWalletId = computed(() => getEvmWalletState.value.data?.id || 0);
@@ -82,15 +82,30 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
   };
 
 
-    const updateNotificationData = (notification: INotification) => {
-        const { fields } = notification.data;
-        const wallet = getEvmWalletState.value.data;
-        if (!wallet) return;
-  
-        Object.assign(wallet, fields);
-  
-        getEvmWalletState.value.data = new EvmWalletFormatter(wallet as any).format();
-    };
+  const updateNotificationData = (notification: INotification) => {
+    const { obj, fields } = notification.data;
+    const wallet = getEvmWalletState.value.data;
+    
+    if (!wallet || !fields) return;
+
+    if (obj === 'evm_transfer') {
+      const objectId = fields?.object_id;
+      if (!objectId) return;
+      
+      const index = wallet.transactions?.findIndex((t) => t.id === objectId);
+
+      if (index !== -1) {
+        Object.assign(wallet.transactions[index], fields);
+      } else {
+        wallet.transactions?.unshift({ ...fields, id: fields.object_id });
+      }
+    } else if (obj === 'evm_wallet') {
+      Object.assign(wallet, fields);
+    }
+    
+    // Reformat the wallet data to ensure all computed properties are updated
+    getEvmWalletState.value.data = new EvmWalletFormatter(wallet as any).format();
+  };
 
   const selectedIdAsDataIs = computed(() => selectedUserProfileData.value.id === selectedUserProfileId.value);
   const canLoadEvmWalletData = computed(() => (

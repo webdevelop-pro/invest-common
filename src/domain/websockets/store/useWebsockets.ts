@@ -11,6 +11,7 @@ import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository'
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
 import { useRepositoryOffer } from 'InvestCommon/data/offer/offer.repository';
 import { useRepositoryFiler } from 'InvestCommon/data/filer/filer.repository';
+import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
 
 const { NOTIFICATION_URL } = env;
 
@@ -32,6 +33,7 @@ export const useDomainWebSocketStore = defineStore('domainWebsockets', () => {
   const repositoryInvestment = useRepositoryInvestment();
   const repositoryOffer = useRepositoryOffer();
   const repositoryFiler = useRepositoryFiler();
+  const repositoryEvm = useRepositoryEvm();
 
   const handleInternalMessage = (notification: INotification) => {
     switch (notification.data.obj) {
@@ -50,6 +52,9 @@ export const useDomainWebSocketStore = defineStore('domainWebsockets', () => {
         break;
       case 'filer':
         repositoryFiler.updateNotificationData(notification);
+        break;
+      case 'evm_transfer':
+        repositoryEvm.updateNotificationData(notification);
         break;
       default:
         // Optionally handle unknown types

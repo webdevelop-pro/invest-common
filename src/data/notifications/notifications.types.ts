@@ -2,7 +2,7 @@ import { InvestKycTypes } from 'InvestCommon/types/api/invest';
 import { IProfileIndividual } from 'InvestCommon/types/api/user';
 import { AccreditationTypes } from 'InvestCommon/data/accreditation/accreditation.types';
 
-interface INotificationDataFields {
+export interface INotificationDataFields {
   kyc_status?: InvestKycTypes;
   accreditation_status?: AccreditationTypes;
   funding_status?: string;
@@ -15,6 +15,9 @@ interface INotificationDataFields {
   confirmed_shares?: number;
   subscribed_shares?: number;
   type: string;
+  transaction_tx?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 interface INotificationData {

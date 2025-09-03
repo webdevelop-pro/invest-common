@@ -15,22 +15,30 @@ export const useDashboardEvmWalletTokens = () => {
   const tableOptions = computed(() => getEvmWalletState.value.data?.balances);
 
   const isShowIncomingBalance = computed(() => (
-    (getEvmWalletState.value.data?.pending_incoming_balance ?? 0) > 0
+    (getEvmWalletState.value.data?.pendingIncomingBalance ?? 0) > 0
   ));
 
   const isShowOutgoingBalance = computed(() => (
-    (getEvmWalletState.value.data?.pending_outcoming_balance ?? 0) > 0
+    (getEvmWalletState.value.data?.pendingOutcomingBalance ?? 0) > 0
   ));
 
   const canWithdraw = computed(() => (
-    getEvmWalletState.value.data?.balances?.length > 0
+    (getEvmWalletState.value.data?.balances?.length ?? 0) > 0
   ));
 
   const canExchange = computed(() => (
-    getEvmWalletState.value.data?.balances?.length > 0
+    (getEvmWalletState.value.data?.balances?.length ?? 0) > 0
   ));
 
   const isSkeleton = computed(() => (getEvmWalletState.value.loading));
+
+  const transactionsOptions = computed(() => {
+    const transactions = getEvmWalletState.value.data?.formattedTransactions || [];
+    return transactions
+      .slice()
+      .sort((a, b) => (b.id || 0) - (a.id || 0))
+      .slice(0, 5);
+  });
 
   const buttonConfigs = computed(() => [
     {
@@ -78,6 +86,7 @@ export const useDashboardEvmWalletTokens = () => {
   return {
     getEvmWalletState,
     tableOptions,
+    transactionsOptions,
     isShowIncomingBalance,
     isShowOutgoingBalance,
     canWithdraw,

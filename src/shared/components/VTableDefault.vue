@@ -67,14 +67,14 @@ const headerLength = computed(() => props.colspan ?? (props.header?.length || 0)
     </VTableBody>
     <!-- Data Slot -->
     <VTableBody
-      v-show="data && data.length > 0"
+      v-show="!loading && data && (data.length > 0)"
       key="data"
     >
       <slot name="default" />
     </VTableBody>
     <!-- Empty State -->
     <VTableBody
-      v-show="data.length === 0"
+      v-show="!loading && (data.length === 0)"
       key="empty"
     >
       <VTableEmpty :colspan="headerLength">
