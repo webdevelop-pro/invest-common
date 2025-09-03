@@ -1,4 +1,4 @@
-import { IEvmWalletDataResponse, IEvmWalletDataFormatted, EvmWalletStatusTypes } from '../evm.types';
+import { IEvmWalletDataResponse, IEvmWalletDataFormatted, EvmWalletStatusTypes, IEvmWalletBalances } from '../evm.types';
 
 export class EvmWalletFormatter {
   private data: IEvmWalletDataResponse;
@@ -57,8 +57,19 @@ export class EvmWalletFormatter {
   }
 
   format(): IEvmWalletDataFormatted {
+    // Normalize balances to an array regardless of backend shape (array or map)
+    let balancesArray: IEvmWalletBalances[] = [];
+    const rawBalances: any = (this.data as any).balances;
+    balancesArray = Object.values(rawBalances).map((b: any) => ({
+      address: String(b.address),
+      amount: Number(b.amount ?? 0),
+      symbol: String(b.symbol ?? ''),
+      name: b.name ? String(b.name) : undefined,
+    }));
+
     return {
-      ...this.data,
+      ...(this.data as any),
+      balances: balancesArray,
       isStatusCreated: this.isStatusCreated,
       isStatusVerified: this.isStatusVerified,
       isStatusError: this.isStatusError,

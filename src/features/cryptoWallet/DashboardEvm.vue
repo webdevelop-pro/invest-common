@@ -143,6 +143,7 @@ const {
   &__content {
     display: flex;
     align-items: flex-start;
+    justify-content: center;
     gap: 80px;
 
     @media screen and (max-width: $tablet){
@@ -152,9 +153,9 @@ const {
   }
 
   &__transactions {
-    width: 50%;
+    width: 70%;
 
-    @media screen and (max-width: $tablet){
+    @media screen and (max-width: $desktop){
       width: 100%;
     }
   }

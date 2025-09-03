@@ -2,7 +2,6 @@
 import { currency } from 'InvestCommon/helpers/currency';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import VTooltip from 'UiKit/components/VTooltip.vue';
-import plus from 'UiKit/assets/images/plus.svg';
 import VTableDefault from 'InvestCommon/shared/components/VTableDefault.vue';
 import VTableWalletTokensItem from './VTableWalletTokensItem.vue';
 import env from 'InvestCommon/domain/config/env';
@@ -30,9 +29,8 @@ const {
   tableOptions,
   isShowIncomingBalance,
   isShowOutgoingBalance,
-  canWithdraw,
-  canExchange,
   isSkeleton,
+  buttonConfigs,
 } = useDashboardEvmWalletTokens();
 </script>
 
@@ -47,12 +45,16 @@ const {
           <a
             :href="`${env.CRYPTO_WALLET_SCAN_URL}/address/${getEvmWalletState.data?.address}`"
             class="dashboard-evm-wallet-tokens__balance-current is--subheading-1"
+            :aria-label="`View wallet address ${getEvmWalletState.data?.address} on blockchain explorer`"
+            target="_blank"
+            rel="noopener noreferrer"
           >
             {{ currency(getEvmWalletState.data?.currentBalance) }}
           </a>
           <span
             v-if="isShowIncomingBalance"
             class="dashboard-evm-wallet-tokens__balance-incoming is--small"
+            aria-label="Pending incoming balance"
           >
             + {{ currency(getEvmWalletState.data?.pending_incoming_balance) }}
           </span>
@@ -63,6 +65,7 @@ const {
             <span
               v-if="isShowOutgoingBalance"
               class="dashboard-evm-wallet-tokens__balance-outcoming is--small"
+              aria-label="Pending outgoing balance"
             >
               - {{ currency(getEvmWalletState.data?.pending_outcoming_balance) }}
             </span>
@@ -74,35 +77,21 @@ const {
       </div>
       <div class="dashboard-evm-wallet-tokens__buttons">
         <VButton
-          icon-placement="left"
+          v-for="button in buttonConfigs"
+          :key="button.id"
           size="small"
-          data-testid="funding-add-funds-btn"
+          :variant="button.variant"
+          :disabled="button.disabled"
           class="dashboard-evm-wallet-tokens__funds-button"
-          @click="emit('click', EvmTransactionTypes.deposit)"
+          @click="button.transactionType ? emit('click', button.transactionType) : null"
         >
-          <plus
+          <component
+            v-if="button.icon"
+            :is="button.icon"
             alt="plus icon"
             class="dashboard-evm-wallet-tokens__button-icon"
           />
-          Add Funds
-        </VButton>
-        <VButton
-          size="small"
-          variant="outlined"
-          :disabled="!canWithdraw"
-          class="dashboard-evm-wallet-tokens__funds-button"
-          @click="emit('click', EvmTransactionTypes.withdrawal)"
-        >
-          Withdraw
-        </VButton>
-        <VButton
-          size="small"
-          variant="outlined"
-          :disabled="!canExchange"
-          class="dashboard-evm-wallet-tokens__funds-button"
-          @click="emit('click', EvmTransactionTypes.exchange)"
-        >
-          Exchange
+          {{ button.label }}
         </VButton>
       </div>
     </div>

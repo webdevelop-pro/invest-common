@@ -1,6 +1,12 @@
 import { computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
+import { EvmTransactionTypes } from 'InvestCommon/data/evm/evm.types';
+import addFunds from 'InvestCommon/shared/assets/images/icons/add-funds.svg';
+import withdraw from 'InvestCommon/shared/assets/images/icons/withdraw.svg';
+import exchange from 'InvestCommon/shared/assets/images/icons/exchange.svg';
+import buy from 'InvestCommon/shared/assets/images/icons/buy.svg';
+import earn from 'InvestCommon/shared/assets/images/icons/earn.svg';
 
 export const useDashboardEvmWalletTokens = () => {
   const evmRepository = useRepositoryEvm();
@@ -26,6 +32,49 @@ export const useDashboardEvmWalletTokens = () => {
 
   const isSkeleton = computed(() => (getEvmWalletState.value.loading));
 
+  const buttonConfigs = computed(() => [
+    {
+      id: 'add-funds',
+      label: 'Add Funds',
+      variant: 'default',
+      icon: addFunds,
+      disabled: getEvmWalletState.value.loading,
+      transactionType: EvmTransactionTypes.deposit,
+    },
+    {
+      id: 'withdraw',
+      label: 'Withdraw',
+      variant: 'outlined',
+      icon: withdraw,
+      disabled: !canWithdraw.value,
+      transactionType: EvmTransactionTypes.withdrawal,
+    },
+    {
+      id: 'exchange',
+      label: 'Exchange',
+      variant: 'outlined',
+      icon: exchange,
+      disabled: !canExchange.value,
+      transactionType: EvmTransactionTypes.exchange,
+    },
+    {
+      id: 'buy',
+      label: 'Buy',
+      variant: 'outlined',
+      icon: buy,
+      disabled:  getEvmWalletState.value.loading,
+      transactionType: null,
+    },
+    {
+      id: 'earn',
+      label: 'Earn',
+      variant: 'outlined',
+      icon: earn,
+      disabled:  getEvmWalletState.value.loading,
+      transactionType: null,
+    },
+  ]);
+
   return {
     getEvmWalletState,
     tableOptions,
@@ -34,6 +83,7 @@ export const useDashboardEvmWalletTokens = () => {
     canWithdraw,
     canExchange,
     isSkeleton,
+    buttonConfigs,
   };
 };
 

@@ -22,12 +22,13 @@ export enum EvmTransactionTypes {
   exchange = 'exchange',
 }
 
-export interface IEvmWalletBalances {
+// Backend may return balances as a map keyed by token address
+export type IEvmWalletBalancesMap = Record<string, {
   address: string;
-  amount: number;
+  amount: number | string;
   symbol: string;
   name?: string;
-}
+}>;
 
 export interface IEvmWalletDataResponse {
   id: number;
@@ -36,7 +37,7 @@ export interface IEvmWalletDataResponse {
   pending_incoming_balance: number;
   pending_outcoming_balance: number;
   address: string;
-  balances: IEvmWalletBalances[];
+  balances: IEvmWalletBalancesMap;
 }
 
 export interface IEvmWalletDataFormatted extends IEvmWalletDataResponse {
