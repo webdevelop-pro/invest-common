@@ -1,5 +1,6 @@
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import { oryErrorHandling } from 'InvestCommon/data/repository/error/oryErrorHandling';
+import { oryResponseHandling } from 'InvestCommon/data/repository/response/oryResponseHandling';
 import { toasterErrorHandlingAnalytics } from 'InvestCommon/data/repository/error/toasterErrorHandlingAnalytics';
 import env from 'InvestCommon/domain/config/env';
 import { SELFSERVICE } from 'InvestCommon/features/auth/store/type';
@@ -55,6 +56,10 @@ export const useRepositoryAuth = () => {
       getAuthFlowState.value.error = null;
       const response = await apiClient.get(url, { params: query });
       getAuthFlowState.value.data = response.data;
+  
+      // Handle successful responses that may contain special UI states or messages
+      oryResponseHandling(response.data);
+      
       return response.data;
     } catch (err) {
       getAuthFlowState.value.error = err as Error;

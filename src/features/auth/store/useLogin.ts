@@ -55,6 +55,7 @@ export const useLoginStore = defineStore('login', () => {
     getSchemaState.value.data ? structuredClone(toRaw(getSchemaState.value.data)) : null));
 
   const fieldsPaths = ['email', 'password'];
+  const initModel = computed(() => (getQueryParam('email') ? { email: getQueryParam('email') } : {}));
 
   const {
     model, validation, isValid, onValidate,
@@ -63,7 +64,7 @@ export const useLoginStore = defineStore('login', () => {
   } = useFormValidation<FormModelSignIn>(
     schemaFrontend,
     schemaBackend,
-    {} as FormModelSignIn,
+    initModel.value as FormModelSignIn,
     fieldsPaths
   );
 
@@ -132,10 +133,9 @@ export const useLoginStore = defineStore('login', () => {
     isLoading.value = true;
     try {
       const flowId = getQueryParam('flow');
-      if (!flowId) {
-        await authRepository.getAuthFlow(SELFSERVICE.login);
-        if (getAuthFlowState.value.error) return;
-      }
+      console.log('Using query flow ID:', flowId);
+      await authRepository.getAuthFlow(SELFSERVICE.login);
+      if (getAuthFlowState.value.error) return;
 
       await authRepository.setLogin(flowId || authRepository.flowId.value, {
         csrf_token: authRepository.csrfToken.value,
