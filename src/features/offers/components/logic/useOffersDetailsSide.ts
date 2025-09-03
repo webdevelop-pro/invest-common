@@ -27,7 +27,7 @@ export function useOffersDetailsSide(offerRef: Ref<IOfferFormatted | undefined>)
       text: offerRef.value?.pricePerShareFormatted,
     },
     {
-      title: 'Pre-Money Valuation:',
+      title: offerRef.value?.valuationLabel,
       text: offerRef.value?.valuationFormatted,
     },
     {
@@ -54,6 +54,46 @@ export function useOffersDetailsSide(offerRef: Ref<IOfferFormatted | undefined>)
       title: 'Close Date:',
       text: offerRef.value?.closeAtFormatted,
       tooltip: 'Closing offer date may vary depending on factors such as property type, financing conditions, buyer readiness, or legal requirements.',
+    },
+    {
+      title: 'Voting Rights:',
+      text: offerRef.value?.votingRightsFormatted,
+    },
+    {
+      title: 'Liquidation Preference:',
+      text: offerRef.value?.liquidationPreferenceFormatted,
+    },
+    {
+      title: 'Dividend Type:',
+      text: offerRef.value?.dividendTypeFormatted,
+    },
+    {
+      title: 'Valuation Cap:',
+      text: offerRef.value?.valuationCapFormatted,
+    },
+    {
+      title: 'Discount Rate:',
+      text: offerRef.value?.discountRateFormatted,
+    },
+    {
+      title: 'Interest Rate:',
+      text: offerRef.value?.interestRateFormatted,
+    },
+    {
+      title: 'Maturity Date:',
+      text: offerRef.value?.maturityDateFormatted,
+    },
+    {
+      title: 'Interest Rate (APY):',
+      text: offerRef.value?.interestRateApyFormatted,
+    },
+    {
+      title: 'Payment Schedule:',
+      text: offerRef.value?.paymentScheduleFormatted,
+    },
+    {
+      title: 'Term Length:',
+      text: offerRef.value?.termLengthFormatted,
     },
   ]));
 

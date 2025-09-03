@@ -10,6 +10,37 @@ export enum OfferStatuses {
   closed_unsuccessfully = 'closed_unsuccessfully',
 }
 
+export enum PaymentScheduleTypes {
+  interest_only_monthly = 'Interest-Only Monthly',
+  interest_only_quarterly = 'Interest-Only Quarterly',
+  fully_amortizing_monthly = 'Fully Amortizing Monthly',
+  all_at_maturity = 'All at Maturity',
+  principal_at_maturity = 'Principal at Maturity',
+}
+
+export enum VotingRightsTypes {
+  one_vote_per_share = '1 Vote per Share',
+  no_voting_rights = 'No Voting Rights',
+  other = 'Other',
+}
+
+export enum DividendType {
+  none = 'None',
+  cumulative = 'Cumulative',
+  non_cumulative = 'Non-Cumulative',
+}
+
+export enum SecurityType {
+  equity = 'Equity',
+  preferred_equity = 'Preferred Equity',
+  debt = 'Debt',
+  equity_warrants = 'Equity Warrants',
+  preference_shares = 'Preference Shares',
+  convertible_bonds = 'Convertible Bonds',
+  convertible_debt = 'Convertible Debt',
+  'convertible-note' = 'Convertible Note',
+}
+
 export enum OfferDocumentsObjectTypes {
   company = 'company',
   investment_agreements = 'investment-agreements',
@@ -33,13 +64,16 @@ export interface ISecurityInfo {
   voting_rights?: string;
   liquidation_preference?: string;
   dividend_type?: string;
-  valuation_cap?: string;
-  discount_rate?: string;
-  interest_rate?: string;
-  maturity_date?: string;
+  cn_valuation_cap?: string;
+  cn_discount_rate?: string;
+  cn_interest_rate?: string;
+  cn_maturity_date?: string;
   interest_rate_apy?: string;
-  payment_schedule?: string;
-  term_length?: number;
+  debt_payment_schedule?: string;
+  debt_maturity_date?: string;
+  debt_interest_rate?: string;
+  debt_term_length?: number;
+  debt_term_unit?: number;
 }
 
 export interface IOffer {
@@ -137,4 +171,19 @@ export interface IOfferFormatted extends IOffer {
   isStatusClosedSuccessfully: boolean;
   isStatusClosedUnsuccessfully: boolean;
   isFundingCompleted: boolean;
+  // Security Info Formatted Fields
+  votingRightsFormatted: string | undefined;
+  liquidationPreferenceFormatted: string | undefined;
+  dividendTypeFormatted: string | undefined;
+  valuationCapFormatted: string | undefined;
+  discountRateFormatted: string | undefined;
+  interestRateFormatted: string | undefined;
+  maturityDateFormatted: string | undefined;
+  interestRateApyFormatted: string | undefined;
+  paymentScheduleFormatted: string | undefined;
+  termLengthFormatted: string | undefined;
+  isSecurityTypeConvertibleNote: boolean;
+  isSecurityTypeDebt: boolean;
+  isSecurityTypeEquity: boolean;
+  valuationLabel: string;
 } 

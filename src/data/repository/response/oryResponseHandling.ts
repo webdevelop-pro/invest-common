@@ -1,9 +1,6 @@
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 import { IAuthFlow } from 'InvestCommon/data/auth/auth.type';
 import { h } from 'vue';
-import { navigateWithQueryParams } from 'UiKit/helpers/general';
-import { urlSignin } from 'InvestCommon/domain/config/links';
-import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 
 /**
  * Handles successful Ory auth flow responses that contain UI messages or special states
@@ -11,7 +8,7 @@ import VButton from 'UiKit/components/Base/VButton/VButton.vue';
  * @param response - The successful auth flow response
  * @param flowType - The type of flow (login, registration, etc.)
  */
-export const oryResponseHandling = (response: IAuthFlow, flowType: string) => {
+export const oryResponseHandling = (response: IAuthFlow) => {
   const { toast } = useToast();
 
   const duplicateMessage = response.ui?.messages?.find((m: any) => 

@@ -1,10 +1,9 @@
-import {
-  IOffer,
-  OfferStatuses,
-} from 'InvestCommon/types/api/offers';
 import defaultImage from 'InvestCommon/shared/assets/images/default.svg?url';
 import env from 'InvestCommon/domain/config/env';
-import { IOfferFormatted } from './offer.types';
+import {
+  IOfferFormatted, IOffer, OfferStatuses, PaymentScheduleTypes, VotingRightsTypes,
+  DividendType,
+} from './offer.types';
 
 // Currency formatter function
 const defaultInstance = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 });
@@ -52,6 +51,25 @@ export class OfferFormatter {
 
   get securityTypeFormatted() {
     return this.offer.security_type ? capitalizeFirstLetter(this.offer.security_type) : '-';
+  }
+
+  get isSecurityTypeConvertibleNote(): boolean {
+    return this.offer.security_type === 'convertible-note';
+  }
+
+  get isSecurityTypeDebt(): boolean {
+    return this.offer.security_type === 'debt';
+  }
+
+  get isSecurityTypeEquity(): boolean {
+    return this.offer.security_type === 'equity';
+  }
+
+  get valuationLabel(): string {
+    if (this.isSecurityTypeDebt || this.isSecurityTypeConvertibleNote) {
+      return 'Funding Goal:';
+    }
+    return 'Pre-Money Valuation:';
   }
 
   get approvedAtFormatted(): string {
@@ -197,6 +215,104 @@ export class OfferFormatter {
     );
   }
 
+  // Security Info Formatters
+  get votingRightsFormatted(): string | undefined {
+    const votingRights = this.offer.security_info?.voting_rights;
+    if (!votingRights) return undefined;
+    
+    return VotingRightsTypes[votingRights as keyof typeof VotingRightsTypes] || votingRights;
+  }
+
+  get liquidationPreferenceFormatted(): string | undefined {
+    if (this.isSecurityTypeEquity) return undefined;
+    return this.offer.security_info?.liquidation_preference;
+  }
+
+  get dividendTypeFormatted(): string | undefined {
+    const dividendType = this.offer.security_info?.dividend_type;
+    if (!dividendType || this.isSecurityTypeEquity) return undefined;
+    
+    return DividendType[dividendType as keyof typeof DividendType] || dividendType;
+  }
+
+  get valuationCapFormatted(): string | undefined {
+    const valuationCap = this.offer.security_info?.cn_valuation_cap;
+    if (!valuationCap) return undefined;
+    
+    // Parse the value and format as currency
+    const numericValue = parseFloat(valuationCap);
+    if (isNaN(numericValue)) return valuationCap; // Return as-is if not a number
+    
+    return currency(numericValue);
+  }
+
+  get discountRateFormatted(): string | undefined {
+    const discountRate = this.offer.security_info?.cn_discount_rate;
+    if (!discountRate) return undefined;
+    
+    // Parse the value and format as percentage
+    const numericValue = parseFloat(discountRate);
+    if (isNaN(numericValue)) return discountRate; // Return as-is if not a number
+    
+    return `${numericValue}%`;
+  }
+
+  get interestRateFormatted(): string | undefined {
+    const cnInterestRate = this.offer.security_info?.cn_interest_rate;
+    const debtInterestRate = this.offer.security_info?.debt_interest_rate;
+    
+    const rate = cnInterestRate || debtInterestRate;
+    if (!rate) return undefined;
+    
+    // Parse the value and format as percentage
+    const numericValue = parseFloat(rate);
+    if (isNaN(numericValue)) return rate; // Return as-is if not a number
+    
+    return `${numericValue}%`;
+  }
+
+  get maturityDateFormatted(): string | undefined {
+    const cnMaturityDate = this.offer.security_info?.cn_maturity_date;
+    const debtMaturityDate = this.offer.security_info?.debt_maturity_date;
+    
+    if (cnMaturityDate) {
+      return formatToFullDate(new Date(cnMaturityDate).toISOString());
+    }
+    
+    if (debtMaturityDate) {
+      return formatToFullDate(new Date(debtMaturityDate).toISOString());
+    }
+    
+    return undefined;
+  }
+
+  get interestRateApyFormatted(): string | undefined {
+    const interestRateApy = this.offer.security_info?.interest_rate_apy;
+    if (!interestRateApy) return undefined;
+    
+    // Parse the value and format as percentage
+    const numericValue = parseFloat(interestRateApy);
+    if (isNaN(numericValue)) return interestRateApy; // Return as-is if not a number
+    
+    return `${numericValue}%`;
+  }
+
+  get paymentScheduleFormatted(): string | undefined {
+    const paymentSchedule = this.offer.security_info?.debt_payment_schedule;
+    if (!paymentSchedule) return undefined;
+    
+    return PaymentScheduleTypes[paymentSchedule as keyof typeof PaymentScheduleTypes] || paymentSchedule;
+  }
+
+  get termLengthFormatted(): string | undefined {
+    const termLength = this.offer.security_info?.debt_term_length;
+    const termUnit = this.offer.security_info?.debt_term_unit;
+    
+    if (!termLength) return undefined;
+    
+    return `${termLength} ${termUnit}`;
+  }
+
   private createDefaultOffer(): IOffer {
     return {
       id: 0,
@@ -204,20 +320,7 @@ export class OfferFormatter {
       approved_at: '',
       close_at: '',
       confirmed_shares: 0,
-      image: {
-        bucket_path: '',
-        filename: '',
-        id: 0,
-        meta_data: {
-          big: '',
-          small: '',
-          medium: '',
-          size: 0,
-        },
-        name: '',
-        updated_at: '',
-        url: '',
-      },
+      image_link_id: 0,
       min_investment: 0,
       name: '',
       legal_name: '',
@@ -232,7 +335,7 @@ export class OfferFormatter {
       title: '',
       total_shares: 0,
       valuation: 0,
-      documents: [],
+
       website: '',
       security_type: '',
       city: '',
@@ -247,6 +350,21 @@ export class OfferFormatter {
         distribution_frequency: '',
         investment_strategy: '',
         estimated_hold_period: '',
+      },
+      security_info: {
+        voting_rights: '',
+        liquidation_preference: '',
+        dividend_type: '',
+        cn_valuation_cap: '',
+        cn_discount_rate: '',
+        cn_interest_rate: '',
+        cn_maturity_date: '',
+        interest_rate_apy: '',
+        debt_payment_schedule: '',
+        debt_maturity_date: '',
+        debt_interest_rate: '',
+        debt_term_length: 0,
+        debt_term_unit: 0,
       },
     };
   }
@@ -284,6 +402,21 @@ export class OfferFormatter {
       isStatusClosedSuccessfully: this.isStatusClosedSuccessfully,
       isStatusClosedUnsuccessfully: this.isStatusClosedUnsuccessfully,
       isFundingCompleted: this.isFundingCompleted,
+      // Security Info Formatted Fields
+      votingRightsFormatted: this.votingRightsFormatted,
+      liquidationPreferenceFormatted: this.liquidationPreferenceFormatted,
+      dividendTypeFormatted: this.dividendTypeFormatted,
+      valuationCapFormatted: this.valuationCapFormatted,
+      discountRateFormatted: this.discountRateFormatted,
+      interestRateFormatted: this.interestRateFormatted,
+      maturityDateFormatted: this.maturityDateFormatted,
+      interestRateApyFormatted: this.interestRateApyFormatted,
+      paymentScheduleFormatted: this.paymentScheduleFormatted,
+      termLengthFormatted: this.termLengthFormatted,
+      isSecurityTypeConvertibleNote: this.isSecurityTypeConvertibleNote,
+      isSecurityTypeDebt: this.isSecurityTypeDebt,
+      isSecurityTypeEquity: this.isSecurityTypeEquity,
+      valuationLabel: this.valuationLabel,
     };
   }
 }
