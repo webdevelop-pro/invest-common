@@ -35,6 +35,7 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
 }
+
 .kyc-success-message {
   text-align: center;
   margin: 0 auto;

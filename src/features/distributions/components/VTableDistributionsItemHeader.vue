@@ -142,6 +142,7 @@ const isDefaultImage = computed(() => (
     width: 20px;
     display: block;
     transition: 0.3s all ease;
+
     &:hover {
       color: $primary;
     }
@@ -158,6 +159,7 @@ const isDefaultImage = computed(() => (
 
   &.is--open {
     position: relative;
+
     &::after {
       box-sizing: border-box;
       content:'';
@@ -168,7 +170,7 @@ const isDefaultImage = computed(() => (
       display: block;
       height: 100%;
       // box-shadow: variables.$box-shadow-small;
-      box-shadow: 0px 2px 5px -5px rgba(18, 22, 31, 0.03), 0px 2px 3px -3px rgba(18, 22, 31, 0.15);;
+      box-shadow: 0 2px 5px -5px rgb(18 22 31 / 3%), 0 2px 3px -3px rgb(18 22 31 / 15%);;
     }
 
     #{$root}__chevron {

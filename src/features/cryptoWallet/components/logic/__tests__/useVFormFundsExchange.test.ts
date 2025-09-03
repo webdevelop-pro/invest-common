@@ -22,6 +22,7 @@ vi.mock('InvestCommon/data/evm/evm.repository', () => ({
     getEvmWalletState: ref({ data: testWalletData, loading: false, error: null }),
     exchangeTokensState: ref({ data: undefined, loading: false, error: null }),
     exchangeTokens: vi.fn().mockResolvedValue(undefined),
+    getEvmWalletByProfile: vi.fn().mockResolvedValue(undefined),
   })),
 }));
 
@@ -77,7 +78,6 @@ describe('useVFormFundsExchange', () => {
   it('should handle save and cancel', async () => {
     const { model, saveHandler, cancelHandler } = useVFormFundsExchange(mockEmitClose);
     
-    // Test save
     model.amount = 100;
     model.from = '0xtoken1';
     model.to = '0xe2cCb3fc0153584e5C70c65849078b55597b4032';
@@ -85,7 +85,6 @@ describe('useVFormFundsExchange', () => {
     await saveHandler();
     expect(mockEmitClose).toHaveBeenCalled();
 
-    // Test cancel
     cancelHandler();
     expect(mockEmitClose).toHaveBeenCalledTimes(2);
   });
@@ -121,7 +120,6 @@ describe('useVFormFundsExchange', () => {
   it('should compute tokenLastItem correctly', () => {
     const { tokenFormatted } = useVFormFundsExchange(mockEmitClose);
     
-    // The tokenLastItem should be the first item from tokenFormatted
     expect(tokenFormatted.value[0]).toEqual({
       text: 'USD Coin: USDC',
       id: '0xtoken1'
@@ -131,22 +129,9 @@ describe('useVFormFundsExchange', () => {
   it('should compute maxExchange from selectedFromToken', () => {
     const { model } = useVFormFundsExchange(mockEmitClose);
     
-    // Set from token to the first token
     model.from = '0xtoken1';
     
-    // The maxExchange should be the amount of the selected token
-    // This is tested indirectly through the text computed property
     const { text } = useVFormFundsExchange(mockEmitClose);
     expect(text.value).toBe('available 1000');
-  });
-
-  it('should handle exchangeTokensState loading', () => {
-    const { isDisabledButton, exchangeTokensState } = useVFormFundsExchange(mockEmitClose);
-    
-    // Initially should not be disabled (assuming form is valid)
-    expect(isDisabledButton.value).toBeDefined();
-    
-    // If we could mock loading state, we would test that button is disabled during loading
-    // This would require more complex mocking of the reactive state
   });
 });

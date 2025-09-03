@@ -200,11 +200,17 @@ const {
                 width="50px"
                 class="investment-top-info__skeleton"
               />
+              <button
+                v-else-if="info.funding"
+                type="button"
+                class="investment-top-info__info-value is--small is--link-regular"
+                @click.prevent="onFundingType"
+              >
+                {{ info.value }}
+              </button>
               <span
                 v-else
                 class="investment-top-info__info-value is--small"
-                :class="{ 'is--link-regular': info.funding }"
-                @click.prevent="onFundingType"
               >
                 {{ info.value }}
               </span>

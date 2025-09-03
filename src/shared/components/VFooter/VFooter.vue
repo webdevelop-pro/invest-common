@@ -155,6 +155,7 @@ const SOCIAL_LIST = [
     padding-bottom: 5px;
     padding-top: 50px;
   }
+
   @include media-lte(tablet) {
     padding-bottom: 5px;
     padding-top: 50px;
@@ -168,15 +169,18 @@ const SOCIAL_LIST = [
     display: flex;
     gap: 80px;
     justify-content: space-between;
+
     @include media-lte(desktop-lg) {
       gap: 40px;
     }
+
     @include media-lte(desktop) {
       max-width: 100%;
       gap: 40px;
       margin: 0 auto;
       flex-wrap: wrap;
     }
+
     @include media-lte(tablet) {
       max-width: 100%;
       gap: 40px;
@@ -188,18 +192,23 @@ const SOCIAL_LIST = [
   &__group {
     width: 100%;
   }
+
   &__form-wrap {
     width: 48%;
+
     @include media-lte(tablet) {
       width: 100%;
     }
   }
+
   &__form {
     margin-bottom: 32px;
   }
+
   &__title {
     margin-bottom: 8px;
   }
+
   &__contact {
     display: flex;
     flex-direction: column;
@@ -209,6 +218,7 @@ const SOCIAL_LIST = [
     a {
       display: block;
       color: $white;
+
       &:hover {
         text-decoration: underline;
       }
@@ -218,6 +228,7 @@ const SOCIAL_LIST = [
       margin-bottom: 0;
     }
   }
+
   &__menu {
     @include media-lte(desktop) {
       width: 100%;
@@ -234,9 +245,11 @@ const SOCIAL_LIST = [
 .footer-bottom {
   background-color: $black;
   padding: 10px 0 16px;
+
   @include media-lte(tablet) {
     padding-top: 51px;
   }
+
   p {
     color: $gray-50;
   }
@@ -245,14 +258,18 @@ const SOCIAL_LIST = [
 .social-links {
   display: flex;
   align-items: center;
+
   a {
     margin-right: 24px;
+
     &:last-child {
       margin-right: 0;
     }
+
     &:hover {
       opacity: .8;
     }
+
     @include media-lte(tablet) {
       margin-right: 32px;
     }

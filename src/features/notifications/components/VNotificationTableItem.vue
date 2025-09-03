@@ -138,6 +138,7 @@ const onMessageClick = () => {
 
 <style lang="scss">
 @use 'UiKit/styles/_variables.scss' as *;
+
 .v-table-notification-item {
   @media screen and (width > $tablet){
     display: table-row;
@@ -174,6 +175,7 @@ const onMessageClick = () => {
       transition: 0.3s all  ease-in-out;
       color: $primary;
       cursor: pointer;
+
       &:hover {
         text-decoration: none;
       }

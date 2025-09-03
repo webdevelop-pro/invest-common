@@ -171,6 +171,7 @@ watch(() => currentTab.value, () => {
   & &__tabs {
     margin-top: 0;
     width: auto;
+
     @media screen and (max-width: $tablet){
       width: 100%;
     }

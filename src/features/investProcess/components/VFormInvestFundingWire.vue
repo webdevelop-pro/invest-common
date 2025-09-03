@@ -51,6 +51,7 @@ defineProps({
 <style lang="scss">
 @use 'UiKit/styles/_variables.scss' as *;
 @use 'UiKit/styles/_colors.scss' as *;
+
 .form-invest-funding-wire {
   color: $gray-80;
   display: flex;
@@ -60,6 +61,7 @@ defineProps({
   gap: 8px;
   align-self: stretch;
   margin-bottom: 40px;
+
   @media screen and (max-width: $tablet){
     gap: 0;
   }
@@ -68,6 +70,7 @@ defineProps({
     display: flex;
     gap: 12px;
     max-width: 475px;
+
     @media screen and (max-width: $tablet){
       flex-direction: column;
       border-bottom: 1px solid $gray-30;

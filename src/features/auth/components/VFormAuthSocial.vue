@@ -97,6 +97,7 @@ const socialSignin = [
       .social-form__item-icon {
         display: none;
       }
+
       .social-form__item-icon-hover {
         display: block;
       }

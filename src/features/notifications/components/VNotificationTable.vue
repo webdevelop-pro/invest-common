@@ -136,6 +136,7 @@ const onApplyFilter = (items: IVFilter[]) => {
 
 <style lang="scss">
 @use 'UiKit/styles/_variables.scss' as *;
+
 .wd-notification-table {
 
   &__content {
@@ -177,6 +178,7 @@ const onApplyFilter = (items: IVFilter[]) => {
     align-items: center;
     min-width: 75%;
     flex-wrap: wrap;
+
     @media screen and (max-width: $tablet){
       min-width: auto;
       width: 100%;
@@ -186,6 +188,7 @@ const onApplyFilter = (items: IVFilter[]) => {
   &__filter {
     --v-filter-dropdown-min-width: 250px;
   }
+
   &__mark-all {
     @media screen and (max-width: $tablet){
       align-self: flex-end;
@@ -202,6 +205,7 @@ const onApplyFilter = (items: IVFilter[]) => {
   &__tabs {
     margin-right: 12px;
     flex-shrink: 0;
+
     @media screen and (max-width: $tablet){
       width: 100%;
     }
@@ -209,6 +213,7 @@ const onApplyFilter = (items: IVFilter[]) => {
 
   &__search {
     width: 32%;
+
     @media screen and (max-width: $tablet){
       width: 100%;
     }

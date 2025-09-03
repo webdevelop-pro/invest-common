@@ -89,6 +89,7 @@ watch(() => open.value, () => {
 <style lang="scss">
 .v-dialog-log-out {
   text-align: center;
+
     @media screen and (max-width: $tablet){
       display: flex;
       flex-direction: column;

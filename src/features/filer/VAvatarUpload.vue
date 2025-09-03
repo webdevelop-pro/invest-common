@@ -70,16 +70,19 @@ const handleButtonClick = async () => {
         v-if="isLoading || isButtonLoading" 
         class="v-account-upload__loading-overlay"
       >
-        <div class="v-account-upload__spinner"></div>
+        <div class="v-account-upload__spinner" />
       </div>
     </Transition>
 
     <!-- Upload button -->
     <div
       role="button"
+      tabindex="0"
       class="v-account-upload__button"
       :class="{ 'is-clicked': isButtonLoading }"
       @click="handleButtonClick"
+      @keydown.enter="handleButtonClick"
+      @keydown.space="handleButtonClick"
     >
       <input
         id="file-control"
@@ -199,7 +202,7 @@ const handleButtonClick = async () => {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(0, 0, 0, 0.3);
+    background: rgb(0 0 0 / 30%);
     border-radius: 100%;
     z-index: 2;
   }
@@ -225,7 +228,7 @@ const handleButtonClick = async () => {
     border-radius: 6px;
     font-size: 12px;
     white-space: nowrap;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgb(0 0 0 / 10%);
     z-index: 10;
     
     &::before {
@@ -279,6 +282,7 @@ const handleButtonClick = async () => {
 // Loading spinner animation
 @keyframes spin {
   0% { transform: rotate(0deg); }
+
   100% { transform: rotate(360deg); }
 }
 

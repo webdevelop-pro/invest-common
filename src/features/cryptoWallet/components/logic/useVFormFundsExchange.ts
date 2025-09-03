@@ -7,7 +7,7 @@ import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
-import { IEvmExchangeRequestBody } from 'InvestCommon/data/evm/evm.types';
+import { IEvmExchangeRequestBody, IEvmWalletBalances } from 'InvestCommon/data/evm/evm.types';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 
 export function useVFormFundsExchange(
@@ -18,11 +18,9 @@ export function useVFormFundsExchange(
   const profilesStore = useProfilesStore();
   const { selectedUserProfileId } = storeToRefs(profilesStore);
 
-  const selectedFromToken = computed(() => (
-    getEvmWalletState.value.data?.balances?.find((item: any) => item.address === model.from)));
-  const maxExchange = computed(() => selectedFromToken.value?.amount);
-  const schemaMaximum = computed(() => maxExchange.value);
-  const schemaMaximumError = computed(() => `Maximum available is $${maxExchange.value}`);
+  const selectedToken = computed(() => (
+    getEvmWalletState.value.data?.balances?.find((item: IEvmWalletBalances) => item.address === model.from)));
+  const maxExchange = computed((): number | undefined => selectedToken.value?.amount);
   const text = computed(() => `available ${maxExchange.value}`);
 
   const tokenToFormatted = computed(() => (
@@ -45,10 +43,10 @@ export function useVFormFundsExchange(
           },
           amount: {
             type: 'number',
-            // maximum: schemaMaximum.value,
-            // errorMessage: {
-            //   maximum: schemaMaximumError.value,
-            // },
+            maximum: maxExchange.value,
+            errorMessage: {
+              maximum: `Maximum available is $${maxExchange.value}`,
+            },
           },
           wallet_id: {
             type: 'number',

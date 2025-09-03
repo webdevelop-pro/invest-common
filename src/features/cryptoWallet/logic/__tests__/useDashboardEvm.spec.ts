@@ -1,4 +1,4 @@
-import { ref, computed, nextTick, defineComponent, h } from 'vue';
+import { ref, nextTick, defineComponent, h } from 'vue';
 import { mount } from '@vue/test-utils';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 

@@ -121,6 +121,7 @@ const {
 
 <style lang="scss">
 @use 'UiKit/styles/_variables.scss' as *;
+
 .v-dialog-cancel-investment {
     @media screen and (max-width: $tablet){
       display: flex;
@@ -145,6 +146,7 @@ const {
     gap: 12px;
     align-self: stretch;
     padding-bottom: 10px;
+
     @media screen and (max-width: $tablet){
       flex-direction: column;
       align-items: stretch;

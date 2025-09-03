@@ -65,6 +65,7 @@ defineProps({
 
 <style lang="scss">
 @use 'UiKit/styles/_variables.scss' as *;
+
 .v-page-top-info-and-tabs {
   width: 100%;
   background-color: $gray-10;

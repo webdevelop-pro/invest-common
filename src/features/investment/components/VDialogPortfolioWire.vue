@@ -174,6 +174,7 @@ const saveHandler = () => {
 <style lang="scss">
 @use 'UiKit/styles/_variables.scss' as *;
 @use 'UiKit/styles/_colors.scss' as *;
+
 .wd-modal-portfolio-wire {
     @media screen and (max-width: $tablet){
       display: flex;
@@ -199,6 +200,7 @@ const saveHandler = () => {
     display: flex;
     gap: 12px;
     max-width: 475px;
+
     @media screen and (max-width: $tablet){
       flex-wrap: wrap;
       width: 100%;
@@ -218,6 +220,7 @@ const saveHandler = () => {
     align-items: flex-start;
     gap: 12px;
     align-self: stretch;
+
     @media screen and (max-width: $tablet){
       flex-direction: column;
       align-items: stretch;

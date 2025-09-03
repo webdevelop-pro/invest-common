@@ -7,7 +7,7 @@ import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
-import { IEvmWithdrawRequestBody } from 'InvestCommon/data/evm/evm.types';
+import { IEvmWithdrawRequestBody, IEvmWalletBalances } from 'InvestCommon/data/evm/evm.types';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 
 export function useVFormFundsWithdraw(
@@ -19,10 +19,8 @@ export function useVFormFundsWithdraw(
     const { selectedUserProfileId } = storeToRefs(profilesStore);
 
   const selectedToken = computed(() => (
-    getEvmWalletState.value.data?.balances?.find((item: any) => item.address === model.token)));
-  const maxWithdraw = computed(() => selectedToken.value?.amount);
-  const schemaMaximum = computed(() => maxWithdraw.value);
-  const schemaMaximumError = computed(() => `Maximum available is $${maxWithdraw.value}`);
+    getEvmWalletState.value.data?.balances?.find((item: IEvmWalletBalances) => item.address === model.token)));
+  const maxWithdraw = computed((): number | undefined => selectedToken.value?.amount);
   const text = computed(() => `available ${maxWithdraw.value}`);
 
   const errorData = computed(() => (withdrawFundsState.value.error as any)?.data?.responseJson);
@@ -35,10 +33,10 @@ export function useVFormFundsWithdraw(
         properties: {
           amount: {
             type: 'number',
-            // maximum: schemaMaximum.value,
-            // errorMessage: {
-            //   maximum: schemaMaximumError.value,
-            // },
+            maximum: maxWithdraw.value,
+            errorMessage: {
+              maximum: `Maximum available is $${maxWithdraw.value}`,
+            },
           },
           token: {
             type: 'string',

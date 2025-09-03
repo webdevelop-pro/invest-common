@@ -68,6 +68,7 @@ const { onFilesChange, onModelChange, onValidChange } = accreditationUploadStore
 
 <style lang="scss">
 @use 'UiKit/styles/_variables.scss' as *;
+
 .form-accreditation-upload-files {
   display: flex;
   flex-direction: column;
@@ -90,6 +91,7 @@ const { onFilesChange, onModelChange, onValidChange } = accreditationUploadStore
     gap: 32px;
     align-self: stretch;
     margin-bottom: 40px;
+
     @media screen and (max-width: $desktop-md){
       flex-direction: column;
       gap: 20px;

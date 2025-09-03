@@ -76,23 +76,27 @@ const getComponentClass = (item: MenuItem) => {
     display: flex;
     flex-direction: column;
   }
+
   &__item-not-link {
     color: $gray-60;
   }
+
   &__item {
     white-space: nowrap;
     color: $white;
     text-decoration: none;
+
     &:hover,
     &.is--active {
       color: $primary;
     }
   }
+
   &__children {
     display: flex;
-    flex-direction: column;
-    flex-wrap: wrap;
+    flex-flow: column wrap;
     gap: 0 40px;
+
     @include media-lte(tablet) {
       gap: 0;
     }
@@ -108,6 +112,7 @@ const getComponentClass = (item: MenuItem) => {
       padding: 8px 0;
     }
   }
+
   &__menu-list {
     display: flex;
     gap: 16px;

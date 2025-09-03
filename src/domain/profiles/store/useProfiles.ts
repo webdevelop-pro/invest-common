@@ -42,7 +42,7 @@ export const useProfilesStore = defineStore('profiles', () => {
     getProfileByIdState.value?.loading || getUserState.value?.loading || false));
 
   const urlProfileId = computed(() => {
-    if (!+IS_STATIC_SITE) return route.params?.profileId;
+    if (!+IS_STATIC_SITE) return route?.params?.profileId;
     return (window && window?.location?.pathname.split('/')[3]); // TODO change if url changes
   });
 

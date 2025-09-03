@@ -197,13 +197,13 @@ watchEffect(() => {
   .v-navigation-menu-link {
     height: $header-height;
     align-content: center;
-    -webkit-align-content: center;
     display: flex;
     align-items: center;
   }
 
   &__button {
     flex-shrink: 0;
+
     @include media-lte(desktop-md) {
       display: none !important;
     }
@@ -236,6 +236,7 @@ watchEffect(() => {
   }
 
 }
+
   .v-header-mobile__list {
     border-top: none !important;
   }

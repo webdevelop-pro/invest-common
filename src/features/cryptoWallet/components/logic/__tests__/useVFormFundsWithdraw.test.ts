@@ -22,6 +22,7 @@ vi.mock('InvestCommon/data/evm/evm.repository', () => ({
     getEvmWalletState: ref({ data: testWalletData, loading: false, error: null }),
     withdrawFundsState: ref({ data: undefined, loading: false, error: null }),
     withdrawFunds: vi.fn().mockResolvedValue(undefined),
+    getEvmWalletByProfile: vi.fn(),
   })),
 }));
 
@@ -70,7 +71,6 @@ describe('useVFormFundsWithdraw', () => {
   it('should handle save and cancel', async () => {
     const { model, saveHandler, cancelHandler } = useVFormFundsWithdraw(mockEmitClose);
     
-    // Test save
     model.amount = 100;
     model.token = '0xtoken1';
     model.to = '0xdestination123';
@@ -78,7 +78,6 @@ describe('useVFormFundsWithdraw', () => {
     await saveHandler();
     expect(mockEmitClose).toHaveBeenCalled();
 
-    // Test cancel
     cancelHandler();
     expect(mockEmitClose).toHaveBeenCalledTimes(2);
   });

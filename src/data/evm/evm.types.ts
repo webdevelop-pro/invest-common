@@ -22,6 +22,13 @@ export enum EvmTransactionTypes {
   exchange = 'exchange',
 }
 
+export interface IEvmWalletBalances {
+  address: string;
+  amount: number;
+  symbol: string;
+  name?: string;
+}
+
 export interface IEvmWalletDataResponse {
   id: number;
   status: EvmWalletStatusTypes;
@@ -29,25 +36,10 @@ export interface IEvmWalletDataResponse {
   pending_incoming_balance: number;
   pending_outcoming_balance: number;
   address: string;
-  balances: Array<{
-    token: string;
-    amount: number;
-    symbol: string;
-  }>;
+  balances: IEvmWalletBalances[];
 }
 
-export interface IEvmWalletDataFormatted {
-  id: number;
-  status: EvmWalletStatusTypes;
-  balance: number;
-  pending_incoming_balance: number;
-  pending_outcoming_balance: number;
-  address: string;
-  balances: Array<{
-    token: string;
-    amount: number;
-    symbol: string;
-  }>;
+export interface IEvmWalletDataFormatted extends IEvmWalletDataResponse {
   isStatusCreated: boolean;
   isStatusVerified: boolean;
   isStatusError: boolean;
@@ -60,14 +52,16 @@ export interface IEvmWalletDataFormatted {
   totalBalance: number;
 }
 
+export interface IEvmWalletAmount {
+  value: string;
+  currency: string;
+}
+
 export interface IEvmTransactionDataResponse {
   id: number;
   status: EvmTransactionStatusTypes;
   type: EvmTransactionTypes;
-  amount: {
-    value: string;
-    currency: string;
-  };
+  amount: IEvmWalletAmount;
   source_wallet_id: number;
   dest_wallet_id: number;
   entity_id: number;
@@ -75,19 +69,7 @@ export interface IEvmTransactionDataResponse {
   created_at: string;
 }
 
-export interface IEvmTransactionDataFormatted {
-  id: number;
-  status: EvmTransactionStatusTypes;
-  type: EvmTransactionTypes;
-  amount: {
-    value: string;
-    currency: string;
-  };
-  source_wallet_id: number;
-  dest_wallet_id: number;
-  entity_id: number;
-  updated_at: string;
-  created_at: string;
+export interface IEvmTransactionDataFormatted extends IEvmTransactionDataResponse {
   isStatusPending: boolean;
   isStatusProcessed: boolean;
   isStatusFailed: boolean;

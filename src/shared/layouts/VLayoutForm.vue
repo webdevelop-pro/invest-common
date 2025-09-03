@@ -92,6 +92,7 @@ const saveHandler = () => {
 
 <style lang="scss">
 @use 'UiKit/styles/_variables.scss' as *;
+
 .layout-back-button {
   $root: &;
 

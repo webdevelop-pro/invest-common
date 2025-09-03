@@ -135,12 +135,14 @@ defineProps({
 
 <style lang="scss">
 @use 'UiKit/styles/_transitions.scss' as *;
+
 .v-table-distributions-content {
   background-color: $gray-10;
 
   &.is--open {
     animation: slideDown 0.3s ease;
   }
+
   &:not(.is--open) {
     animation: slideUp 0.3s ease;
   }

@@ -124,6 +124,7 @@ const {
   &__btn {
     margin-top: 24px;
     flex-shrink: 0;
+
     @media screen and (max-width: $tablet){
       margin-top: 0;
     }

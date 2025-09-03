@@ -58,9 +58,8 @@ const { data, onSocialLoginHandler } = useSettingsSocial();
   width: 190px;
 
   @media screen and (max-width: $desktop) {
-      flex-direction: row;
+      flex-flow: row wrap;
       width: 100%;
-      flex-wrap: wrap;
     }
 
   &__icon {
@@ -100,6 +99,7 @@ const { data, onSocialLoginHandler } = useSettingsSocial();
         display: none;
         transition: all 0.3s ease;
       }
+
       .v-form-setting-social__item-icon-hover {
         display: block;
         transition: all 0.3s ease;

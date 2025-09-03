@@ -75,6 +75,7 @@ const imageID = computed(() => getUserState.value.data?.image_link_id);
 
 <style lang="scss">
 @use 'UiKit/styles/_variables.scss' as *;
+
 .v-header-profile {
   $root: &;
 

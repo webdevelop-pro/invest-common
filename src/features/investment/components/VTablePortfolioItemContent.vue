@@ -152,7 +152,7 @@ const infoData = computed(() => [
 
         <!-- Actions Section -->
         <div class="v-table-item-content__actions">
-          <div
+          <button
             class="v-table-item-content__timeline is--link-regular"
             @click.stop="onTimelineClick"
           >
@@ -161,7 +161,7 @@ const infoData = computed(() => [
               class="v-table-item-content__timeline-icon"
             />
             Investment Timeline
-          </div>
+          </button>
           <VButton
             size="small"
             variant="link"

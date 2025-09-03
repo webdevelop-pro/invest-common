@@ -40,6 +40,7 @@ import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 
 <style lang="scss">
 @use 'UiKit/styles/_variables.scss' as *;
+
 .v-table-notification-item {
   @media screen and (width > $tablet){
     display: table-row;
@@ -80,6 +81,7 @@ import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
       transition: 0.3s all  ease-in-out;
       color: $primary;
       cursor: pointer;
+
       &:hover {
         text-decoration: none;
       }

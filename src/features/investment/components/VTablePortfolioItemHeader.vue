@@ -75,13 +75,13 @@ const profileType = computed(() => selectedUserProfileData.value?.type || '');
       {{ profileType.charAt(0).toUpperCase() + profileType.slice(1) }}
     </VTableCell>
     <VTableCell>
-      <div
+      <button
         class="v-table-item-header__table-funding-type"
         :class="{ 'is--link-regular': item.isFundingClickable }"
         @click.stop="emit('clickFundingType', item.id)"
       >
         {{ item.fundingTypeFormatted }}
-      </div>
+      </button>
     </VTableCell>
     <VTableCell class="v-table-item-header__status">
       <VBadge
@@ -98,6 +98,7 @@ const profileType = computed(() => selectedUserProfileData.value?.type || '');
 
 <style lang="scss">
 @use 'UiKit/styles/_variables.scss' as variables;
+
 .v-table-item-header {
   $root: &;
 
@@ -107,6 +108,7 @@ const profileType = computed(() => selectedUserProfileData.value?.type || '');
   &__link {
     color: $gray-80;
     text-decoration: none;
+
     &:hover {
       color: $primary !important;
     }
@@ -119,6 +121,7 @@ const profileType = computed(() => selectedUserProfileData.value?.type || '');
   &__table-image {
     width: 100%;
     height: 100%;
+
     &.is--default-image {
       max-width: 75%;
       max-height: 75%;
@@ -152,6 +155,7 @@ const profileType = computed(() => selectedUserProfileData.value?.type || '');
     width: 20px;
     display: block;
     transition: 0.3s all ease;
+
     &:hover {
       color: $primary;
     }
@@ -164,7 +168,7 @@ const profileType = computed(() => selectedUserProfileData.value?.type || '');
 
   &.is--open {
     position: relative;
-    box-shadow: 0px 2px 5px -5px rgba(18, 22, 31, 0.03), 0px 2px 3px -3px rgba(18, 22, 31, 0.15);
+    box-shadow: 0 2px 5px -5px rgb(18 22 31 / 3%), 0 2px 3px -3px rgb(18 22 31 / 15%);
 
     #{$root}__chevron {
       transform: rotate(180deg);

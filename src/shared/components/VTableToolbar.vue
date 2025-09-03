@@ -66,6 +66,7 @@ const onApplyFilter = (items: IVFilter[]) => {
 
 <style lang="scss">
 @use 'UiKit/styles/_variables.scss' as *;
+
 .v-table-toolbar {
   $root: &;
 
@@ -90,6 +91,7 @@ const onApplyFilter = (items: IVFilter[]) => {
     border-bottom: 1px dotted $primary;
     color: $black;
     transition: all .3s ease;
+
     &:hover {
       color: $primary;
       border-color: transparent;
@@ -140,6 +142,7 @@ const onApplyFilter = (items: IVFilter[]) => {
 
   &__search {
     width: 34.5%;
+
     @media screen and (max-width: $desktop){
       width: 50%;
     }
@@ -150,7 +153,6 @@ const onApplyFilter = (items: IVFilter[]) => {
   }
 
   &__export {
-
     @media screen and (max-width: $tablet){
       align-self: flex-end;
     }

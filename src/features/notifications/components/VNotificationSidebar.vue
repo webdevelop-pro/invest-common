@@ -73,6 +73,7 @@ const onClose = () => {
 
 <style lang="scss">
 @use 'UiKit/styles/_variables.scss' as *;
+
 .v-notification-sidebar {
 
   &__header {
@@ -86,13 +87,15 @@ const onClose = () => {
 
     .wd-notification-table__toolbar-left {
       flex-wrap: initial;
+
       @media screen and (max-width: $tablet){
         flex-wrap: wrap;
       }
     }
   }
+
   &__text {
-    padding: 28px 20px 20px 20px;
+    padding: 28px 20px 20px;
     max-height: calc(100vh - 65px - 80px);
     height: 100%;
     overflow-y: auto;

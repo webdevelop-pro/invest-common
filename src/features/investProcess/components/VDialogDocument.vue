@@ -63,6 +63,7 @@ onBeforeUnmount(() => {
 
 <style lang="scss">
 @use 'UiKit/styles/_variables.scss' as *;
+
 .v-dialog-document {
   width: 100%;
   height: 100%;
@@ -70,6 +71,7 @@ onBeforeUnmount(() => {
   &__sign {
     height: 100%;
     padding: 0 26px;
+
     @media screen and (max-width: $tablet){
       padding: 0;
     }
