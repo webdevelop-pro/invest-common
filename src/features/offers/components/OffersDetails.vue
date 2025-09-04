@@ -16,6 +16,10 @@ const VBreadcrumbs = defineAsyncComponent({
   hydrate: hydrateOnVisible(),
 });
 
+const VSocialLinks = defineAsyncComponent({
+  loader: () => import('UiKit/components/VSocialLinks/VSocialLinks.vue'),
+});
+
 const props = defineProps({
   offer: {
     type: Object as PropType<IOfferFormatted> | undefined,
@@ -28,7 +32,7 @@ const props = defineProps({
 const emit = defineEmits(['invest']);
 
 const offerRef = computed(() => props.offer);
-const { breadcrumbsList, carouselFiles, frontmatter } = useOffersDetails(offerRef); // tags hidden
+const { breadcrumbsList, carouselFiles, frontmatter, socialLinks } = useOffersDetails(offerRef);
 
 useGlobalLoader().hide();
 </script>
@@ -67,7 +71,7 @@ useGlobalLoader().hide();
           />
         </div>
         <VSkeleton
-          v-if="!(offer?.website || offer?.city || offer?.state)"
+          v-if="!(offer?.website || offer?.city || offer?.state || socialLinks.length > 0)"
           height="45px"
           width="100%"
           class="offer-details__additional-info-wrap"
@@ -95,6 +99,11 @@ useGlobalLoader().hide();
             >
               {{ offer?.website?.replace('https://', '')?.replace('/', '') }}
             </a>
+            <VSocialLinks
+              v-if="socialLinks.length > 0"
+              :social-list="socialLinks"
+              class="offer-details__social-links"
+            />
           </div>
           <!-- <ul class="offer-details__tags-wrap">
             <VBadge
@@ -115,6 +124,7 @@ useGlobalLoader().hide();
           @invest="emit('invest')"
         />
         <OffersDetailsContent
+          v-if="offer"
           :offer="offer"
           :loading="loading"
           class="offer-details__content"
@@ -221,6 +231,27 @@ useGlobalLoader().hide();
 
   &__city {
     color: $gray-80;
+    flex-shrink: 0;
+  }
+
+  &__social-links {
+      color: $gray-70;
+      gap: 10px;
+      
+      &__item {
+        &:hover {
+          color: $primary;
+        }
+      }
+
+      svg {
+        width: 20px;
+        height: 20px;
+      }
+
+      a {
+        margin-right: 0;
+      }
   }
 
   &__breadcrumbs {

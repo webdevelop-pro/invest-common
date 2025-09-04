@@ -72,8 +72,8 @@ export interface ISecurityInfo {
   debt_payment_schedule?: string;
   debt_maturity_date?: string;
   debt_interest_rate?: string;
-  debt_term_length?: number;
-  debt_term_unit?: number;
+  debt_term_length?: string;
+  debt_term_unit?: string;
 }
 
 export interface IOffer {
@@ -103,6 +103,13 @@ export interface IOffer {
   highlights?: string;
   additional_details: string;
   data?: IOfferInfoData;
+  linkedin?: string;
+  facebook?: string;
+  twitter?: string;
+  github?: string;
+  instagram?: string;
+  telegram?: string;
+  mastodon?: string;
   amount_raised: number;
 }
 

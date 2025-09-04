@@ -335,7 +335,7 @@ export class OfferFormatter {
       title: '',
       total_shares: 0,
       valuation: 0,
-
+      additional_details: '',
       website: '',
       security_type: '',
       city: '',
@@ -363,9 +363,16 @@ export class OfferFormatter {
         debt_payment_schedule: '',
         debt_maturity_date: '',
         debt_interest_rate: '',
-        debt_term_length: 0,
-        debt_term_unit: 0,
+        debt_term_length: '',
+        debt_term_unit: '',
       },
+      linkedin: '',
+      facebook: '',
+      twitter: '',
+      github: '',
+      instagram: '',
+      telegram: '',
+      mastodon: '',
     };
   }
 
