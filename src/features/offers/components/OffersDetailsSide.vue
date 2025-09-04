@@ -10,6 +10,7 @@ import VProgress from 'UiKit/components/Base/VProgress/VProgress.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import VTooltip from 'UiKit/components/VTooltip.vue';
 import { useOffersDetailsSide } from './logic/useOffersDetailsSide';
+import infoIcon from 'UiKit/assets/images/circle-info.svg';
 
 const props = defineProps({
   offer: {
@@ -76,12 +77,13 @@ const { readOnlyInfo, investmentDocUrl, onShareClick, copied } = useOffersDetail
               v-if="loading"
               height="26px"
               width="100px"
-              class="offer-details-side__side-details-value is--body"
+              class="offer-details-side__details-value is--body"
             />
             <VTooltip
               v-else-if="item.tooltip"
             >
-              <span class="offer-details-side__side-details-value is--body">
+              <span class="offer-details-side__details-value is--body is--tooltip">
+                <infoIcon class="offer-details-side__info-icon" />
                 {{ item.text }}
               </span>
               <template #content>
@@ -90,7 +92,7 @@ const { readOnlyInfo, investmentDocUrl, onShareClick, copied } = useOffersDetail
             </VTooltip>
             <span
               v-else
-              class="offer-details-side__side-details-value is--body"
+              class="offer-details-side__details-value is--body"
             >
               {{ item.text }}
             </span>
@@ -202,8 +204,22 @@ const { readOnlyInfo, investmentDocUrl, onShareClick, copied } = useOffersDetail
     color: $gray-70;
   }
 
-  &__side-details-value {
+  &__details-value {
     color: $gray-80;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    &.is--tooltip {
+      cursor: help;
+    }
+  }
+
+  &__info-icon {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    color: $gray-60;
   }
 
   &__min-invest-label {

@@ -21,6 +21,7 @@ export const urlProfileAccreditation = (profileId: number) => `${env.FRONTEND_UR
 export const urlInvestmentTimeline = (profileId: number, investId: string) => (
   `${env.FRONTEND_URL_DASHBOARD}/profile/${profileId}/investment/${investId}/timeline`
 );
+export const urlProfileCryptoWallet = (profileId: number) => `${env.FRONTEND_URL_DASHBOARD}/profile/${profileId}/evmwallet`;
 export const urlProfileWallet = (profileId: number) => `${env.FRONTEND_URL_DASHBOARD}/profile/${profileId}/wallet`;
 export const urlProfileAccount = (profileId: number) => `${env.FRONTEND_URL_DASHBOARD}/profile/${profileId}/account`;
 export const urlProfileKYC = (profileId: number) => `${env.FRONTEND_URL_DASHBOARD}/profile/${profileId}/kyc`;

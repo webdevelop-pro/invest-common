@@ -151,4 +151,10 @@ const imageID = computed(() => getUserState.value.data?.image_link_id);
     }
   }
 }
+
+.v-dropdown-menu-item {
+    &.is--border-top {
+      border-top: 1px solid $gray-40;
+    }
+}
 </style>

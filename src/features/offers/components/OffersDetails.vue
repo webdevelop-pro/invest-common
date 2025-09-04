@@ -8,9 +8,9 @@ import { useOffersDetails } from './logic/useOffersDetails';
 import VCarousel from 'UiKit/components/VCarousel.vue';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 
-const VBadge = defineAsyncComponent({
-  loader: () => import('UiKit/components/Base/VBadge/VBadge.vue'),
-});
+// const VBadge = defineAsyncComponent({
+//   loader: () => import('UiKit/components/Base/VBadge/VBadge.vue'),
+// });
 const VBreadcrumbs = defineAsyncComponent({
   loader: () => import('UiKit/components/VBreadcrumb/VBreadcrumbsList.vue'),
   hydrate: hydrateOnVisible(),
@@ -28,7 +28,7 @@ const props = defineProps({
 const emit = defineEmits(['invest']);
 
 const offerRef = computed(() => props.offer);
-const { breadcrumbsList, tags, carouselFiles, frontmatter } = useOffersDetails(offerRef);
+const { breadcrumbsList, carouselFiles, frontmatter } = useOffersDetails(offerRef); // tags hidden
 
 useGlobalLoader().hide();
 </script>
@@ -96,7 +96,7 @@ useGlobalLoader().hide();
               {{ offer?.website?.replace('https://', '')?.replace('/', '') }}
             </a>
           </div>
-          <ul class="offer-details__tags-wrap">
+          <!-- <ul class="offer-details__tags-wrap">
             <VBadge
               v-for="(tag, index) in tags"
               :key="index"
@@ -106,7 +106,7 @@ useGlobalLoader().hide();
             >
               {{ tag }}
             </VBadge>
-          </ul>
+          </ul> -->
         </div>
         <OfferDetailsSide
           :loading="loading"
