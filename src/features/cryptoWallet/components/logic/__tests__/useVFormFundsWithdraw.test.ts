@@ -12,8 +12,8 @@ const testWalletData = {
   pending_outgoing_balance: 0,
   address: '0x1234567890abcdef',
   balances: [
-    { address: '0xtoken1', amount: 500, symbol: 'USDC', name: 'USD Coin' },
-    { address: '0xtoken2', amount: 1000, symbol: 'ETH', name: 'Ethereum' },
+    { address: '0xtoken1', amount: 500, symbol: 'USDC', name: 'USD Coin', icon: '/img/tokens/usdc.svg' },
+    { address: '0xtoken2', amount: 1000, symbol: 'ETH', name: 'Ethereum', icon: '/img/tokens/eth.svg' },
   ],
 };
 
@@ -51,8 +51,24 @@ describe('useVFormFundsWithdraw', () => {
     const { tokenFormatted, text } = useVFormFundsWithdraw(mockEmitClose);
 
     expect(tokenFormatted.value).toEqual([
-      { text: 'USD Coin: USDC', id: '0xtoken1' },
-      { text: 'Ethereum: ETH', id: '0xtoken2' },
+      { 
+        address: '0xtoken1', 
+        amount: 500, 
+        symbol: 'USDC', 
+        name: 'USD Coin', 
+        icon: '/img/tokens/usdc.svg',
+        text: 'USD Coin: USDC', 
+        id: '0xtoken1' 
+      },
+      { 
+        address: '0xtoken2', 
+        amount: 1000, 
+        symbol: 'ETH', 
+        name: 'Ethereum', 
+        icon: '/img/tokens/eth.svg',
+        text: 'Ethereum: ETH', 
+        id: '0xtoken2' 
+      },
     ]);
     expect(text.value).toBe('available 500');
   });

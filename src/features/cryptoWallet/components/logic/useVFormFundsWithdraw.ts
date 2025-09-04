@@ -101,6 +101,13 @@ export function useVFormFundsWithdraw(
     if (model.wallet_id) model.wallet_id = getEvmWalletState.value.data?.id;
   }, { immediate: true });
 
+  // Helper function to format token data
+  const formatToken = (item: any) => ({
+    ...item,
+    text: `${item.name}: ${item.symbol}`,
+    id: item.address,
+  });
+
   const tokenFormatted = computed(() => {
     const balances = getEvmWalletState.value.data?.balances || [];
     const uniqueTokens = new Map();
@@ -108,10 +115,7 @@ export function useVFormFundsWithdraw(
     balances.forEach((item: any) => {
       const key = `${item.name}:${item.symbol}`;
       if (!uniqueTokens.has(key)) {
-        uniqueTokens.set(key, {
-          text: `${item.name}: ${item.symbol}`,
-          id: `${item.address}`,
-        });
+        uniqueTokens.set(key, formatToken(item));
       }
     });
     

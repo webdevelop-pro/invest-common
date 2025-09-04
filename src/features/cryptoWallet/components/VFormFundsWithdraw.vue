@@ -6,6 +6,7 @@ import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
 import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import VFormSelect from 'UiKit/components/Base/VForm/VFormSelect.vue';
+import VImage from 'UiKit/components/Base/VImage/VImage.vue';
 import { useVFormFundsWithdraw } from './logic/useVFormFundsWithdraw';
 
 const emit = defineEmits(['close']);
@@ -33,7 +34,7 @@ const {
   <div class="VFormFundsWithdraw form-wallet-add-transaction">
     <div class="form-wallet-add-transaction__content">
       <FormRow>
-        <FormCol>
+        <FormCol col2>
           <VFormGroup
             v-slot="VFormGroupProps"
             :required="isFieldRequired('token')"
@@ -52,12 +53,24 @@ const {
               dropdown-absolute
               :options="tokenFormatted"
               @update:model-value="model.token = String($event)"
-            />
+            >
+              <template #item="{ item }">
+                <div class="token-option">
+                  <VImage 
+                    v-if="item.icon" 
+                    :src="item.icon" 
+                    :alt="item.symbol" 
+                    class="token-option__icon"
+                  />
+                  <div class="token-option__content">
+                    {{ item.symbol }}
+                  </div>
+                </div>
+              </template>
+            </VFormSelect>
           </VFormGroup>
         </FormCol>
-      </FormRow>
-      <FormRow>
-        <FormCol>
+        <FormCol col2>
           <VFormGroup
             v-slot="VFormGroupProps"
             :required="isFieldRequired('amount')"
@@ -83,14 +96,14 @@ const {
       <FormRow>
         <FormCol>
           <VFormGroup
-            v-slot="VFormGroupProps"
+            v-slot="{ isFieldError }"
             :required="isFieldRequired('to')"
             :error-text="getErrorText('to', errorData)"
             label="Wallet address where to send"
             class="form-wallet-add-transaction__input"
           >
             <VFormInput
-              :is-error="VFormGroupProps.isFieldError"
+              :is-error="isFieldError"
               placeholder="Address"
               :model-value="model.to ? String(model.to) : undefined"
               name="to"
@@ -145,6 +158,30 @@ const {
     gap: 12px;
     margin-top: 20px;
     margin-bottom: 4px;
+  }
+}
+
+.token-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  &__icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  &__symbol {
+    font-weight: 600;
+    font-size: 14px;
+    color: $black;
   }
 }
 </style>
