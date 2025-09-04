@@ -6,11 +6,12 @@ import { useRepositoryFiler } from 'InvestCommon/data/filer/filer.repository';
 import { FilerFormatter } from 'InvestCommon/data/filer/filer.formatter';
 
 export interface ReadOnlyInfoItem {
-  title: string;
+  title?: string;
   text?: string;
   value?: string;
   tooltip?: string;
 }
+
 
 export function useOffersDetailsSide(offerRef: Ref<IOfferFormatted | undefined>) {
   const filerRepository = useRepositoryFiler();
@@ -33,6 +34,7 @@ export function useOffersDetailsSide(offerRef: Ref<IOfferFormatted | undefined>)
     {
       title: 'Security Type:',
       text: offerRef.value?.securityTypeFormatted,
+      tooltip: offerRef.value?.securityTypeTooltip,
     },
     {
       title: 'Interest Rate:',
@@ -90,6 +92,7 @@ export function useOffersDetailsSide(offerRef: Ref<IOfferFormatted | undefined>)
     {
       title: 'Payment Schedule:',
       text: offerRef.value?.paymentScheduleFormatted,
+      tooltip: 'Payment schedule refers to how often interest payments are made to investors (e.g., monthly, quarterly, annually, or at maturity',
     },
     {
       title: 'Term Length:',

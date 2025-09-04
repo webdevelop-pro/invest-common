@@ -99,11 +99,6 @@ useGlobalLoader().hide();
             >
               {{ offer?.website?.replace('https://', '')?.replace('/', '') }}
             </a>
-            <VSocialLinks
-              v-if="socialLinks.length > 0"
-              :social-list="socialLinks"
-              class="offer-details__social-links"
-            />
           </div>
           <!-- <ul class="offer-details__tags-wrap">
             <VBadge
@@ -116,6 +111,11 @@ useGlobalLoader().hide();
               {{ tag }}
             </VBadge>
           </ul> -->
+          <VSocialLinks
+            v-if="socialLinks.length > 0"
+            :social-list="socialLinks"
+            class="offer-details__social-links"
+          />
         </div>
         <OfferDetailsSide
           :loading="loading"
@@ -237,6 +237,7 @@ useGlobalLoader().hide();
   &__social-links {
       color: $gray-70;
       gap: 10px;
+      width: auto;
       
       &__item {
         &:hover {

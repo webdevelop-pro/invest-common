@@ -32,7 +32,7 @@ export enum DividendType {
 
 export enum SecurityType {
   equity = 'Equity',
-  preferred_equity = 'Preferred Equity',
+  'preferred-equity' = 'Preferred Equity',
   debt = 'Debt',
   equity_warrants = 'Equity Warrants',
   preference_shares = 'Preference Shares',
@@ -149,6 +149,7 @@ export interface IOfferFormatted extends IOffer {
   pricePerShareFormatted: string;
   valuationFormatted: string;
   securityTypeFormatted: string;
+  securityTypeTooltip: string | undefined;
   statusFormatted: {
     text: string;
     color: string;
@@ -192,5 +193,6 @@ export interface IOfferFormatted extends IOffer {
   isSecurityTypeConvertibleNote: boolean;
   isSecurityTypeDebt: boolean;
   isSecurityTypeEquity: boolean;
+  isSecurityTypePreferredEquity: boolean;
   valuationLabel: string;
 } 

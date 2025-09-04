@@ -53,6 +53,17 @@ export class OfferFormatter {
     return this.offer.security_type ? capitalizeFirstLetter(this.offer.security_type) : '-';
   }
 
+  get securityTypeTooltip(): string | undefined {
+    const securityTypeTooltips: Record<string, string> = {
+      'debt': 'A loan to the company that must be repaid with interest. Investors receive fixed interest payments on a set schedule until maturity.',
+      'convertible-note': 'A loan that may convert into equity (shares) in the future, usually during a financing round and often at a discount or with other benefits.',
+      'equity': 'Ownership shares in the company. Common stock may include voting rights, limited voting rights, or none, depending on the terms. Holders share in profits (if dividends are declared) and potential exit upside, but are last in priority if the company liquidates.',
+      'preferred-equity': 'Shares with priority over common stock for dividends and liquidation proceeds. Preferred stock may or may not include voting rights, depending on the terms.',
+    };
+
+    return this.offer.security_type ? securityTypeTooltips[this.offer.security_type.toLowerCase()] : undefined;
+  }
+
   get isSecurityTypeConvertibleNote(): boolean {
     return this.offer.security_type === 'convertible-note';
   }
@@ -63,6 +74,10 @@ export class OfferFormatter {
 
   get isSecurityTypeEquity(): boolean {
     return this.offer.security_type === 'equity';
+  }
+
+  get isSecurityTypePreferredEquity(): boolean {
+    return this.offer.security_type === 'preferred-equity';
   }
 
   get valuationLabel(): string {
@@ -383,6 +398,7 @@ export class OfferFormatter {
       pricePerShareFormatted: this.pricePerShareFormatted,
       valuationFormatted: this.valuationFormatted,
       securityTypeFormatted: this.securityTypeFormatted,
+      securityTypeTooltip: this.securityTypeTooltip,
       statusFormatted: this.statusFormatted,
       approvedAtFormatted: this.approvedAtFormatted,
       closeAtFormatted: this.closeAtFormatted,
@@ -423,6 +439,7 @@ export class OfferFormatter {
       isSecurityTypeConvertibleNote: this.isSecurityTypeConvertibleNote,
       isSecurityTypeDebt: this.isSecurityTypeDebt,
       isSecurityTypeEquity: this.isSecurityTypeEquity,
+      isSecurityTypePreferredEquity: this.isSecurityTypePreferredEquity,
       valuationLabel: this.valuationLabel,
     };
   }
