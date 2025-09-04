@@ -33,6 +33,8 @@ const {
   isShowOutgoingBalance,
   isSkeleton,
   buttonConfigs,
+  isLoadingNotificationTransaction,
+  isLoadingNotificationWallet,
 } = useDashboardEvmWalletTokens();
 </script>
 
@@ -105,7 +107,7 @@ const {
         class="investment-documents__table"
         size="small"
         :data="tableOptions || []"
-        :loading="isSkeleton && !isError"
+        :loading="isSkeleton && !isError || isLoadingNotificationWallet"
         :loading-row-length="5"
         :colspan="5"
       >
@@ -135,7 +137,7 @@ const {
         class="investment-documents__table"
         size="small"
         :data="transactionsOptions || []"
-        :loading="isSkeleton && !isError"
+        :loading="isSkeleton && !isError || isLoadingNotificationTransaction"
         :loading-row-length="5"
         :colspan="5"
       >

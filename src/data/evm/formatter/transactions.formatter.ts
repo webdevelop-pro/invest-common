@@ -1,7 +1,8 @@
 import { 
   IEvmTransactionDataResponse, 
   IEvmTransactionDataFormatted, 
-  EvmTransactionStatusTypes
+  EvmTransactionStatusTypes,
+  EvmTransactionTypes
 } from '../evm.types';
 
 const BASE_OPTIONS = {
@@ -37,6 +38,40 @@ export class EvmTransactionFormatter {
     this.data = data;
   }
 
+  get isTypeWithdrawal() {
+    return this.data?.type === EvmTransactionTypes.withdrawal;
+  }
+
+  get isTypeDeposit() {
+    return this.data?.type === EvmTransactionTypes.deposit;
+  }
+
+  get isTypeExchange() {
+    return this.data?.type === EvmTransactionTypes.exchange;
+  }
+
+  get typeFormatted() {
+    return this.data?.type ? this.data.type[0]?.toUpperCase() + this.data.type?.slice(1) : '';
+  }
+
+  get amountFormatted() {
+    if (!this.data?.amount) return '0';
+    const amount = Number(this.data.amount);
+    if (this.isTypeDeposit) return `+ ${amount}`;
+    return `- ${amount}`;
+  }
+
+  get networkFormatted() {
+    return this.data?.network ? this.data.network[0]?.toUpperCase() + this.data.network?.slice(1) : '';
+  }
+
+  get tagBackground() {
+    if (this.isTypeDeposit) return 'secondary-light';
+    if (this.isTypeWithdrawal) return 'red-light';
+    if (this.isTypeExchange) return 'purple-light';
+    return 'default';
+  }
+
   format(): IEvmTransactionDataFormatted {
     return {
       ...this.data,
@@ -53,6 +88,15 @@ export class EvmTransactionFormatter {
       
       statusColor: EvmTransactionFormatter.getStatusColor(this.data.status),
       statusText: EvmTransactionFormatter.getStatusText(this.data.status),
+      
+      // New formatted fields for type, amount, and network
+      isTypeWithdrawal: this.isTypeWithdrawal,
+      isTypeDeposit: this.isTypeDeposit,
+      isTypeExchange: this.isTypeExchange,
+      typeFormatted: this.typeFormatted,
+      amountFormatted: this.amountFormatted,
+      networkFormatted: this.networkFormatted,
+      tagColor: this.tagBackground,
     };
   }
 

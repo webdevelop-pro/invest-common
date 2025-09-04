@@ -10,7 +10,7 @@ import earn from 'InvestCommon/shared/assets/images/icons/earn.svg';
 
 export const useDashboardEvmWalletTokens = () => {
   const evmRepository = useRepositoryEvm();
-  const { getEvmWalletState } = storeToRefs(evmRepository);
+  const { getEvmWalletState, isLoadingNotificationTransaction, isLoadingNotificationWallet } = storeToRefs(evmRepository);
 
   const tableOptions = computed(() => getEvmWalletState.value.data?.balances);
 
@@ -30,7 +30,7 @@ export const useDashboardEvmWalletTokens = () => {
     (getEvmWalletState.value.data?.balances?.length ?? 0) > 0
   ));
 
-  const isSkeleton = computed(() => (getEvmWalletState.value.loading));
+  const isSkeleton = computed(() => getEvmWalletState.value.loading);
 
   const transactionsOptions = computed(() => {
     const transactions = getEvmWalletState.value.data?.formattedTransactions || [];
@@ -93,6 +93,8 @@ export const useDashboardEvmWalletTokens = () => {
     canExchange,
     isSkeleton,
     buttonConfigs,
+    isLoadingNotificationTransaction,
+    isLoadingNotificationWallet,
   };
 };
 

@@ -82,6 +82,9 @@ export interface IEvmTransactionDataResponse {
   dest_wallet_id: number | null;
   source_wallet_id: number | null;
   investment_id: number | null;
+  type: EvmTransactionTypes;
+  amount: string;
+  network: string;
   status: EvmTransactionStatusTypes;
   transaction_tx: string;
   created_at: string;
@@ -100,6 +103,17 @@ export interface IEvmTransactionDataFormatted extends IEvmTransactionDataRespons
   updated_at_time: string;
   statusColor?: string;
   statusText?: string;
+  
+  // Type checking helpers
+  isTypeWithdrawal: boolean;
+  isTypeDeposit: boolean;
+  isTypeExchange: boolean;
+  
+  // Formatted display values
+  typeFormatted: string;
+  amountFormatted: string;
+  networkFormatted: string;
+  tagColor?: string;
 }
 
 export interface IEvmWithdrawRequestBody {

@@ -1,4 +1,4 @@
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import env from 'InvestCommon/domain/config/env';
@@ -25,6 +25,10 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
   const getEvmWalletState = createActionState<IEvmWalletDataFormatted>();
   const withdrawFundsState = createActionState<IEvmWalletDataResponse>();
   const exchangeTokensState = createActionState<IEvmExchangeResponse>();
+
+  // Loading states for websocket updates
+  const isLoadingNotificationTransaction = ref(false);
+  const isLoadingNotificationWallet = ref(false);
 
   const evmWalletId = computed(() => getEvmWalletState.value.data?.id || 0);
 
@@ -89,17 +93,27 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
     if (!wallet || !fields) return;
 
     if (obj === 'evm_transfer') {
+      // Trigger loading for 2 seconds when receiving transaction updates
+      isLoadingNotificationTransaction.value = true;
+      setTimeout(() => {
+        isLoadingNotificationTransaction.value = false;
+      }, 2000);
       const objectId = fields?.object_id;
-      if (!objectId) return;
+      if (!objectId || typeof objectId !== 'number') return;
       
       const index = wallet.transactions?.findIndex((t) => t.id === objectId);
 
       if (index !== -1) {
         Object.assign(wallet.transactions[index], fields);
       } else {
-        wallet.transactions?.unshift({ ...fields, id: fields.object_id });
+        wallet.transactions?.unshift({ ...fields, id: objectId } as any);
       }
     } else if (obj === 'evm_wallet') {
+      // Trigger loading for 2 seconds when receiving wallet updates
+      isLoadingNotificationWallet.value = true;
+      setTimeout(() => {
+        isLoadingNotificationWallet.value = false;
+      }, 2000);
       Object.assign(wallet, fields);
     }
     
@@ -117,6 +131,8 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
     getEvmWalletState.value = { loading: false, error: null, data: undefined };
     withdrawFundsState.value = { loading: false, error: null, data: undefined };
     exchangeTokensState.value = { loading: false, error: null, data: undefined };
+    isLoadingNotificationTransaction.value = false;
+    isLoadingNotificationWallet.value = false;
   };
 
   return {
@@ -130,6 +146,8 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
     exchangeTokens,
     resetAll,
     updateNotificationData,
+    isLoadingNotificationTransaction,
+    isLoadingNotificationWallet,
   };
 });
 

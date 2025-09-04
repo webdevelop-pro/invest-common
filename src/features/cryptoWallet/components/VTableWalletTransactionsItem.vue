@@ -15,7 +15,7 @@ defineProps<Props>();
 </script>
 
 <template>
-  <VTableRow class="v-table-wallet-transactions-item">
+  <VTableRow class="VTableWalletTransactionsItem v-table-wallet-transactions-item">
     <VTableCell>
       <div>
         {{ data?.updated_at_date }}
@@ -23,6 +23,23 @@ defineProps<Props>();
       <div class="is--color-gray-60">
         {{ data?.updated_at_time }}
       </div>
+    </VTableCell>
+    
+    <VTableCell>
+      <VBadge
+        :color="data?.tagColor"
+        size="small"
+      >
+        {{ data?.typeFormatted }}
+      </VBadge>
+    </VTableCell>
+    
+    <VTableCell>
+      {{ data?.amountFormatted }}
+    </VTableCell>
+    
+    <VTableCell>
+      {{ data?.networkFormatted }}
     </VTableCell>
     
     <VTableCell>
@@ -63,7 +80,7 @@ defineProps<Props>();
   &__link {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: end;
   }
 
   &__hash-link {
