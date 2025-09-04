@@ -29,6 +29,7 @@ export type IEvmWalletBalancesMap = Record<string, {
   symbol: string;
   name?: string;
   icon?: string;
+  price_per_usd?: number;
 }>;
 
 export interface IEvmWalletBalances {
@@ -37,6 +38,7 @@ export interface IEvmWalletBalances {
   symbol: string;
   name?: string;
   icon?: string;
+  price_per_usd?: number;
 }
 
 export interface IEvmWalletDataResponse {

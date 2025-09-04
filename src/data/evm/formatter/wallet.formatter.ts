@@ -65,6 +65,7 @@ export class EvmWalletFormatter {
     let balancesArray: IEvmWalletBalances[] = [];
     const rawBalances: any = (this.data as any).balances;
     balancesArray = Object.values(rawBalances).map((b: any) => ({
+      ...b,
       address: String(b.address),
       amount: Number(b.amount ?? 0),
       symbol: String(b.symbol ?? ''),

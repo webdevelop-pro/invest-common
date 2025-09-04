@@ -6,6 +6,7 @@ import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
 import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import VFormSelect from 'UiKit/components/Base/VForm/VFormSelect.vue';
+import VImage from 'UiKit/components/Base/VImage/VImage.vue';
 import { useVFormFundsExchange } from './logic/useVFormFundsExchange';
 
 const emit = defineEmits(['close']);
@@ -22,11 +23,14 @@ const {
   text,
   errorData,
   exchangeTokensState,
-  tokenFormatted,
+  receiveAmount,
   tokenToFormatted,
+  tokensFromFormatted,
   numberFormatter,
   isFieldRequired,
   getErrorText,
+  exchangeRate,
+  selectedToken,
 } = useVFormFundsExchange(() => emit('close'));
 </script>
 
@@ -34,13 +38,13 @@ const {
   <div class="VFormFundsExchange form-wallet-add-transaction">
     <div class="form-wallet-add-transaction__content">
       <FormRow>
-        <FormCol>
+        <FormCol col2>
           <VFormGroup
             v-slot="VFormGroupProps"
             :required="isFieldRequired('from')"
             :error-text="getErrorText('from', errorData)"
             data-testid="from-token-group"
-            label="From Token"
+            label="From:"
             class="form-wallet-add-transaction__input"
           >
             <VFormSelect
@@ -51,39 +55,27 @@ const {
               item-label="text"
               item-value="id"
               dropdown-absolute
-              :options="tokenFormatted"
+              :options="tokensFromFormatted"
               @update:model-value="model.from = String($event)"
-            />
+            >
+              <template #item="slotProps">
+                <div class="token-option">
+                  <VImage 
+                    v-if="slotProps.item.icon" 
+                    :src="slotProps.item.icon" 
+                    :alt="slotProps.item.symbol" 
+                    class="token-option__icon"
+                  />
+                  <div class="token-option__content">
+                    {{ slotProps.item.symbol }}
+                  </div>
+                </div>
+              </template>
+            </VFormSelect>
           </VFormGroup>
         </FormCol>
-      </FormRow>
-      <FormRow>
-        <FormCol>
-          <VFormGroup
-            v-slot="VFormGroupProps"
-            :required="isFieldRequired('to')"
-            :error-text="getErrorText('to', errorData)"
-            data-testid="to-token-group"
-            label="To Token"
-            class="form-wallet-add-transaction__input"
-          >
-            <VFormSelect
-              :model-value="model.to || undefined"
-              :is-error="VFormGroupProps.isFieldError"
-              placeholder="Select destination token"
-              name="to"
-              item-label="text"
-              item-value="id"
-              dropdown-absolute
-              readonly
-              :options="tokenToFormatted"
-              @update:model-value="model.to = String($event)"
-            />
-          </VFormGroup>
-        </FormCol>
-      </FormRow>
-      <FormRow>
-        <FormCol>
+
+        <FormCol col2>
           <VFormGroup
             v-slot="VFormGroupProps"
             :required="isFieldRequired('amount')"
@@ -98,6 +90,7 @@ const {
               :model-value="model.amount ? String(model.amount) : undefined"
               name="amount"
               size="large"
+              money-format
               @update:model-value="model.amount = numberFormatter($event)"
             />
           </VFormGroup>
@@ -106,7 +99,68 @@ const {
           </div>
         </FormCol>
       </FormRow>
+      <FormRow>
+        <FormCol col2>
+          <VFormGroup
+            v-slot="VFormGroupProps"
+            :required="isFieldRequired('to')"
+            :error-text="getErrorText('to', errorData)"
+            data-testid="to-token-group"
+            label="To:"
+            class="form-wallet-add-transaction__input"
+          >
+            <VFormSelect
+              :model-value="model.to || undefined"
+              :is-error="VFormGroupProps.isFieldError"
+              placeholder="Select destination token"
+              name="to"
+              item-label="text"
+              item-value="id"
+              dropdown-absolute
+              readonly
+              :options="tokenToFormatted"
+              @update:model-value="model.to = String($event)"
+            >
+              <template #item="slotProps">
+                <div class="token-option">
+                  <VImage 
+                    v-if="slotProps.item.icon" 
+                    :src="slotProps.item.icon" 
+                    :alt="slotProps.item.symbol" 
+                    class="token-option__icon"
+                  />
+                  <div class="token-option__content">
+                    {{ slotProps.item.symbol }}
+                  </div>
+                </div>
+              </template>
+            </VFormSelect>
+          </VFormGroup>
+        </FormCol>
+
+        <FormCol col2>
+          <VFormGroup
+            v-slot="VFormGroupProps"
+            label="Receive:"
+            class="form-wallet-add-transaction__input"
+          >
+            <VFormInput
+              :is-error="VFormGroupProps.isFieldError"
+              placeholder="Amount"
+              readonly
+              :model-value="receiveAmount"
+              size="large"
+            />
+          </VFormGroup>
+        </FormCol>
+      </FormRow>
     </div>
+    
+    <!-- Exchange Rate Display -->
+    <div v-if="exchangeRate && model.from" class="form-wallet-add-transaction__exchange-rate is--h6__title">
+      1 {{ selectedToken?.symbol || 'Token' }} = {{ exchangeRate.toFixed(6) }} USDC
+    </div>
+    
     <div class="form-wallet-add-transaction__footer">
       <VButton
         variant="outlined"
@@ -144,6 +198,18 @@ const {
     margin-top: 4px;
   }
 
+  &__exchange-rate {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin: 16px 0;
+    padding: 12px 16px;
+    background-color: $gray-10;
+    border-radius: 2px;
+    border: 1px solid $gray-20;
+  }
+
   &__footer {
     display: flex;
     justify-content: flex-end;
@@ -151,6 +217,30 @@ const {
     gap: 12px;
     margin-top: 20px;
     margin-bottom: 4px;
+  }
+}
+
+.token-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  &__icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  &__symbol {
+    font-weight: 600;
+    font-size: 14px;
+    color: $black;
   }
 }
 </style>

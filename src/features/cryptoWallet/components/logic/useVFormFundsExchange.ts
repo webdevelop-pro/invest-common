@@ -15,14 +15,28 @@ export function useVFormFundsExchange(
   const evmRepository = useRepositoryEvm();
   const { getEvmWalletState, exchangeTokensState } = storeToRefs(evmRepository);
 
-  const selectedToken = computed(() => (
-    getEvmWalletState.value.data?.balances?.find((item: IEvmWalletBalances) => item.address === model.from)));
-  const maxExchange = computed((): number | undefined => selectedToken.value?.amount);
-  const text = computed(() => `available ${maxExchange.value}`);
+  // Helper function to format token data
+  const formatToken = (item: any) => ({
+    ...item,
+    text: `${item.name}: ${item.symbol}`,
+    id: item.address,
+  });
 
-  const tokenToFormatted = computed(() => (
-    [{ text: 'USDC', id: '0xe2cCb3fc0153584e5C70c65849078b55597b4032' }]
-  ));
+
+  const tokenToFormatted = computed(() => {
+    const balances = getEvmWalletState.value.data?.balances || [];
+    const usdcToken = balances.find((item: any) => 
+      item.name?.toLowerCase().includes('usdc')
+    );
+    
+    return usdcToken ? [formatToken(usdcToken)] : [{
+      text: 'USDC', 
+      id: '0xe2cCb3fc0153584e5C70c65849078b55597b4032',
+      icon: '/img/tokens/usdc.svg',
+      symbol: 'USDC',
+      name: 'USD Coin'
+    }];
+  });
 
   const errorData = computed(() => (exchangeTokensState.value.error as any)?.data?.responseJson);
   const fieldsPaths = ['from', 'to', 'amount', 'wallet_id'];
@@ -78,6 +92,26 @@ export function useVFormFundsExchange(
 
   const isDisabledButton = computed(() => (!isValid.value || exchangeTokensState.value.loading));
 
+  const selectedToken = computed(() => (
+    getEvmWalletState.value.data?.balances?.find((item: IEvmWalletBalances) => item.address === model.from)));
+  const maxExchange = computed((): number | undefined => selectedToken.value?.amount);
+  const text = computed(() => `available ${maxExchange.value}`);
+
+  const receiveAmount = computed(() => {
+    console.log('model.amount', model.amount);
+    console.log('selectedToken.value?.price_per_usd', selectedToken.value);
+    if (!model.amount || !selectedToken.value?.price_per_usd) return undefined;
+    const amount = Number(model.amount);
+    const pricePerUsd = Number(selectedToken.value.price_per_usd);
+    console.log('amount', (amount * pricePerUsd).toFixed(6));
+    return (amount * pricePerUsd).toFixed(6);
+  });
+
+  const exchangeRate = computed(() => {
+    if (!selectedToken.value?.price_per_usd) return undefined;
+    return Number(selectedToken.value.price_per_usd);
+  });
+
   const saveHandler = async () => {
     onValidate();
     if (!isValid.value) {
@@ -105,26 +139,33 @@ export function useVFormFundsExchange(
     if (model.wallet_id) model.wallet_id = getEvmWalletState.value.data?.id;
   }, { immediate: true });
 
-  const tokenFormatted = computed(() => {
-    const balances = getEvmWalletState.value.data?.balances || [];
+  // Helper function to get unique tokens from balances
+  const getUniqueTokens = (balances: any[], filterFn?: (item: any) => boolean) => {
     const uniqueTokens = new Map();
+    const filteredBalances = filterFn ? balances.filter(filterFn) : balances;
     
-    balances.forEach((item: any) => {
+    filteredBalances.forEach((item: any) => {
       const key = `${item.name}:${item.symbol}`;
       if (!uniqueTokens.has(key)) {
-        uniqueTokens.set(key, {
-          text: `${item.name}: ${item.symbol}`,
-          id: `${item.address}`,
-        });
+        uniqueTokens.set(key, formatToken(item));
       }
     });
     
     return Array.from(uniqueTokens.values());
-  });
+  };
 
-  const tokenLastItem = computed(() => (
-    tokenFormatted.value[0] || null
-  ));
+  const tokenFormatted = computed(() => 
+    getUniqueTokens(getEvmWalletState.value.data?.balances || [])
+  );
+
+  const tokensFromFormatted = computed(() => 
+    getUniqueTokens(
+      getEvmWalletState.value.data?.balances || [],
+      (item: any) => !item.name?.toLowerCase().includes('usdc')
+    )
+  );
+
+  const tokenLastItem = computed(() => tokenFormatted.value[0] || null);
 
   watch(() => tokenFormatted.value, () => {
     if (!model.from) model.from = String(tokenLastItem.value?.id || '');
@@ -143,6 +184,7 @@ export function useVFormFundsExchange(
     schemaExchangeTransaction,
     tokenFormatted,
     tokenToFormatted,
+    tokensFromFormatted,
     numberFormatter,
     exchangeTokensState,
     
@@ -153,5 +195,8 @@ export function useVFormFundsExchange(
     getOptions,
     getReferenceType,
     scrollToError,
+    receiveAmount,
+    exchangeRate,
+    selectedToken,
   };
 }

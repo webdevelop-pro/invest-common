@@ -12,8 +12,8 @@ const testWalletData = {
   pending_outgoing_balance: 0,
   address: '0x1234567890abcdef',
   balances: [
-    { address: '0xtoken1', amount: 500, symbol: 'USDC', name: 'USD Coin' },
-    { address: '0xtoken2', amount: 1000, symbol: 'ETH', name: 'Ethereum' },
+    { address: '0xtoken1', amount: 500, symbol: 'USDC', name: 'USD Coin', price_per_usd: 1.0 },
+    { address: '0xtoken2', amount: 1000, symbol: 'ETH', name: 'Ethereum', price_per_usd: 0.0003 },
   ],
 };
 
@@ -52,13 +52,37 @@ describe('useVFormFundsExchange', () => {
   it('should compute properties correctly', () => {
     const { tokenFormatted, tokenToFormatted, text } = useVFormFundsExchange(mockEmitClose);
 
-    expect(tokenFormatted.value).toEqual([
-      { text: 'USD Coin: USDC', id: '0xtoken1' },
-      { text: 'Ethereum: ETH', id: '0xtoken2' },
-    ]);
+    expect(tokenFormatted.value).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          text: 'USD Coin: USDC',
+          id: '0xtoken1',
+          address: '0xtoken1',
+          amount: 500,
+          symbol: 'USDC',
+          name: 'USD Coin',
+          price_per_usd: 1.0
+        }),
+        expect.objectContaining({
+          text: 'Ethereum: ETH',
+          id: '0xtoken2',
+          address: '0xtoken2',
+          amount: 1000,
+          symbol: 'ETH',
+          name: 'Ethereum',
+          price_per_usd: 0.0003
+        })
+      ])
+    );
     
     expect(tokenToFormatted.value).toEqual([
-      { text: 'USDC', id: '0xe2cCb3fc0153584e5C70c65849078b55597b4032' }
+      expect.objectContaining({
+        text: 'USDC',
+        id: '0xe2cCb3fc0153584e5C70c65849078b55597b4032',
+        icon: '/img/tokens/usdc.svg',
+        symbol: 'USDC',
+        name: 'USD Coin'
+      })
     ]);
     
     expect(text.value).toBe('available 500');
@@ -117,13 +141,32 @@ describe('useVFormFundsExchange', () => {
     expect(errorData.value).toBeUndefined();
   });
 
-  it('should compute tokenLastItem correctly', () => {
+  it('should compute tokenFormatted correctly', () => {
     const { tokenFormatted } = useVFormFundsExchange(mockEmitClose);
     
-    expect(tokenFormatted.value[0]).toEqual({
-      text: 'USD Coin: USDC',
-      id: '0xtoken1'
-    });
+    expect(tokenFormatted.value).toHaveLength(2);
+    expect(tokenFormatted.value).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          text: 'USD Coin: USDC',
+          id: '0xtoken1',
+          address: '0xtoken1',
+          amount: 500,
+          symbol: 'USDC',
+          name: 'USD Coin',
+          price_per_usd: 1.0
+        }),
+        expect.objectContaining({
+          text: 'Ethereum: ETH',
+          id: '0xtoken2',
+          address: '0xtoken2',
+          amount: 1000,
+          symbol: 'ETH',
+          name: 'Ethereum',
+          price_per_usd: 0.0003
+        })
+      ])
+    );
   });
 
   it('should compute maxExchange from selectedFromToken', () => {
@@ -133,5 +176,24 @@ describe('useVFormFundsExchange', () => {
     
     const { text } = useVFormFundsExchange(mockEmitClose);
     expect(text.value).toBe('available 500');
+  });
+
+  it('should compute exchangeRate correctly', () => {
+    const { model, exchangeRate, selectedToken } = useVFormFundsExchange(mockEmitClose);
+    
+    model.from = '0xtoken1';
+    expect(exchangeRate.value).toBe(1.0);
+    expect(selectedToken.value?.symbol).toBe('USDC');
+    
+    model.from = '0xtoken2';
+    expect(exchangeRate.value).toBe(0.0003);
+    expect(selectedToken.value?.symbol).toBe('ETH');
+  });
+
+  it('should return undefined exchangeRate when no token selected', () => {
+    const { model, exchangeRate } = useVFormFundsExchange(mockEmitClose);
+    
+    model.from = '';
+    expect(exchangeRate.value).toBeUndefined();
   });
 });
