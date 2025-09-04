@@ -54,16 +54,16 @@ const {
               :options="tokenFormatted"
               @update:model-value="model.token = String($event)"
             >
-              <template #item="{ item }">
+              <template #item="slotProps">
                 <div class="token-option">
                   <VImage 
-                    v-if="item.icon" 
-                    :src="item.icon" 
-                    :alt="item.symbol" 
+                    v-if="slotProps.item.icon" 
+                    :src="slotProps.item.icon" 
+                    :alt="slotProps.item.symbol" 
                     class="token-option__icon"
                   />
                   <div class="token-option__content">
-                    {{ item.symbol }}
+                    {{ slotProps.item.symbol }}
                   </div>
                 </div>
               </template>
@@ -96,14 +96,14 @@ const {
       <FormRow>
         <FormCol>
           <VFormGroup
-            v-slot="{ isFieldError }"
+            v-slot="VFormGroupProps"
             :required="isFieldRequired('to')"
             :error-text="getErrorText('to', errorData)"
             label="Wallet address where to send"
             class="form-wallet-add-transaction__input"
           >
             <VFormInput
-              :is-error="isFieldError"
+              :is-error="VFormGroupProps.isFieldError"
               placeholder="Address"
               :model-value="model.to ? String(model.to) : undefined"
               name="to"
