@@ -17,7 +17,7 @@ import { EvmTransactionTypes } from 'InvestCommon/data/evm/evm.types';
 export const EVM_WALLET_TAB_INFO = {
   title: 'Crypto Wallet',
   text: `
-    Crypto wallet statuses and transactions
+    Modern, simple, user-friendly "hot wallet" for managing your REAL WORLD ASSETS. It allows you to not only send, receive, and store RWA tokens but also to beautifully display and manage your crypto portfolio. Its real power lies in its ability to connect to world assets and interact directly with other marketplaces, decentralized finance (DeFi) platforms for swapping tokens or earning yield. In essence, we simplifies the complex process DeFI and TradeFI into a clean interface, making it easy for anyone to securely navigate the decentralized web
   `,
 };
 

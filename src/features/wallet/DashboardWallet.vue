@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { defineAsyncComponent, onBeforeMount } from 'vue';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
-import DashboardTabsTopInfo from '@/views/Dashboard/components/DashboardTabsTopInfo.vue';
+import DashboardTabsTopInfo from 'InvestCommon/features/dashboard/components/DashboardTabsTopInfo.vue';;
 import { storeToRefs } from 'pinia';
 import DashboardWalletBankAccounts from 'InvestCommon/features/wallet/DashboardWalletBankAccounts.vue';
 import DashboardWalletTransactions from 'InvestCommon/features/wallet/DashboardWalletTransactions.vue';

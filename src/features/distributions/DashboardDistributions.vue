@@ -4,7 +4,7 @@ import {
 } from 'vue';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
-import DashboardTabsTopInfo from '@/views/Dashboard/components/DashboardTabsTopInfo.vue';
+import DashboardTabsTopInfo from 'InvestCommon/features/dashboard/components/DashboardTabsTopInfo.vue';;
 import { storeToRefs } from 'pinia';
 import DashboardDistributionsSummary from './components/DashboardDistributionsSummary.vue';
 import { useRepositoryDistributions } from 'InvestCommon/data/distributions/distributions.repository';

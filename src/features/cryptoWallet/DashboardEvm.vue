@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { defineAsyncComponent } from 'vue';
-import DashboardTabsTopInfo from '@/views/Dashboard/components/DashboardTabsTopInfo.vue';
+import DashboardTabsTopInfo from 'InvestCommon/features/dashboard/components/DashboardTabsTopInfo.vue';
 import DashboardEvmWalletTokens from './components/DashboardEvmWalletTokens.vue';
 import { useDashboardEvm, EVM_WALLET_TAB_INFO } from './logic/useDashboardEvm';
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { urlOffers } from 'InvestCommon/domain/config/links';
-import DashboardTabsTopInfo from '@/views/Dashboard/components/DashboardTabsTopInfo.vue';
+import DashboardTabsTopInfo from 'InvestCommon/features/dashboard/components/DashboardTabsTopInfo.vue';;
 import { storeToRefs } from 'pinia';
 import VTableDefault from 'InvestCommon/shared/components/VTableDefault.vue';
 import VTablePortfolioItem from './components/VTablePortfolioItem.vue';

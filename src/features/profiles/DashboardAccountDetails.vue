@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import DashboardTabsTopInfo from '@/views/Dashboard/components/DashboardTabsTopInfo.vue';
+import DashboardTabsTopInfo from 'InvestCommon/features/dashboard/components/DashboardTabsTopInfo.vue';;
 import { storeToRefs } from 'pinia';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { PROFILE_TYPES } from 'InvestCommon/domain/config/enums/profileTypes';
