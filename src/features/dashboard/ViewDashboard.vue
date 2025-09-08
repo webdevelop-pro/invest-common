@@ -5,7 +5,7 @@ import DashboardTopInfo from './components/DashboardTopInfo.vue';
 import VPageTopInfoAndTabs from 'InvestCommon/shared/components/VPageTopInfoAndTabs.vue';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { storeToRefs } from 'pinia';
-import { computed, PropType } from 'vue';
+import { computed, PropType, watch, onMounted, nextTick, type Component } from 'vue';
 import {
   ROUTE_DASHBOARD_PORTFOLIO, ROUTE_DASHBOARD_ACCOUNT, ROUTE_DASHBOARD_WALLET,
   ROUTE_DASHBOARD_DISTRIBUTIONS, ROUTE_DASHBOARD_EVMWALLET,
@@ -16,6 +16,7 @@ import DashboardAccountDetails from 'InvestCommon/features/profiles/DashboardAcc
 import DashboardWallet from 'InvestCommon/features/wallet/DashboardWallet.vue';
 import DashboardEvm from 'InvestCommon/features/cryptoWallet/DashboardEvm.vue';
 import DashboardDistributions from 'InvestCommon/features/distributions/DashboardDistributions.vue';
+import { useRoute } from 'vue-router';
 
 defineProps({
   tab: {
@@ -26,7 +27,11 @@ defineProps({
 });
 
 const globalLoader = useGlobalLoader();
-globalLoader.hide();
+onMounted(() => {
+  globalLoader.hide();
+});
+
+const route = useRoute();
 
 const profilesStore = useProfilesStore();
 const { selectedUserProfileId } = storeToRefs(profilesStore);
@@ -59,6 +64,25 @@ const tabs = computed(() => ({
     to: { name: ROUTE_DASHBOARD_DISTRIBUTIONS, params: { profileId: selectedUserProfileId.value } },
   },
 }) as const);
+
+const tabsList = computed(() => Object.values(tabs.value));
+
+const tabComponents: Record<DashboardTabTypes, Component> = {
+  [DashboardTabTypes.portfolio]: DashboardPortfolio,
+  [DashboardTabTypes.acount]: DashboardAccountDetails,
+  [DashboardTabTypes.wallet]: DashboardWallet,
+  [DashboardTabTypes.evmwallet]: DashboardEvm,
+  [DashboardTabTypes.distributions]: DashboardDistributions,
+};
+
+watch(
+  () => route.path,
+  async () => {
+    await nextTick();
+    globalLoader.hide();
+  },
+);
+
 </script>
 
 <template>
@@ -72,29 +96,11 @@ const tabs = computed(() => ({
     </template>
     <template #tabs-content>
       <VTabsContent
-        :value="tabs.portfolio.value"
+        v-for="item in tabsList"
+        :key="item.value"
+        :value="item.value"
       >
-        <DashboardPortfolio />
-      </VTabsContent>
-      <VTabsContent
-        :value="tabs.acount.value"
-      >
-        <DashboardAccountDetails />
-      </VTabsContent>
-      <VTabsContent
-        :value="tabs.wallet.value"
-      >
-        <DashboardWallet />
-      </VTabsContent>
-      <VTabsContent
-        :value="tabs.evmwallet.value"
-      >
-        <DashboardEvm />
-      </VTabsContent>
-      <VTabsContent
-        :value="tabs.distributions.value"
-      >
-        <DashboardDistributions />
+        <component :is="tabComponents[item.value]" />
       </VTabsContent>
     </template>
   </VPageTopInfoAndTabs>

@@ -45,7 +45,7 @@ export class EvmWalletFormatter {
   }
 
   get currentBalance() {
-    return Number(this.data.balance) * 0.1 || 0;
+    return Number(this.data.balance) || 0;
   }
 
   get totalBalance() {

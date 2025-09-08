@@ -92,6 +92,7 @@ export interface IEvmTransactionDataResponse {
   transaction_tx: string;
   created_at: string;
   updated_at: string;
+  address?: string;
 }
 
 export interface IEvmTransactionDataFormatted extends IEvmTransactionDataResponse {

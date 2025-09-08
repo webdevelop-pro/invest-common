@@ -34,8 +34,7 @@ const isLoading = computed(() => (getUserState.value.loading || getProfileByIdSt
             width="250px"
             class="dashboard-top-info__title-skeleton"
           />
-          <span>{{ userSessionTraits?.first_name }}
-          </span>
+          <span v-else>{{ userSessionTraits?.first_name }}</span>
         </div>
       </div>
       <div class="dashboard-top-info__select-profile">

@@ -81,7 +81,6 @@ defineProps({
 .v-table-wallet-tokens-item {
 
   &__table-amount {
-    text-align: right;
     color: $black;
   }
 
@@ -113,7 +112,7 @@ defineProps({
   &__link {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: end;
 
     a {
       display: flex;

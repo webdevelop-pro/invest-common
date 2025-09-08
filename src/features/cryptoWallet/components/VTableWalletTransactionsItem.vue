@@ -44,9 +44,14 @@ const { selectedUserProfileId } = storeToRefs(profilesStore);
           fit="cover"
           class="v-table-wallet-transactions-item__asset-icon"
         />
-        <span class="v-table-wallet-transactions-item__asset-symbol">
+        <a
+          v-if="data?.address"
+          :href="`${env.CRYPTO_WALLET_SCAN_URL}/token/${data?.address}`"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           {{ data?.symbol }}
-        </span>
+        </a>
       </div>
     </VTableCell>
     
