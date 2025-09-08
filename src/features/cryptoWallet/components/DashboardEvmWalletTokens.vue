@@ -25,6 +25,23 @@ const emit = defineEmits<{
   (e: 'click', type: EvmTransactionTypes): void,
 }>();
 
+const transactionsTableHeader = [
+  { text: 'Date' },
+  { text: 'Token' },
+  { text: 'Amount' },
+  { text: 'Investment ID' },
+  { text: 'Status' },
+  { text: 'Transaction TX/Network' },
+];
+
+const balanceTableHeader = [
+  { text: 'Icon' },
+  { text: 'Name' },
+  { text: 'Symbol' },
+  { text: 'Amount' },
+  { text: 'Network link' },
+];
+
 const {
   getEvmWalletState,
   tableOptions,
@@ -106,10 +123,11 @@ const {
       <VTableDefault
         class="investment-documents__table"
         size="small"
+        :header="balanceTableHeader"
         :data="tableOptions || []"
         :loading="isSkeleton && !isError || isLoadingNotificationWallet"
         :loading-row-length="5"
-        :colspan="5"
+        :colspan="balanceTableHeader.length"
       >
         <VTableWalletTokensItem
           v-for="(item, index) in tableOptions"
@@ -136,10 +154,11 @@ const {
       <VTableDefault
         class="investment-documents__table"
         size="small"
+        :header="transactionsTableHeader"
         :data="transactionsOptions || []"
         :loading="isSkeleton && !isError || isLoadingNotificationTransaction"
         :loading-row-length="5"
-        :colspan="5"
+        :colspan="transactionsTableHeader.length"
       >
         <VTableWalletTransactionsItem
           v-for="(item, index) in transactionsOptions"

@@ -84,6 +84,9 @@ export interface IEvmTransactionDataResponse {
   investment_id: number | null;
   type: EvmTransactionTypes;
   amount: string;
+  symbol?: string;
+  name?: string;
+  icon?: string;
   network: string;
   status: EvmTransactionStatusTypes;
   transaction_tx: string;

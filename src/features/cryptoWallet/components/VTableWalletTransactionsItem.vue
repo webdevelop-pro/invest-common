@@ -5,6 +5,10 @@ import VBadge from 'UiKit/components/Base/VBadge/VBadge.vue';
 import externalLink from 'UiKit/assets/images/external-link.svg';
 import env from 'InvestCommon/domain/config/env';
 import { IEvmTransactionDataFormatted } from 'InvestCommon/data/evm/evm.types';
+import { ROUTE_INVESTMENT_DOCUMENTS } from 'InvestCommon/domain/config/enums/routes';
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
+import { storeToRefs } from 'pinia';
+import VImage from 'UiKit/components/Base/VImage/VImage.vue';
 
 interface Props {
   data?: IEvmTransactionDataFormatted;
@@ -12,6 +16,9 @@ interface Props {
 }
 
 defineProps<Props>();
+
+const profilesStore = useProfilesStore();
+const { selectedUserProfileId } = storeToRefs(profilesStore);
 </script>
 
 <template>
@@ -26,20 +33,45 @@ defineProps<Props>();
     </VTableCell>
     
     <VTableCell>
+      <div
+        v-if="data?.symbol"
+        class="v-table-wallet-transactions-item__asset"
+      >
+        <VImage
+          v-if="data?.icon"
+          :src="data.icon"
+          :alt="data?.symbol"
+          fit="cover"
+          class="v-table-wallet-transactions-item__asset-icon"
+        />
+        <span class="v-table-wallet-transactions-item__asset-symbol">
+          {{ data?.symbol }}
+        </span>
+      </div>
+    </VTableCell>
+    
+    <VTableCell>
       <VBadge
         :color="data?.tagColor"
         size="small"
       >
-        {{ data?.typeFormatted }}
+        <span class="is--h6__title">
+          {{ data?.amountFormatted }}
+        </span>
       </VBadge>
     </VTableCell>
     
     <VTableCell>
-      {{ data?.amountFormatted }}
-    </VTableCell>
-    
-    <VTableCell>
-      {{ data?.networkFormatted }}
+      <router-link
+        v-if="data?.investment_id"
+        :to="{
+          name: ROUTE_INVESTMENT_DOCUMENTS,
+          params: { profileId: selectedUserProfileId, id: data?.investment_id }
+        }"
+        class="is--link-1 v-table-wallet-transactions-item__link-investment"
+      >
+        {{ data?.investment_id }}
+      </router-link>
     </VTableCell>
     
     <VTableCell>
@@ -68,6 +100,9 @@ defineProps<Props>();
             class="v-table-wallet-transactions-item__link-icon"
           />
         </a>
+        <span class="is--small-2">
+          {{ data?.networkFormatted }}
+        </span>
       </div>
     </VTableCell>
   </VTableRow>
@@ -79,8 +114,26 @@ defineProps<Props>();
 .v-table-wallet-transactions-item {
   &__link {
     display: flex;
-    align-items: center;
+    align-items: end;
     justify-content: end;
+    flex-direction: column;
+  }
+
+  &__asset {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__asset-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  &__asset-symbol {
+    color: $gray-80;
   }
 
   &__hash-link {
@@ -93,6 +146,15 @@ defineProps<Props>();
     width: 14px;
     height: 16px;
     color: $primary;
+  }
+
+  &__link-investment {
+    color: $gray-80;
+    text-decoration: none;
+
+    &:hover {
+      color: $primary !important;
+    }
   }
 }
 </style>
