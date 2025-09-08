@@ -24,7 +24,7 @@ export const oryResponseHandling = (response: IAuthFlow) => {
     toast({
        title: 'Account Already Exists',
        description: h('div', {
-        innerHTML: `Sorry, your email ${duplicateIdentifier} already used, do you want to <a href="/signin?email=${encodeURIComponent(duplicateIdentifier)}" class="underline text-blue-600 hover:text-blue-800">sign in</a>?`
+        innerHTML: `Sorry, your email ${duplicateIdentifier} already used, do you want to <a href="/signin?email=${encodeURIComponent(duplicateIdentifier)}">sign in</a>?`
       }),
        variant: 'info',
        duration: 8000,

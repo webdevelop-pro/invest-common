@@ -5,6 +5,7 @@ import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 import { toasterErrorHandlingAnalytics } from './toasterErrorHandlingAnalytics';
 import { toasterErrorHandling } from './toasterErrorHandling';
+import { h } from 'vue';
 
 type FlowType = 'login' | 'registration' | 'settings' | 'recovery' | 'verification';
 
@@ -36,8 +37,20 @@ export const oryErrorHandling = async (
     return;
   }
 
+  if (uiError?.text?.toLowerCase().includes('account with the same identifier')) {
+    toast({
+           title: 'Account Already Exists',
+           description: h('div', {
+            innerHTML: `Sorry, your email already used, do you want to <a href="/signin">sign in</a>?`
+          }),
+           variant: 'error',
+           duration: 8000,
+    });
+    return;
+  }
+
   if (!responseJson?.error?.id) {
-    toasterErrorHandlingAnalytics(error, comment);
+    toasterErrorHandling(error, comment);
     return;
   }
 
