@@ -110,7 +110,7 @@ watch(() => getOfferOneState.value.data, (newValue) => {
   if (newValue) {
     offer.value = newValue;
   }
-});
+}, { immediate: true });
 watch(() => offer.value?.id, () => {
   if (offer.value?.id !== 0) {
     offerRepository.getOfferComments(offer.value?.id);

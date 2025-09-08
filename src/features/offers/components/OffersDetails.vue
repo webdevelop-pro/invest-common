@@ -234,7 +234,7 @@ useGlobalLoader().hide();
     flex-shrink: 0;
   }
 
-  &__social-links {
+  & &__social-links {
       color: $gray-70;
       gap: 10px;
       width: auto;

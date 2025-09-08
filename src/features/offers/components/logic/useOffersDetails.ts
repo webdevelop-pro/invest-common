@@ -7,48 +7,9 @@ import type { IOfferFormatted } from 'InvestCommon/data/offer/offer.types';
 import {
   urlHome, urlOffers, 
 } from 'InvestCommon/domain/config/links';
-import linkedinIcon from 'UiKit/assets/social/linkedin.svg?component';
-import facebookIcon from 'UiKit/assets/social/facebook.svg?component';
-import instagramIcon from 'UiKit/assets/social/instagram.svg?component';
-import xIcon from 'UiKit/assets/social/x-twitter.svg?component';
-import githubIcon from 'UiKit/assets/social/github.svg?component';
-import telegramIcon from 'UiKit/assets/social/telegram.svg?component';
+import { socials } from 'UiKit/utils/socials';
 
 const { FILER_URL } = env;
-
-// Social media configuration
-const socialMediaConfig = {
-  linkedin: {
-    icon: linkedinIcon,
-    iconName: 'linkedin',
-    name: 'LinkedIn',
-  },
-  facebook: {
-    icon: facebookIcon,
-    iconName: 'facebook',
-    name: 'Facebook',
-  },
-  twitter: {
-    icon: xIcon,
-    iconName: 'twitter',
-    name: 'Twitter',
-  },
-  github: {
-    icon: githubIcon,
-    iconName: 'github',
-    name: 'GitHub',
-  },
-  instagram: {
-    icon: instagramIcon,
-    iconName: 'instagram',
-    name: 'Instagram',
-  },
-  telegram: {
-    icon: telegramIcon,
-    iconName: 'telegram',
-    name: 'Telegram',
-  },
-};
 
 export function useOffersDetails(offerRef: Ref<IOfferFormatted | undefined>) {
   const { frontmatter } = useData();
@@ -99,10 +60,12 @@ export function useOffersDetails(offerRef: Ref<IOfferFormatted | undefined>) {
   const socialLinks = computed(() => {
     if (!offerRef.value) return [];
     
-    return Object.entries(socialMediaConfig)
+    return Object.entries(socials)
       .filter(([key]) => offerRef.value?.[key as keyof typeof offerRef.value])
       .map(([key, config]) => ({
-        ...config,
+        icon: config.icon,
+        iconName: config.iconName,
+        name: config.name,
         href: offerRef.value?.[key as keyof typeof offerRef.value] as string,
       }));
   });
