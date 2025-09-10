@@ -14,14 +14,14 @@ const props = defineProps({
   errorData: Object,
   schemaBackend: Object as PropType<JSONSchemaType<FormModelPlanInformation> | undefined>,
   loading: Boolean,
-  showDocument: Boolean,
+  isEditMode: Boolean,
 });
 
 const modelDataComputed = computed(() => props.modelData);
 const errorDataComputed = computed(() => props.errorData);
 const schemaBackendComputed = computed(() => props.schemaBackend);
 const loadingComputed = computed(() => props.loading);
-const showDocumentComputed = computed(() => props.showDocument);
+const isEditModeComputed = computed(() => props.isEditMode);
 
 const {
   model,
@@ -35,7 +35,7 @@ const {
 } = useVFormPartialPlanInformation(
   modelDataComputed,
   schemaBackendComputed,
-  showDocumentComputed,
+  isEditModeComputed,
 );
 
 defineExpose({
@@ -112,7 +112,7 @@ defineExpose({
         </VFormGroup>
       </FormCol>
     </FormRow>
-    <FormRow v-if="showDocumentComputed">
+    <FormRow v-if="!isEditModeComputed">
       <FormCol>
         <VFormGroup
           v-slot="VFormGroupProps"

@@ -5,6 +5,7 @@ import { RouteLocationRaw, useRouter } from 'vue-router';
 
 const props = defineProps({
   loading: Boolean,
+  readonly: Boolean,
   routerPush: {
     type: Object as PropType<RouteLocationRaw>,
     required: true,
@@ -23,6 +24,7 @@ const onClick = () => {
   <ReadOnlyForm
     :data="info"
     :loading="loading"
+    :readonly="readonly"
     @edit="onClick"
   />
 </template>

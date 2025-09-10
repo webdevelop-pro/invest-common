@@ -161,6 +161,7 @@ const formSections = computed(() => {
     },
     {
       id: 'controller',
+      readonly: true,
       title: selectedUserProfileType.value === PROFILE_TYPES.TRUST ? 'Grantor Information' : 'Business Controller Information',
       route: ROUTE_DASHBOARD_BUSINESS_CONTROLLER,
       data: [
@@ -225,6 +226,7 @@ const ACCOUNT_TAB_INFO = {
           params: { profileId: selectedUserProfileId },
           query: section.query,
         }"
+        :readonly="section.readonly"
         :info="{ title: section.title, data: section.data }"
       />
     </div>

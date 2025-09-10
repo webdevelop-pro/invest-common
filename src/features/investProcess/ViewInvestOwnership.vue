@@ -144,6 +144,7 @@ watch(selectedUserProfileType, async (newType, oldType) => {
                   :loading="isLoading"
                   :schema-backend="schemaBackend || {}"
                   :error-data="errorData || {}"
+                  is-edit-mode
                 />
               </template>
               
@@ -156,6 +157,7 @@ watch(selectedUserProfileType, async (newType, oldType) => {
                 :loading="isLoading"
                 :schema-backend="schemaBackend || {}"
                 :error-data="errorData || {}"
+                is-edit-mode
               />
               <VFormProfileSDIRA
                 v-else-if="selectedUserProfileType === PROFILE_TYPES.SDIRA"
@@ -165,6 +167,7 @@ watch(selectedUserProfileType, async (newType, oldType) => {
                 :loading="isLoading"
                 :schema-backend="schemaBackend || {}"
                 :error-data="errorData || {}"
+                is-edit-mode
               />
               <VFormProfileSolo
                 v-else-if="selectedUserProfileType === PROFILE_TYPES.SOLO401K"
@@ -174,6 +177,7 @@ watch(selectedUserProfileType, async (newType, oldType) => {
                 :loading="isLoading"
                 :schema-backend="schemaBackend || {}"
                 :error-data="errorData || {}"
+                is-edit-mode
               />
               <VFormProfileTrust
                 v-else-if="selectedUserProfileType === PROFILE_TYPES.TRUST"
@@ -183,6 +187,7 @@ watch(selectedUserProfileType, async (newType, oldType) => {
                 :loading="isLoading"
                 :schema-backend="schemaBackend || {}"
                 :error-data="errorData || {}"
+                is-edit-mode
               />
             </div>
           </Transition>

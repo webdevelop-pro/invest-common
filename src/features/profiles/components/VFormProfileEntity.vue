@@ -10,8 +10,7 @@ defineProps({
   errorData: Object,
   schemaBackend: Object,
   loading: Boolean,
-  showDocument: Boolean,
-  showSSN: Boolean,
+  isEditMode: Boolean,
 });
 
 // pass props directly in template
@@ -50,7 +49,7 @@ defineExpose({
       :loading="loading"
       :schema-backend="schemaBackend"
       :error-data="errorData"
-      :show-ssn="showSSN"
+      :is-edit-mode="isEditMode"
     />
     <VFormPartialEntityInformation
       ref="entityInfoFormChild"
@@ -58,7 +57,7 @@ defineExpose({
       :loading="loading"
       :schema-backend="schemaBackend"
       :error-data="errorData"
-      :show-document="showDocument"
+      :is-edit-mode="isEditMode"
     />
     <VFormPartialBusinessController
       ref="businessControllerFormChild"
@@ -67,6 +66,7 @@ defineExpose({
       :loading="loading"
       :schema-backend="schemaBackend"
       :error-data="errorData"
+      :is-edit-mode="isEditMode"
     />
     <VFormPartialBeneficialOwnership
       ref="beneficialOwnershipFormChild"
@@ -74,6 +74,7 @@ defineExpose({
       :loading="loading"
       :schema-backend="schemaBackend"
       :error-data="errorData"
+      :is-edit-mode="isEditMode"
     />
   </div>
 </template>

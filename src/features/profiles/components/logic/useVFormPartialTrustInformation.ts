@@ -22,7 +22,7 @@ export interface FormModelTrustInformation {
 export const useVFormPartialTrustInformation = (
   modelData: ComputedRef<FormModelTrustInformation | undefined>,
   schemaBackend: ComputedRef<JSONSchemaType<FormModelTrustInformation> | undefined>,
-  showDocument: ComputedRef<boolean>,
+  isEditMode: ComputedRef<boolean>,
 ) => {
   let modelLocal = reactive<FormModelTrustInformation>({
     ein: modelData.value?.ein,
@@ -37,7 +37,7 @@ export const useVFormPartialTrustInformation = (
     if (modelLocal.is_use_ein && modelLocal.is_use_ein === 'Yes') {
       baseRequired.push('ein');
     }
-    if (showDocument.value) {
+    if (!isEditMode.value) {
       baseRequired.push('trust_agreement_id');
     }
     return baseRequired;

@@ -12,8 +12,7 @@ const props = defineProps({
   errorData: Object,
   schemaBackend: Object as PropType<JSONSchemaType<unknown> | undefined>,
   loading: Boolean,
-  showDocument: Boolean,
-  showSSN: Boolean,
+  isEditMode: Boolean,
 });
 
 const modelDataComputed = computed(() => props.modelData);
@@ -55,7 +54,7 @@ defineExpose({
       :loading="loadingComputed"
       :schema-backend="schemaBackendComputed"
       :error-data="errorDataComputed"
-      :show-ssn="showSSN"
+      :is-edit-mode="isEditMode"
     />
     <VFormPartialTrustInformation
       ref="trustInfoFormChild"
@@ -63,7 +62,7 @@ defineExpose({
       :loading="loadingComputed"
       :schema-backend="schemaBackendComputed"
       :error-data="errorDataComputed"
-      :show-document="showDocument"
+      :is-edit-mode="isEditMode"
     />
     <VFormPartialBusinessController
       ref="businessControllerFormChild"
@@ -73,6 +72,7 @@ defineExpose({
       :loading="loadingComputed"
       :schema-backend="schemaBackendComputed"
       :error-data="errorDataComputed"
+      :is-edit-mode="isEditMode"
     />
     <VFormPartialBeneficialOwnership
       ref="beneficialOwnershipFormChild"
@@ -81,6 +81,7 @@ defineExpose({
       :loading="loadingComputed"
       :schema-backend="schemaBackendComputed"
       :error-data="errorDataComputed"
+      :is-edit-mode="isEditMode"
     />
   </div>
 </template>

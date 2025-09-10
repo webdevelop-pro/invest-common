@@ -15,14 +15,14 @@ const props = defineProps({
   errorData: Object,
   schemaBackend: Object as PropType<JSONSchemaType<FormModelTrustInformation> | undefined>,
   loading: Boolean,
-  showDocument: Boolean,
+  isEditMode: Boolean,
 });
 
 const modelDataComputed = computed(() => props.modelData);
 const errorDataComputed = computed(() => props.errorData);
 const schemaBackendComputed = computed(() => props.schemaBackend);
 const loadingComputed = computed(() => props.loading);
-const showDocumentComputed = computed(() => props.showDocument);
+const isEditModeComputed = computed(() => props.isEditMode);
 
 const {
   model,
@@ -37,7 +37,7 @@ const {
 } = useVFormPartialTrustInformation(
   modelDataComputed,
   schemaBackendComputed,
-  showDocumentComputed,
+  isEditModeComputed,
 );
 
 defineExpose({
@@ -68,6 +68,7 @@ defineExpose({
             item-label="name"
             item-value="value"
             searchable
+            :readonly="isEditMode"
             :options="optionsType"
             :loading="loadingComputed || (optionsType?.length === 0)"
             data-testid="type"
@@ -157,7 +158,7 @@ defineExpose({
         </VFormGroup>
       </FormCol>
     </FormRow>
-    <FormRow v-if="showDocumentComputed">
+    <FormRow v-if="!isEditModeComputed">
       <FormCol>
         <VFormGroup
           v-slot="VFormGroupProps"

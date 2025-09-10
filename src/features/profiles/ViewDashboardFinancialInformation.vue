@@ -36,6 +36,7 @@ const {
           :loading="isLoading"
           :schema-backend="schemaBackend"
           :error-data="errorData"
+          is-edit-mode
         />
         <VFormPartialInvestmentObjectives
           ref="investmentObjectivesFormChild"
@@ -43,6 +44,7 @@ const {
           :loading="isLoading"
           :schema-backend="schemaBackend"
           :error-data="errorData"
+          is-edit-mode
         />
         <VFormPartialUnderstandingOfRisks
           ref="understandingRisksFormChild"
@@ -50,6 +52,7 @@ const {
           :loading="isLoading"
           :error-data="errorData"
           consent-plaid
+          is-edit-mode
         />
       </div>
     </VLayoutForm>

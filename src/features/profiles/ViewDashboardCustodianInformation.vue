@@ -34,6 +34,7 @@ const {
           :schema-backend="schemaBackend"
           :error-data="errorData"
           :loading="isLoadingFields"
+          is-edit-mode
         />
       </div>
     </VLayoutForm>

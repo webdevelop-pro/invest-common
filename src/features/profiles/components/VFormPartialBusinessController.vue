@@ -17,6 +17,7 @@ const props = defineProps({
   schemaBackend: Object as PropType<JSONSchemaType<FormModelBusinessController> | undefined>,
   loading: Boolean,
   trust: Boolean,
+  isEditMode: Boolean,
 });
 
 // Create computed refs for reactive props
@@ -62,6 +63,7 @@ defineExpose({
       <FormCol>
         <VFormCheckbox
           v-model="sameData"
+          :readonly="isEditMode"
           data-testid="V-checkbox"
           class="signup-form__checkbox"
         >

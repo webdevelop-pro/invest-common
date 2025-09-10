@@ -27,7 +27,7 @@ export const useVFormPartialEntityInformation = (
   schemaBackend: ComputedRef<JSONSchemaType<FormModelEntityInformation> | undefined>,
   errorData: ComputedRef<any>,
   loading: ComputedRef<boolean>,
-  showDocument: ComputedRef<boolean> = computed(() => false),
+  isEditMode: ComputedRef<boolean> = computed(() => false),
 ) => {
   let modelLocal = reactive<FormModelEntityInformation>({
     solely_for_investing: modelData.value?.solely_for_investing || 'No',
@@ -43,7 +43,7 @@ export const useVFormPartialEntityInformation = (
 
   const required = computed(() => {
     const baseRequired = ['type', 'solely_for_investing', 'tax_exempts', 'name', 'owner_title', 'ein'];
-    if (showDocument.value) {
+    if (!isEditMode.value) {
       baseRequired.push('operating_agreement_id', 'formation_document_id', 'organization_document_id');
     }
     return baseRequired;

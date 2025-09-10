@@ -41,6 +41,7 @@ const title = props.trust ? 'Grantor Information' : 'Business Controller Informa
           :loading="isLoading"
           :schema-backend="schemaBackend"
           :error-data="errorData"
+          is-edit-mode
         />
       </div>
     </VLayoutForm>

@@ -20,7 +20,7 @@ export interface FormModelPlanInformation {
 export const useVFormPartialPlanInformation = (
   modelData: ComputedRef<FormModelPlanInformation | undefined>,
   schemaBackend: ComputedRef<JSONSchemaType<FormModelPlanInformation> | undefined>,
-  showDocument: ComputedRef<boolean>,
+  isEditMode: ComputedRef<boolean>,
 ) => {
   let modelLocal = reactive<FormModelPlanInformation>({
     name: modelData.value?.name,
@@ -33,7 +33,7 @@ export const useVFormPartialPlanInformation = (
     if (modelLocal.is_use_ein && modelLocal.is_use_ein === 'Yes') {
       baseRequired.push('ein');
     }
-    if (showDocument.value) {
+    if (!isEditMode.value) {
       baseRequired.push('plan_document_id');
     }
     return baseRequired;

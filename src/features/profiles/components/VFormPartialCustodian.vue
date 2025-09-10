@@ -12,6 +12,7 @@ const props = defineProps({
   errorData: Object,
   schemaBackend: Object,
   loading: Boolean,
+  isEditMode: Boolean,
 });
 
 const modelDataComputed = computed(() => props.modelData);
@@ -58,6 +59,7 @@ defineExpose({
             item-label="name"
             item-value="value"
             searchable
+            :readonly="isEditMode"
             :options="optionsCustodian"
             data-testid="type"
             :loading="loadingComputed || (optionsCustodian?.length === 0)"

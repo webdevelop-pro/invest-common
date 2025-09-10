@@ -39,10 +39,10 @@ const props = defineProps({
   errorData: Object,
   schemaBackend: Object,
   loading: Boolean,
-  showSSN: Boolean,
+  isEditMode: Boolean,
 });
 
-const isSsnHidden = computed(() => (props.modelData?.is_full_ssn_provided === true) && !props.showSSN);
+const isSsnHidden = computed(() => (props.modelData?.is_full_ssn_provided === true) && props.isEditMode);
 
 const schemaFrontend = computed(() => {
   const properties = {
@@ -272,7 +272,10 @@ watch(() => props.modelData, (newModelData) => {
           />
         </VFormGroup>
       </FormCol>
-      <FormCol col2>
+      <FormCol
+        v-if="!isSsnHidden" 
+        col2
+      >
         <VFormGroup
           v-slot="VFormGroupProps"
           :required="isFieldRequired('ssn')"
@@ -281,7 +284,6 @@ watch(() => props.modelData, (newModelData) => {
           data-testid="ssn-group"
         >
           <VFormInput
-            v-if="!isSsnHidden"
             :model-value="model.ssn"
             :is-error="VFormGroupProps.isFieldError"
             placeholder="XXX-XX-XXXX"
@@ -293,12 +295,6 @@ watch(() => props.modelData, (newModelData) => {
             :readonly="readOnly"
             :loading="loading"
             @update:model-value="model.ssn = $event"
-          />
-          <VFormInput
-            v-else
-            model-value="********"
-            readonly
-            size="large"
           />
         </VFormGroup>
       </FormCol>
