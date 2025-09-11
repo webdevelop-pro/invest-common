@@ -10,7 +10,9 @@ import earn from 'InvestCommon/shared/assets/images/icons/earn.svg';
 
 export const useDashboardEvmWalletTokens = () => {
   const evmRepository = useRepositoryEvm();
-  const { getEvmWalletState, isLoadingNotificationTransaction, isLoadingNotificationWallet } = storeToRefs(evmRepository);
+  const {
+    getEvmWalletState, isLoadingNotificationTransaction, isLoadingNotificationWallet,
+  } = storeToRefs(evmRepository);
 
   const tableOptions = computed(() => getEvmWalletState.value.data?.balances);
 
