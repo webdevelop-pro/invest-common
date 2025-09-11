@@ -1,9 +1,11 @@
 import {
   IProfileIndividual,
   IProfileFormatted,
+  IFormPartialBeneficialOwnershipItemFormatted,
 } from '../profiles.types';
 import { InvestKycTypes, AccreditationTypes } from 'InvestCommon/types/api/invest';
 import { PROFILE_TYPES } from 'InvestCommon/domain/config/enums/profileTypes';
+import { BeneficialsFormatter } from './beneficials.formatter';
 
 export class ProfileFormatter {
   private profile: IProfileIndividual;
@@ -91,6 +93,23 @@ export class ProfileFormatter {
     return this.profile.accreditation_status === AccreditationTypes.expired;
   }
 
+  // Beneficials formatting methods
+  get hasBeneficials() {
+    return Boolean(this.profile.data.beneficials && this.profile.data.beneficials.length > 0);
+  }
+
+  get beneficialsCount() {
+    return this.profile.data.beneficials?.length || 0;
+  }
+
+  get formattedBeneficials(): IFormPartialBeneficialOwnershipItemFormatted[] {
+    if (!this.hasBeneficials) return [];
+    
+    return this.profile.data.beneficials!.map(beneficial => 
+      new BeneficialsFormatter(beneficial).format()
+    );
+  }
+
   format(): IProfileFormatted {
     return {
       ...this.profile,
@@ -113,6 +132,12 @@ export class ProfileFormatter {
       isAccreditationInfoRequired: this.isAccreditationInfoRequired,
       isAccreditationExpired: this.isAccreditationExpired,
       isCanCallKycPlaid: this.isCanCallKycPlaid,
+      hasBeneficials: this.hasBeneficials,
+      beneficialsCount: this.beneficialsCount,
+      data: {
+        ...this.profile.data,
+        beneficials: this.formattedBeneficials,
+      },
     };
   }
 } 

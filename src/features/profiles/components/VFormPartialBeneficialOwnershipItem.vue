@@ -7,32 +7,14 @@ import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import VFormCheckbox from 'UiKit/components/Base/VForm/VFormCheckbox.vue';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import VFormCombobox from 'UiKit/components/Base/VForm/VFormCombobox.vue';
+import { IFormPartialBeneficialOwnershipItem } from 'InvestCommon/data/profiles/profiles.types';
 
-export interface FormPartialBeneficialOwnershipItem {
-  first_name: string;
-  last_name: string;
-  dob: string;
-  address1: string;
-  address2?: string;
-  city: string;
-  state: string;
-  zip_code: string;
-  country: string;
-  phone: string;
-  email: string;
-  non_us: string;
-  ssn?: string;
-  type_of_identification?: {
-    id_number: string;
-    country: string;
-  };
-}
 
-const model = defineModel<FormPartialBeneficialOwnershipItem>();
+const model = defineModel<IFormPartialBeneficialOwnershipItem>();
 const props = defineProps({
   itemIndex: Number,
   validation: Object,
-  schema: Object as PropType<JSONSchemaType<FormPartialBeneficialOwnershipItem>>,
+  schema: Object as PropType<JSONSchemaType<IFormPartialBeneficialOwnershipItem>>,
   optionsCountry: Array,
   optionsState: Array,
   trust: Boolean,

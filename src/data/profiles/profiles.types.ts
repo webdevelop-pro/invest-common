@@ -73,6 +73,30 @@ export interface ITypeOfId {
   number: string;
 }
 
+export interface IFormPartialBeneficialOwnershipItem {
+  first_name: string;
+  last_name: string;
+  dob: string;
+  address1: string;
+  address2?: string;
+  city: string;
+  state: string;
+  zip_code: string;
+  country: string;
+  phone: string;
+  email: string;
+  non_us: string;
+  ssn?: string;
+  type_of_identification?: {
+    id_number: string;
+    country: string;
+  };
+}
+
+export interface IFormPartialBeneficialOwnershipItemFormatted extends IFormPartialBeneficialOwnershipItem {
+  phoneFormatted?: string;
+}
+
 export interface IUserDataIndividual {
   first_name?: string;
   last_name?: string;
@@ -114,6 +138,8 @@ export interface IUserDataIndividual {
   full_account_name?: string;
   ein?: string;
   is_full_ssn_provided: boolean;
+  beneficials?: IFormPartialBeneficialOwnershipItem[];
+  formattedBeneficials?: IFormPartialBeneficialOwnershipItemFormatted[];
 }
 
 export interface IProfileIndividual {
@@ -292,4 +318,6 @@ export interface IProfileFormatted extends IProfileIndividual {
   isAccreditationInfoRequired: boolean;
   isAccreditationExpired: boolean;
   isCanCallKycPlaid: boolean;
+  hasBeneficials: boolean;
+  beneficialsCount: number;
 }

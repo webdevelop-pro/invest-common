@@ -5,6 +5,8 @@ import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles
 import { PROFILE_TYPES } from 'InvestCommon/domain/config/enums/profileTypes';
 import { computed } from 'vue';
 import DashboardAccountDetailsReadonlyForm from './components/DashboardAccountDetailsReadonlyForm.vue';
+import VTableBeneficialItem from './components/VTableBeneficialItem.vue';
+import VTableDefault from 'InvestCommon/shared/components/VTableDefault.vue';
 import { urlContactUs } from 'InvestCommon/domain/config/links';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { 
@@ -81,6 +83,17 @@ const financialSituation = computed(() => {
   const { accredited_investor } = profileData.value || {};
   if (!accredited_investor) return 'N/A';
   return accredited_investor?.is_accredited ? 'Accredited Investor' : 'Not Accredited Investor';
+});
+
+const beneficialsTableTitle = computed(() => {
+  if (selectedUserProfileType.value === PROFILE_TYPES.TRUST) {
+    return 'Trustees/Protectors Information';
+  }
+  return 'Beneficial Owners Information';
+});
+
+const showBeneficialsTable = computed(() => {
+  return profileData.value?.beneficials && profileData.value.beneficials.length > 0;
 });
 
 // Simplified data structure
@@ -230,6 +243,40 @@ const ACCOUNT_TAB_INFO = {
         :info="{ title: section.title, data: section.data }"
       />
     </div>
+
+    <!-- Beneficials Table Section -->
+    <div 
+      v-if="showBeneficialsTable"
+      class="dashboard-account-details__beneficials is--margin-top-40"
+    >
+      <div class="dashboard-account-details__beneficials-title is--h3__title">
+        {{ beneficialsTableTitle }}:
+      </div>
+      <VTableDefault
+        class="dashboard-account-details__beneficials-table"
+        :data="profileData?.beneficials || []"
+        :loading="getProfileByIdState.loading"
+        :loading-row-length="3"
+        :colspan="5"
+        :header="[
+          { text: 'First Name' },
+          { text: 'Last Name' },
+          { text: 'Date of Birth' },
+          { text: 'Phone Number' },
+          { text: 'Email' }
+        ]"
+      >
+        <VTableBeneficialItem
+          v-for="item in profileData?.beneficials"
+          :key="`${item.first_name}-${item.last_name}-${item.dob}`"
+          :data="item"
+        />
+        <template #empty>
+          No beneficial owners information available
+        </template>
+      </VTableDefault>
+    </div>
+
   </div>
 </template>
 
@@ -241,6 +288,18 @@ const ACCOUNT_TAB_INFO = {
 
   &__title {
     margin-bottom: 40px;
+  }
+
+  &__beneficials {
+    margin-bottom: 40px;
+  }
+
+  &__beneficials-title {
+    margin-bottom: 20px;
+  }
+
+  &__beneficials-table {
+    margin-top: 20px;
   }
 }
 </style>
