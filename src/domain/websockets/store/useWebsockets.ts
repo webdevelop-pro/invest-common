@@ -54,6 +54,7 @@ export const useDomainWebSocketStore = defineStore('domainWebsockets', () => {
         repositoryFiler.updateNotificationData(notification);
         break;
       case 'evm_transfer':
+      case 'evm_contract':
         repositoryEvm.updateNotificationData(notification);
         break;
       default:

@@ -267,5 +267,9 @@ const {
   &__button-icon {
     width: 16px;
   }
+
+  .v-table-head:last-of-type {
+    text-align: end;
+  }
 }
 </style>

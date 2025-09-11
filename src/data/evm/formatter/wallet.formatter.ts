@@ -64,14 +64,20 @@ export class EvmWalletFormatter {
     // Normalize balances to an array regardless of backend shape (array or map)
     let balancesArray: IEvmWalletBalances[] = [];
     const rawBalances: any = (this.data as any).balances;
-    balancesArray = Object.values(rawBalances).map((b: any) => ({
-      ...b,
-      address: String(b.address),
-      amount: Number(b.amount ?? 0),
-      symbol: String(b.symbol ?? ''),
-      name: b.name ? String(b.name) : undefined,
-      icon: b.icon ? String(b.icon) : undefined,
-    }));
+    balancesArray = Object.values(rawBalances)
+      .map((b: any) => ({
+        ...b,
+        address: String(b.address),
+        amount: Number(b.amount ?? 0),
+        symbol: String(b.symbol ?? ''),
+        name: b.name ? String(b.name) : undefined,
+        icon: b.icon ? String(b.icon) : undefined,
+      }))
+      // Hide zero-amount balances except USDC
+      .filter((b: IEvmWalletBalances) => {
+        const isUsdc = (b.symbol || '').toUpperCase() === 'USDC';
+        return isUsdc || (Number(b.amount) > 0);
+      });
 
     // Format transactions using the transaction formatter
     const formattedTransactions: IEvmTransactionDataFormatted[] = this.data.transactions.map(transaction => 

@@ -157,7 +157,10 @@ const {
     </div>
     
     <!-- Exchange Rate Display -->
-    <div v-if="exchangeRate && model.from" class="form-wallet-add-transaction__exchange-rate is--h6__title">
+    <div
+      v-if="exchangeRate && model.from"
+      class="form-wallet-add-transaction__exchange-rate is--h6__title"
+    >
       1 {{ selectedToken?.symbol || 'Token' }} = {{ exchangeRate.toFixed(6) }} USDC
     </div>
     

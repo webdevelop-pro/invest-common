@@ -8,6 +8,8 @@ export interface INotificationDataFields {
   funding_status?: string;
   status?: string;
   object_id?: number;
+  address?: string;
+  amount?: number;
   balance?: number;
   inc_balance?: number;
   out_balance?: number;
