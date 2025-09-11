@@ -85,7 +85,7 @@ export const useRepositoryInvestment = defineStore('repository-investment', () =
     try {
       getInvestUnconfirmedState.value.loading = true;
       getInvestUnconfirmedState.value.error = null;
-      const response = await apiClient.get('/auth/investment/unconfirmed');
+      const response = await apiClient.get(`/auth/investment/${profileId}/unconfirmed`);
       const rawData = response.data as IInvestUnconfirmed;
       
       // Format investments if data array exists
@@ -96,9 +96,9 @@ export const useRepositoryInvestment = defineStore('repository-investment', () =
         }
         : rawData;
 
-      // Find the specific investment by slug and profile ID
+      // Find the specific investment by slug
       getInvestUnconfirmedOne.value = formattedData.data?.find(
-        (investment: any) => investment?.offer?.slug === slug && Number(investment?.profile_id) === Number(profileId)
+        (investment: any) => investment?.offer?.slug === slug
       );
 
       getInvestUnconfirmedState.value.data = formattedData;
