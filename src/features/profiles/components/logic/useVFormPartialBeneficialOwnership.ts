@@ -101,7 +101,8 @@ export function useVFormPartialBeneficialOwnership(
   const schemaBackendLocal = computed(() => (
     schemaBackend.value ? structuredClone(toRaw(schemaBackend.value)) : undefined));
 
-  const fieldsPaths = ['beneficial_owners_number'];
+  // Track top-level owner count and nested items for validity
+  const fieldsPaths = ['beneficial_owners_number', 'beneficials'];
 
   const {
     model,

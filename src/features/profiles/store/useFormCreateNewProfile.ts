@@ -50,6 +50,32 @@ export const useFormCreateNewProfile = () => {
   const errorData = computed(() => setProfileState.value.error?.data?.responseJson || null);
   const schemaBackend = computed(() => getProfileByIdOptionsState.value.data || null);
 
+  // Enhanced loading state for profile switching
+  const isProfileSwitching = ref(false);
+  const previousSelectedType = ref<string>('');
+  const showSkeleton = ref(false);
+
+  // Watch for profile type changes to show loading skeleton
+  watch(
+    selectedType,
+    async (newType, oldType) => {
+      if (oldType && oldType !== newType) {
+        isProfileSwitching.value = true;
+        showSkeleton.value = true;
+
+        await nextTick();
+
+        setTimeout(() => {
+          showSkeleton.value = false;
+          isProfileSwitching.value = false;
+        }, 150);
+      }
+
+      previousSelectedType.value = newType || '';
+    },
+    { immediate: true }
+  );
+
   const childFormIsValid = computed(() => {
     if (selectedType.value.toLowerCase() === profileTypes.ENTITY) {
       return entityTypeFormRef.value?.isValid;
@@ -298,5 +324,8 @@ export const useFormCreateNewProfile = () => {
     modelData,
     schemaBackend,
     errorData,
+    isProfileSwitching,
+    previousSelectedType,
+    showSkeleton,
   };
 };

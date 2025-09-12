@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useFormCreateNewProfile } from './store/useFormCreateNewProfile';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
-import { defineAsyncComponent, ref, watch, nextTick } from 'vue';
+import { defineAsyncComponent } from 'vue';
 import VLayoutForm from 'InvestCommon/shared/layouts/VLayoutForm.vue';
 import VFormCreateProfileSelectType from './components/VFormCreateProfileSelectType.vue';
 import VFormPartialPersonalInformationSkeleton from 'InvestCommon/shared/components/forms/VFormPartialPersonalInformationSkeleton.vue';
@@ -30,32 +30,10 @@ const formComposable = useFormCreateNewProfile();
 const {
   backButtonText, breadcrumbs, isLoading, isDisabledButton,
   modelData, PROFILE_TYPES, selectedType, schemaBackend, errorData,
+  showSkeleton,
 } = formComposable;
 
-// Enhanced loading state for profile switching
-const isProfileSwitching = ref(false);
-const previousSelectedType = ref<string>('');
-const showSkeleton = ref(false);
-
-// Watch for profile type changes to show loading skeleton
-watch(selectedType, async (newType, oldType) => {
-  // Only trigger switching if we have a previous type and it's different
-  if (oldType && oldType !== newType) {
-    isProfileSwitching.value = true;
-    showSkeleton.value = true;
-    
-    // Wait for the next tick to ensure smooth transition
-    await nextTick();
-    
-    // Add a small delay to ensure the skeleton is visible
-    setTimeout(() => {
-      showSkeleton.value = false;
-      isProfileSwitching.value = false;
-    }, 150);
-  }
-  
-  previousSelectedType.value = newType;
-}, { immediate: true });
+// Enhanced loading state for profile switching handled inside useFormCreateNewProfile
 
 const handleSave = () => {
   formComposable.handleSave();

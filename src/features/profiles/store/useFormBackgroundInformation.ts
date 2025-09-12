@@ -216,7 +216,7 @@ export const useFormBackgroundInformation = () => {
     schemaFrontend,
     schemaBackend,
     modelLocal,
-    requiredFields.value,
+    requiredFields,
   );
 
   const isDisabledButton = computed(() => (!isValid.value));
@@ -309,7 +309,7 @@ export const useFormBackgroundInformation = () => {
     }
   }, { deep: true, immediate: true });
 
-  watch(() => selectedUserProfileData.value?.data.ten_percent_shareholder, () => {
+  watch(() => selectedUserProfileData.value?.data?.ten_percent_shareholder, () => {
     if (dataShareholderData.value?.shareholder_association && model.ten_percent_shareholder) {
       model.ten_percent_shareholder.shareholder_association = dataShareholderData.value?.shareholder_association;
     }
@@ -318,8 +318,8 @@ export const useFormBackgroundInformation = () => {
     }
   }, { deep: true, immediate: true });
 
-  watch(() => selectedUserProfileData.value?.data.irs_backup_withholding, () => {
-    if (selectedUserProfileData.value?.data.irs_backup_withholding !== undefined) {
+  watch(() => selectedUserProfileData.value?.data?.irs_backup_withholding, () => {
+    if (selectedUserProfileData.value?.data?.irs_backup_withholding !== undefined) {
       model.irs_backup_withholding = selectedUserProfileData.value?.data.irs_backup_withholding;
     }
   }, { deep: true, immediate: true });
