@@ -1,4 +1,4 @@
-import { isPWA } from "./isPwa";
+import { isPwaMobile } from "./pwaDetector";
 
 type Listener = (e: Event) => void;
 
@@ -9,7 +9,7 @@ function insideAllowZone(target: EventTarget | null): boolean {
 
 export function installPwaNoZoomGuards() {
   if (typeof window === "undefined") return;
-  if (!isPWA()) return;
+  if (!isPwaMobile()) return;
 
   // Pinch/gesture iOS Safari
   const onGesture: Listener = (e) => {
