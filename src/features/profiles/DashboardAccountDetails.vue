@@ -276,7 +276,6 @@ const ACCOUNT_TAB_INFO = {
         </template>
       </VTableDefault>
     </div>
-
   </div>
 </template>
 

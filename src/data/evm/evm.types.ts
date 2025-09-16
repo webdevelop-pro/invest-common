@@ -33,6 +33,7 @@ export type IEvmWalletBalancesMap = Record<string, {
 }>;
 
 export interface IEvmWalletBalances {
+  id: number;
   address: string;
   amount: number;
   symbol: string;

@@ -6,18 +6,21 @@ import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import VFormSelect from 'UiKit/components/Base/VForm/VFormSelect.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
 import { useVFormPartialCustodian, FormModelSdira } from './logic/useVFormPartialCustodian';
+import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 
 const props = defineProps({
   modelData: Object as PropType<FormModelSdira>,
   errorData: Object,
-  schemaBackend: Object,
+  schemaBackend: Object as PropType<JSONSchemaType<FormModelSdira> | undefined>,
   loading: Boolean,
   isEditMode: Boolean,
 });
 
 const modelDataComputed = computed(() => props.modelData);
+const schemaBackendComputed = computed(() => props.schemaBackend);
 const errorDataComputed = computed(() => props.errorData);
 const loadingComputed = computed(() => props.loading);
+const editComputed = computed(() => props.isEditMode);
 
 const {
   model,
@@ -29,6 +32,8 @@ const {
   optionsCustodian,
 } = useVFormPartialCustodian(
   modelDataComputed,
+  schemaBackendComputed,
+  editComputed,
 );
 
 defineExpose({

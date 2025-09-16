@@ -4,7 +4,7 @@ import {
 import { setActivePinia, createPinia } from 'pinia';
 import { ref, nextTick } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { useHelloSign } from 'UiKit/composables/useHelloSign';
+import { useHelloSign } from 'InvestCommon/shared/composables/useHelloSign';
 import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
@@ -18,7 +18,7 @@ vi.mock('vue-router', () => ({
   useRoute: vi.fn(),
 }));
 
-vi.mock('UiKit/composables/useHelloSign', () => ({
+vi.mock('InvestCommon/shared/composables/useHelloSign', () => ({
   useHelloSign: vi.fn(),
 }));
 

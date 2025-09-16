@@ -4,8 +4,6 @@ import {
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
-import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
-import { storeToRefs } from 'pinia';
 
 export interface FormModelSdira {
   full_account_name: string | undefined;
@@ -15,11 +13,11 @@ export interface FormModelSdira {
 
 export const useVFormPartialCustodian = (
   modelData: ComputedRef<FormModelSdira | undefined>,
+  schemaBackend: ComputedRef<JSONSchemaType<FormModelSdira> | undefined>,
+  isEditMode?: ComputedRef<boolean>,
 ) => {
-  const useRepositoryProfilesStore = useRepositoryProfiles();
-  const { getProfileByIdOptionsState } = storeToRefs(useRepositoryProfilesStore);
 
-  const schemaBackend = computed(() => getProfileByIdOptionsState.value.data);
+  const nameSchema = computed(() => (isEditMode?.value ? 'SdiraEdit' : 'Sdira'));
 
   const schemaFrontend = {
     $schema: 'http://json-schema.org/draft-07/schema#',
@@ -35,7 +33,7 @@ export const useVFormPartialCustodian = (
         required: ['full_account_name', 'type', 'account_number'],
       },
     },
-    $ref: '#/definitions/Sdira',
+    $ref: `#/definitions/${nameSchema.value}`,
   } as unknown as JSONSchemaType<FormModelSdira>;
 
   const schemaBackendLocal = computed(() => (

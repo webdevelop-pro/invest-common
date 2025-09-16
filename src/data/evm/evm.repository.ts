@@ -6,9 +6,10 @@ import { toasterErrorHandling } from 'InvestCommon/data/repository/error/toaster
 import { createActionState } from 'InvestCommon/data/repository/repository';
 import { INotification } from 'InvestCommon/data/notifications/notifications.types';
 import { EvmWalletFormatter } from './formatter/wallet.formatter';
+import { EvmTransactionFormatter } from './formatter/transactions.formatter';
 import {
   IEvmWalletDataFormatted, IEvmWalletDataResponse, IEvmWithdrawRequestBody,
-  IEvmExchangeRequestBody, IEvmExchangeResponse,
+  IEvmExchangeRequestBody, IEvmExchangeResponse, EvmTransactionTypes, EvmTransactionStatusTypes,
 } from './evm.types';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
@@ -88,6 +89,7 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
 
   const updateNotificationData = (notification: INotification) => {
     const { obj, fields } = notification.data;
+    const objectId = fields?.object_id;
     const wallet = getEvmWalletState.value.data;
     
     if (!wallet || !fields) return;
@@ -99,50 +101,111 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
 
     const upsertTransaction = () => {
       setTempLoading(isLoadingNotificationTransaction);
-      const objectId = fields?.object_id;
       if (!objectId || typeof objectId !== 'number') return;
-      const list = wallet.transactions as any[];
-      const index = list?.findIndex((t: any) => t.id === objectId);
-      if (index !== -1) Object.assign(list[index], fields);
-      else list?.unshift({ ...fields, id: objectId });
+      
+      if (!wallet.transactions) {
+        wallet.transactions = [];
+      }
+      
+      const index = wallet.transactions.findIndex((t: any) => t.id === objectId);
+      
+      if (index !== -1) {
+        Object.assign(wallet.transactions[index], fields);
+        // Re-format the updated transaction
+        Object.assign(
+          wallet.transactions[index], 
+          new EvmTransactionFormatter(wallet.transactions[index] as any).format()
+        );
+      } else {
+        // Create a new transaction with required fields
+        const baseItem = {
+          id: objectId,
+          user_id: 0, // Will be set by backend
+          dest_wallet_id: null,
+          source_wallet_id: null,
+          investment_id: null,
+          type: EvmTransactionTypes.deposit,
+          amount: '0',
+          network: 'ethereum',
+          status: EvmTransactionStatusTypes.pending,
+          transaction_tx: '',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+        
+        // Merge fields but preserve required structure
+        const newItem = {
+          ...baseItem,
+          ...fields,
+          // Ensure type and status are valid enum values
+          type: (fields.type && Object.values(EvmTransactionTypes).includes(fields.type as EvmTransactionTypes)) 
+            ? fields.type as EvmTransactionTypes 
+            : EvmTransactionTypes.deposit,
+          status: (fields.status && Object.values(EvmTransactionStatusTypes).includes(fields.status as EvmTransactionStatusTypes)) 
+            ? fields.status as EvmTransactionStatusTypes 
+            : EvmTransactionStatusTypes.pending,
+        };
+        
+        Object.assign(newItem, new EvmTransactionFormatter(newItem as any).format());
+        wallet.transactions.unshift(newItem);
+      }
+
+      getEvmWalletState.value.data = new EvmWalletFormatter(wallet as any).format();
     };
 
     const upsertWallet = () => {
       setTempLoading(isLoadingNotificationWallet);
       Object.assign(wallet, fields);
+
+      getEvmWalletState.value.data = new EvmWalletFormatter(wallet as any).format();
     };
 
     const upsertBalance = () => {
       setTempLoading(isLoadingNotificationWallet);
-      const objectId = fields?.object_id;
-      const addressFromFields = fields?.address || '';
+      const addressFromFields = fields?.token?.address || '';
       if (objectId == null && !addressFromFields) return;
+      
       const update: any = { ...fields };
       update.amount = Number(update.amount ?? 0);
       delete update.object_id;
 
-      const balances = wallet.balances as any;
-      const balancesMap: Record<string, any> = (balances && !Array.isArray(balances)) ? balances : {};
+      // Convert balances array to map for easier manipulation
+      const balancesArray = wallet.balances as any[];
+      const balancesMap: Record<string, any> = {};
+      
+      // Convert array to map using address as key
+      balancesArray.forEach((balance: any) => {
+        if (balance.address) {
+          balancesMap[balance.address] = { ...balance };
+        }
+      });
 
       // 1) Try update by address key if present
       if (addressFromFields && balancesMap[addressFromFields]) {
         Object.assign(balancesMap[addressFromFields], update);
-        return;
-      }
-
-      // 2) Otherwise find entry by id === objectId and update it
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const foundKey = Object.entries(balancesMap).find(([_, v]) => v?.id === objectId)?.[0];
-      if (foundKey) {
-        Object.assign(balancesMap[foundKey], update);
-        return;
-      }
-
-      // 3) If not found, create new entry keyed by address (when provided)
-      if (addressFromFields) {
-        const base = { address: addressFromFields, amount: 0, symbol: '', name: undefined, icon: undefined };
+      } else if (objectId != null) {
+        // 2) Find entry by id === objectId and update it
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const foundKey = Object.entries(balancesMap).find(([_, v]) => v?.id === objectId)?.[0];
+        if (foundKey) {
+          Object.assign(balancesMap[foundKey], update);
+        }
+      } else if (addressFromFields) {
+        // 3) If not found, create new entry keyed by address (when provided)
+        const base = { 
+          id: objectId || 0,
+          address: addressFromFields, 
+          amount: 0, 
+          symbol: '', 
+          name: undefined, 
+          icon: undefined 
+        };
         balancesMap[addressFromFields] = Object.assign(base, update);
       }
+
+      // Convert map back to array
+      wallet.balances = Object.values(balancesMap);
+      getEvmWalletState.value.data = new EvmWalletFormatter(wallet as any).format();
     };
 
     switch (obj) {
@@ -158,8 +221,6 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
       default:
         break;
     }
-
-    getEvmWalletState.value.data = new EvmWalletFormatter(wallet as any).format();
   };
 
   const selectedIdAsDataIs = computed(() => selectedUserProfileData.value.id === selectedUserProfileId.value);

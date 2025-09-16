@@ -21,7 +21,7 @@ export const useFormCreateNewProfile = () => {
     selectedUserProfileId, selectedUserProfileData, selectedUserIndividualProfile,
   } = storeToRefs(userProfileStore);
   const useRepositoryProfilesStore = useRepositoryProfiles();
-  const { setProfileState, getProfileByIdOptionsState, setProfileByIdState } = storeToRefs(useRepositoryProfilesStore);
+  const { setProfileState, getProfileOptionsState, setProfileByIdState } = storeToRefs(useRepositoryProfilesStore);
   const userSessionStore = useSessionStore();
   const { userSessionTraits } = storeToRefs(userSessionStore);
   const accreditationRepository = useRepositoryAccreditation();
@@ -48,7 +48,7 @@ export const useFormCreateNewProfile = () => {
   const PROFILE_TYPES = computed(() => profileTypes);
   const selectedType = computed(() => String(selectTypeFormRef.value?.model?.type_profile));
   const errorData = computed(() => setProfileState.value.error?.data?.responseJson || null);
-  const schemaBackend = computed(() => getProfileByIdOptionsState.value.data || null);
+  const schemaBackend = computed(() => getProfileOptionsState.value.data || null);
 
   // Enhanced loading state for profile switching
   const isProfileSwitching = ref(false);
@@ -307,7 +307,7 @@ export const useFormCreateNewProfile = () => {
 
   watch(() => selectedType.value, () => {
     if (selectedType.value && selectedType.value.length > 0 && selectedType.value !== 'undefined') {
-      useRepositoryProfilesStore.getProfileByIdOptions(selectedType.value, selectedUserProfileId.value);
+      useRepositoryProfilesStore.getProfileOptions(selectedType.value);
     }
   });
 

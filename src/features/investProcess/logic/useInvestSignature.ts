@@ -1,6 +1,6 @@
 import { computed, ref, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { useHelloSign } from 'UiKit/composables/useHelloSign';
+import { useHelloSign } from 'InvestCommon/shared/composables/useHelloSign';
 import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
 import { ROUTE_INVEST_FUNDING } from 'InvestCommon/domain/config/enums/routes';
 import { ISignature } from 'InvestCommon/types/api/invest';

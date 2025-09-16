@@ -2,6 +2,13 @@ import { InvestKycTypes } from 'InvestCommon/types/api/invest';
 import { IProfileIndividual } from 'InvestCommon/types/api/user';
 import { AccreditationTypes } from 'InvestCommon/data/accreditation/accreditation.types';
 
+export interface INotificationToken {
+  address: string;
+  id: number;
+  name: string;
+  offer_id: number;
+}
+
 export interface INotificationDataFields {
   kyc_status?: InvestKycTypes;
   accreditation_status?: AccreditationTypes;
@@ -9,7 +16,7 @@ export interface INotificationDataFields {
   status?: string;
   object_id?: number;
   address?: string;
-  amount?: number;
+  amount?: string;
   balance?: number;
   inc_balance?: number;
   out_balance?: number;
@@ -20,11 +27,14 @@ export interface INotificationDataFields {
   transaction_tx?: string;
   created_at?: string;
   updated_at?: string;
+  investment_id?: number | null;
+  network?: string;
+  token?: INotificationToken;
 }
 
 interface INotificationData {
   obj: string;
-  id: number;
+  object_id: number;
   fields: INotificationDataFields;
 }
 
