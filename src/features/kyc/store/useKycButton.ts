@@ -26,6 +26,9 @@ export const useKycButton = defineStore('useKycButton', () => {
   /* * Loading State * */
   const isLoading = ref(true);
 
+  // const showSkeleton = computed(() => isLoading.value || (isPlaidDone.value && selectedUserProfileData.value?.isTypeIndividual));
+  const showSkeleton = computed(() => isLoading.value || (isPlaidDone.value));
+
   // Watch for notification changes to update loading state
   watch([selectedUserProfileData, isSelectedProfileLoading], () => {
     isLoading.value = !selectedUserProfileData.value && isSelectedProfileLoading.value;
@@ -101,6 +104,7 @@ export const useKycButton = defineStore('useKycButton', () => {
     isButtonDisabled,
     showContactUs,
     isPlaidDone,
+    showSkeleton,
   };
 });
 

@@ -5,10 +5,8 @@ import {
 import { setActivePinia, createPinia } from 'pinia';
 import { useKycThirdParty } from '../useKycThirdParty';
 
-const toastMock = vi.fn();
-
-vi.mock('UiKit/components/Base/VToast/use-toast', () => ({
-  useToast: () => ({ toast: toastMock }),
+vi.mock('InvestCommon/data/plaid/loadPlaidScriptOnce', () => ({
+  loadPlaidScriptOnce: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock('InvestCommon/data/repository/error/toasterErrorHandlingAnalytics', () => ({
@@ -19,9 +17,9 @@ describe('useKycThirdParty', () => {
   let store: ReturnType<typeof useKycThirdParty>;
   let originalLocation: Location;
   let originalPlaid: any;
-  let scriptEl: any;
 
   beforeEach(() => {
+    vi.useFakeTimers();
     setActivePinia(createPinia());
     vi.clearAllMocks();
     originalLocation = window.location;
@@ -36,9 +34,6 @@ describe('useKycThirdParty', () => {
         ...opts,
       })),
     };
-    scriptEl = { setAttribute: vi.fn(), onload: null, tagName: 'SCRIPT' };
-    vi.spyOn(document, 'createElement').mockImplementation((tag) => (tag === 'script' ? scriptEl : document.createElement(tag)));
-    vi.spyOn(document.head, 'appendChild').mockImplementation((el: any) => el);
     store = useKycThirdParty();
   });
 
@@ -48,38 +43,37 @@ describe('useKycThirdParty', () => {
       value: originalLocation,
     });
     window.Plaid = originalPlaid;
-    (document.createElement as any).mockRestore?.();
-    (document.head.appendChild as any).mockRestore?.();
+    vi.useRealTimers();
   });
 
-  it('loads Plaid script and calls Plaid.create with correct token', async () => {
+  it('loads Plaid (via loader) and calls Plaid.create with correct token', async () => {
     await store.handlePlaidKycThirdParty();
-    scriptEl.onload && scriptEl.onload();
-    expect(document.createElement).toHaveBeenCalledWith('script');
-    expect(document.head.appendChild).toHaveBeenCalled();
     expect(window.Plaid.create).toHaveBeenCalledWith(
       expect.objectContaining({ token: 'test-token' }),
     );
   });
 
-  it('handles onSuccess and shows toast', async () => {
+  it('triggers handler.open after timeout', async () => {
     await store.handlePlaidKycThirdParty();
-    scriptEl.onload && scriptEl.onload();
-    const handlerArgs = (window.Plaid.create as any).mock.calls[0][0];
-    handlerArgs.onSuccess();
-    expect(toastMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        title: 'Thank you for completing KYC',
-        description: 'Your KYC process is now complete.',
-        variant: 'info',
-      }),
-    );
+    const handlerInstance = (window.Plaid.create as any).mock.results[0].value;
+    const openSpy = handlerInstance.open as ReturnType<typeof vi.fn>;
+    expect(openSpy).not.toHaveBeenCalled();
+    vi.advanceTimersByTime(1000);
+    expect(openSpy).toHaveBeenCalled();
   });
 
-  it('handles onExit without throwing', async () => {
+  it('handles onSuccess and updates state', async () => {
     await store.handlePlaidKycThirdParty();
-    scriptEl.onload && scriptEl.onload();
+    const handlerArgs = (window.Plaid.create as any).mock.calls[0][0];
+    handlerArgs.onSuccess('pub', { link_session_id: 'abc' });
+    expect(store.isPlaidLoading.value).toBe(false);
+    expect(store.plaidSuccess.value).toBe(true);
+  });
+
+  it('handles onExit without throwing and stops loading', async () => {
+    await store.handlePlaidKycThirdParty();
     const handlerArgs = (window.Plaid.create as any).mock.calls[0][0];
     expect(() => handlerArgs.onExit('err', { meta: 1 })).not.toThrow();
+    expect(store.isPlaidLoading.value).toBe(false);
   });
 });

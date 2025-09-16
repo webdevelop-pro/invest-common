@@ -1,11 +1,14 @@
 import { ref, computed } from 'vue';
 import { toasterErrorHandlingAnalytics } from 'InvestCommon/data/repository/error/toasterErrorHandlingAnalytics';
-import { useToast } from 'UiKit/components/Base/VToast/use-toast';
+import { loadPlaidScriptOnce, PlaidHandler } from 'InvestCommon/data/plaid/loadPlaidScriptOnce';
+
+// Keep a single Plaid handler within this module
+let plaidHandler: PlaidHandler | null = null;
+let expectedLinkSessionId: string | null = null;
 
 export function useKycThirdParty() {
   const isPlaidLoading = ref(false);
   const plaidSuccess = ref(false);
-  const { toast } = useToast();
 
   const query = computed(() => new URLSearchParams(window.location.search));
   const token = computed(() => query.value.get('token'));
@@ -14,36 +17,32 @@ export function useKycThirdParty() {
     isPlaidLoading.value = true;
     try {
       if (token.value) {
-        const plaidScript = document.createElement('script');
-        plaidScript.setAttribute('src', 'https://cdn.plaid.com/link/v2/stable/link-initialize.js');
-        document.head.appendChild(plaidScript);
-        plaidScript.onload = () => {
-          const handler = window?.Plaid.create({
-            token: token.value,
-            onSuccess: () => {
-              isPlaidLoading.value = false;
-              plaidSuccess.value = true;
-              toast({
-                title: 'Thank you for completing KYC',
-                description: 'Your KYC process is now complete.',
-                variant: 'info',
-              });
-            },
-            onLoad: () => {
-              console.log('plaid own onload event');
-            },
-            onExit: (err: unknown, metadata: unknown) => {
-              console.log('plaid on exit event', err, metadata);
-              console.log('update account with failed kyc status');
-              isPlaidLoading.value = false;
-            },
-            onEvent: (eventName: string, metadata: any) => {
-              console.log('plaid on event', eventName, metadata);
-            },
-            receivedRedirectUri: null,
-          });
-          setTimeout(handler.open, 1000);
-        };
+        await loadPlaidScriptOnce();
+        expectedLinkSessionId = null;
+        plaidHandler = window?.Plaid.create({
+          token: token.value,
+          onSuccess: (_publicToken: string, metadata: any) => {
+            if (expectedLinkSessionId && metadata?.link_session_id !== expectedLinkSessionId) return;
+            isPlaidLoading.value = false;
+            plaidSuccess.value = true;
+          },
+          onLoad: () => {
+            console.log('plaid own onload event');
+          },
+          onExit: (err: unknown, metadata: any) => {
+            console.log('plaid on exit event', err, metadata);
+            console.log('update account with failed kyc status');
+            isPlaidLoading.value = false;
+          },
+          onEvent: (eventName: string, metadata: any) => {
+            if (!expectedLinkSessionId && metadata?.link_session_id) {
+              expectedLinkSessionId = metadata.link_session_id;
+            }
+            console.log('plaid on event', eventName, metadata);
+          },
+          receivedRedirectUri: null,
+        });
+        setTimeout(() => { if (plaidHandler) plaidHandler.open(); }, 1000);
       }
     } catch (err) {
       isPlaidLoading.value = false;

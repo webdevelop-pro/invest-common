@@ -1,6 +1,11 @@
 import { ref, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository';
+import { loadPlaidScriptOnce, PlaidHandler } from 'InvestCommon/data/plaid/loadPlaidScriptOnce';
+
+// Keep a single Plaid handler per module to prevent multiple callbacks firing
+let plaidHandler: PlaidHandler | null = null;
+let expectedLinkSessionId: string | null = null;
 
 export function useWalletBankAccounts() {
   // State
@@ -70,20 +75,24 @@ export function useWalletBankAccounts() {
     await Promise.all(promises);
     walletRepository.getWalletByProfile(profileId.value);
   };
+
   const handleLinkBankAccount = async () => {
     isLinkBankAccountLoading.value = true;
+
     if (!createLinkTokenState.value.data?.link_token) {
       await walletRepository.createLinkToken(profileId.value);
     }
 
     if (!createLinkTokenState.value.error && createLinkTokenState.value.data?.link_token) {
-      const plaidScript = document.createElement('script');
-      plaidScript.setAttribute('src', 'https://cdn.plaid.com/link/v2/stable/link-initialize.js');
-      document.head.appendChild(plaidScript);
-      plaidScript.onload = () => {
-        const handler = window?.Plaid.create({
-          token: createLinkTokenState.value.data?.link_token,
-          onSuccess: async (publicToken: string, metadata: unknown) => {
+      try {
+        await loadPlaidScriptOnce();
+        expectedLinkSessionId = null;
+        // Create a fresh handler each time and replace the previous one
+        const currentToken = createLinkTokenState.value.data?.link_token;
+        plaidHandler = window?.Plaid.create({
+          token: currentToken,
+          onSuccess: async (publicToken: string, metadata: any) => {
+            if (expectedLinkSessionId && metadata?.link_session_id !== expectedLinkSessionId) return;
             console.log('plaid success event', publicToken, metadata);
             await plaidOnLinkSuccess(publicToken);
             isLinkBankAccountLoading.value = false;
@@ -91,18 +100,28 @@ export function useWalletBankAccounts() {
           onLoad: () => {
             console.log('plaid on onload even');
           },
-          onExit: (err: unknown, metadata: unknown) => {
+          onExit: (err: unknown, metadata: any) => {
             console.log('plaid on exit event', err, metadata);
             isLinkBankAccountLoading.value = false;
           },
-          onEvent: (eventName: string, metadata: unknown) => {
+          onEvent: (eventName: string, metadata: any) => {
+            if (!expectedLinkSessionId && metadata?.link_session_id) {
+              expectedLinkSessionId = metadata.link_session_id;
+            }
             console.log('plaid on event', eventName, metadata);
           },
-          // required for OAuth; if not using OAuth, set to null or omit:
-          receivedRedirectUri: null, // window.location.href,
+          receivedRedirectUri: null,
         });
-        setTimeout(handler.open, 1000);
-      };
+        // Open only the latest created handler
+        setTimeout(() => {
+          if (plaidHandler) plaidHandler.open();
+        }, 1000);
+      } catch (e) {
+        console.error(e);
+        isLinkBankAccountLoading.value = false;
+      }
+    } else {
+      isLinkBankAccountLoading.value = false;
     }
   };
 
@@ -122,5 +141,5 @@ export function useWalletBankAccounts() {
     onDeleteAccountClick,
     setProfileContext,
   };
-};
+}
 

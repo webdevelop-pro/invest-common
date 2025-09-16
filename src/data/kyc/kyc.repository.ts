@@ -6,6 +6,7 @@ import { toasterErrorHandlingAnalytics } from 'InvestCommon/data/repository/erro
 import { createActionState } from 'InvestCommon/data/repository/repository';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { IKycTokenResponse } from './kyc.types';
+import { loadPlaidScriptOnce, PlaidHandler } from 'InvestCommon/data/plaid/loadPlaidScriptOnce';
 
 // Add Plaid window type
 declare global {
@@ -15,6 +16,10 @@ declare global {
     };
   }
 }
+
+// Keep a single Plaid handler within this module
+let plaidHandler: PlaidHandler | null = null;
+let expectedLinkSessionId: string | null = null;
 
 export const useRepositoryKyc = defineStore('repository-kyc', () => {
   // Dependencies
@@ -62,41 +67,32 @@ export const useRepositoryKyc = defineStore('repository-kyc', () => {
     try {
       await createToken(id || selectedUserProfileData.value.id);
       if (kycToken.value && kycToken.value.link_token) {
-        const plaidScript = document.createElement('script');
-        plaidScript.setAttribute('src', 'https://cdn.plaid.com/link/v2/stable/link-initialize.js');
-        document.head.appendChild(plaidScript);
-        plaidScript.onload = () => {
-          const handler = window?.Plaid.create({
-            token: kycToken.value?.link_token,
-            onSuccess: () => {
-              isPlaidLoading.value = false;
-              isPlaidDone.value = true;
-              // if (IS_STATIC_SITE) {
-              //   window.location.href = urlProfilePortfolio(selectedUserProfileId.value);
-              // } else {
-              //   const { pushTo } = useRedirect();
-              //   const router = useRouter();
-              //   router.push(pushTo({
-              //     name: ROUTE_DASHBOARD_PORTFOLIO,
-              //     params: { profileId: selectedUserProfileId.value },
-              //   }));
-              // }
-            },
-            onLoad: () => {
-              console.log('plaid own onload event');
-            },
-            onExit: (err: unknown, metadata: unknown) => {
-              console.log('plaid on exit event', err, metadata);
-              console.log('update account with failed kyc status');
-              isPlaidLoading.value = false;
-            },
-            onEvent: (eventName: string, metadata: any) => {
-              console.log('plaid on event', eventName, metadata);
-            },
-            receivedRedirectUri: null,
-          });
-          setTimeout(handler.open, 1000);
-        };
+        await loadPlaidScriptOnce();
+        expectedLinkSessionId = null;
+        plaidHandler = window?.Plaid.create({
+          token: kycToken.value?.link_token,
+          onSuccess: (publicToken: string, metadata: any) => {
+            if (expectedLinkSessionId && metadata?.link_session_id !== expectedLinkSessionId) return;
+            isPlaidLoading.value = false;
+            isPlaidDone.value = true;
+          },
+          onLoad: () => {
+            console.log('plaid own onload event');
+          },
+          onExit: (err: unknown, metadata: any) => {
+            console.log('plaid on exit event', err, metadata);
+            console.log('update account with failed kyc status');
+            isPlaidLoading.value = false;
+          },
+          onEvent: (eventName: string, metadata: any) => {
+            if (!expectedLinkSessionId && metadata?.link_session_id) {
+              expectedLinkSessionId = metadata.link_session_id;
+            }
+            console.log('plaid on event', eventName, metadata);
+          },
+          receivedRedirectUri: null,
+        });
+        setTimeout(() => { if (plaidHandler) plaidHandler.open(); }, 1000);
       }
     } catch (err) {
       isPlaidLoading.value = false;

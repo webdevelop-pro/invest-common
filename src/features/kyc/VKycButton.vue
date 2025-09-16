@@ -10,7 +10,7 @@ import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 const kycButtonStore = useKycButton();
 const {
   data, tagBackground, isButtonLoading, isButtonDisabled, showContactUs,
-  isPlaidDone,
+  showSkeleton,
 } = storeToRefs(kycButtonStore);
 
 const handleClick = () => {
@@ -24,7 +24,7 @@ defineProps({
 
 <template>
   <VSkeleton
-    v-if="isLoading || isPlaidDone"
+    v-if="showSkeleton"
     height="22px"
     width="100px"
     class="dashboard-top-info__skeleton"
