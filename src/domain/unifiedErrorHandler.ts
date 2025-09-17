@@ -1,5 +1,7 @@
 import { useRepositoryAnalytics } from 'InvestCommon/data/analytics/analytics.repository';
 import { AnalyticsLogLevel } from 'InvestCommon/data/analytics/analytics.type';
+import { APIError } from 'InvestCommon/data/service/handlers/apiError';
+import { urlServerError } from 'InvestCommon/domain/config/links';
 
 // Extend Window interface for VitePress
 declare global {
@@ -64,6 +66,21 @@ export const setupUnifiedErrorHandler = (config: ErrorHandlerConfig) => {
   // Handle errors
   const handleError = (error: Error, componentName: string, errorType: string) => {
     sendErrorToAnalytics(error, componentName, errorType);
+
+    // Optional redirect to 500 page for API 5xx errors
+    try {
+      if (error instanceof APIError && error.isServerError()) {
+        if (typeof window !== 'undefined') {
+          if (window.location.pathname !== urlServerError) {
+            setTimeout(() => {
+              window.location.replace(urlServerError);
+            }, 500);
+          }
+        }
+      }
+    } catch (_) {
+      // ignore navigation errors
+    }
   };
 
   // Set up global error handlers

@@ -15,6 +15,7 @@ export const urlBlog = `${env.FRONTEND_URL_STATIC}/resource-center`;
 export const urlTerms = `${env.FRONTEND_URL_STATIC}/legal/terms-of-use`;
 export const urlPrivacy = `${env.FRONTEND_URL_STATIC}/legal/privacy-policy`;
 export const urlCookie = `${env.FRONTEND_URL_STATIC}/legal/cookie`;
+export const urlServerError = `${env.FRONTEND_URL_DASHBOARD}/500`;
 export const urlNotifications = `${env.FRONTEND_URL_DASHBOARD}/notifications`;
 export const urlSettings = (profileId: number) => `${env.FRONTEND_URL_DASHBOARD}/settings/${profileId}/mfa`;
 export const urlProfileAccreditation = (profileId: number) => `${env.FRONTEND_URL_DASHBOARD}/profile/${profileId}/accreditation`;

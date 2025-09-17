@@ -1,6 +1,7 @@
 export const ROUTE_HOME = 'ROUTE_HOME';
 
 export const ROUTE_ERROR_404 = 'ROUTE_ERROR_404';
+export const ROUTE_ERROR_500 = 'ROUTE_ERROR_500';
 export const ROUTE_RESET_PASSWORD = 'ROUTE_RESET_PASSWORD';
 
 export const ROUTE_DASHBOARD_PORTFOLIO = 'ROUTE_DASHBOARD_PORTFOLIO';
@@ -119,6 +120,7 @@ export const PAGE_TITLES = {
   [ROUTE_NOTIFICATIONS]: `Notifications | ${DEFAULT_PAGE_TITLE}`,
 
   [ROUTE_ERROR_404]: `Page not found | ${DEFAULT_PAGE_TITLE}`,
+  [ROUTE_ERROR_500]: `Server error | ${DEFAULT_PAGE_TITLE}`,
   [ROUTE_RESET_PASSWORD]: `Reset Password | ${DEFAULT_PAGE_TITLE}`,
 };
 
@@ -179,5 +181,6 @@ export const PAGE_DESCRIPTIONS = {
   [ROUTE_NOTIFICATIONS]: 'Stay informed. Receive updates and alerts about your investments.',
 
   [ROUTE_ERROR_404]: 'Oops! Page not found. Let\'s get you back on track.',
+  [ROUTE_ERROR_500]: 'We\'re experiencing issues. Please try again shortly.',
   [ROUTE_RESET_PASSWORD]: 'Reset your password',
 };
