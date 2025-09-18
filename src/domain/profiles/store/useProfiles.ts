@@ -11,6 +11,7 @@ import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { PROFILE_TYPES } from 'InvestCommon/domain/config/enums/profileTypes';
 import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository';
 import { useLogoutStore } from 'InvestCommon/features/auth/store/useLogout';
+import { InvestKycTypes } from 'InvestCommon/types/api/invest';
 
 const { IS_STATIC_SITE } = env;
 
@@ -76,6 +77,20 @@ export const useProfilesStore = defineStore('profiles', () => {
 
   const isTrustRevocable = computed(() => (
     (selectedUserProfileType.value?.toLowerCase() === PROFILE_TYPES.TRUST) && selectedUserProfileData.value?.data?.type?.toLowerCase().includes('revocable')));
+
+  // KYC status checking functions
+  const isCurrentProfileKycApproved = computed(() => {
+    const currentProfile = profileByIdInProfilesList.value;
+    return currentProfile?.isKycApproved;
+  });
+
+  const getKycApprovedProfiles = computed(() => {
+    return userProfiles.value.filter(profile => profile.isKycApproved);
+  });
+
+  const hasAnyKycApprovedProfile = computed(() => {
+    return getKycApprovedProfiles.value.length > 0;
+  });
 
   const init = async () => {
     if (!userLoggedIn.value) {
@@ -156,6 +171,11 @@ export const useProfilesStore = defineStore('profiles', () => {
     selectedUserProfileShowKycInitForm,
     isTrustRevocable,
     selectedUserProfileRiskAcknowledged,
+
+    // KYC-related computed properties
+    isCurrentProfileKycApproved,
+    getKycApprovedProfiles,
+    hasAnyKycApprovedProfile,
 
     // Methods
     setSelectedUserProfileById,

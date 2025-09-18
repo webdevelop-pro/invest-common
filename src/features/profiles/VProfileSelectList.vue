@@ -1,17 +1,21 @@
 <script setup lang="ts">
-import { PropType } from 'vue';
+import { PropType, computed } from 'vue';
 import VFormSelect from 'UiKit/components/Base/VForm/VFormSelect.vue';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import { useProfileSelectStore } from './store/useProfileSelect';
 
-defineProps({
+const props = defineProps({
   size: String as PropType<'large' | 'medium' | 'small'>,
   label: String,
+  defaultValue: String,
 });
 
 const {
-  userListFormatted, isLoading, defaultValue, onUpdateSelectedProfile,
+  userListFormatted, isLoading, defaultValue: storeDefaultValue, onUpdateSelectedProfile,
 } = useProfileSelectStore();
+
+// Use prop defaultValue if provided, otherwise use store defaultValue
+const selectedValue = computed(() => props.defaultValue || storeDefaultValue.value);
 
 const onUpdate = (value: string) => {
   onUpdateSelectedProfile(value);
@@ -24,7 +28,7 @@ const onUpdate = (value: string) => {
       :label="label"
     >
       <VFormSelect
-        :model-value="defaultValue"
+        :model-value="selectedValue"
         name="investmentAccount"
         :size="size"
         data-testid="investAccount"

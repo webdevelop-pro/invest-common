@@ -22,16 +22,18 @@ defineEmits(['invest']);
 const userSessionStore = useSessionStore();
 const { userLoggedIn } = storeToRefs(userSessionStore);
 const profilesStore = useProfilesStore();
-const { selectedUserProfileData } = storeToRefs(profilesStore);
+const { selectedUserProfileData, hasAnyKycApprovedProfile } = storeToRefs(profilesStore);
 const kycButtonStore = useKycButton();
 const route = useRoute();
 
 const showInvestBtn = computed(() => (
   selectedUserProfileData.value?.isKycApproved
+  || hasAnyKycApprovedProfile.value
   || props.isSharesReached
 ));
 const showKYCBtn = computed(() => (
-  selectedUserProfileData.value?.isKycNew
+  !hasAnyKycApprovedProfile.value
+  && selectedUserProfileData.value?.isKycNew
   && !props.isSharesReached
 ));
 
@@ -57,14 +59,6 @@ const startKycHandler = () => {
       Sign in
     </VButton>
     <VButton
-      v-else-if="showKYCBtn"
-      class="offer-details-btn__btn"
-      size="large"
-      @click="startKycHandler"
-    >
-      Start KYC
-    </VButton>
-    <VButton
       v-else-if="showInvestBtn"
       class="offer-details-btn__btn"
       size="large"
@@ -72,6 +66,14 @@ const startKycHandler = () => {
       @click="$emit('invest')"
     >
       Invest Now
+    </VButton>
+    <VButton
+      v-else-if="showKYCBtn"
+      class="offer-details-btn__btn"
+      size="large"
+      @click="startKycHandler"
+    >
+      Start KYC
     </VButton>
     <p
       v-else
