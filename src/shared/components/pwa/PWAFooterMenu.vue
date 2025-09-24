@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onBeforeMount, computed } from 'vue';
+import { computed } from 'vue';
 import { useRoute, withBase } from 'vitepress';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { storeToRefs } from 'pinia';
@@ -49,16 +49,10 @@ const isActive = (to: string, baseUrl: string = '/') => {
 const profilesStore = useProfilesStore();
 const { selectedUserProfileId } = storeToRefs(profilesStore);
 
-const authed = ref(false);
-
-onBeforeMount(() => {
-  authed.value = userLoggedIn.value;
-});
-
 type Item = { to: string; icon: string, text: string };
 
 const menuItems = computed<Item[]>(() =>
-  authed.value
+  userLoggedIn.value
   ? [
       { to: urlProfilePortfolio(selectedUserProfileId.value), icon: DashboardIcon, text: 'Dashboard' },  
       { to: urlProfileWallet(selectedUserProfileId.value), icon: WalletIcon, text: 'Wallet' },
