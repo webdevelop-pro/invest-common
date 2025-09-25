@@ -4,7 +4,7 @@ import { InvestStepTypes } from 'InvestCommon/types/api/invest';
 import OffersDetails from './components/OffersDetails.vue';
 import { storeToRefs } from 'pinia';
 import {
-  computed, onBeforeMount, ref, watch,
+  computed, onBeforeMount, ref, watch, nextTick,
 } from 'vue';
 import { useData, useRoute } from 'vitepress';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
@@ -54,7 +54,7 @@ const { params } = useData();
 const userSessionStore = useSessionStore();
 const { userLoggedIn } = storeToRefs(userSessionStore);
 const profilesStore = useProfilesStore();
-const { selectedUserProfileId } = storeToRefs(profilesStore);
+const { selectedUserProfileId, userProfiles } = storeToRefs(profilesStore);
 const offerRepository = useRepositoryOffer();
 const { getOfferOneState } = storeToRefs(offerRepository);
 
@@ -68,6 +68,25 @@ const offer = ref(params.value?.data || null);
 const offerLoading = ref(true);
 
 const investHandler = async () => {
+  // If current selected profile is not KYC approved, switch to a random approved profile (if any)
+  try {
+    const profiles = userProfiles.value || [];
+    if (profiles.length > 0) {
+      const current = profiles.find((p: any) => p?.id === selectedUserProfileId.value);
+      const isCurrentApproved = (current as { isKycApproved?: boolean } | undefined)?.isKycApproved;
+      if (!isCurrentApproved) {
+        const approvedProfiles = profiles.filter((p: any) => p?.isKycApproved);
+        if (approvedProfiles.length > 0) {
+          const randomApproved = approvedProfiles[Math.floor(Math.random() * approvedProfiles.length)];
+          if (randomApproved?.id && randomApproved.id !== selectedUserProfileId.value) {
+            profilesStore.setSelectedUserProfileById(randomApproved.id);
+            await nextTick();
+          }
+        }
+      }
+    }
+  } catch {}
+
   if (!getInvestUnconfirmedOne.value) {
     await investmentRepository.setInvest(params.value?.slug as string, selectedUserProfileId.value, 0);
 

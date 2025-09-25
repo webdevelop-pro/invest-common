@@ -141,7 +141,8 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
           type: (fields.type && Object.values(EvmTransactionTypes).includes(fields.type as EvmTransactionTypes)) 
             ? fields.type as EvmTransactionTypes 
             : EvmTransactionTypes.deposit,
-          status: (fields.status && Object.values(EvmTransactionStatusTypes).includes(fields.status as EvmTransactionStatusTypes)) 
+          status: (fields.status
+            && Object.values(EvmTransactionStatusTypes).includes(fields.status as EvmTransactionStatusTypes)) 
             ? fields.status as EvmTransactionStatusTypes 
             : EvmTransactionStatusTypes.pending,
         };

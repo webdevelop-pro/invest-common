@@ -11,7 +11,6 @@ import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { PROFILE_TYPES } from 'InvestCommon/domain/config/enums/profileTypes';
 import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository';
 import { useLogoutStore } from 'InvestCommon/features/auth/store/useLogout';
-import { InvestKycTypes } from 'InvestCommon/types/api/invest';
 
 const { IS_STATIC_SITE } = env;
 
