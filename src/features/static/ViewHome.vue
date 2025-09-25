@@ -8,6 +8,9 @@ import { filterPages } from 'UiKit/helpers/allData';
 import { IFrontmatter } from 'UiKit/types/types';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import { useRepositoryOffer } from 'InvestCommon/data/offer/offer.repository';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
+import { useAppStateStore } from 'InvestCommon/domain/pwa/store/useAppStateStore';
+import { urlSignin, urlSignup } from 'InvestCommon/domain/config/links';
 
 const VSectionCardArticleList = defineAsyncComponent({
   loader: () => import('UiKit/components/VCard/VSectionCardArticleList.vue'),
@@ -33,6 +36,11 @@ const VIntro = defineAsyncComponent({
 const { theme } = useData();
 const offerRepository = useRepositoryOffer();
 const { getOffersState } = storeToRefs(offerRepository);
+
+const sessionStore = useSessionStore();
+const appStore = useAppStateStore();
+const { userLoggedIn } = storeToRefs(sessionStore);
+const { isPwa, isMobile } = storeToRefs(appStore);
 
 const blogPosts = theme.navigation.rc.filterChilds('layout', 'resource-center-single')?.map((post) => post.data);
 const blog = theme.navigation.rc.data;
@@ -65,6 +73,11 @@ onMounted(async () => {
         :button-href="explore[0].url"
         :video-src="videoSrc"
         full-height
+        :user-logged-in="userLoggedIn"
+        :is-pwa="isPwa"
+        :is-mobile="isMobile"
+        :url-signin="urlSignin"
+        :url-signup="urlSignup"
         video-cover-image="/images/main-header-banner.svg"
       >
         <template #buttonText>
