@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useRoute, withBase } from 'vitepress';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { storeToRefs } from 'pinia';
 import { VNavigationMenuLink } from 'UiKit/components/Base/VNavigationMenu';
@@ -29,22 +28,40 @@ import {
 
 defineOptions({ name: 'PWAFooterMenu' });
 
-const route = useRoute();
+const props = defineProps<{
+  currentPath?: string
+  withBase?: (to: string) => string
+  baseUrl?: string
+}>();
 
+const fallbackPath = typeof window !== 'undefined' ? window.location.pathname + window.location.search + window.location.hash : '/';
+const currentPath = computed(() => (props.currentPath ?? fallbackPath));
+
+function defaultWithBase(to: string): string {
+
+  if (/^(https?:)?\/\//i.test(to) || /^[a-z]+:/i.test(to)) return to;
+  return to.startsWith('/') ? to : `/${to}`;
+
+}
+
+const withBaseUniversal = (to: string) => (props.withBase ? props.withBase(to) : defaultWithBase(to));
+
+function isActive(to: string): boolean {
+
+  const target = withBaseUniversal(to);
+  const origin = typeof window !== 'undefined'
+    ? window.location.origin
+    : (props.baseUrl ?? '/');
+
+  const targetPath = new URL(target, origin).pathname;
+
+  const p = (currentPath.value || '/').split('#')[0].split('?')[0];
+  return p === targetPath || p.startsWith(`${targetPath}/`);
+
+}
 
 const sessionStore = useSessionStore();
 const { userLoggedIn } = storeToRefs(sessionStore);
-
-
-const isActive = (to: string, baseUrl: string = '/') => {
-  const target = withBase(to);
-
-  const origin = typeof window !== 'undefined' ? window.location.origin : baseUrl;
-  const targetPath = new URL(target, origin).pathname;
-
-  const p = route.path;
-  return p === targetPath || p.startsWith(targetPath + '/');
-};
 
 const profilesStore = useProfilesStore();
 const { selectedUserProfileId } = storeToRefs(profilesStore);
