@@ -15,7 +15,6 @@ const VAlert = defineAsyncComponent({
 const {
   // state
   selectedUserProfileId,
-  selectedUserProfileData,
   userLoggedIn,
 
   // repository state
@@ -24,7 +23,7 @@ const {
   // ui constants
 
   // computed
-  isWalletError,
+  showWalletTable,
   isAlertShow,
   isTopTextShow,
   isAlertType,
@@ -64,14 +63,14 @@ const {
       </template>
     </VAlert>
     <div
-      v-if="!isWalletError"
+      v-if="showWalletTable"
       class="dashboard-evm-wallet__content"
     >
       <div class="dashboard-evm-wallet__transactions">
         <DashboardEvmWalletTokens
           :profile-id="selectedUserProfileId"
           :logged-in="userLoggedIn"
-          :is-error="isAlertShow || selectedUserProfileData.isTypeSdira"
+          :is-error="isAlertShow"
           @click="onTransactionClick"
         />
       </div>

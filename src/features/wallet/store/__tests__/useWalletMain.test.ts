@@ -72,6 +72,8 @@ describe('useWalletMain', () => {
       isKycPending: false,
       isKycInProgress: false,
       isKycDeclined: false,
+      isTypeSdira: false,
+      isTypeSolo401k: false,
     });
     mockSelectedUserProfileId = ref(1);
     mockUserLoggedIn = ref(true);
@@ -158,6 +160,18 @@ describe('useWalletMain', () => {
     expect(store.isAlertShow.value).toBe(true);
   });
 
+  it('isAlertShow is true when profile type is SDIRA', () => {
+    mockSelectedUserProfileData.value.isTypeSdira = true;
+    const store = useWalletMain();
+    expect(store.isAlertShow.value).toBe(true);
+  });
+
+  it('isAlertShow is true when profile type is Solo401k', () => {
+    mockSelectedUserProfileData.value.isTypeSolo401k = true;
+    const store = useWalletMain();
+    expect(store.isAlertShow.value).toBe(true);
+  });
+
   it('isAlertShow is false when profile is loading', () => {
     mockSelectedUserProfileData.value.isKycNone = true;
     mockGetProfileByIdState.value.loading = true;
@@ -180,6 +194,29 @@ describe('useWalletMain', () => {
     mockSelectedUserProfileData.value.isKycDeclined = true;
     const store = useWalletMain();
     expect(store.isTopTextShow.value).toBe(false);
+  });
+
+  it('isTopTextShow is false when profile type is SDIRA', () => {
+    mockSelectedUserProfileData.value.isTypeSdira = true;
+    const store = useWalletMain();
+    expect(store.isTopTextShow.value).toBe(false);
+  });
+
+  it('showWalletTable is true when not SDIRA and no wallet error', () => {
+    const store = useWalletMain();
+    expect(store.showWalletTable.value).toBe(true);
+  });
+
+  it('showWalletTable is false when profile type is SDIRA', () => {
+    mockSelectedUserProfileData.value.isTypeSdira = true;
+    const store = useWalletMain();
+    expect(store.showWalletTable.value).toBe(false);
+  });
+
+  it('showWalletTable is false when wallet has error', () => {
+    mockGetWalletState.value.data.isWalletStatusAnyError = true;
+    const store = useWalletMain();
+    expect(store.showWalletTable.value).toBe(false);
   });
 
   it('isAlertType returns "info" when wallet is created', () => {

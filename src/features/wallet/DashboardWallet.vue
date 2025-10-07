@@ -22,7 +22,7 @@ const {
   isAlertType,
   isAlertText,
   alertTitle,
-  isWalletError,
+  showWalletTable,
   isTopTextShow,
   alertButtonText,
   FUNDING_TAB_INFO,
@@ -57,14 +57,14 @@ onBeforeMount(() => {
       </template>
     </VAlert>
     <div
-      v-if="!isWalletError"
+      v-if="showWalletTable"
       class="dashboard-wallet__content"
     >
       <div class="dashboard-wallet__transactions">
         <DashboardWalletTransactions
           :profile-id="selectedUserProfileId"
           :logged-in="userLoggedIn"
-          :is-error="isAlertShow || selectedUserProfileData.isTypeSdira"
+          :is-error="isAlertShow"
         />
       </div>
       <div class="dashboard-wallet__bank-accounts">

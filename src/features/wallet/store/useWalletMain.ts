@@ -43,12 +43,19 @@ export function useWalletMain() {
     selectedUserProfileData.value.isKycDeclined || isWalletError.value || selectedUserProfileData.value.isTypeSdira));
 
   const isAlertShow = computed(() => (
-    (isKYCNeedToPass.value || isKYCInProgress.value || isWalletCreated.value || isError.value)
+    selectedUserProfileData.value.isTypeSdira || selectedUserProfileData.value.isTypeSolo401k
+    || (isKYCNeedToPass.value || isKYCInProgress.value || isWalletCreated.value || isError.value)
     && !getProfileByIdState.value.loading
   ));
 
   const isTopTextShow = computed(() => (
-    !isWalletError.value && !selectedUserProfileData.value.isKycDeclined
+    !selectedUserProfileData.value.isTypeSdira
+    && !isWalletError.value && !selectedUserProfileData.value.isKycDeclined
+  ));
+  
+  const showWalletTable = computed(() => (
+    !selectedUserProfileData.value.isTypeSdira
+    && !isWalletError.value
   ));
 
   const isAlertType = computed(() => {
@@ -65,7 +72,7 @@ export function useWalletMain() {
     }
     if (isKYCNeedToPass.value) return `You need to <a href="/profile/${selectedUserProfileId.value}/kyc">pass KYC </a>\n    before you can make a transfer`;
     if (isKYCInProgress.value) return `Your KYC is in progress. You need to pass KYC before you can make a transfer`;
-    return undefined;
+    return `Unfortunately, we were not able to create a wallet for you. Please <a href="${urlContactUs}">contact us</a>\n    to resolve the issue.`;
   });
 
   const alertTitle = computed(() => {
@@ -115,6 +122,7 @@ export function useWalletMain() {
     alertTitle,
     alertButtonText,
     canLoadWalletData,
+    showWalletTable,
     // Action
     updateData,
     onAlertButtonClick,

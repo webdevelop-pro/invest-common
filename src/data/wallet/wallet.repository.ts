@@ -214,7 +214,8 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
 
   const selectedIdAsDataIs = computed(() => selectedUserProfileData.value.id === selectedUserProfileId.value);
   const canLoadWalletData = computed(() => (
-    !selectedUserProfileData.value.isTypeSdira && selectedIdAsDataIs.value && userLoggedIn.value
+    !selectedUserProfileData.value.isTypeSdira && !selectedUserProfileData.value.isTypeSolo401k
+    && selectedIdAsDataIs.value && userLoggedIn.value
     &&  selectedUserProfileData.value.isKycApproved && (selectedUserProfileId.value > 0)
     && !getWalletState.value.loading && (selectedUserProfileId.value > 0)));
 

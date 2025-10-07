@@ -226,7 +226,8 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
 
   const selectedIdAsDataIs = computed(() => selectedUserProfileData.value.id === selectedUserProfileId.value);
   const canLoadEvmWalletData = computed(() => (
-    !selectedUserProfileData.value.isTypeSdira && selectedIdAsDataIs.value && userLoggedIn.value
+    !selectedUserProfileData.value.isTypeSdira && !selectedUserProfileData.value.isTypeSolo401k
+    && selectedIdAsDataIs.value && userLoggedIn.value
     &&  selectedUserProfileData.value.isKycApproved && (selectedUserProfileId.value > 0)
     && !getEvmWalletState.value.loading && (selectedUserProfileId.value > 0)));
 

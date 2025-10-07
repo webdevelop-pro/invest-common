@@ -1,5 +1,6 @@
 import { ref } from 'vue';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { createPinia, setActivePinia } from 'pinia';
 
 const getEvmWalletStateRef = ref({
   data: {
@@ -16,10 +17,18 @@ vi.mock('InvestCommon/data/evm/evm.repository', () => {
   };
 });
 
+vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => {
+  const selectedUserProfileData = ref({ isTypeSolo401k: false });
+  return {
+    useProfilesStore: () => ({ selectedUserProfileData }),
+  };
+});
+
 import { useDashboardEvmWalletTokens } from '../useDashboardEvmWalletTokens';
 
 describe('useDashboardEvmWalletTokens', () => {
   beforeEach(() => {
+    setActivePinia(createPinia());
     getEvmWalletStateRef.value = {
       data: {
         balances: [],

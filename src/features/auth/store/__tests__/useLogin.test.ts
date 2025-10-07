@@ -250,11 +250,15 @@ describe('useLogin Store', () => {
 
   describe('Social Login', () => {
     it('should handle social login', async () => {
-      // Mock URL with flow parameter
+      // Mock URL with flow parameter BEFORE store creation (computed caches value)
       Object.defineProperty(window, 'location', {
         value: { search: '?flow=existing-flow-id' },
         writable: true,
       });
+
+      // Recreate store to pick up new query params
+      store = useLoginStore();
+      mockAuthRepository = useRepositoryAuth();
 
       // Mock successful auth flow
       mockAuthRepository.getAuthFlowState.value = { data: undefined, loading: false, error: null } as any;
@@ -275,13 +279,15 @@ describe('useLogin Store', () => {
     });
 
     it('should handle social login without flow ID', async () => {
-      const store = useLoginStore();
-
       // Mock URL without flow parameter
       Object.defineProperty(window, 'location', {
         value: { search: '' },
         writable: true,
       });
+
+      // Recreate store to pick up new query params
+      store = useLoginStore();
+      mockAuthRepository = useRepositoryAuth();
 
       await store.loginSocialHandler('google');
 
@@ -301,26 +307,26 @@ describe('useLogin Store', () => {
 
   describe('Navigation and Query Parameters', () => {
     it('should handle query parameters correctly', () => {
-      const store = useLoginStore();
-
       // Mock URL with multiple query parameters
       Object.defineProperty(window, 'location', {
         value: { search: '?redirect=/test&source=email' },
         writable: true,
       });
+      // Recreate store to pick up new query params
+      store = useLoginStore();
 
       // Test query parameter retrieval
       expect(store.getQueryParam('redirect')).toBe('/test');
     });
 
     it('should handle navigation with query parameters', () => {
-      const store = useLoginStore();
-
       // Mock URL with query parameters
       Object.defineProperty(window, 'location', {
         value: { search: '?redirect=/test&source=email' },
         writable: true,
       });
+      // Recreate store to pick up new query params
+      store = useLoginStore();
 
       store.onSignup();
 
@@ -331,14 +337,17 @@ describe('useLogin Store', () => {
 
   describe('onMountedHandler', () => {
     it('should handle flow parameter and navigate to authenticator when aal2 is requested', async () => {
-      const store = useLoginStore();
       const mockFlowId = 'test-flow-id';
 
-      // Mock URL with flow parameter
+      // Mock URL with flow parameter BEFORE store creation
       Object.defineProperty(window, 'location', {
         value: { search: `?flow=${mockFlowId}` },
         writable: true,
       });
+
+      // Recreate store to pick up new query params
+      store = useLoginStore();
+      mockAuthRepository = useRepositoryAuth();
 
       // Mock getLogin response with aal2
       vi.mocked(useRepositoryAuth).mockReturnValueOnce({
@@ -353,13 +362,13 @@ describe('useLogin Store', () => {
     });
 
     it('should not navigate when flow parameter is not present', async () => {
-      const store = useLoginStore();
-
       // Mock URL without flow parameter
       Object.defineProperty(window, 'location', {
         value: { search: '' },
         writable: true,
       });
+      // Recreate store to pick up new query params
+      store = useLoginStore();
 
       await store.onMountedHandler();
 
@@ -368,14 +377,17 @@ describe('useLogin Store', () => {
     });
 
     it('should not navigate when aal2 is not requested', async () => {
-      const store = useLoginStore();
       const mockFlowId = 'test-flow-id';
 
-      // Mock URL with flow parameter
+      // Mock URL with flow parameter BEFORE store creation
       Object.defineProperty(window, 'location', {
         value: { search: `?flow=${mockFlowId}` },
         writable: true,
       });
+
+      // Recreate store to pick up new query params
+      store = useLoginStore();
+      mockAuthRepository = useRepositoryAuth();
 
       // Mock getLogin response without aal2
       const mockAuthRepo = {

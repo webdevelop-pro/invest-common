@@ -2,6 +2,7 @@ import { computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
 import { EvmTransactionTypes } from 'InvestCommon/data/evm/evm.types';
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import addFunds from 'InvestCommon/shared/assets/images/icons/add-funds.svg';
 import withdraw from 'InvestCommon/shared/assets/images/icons/withdraw.svg';
 import exchange from 'InvestCommon/shared/assets/images/icons/exchange.svg';
@@ -13,6 +14,9 @@ export const useDashboardEvmWalletTokens = () => {
   const {
     getEvmWalletState, isLoadingNotificationTransaction, isLoadingNotificationWallet,
   } = storeToRefs(evmRepository);
+  
+  const profilesStore = useProfilesStore();
+  const { selectedUserProfileData } = storeToRefs(profilesStore);
 
   const tableOptions = computed(() => getEvmWalletState.value.data?.balances);
 
@@ -32,6 +36,18 @@ export const useDashboardEvmWalletTokens = () => {
     (getEvmWalletState.value.data?.balances?.length ?? 0) > 0
   ));
 
+  const canAddFunds = computed(() => (
+    !getEvmWalletState.value.loading && !selectedUserProfileData.value.isTypeSolo401k
+  ));
+
+  const canEarn = computed(() => (
+    !getEvmWalletState.value.loading && !selectedUserProfileData.value.isTypeSolo401k
+  ));
+
+  const canBuy = computed(() => (
+    !getEvmWalletState.value.loading && !selectedUserProfileData.value.isTypeSolo401k
+  ));
+
   const isSkeleton = computed(() => getEvmWalletState.value.loading);
 
   const transactionsOptions = computed(() => {
@@ -48,7 +64,7 @@ export const useDashboardEvmWalletTokens = () => {
       label: 'Add Funds',
       variant: 'default',
       icon: addFunds,
-      disabled: getEvmWalletState.value.loading,
+      disabled: !canAddFunds.value,
       transactionType: EvmTransactionTypes.deposit,
     },
     {
@@ -72,7 +88,7 @@ export const useDashboardEvmWalletTokens = () => {
       label: 'Buy',
       variant: 'outlined',
       icon: buy,
-      disabled:  getEvmWalletState.value.loading,
+      disabled: !canBuy.value,
       transactionType: null,
     },
     {
@@ -80,7 +96,7 @@ export const useDashboardEvmWalletTokens = () => {
       label: 'Earn',
       variant: 'outlined',
       icon: earn,
-      disabled:  getEvmWalletState.value.loading,
+      disabled: !canEarn.value,
       transactionType: null,
     },
   ]);

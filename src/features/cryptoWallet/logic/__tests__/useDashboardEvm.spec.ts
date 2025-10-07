@@ -65,6 +65,7 @@ vi.mock('InvestCommon/data/evm/evm.repository', () => {
 // Must import after mocks
 import { useDashboardEvm } from '../useDashboardEvm';
 import { EvmTransactionTypes } from 'InvestCommon/data/evm/evm.types';
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 
 // helper to mount composable inside a component
 function mountComposable() {
@@ -141,6 +142,62 @@ describe('useDashboardEvm', () => {
     await nextTick();
     expect(transactiontType.value).toBe(EvmTransactionTypes.deposit);
     expect(isDialogTransactionOpen.value).toBe(true);
+  });
+
+  it('accepts array form for add-transaction query', async () => {
+    const route = useRoute();
+    route.query['add-transaction'] = [EvmTransactionTypes.deposit];
+    const { transactiontType } = mountComposable();
+    await nextTick();
+    expect(transactiontType.value).toBe(EvmTransactionTypes.deposit);
+  });
+
+  it('alert text shows contact link when error state', async () => {
+    getEvmWalletStateRef.value.data.isStatusAnyError = true;
+    const { isAlertText } = mountComposable();
+    await nextTick();
+    expect(isAlertText.value).toContain('contact us');
+  });
+
+  it('alert title/text reflect wallet creation state', async () => {
+    const profiles = useProfilesStore();
+    profiles.selectedUserProfileData.value.isKycNone = false as unknown as boolean;
+    profiles.selectedUserProfileData.value.isKycNew = false as unknown as boolean;
+    profiles.selectedUserProfileData.value.isKycPending = false as unknown as boolean;
+    getEvmWalletStateRef.value.data.isStatusCreated = true;
+    const { alertTitle, isAlertText, isAlertType } = mountComposable();
+    await nextTick();
+    expect(alertTitle.value).toBe('Your wallet is being created and verified.');
+    expect(isAlertText.value).toContain('contact us');
+    expect(isAlertType.value).toBe('info');
+  });
+
+  it('top text shows by default and hides on error/declined', async () => {
+    let api = mountComposable();
+    await nextTick();
+    expect(api.isTopTextShow.value).toBe(true);
+    getEvmWalletStateRef.value.data.isStatusAnyError = true;
+    api = mountComposable();
+    await nextTick();
+    expect(api.isTopTextShow.value).toBe(false);
+  });
+
+  it('table visibility hides for SDIRA and wallet error', async () => {
+    let api = mountComposable();
+    await nextTick();
+    expect(api.showWalletTable.value).toBe(true);
+    getEvmWalletStateRef.value.data.isStatusAnyError = true;
+    api = mountComposable();
+    await nextTick();
+    expect(api.showWalletTable.value).toBe(false);
+  });
+
+  it('navigates to KYC with profileId param when KYC needed', async () => {
+    const { onAlertButtonClick } = mountComposable();
+    const router = useRouter();
+    onAlertButtonClick();
+    await nextTick();
+    expect(router.push).toHaveBeenCalledWith({ name: 'ROUTE_SUBMIT_KYC', params: { profileId: 123 } });
   });
 });
 
