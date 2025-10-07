@@ -13,6 +13,7 @@ export const useAppStateStore = defineStore('appState', {
       if (this.isMobile) {
         this.isPwa = true;
         installPwaNoZoomGuards();
+        document.body.classList.add('pwa-mobile');
       }
     },
   },
