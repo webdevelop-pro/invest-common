@@ -121,13 +121,14 @@ const menuItems = computed<Item[]>(() =>
   --pwamenu-gx: 12px;
   --pwamenu-gb: 12px;
   --pwamenu-radius: 16px;
-  --pwamenu-bg: rgba(243, 243, 243, 0.96);
-  --pwamenu-border: rgba(255, 255, 255, 0.05);
-  --pwamenu-shadow: 0 10px 30px rgba(0, 0, 0, 0.24), 0 2px 8px rgba(0,0,0,0.08);
+  --pwamenu-bg: rgb(243 243 243 / 96%);
+  --pwamenu-border: rgb(255 255 255 / 5%);
+  --pwamenu-shadow: 0 10px 30px rgb(0 0 0 / 24%), 0 2px 8px rgb(0 0 0 / 8%);
 }
 
 .pwamenu { display: block; } // fix it
-@media (max-width: 768px) {
+
+@media (width <= 768px) {
   body.pwa-standalone .pwamenu { display: block; }
 }
 
@@ -144,7 +145,6 @@ const menuItems = computed<Item[]>(() =>
     list-style: none;
     margin: 0;
     padding: 8px;
-
     display: grid;
     gap: 6px;
     background: var(--pwamenu-bg);
@@ -154,6 +154,7 @@ const menuItems = computed<Item[]>(() =>
     backdrop-filter: blur(6px);
 
     &.cols-5 { grid-template-columns: repeat(5, 1fr); }
+
     &.cols-4 { grid-template-columns: repeat(4, 1fr); }
   }
 
@@ -165,12 +166,10 @@ const menuItems = computed<Item[]>(() =>
     width: 100%;
     padding: 8px 0;
     border-radius: 12px;
-
     display: flex;
     flex-direction: column; 
     align-items: center;
     justify-content: center;
-
     text-decoration: none; 
     color: inherit;        
     transition: background .2s ease, color .2s ease;
@@ -191,7 +190,7 @@ const menuItems = computed<Item[]>(() =>
     }
 
     &.is-active {
-      background: rgba(17,24,39,0.06);
+      background: rgb(17 24 39 / 6%);
 
       .pwamenu__label {
         font-weight: 600;  
