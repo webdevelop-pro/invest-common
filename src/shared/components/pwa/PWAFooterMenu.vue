@@ -23,7 +23,7 @@ import {
   urlProfileCryptoWallet, 
   urlProfileWallet, 
   urlProfilePortfolio
-} from 'InvestCommon/domain/config/links.ts';
+} from 'InvestCommon/domain/config/links';
 
 
 defineOptions({ name: 'PWAFooterMenu' });
