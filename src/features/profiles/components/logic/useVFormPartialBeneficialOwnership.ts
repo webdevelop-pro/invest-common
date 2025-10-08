@@ -3,7 +3,7 @@ import {
 } from 'vue';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import {
-  address1Rule, cityRule, countryRuleObject, dobRule,
+  address1Rule, cityRule, dobRule,
   emailRule, errorMessageRule, firstNameRule, lastNameRule,
   phoneRule, ssnRule, stateRule, zipRule,
 } from 'UiKit/helpers/validation/rules';
@@ -23,7 +23,7 @@ const options = [
   { value: '4', name: '4' },
 ];
 
-const requiredDefault = ['address1', 'first_name', 'last_name', 'dob', 'email', 'phone', 'city', 'state', 'zip_code', 'country'];
+const requiredDefault = ['address1', 'first_name', 'last_name', 'dob', 'email', 'phone', 'city', 'zip_code', 'country'];
 const defItem = {
   non_us: false,
 };
@@ -45,17 +45,44 @@ export function useVFormPartialBeneficialOwnership(
           address1: address1Rule,
           dob: dobRule,
           city: cityRule,
-          state: stateRule,
-          zip_code: zipRule,
-          country: countryRuleObject,
+          country: {
+            title: 'country',
+            minLength: 2,
+          },
           phone: phoneRule,
           email: emailRule,
           non_us: { type: 'boolean' },
           ssn: ssnRule,
+          type_of_identification:	{
+            type: "object",
+            "$ref": "#/definitions/Identification",
+          },
         },
         required: requiredDefault,
         if: { properties: { non_us: { const: false } } },
-        then: { required: ['ssn'] },
+        then: {
+          required: ['ssn', 'state'],
+          properties: {
+            state: stateRule,
+            zip_code: zipRule,
+          },
+        },
+        else: {
+          properties: { 
+            state: {
+              type: 'string',
+              title: 'state',
+              minLength: 2,
+              maxLength: 100,
+            },
+            zip_code: {
+              type: 'string',
+              title: 'zip_code',
+              minLength: 3,
+              maxLength: 10,
+            },
+          }
+        },
       },
       Identification: {
         allOf: [

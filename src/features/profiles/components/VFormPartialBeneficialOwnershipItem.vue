@@ -298,19 +298,32 @@ watch(() => model.value?.non_us, () => {
           label="State"
           data-testid="state-group"
         >
-          <VFormCombobox
-            v-model="model.state"
-            :is-error="VFormGroupProps.isFieldError"
-            name="state"
-            size="large"
-            placeholder="State"
-            item-label="name"
-            item-value="value"
-            searchable
-            :options="optionsState"
-            :loading="loading || (optionsState.length === 0)"
-            data-testid="state"
-          />
+          <template v-if="optionsState?.length">
+            <VFormCombobox
+              v-model="model.state"
+              :is-error="VFormGroupProps.isFieldError"
+              name="state"
+              size="large"
+              placeholder="State"
+              item-label="name"
+              item-value="value"
+              searchable
+              :options="optionsState"
+              :loading="loading || (optionsState.length === 0)"
+              data-testid="state"
+            />
+          </template>
+          <template v-else>
+            <VFormInput
+              v-model="model.state"
+              :is-error="VFormGroupProps.isFieldError"
+              name="state"
+              size="large"
+              :placeholder="model.non_us ? 'State / Province / Region' : 'State'"
+              data-testid="state"
+              :loading="loading"
+            />
+          </template>
         </VFormGroup>
       </FormCol>
     </FormRow>
@@ -331,7 +344,7 @@ watch(() => model.value?.non_us, () => {
             size="large"
             data-testid="zip"
             placeholder="Zip Code"
-            mask="#####-####"
+            :mask="model.non_us ? undefined : '#####-####'"
             return-masked-value
             disallow-special-chars
             :loading="loading"
