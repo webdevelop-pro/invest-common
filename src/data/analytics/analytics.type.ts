@@ -42,6 +42,37 @@ export interface IAnalyticsData {
   caller: string[];
   stack: string[];
   serviceContext: IServiceContext;
+  client?: IClientContext;
+}
+
+export interface IViewportInfo {
+  width?: number;
+  height?: number;
+}
+
+export interface IScreenInfo {
+  width?: number;
+  height?: number;
+  availWidth?: number;
+  availHeight?: number;
+  colorDepth?: number;
+  pixelRatio?: number;
+}
+
+export interface IOrientationInfo {
+  type?: string;
+  angle?: number;
+}
+
+export interface IClientContext {
+  userAgent?: string;
+  language?: string;
+  languages?: readonly string[];
+  onLine?: boolean;
+  timeZone?: string;
+  viewport?: IViewportInfo;
+  screen?: IScreenInfo;
+  orientation?: IOrientationInfo;
 }
 
 /**

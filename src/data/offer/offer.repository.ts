@@ -1,5 +1,5 @@
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
-import { toasterErrorHandlingAnalytics } from 'InvestCommon/data/repository/error/toasterErrorHandlingAnalytics';
+import { toasterErrorHandling } from 'InvestCommon/data/repository/error/toasterErrorHandling';
 import {
   IOffer, IOfferData, IOfferCommentsResponse, IOfferCommentPayload,
 } from 'InvestCommon/types/api/offers';
@@ -48,7 +48,7 @@ export const useRepositoryOffer = defineStore('repository-offer', () => {
       return formattedData;
     } catch (err) {
       getOffersState.value.error = err as Error;
-      toasterErrorHandlingAnalytics(err, 'Failed to fetch offers');
+      toasterErrorHandling(err, 'Failed to fetch offers');
       throw err;
     } finally {
       getOffersState.value.loading = false;
@@ -67,7 +67,7 @@ export const useRepositoryOffer = defineStore('repository-offer', () => {
       return formattedData;
     } catch (err) {
       getOfferOneState.value.error = err as Error;
-      toasterErrorHandlingAnalytics(err, 'Failed to fetch offer');
+      toasterErrorHandling(err, 'Failed to fetch offer');
       throw err;
     } finally {
       getOfferOneState.value.loading = false;
@@ -84,7 +84,7 @@ export const useRepositoryOffer = defineStore('repository-offer', () => {
       return commentsData;
     } catch (err) {
       getOfferCommentsState.value.error = err as Error;
-      toasterErrorHandlingAnalytics(err, 'Failed to fetch offer comments');
+      toasterErrorHandling(err, 'Failed to fetch offer comments');
       throw err;
     } finally {
       getOfferCommentsState.value.loading = false;
@@ -101,7 +101,7 @@ export const useRepositoryOffer = defineStore('repository-offer', () => {
       return commentData;
     } catch (err) {
       setOfferCommentState.value.error = err as Error;
-      toasterErrorHandlingAnalytics(err, 'Failed to set offer comment');
+      toasterErrorHandling(err, 'Failed to set offer comment');
       throw err;
     } finally {
       setOfferCommentState.value.loading = false;
@@ -117,7 +117,7 @@ export const useRepositoryOffer = defineStore('repository-offer', () => {
       return response.data;
     } catch (err) {
       setOfferCommentOptionsState.value.error = err as Error;
-      toasterErrorHandlingAnalytics(err, 'Failed to fetch offer comment options');
+      toasterErrorHandling(err, 'Failed to fetch offer comment options');
       throw err;
     } finally {
       setOfferCommentOptionsState.value.loading = false;

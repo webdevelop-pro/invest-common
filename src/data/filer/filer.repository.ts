@@ -2,7 +2,7 @@ import { acceptHMRUpdate, defineStore } from 'pinia';
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import env from 'InvestCommon/domain/config/env';
 import { IFilerItem } from 'InvestCommon/types/api/filer.type';
-import { toasterErrorHandlingAnalytics } from 'InvestCommon/data/repository/error/toasterErrorHandlingAnalytics';
+import { toasterErrorHandling } from 'InvestCommon/data/repository/error/toasterErrorHandling';
 import { createActionState } from 'InvestCommon/data/repository/repository';
 import { INotification } from 'InvestCommon/data/notifications/notifications.types';
 
@@ -50,7 +50,7 @@ export const useRepositoryFiler = defineStore('repository-filer', () => {
       return response.data;
     } catch (err) {
       getFilesState.value.error = err as Error;
-      toasterErrorHandlingAnalytics(err, 'Failed to fetch files');
+      toasterErrorHandling(err, 'Failed to fetch files');
       throw err;
     } finally {
       getFilesState.value.loading = false;
@@ -66,7 +66,7 @@ export const useRepositoryFiler = defineStore('repository-filer', () => {
       return response.data;
     } catch (err) {
       getPublicFilesState.value.error = err as Error;
-      toasterErrorHandlingAnalytics(err, 'Failed to fetch public files');
+      toasterErrorHandling(err, 'Failed to fetch public files');
       throw err;
     } finally {
       getPublicFilesState.value.loading = false;
@@ -88,7 +88,7 @@ export const useRepositoryFiler = defineStore('repository-filer', () => {
       return response.data;
     } catch (err) {
       postSignurlState.value.error = err as Error;
-      toasterErrorHandlingAnalytics(err, 'Failed to get signurl');
+      toasterErrorHandling(err, 'Failed to get signurl');
       throw err;
     } finally {
       postSignurlState.value.loading = false;
@@ -104,7 +104,7 @@ export const useRepositoryFiler = defineStore('repository-filer', () => {
       return result;
     } catch (err) {
       uploadFileState.value.error = err as Error;
-      toasterErrorHandlingAnalytics(err, 'Failed to upload file');
+      toasterErrorHandling(err, 'Failed to upload file');
       throw err;
     } finally {
       uploadFileState.value.loading = false;
@@ -123,7 +123,7 @@ export const useRepositoryFiler = defineStore('repository-filer', () => {
       return response.data;
     } catch (err) {
       getFileByIdLinkState.value.error = err as Error;
-      toasterErrorHandlingAnalytics(err, 'Failed to fetch image by id');
+      toasterErrorHandling(err, 'Failed to fetch image by id');
       throw err;
     } finally {
       getFileByIdLinkState.value.loading = false;

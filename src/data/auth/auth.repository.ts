@@ -1,7 +1,7 @@
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import { oryErrorHandling } from 'InvestCommon/data/repository/error/oryErrorHandling';
 import { oryResponseHandling } from 'InvestCommon/data/repository/response/oryResponseHandling';
-import { toasterErrorHandlingAnalytics } from 'InvestCommon/data/repository/error/toasterErrorHandlingAnalytics';
+import { toasterErrorHandling } from 'InvestCommon/data/repository/error/toasterErrorHandling';
 import env from 'InvestCommon/domain/config/env';
 import { SELFSERVICE } from 'InvestCommon/features/auth/store/type';
 import { createActionState } from 'InvestCommon/data/repository/repository';
@@ -174,7 +174,7 @@ export const useRepositoryAuth = () => {
       return response.data;
     } catch (err) {
       getSchemaState.value.error = err as Error;
-      toasterErrorHandlingAnalytics(err, 'Failed to get schema');
+      toasterErrorHandling(err, 'Failed to get schema');
       throw err;
     } finally {
       getSchemaState.value.loading = false;

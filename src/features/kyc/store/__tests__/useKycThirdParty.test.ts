@@ -8,8 +8,8 @@ vi.mock('InvestCommon/data/plaid/loadPlaidScriptOnce', () => ({
   loadPlaidScriptOnce: vi.fn().mockResolvedValue(undefined),
 }));
 
-vi.mock('InvestCommon/data/repository/error/toasterErrorHandlingAnalytics', () => ({
-  toasterErrorHandlingAnalytics: vi.fn(),
+vi.mock('InvestCommon/data/repository/error/toasterErrorHandling', () => ({
+  toasterErrorHandling: vi.fn(),
 }));
 
 describe('useKycThirdParty', () => {

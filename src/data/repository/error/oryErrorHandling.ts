@@ -3,7 +3,6 @@ import { urlAuthenticator, urlProfile, urlSignin } from 'InvestCommon/domain/con
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
-import { toasterErrorHandlingAnalytics } from './toasterErrorHandlingAnalytics';
 import { toasterErrorHandling } from './toasterErrorHandling';
 import { h } from 'vue';
 
@@ -131,6 +130,6 @@ export const oryErrorHandling = async (
       navigateWithQueryParams(urlSignin);
       break;
     default:
-      toasterErrorHandlingAnalytics(error, comment);
+      toasterErrorHandling(error, comment);
   }
 };

@@ -1,6 +1,7 @@
 import { useRepositoryAnalytics } from 'InvestCommon/data/analytics/analytics.repository';
 import { AnalyticsLogLevel } from 'InvestCommon/data/analytics/analytics.type';
 import { APIError } from 'InvestCommon/data/service/handlers/apiError';
+import { normalizeGroupMessage, resolveComponentName, getClientContext, formatErrorMessage, chooseSafeComponentName } from 'InvestCommon/domain/analytics/useAnalyticsError';
 import { urlServerError } from 'InvestCommon/domain/config/links';
 
 // Extend Window interface for VitePress
@@ -32,30 +33,37 @@ export const setupUnifiedErrorHandler = (config: ErrorHandlerConfig) => {
   const analytics = useRepositoryAnalytics();
   const { appType, serviceName = `${appType}-app` } = config;
 
+  // helpers imported from useAnalyticsError
+
   // Send error to analytics
-  const sendErrorToAnalytics = async (error: Error, componentName: string, errorType: string) => {
+  const sendErrorToAnalytics = async (error: Error | APIError, componentName: string, errorType: string) => {
     try {
+      const pathValue = typeof window !== 'undefined' ? window.location.pathname : '';
+      const urlValue = typeof window !== 'undefined' ? window.location.href : '';
+      const userAgentValue = typeof navigator !== 'undefined' ? navigator.userAgent : '';
+
       await analytics.setMessage({
         time: new Date().toISOString(),
         level: AnalyticsLogLevel.ERROR,
-        message: error.message,
-        error: errorType,
+        message: normalizeGroupMessage(error.message),
+        error: formatErrorMessage(error.message, componentName),
         data: {
-          component: componentName,
-          caller: ['unified-error-handler', errorType, appType],
-          stack: error.stack ? [error.stack] : [],
+          component: (error as any).component || componentName,
+          caller: (error as any).caller || ['unified-error-handler', errorType, appType],
+          stack: (error as any).data?.stack ? [(error as any).data.stack] : error.stack ? [error.stack] : [],
           serviceContext: {
-            httpRequest: {
+            httpRequest: (error as any).data?.httpRequest || {
               method: 'GET',
-              url: typeof window !== 'undefined' ? window.location.href : '',
-              path: typeof window !== 'undefined' ? window.location.pathname : '',
-              userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : '',
+              url: urlValue,
+              path: pathValue,
+              userAgent: userAgentValue,
               referer: typeof document !== 'undefined' ? document.referrer || '-' : '-',
               remoteIp: '-',
               protocol: typeof window !== 'undefined' ? window.location.protocol : ''
             },
-            service_name: serviceName
-          }
+            service_name: serviceName,
+          },
+          client: getClientContext()
         }
       });
     } catch (analyticsError) {
@@ -109,7 +117,7 @@ export const setupUnifiedErrorHandler = (config: ErrorHandlerConfig) => {
   const setupVueHandler = (app?: any) => {
     if (app?.config) {
       app.config.errorHandler = (error: Error, vm: any) => {
-        const componentName = vm?.$options?.name || vm?.$options?.__file || 'Unknown Component';
+        const componentName = chooseSafeComponentName(error, vm, 'Unknown Component');
         handleError(error, componentName, 'Vue Error Handler');
       };
     }
@@ -156,7 +164,7 @@ export const setupUnifiedErrorHandler = (config: ErrorHandlerConfig) => {
     if ((window as any).Vue?.config) {
       const originalVueHandler = (window as any).Vue.config.errorHandler;
       (window as any).Vue.config.errorHandler = (error: Error, vm: any) => {
-        const componentName = vm?.$options?.name || vm?.$options?.__file || 'VitePress Component';
+        const componentName = resolveComponentName(vm, 'VitePress Component');
         handleError(error, componentName, 'Component Error');
         
         if (originalVueHandler) {
@@ -178,11 +186,15 @@ export const setupUnifiedErrorHandler = (config: ErrorHandlerConfig) => {
 
 // Convenience functions
 export const setupVueErrorHandler = (app?: any) => {
+  const envValue = typeof import.meta !== 'undefined' && (import.meta as any).env ? (import.meta as any).env.VITE_ENV : undefined;
+  if (envValue === 'local') return;
   const handler = setupUnifiedErrorHandler({ appType: 'vue' });
   handler?.initialize(app);
 };
 
 export const setupVitePressErrorHandler = () => {
+  const envValue = typeof import.meta !== 'undefined' && (import.meta as any).env ? (import.meta as any).env.VITE_ENV : undefined;
+  if (envValue === 'local') return;
   const handler = setupUnifiedErrorHandler({ appType: 'vitepress' });
   handler?.initialize();
 };

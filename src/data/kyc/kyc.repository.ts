@@ -2,7 +2,7 @@ import { ref, computed, watch } from 'vue';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import env from 'InvestCommon/domain/config/env';
-import { toasterErrorHandlingAnalytics } from 'InvestCommon/data/repository/error/toasterErrorHandlingAnalytics';
+import { toasterErrorHandling } from 'InvestCommon/data/repository/error/toasterErrorHandling';
 import { createActionState } from 'InvestCommon/data/repository/repository';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { IKycTokenResponse } from './kyc.types';
@@ -51,7 +51,7 @@ export const useRepositoryKyc = defineStore('repository-kyc', () => {
       return response.data;
     } catch (err) {
       tokenState.value.error = err as Error;
-      toasterErrorHandlingAnalytics(err, 'Failed to create KYC token');
+      toasterErrorHandling(err, 'Failed to create KYC token');
       throw err;
     } finally {
       tokenState.value.loading = false;
@@ -96,7 +96,7 @@ export const useRepositoryKyc = defineStore('repository-kyc', () => {
       }
     } catch (err) {
       isPlaidLoading.value = false;
-      toasterErrorHandlingAnalytics(err, 'Failed to handle Plaid KYC');
+      toasterErrorHandling(err, 'Failed to handle Plaid KYC');
     }
   };
 

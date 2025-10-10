@@ -1,5 +1,5 @@
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
-import { toasterErrorHandlingAnalytics } from 'InvestCommon/data/repository/error/toasterErrorHandlingAnalytics';
+import { toasterErrorHandling } from 'InvestCommon/data/repository/error/toasterErrorHandling';
 import { IAccreditationData } from 'InvestCommon/types/api/invest';
 import env from 'InvestCommon/domain/config/env';
 import { v4 as uuidv4 } from 'uuid';
@@ -26,7 +26,7 @@ export const useRepositoryAccreditation = () => {
       return response.data;
     } catch (err) {
       getAllState.value.error = err as Error;
-      toasterErrorHandlingAnalytics(err, 'Failed to fetch accreditation data');
+      toasterErrorHandling(err, 'Failed to fetch accreditation data');
       throw err;
     } finally {
       getAllState.value.loading = false;
@@ -45,7 +45,7 @@ export const useRepositoryAccreditation = () => {
       return response.data;
     } catch (err) {
       createState.value.error = err as Error;
-      toasterErrorHandlingAnalytics(err, 'Failed to create accreditation');
+      toasterErrorHandling(err, 'Failed to create accreditation');
       throw err;
     } finally {
       createState.value.loading = false;
@@ -65,7 +65,7 @@ export const useRepositoryAccreditation = () => {
       return response.data;
     } catch (err) {
       updateState.value.error = err as Error;
-      toasterErrorHandlingAnalytics(err, 'Failed to update accreditation');
+      toasterErrorHandling(err, 'Failed to update accreditation');
       throw err;
     } finally {
       updateState.value.loading = false;
@@ -86,7 +86,7 @@ export const useRepositoryAccreditation = () => {
       return response.data;
     } catch (err) {
       uploadDocumentState.value.error = err as Error;
-      toasterErrorHandlingAnalytics(err, 'Failed to upload accreditation document');
+      toasterErrorHandling(err, 'Failed to upload accreditation document');
       throw err;
     } finally {
       uploadDocumentState.value.loading = false;
@@ -108,7 +108,7 @@ export const useRepositoryAccreditation = () => {
       return response.data;
     } catch (err) {
       createEscrowState.value.error = err as Error;
-      toasterErrorHandlingAnalytics(err, 'Failed to create escrow');
+      toasterErrorHandling(err, 'Failed to create escrow');
       throw err;
     } finally {
       createEscrowState.value.loading = false;

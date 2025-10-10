@@ -1,5 +1,5 @@
 import { ref, computed } from 'vue';
-import { toasterErrorHandlingAnalytics } from 'InvestCommon/data/repository/error/toasterErrorHandlingAnalytics';
+import { toasterErrorHandling } from 'InvestCommon/data/repository/error/toasterErrorHandling';
 import { loadPlaidScriptOnce, PlaidHandler } from 'InvestCommon/data/plaid/loadPlaidScriptOnce';
 
 // Keep a single Plaid handler within this module
@@ -46,7 +46,7 @@ export function useKycThirdParty() {
       }
     } catch (err) {
       isPlaidLoading.value = false;
-      toasterErrorHandlingAnalytics(err, 'Failed to handle Plaid KYC');
+      toasterErrorHandling(err, 'Failed to handle Plaid KYC');
     }
   };
 
