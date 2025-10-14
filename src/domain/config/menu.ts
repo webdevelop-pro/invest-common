@@ -3,30 +3,34 @@ import {
   urlCookie, urlPrivacy, urlTerms,
 } from 'InvestCommon/domain/config/links';
 import { computed } from 'vue';
+import type { MenuItem } from 'InvestCommon/types/global';
+import ExploreMenuIcon from 'UiKit/assets/images/menu_common/investments.svg';
+import HowItWorksMenuIcon from 'UiKit/assets/images/menu_common/help.svg';
+import ResourceCenterMenuIcon from 'UiKit/assets/images/menu_common/crypto2.svg';
+import FaqMenuIcon from 'UiKit/assets/images/menu_common/faq.svg';
 
-export type MenuItem = {
-  to?: string;
-  href?: string;
-  active?: boolean;
-  text: string;
-  children?: MenuItem[];
-}
+export type { MenuItem } from 'InvestCommon/types/global';
+
 export const MENU_HEADER_RIGHT = computed(() => ([
   {
     href: urlOffers,
     text: 'Explore',
+    icon: ExploreMenuIcon,
   },
   {
     href: urlHowItWorks,
     text: 'How It Works',
+    icon: HowItWorksMenuIcon,
   },
   {
     href: urlBlog,
     text: 'Resource center',
+    icon: ResourceCenterMenuIcon,
   },
   {
     href: urlFaq,
     text: 'FAQ',
+    icon: FaqMenuIcon,
   },
 ]));
 

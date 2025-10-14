@@ -1,19 +1,19 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import type { Component } from 'vue';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { storeToRefs } from 'pinia';
 import { VNavigationMenuLink } from 'UiKit/components/Base/VNavigationMenu';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 
-
-import HomeIcon    from 'UiKit/assets/images/pwa_specific/home.svg';
-import DashboardIcon    from 'UiKit/assets/images/pwa_specific/dashboard__.svg';
-import NotificationIcon    from 'UiKit/assets/images/pwa_specific/notification.svg';
-import InvestmentIcon from 'UiKit/assets/images/pwa_specific/investment.svg';
-import WalletIcon  from 'UiKit/assets/images/pwa_specific/wallet.svg';
-import CryptoIcon  from 'UiKit/assets/images/pwa_specific/crypto-wallet.svg';
-import HowIcon_     from 'UiKit/assets/images/pwa_specific/info_.svg';
-import FaqIcon_     from 'UiKit/assets/images/pwa_specific/faq_.svg';
+import HomeIcon from 'UiKit/assets/images/menu_common/home.svg';
+import DashboardIcon from 'UiKit/assets/images/menu_common/grid.svg';
+import NotificationIcon from 'UiKit/assets/images/menu_common/notifications.svg';
+import InvestmentIcon from 'UiKit/assets/images/menu_common/investments.svg';
+import WalletIcon from 'UiKit/assets/images/menu_common/wallet.svg';
+import CryptoIcon from 'UiKit/assets/images/menu_common/crypto1.svg';
+import HelpIcon from 'UiKit/assets/images/menu_common/help.svg';
+import FaqIcon from 'UiKit/assets/images/menu_common/faq.svg';
 import {
   urlHome, 
   urlHowItWorks, 
@@ -66,7 +66,7 @@ const { userLoggedIn } = storeToRefs(sessionStore);
 const profilesStore = useProfilesStore();
 const { selectedUserProfileId } = storeToRefs(profilesStore);
 
-type Item = { to: string; icon: string, text: string };
+type Item = { to: string; icon: Component; text: string };
 
 const menuItems = computed<Item[]>(() =>
   userLoggedIn.value
@@ -80,8 +80,8 @@ const menuItems = computed<Item[]>(() =>
   : [
       { to: urlHome, icon: HomeIcon, text: 'Home' },  
       { to: urlOffers, icon: InvestmentIcon, text: 'Invest' },
-      { to: urlHowItWorks, icon: HowIcon_, text: 'Help' },   
-      { to: urlFaq, icon: FaqIcon_, text: 'FAQ' },   
+      { to: urlHowItWorks, icon: HelpIcon, text: 'Help' },   
+      { to: urlFaq, icon: FaqIcon, text: 'FAQ' },   
     ]
 );
 </script>

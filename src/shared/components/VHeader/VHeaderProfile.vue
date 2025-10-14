@@ -9,16 +9,10 @@ import NotificationsSidebarButton from 'InvestCommon/features/notifications/VNot
 import env from 'InvestCommon/domain/config/env';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
+import LogOutIcon from 'UiKit/assets/images/menu_common/logout.svg';
+import type { MenuItem } from 'InvestCommon/types/global';
 
 const { IS_STATIC_SITE, FILER_URL } = env;
-
-type MenuItem = {
-  to?: string;
-  href?: string;
-  text: string;
-  active?: boolean;
-  children?: MenuItem[];
-}
 
 defineProps({
   menu: Array as PropType<MenuItem[]>,
@@ -66,7 +60,13 @@ const imageID = computed(() => getUserState.value.data?.image_link_id);
           data-testid="header-profile-logout"
           @click="onLogout"
         >
-          Log Out
+          <LogOutIcon
+            class="v-header-profile__icon"
+            aria-hidden="true"
+          />
+          <span class="v-header-profile__label">
+            Log Out
+          </span>
         </VDropdownMenuItem>
       </template>
     </VDropdown>
@@ -75,6 +75,7 @@ const imageID = computed(() => getUserState.value.data?.image_link_id);
 
 <style lang="scss">
 @use 'UiKit/styles/_variables.scss' as *;
+@use 'UiKit/styles/_colors.scss' as colors;
 
 .v-header-profile {
   $root: &;
@@ -99,20 +100,43 @@ const imageID = computed(() => getUserState.value.data?.image_link_id);
 
   &__item {
     padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: inherit;
 
     &:hover {
-      background-color: $gray-20;
+      background-color: colors.$gray-20;
     }
 
     &.router-link-active {
-      color: $primary;
+      color: colors.$primary;
     }
+  }
+
+  &__icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    color: colors.$gray-50;
+
+    path {
+      fill: currentColor;
+    }
+
+    path[stroke] {
+      stroke: currentColor;
+    }
+  }
+
+  &__label {
+    flex: 1;
   }
 
   &__divider {
     width: 1px;
     height: 30px;
-    border-left: 1px solid $gray-40;
+    border-left: 1px solid colors.$gray-40;
   }
 
   &__notification {
@@ -125,7 +149,7 @@ const imageID = computed(() => getUserState.value.data?.image_link_id);
   &__notification-icon {
     width: 24px;
     height: 24px;
-    color: $gray-50;
+    color: colors.$gray-50;
   }
 
   &__notification-dot {
@@ -134,7 +158,7 @@ const imageID = computed(() => getUserState.value.data?.image_link_id);
     position: absolute;
     right: -2px;
     top: -2px;
-    background-color: $white;
+    background-color: colors.$white;
     border-radius: 100%;
     z-index: 0;
 
@@ -145,16 +169,14 @@ const imageID = computed(() => getUserState.value.data?.image_link_id);
       height: 6px;
       right: 1px;
       top: 1px;
-      background-color: $primary;
+      background-color: colors.$primary;
       border-radius: 100%;
       z-index: 0;
     }
   }
 }
 
-.v-dropdown-menu-item {
-    &.is--border-top {
-      border-top: 1px solid $gray-40;
-    }
+.v-dropdown-menu-item.is--border-top {
+  border-top: none;
 }
 </style>

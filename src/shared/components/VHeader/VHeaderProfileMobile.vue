@@ -9,16 +9,10 @@ import VAvatar from 'UiKit/components/VAvatar.vue';
 import NotificationsSidebarButton from 'InvestCommon/features/notifications/VNotificationsSidebarButton.vue';
 import env from 'InvestCommon/domain/config/env';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
+import LogOutIcon from 'UiKit/assets/images/menu_common/logout.svg';
+import type { MenuItem } from 'InvestCommon/types/global';
 
 const { IS_STATIC_SITE } = env;
-
-type MenuItem = {
-  to?: string;
-  href?: string;
-  text: string;
-  active?: boolean;
-  children?: MenuItem[];
-}
 
 defineProps({
   menu: Array as PropType<MenuItem[]>,
@@ -78,15 +72,26 @@ const getComponentName = (item: MenuItem) => {
         :key="JSON.stringify(menuItem)"
         @click="onClick"
       >
-        <VNavigationMenuLink
-          as-child
-        >
+        <VNavigationMenuLink as-child>
           <component
             :is="getComponentName(menuItem)"
             :to="menuItem.to"
             :href="menuItem.href"
+            :class="[
+              'v-header-profile-mobile__menu-link',
+              menuItem.class,
+              { 'is-active': menuItem.active },
+            ]"
           >
-            {{ menuItem.text }}
+            <component
+              :is="menuItem.icon"
+              v-if="menuItem.icon"
+              class="v-header-profile-mobile__icon"
+              aria-hidden="true"
+            />
+            <span class="v-header-profile-mobile__label">
+              {{ menuItem.text }}
+            </span>
           </component>
         </VNavigationMenuLink>
       </VNavigationMenuItem>
@@ -94,8 +99,14 @@ const getComponentName = (item: MenuItem) => {
         data-testid="header-profile-logout"
         @click="onLogout"
       >
-        <VNavigationMenuLink>
-          Log Out
+        <VNavigationMenuLink class="v-header-profile-mobile__menu-link">
+          <LogOutIcon
+            class="v-header-profile-mobile__icon"
+            aria-hidden="true"
+          />
+          <span class="v-header-profile-mobile__label">
+            Log Out
+          </span>
         </VNavigationMenuLink>
       </VNavigationMenuItem>
     </VNavigationMenuList>
@@ -103,6 +114,8 @@ const getComponentName = (item: MenuItem) => {
 </template>
 
 <style lang="scss">
+@use 'UiKit/styles/_colors.scss' as colors;
+
 .v-header-profile-mobile {
   $root: &;
 
@@ -113,12 +126,52 @@ const getComponentName = (item: MenuItem) => {
   z-index: 0;
   flex-direction: column;
 
+  .v-navigation-menu-list {
+    gap: 18px;
+  }
+
+  .v-navigation-menu-item {
+    width: 100%;
+  }
+
   & > div {
     width: 100%;
   }
 
+  &__menu-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px 0;
+    text-decoration: none;
+    color: inherit;
+
+    &.is-active {
+      color: colors.$primary;
+      font-weight: 600;
+    }
+
+    &.is--border-top {
+      border-top: 1px solid colors.$gray-30;
+      padding-top: 20px;
+    }
+  }
+
+  &__icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    color: colors.$gray-50;
+  }
+
+  &__label {
+    flex: 1;
+  }
+
   &__avatar {
     margin-right: 5px;
+    margin-left: -5px;
   }
 
   &__notification {
@@ -132,7 +185,7 @@ const getComponentName = (item: MenuItem) => {
     position: absolute;
     right: -8px;
     top: -2px;
-    background-color: $white;
+    background-color: colors.$white;
     border-radius: 100%;
     z-index: 0;
 
@@ -143,7 +196,7 @@ const getComponentName = (item: MenuItem) => {
       height: 6px;
       right: 1px;
       top: 1px;
-      background-color: $primary;
+      background-color: colors.$primary;
       border-radius: 100%;
       z-index: 0;
     }
