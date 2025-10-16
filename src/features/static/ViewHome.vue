@@ -12,6 +12,11 @@ import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useAppStateStore } from 'InvestCommon/domain/pwa/store/useAppStateStore';
 import { urlSignin, urlSignup } from 'InvestCommon/domain/config/links';
 
+import { __pageData as topData } from 'Docs/home/top.md';
+import { __pageData as partnersData } from 'Docs/home/partners.md';
+import { __pageData as introData } from 'Docs/home/intro.md';
+import { __pageData as blogData } from 'Docs/home/blog.md';
+
 const VSectionCardArticleList = defineAsyncComponent({
   loader: () => import('UiKit/components/VCard/VSectionCardArticleList.vue'),
   hydrate: hydrateOnVisible(),
@@ -46,8 +51,6 @@ const blogPosts = theme.navigation.rc.filterChilds('layout', 'resource-center-si
 const blog = theme.navigation.rc.data;
 const explore = filterPages(allPages as IFrontmatter[], 'layout', 'offers');
 
-const { frontmatter } = useData();
-
 const offers = computed(() => getOffersState.value.data?.data?.slice(0, 6) || []);
 const latest3Items = computed(() => blogPosts?.slice(0, 3));
 
@@ -68,8 +71,8 @@ onMounted(async () => {
   >
     <div class="view-home__top-wrap">
       <VSectionTopVideo
-        :title="frontmatter.top.title"
-        :sub-title="frontmatter.top.subTitle"
+        :title="topData.frontmatter.title"
+        :sub-title="topData.frontmatter.subTitle"
         :button-href="explore[0].url"
         :video-src="videoSrc"
         full-height
@@ -81,19 +84,19 @@ onMounted(async () => {
         video-cover-image="/images/main-header-banner.svg"
       >
         <template #buttonText>
-          {{ frontmatter.top.buttonText }}
+          {{ topData.frontmatter.buttonText }}
         </template>
       </VSectionTopVideo>
       <VSectionPartners
-        :title="frontmatter.partners.title"
-        :items="frontmatter.partners.items"
+        :title="partnersData.frontmatter.title"
+        :items="partnersData.frontmatter.items"
         class="view-home__partners"
       />
     </div>
     <VIntro
-      :data="[frontmatter.intro]"
+      :data="[introData.frontmatter]"
       color="dark"
-      :image-url="frontmatter.intro.img"
+      :image-url="introData.frontmatter.img"
     />
     <VSectionCardOfferGrid
       :items="offers"
@@ -106,8 +109,8 @@ onMounted(async () => {
     />
     <VSectionWhatOurClientsSay />
     <VSectionCardArticleList
-      :title="frontmatter.blog.title"
-      :sub-title="frontmatter.blog.subTitle"
+      :title="blogData.frontmatter.title"
+      :sub-title="blogData.frontmatter.subTitle"
       :items="latest3Items"
       :button-href="blog.url"
       button-text="View More Articles"
