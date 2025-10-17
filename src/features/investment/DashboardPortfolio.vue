@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { urlOffers } from 'InvestCommon/domain/config/links';
+import { urlOffers, urlBlogSingle } from 'InvestCommon/domain/config/links';
 import DashboardTabsTopInfo from 'InvestCommon/features/dashboard/components/DashboardTabsTopInfo.vue';;
 import { storeToRefs } from 'pinia';
 import VTableDefault from 'InvestCommon/shared/components/VTableDefault.vue';
 import VTablePortfolioItem from './components/VTablePortfolioItem.vue';
 import VTableToolbar from 'InvestCommon/shared/components/VTableToolbar.vue';
 import { useDashboardPortfolioStore } from './store/useDashboardPortfolio';
+import { PostLinkTypes } from 'InvestCommon/types/api/blog';
 
 const portfolioTableHeader = [
   { text: 'ID' },
@@ -24,7 +25,7 @@ const PORTFOLIO_TAB_INFO = {
     One of the most important things to consider when creating a portfolio is your personal risk tolerance.
     Your risk tolerance is your ability to accept investment losses in exchange for the possibility of
     earning higher investment returns. Learn more about 
-    <a href="/resource-center/investors-due-diligence"  class="is--link-2">due diligence</a> 
+    <a href="${urlBlogSingle(PostLinkTypes.investorsDueDiligence)}"  class="is--link-2">due diligence</a> 
     process in our blog post.
   `,
 };

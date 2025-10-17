@@ -1,5 +1,7 @@
 export enum PostLinkTypes {
-  cancelInvestment = 'can-i-cancel-my-investment'
+  cancelInvestment = 'can-i-cancel-my-investment',
+  dueDiligenceTips = 'due-diligence-tips',
+  investorsDueDiligence = 'investors-due-diligence',
 }
 
 export interface IMarkdownOptions {

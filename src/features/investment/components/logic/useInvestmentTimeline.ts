@@ -7,6 +7,8 @@ import {
   IAccreditationData, IKycData, InvestKycTypes,
 } from 'InvestCommon/types/api/invest';
 import { ACCREDITATION_HISTORY, INVEST_KYC_HISTORY, ITimelineItemsHistory } from '../../utils';
+import { PostLinkTypes } from 'InvestCommon/types/api/blog';
+import { urlBlogSingle } from 'InvestCommon/domain/config/links';
 
 export const useInvestmentTimeline = () => {
   const investmentRepository = useRepositoryInvestment();
@@ -173,7 +175,7 @@ export const useInvestmentTimeline = () => {
           title: 'The offer closes fundraising campaign',
           duration: '~1 week',
           text: 'Once 100% funded, investors are no longer able to cancel their investments. Learn more info '
-            + '<a href="/resource-center/can-i-cancel-my-investment-and-get-a-refund" class="is--link-1">here</a> about the process.',
+            + `<a href="${urlBlogSingle(PostLinkTypes.cancelInvestment)}" class="is--link-1">here</a> about the process.`,
           type: getInvestOneState.value.data?.offer.isFundingCompleted ? 'complete' : 'active',
         },
       ] as unknown as ITimelineItemsHistory[],
@@ -186,7 +188,7 @@ export const useInvestmentTimeline = () => {
           title: 'Final legal checks',
           duration: '~2 weeks',
           text: 'Our system makes final legal checks and we seal the deal and send information to the '
-            + 'government structures. Learn more info <a href="/resource-center/can-i-cancel-my-investment-and-get-a-refund" class="is--link-1">here</a> about the process.',
+            + `government structures. Learn more info <a href="${urlBlogSingle(PostLinkTypes.cancelInvestment)}" class="is--link-1">here</a> about the process.`,
           type: getLegalCardType.value,
         },
       ] as unknown as ITimelineItemsHistory[],
@@ -199,7 +201,7 @@ export const useInvestmentTimeline = () => {
           title: 'Collect distributions and manage taxes',
           duration: '6 months',
           text: 'Don\'t forget to check your emails or web notifications in order not to miss '
-            + 'important tax and distribution updates. Learn more info <a href="/resource-center/can-i-cancel-my-investment-and-get-a-refund" class="is--link-1 is--gray-10">here</a> '
+            + `important tax and distribution updates. Learn more info <a href="${urlBlogSingle(PostLinkTypes.cancelInvestment)}" class="is--link-1 is--gray-10">here</a> `
             + 'about the process.',
           variant: 'highlight',
           type: getInvestOneState.value.data?.offer.isStatusClosedSuccessfully ? 'active' : 'not-complete',
