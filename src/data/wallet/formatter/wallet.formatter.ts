@@ -1,3 +1,4 @@
+import { currency } from 'InvestCommon/helpers/currency';
 import {
   WalletTypes, IWalletDataFormatted,
 } from '../wallet.types';
@@ -82,9 +83,13 @@ export class WalletFormatter {
       isWalletStatusErrorPending: this.isWalletStatusErrorPending,
       isWalletStatusErrorSuspended: this.isWalletStatusErrorSuspended,
       currentBalance: this.currentBalance,
+      currentBalanceFormatted: currency(this.currentBalance),
       pendingIncomingBalance: this.pendingIncomingBalance,
+      pendingIncomingBalanceFormatted: currency(this.pendingIncomingBalance),
       pendingOutcomingBalance: this.pendingOutcomingBalance,
+      pendingOutcomingBalanceFormatted: currency(this.pendingOutcomingBalance),
       totalBalance: this.totalBalance,
+      totalBalanceFormatted: currency(this.totalBalance),
       isCurrentBalanceZero: this.isCurrentBalanceZero,
       isTotalBalanceZero: this.isTotalBalanceZero,
       isWalletStatusAnyError: this.isWalletStatusAnyError,

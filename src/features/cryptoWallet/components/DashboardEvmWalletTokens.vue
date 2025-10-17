@@ -1,15 +1,14 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import { currency } from 'InvestCommon/helpers/currency';
-import VButton from 'UiKit/components/Base/VButton/VButton.vue';
-import VTooltip from 'UiKit/components/VTooltip.vue';
-import VTableDefault from 'InvestCommon/shared/components/VTableDefault.vue';
+import VWalletTokensAndTransactions from 'InvestCommon/shared/components/VWalletTokensAndTransactions.vue';
 import VTableWalletTokensItem from './VTableWalletTokensItem.vue';
 import VTableWalletTransactionsItem from './VTableWalletTransactionsItem.vue';
 import env from 'InvestCommon/domain/config/env';
 import { EvmTransactionTypes } from 'InvestCommon/data/evm/evm.types';
 import { useDashboardEvmWalletTokens } from './logic/useDashboardEvmWalletTokens';
 
-defineProps({
+const props = defineProps({
   profileId: {
     type: Number,
     required: true,
@@ -53,129 +52,59 @@ const {
   isLoadingNotificationTransaction,
   isLoadingNotificationWallet,
 } = useDashboardEvmWalletTokens();
+
+// Help TS resolve env property in template binding
+const WALLET_SCAN_URL = (env as any).CRYPTO_WALLET_SCAN_URL as string;
+
+const balances = computed(() => [
+  {
+    title: 'Wallet Balance:',
+    balance: currency(getEvmWalletState.value.data?.currentBalance),
+    href: `${WALLET_SCAN_URL}/address/${getEvmWalletState.value.data?.address}`,
+  },
+  ...(isShowIncomingBalance.value ? [{
+    title: 'Incoming:',
+    balance: `+ ${currency(getEvmWalletState.value.data?.pendingIncomingBalance)}`,
+    label: 'Pending',
+  }] : []),
+  ...(isShowOutgoingBalance.value ? [{
+    title: 'Outgoing:',
+    balance: `- ${currency(getEvmWalletState.value.data?.pendingOutcomingBalance)}`,
+    label: 'Pending investment',
+  }] : []),
+]);
+
+const tables = computed(() => [
+  {
+    title: 'Tokens:',
+    header: balanceTableHeader,
+    data: tableOptions.value || [],
+    loading: (isSkeleton.value && !props.isError) || isLoadingNotificationWallet.value,
+    rowLength: 5,
+    colspan: balanceTableHeader.length,
+    tableRowComponent: VTableWalletTokensItem,
+  },
+  {
+    title: 'Latest Transactions:',
+    viewAllHref: '#',
+    header: transactionsTableHeader,
+    data: transactionsOptions.value || [],
+    loading: (isSkeleton.value && !props.isError) || isLoadingNotificationTransaction.value,
+    rowLength: 5,
+    colspan: transactionsTableHeader.length,
+    tableRowComponent: VTableWalletTransactionsItem,
+  },
+]);
 </script>
 
 <template>
-  <div class="DashboardEvmWalletTokens dashboard-evm-wallet-tokens">
-    <div class="dashboard-evm-wallet-tokens__top">
-      <div class="dashboard-evm-wallet-tokens__balance">
-        <div class="dashboard-evm-wallet-tokens__top-title is--h6__title">
-          Wallet Balance:
-        </div>
-        <div class="dashboard-evm-wallet-tokens__balance-numbers">
-          <a
-            :href="`${env.CRYPTO_WALLET_SCAN_URL}/address/${getEvmWalletState.data?.address}`"
-            class="dashboard-evm-wallet-tokens__balance-current is--subheading-1"
-            :aria-label="`View wallet address ${getEvmWalletState.data?.address} on blockchain explorer`"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {{ currency(getEvmWalletState.data?.currentBalance) }}
-          </a>
-          <span
-            v-if="isShowIncomingBalance"
-            class="dashboard-evm-wallet-tokens__balance-incoming is--small"
-            aria-label="Pending incoming balance"
-          >
-            + {{ currency(getEvmWalletState.data?.pendingIncomingBalance) }}
-          </span>
-          <span v-if="isShowOutgoingBalance">|</span>
-          <VTooltip
-            class="dashboard-evm-wallet-tokens__tooltip"
-          >
-            <span
-              v-if="isShowOutgoingBalance"
-              class="dashboard-evm-wallet-tokens__balance-outcoming is--small"
-              aria-label="Pending outgoing balance"
-            >
-              - {{ currency(getEvmWalletState.data?.pendingOutcomingBalance) }}
-            </span>
-            <template #content>
-              Pending investment
-            </template>
-          </VTooltip>
-        </div>
-      </div>
-      <div class="dashboard-evm-wallet-tokens__buttons">
-        <VButton
-          v-for="button in buttonConfigs"
-          :key="button.id"
-          size="small"
-          :variant="button.variant"
-          :disabled="button.disabled"
-          class="dashboard-evm-wallet-tokens__funds-button"
-          @click="button.transactionType ? emit('click', button.transactionType) : null"
-        >
-          <component
-            :is="button.icon"
-            v-if="button.icon"
-            alt="plus icon"
-            class="dashboard-evm-wallet-tokens__button-icon"
-          />
-          {{ button.label }}
-        </VButton>
-      </div>
-    </div>
-    <div class="dashboard-evm-wallet-tokens__content">
-      <div class="dashboard-evm-wallet-tokens__content-top is--h6__title">
-        Tokens:
-      </div>
-      <VTableDefault
-        class="investment-documents__table"
-        size="small"
-        :header="balanceTableHeader"
-        :data="tableOptions || []"
-        :loading="isSkeleton && !isError || isLoadingNotificationWallet"
-        :loading-row-length="5"
-        :colspan="balanceTableHeader.length"
-      >
-        <VTableWalletTokensItem
-          v-for="(item, index) in tableOptions"
-          :key="index"
-          :data="item"
-          size="small"
-        />
-        <template #empty>
-          You have no tokens yet
-        </template>
-      </VTableDefault>
-
-
-      <div class="dashboard-evm-wallet-tokens__content-top is--h6__title is--margin-top-40">
-        <span>Latest Transactions:</span>
-        <VButton
-          variant="link"
-          size="small"
-          class="dashboard-evm-wallet-tokens__view-all"
-        >
-          View All
-        </VButton>
-      </div>
-      <VTableDefault
-        class="investment-documents__table"
-        size="small"
-        :header="transactionsTableHeader"
-        :data="transactionsOptions || []"
-        :loading="isSkeleton && !isError || isLoadingNotificationTransaction"
-        :loading-row-length="5"
-        :colspan="transactionsTableHeader.length"
-      >
-        <VTableWalletTransactionsItem
-          v-for="(item, index) in transactionsOptions"
-          :key="index"
-          :data="item"
-          size="small"
-        />
-        <template #empty>
-          You have no transactions yet
-        </template>
-      </VTableDefault>
-    </div>
-    <!-- <VDialogWalletAddTransaction
-      v-model="isDialogAddTransactionOpen"
-      :transaction-type="addTransactiontTransactionType"
-    /> -->
-  </div>
+    <VWalletTokensAndTransactions
+      :balances="balances"
+      :tables="tables"
+      :action-buttons="buttonConfigs"
+      class="DashboardEvmWalletTokens dashboard-evm-wallet-tokens"
+      @button-click="payload => payload.transactionType ? emit('click', payload.transactionType) : null"
+    />
 </template>
 
 <style lang="scss">

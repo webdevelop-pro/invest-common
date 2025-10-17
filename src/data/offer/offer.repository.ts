@@ -149,6 +149,17 @@ export const useRepositoryOffer = defineStore('repository-offer', () => {
     );
   };
 
+  // Returns the not-closed offer with the highest funded percent
+  const getTopOpenOffer = (): IOfferFormatted | undefined => {
+    const items = (getOffersState.value.data as unknown as { data?: IOfferFormatted[] })?.data;
+    if (!items || items.length === 0) return undefined;
+    const openOffers = items.filter((offer) => !offer.isFundingCompleted && offer.offerFundedPercent < 100);
+    if (openOffers.length === 0) return undefined;
+    return openOffers.reduce<IOfferFormatted>((best, current) => (
+      current.offerFundedPercent > best.offerFundedPercent ? current : best
+    ));
+  };
+
   const resetAll = () => {
     getOffersState.value = { loading: false, error: null, data: undefined };
     getOfferOneState.value = { loading: false, error: null, data: undefined };
@@ -166,6 +177,7 @@ export const useRepositoryOffer = defineStore('repository-offer', () => {
     setOfferCommentOptions,
     getOfferFundedPercent,
     updateNotificationData,
+    getTopOpenOffer,
     resetAll,
 
     // States

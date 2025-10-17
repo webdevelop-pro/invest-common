@@ -61,8 +61,17 @@ export const useProfileSelectStore = () => {
     if (id === 'new') {
       router.push({ name: ROUTE_CREATE_PROFILE });
     } else {
-      userProfilesStore.setSelectedUserProfileById(id);
-      router.push({ name: router.currentRoute.value.name, params: { profileId: id } });
+      userProfilesStore.setSelectedUserProfileById(Number(id));
+      
+      // Preserve current route queries when updating profile
+      const currentRoute = router.currentRoute.value;
+      const query = currentRoute.query;
+      
+      router.push({ 
+        name: currentRoute.name, 
+        params: { profileId: id },
+        query: Object.keys(query).length > 0 ? query : undefined
+      });
     }
   };
 

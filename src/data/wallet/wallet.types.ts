@@ -72,9 +72,13 @@ export interface IWalletDataFormatted {
   isWalletStatusErrorSuspended: boolean;
   isWalletStatusAnyError: boolean;
   currentBalance: number;
+  currentBalanceFormatted?: string;
   pendingIncomingBalance: number;
+  pendingIncomingBalanceFormatted?: string;
   pendingOutcomingBalance: number;
+  pendingOutcomingBalanceFormatted?: string;
   totalBalance: number;
+  totalBalanceFormatted?: string;
   isCurrentBalanceZero: boolean;
   isTotalBalanceZero: boolean;
 }
