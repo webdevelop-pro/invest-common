@@ -206,6 +206,10 @@ const emit = defineEmits<{
     align-items: flex-start;
     gap: 4px;
     flex: 1 0 0;
+
+    @media screen and (max-width: $tablet){
+      flex-direction: column;
+    }
   }
 
   &__balance-block {
@@ -214,6 +218,12 @@ const emit = defineEmits<{
     align-items: flex-start;
     gap: 4px;
     flex: 1 0 0;
+
+    @media screen and (max-width: $tablet){
+      flex-direction: row;
+      align-items: center;
+      gap: 8px;
+    }
   }
 
   &__buttons {

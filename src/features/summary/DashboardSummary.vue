@@ -131,6 +131,7 @@ const {
         <VWalletTokensAndTransactions
           :balances="balances"
           :tables="tables"
+          class="dashboard-summary__wallet"
         />
         <VCardOffer
           v-if="topFundedOffer"
@@ -169,6 +170,13 @@ const {
 
       @media screen and (width < $tablet){
         grid-template-columns: 1fr;
+      }
+    }
+
+    &__wallet {
+      @media screen and (width < $tablet){
+        width: 100%;
+        overflow: auto;
       }
     }
     

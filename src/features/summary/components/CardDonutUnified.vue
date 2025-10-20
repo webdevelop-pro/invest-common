@@ -119,10 +119,6 @@ const valueFormatter = (tick: number) => (props.valueFormatter ? props.valueForm
   .unovis-single-container {
     width: 80%;
     margin: 10px auto 0;
-
-    @media screen and (max-width: $tablet) {
-        width: 100%;
-    }
   }
 }
 </style>
