@@ -217,7 +217,7 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
     !selectedUserProfileData.value.isTypeSdira && !selectedUserProfileData.value.isTypeSolo401k
     && selectedIdAsDataIs.value && userLoggedIn.value
     &&  selectedUserProfileData.value.isKycApproved && (selectedUserProfileId.value > 0)
-    && !getWalletState.value.loading && (selectedUserProfileId.value > 0)));
+    && !getWalletState.value.loading));
 
   const resetAll = () => {
     getWalletState.value = { loading: false, error: null, data: undefined };

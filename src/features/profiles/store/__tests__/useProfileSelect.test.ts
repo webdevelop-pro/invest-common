@@ -13,7 +13,7 @@ vi.mock('InvestCommon/helpers/enums/routes', () => ({
 vi.mock('vue-router', () => ({
   useRouter: vi.fn(() => ({
     push: mockPush,
-    currentRoute: { value: { name: 'test-route' } },
+    currentRoute: { value: { name: 'test-route', query: {} } },
   })),
 }));
 
@@ -62,10 +62,11 @@ describe('useProfileSelectStore', () => {
     const composable = useProfileSelectStore();
     composable.onUpdateSelectedProfile('2');
 
-    expect(mockSetSelectedUserProfileById).toHaveBeenCalledWith('2');
+    expect(mockSetSelectedUserProfileById).toHaveBeenCalledWith(2);
     expect(mockPush).toHaveBeenCalledWith({
       name: 'test-route',
       params: { profileId: '2' },
+      query: undefined,
     });
   });
 
@@ -74,6 +75,26 @@ describe('useProfileSelectStore', () => {
     composable.onUpdateSelectedProfile('new');
     expect(mockPush).toHaveBeenCalledWith({
       name: 'ROUTE_CREATE_PROFILE',
+    });
+  });
+
+  it('should preserve query parameters when selecting existing profile', () => {
+    // Mock router with query parameters
+    const mockRouterWithQuery = {
+      push: mockPush,
+      currentRoute: { value: { name: 'test-route', query: { tab: 'overview', filter: 'active' } } },
+    } as any;
+    
+    vi.mocked(useRouter).mockReturnValue(mockRouterWithQuery);
+    
+    const composable = useProfileSelectStore();
+    composable.onUpdateSelectedProfile('1');
+
+    expect(mockSetSelectedUserProfileById).toHaveBeenCalledWith(1);
+    expect(mockPush).toHaveBeenCalledWith({
+      name: 'test-route',
+      params: { profileId: '1' },
+      query: { tab: 'overview', filter: 'active' },
     });
   });
 

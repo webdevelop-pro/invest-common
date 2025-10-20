@@ -49,7 +49,7 @@ export class ApiClient {
 
     try {
       const response = await fetch(fullUrl, {
-        credentials: 'include',
+        credentials: (config as any).credentials ?? 'include',
         method: config.method,
         body: config.body,
         headers,

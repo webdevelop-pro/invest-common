@@ -8,7 +8,7 @@ import { storeToRefs } from 'pinia';
 import { computed, PropType, watch, onMounted, nextTick, type Component } from 'vue';
 import {
   ROUTE_DASHBOARD_PORTFOLIO, ROUTE_DASHBOARD_ACCOUNT, ROUTE_DASHBOARD_WALLET,
-  ROUTE_DASHBOARD_DISTRIBUTIONS, ROUTE_DASHBOARD_EVMWALLET,
+  ROUTE_DASHBOARD_DISTRIBUTIONS, ROUTE_DASHBOARD_EVMWALLET, ROUTE_DASHBOARD_SUMMARY,
 } from 'InvestCommon/domain/config/enums/routes';
 import { VTabsContent } from 'UiKit/components/Base/VTabs';
 import DashboardPortfolio from 'InvestCommon/features/investment/DashboardPortfolio.vue';
@@ -16,6 +16,7 @@ import DashboardAccountDetails from 'InvestCommon/features/profiles/DashboardAcc
 import DashboardWallet from 'InvestCommon/features/wallet/DashboardWallet.vue';
 import DashboardEvm from 'InvestCommon/features/cryptoWallet/DashboardEvm.vue';
 import DashboardDistributions from 'InvestCommon/features/distributions/DashboardDistributions.vue';
+import DashboardSummary from 'InvestCommon/features/summary/DashboardSummary.vue';
 import { useRoute } from 'vue-router';
 
 defineProps({
@@ -37,6 +38,11 @@ const profilesStore = useProfilesStore();
 const { selectedUserProfileId } = storeToRefs(profilesStore);
 
 const tabs = computed(() => ({
+  [DashboardTabTypes.summary]: {
+    value: DashboardTabTypes.summary,
+    label: 'Summary',
+    to: { name: ROUTE_DASHBOARD_SUMMARY, params: { profileId: selectedUserProfileId.value } },
+  },
   [DashboardTabTypes.portfolio]: {
     value: DashboardTabTypes.portfolio,
     label: 'Portfolio',
@@ -73,6 +79,7 @@ const tabComponents: Record<DashboardTabTypes, Component> = {
   [DashboardTabTypes.wallet]: DashboardWallet,
   [DashboardTabTypes.evmwallet]: DashboardEvm,
   [DashboardTabTypes.distributions]: DashboardDistributions,
+  [DashboardTabTypes.summary]: DashboardSummary,
 };
 
 watch(

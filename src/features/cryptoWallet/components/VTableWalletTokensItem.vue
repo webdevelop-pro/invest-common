@@ -6,8 +6,8 @@ import env from 'InvestCommon/domain/config/env';
 import VImage from 'UiKit/components/Base/VImage/VImage.vue';
 
 interface ITableEvmWalletTransaction {
-  name: string;
-  amount: string;
+  name?: string;
+  amount: string | number;
   symbol: string;
   address: string;
   icon?: string;

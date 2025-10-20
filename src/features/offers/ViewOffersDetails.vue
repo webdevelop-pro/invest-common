@@ -72,10 +72,10 @@ const investHandler = async () => {
   try {
     const profiles = userProfiles.value || [];
     if (profiles.length > 0) {
-      const current = profiles.find((p: any) => p?.id === selectedUserProfileId.value);
+      const current = profiles.find((p: unknown) => p?.id === selectedUserProfileId.value);
       const isCurrentApproved = (current as { isKycApproved?: boolean } | undefined)?.isKycApproved;
       if (!isCurrentApproved) {
-        const approvedProfiles = profiles.filter((p: any) => p?.isKycApproved);
+        const approvedProfiles = profiles.filter((p: unknown) => p?.isKycApproved);
         if (approvedProfiles.length > 0) {
           const randomApproved = approvedProfiles[Math.floor(Math.random() * approvedProfiles.length)];
           if (randomApproved?.id && randomApproved.id !== selectedUserProfileId.value) {

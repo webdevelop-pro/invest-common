@@ -77,11 +77,11 @@ onBeforeMount(() => {
     // margin: 5px 0;
 
     path {
-      fill: currentColor;
+      fill: currentcolor;
     }
 
     path[stroke] {
-      stroke: currentColor;
+      stroke: currentcolor;
     }
   }
 
