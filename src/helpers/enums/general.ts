@@ -60,7 +60,7 @@ export enum FundingTypes {
   ach = 'ach',
   wire = 'wire',
   wallet = 'wallet',
-  cryptoWallet = 'cryptoWallet'
+  cryptoWallet = 'crypto_wallet'
 }
 
 export enum CitizenTypes {

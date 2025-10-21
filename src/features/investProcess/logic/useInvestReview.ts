@@ -8,6 +8,7 @@ import { storeToRefs } from 'pinia';
 import { urlOfferSingle } from 'InvestCommon/domain/config/links';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
+import { FundingTypes } from 'InvestCommon/helpers/enums/general';
 
 export function useInvestReview() {
   const globalLoader = useGlobalLoader();
@@ -36,6 +37,10 @@ export function useInvestReview() {
   const fundingSourceDataToShow = computed(() => {
     const fundingType = getInvestUnconfirmedOne.value?.funding_type;
     if (!fundingType) return '';
+    
+    if (fundingType.toLowerCase() === FundingTypes.cryptoWallet) {
+      return 'Crypto Wallet';
+    }
     
     if (fundingType.toLowerCase().includes('wallet')) {
       return fundingType.charAt(0).toUpperCase() + fundingType.slice(1);

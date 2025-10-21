@@ -260,8 +260,10 @@ export function useInvestFunding() {
     }
     if ((model.funding_type !== FundingTypes.ach) && (model.funding_type === FundingTypes.cryptoWallet)) {
       data = {
-        funding_source_id: Number(model.funding_type),
         funding_type: FundingTypes.cryptoWallet,
+        payment_data: {
+          wallet: getEvmWalletState.value.data?.address || '',
+        },
       };
     }
     await investmentRepository.setFunding(slug as string, id as string, profileId as string, data);

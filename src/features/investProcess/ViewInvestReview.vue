@@ -143,7 +143,7 @@ const {
           </FormCol>
         </FormRow>
 
-        <div v-if="getInvestUnconfirmedOne?.funding_type.toLowerCase() === 'ach'">
+        <div v-if="getInvestUnconfirmedOne?.funding_type?.toLowerCase() === 'ach'">
           <FormRow>
             <FormCol col2>
               <VFormGroup label="Account Holder Name">
