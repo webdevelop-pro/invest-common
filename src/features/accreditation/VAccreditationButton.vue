@@ -39,8 +39,12 @@ defineProps({
       class="v-accreditation-button__button"
       @click="onClick"
     >
-      {{ data.text }}
-
+      <span class="is--gt-tablet-show">
+        {{ data.text }}
+      </span>
+      <span class="is--lt-tablet-show">
+        {{ data.mobileText || data.text }}
+      </span>
       <arrowRight
         alt="Arrow icon"
         class="v-accreditation-button__button-icon"
@@ -59,7 +63,12 @@ defineProps({
           :color="tagBackground"
           class="v-accreditation-button__tag"
         >
-          {{ data.text }}
+          <span class="is--gt-tablet-show">
+            {{ data.text }}
+          </span>
+          <span class="is--lt-tablet-show">
+            {{ data.mobileText || data.text }}
+          </span>
         </VBadge>
         <template #content>
           <div class="is--small">
@@ -79,7 +88,6 @@ defineProps({
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-left: 12px;
   }
 
   &__button-icon {

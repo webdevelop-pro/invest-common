@@ -12,6 +12,7 @@ export interface ITextStatuses {
   class: string;
   button?: boolean;
   tooltip?: string;
+  mobileText?: string;
 }
 
 export interface IAccreditationData {
@@ -29,17 +30,20 @@ export interface IAccreditation {
 export const AccreditationTextStatuses: Record<AccreditationTypes, ITextStatuses> = {
   [AccreditationTypes.new]: {
     text: 'Verify Accreditation',
+    mobileText: 'Verify',
     class: 'new',
     button: true,
   },
   [AccreditationTypes.pending]: {
     text: 'Verification In Progress',
+    mobileText: 'In Progress',
     class: 'pending',
     tooltip: 'Please wait while our legal team will review your documents. The process may take 2-4 days. '
       + 'We will notify you automatically once we have more information.',
   },
   [AccreditationTypes.info_required]: {
     text: 'Info required',
+    mobileText: 'Need Info',
     class: 'info-required',
     button: true,
   },

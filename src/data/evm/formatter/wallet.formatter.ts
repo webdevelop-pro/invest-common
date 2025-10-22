@@ -52,6 +52,22 @@ export class EvmWalletFormatter {
     return (this.currentBalance + this.pendingIncomingBalance - this.pendingOutcomingBalance) || 0;
   }
 
+  get fundingBalance() {
+    // Sum of all stablecoin balances
+    const rawBalances: any = (this.data as any).balances;
+    const balancesArray = Object.values(rawBalances);
+    
+    // Define stablecoin symbols
+    const stablecoinSymbols = ['USDC', 'USDT', 'DAI', 'BUSD', 'TUSD', 'USDP', 'FRAX', 'LUSD', 'SUSD', 'GUSD'];
+    
+    return balancesArray.reduce((sum: number, balance: any) => {
+      const symbol = String(balance.symbol || '').toUpperCase();
+      const isStablecoin = stablecoinSymbols.includes(symbol);
+      const amount = Number(balance.amount ?? 0);
+      return isStablecoin ? sum + amount : sum;
+    }, 0);
+  }
+
   get pendingIncomingBalance() {
     return Number(this.data.inc_balance) || 0;
   }
@@ -97,6 +113,7 @@ export class EvmWalletFormatter {
       isStatusAnyError: this.isStatusAnyError,
       currentBalance: this.currentBalance,
       totalBalance: this.totalBalance,
+      fundingBalance: this.fundingBalance,
       pendingIncomingBalance: this.pendingIncomingBalance,
       pendingOutcomingBalance: this.pendingOutcomingBalance,
       formattedTransactions,

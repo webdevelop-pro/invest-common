@@ -59,7 +59,7 @@ const WALLET_SCAN_URL = env.CRYPTO_WALLET_SCAN_URL as string;
 const balances = computed(() => [
   {
     title: 'Wallet Balance:',
-    balance: currency(getEvmWalletState.value.data?.currentBalance),
+    balance: currency(getEvmWalletState.value.data?.fundingBalance),
     href: `${WALLET_SCAN_URL}/address/${getEvmWalletState.value.data?.address}`,
   },
   ...(isShowIncomingBalance.value ? [{

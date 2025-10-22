@@ -33,16 +33,19 @@ interface ITextStatuses {
   class: string;
   button?: boolean;
   tooltip?: string;
+  mobileText?: string;
 }
 
 export const KycTextStatuses: Record<InvestKycTypes, ITextStatuses> = {
   [InvestKycTypes.none]: {
     text: 'Verify Identity',
+    mobileText: 'Verify',
     class: 'none',
     button: true,
   },
   [InvestKycTypes.new]: {
     text: 'Verify Identity',
+    mobileText: 'Verify',
     class: 'none',
     button: true,
   },
@@ -57,6 +60,7 @@ export const KycTextStatuses: Record<InvestKycTypes, ITextStatuses> = {
   },
   [InvestKycTypes.in_progress]: {
     text: 'Verification In Progress',
+    mobileText: 'In Progress',
     class: 'pending',
     tooltip: 'Pending until all associated parties complete KYC.',
   },

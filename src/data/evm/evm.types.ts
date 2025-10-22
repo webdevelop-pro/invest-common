@@ -67,6 +67,7 @@ export interface IEvmWalletDataFormatted extends Omit<IEvmWalletDataResponse, 'b
   isStatusAnyError: boolean;
   currentBalance: number;
   totalBalance: number;
+  fundingBalance: number;
   pendingIncomingBalance: number;
   pendingOutcomingBalance: number;
   formattedTransactions: IEvmTransactionDataFormatted[];

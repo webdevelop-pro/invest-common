@@ -122,7 +122,7 @@ export function useInvestFunding() {
   );
 
   const notEnoughEvmWalletFunds = computed(() => 
-    (getInvestUnconfirmedOne.value?.amount || 0) > (getEvmWalletState.value.data?.totalBalance || 0)
+    (getInvestUnconfirmedOne.value?.amount || 0) > (getEvmWalletState.value.data?.fundingBalance || 0)
   );
 
   const selectOptions = computed(() => {
@@ -144,8 +144,8 @@ export function useInvestFunding() {
     if (hasEvmWallet.value) {
       options.push({
         value: FundingTypes.cryptoWallet,
-        text: `Crypto Wallet (${currency(getEvmWalletState.value.data?.totalBalance || 0)})`,
-        disabled: (getEvmWalletState.value.data?.totalBalance || 0) === 0,
+        text: `Crypto Wallet (${currency(getEvmWalletState.value.data?.fundingBalance || 0)})`,
+        disabled: (getEvmWalletState.value.data?.fundingBalance || 0) === 0,
       });
     }
     

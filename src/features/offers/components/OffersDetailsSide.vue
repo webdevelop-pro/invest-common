@@ -212,6 +212,12 @@ const { readOnlyInfo, investmentDocUrl, onShareClick, copied } = useOffersDetail
 
     &.is--tooltip {
       cursor: help;
+
+      @media screen and (max-width: $tablet){
+        width: fit-content;
+        display: inline-block;
+        text-align: end;
+      }
     }
   }
 
@@ -220,6 +226,11 @@ const { readOnlyInfo, investmentDocUrl, onShareClick, copied } = useOffersDetail
     height: 14px;
     flex-shrink: 0;
     color: $gray-60;
+
+    @media screen and (max-width: $tablet){
+      position: relative;
+      top: 1px;
+    }
   }
 
   &__min-invest-label {

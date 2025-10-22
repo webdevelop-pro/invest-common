@@ -99,12 +99,12 @@ const onDocumentClick = async () => {
         {{ data?.typeFormatted }}
       </VBadge>
     </VTableCell>
-    <VTableCell class="v-table-document-item__date-wrap is--small">
+    <VTableCell class="v-table-document-item__date-wrap is--small is--lt-tablet-hide">
       {{ data?.date }}
     </VTableCell>
     <VTableCell
       v-if="withDownload"
-      class="v-table-document-item__download-wrap"
+      class="v-table-document-item__download-wrap  is--lt-tablet-hide"
     >
       <VButton
         size="small"
@@ -132,11 +132,11 @@ const onDocumentClick = async () => {
   cursor: pointer !important;
   align-items: center;
 
-  @media screen and (width < $tablet){
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    align-items: center;
+  @media screen and (max-width: $tablet){
+    /* Make table rows more compact on mobile */
+    td {
+      padding: 8px 12px !important;
+    }
   }
 
   &__icon {
@@ -150,6 +150,10 @@ const onDocumentClick = async () => {
     display: flex;
     align-items: center;
     gap: 16px;
+
+    @media screen and (max-width: $tablet){
+      gap: 8px;
+    }
   }
 
   &__name {
@@ -157,6 +161,11 @@ const onDocumentClick = async () => {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+
+    @media screen and (max-width: $tablet){
+      max-width: 200px;
+      flex-wrap: wrap;
+    }
   }
 
   &__download-icon {
@@ -167,7 +176,8 @@ const onDocumentClick = async () => {
     gap: 4px;
     width: 260px;
 
-    @media screen and (width < $tablet){
+    @media screen and (max-width: $tablet){
+      width: fit-content;
       display: flex;
       justify-content: center;
     }

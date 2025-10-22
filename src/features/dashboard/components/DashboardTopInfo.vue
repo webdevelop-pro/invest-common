@@ -107,7 +107,6 @@ const isLoading = computed(() => (getUserState.value.loading || getProfileByIdSt
   &__status {
     @media screen and (max-width: $mobile-xs){
       white-space: nowrap;
-      align-self: flex-end;
     }
   }
 
@@ -122,6 +121,7 @@ const isLoading = computed(() => (getUserState.value.loading || getProfileByIdSt
     align-self: stretch;
     padding-left: 12px;
     min-height: 32px;
+    gap: 4px;
 
     & + & {
       margin-top: 4px;
@@ -131,9 +131,8 @@ const isLoading = computed(() => (getUserState.value.loading || getProfileByIdSt
     }
 
     @media screen and (max-width: $mobile-xs){
-      flex-direction: column;
-      gap: 8px;
-      align-items: flex-start;
+      align-items: center;
+      flex-wrap: wrap;
     }
   }
 

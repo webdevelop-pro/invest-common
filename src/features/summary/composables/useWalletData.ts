@@ -66,7 +66,7 @@ export function useWalletData() {
   const balances = computed(() => [
     {
       title: 'Crypto Wallet Balance:',
-      balance: currency(getEvmWalletState.value.data?.currentBalance),
+      balance: currency(getEvmWalletState.value.data?.fundingBalance),
       to: { name: ROUTE_DASHBOARD_EVMWALLET, params: { profileId: selectedUserProfileId.value } },
     },
     {
