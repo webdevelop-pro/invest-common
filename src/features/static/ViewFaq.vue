@@ -49,12 +49,16 @@ useGlobalLoader().hide();
   width: 100%;
   padding-bottom: 70px;
 
+  @include media-lt(tablet) {
+    padding-bottom: 0;
+  }
+
   &__left {
     width: 30%;
 
     @include media-lt(tablet) {
       width: 100%;
-      margin-bottom: 40px;
+      margin-bottom: 20px;
     }
   }
 
@@ -63,7 +67,6 @@ useGlobalLoader().hide();
 
     @include media-lt(tablet) {
       width: 100%;
-      margin-bottom: 80px;
     }
   }
 }

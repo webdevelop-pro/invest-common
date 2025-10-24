@@ -40,7 +40,7 @@ export const oryErrorHandling = async (
     toast({
            title: 'Account Already Exists',
            description: h('div', {
-            innerHTML: `Sorry, your email already used, do you want to <a href="/signin">sign in</a>?`
+            innerHTML: `Sorry, your email already used, do you want to <a href="/signin">log in</a>?`
           }),
            variant: 'error',
            duration: 8000,

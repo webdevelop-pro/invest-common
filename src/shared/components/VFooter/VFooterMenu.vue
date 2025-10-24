@@ -116,8 +116,8 @@ const getComponentClass = (item: MenuItem) => {
   &__menu-list {
     display: flex;
     gap: 16px;
-    flex-direction: column;
     list-style-type: none;
+    flex-direction: column;
 
     @include media-lte(tablet) {
       padding-left: 0;

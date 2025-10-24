@@ -18,7 +18,7 @@ const VFooterText = defineAsyncComponent({
 });
 
 const VFooterMenu = defineAsyncComponent({
-  loader: () => import('./VFooterMenu.vue'),
+  loader: () => import('UiKit/components/VFooter/VFooterMenu.vue'),
 });
 
 const VFormFooterSubscribe = defineAsyncComponent({
@@ -52,6 +52,10 @@ const props = defineProps({
   menu: Array as PropType<MenuItem[]>,
   path: String,
   legalItems: Array,
+  isColumnMenu: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const { toast } = useToast();
@@ -131,7 +135,7 @@ const SOCIAL_LIST = [
         </div>
         <VFooterMenu
           :menu="menu"
-          :path="path"
+          :is-column="isColumnMenu"
           class="v-footer__menu"
         />
       </div>

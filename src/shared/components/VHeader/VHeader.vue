@@ -26,7 +26,6 @@ const VButton = defineAsyncComponent({
 
 const props = defineProps({
   profileMenu: Array as PropType<MenuItem[]>,
-  path: String,
 });
 
 const sessionStore = useSessionStore();
@@ -89,7 +88,6 @@ watchEffect(() => {
   <VHeader
     v-model="isMobileSidebarOpen"
     :show-navigation="showNavigation"
-    :path="path"
     class="VHeaderInvest v-header-invest"
   >
     <div class="v-header-invest__wrap">

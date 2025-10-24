@@ -94,6 +94,10 @@ useGlobalLoader().hide();
   width: 100%;
   padding-bottom: 40px;
 
+  @include media-lt(tablet) {
+    padding-bottom: 0;
+  }
+
   &__subheading {
     color: $black;
     margin-bottom: 10px;
@@ -117,6 +121,10 @@ useGlobalLoader().hide();
     @include media-lt(tablet) {
       width: 100%;
     }
+  }
+
+  .v-timeline-item:not(.is--horizontal) .v-timeline-item__items {
+    margin-left: 12px;
   }
 }
 </style>

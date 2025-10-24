@@ -56,7 +56,7 @@ const startKycHandler = () => {
       class="offer-details-btn__btn"
       @click="signInHandler"
     >
-      Sign in
+      Log in
     </VButton>
     <VButton
       v-else-if="showInvestBtn"

@@ -24,5 +24,9 @@ useGlobalLoader().hide();
 <style lang="scss">
 .view-resource-center{
   padding-bottom: 130px;
+
+  @include media-lt(tablet) {
+    padding-bottom: 80px;
+  }
 }
 </style>

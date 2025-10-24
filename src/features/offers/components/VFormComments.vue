@@ -73,7 +73,7 @@ const {
           :loading="loading"
           @click="signInHandler"
         >
-          Sign in
+          Log in
         </VButton>
         <VButton
           v-else

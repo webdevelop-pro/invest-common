@@ -115,13 +115,13 @@ const signInHandler = () => {
         class="offer-details-content__signin-wrap"
       >
         <span class="is--body">
-          Please sign in to be able to see documents
+          Please log in to be able to see documents
         </span>
         <VButton
           class="is--margin-top-0"
           @click="signInHandler"
         >
-          Sign in
+          Log in
         </VButton>
       </div>
     </VTabsContent>
