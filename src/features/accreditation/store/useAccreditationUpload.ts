@@ -159,7 +159,6 @@ export const useAccreditationUpload = defineStore('useAccreditationUpload', () =
       if (!isFieldsValid.value) {
         return;
       }
-      console.log(isFieldsValid.value, 'isFieldsValid.value');
       sendFiles();
     });
   };

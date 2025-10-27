@@ -38,14 +38,17 @@ export const useDashboardEvmWalletTokens = () => {
 
   const canAddFunds = computed(() => (
     !getEvmWalletState.value.loading && !selectedUserProfileData.value.isTypeSolo401k
+    && selectedUserProfileData.value.isKycApproved
   ));
 
   const canEarn = computed(() => (
     !getEvmWalletState.value.loading && !selectedUserProfileData.value.isTypeSolo401k
+    && selectedUserProfileData.value.isKycApproved
   ));
 
   const canBuy = computed(() => (
     !getEvmWalletState.value.loading && !selectedUserProfileData.value.isTypeSolo401k
+    && selectedUserProfileData.value.isKycApproved
   ));
 
   const isSkeleton = computed(() => getEvmWalletState.value.loading);

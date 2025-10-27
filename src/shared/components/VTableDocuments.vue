@@ -73,7 +73,7 @@ const searchData = computed(() => {
 });
 
 const filterResults = computed(() => searchData.value.length);
-const showSearch = computed(() => filterResults.value > 0);
+const showSearch = computed(() => documentList.value.length > 0);
 const isshowPagination = computed(() => (
   Boolean(documentListLength.value && (documentListLength.value > 0)) && (filterResults.value > 0)
 ));

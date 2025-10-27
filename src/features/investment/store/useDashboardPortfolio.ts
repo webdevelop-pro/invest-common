@@ -4,7 +4,7 @@ import { IVFilter } from 'UiKit/components/VFilter/VFilter.vue';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useReactiveQuery } from 'UiKit/composables/useReactiveQuery';
-import { IInvestmentFormatted } from 'InvestCommon/data/investment/investment.type';
+import { IInvestmentFormatted } from 'InvestCommon/data/investment/investment.types';
 
 // Status mapping from display names to actual values
 const STATUS_MAPPING = {
@@ -39,6 +39,10 @@ export const useDashboardPortfolioStore = defineStore('dashboard-portfolio', () 
     },
   ] as IVFilter[]);
 
+  // Intermediate refs that are only updated when Apply is clicked
+  const filterFundingType = ref<string[]>([]);
+  const filterStatus = ref<string[]>([]);
+
   // Store dependencies
   const investmentRepository = useRepositoryInvestment();
   const { getInvestmentsState } = storeToRefs(investmentRepository);
@@ -50,25 +54,21 @@ export const useDashboardPortfolioStore = defineStore('dashboard-portfolio', () 
   const totalResults = computed(() => portfolioData.value.length);
 
   const isFiltering = computed(() => (
-    filterPortfolio.value.some((item: IVFilter) => item.model?.length > 0) || search.value?.length > 0));
+    filterFundingType.value.length > 0 || filterStatus.value.length > 0 || search.value?.length > 0));
 
   const filteredData = computed(() => {
     let filtered = portfolioData.value;
 
-    // Apply funding type filter
-    const fundingTypeFilter = filterPortfolio.value.find((item: IVFilter) => item.value === 'funding-type');
-    if (fundingTypeFilter?.model?.length) {
-      const fundingTypes = fundingTypeFilter.model.map((type: string) => type.toLowerCase());
+    // Apply funding type filter using intermediate ref
+    if (filterFundingType.value?.length) {
       filtered = filtered.filter((item: IInvestmentFormatted) => (
-        fundingTypes.includes(item.funding_type?.toLowerCase())));
+        filterFundingType.value.includes(item.funding_type?.toLowerCase())));
     }
 
-    // Apply status filter
-    const statusFilter = filterPortfolio.value.find((item: IVFilter) => item.value === 'status');
-    if (statusFilter?.model?.length) {
-      const statusValues = statusFilter.model.map((displayName: string) => (
-        STATUS_MAPPING[displayName as keyof typeof STATUS_MAPPING]));
-      filtered = filtered.filter((item: IInvestmentFormatted) => statusValues.includes(item.status));
+    // Apply status filter using intermediate ref
+    if (filterStatus.value?.length) {
+      filtered = filtered.filter((item: IInvestmentFormatted) => 
+        filterStatus.value.includes(item.status));
     }
 
     // Apply search filter
@@ -90,10 +90,28 @@ export const useDashboardPortfolioStore = defineStore('dashboard-portfolio', () 
 
   const onApplyFilter = (items: IVFilter[]) => {
     filterPortfolio.value = items;
+
+    // Update intermediate refs from filter settings
+    const fundingTypeObject = items?.find((item: IVFilter) => item.value === 'funding-type');
+    if (!fundingTypeObject) {
+      filterFundingType.value = [];
+    } else {
+      filterFundingType.value = fundingTypeObject.model.map((type: string) => type.toLowerCase());
+    }
+
+    const statusObject = items?.find((item: IVFilter) => item.value === 'status');
+    if (!statusObject) {
+      filterStatus.value = [];
+    } else {
+      filterStatus.value = statusObject.model.map((displayName: string) => (
+        STATUS_MAPPING[displayName as keyof typeof STATUS_MAPPING]));
+    }
   };
 
   const resetFilters = () => {
     search.value = '';
+    filterFundingType.value = [];
+    filterStatus.value = [];
     filterPortfolio.value = filterPortfolio.value.map((filter) => ({
       ...filter,
       model: [] as string[],
@@ -101,8 +119,9 @@ export const useDashboardPortfolioStore = defineStore('dashboard-portfolio', () 
   };
 
   const resetAll = () => {
-    portfolioData.value = [];
     search.value = '';
+    filterFundingType.value = [];
+    filterStatus.value = [];
     filterPortfolio.value = filterPortfolio.value.map((filter: IVFilter) => ({
       ...filter,
       model: [] as string[],

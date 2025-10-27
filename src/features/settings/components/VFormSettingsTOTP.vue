@@ -12,7 +12,7 @@ const {
   qrOnMounted,
   totpQR,
   totpSecret,
-  totpCodeError,
+  errorTotpCode,
   model,
   onSave,
   getAuthFlowState,
@@ -56,7 +56,7 @@ const handleSave = async () => {
           <VFormGroup
             v-slot="VFormGroupProps"
             :required="isFieldRequired('totp_code')"
-            :error-text="totpCodeError"
+            :error-text="errorTotpCode"
             data-testid="totp-code-group"
             label="6-Digit Verification Code"
             class="form-settings-totp__input"

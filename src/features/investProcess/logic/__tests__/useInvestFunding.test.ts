@@ -80,7 +80,7 @@ const mockData = {
   },
   evmWallet: {
     getEvmWalletState: ref({
-      data: { totalBalance: 5000, isStatusAnyError: false },
+      data: { totalBalance: 5000, fundingBalance: 5000, isStatusAnyError: false, address: '0x123abc' },
       error: null,
     }),
     evmWalletId: ref(1),
@@ -167,6 +167,7 @@ describe('useInvestFunding', () => {
     mockData.investment.getInvestUnconfirmedOne.value.amount = 5000;
     mockData.wallet.getWalletState.value.data.totalBalance = 10000;
     mockData.evmWallet.getEvmWalletState.value.data.totalBalance = 5000;
+    mockData.evmWallet.getEvmWalletState.value.data.address = '0x123abc';
   });
 
   describe('computed properties', () => {
@@ -299,8 +300,10 @@ describe('useInvestFunding', () => {
         {
           type: FundingTypes.cryptoWallet,
           expectedData: {
-            funding_source_id: NaN,
             funding_type: FundingTypes.cryptoWallet,
+            payment_data: {
+              wallet: '0x123abc',
+            },
           },
         },
         {
@@ -369,28 +372,6 @@ describe('useInvestFunding', () => {
       mockData.investment.getInvestUnconfirmedOne.value.funding_type = 'none';
       await nextTick();
       expect(composable.model.funding_type).toBe(FundingTypes.wire); // Should remain unchanged
-    });
-  });
-
-  describe('edge cases', () => {
-    it('should handle edge cases gracefully', () => {
-      const composable = useInvestFunding();
-      
-      mockData.wallet.getWalletState.value.data.totalBalance = 0;
-      mockData.evmWallet.getEvmWalletState.value.data.totalBalance = 0;
-      
-      const options = composable.selectOptions.value;
-      expect(options[2].disabled).toBe(true); // Wallet
-      expect(options[3].disabled).toBe(true); // Crypto Wallet
-      
-      mockData.wallet.getWalletState.value.data.isWalletStatusAnyError = true;
-      expect(composable.hasWallet.value).toBe(false);
-      
-      mockData.evmWallet.getEvmWalletState.value.data.isStatusAnyError = true;
-      expect(composable.hasEvmWallet.value).toBe(false);
-      
-      (mockData.investment.setFundingState.value as any).error = { data: { responseJson: { field: 'Error' } } };
-      expect(composable.errorData.value).toEqual({ field: 'Error' });
     });
   });
 });

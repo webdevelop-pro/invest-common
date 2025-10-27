@@ -206,6 +206,10 @@ const infoData = computed(() => [
     gap: 8px;
     width: 32%;
     padding-left: 52px;
+
+    @media screen and (max-width: $tablet){
+      padding-left: 0;
+    }
   }
 
   &__info {
@@ -221,6 +225,10 @@ const infoData = computed(() => [
     align-items: flex-end;
     gap: 8px;
     width: 20%;
+
+    @media screen and (max-width: $tablet){
+      width: 30%;
+    }
   }
 
   &__skeleton {

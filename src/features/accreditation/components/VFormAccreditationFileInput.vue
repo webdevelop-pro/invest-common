@@ -28,6 +28,8 @@ const { onFilesChange, onFileRemove, model, isFieldRequired, getErrorText } = ac
     >
       <VUploader
         :is-error="VFormGroupProps.isFieldError"
+        multiple
+        :max-files="10"
         class="v-form-accreditation-file-input__field"
         @update:files="onFilesChange"
         @remove="onFileRemove"

@@ -192,8 +192,9 @@ const saveHandler = () => {
     flex-direction: column;
     justify-content: center;
     align-items: flex-start;
-    gap: 12px;
+    gap: 8px;
     align-self: stretch;
+    margin-top: 21px;
   }
 
   &__row {
@@ -211,6 +212,7 @@ const saveHandler = () => {
   &__text-title {
     color: $gray-70;
     min-width: 181px;
+    margin-top: 3px;
   }
 
   &__footer-btns {

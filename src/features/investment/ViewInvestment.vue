@@ -122,7 +122,7 @@ const tabs = computed(() => ({
     padding-top: 130px;
 
     @media screen and (max-width: $tablet){
-      padding-top: 80px;
+      padding-top: 40px;
     }
   }
 }

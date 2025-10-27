@@ -252,7 +252,7 @@ export function useInvestFunding() {
       };
     }
     if ((model.funding_type !== FundingTypes.ach) && (model.funding_type !== FundingTypes.wallet)
-      && (model.funding_type !== FundingTypes.wire)) {
+      && (model.funding_type !== FundingTypes.wire) && (model.funding_type !== FundingTypes.cryptoWallet)) {
       data = {
         funding_source_id: Number(model.funding_type),
         funding_type: FundingTypes.wallet,

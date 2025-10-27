@@ -109,9 +109,14 @@ const imageID = computed(() => getUserState.value.data?.image_link_id);
       background-color: colors.$gray-20;
     }
 
-    &.router-link-active {
+    &.router-link-active,
+    &.is--active {
       color: colors.$primary;
     }
+  }
+
+  .is--active {
+    color: colors.$primary;
   }
 
   &__icon {

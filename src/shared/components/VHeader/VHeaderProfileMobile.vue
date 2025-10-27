@@ -80,7 +80,7 @@ const getComponentName = (item: MenuItem) => {
             :class="[
               'v-header-profile-mobile__menu-link',
               menuItem.class,
-              { 'is-active': menuItem.active },
+              { 'is--active': menuItem.active },
             ]"
           >
             <component
@@ -147,7 +147,7 @@ const getComponentName = (item: MenuItem) => {
     text-decoration: none;
     color: inherit;
 
-    &.is-active {
+    &.is--active {
       color: colors.$primary;
       font-weight: 600;
     }

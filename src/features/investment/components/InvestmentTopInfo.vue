@@ -385,7 +385,7 @@ const {
     width: 100%;
 
     @media screen and (max-width: $tablet){
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       margin-top: 10px;
     }
 
@@ -400,6 +400,7 @@ const {
     display: flex;
     gap: 12px;
     align-items: center;
+    text-align: initial;
 
     @media screen and (max-width: $desktop-lg){
       min-width: auto;

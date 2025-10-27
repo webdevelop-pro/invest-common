@@ -31,11 +31,6 @@ export function useVFormSettingsTOTP() {
 
   const errorData = computed(() => (setSettingsState.value.error as any)?.data?.responseJson);
 
-  const totpCodeError = computed(() => {
-    const tokenItem = errorData.value?.ui?.nodes?.find((item) => item.attributes.name === 'totp_code');
-    return tokenItem?.messages?.[0]?.text;
-  });
-
   const schema = {
     $schema: 'http://json-schema.org/draft-07/schema#',
     definitions: {
@@ -65,6 +60,14 @@ export function useVFormSettingsTOTP() {
     {} as FormModelTOTP,
     fieldsPaths
   );
+
+
+  const totpCodeError = computed(() => {
+    const tokenItem = errorData.value?.ui?.nodes?.find((item) => item.attributes.name === 'totp_code');
+    return tokenItem?.messages?.[0]?.text;
+  });
+
+  const errorTotpCode = computed(() => totpCodeError.value || getErrorText('totp_code', errorData.value));
 
   const onSave = async () => {
     onValidate();
@@ -124,6 +127,7 @@ export function useVFormSettingsTOTP() {
     totpSecret,
     errorData,
     totpCodeError,
+    errorTotpCode,
     
     // Form
     model,
