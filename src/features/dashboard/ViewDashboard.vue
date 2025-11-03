@@ -58,11 +58,11 @@ const tabs = computed(() => ({
     label: 'Wallet',
     to: { name: ROUTE_DASHBOARD_WALLET, params: { profileId: selectedUserProfileId.value } },
   },
-  // [DashboardTabTypes.evmwallet]: {
-  //   value: DashboardTabTypes.evmwallet,
-  //   label: 'Crypto Wallet',
-  //   to: { name: ROUTE_DASHBOARD_EVMWALLET, params: { profileId: selectedUserProfileId.value } },
-  // },
+  [DashboardTabTypes.evmwallet]: {
+    value: DashboardTabTypes.evmwallet,
+    label: 'Crypto Wallet',
+    to: { name: ROUTE_DASHBOARD_EVMWALLET, params: { profileId: selectedUserProfileId.value } },
+  },
   [DashboardTabTypes.distributions]: {
     value: DashboardTabTypes.distributions,
     label: 'Distributions',
