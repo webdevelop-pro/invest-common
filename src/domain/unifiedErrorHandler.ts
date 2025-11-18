@@ -35,12 +35,32 @@ export const setupUnifiedErrorHandler = (config: ErrorHandlerConfig) => {
 
   // helpers imported from useAnalyticsError
 
+  // Check if error should be reported (filter out bots)
+  const shouldReportError = (userAgent: string): boolean => {
+    console.log('userAgent', userAgent);
+    const botPatterns = [
+      /bot/i,
+      /crawler/i,
+      /spider/i,
+      /AhrefsBot/i,
+      /googlebot/i,
+      /bingbot/i
+    ];
+    
+    return !botPatterns.some(pattern => pattern.test(userAgent));
+  };
+
   // Send error to analytics
   const sendErrorToAnalytics = async (error: Error | APIError, componentName: string, errorType: string) => {
     try {
       const pathValue = typeof window !== 'undefined' ? window.location.pathname : '';
       const urlValue = typeof window !== 'undefined' ? window.location.href : '';
       const userAgentValue = typeof navigator !== 'undefined' ? navigator.userAgent : '';
+
+      // Filter out bot errors before sending to analytics
+      if (!shouldReportError(userAgentValue)) {
+        return;
+      }
 
       await analytics.setMessage({
         time: new Date().toISOString(),

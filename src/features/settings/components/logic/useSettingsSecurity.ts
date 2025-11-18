@@ -12,6 +12,7 @@ export function useSettingsSecurity() {
   const { getAllSessionState, deleteOneSessionState, deleteAllSessionState } = storeToRefs(settingsRepository);
 
   const onDeleteId = ref<string>();
+  const isDialogContactUsOpen = ref(false);
 
   const activityHeader = [
     { text: 'Date' },
@@ -51,12 +52,17 @@ export function useSettingsSecurity() {
 
   onMounted(initializeSessions);
 
+  const onContactUsClick = () => {
+    isDialogContactUsOpen.value = true;
+  };
+
   return {
     // State
     getAllSessionState,
     deleteOneSessionState,
     deleteAllSessionState,
     onDeleteId,
+    isDialogContactUsOpen,
     
     // Computed
     activityHeader,
@@ -65,5 +71,6 @@ export function useSettingsSecurity() {
     // Methods
     onFinishAllSessions,
     onDeleteSession,
+    onContactUsClick,
   };
 }

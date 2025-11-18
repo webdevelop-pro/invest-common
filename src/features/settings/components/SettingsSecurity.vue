@@ -3,18 +3,24 @@ import VTableDefault from 'InvestCommon/shared/components/VTableDefault.vue';
 import VTableActivityItem from './VTableActivityItem.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import circleExclamation from 'UiKit/assets/images/circle-exclamation.svg';
-import { urlContactUs } from 'InvestCommon/domain/config/links';
 import { useSettingsSecurity } from './logic/useSettingsSecurity';
+import { defineAsyncComponent } from 'vue';
+
+const VDialogContactUs = defineAsyncComponent({
+  loader: () => import('InvestCommon/shared/components/dialogs/VDialogContactUs.vue'),
+});
 
 const {
   getAllSessionState,
   deleteOneSessionState,
   deleteAllSessionState,
+  isDialogContactUsOpen,
   onDeleteId,
   activityHeader,
   activityBody,
   onFinishAllSessions,
   onDeleteSession,
+  onContactUsClick,
 } = useSettingsSecurity();
 
 </script>
@@ -30,12 +36,11 @@ const {
       </h3>
       <div class="settings-security__header-buttons">
         <VButton
-          as="a"
-          :href="urlContactUs"
           size="small"
           color="red"
           variant="link"
           class="settings-security__warning"
+          @click="onContactUsClick"
         >
           <circleExclamation
             alt="Exclamation icon"
@@ -75,6 +80,12 @@ const {
         You have no data
       </template>
     </VTableDefault>
+
+
+    <VDialogContactUs
+      v-model:open="isDialogContactUsOpen"
+      :subject="'report an issue'"
+    />
   </div>
 </template>
 
