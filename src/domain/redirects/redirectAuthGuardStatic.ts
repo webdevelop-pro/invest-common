@@ -13,6 +13,11 @@ import {
 // ];
 
 export const redirectAuthGuardStatic = async () => {
+  // Skip during SSR (server-side rendering)
+  if (typeof window === 'undefined') {
+    return;
+  }
+
   const userSessionStore = useSessionStore();
   // const { userLoggedIn } = storeToRefs(userSessionStore);
 

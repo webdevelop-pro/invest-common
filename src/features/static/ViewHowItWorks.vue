@@ -51,7 +51,7 @@ useGlobalLoader().hide();
               :title="item.title"
             >
               <div>
-                <p v-html="item.text" />
+                <p v-dompurify-html="item.text" />
                 <VListsCaption
                   v-if="item.captions"
                   :items="item.captions"
@@ -123,8 +123,12 @@ useGlobalLoader().hide();
     }
   }
 
+  
+
   .v-timeline-item:not(.is--horizontal) .v-timeline-item__items {
-    margin-left: 12px;
+    @include media-lt(tablet) {
+      margin-left: 12px;
+    }
   }
 }
 </style>

@@ -35,8 +35,8 @@ const { data, getButtonTag, selectedUserProfileId, tokenState } = useInvestmentT
         >
           <div class="investment-timeline__timeline-text">
             <p
+              v-dompurify-html="item.text"
               class="investment-timeline__text"
-              v-html="item.text"
             />
             <VButton
               v-if="item.buttonText && item.showButton"

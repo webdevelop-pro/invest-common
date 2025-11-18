@@ -76,9 +76,9 @@ const signInHandler = () => {
       </div>
       <p
         v-if="offer.description"
+        v-dompurify-html="parsedDescription"
         itemprop="description"
-        class="offer-details-content__description-text is--body"
-        v-html="parsedDescription"
+        class="offer-details-content__content-text is--body"
       />
     </VTabsContent>
 
@@ -91,8 +91,8 @@ const signInHandler = () => {
       </div>
       <p
         v-if="offer.highlights"
-        class="offer-details-content__highlights-text is--body"
-        v-html="parsedHighlights"
+        v-dompurify-html="parsedHighlights"
+        class="offer-details-content__content-text is--body"
       />
     </VTabsContent>
 
@@ -156,6 +156,11 @@ const signInHandler = () => {
     align-items: center;
     width: 100%;
     justify-content: space-between;
+  }
+
+  &__content-text {
+    width: 100%;
+    overflow: auto;
   }
 
   &__date-header {

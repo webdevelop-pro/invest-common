@@ -90,6 +90,7 @@ const onMessageClick = () => {
             <p
               :key="data?.content"
               v-highlight="search"
+              v-dompurify-html="data?.content"
               class="v-table-notification-item__content is--body"
               role="button"
               tabindex="0"
@@ -97,7 +98,6 @@ const onMessageClick = () => {
               @click="onMessageClick"
               @keydown.enter="onMessageClick"
               @keydown.space="onMessageClick"
-              v-html="data?.content"
             />
           </VSkeleton>
         </div>

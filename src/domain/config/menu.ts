@@ -52,11 +52,11 @@ export const MENU_FOOTER = computed(() => (path: string) => [
     text: 'FAQ',
     active: urlFaq === path,
   },
-  {
-    href: urlOffers,
-    text: 'About',
-    active: urlOffers === path,
-  },
+  // {
+  //   href: urlOffers,
+  //   text: 'About',
+  //   active: urlOffers === path,
+  // },
   {
     href: urlContactUs,
     text: 'Contact Us',

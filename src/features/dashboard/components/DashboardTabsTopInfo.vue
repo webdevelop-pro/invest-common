@@ -18,7 +18,7 @@ defineProps({
       v-if="text"
       class="dashboard-tab-top-info__text is--small"
     >
-      <p v-html="text" />
+      <p v-dompurify-html="text" />
     </div>
   </div>
 </template>

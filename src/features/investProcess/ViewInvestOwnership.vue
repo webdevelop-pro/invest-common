@@ -109,7 +109,7 @@ watch(selectedUserProfileType, async (newType, oldType) => {
                 Identity verification is needed.
               </template>
               <template #description>
-                <span v-html="isAlertText" />
+                <span v-dompurify-html="isAlertText" />
               </template>
             </VAlert>
           </FormCol>

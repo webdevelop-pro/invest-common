@@ -59,7 +59,7 @@ const {
         {{ alertTitle }}
       </template>
       <template #description>
-        <span v-html="isAlertText" />
+        <span v-dompurify-html="isAlertText" />
       </template>
     </VAlert>
     <div
