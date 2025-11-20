@@ -308,6 +308,11 @@ describe('useFormPersonalInformation', () => {
     });
 
     it('should not proceed with hubspot submission and navigation when setProfileById fails', async () => {
+      mockRepositoryProfiles.setProfileById.mockClear();
+      mockHubspotForm.submitFormToHubspot.mockClear();
+      mockRepositoryProfiles.getProfileById.mockClear();
+      mockRouter.push.mockClear();
+      
       mockRepositoryProfiles.setProfileById = vi.fn().mockImplementation(() => {
         mockRepositoryProfiles.setProfileByIdState.value = { error: { data: { responseJson: 'API Error' } } };
         return Promise.resolve();
@@ -323,6 +328,11 @@ describe('useFormPersonalInformation', () => {
     });
 
     it('should not proceed when setProfileByIdState has error', async () => {
+      mockRepositoryProfiles.setProfileById.mockClear();
+      mockHubspotForm.submitFormToHubspot.mockClear();
+      mockRepositoryProfiles.getProfileById.mockClear();
+      mockRouter.push.mockClear();
+      
       mockRepositoryProfiles.setProfileByIdState.value = { error: { data: { responseJson: 'Error' } } };
 
       await composable.handleSave();

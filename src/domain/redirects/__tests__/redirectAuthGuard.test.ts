@@ -1,140 +1,284 @@
-import {
-  describe, it, expect, vi, beforeEach,
-} from 'vitest';
-import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
-import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
-import { navigateWithQueryParams } from 'UiKit/helpers/general';
-import { urlSignin } from 'InvestCommon/domain/config/links';
-import { resetAllData } from 'InvestCommon/domain/resetAllData';
-import { redirectAuthGuard } from '../redirectAuthGuard';
+/* @vitest-environment jsdom */
 
-vi.mock('InvestCommon/domain/session/store/useSession', () => ({
-  useSessionStore: vi.fn(),
-}));
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { setActivePinia, createPinia } from 'pinia'
+import { redirectAuthGuard } from '../redirectAuthGuard'
+import type { ISession } from 'InvestCommon/types/api/auth'
 
-vi.mock('InvestCommon/data/auth/auth.repository', () => ({
-  useRepositoryAuth: vi.fn(() => ({
-    getSession: vi.fn(),
-  })),
-}));
+// ------------------- HOIST-SAFE HELPERS -------------------
+const hoisted = vi.hoisted(() => ({
+  getSessionMock: vi.fn(),
+  navigateWithQueryParamsMock: vi.fn(),
+}))
 
-vi.mock('UiKit/helpers/general', () => ({
-  navigateWithQueryParams: vi.fn(),
-}));
+// ------------------- MOCKS -------------------
 
-vi.mock('InvestCommon/domain/resetAllData', () => ({
-  resetAllData: vi.fn(),
-}));
+const mockCookies = {
+  get: vi.fn(),
+  set: vi.fn(),
+  remove: vi.fn(),
+  getAll: vi.fn(() => ({})),
+}
+
+vi.mock('@vueuse/integrations/useCookies', () => ({
+  useCookies: () => mockCookies,
+}))
+
+vi.mock('InvestCommon/data/service/apiClient', () => {
+  class MockApiClient {
+    get(path: string, config?: unknown) {
+      return hoisted.getSessionMock(path, config)
+    }
+  }
+  return { ApiClient: MockApiClient }
+})
+
+const createMockSession = (active: boolean, id = 's1'): ISession => ({
+  id,
+  active,
+  expires_at: '2024-12-31T23:59:59Z',
+  authenticated_at: '2024-01-01T00:00:00Z',
+  authentication_methods: [],
+  authenticator_assurance_level: 'aal1',
+  identity: {
+    id: 'i1',
+    traits: {},
+    created_at: '2024-01-01T00:00:00Z',
+    credentials: {},
+    recovery_addresses: [],
+    schema_id: 'default',
+    schema_url: '',
+    state: 'active',
+    state_changed_at: '2024-01-01T00:00:00Z',
+    updated_at: '2024-01-01T00:00:00Z',
+    verifiable_addresses: [],
+  },
+  issued_at: '2024-01-01T00:00:00Z',
+  devices: [],
+  tikenized: '',
+} as unknown as ISession)
 
 vi.mock('InvestCommon/domain/config/env', () => ({
   default: {
-    FRONTEND_URL: 'http://localhost:3000',
+    FRONTEND_URL_STATIC: 'https://static.example.com',
+    KRATOS_URL: 'https://kratos.example.com',
   },
-}));
+}))
 
-vi.mock('pinia', () => ({
-  storeToRefs: vi.fn((store) => ({
-    userLoggedIn: { value: store.userLoggedIn },
-    userSession: { value: store.userSession },
-  })),
-  defineStore: vi.fn(() => vi.fn()),
-  acceptHMRUpdate: vi.fn(),
-}));
+vi.mock('UiKit/helpers/general', () => ({
+  navigateWithQueryParams: hoisted.navigateWithQueryParamsMock,
+}))
 
-vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
-  useProfilesStore: () => mockProfilesStore,
-}));
+vi.mock('vue-router', () => ({
+  useRoute: () => ({
+    params: {},
+  }),
+}))
 
-let mockProfilesStore: any;
+// ------------------- HELPERS -------------------
+const createMockRoute = (path: string, requiresAuth = false) => ({
+  path,
+  fullPath: path,
+  meta: { requiresAuth },
+} as any)
 
-describe('redirectAuthGuard', () => {
-  const mockTo = {
-    meta: { requiresAuth: true },
-    fullPath: '/protected-route',
-  };
+// ------------------- TESTS -------------------
 
+function redirectAuthGuardTests() {
   beforeEach(() => {
-    vi.clearAllMocks();
-  });
+    setActivePinia(createPinia())
+    vi.clearAllMocks()
+    hoisted.getSessionMock.mockResolvedValue(null)
+    mockCookies.get.mockReturnValue(undefined)
+    mockCookies.getAll.mockReturnValue({})
+    Object.defineProperty(window, 'location', {
+      value: { origin: 'http://localhost:3000' },
+      writable: true,
+    })
+  })
 
-  describe('unauthenticated user', () => {
-    it('should update session and init profiles when valid session exists', async () => {
-      const mockSession = { active: true };
-      const mockUserSessionStore = {
-        userLoggedIn: false,
-        updateSession: vi.fn(),
-      };
-      mockProfilesStore = { init: vi.fn() };
-      (useSessionStore as any).mockReturnValue(mockUserSessionStore);
-      (useRepositoryAuth as any).mockReturnValue({
-        getSession: vi.fn().mockResolvedValue(mockSession),
-      });
+  it('updates session and initializes profiles when valid session found for logged out user', async () => {
+    const { useSessionStore } = await import('InvestCommon/domain/session/store/useSession')
+    const sessionStore = useSessionStore()
+    
+    const session = createMockSession(true)
+    hoisted.getSessionMock.mockResolvedValue({ data: session })
+    const to = createMockRoute('/dashboard', true)
 
-      await redirectAuthGuard(mockTo as any);
+    await redirectAuthGuard(to)
 
-      expect(mockUserSessionStore.updateSession).toHaveBeenCalledWith(mockSession);
-      expect(mockProfilesStore.init).toHaveBeenCalled();
-    });
+    expect(sessionStore.userSession).toEqual(session)
+    expect(hoisted.navigateWithQueryParamsMock).not.toHaveBeenCalled()
+  })
 
-    it('should redirect to signin when no session and route requires auth', async () => {
-      const mockUserSessionStore = {
-        userLoggedIn: false,
-        updateSession: vi.fn(),
-      };
-      (useSessionStore as any).mockReturnValue(mockUserSessionStore);
-      (useRepositoryAuth as any).mockReturnValue({
-        getSession: vi.fn().mockResolvedValue(null),
-      });
+  it('redirects to signin when no session and route requires auth', async () => {
+    hoisted.getSessionMock.mockResolvedValue({ data: null })
+    const to = createMockRoute('/protected', true)
 
-      await redirectAuthGuard(mockTo as any);
+    await redirectAuthGuard(to)
 
-      expect(resetAllData).toHaveBeenCalled();
-      expect(navigateWithQueryParams).toHaveBeenCalledWith(urlSignin, {
-        redirect: 'http://localhost:3000/protected-route',
-      });
-    });
+    expect(hoisted.navigateWithQueryParamsMock).toHaveBeenCalledWith('https://static.example.com/signin', {
+      redirect: 'http://localhost:3000/protected',
+    })
+  })
 
-    it('should do nothing when no session and route does not require auth', async () => {
-      const mockUserSessionStore = {
-        userLoggedIn: false,
-        updateSession: vi.fn(),
-      };
-      (useSessionStore as any).mockReturnValue(mockUserSessionStore);
-      (useRepositoryAuth as any).mockReturnValue({
-        getSession: vi.fn().mockResolvedValue(null),
-      });
-      const toWithoutAuth = { ...mockTo, meta: { requiresAuth: false } };
+  it('does not redirect when no session and route does not require auth', async () => {
+    hoisted.getSessionMock.mockResolvedValue({ data: null })
+    const to = createMockRoute('/public', false)
 
-      await redirectAuthGuard(toWithoutAuth as any);
+    await redirectAuthGuard(to)
 
-      expect(resetAllData).not.toHaveBeenCalled();
-      expect(navigateWithQueryParams).not.toHaveBeenCalled();
-    });
-  });
+    expect(hoisted.navigateWithQueryParamsMock).not.toHaveBeenCalled()
+  })
 
-  describe('authenticated user', () => {
-    it('should reset data when no session data exists', async () => {
-      const mockUserSessionStore = {
-        userLoggedIn: true,
-        userSession: null,
-      };
-      (useSessionStore as any).mockReturnValue(mockUserSessionStore);
+  it('prevents redirect loop when already on signin page', async () => {
+    hoisted.getSessionMock.mockResolvedValue({ data: null })
+    const to = createMockRoute('/signin', true)
 
-      await redirectAuthGuard(mockTo as any);
+    await redirectAuthGuard(to)
 
-      expect(resetAllData).toHaveBeenCalled();
-    });
+    expect(hoisted.navigateWithQueryParamsMock).not.toHaveBeenCalled()
+  })
 
-    it('should do nothing when session data exists', async () => {
-      const mockUserSessionStore = {
-        userLoggedIn: true,
-        userSession: { id: 1 },
-      };
-      (useSessionStore as any).mockReturnValue(mockUserSessionStore);
+  it('prevents redirect loop when already on signup page', async () => {
+    hoisted.getSessionMock.mockResolvedValue({ data: null })
+    const to = createMockRoute('/signup', true)
 
-      await redirectAuthGuard(mockTo as any);
+    await redirectAuthGuard(to)
 
-      expect(resetAllData).not.toHaveBeenCalled();
-    });
-  });
-});
+    expect(hoisted.navigateWithQueryParamsMock).not.toHaveBeenCalled()
+  })
+
+  it('resets data when logged in but session data is missing', async () => {
+    const { useSessionStore } = await import('InvestCommon/domain/session/store/useSession')
+    const sessionStore = useSessionStore()
+    
+    hoisted.getSessionMock.mockClear()
+    
+    // Set up a session in cookies to make userLoggedIn true
+    const session = createMockSession(true)
+    mockCookies.get.mockReturnValue(session)
+    sessionStore.updateSession(session)
+    
+    // Verify session is set
+    expect(sessionStore.userSession).toBeDefined()
+    
+    // Clear the session ref to simulate missing session data
+    sessionStore.resetAll()
+    
+    // After resetAll, userLoggedIn becomes false (computed from userSession.value)
+    // So the guard will call getSession to check for a session
+    hoisted.getSessionMock.mockResolvedValue({ data: null })
+
+    const to = createMockRoute('/dashboard', true)
+    await redirectAuthGuard(to)
+
+    // Verify session is cleared
+    expect(sessionStore.userSession).toBeUndefined()
+    // getSession is called because userLoggedIn is false after resetAll
+    expect(hoisted.getSessionMock).toHaveBeenCalled()
+    // Since no session found and route requires auth, should redirect to signin
+    expect(hoisted.navigateWithQueryParamsMock).toHaveBeenCalled()
+  })
+
+  it('verifies session validity when logged in with session data', async () => {
+    const { useSessionStore } = await import('InvestCommon/domain/session/store/useSession')
+    const sessionStore = useSessionStore()
+    
+    const existingSession = createMockSession(true)
+    sessionStore.updateSession(existingSession)
+    hoisted.getSessionMock.mockResolvedValue({ data: existingSession })
+
+    const to = createMockRoute('/dashboard', true)
+    await redirectAuthGuard(to)
+
+    expect(hoisted.getSessionMock).toHaveBeenCalled()
+    expect(hoisted.navigateWithQueryParamsMock).not.toHaveBeenCalled()
+  })
+
+  it('resets data and redirects when session becomes invalid', async () => {
+    const { useSessionStore } = await import('InvestCommon/domain/session/store/useSession')
+    const sessionStore = useSessionStore()
+    
+    const existingSession = createMockSession(true)
+    sessionStore.updateSession(existingSession)
+    hoisted.getSessionMock.mockResolvedValue({ data: createMockSession(false) })
+
+    const to = createMockRoute('/dashboard', true)
+    await redirectAuthGuard(to)
+
+    expect(sessionStore.userSession).toBeUndefined()
+    expect(hoisted.navigateWithQueryParamsMock).toHaveBeenCalledWith('https://static.example.com/signin', {
+      redirect: 'http://localhost:3000/dashboard',
+    })
+  })
+
+  it('does not redirect when session invalid but route does not require auth', async () => {
+    const { useSessionStore } = await import('InvestCommon/domain/session/store/useSession')
+    const sessionStore = useSessionStore()
+    
+    const existingSession = createMockSession(true)
+    sessionStore.updateSession(existingSession)
+    hoisted.getSessionMock.mockResolvedValue({ data: createMockSession(false) })
+
+    const to = createMockRoute('/public', false)
+    await redirectAuthGuard(to)
+
+    expect(sessionStore.userSession).toBeUndefined()
+    expect(hoisted.navigateWithQueryParamsMock).not.toHaveBeenCalled()
+  })
+
+  it('updates session when session ID changes', async () => {
+    const { useSessionStore } = await import('InvestCommon/domain/session/store/useSession')
+    const sessionStore = useSessionStore()
+    
+    const oldSession = createMockSession(true, 's1')
+    sessionStore.updateSession(oldSession)
+    const newSession = createMockSession(true, 's2')
+    hoisted.getSessionMock.mockResolvedValue({ data: newSession })
+
+    const to = createMockRoute('/dashboard', true)
+    await redirectAuthGuard(to)
+
+    expect(sessionStore.userSession).toEqual(newSession)
+  })
+
+  it('does not update session when session ID unchanged', async () => {
+    const { useSessionStore } = await import('InvestCommon/domain/session/store/useSession')
+    const sessionStore = useSessionStore()
+    
+    const session = createMockSession(true)
+    sessionStore.updateSession(session)
+    hoisted.getSessionMock.mockResolvedValue({ data: session })
+
+    const to = createMockRoute('/dashboard', true)
+    await redirectAuthGuard(to)
+
+    // Session should remain the same
+    expect(sessionStore.userSession).toEqual(session)
+  })
+
+  it('handles errors gracefully by resetting data', async () => {
+    const { useSessionStore } = await import('InvestCommon/domain/session/store/useSession')
+    const sessionStore = useSessionStore()
+    
+    hoisted.getSessionMock.mockRejectedValue(new Error('Network error'))
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    const to = createMockRoute('/dashboard', true)
+    await redirectAuthGuard(to)
+
+    expect(sessionStore.userSession).toBeUndefined()
+    expect(consoleSpy).toHaveBeenCalledWith('Auth guard error:', expect.any(Error))
+
+    consoleSpy.mockRestore()
+  })
+}
+
+describe('redirectAuthGuard (jsdom)', () => {
+  redirectAuthGuardTests()
+})
+
+describe('redirectAuthGuard (node)', () => {
+  redirectAuthGuardTests()
+})

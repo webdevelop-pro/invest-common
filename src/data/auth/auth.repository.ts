@@ -6,6 +6,7 @@ import env from 'InvestCommon/domain/config/env';
 import { SELFSERVICE } from 'InvestCommon/features/auth/store/type';
 import { createActionState } from 'InvestCommon/data/repository/repository';
 import { computed } from 'vue';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import {
   ISession, IAuthFlow, ILogoutFlow, ISchema, ISuccessfullNativeAuth,
 } from './auth.type';
@@ -41,10 +42,13 @@ export const useRepositoryAuth = () => {
       return response.data;
     } catch (err) {
       getSessionState.value.error = err as Error;
-      if (err?.data?.statusCode !== 401) {
-        oryErrorHandling(err, 'session', () => {}, 'Failed to get session');
-        throw err;
+      if (err?.data?.statusCode === 401) {
+        // Session is invalid, clear it from store
+        useSessionStore().resetAll();
+        return null;
       }
+      oryErrorHandling(err, 'session', () => {}, 'Failed to get session');
+      throw err;
     } finally {
       getSessionState.value.loading = false;
     }

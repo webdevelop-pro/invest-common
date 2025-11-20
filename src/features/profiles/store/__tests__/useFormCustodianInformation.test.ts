@@ -394,6 +394,8 @@ describe('useFormCustodianInformation', () => {
     });
 
     it('should handle getProfileById rejection', async () => {
+      mockRepositoryProfiles.setProfileById.mockResolvedValue(undefined);
+      setProfileByIdState.value = { error: null };
       mockRepositoryProfiles.getProfileById.mockRejectedValue(new Error('Profile fetch error'));
       const mockOnValidate = vi.fn();
 

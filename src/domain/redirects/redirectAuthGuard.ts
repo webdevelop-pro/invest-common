@@ -5,7 +5,6 @@ import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import { urlSignin } from 'InvestCommon/domain/config/links';
 import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
 import { resetAllData } from 'InvestCommon/domain/resetAllData';
-import env from 'InvestCommon/domain/config/env';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 // import { useDomainWebSocketStore } from 'InvestCommon/domain/websockets/store/useWebsockets';
 import { ISession } from 'InvestCommon/types/api/auth';
@@ -33,8 +32,12 @@ export const redirectAuthGuard = async (
 
     // Helper for redirecting to signin
     const redirectToSignin = () => {
+      // Prevent redirect loops - if we're already going to signin, don't redirect again
+      if (to.path.includes('/signin') || to.path.includes('/signup')) {
+        return;
+      }
       resetAllData();
-      const redirectUrl = `${env.FRONTEND_URL}${to.fullPath}`;
+      const redirectUrl = `${window.location.origin}${to.fullPath}`;
       navigateWithQueryParams(urlSignin, { redirect: redirectUrl });
     };
 
@@ -52,6 +55,27 @@ export const redirectAuthGuard = async (
         redirectToSignin();
       }
       return;
+    }
+
+    // User appears logged in - verify session is still valid
+    // This handles the case where cookies exist but session was invalidated elsewhere
+    if (userLoggedIn.value && userSession.value) {
+      const session = (await useRepositoryAuth().getSession()) as ISession | null;
+      
+      if (!session?.active) {
+        // Session is invalid, clear everything and redirect
+        resetAllData();
+        if (to.meta.requiresAuth) {
+          redirectToSignin();
+        }
+        return;
+      }
+
+      // Session is valid, update store if needed
+      if (session && session.id !== userSession.value?.id) {
+        await userSessionStore.updateSession(session);
+        profilesStore.init();
+      }
     }
 
     // Logged in but session missing: reset all data

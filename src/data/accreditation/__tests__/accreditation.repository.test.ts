@@ -1,18 +1,27 @@
 import {
   describe, it, expect, beforeEach, vi,
 } from 'vitest';
-import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import { toasterErrorHandling } from 'InvestCommon/data/repository/error/toasterErrorHandling';
 import { AccreditationTypes } from 'InvestCommon/types/api/invest';
 import { useRepositoryAccreditation } from '../accreditation.repository';
 
 // Mock ApiClient
-vi.mock('InvestCommon/data/service/apiClient', () => ({
-  ApiClient: vi.fn().mockImplementation(() => ({
-    get: vi.fn().mockImplementation(() => Promise.resolve({ data: [] })),
-    post: vi.fn().mockImplementation(() => Promise.resolve({ data: {} })),
-  })),
-}));
+const hoisted = vi.hoisted(() => ({
+  getMock: vi.fn().mockImplementation(() => Promise.resolve({ data: [] })),
+  postMock: vi.fn().mockImplementation(() => Promise.resolve({ data: {} })),
+}))
+
+vi.mock('InvestCommon/data/service/apiClient', () => {
+  class MockApiClient {
+    get(path: string, config?: unknown) {
+      return hoisted.getMock(path, config)
+    }
+    post(path: string, body?: unknown, config?: unknown) {
+      return hoisted.postMock(path, body, config)
+    }
+  }
+  return { ApiClient: MockApiClient }
+})
 
 // Mock toaster error handling
 vi.mock('InvestCommon/data/repository/error/toasterErrorHandling', () => ({
@@ -22,6 +31,8 @@ vi.mock('InvestCommon/data/repository/error/toasterErrorHandling', () => ({
 describe('Accreditation Repository', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    hoisted.getMock.mockResolvedValue({ data: [] });
+    hoisted.postMock.mockResolvedValue({ data: {} });
   });
 
   it('should fetch accreditation data successfully', async () => {
@@ -30,11 +41,7 @@ describe('Accreditation Repository', () => {
       { id: 2, status: AccreditationTypes.approved, created_at: '2024-01-02' },
     ];
 
-    const mockGet = vi.fn().mockImplementation(() => Promise.resolve({ data: mockAccreditation }));
-    vi.mocked(ApiClient).mockImplementation(() => ({
-      get: mockGet,
-      post: vi.fn().mockImplementation(() => Promise.resolve({ data: {} })),
-    }));
+    hoisted.getMock.mockResolvedValueOnce({ data: mockAccreditation });
 
     const repository = useRepositoryAccreditation();
     const result = await repository.getAll(123);
@@ -48,11 +55,7 @@ describe('Accreditation Repository', () => {
 
   it('should handle fetch error', async () => {
     const mockError = new Error('Network error');
-    const mockGet = vi.fn().mockImplementation(() => Promise.reject(mockError));
-    vi.mocked(ApiClient).mockImplementation(() => ({
-      get: mockGet,
-      post: vi.fn().mockImplementation(() => Promise.resolve({ data: {} })),
-    }));
+    hoisted.getMock.mockRejectedValueOnce(mockError);
 
     const repository = useRepositoryAccreditation();
 
@@ -64,11 +67,7 @@ describe('Accreditation Repository', () => {
 
   it('should create accreditation successfully', async () => {
     const mockResponse = { id: 1, status: AccreditationTypes.pending };
-    const mockPost = vi.fn().mockImplementation(() => Promise.resolve({ data: mockResponse }));
-    vi.mocked(ApiClient).mockImplementation(() => ({
-      get: vi.fn().mockImplementation(() => Promise.resolve({ data: [] })),
-      post: mockPost,
-    }));
+    hoisted.postMock.mockResolvedValueOnce({ data: mockResponse });
 
     const repository = useRepositoryAccreditation();
     const result = await repository.create(123, 'Test note');
@@ -81,11 +80,7 @@ describe('Accreditation Repository', () => {
 
   it('should update accreditation successfully', async () => {
     const mockResponse = { id: 1, status: AccreditationTypes.pending };
-    const mockPost = vi.fn().mockImplementation(() => Promise.resolve({ data: mockResponse }));
-    vi.mocked(ApiClient).mockImplementation(() => ({
-      get: vi.fn().mockImplementation(() => Promise.resolve({ data: [] })),
-      post: mockPost,
-    }));
+    hoisted.postMock.mockResolvedValueOnce({ data: mockResponse });
 
     const repository = useRepositoryAccreditation();
     const result = await repository.update(123, 'Updated note');
@@ -98,11 +93,7 @@ describe('Accreditation Repository', () => {
 
   it('should upload document successfully', async () => {
     const mockResponse = { id: 1, status: 'success' };
-    const mockPost = vi.fn().mockImplementation(() => Promise.resolve({ data: mockResponse }));
-    vi.mocked(ApiClient).mockImplementation(() => ({
-      get: vi.fn().mockImplementation(() => Promise.resolve({ data: [] })),
-      post: mockPost,
-    }));
+    hoisted.postMock.mockResolvedValueOnce({ data: mockResponse });
 
     const repository = useRepositoryAccreditation();
     const formData = new FormData();
@@ -116,11 +107,7 @@ describe('Accreditation Repository', () => {
 
   it('should create escrow successfully', async () => {
     const mockResponse = { id: 1, status: 'success' };
-    const mockPost = vi.fn().mockImplementation(() => Promise.resolve({ data: mockResponse }));
-    vi.mocked(ApiClient).mockImplementation(() => ({
-      get: vi.fn().mockImplementation(() => Promise.resolve({ data: [] })),
-      post: mockPost,
-    }));
+    hoisted.postMock.mockResolvedValueOnce({ data: mockResponse });
 
     const repository = useRepositoryAccreditation();
     const result = await repository.createEscrow(123, 456);
@@ -133,11 +120,7 @@ describe('Accreditation Repository', () => {
 
   it('should handle create accreditation error', async () => {
     const mockError = new Error('Create failed');
-    const mockPost = vi.fn().mockImplementation(() => Promise.reject(mockError));
-    vi.mocked(ApiClient).mockImplementation(() => ({
-      get: vi.fn().mockImplementation(() => Promise.resolve({ data: [] })),
-      post: mockPost,
-    }));
+    hoisted.postMock.mockRejectedValueOnce(mockError);
 
     const repository = useRepositoryAccreditation();
 
@@ -149,11 +132,7 @@ describe('Accreditation Repository', () => {
 
   it('should handle update accreditation error', async () => {
     const mockError = new Error('Update failed');
-    const mockPost = vi.fn().mockImplementation(() => Promise.reject(mockError));
-    vi.mocked(ApiClient).mockImplementation(() => ({
-      get: vi.fn().mockImplementation(() => Promise.resolve({ data: [] })),
-      post: mockPost,
-    }));
+    hoisted.postMock.mockRejectedValueOnce(mockError);
 
     const repository = useRepositoryAccreditation();
 
@@ -165,11 +144,7 @@ describe('Accreditation Repository', () => {
 
   it('should handle upload document error', async () => {
     const mockError = new Error('Upload failed');
-    const mockPost = vi.fn().mockImplementation(() => Promise.reject(mockError));
-    vi.mocked(ApiClient).mockImplementation(() => ({
-      get: vi.fn().mockImplementation(() => Promise.resolve({ data: [] })),
-      post: mockPost,
-    }));
+    hoisted.postMock.mockRejectedValueOnce(mockError);
 
     const repository = useRepositoryAccreditation();
     const formData = new FormData();
@@ -182,11 +157,7 @@ describe('Accreditation Repository', () => {
 
   it('should handle create escrow error', async () => {
     const mockError = new Error('Escrow creation failed');
-    const mockPost = vi.fn().mockImplementation(() => Promise.reject(mockError));
-    vi.mocked(ApiClient).mockImplementation(() => ({
-      get: vi.fn().mockImplementation(() => Promise.resolve({ data: [] })),
-      post: mockPost,
-    }));
+    hoisted.postMock.mockRejectedValueOnce(mockError);
 
     const repository = useRepositoryAccreditation();
 
@@ -197,12 +168,8 @@ describe('Accreditation Repository', () => {
   });
 
   it('should verify loading states during operations', async () => {
-    const mockPost = vi.fn().mockImplementation(() => new Promise((resolve) => {
+    hoisted.postMock.mockImplementation(() => new Promise((resolve) => {
       setTimeout(() => resolve({ data: {} }), 100);
-    }));
-    vi.mocked(ApiClient).mockImplementation(() => ({
-      get: vi.fn().mockImplementation(() => Promise.resolve({ data: [] })),
-      post: mockPost,
     }));
 
     const repository = useRepositoryAccreditation();
@@ -234,25 +201,22 @@ describe('Accreditation Repository', () => {
   });
 
   it('should handle empty or invalid inputs', async () => {
-    const mockPost = vi.fn().mockImplementation(() => Promise.resolve({ data: {} }));
-    vi.mocked(ApiClient).mockImplementation(() => ({
-      get: vi.fn().mockImplementation(() => Promise.resolve({ data: [] })),
-      post: mockPost,
-    }));
+    hoisted.postMock.mockResolvedValue({ data: {} });
 
     const repository = useRepositoryAccreditation();
 
     // Test with empty note
     await repository.create(123, '');
-    expect(mockPost).toHaveBeenCalledWith(
+    expect(hoisted.postMock).toHaveBeenCalledWith(
       expect.any(String),
       expect.objectContaining({ notes: '' }),
+      undefined,
     );
 
     // Test with empty form data
     const emptyFormData = new FormData();
     await repository.uploadDocument(123, 456, emptyFormData);
-    expect(mockPost).toHaveBeenCalledWith(
+    expect(hoisted.postMock).toHaveBeenCalledWith(
       expect.any(String),
       emptyFormData,
       expect.any(Object),
@@ -260,7 +224,7 @@ describe('Accreditation Repository', () => {
 
     // Test with zero IDs
     await repository.createEscrow(0, 0);
-    expect(mockPost).toHaveBeenCalledWith(
+    expect(hoisted.postMock).toHaveBeenCalledWith(
       expect.stringContaining('/0/0'),
       null,
       expect.any(Object),

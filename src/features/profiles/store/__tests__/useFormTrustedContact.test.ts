@@ -299,6 +299,7 @@ describe('useFormTrustedContact', () => {
       it('should manage loading state correctly', async () => {
         mockSetProfileById.mockResolvedValue(undefined);
         mockGetProfileById.mockResolvedValue(undefined);
+        mockSubmitFormToHubspot.mockResolvedValue(undefined);
 
         const savePromise = composable.handleSave();
         expect(composable.isLoading.value).toBe(true);
@@ -336,6 +337,7 @@ describe('useFormTrustedContact', () => {
     it('should handle complete successful workflow', async () => {
       mockSetProfileById.mockResolvedValue(undefined);
       mockGetProfileById.mockResolvedValue(undefined);
+      mockSubmitFormToHubspot.mockResolvedValue(undefined);
 
       const testComposable = useFormTrustedContact();
 
