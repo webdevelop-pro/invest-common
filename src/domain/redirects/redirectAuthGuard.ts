@@ -57,26 +57,26 @@ export const redirectAuthGuard = async (
       return;
     }
 
-    // // User appears logged in - verify session is still valid
-    // // This handles the case where cookies exist but session was invalidated elsewhere
-    // if (userLoggedIn.value && userSession.value) {
-    //   const session = (await useRepositoryAuth().getSession()) as ISession | null;
+    // User appears logged in - verify session is still valid
+    // This handles the case where cookies exist but session was invalidated elsewhere
+    if (userLoggedIn.value && userSession.value) {
+      const session = (await useRepositoryAuth().getSession()) as ISession | null;
       
-    //   if (!session?.active) {
-    //     // Session is invalid, clear everything and redirect
-    //     resetAllData();
-    //     if (to.meta.requiresAuth) {
-    //       redirectToSignin();
-    //     }
-    //     return;
-    //   }
+      if (!session?.active) {
+        // Session is invalid, clear everything and redirect
+        resetAllData();
+        if (to.meta.requiresAuth) {
+          redirectToSignin();
+        }
+        return;
+      }
 
-    //   // Session is valid, update store if needed
-    //   if (session && session.id !== userSession.value?.id) {
-    //     await userSessionStore.updateSession(session);
-    //     profilesStore.init();
-    //   }
-    // }
+      // Session is valid, update store if needed
+      if (session && session.id !== userSession.value?.id) {
+        await userSessionStore.updateSession(session);
+        profilesStore.init();
+      }
+    }
 
     // Logged in but session missing: reset all data
     if (!userSession.value) {
