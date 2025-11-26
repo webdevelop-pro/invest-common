@@ -11,7 +11,8 @@ declare module '*.scss' {
 }
 
 declare module '*.svg' {
-  const component: string;
+  import type { DefineComponent } from 'vue';
+  const component: DefineComponent<{}, {}, any>;
   export default component;
 }
 
