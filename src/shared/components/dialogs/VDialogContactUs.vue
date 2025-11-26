@@ -1,14 +1,20 @@
 <script setup lang="ts">
-import ContactUsForm from 'InvestCommon/shared/components/forms/VFormContactUs.vue';
+import ContactUsForm from 'UiKit/components/VForms/VFormContactUs.vue';
 import {
   VDialogContent, VDialogHeader, VDialogTitle, VDialog,
 } from 'UiKit/components/Base/VDialog';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
+import { storeToRefs } from 'pinia';
+import env from 'InvestCommon/domain/config/env';
 
 const open = defineModel<boolean>();
 
 defineProps({
   subject: String,
 });
+
+const sessionStore = useSessionStore();
+const { userSessionTraits } = storeToRefs(sessionStore);
 </script>
 
 <template>
@@ -29,6 +35,8 @@ defineProps({
       <ContactUsForm
         is-in-dialog
         :subject="subject"
+        :user-session-traits="userSessionTraits"
+        :hubspot-form-id="env.HUBSPOT_FORM_ID_CONTACT_US"
         class="is--margin-top-40"
         @close="open = false"
       />

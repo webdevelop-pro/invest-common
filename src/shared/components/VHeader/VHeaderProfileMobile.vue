@@ -149,7 +149,7 @@ const getComponentName = (item: MenuItem) => {
 
     &.is--active {
       color: colors.$primary;
-      font-weight: 600;
+      // font-weight: 600;
     }
 
     &.is--border-top {

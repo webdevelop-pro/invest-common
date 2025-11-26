@@ -1,9 +1,15 @@
 <script setup lang="ts">
 import { useData } from 'vitepress';
-import ContactUsForm from 'InvestCommon/shared/components/forms/VFormContactUs.vue';
+import ContactUsForm from 'UiKit/components/VForms/VFormContactUs.vue';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
+import { storeToRefs } from 'pinia';
+import env from 'InvestCommon/domain/config/env';
 
 const { frontmatter } = useData();
+
+const sessionStore = useSessionStore();
+const { userSessionTraits } = storeToRefs(sessionStore);
 
 useGlobalLoader().hide();
 </script>
@@ -16,7 +22,10 @@ useGlobalLoader().hide();
           {{ frontmatter.title }}
         </h1>
 
-        <ContactUsForm />
+        <ContactUsForm
+          :user-session-traits="userSessionTraits"
+          :hubspot-form-id="env.HUBSPOT_FORM_ID_CONTACT_US"
+        />
       </div>
     </div>
   </div>
@@ -25,7 +34,6 @@ useGlobalLoader().hide();
 <style lang="scss">
 .view-contact-us {
   width: 100%;
-  padding-bottom: 70px;
 
   &__wrap {
     max-width: 753px;
