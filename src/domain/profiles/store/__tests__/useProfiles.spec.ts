@@ -209,7 +209,7 @@ describe('useProfilesStore', () => {
     store.setSelectedUserProfileById(123);
     store.updateDataInProfile('name', 'Updated Name');
 
-    expect(store.selectedUserProfileData?.name).toBe('Updated Name');
+    expect((store.selectedUserProfileData as { name?: string })?.name).toBe('Updated Name');
   });
 
   it('should update data from notification', () => {
@@ -226,7 +226,7 @@ describe('useProfilesStore', () => {
     };
 
     store.updateData(notification as any);
-    expect(store.selectedUserProfileData?.name).toBe('Updated Name');
+    expect((store.selectedUserProfileData as { name?: string })?.name).toBe('Updated Name');
   });
 
   it('should handle profile selection when user is logged in', () => {
