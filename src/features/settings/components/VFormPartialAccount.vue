@@ -18,11 +18,10 @@ const {
   onValidate,
   validator,
   errorData,
-  isDialogContactUsOpen,
-  VDialogContactUs,
   setUserState,
   isFieldRequired,
   getErrorText,
+  openAccountContactDialog,
 } = useAccountForm(props);
 
 defineExpose({
@@ -105,9 +104,9 @@ defineExpose({
             class="is--link-2"
             role="button"
             tabindex="0"
-            @click.prevent="isDialogContactUsOpen = true"
-            @keydown.enter.prevent="isDialogContactUsOpen = true"
-            @keydown.space.prevent="isDialogContactUsOpen = true"
+            @click.prevent="openAccountContactDialog"
+            @keydown.enter.prevent="openAccountContactDialog"
+            @keydown.space.prevent="openAccountContactDialog"
           >
             contact us
           </a>
@@ -138,10 +137,6 @@ defineExpose({
         </VFormGroup>
       </FormCol>
     </FormRow>
-    <VDialogContactUs
-      v-model="isDialogContactUsOpen"
-      subject="other"
-    />
   </div>
 </template>
 

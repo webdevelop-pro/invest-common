@@ -28,11 +28,12 @@ vi.mock('InvestCommon/data/profiles/profiles.repository', () => ({
   useRepositoryProfiles: vi.fn(() => mockRepositoryProfiles),
 }));
 
-vi.mock('InvestCommon/shared/components/dialogs/VDialogContactUs.vue', () => ({
-  default: {
-    name: 'VDialogContactUs',
-    template: '<div>Mock Dialog</div>',
-  },
+const mockOpenContactUsDialog = vi.fn();
+
+vi.mock('InvestCommon/domain/dialogs/store/useDialogs', () => ({
+  useDialogs: () => ({
+    openContactUsDialog: mockOpenContactUsDialog,
+  }),
 }));
 
 describe('useAccountForm', () => {
@@ -71,7 +72,6 @@ describe('useAccountForm', () => {
       expect(composable.isValid).toBeDefined();
       expect(composable.errorData.value).toBeUndefined();
       expect(composable.schemaBackend.value).toBeNull();
-      expect(composable.isDialogContactUsOpen.value).toBe(false);
     });
 
     it('should initialize with provided model data', () => {
@@ -170,20 +170,12 @@ describe('useAccountForm', () => {
   });
 
   describe('Dialog management', () => {
-    it('should provide VDialogContactUs component', () => {
+    it('should open contact dialog through dialogs store', () => {
       composable = useAccountForm({});
 
-      expect(composable.VDialogContactUs).toBeDefined();
-    });
+      composable.openAccountContactDialog();
 
-    it('should manage dialog state correctly', () => {
-      composable = useAccountForm({});
-
-      expect(composable.isDialogContactUsOpen.value).toBe(false);
-      
-      // Test dialog state changes
-      composable.isDialogContactUsOpen.value = true;
-      expect(composable.isDialogContactUsOpen.value).toBe(true);
+      expect(mockOpenContactUsDialog).toHaveBeenCalledWith('other');
     });
   });
 
@@ -252,7 +244,7 @@ describe('useAccountForm', () => {
       expect(composable.isValid).toBeDefined();
       expect(composable.errorData.value).toBeUndefined();
       expect(composable.schemaBackend.value).toEqual({ properties: {} });
-      expect(composable.isDialogContactUsOpen.value).toBe(false);
+      expect(typeof composable.openAccountContactDialog).toBe('function');
     });
 
     it('should handle error state workflow', () => {

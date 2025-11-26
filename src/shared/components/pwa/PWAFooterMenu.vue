@@ -126,8 +126,6 @@ const menuItems = computed<Item[]>(() =>
   --pwamenu-shadow: 0 10px 30px rgb(0 0 0 / 24%), 0 2px 8px rgb(0 0 0 / 8%);
 }
 
-.pwamenu { display: block; } // fix it
-
 @media (width <= 768px) {
   body.pwa-standalone .pwamenu { display: block; }
 }
@@ -139,6 +137,7 @@ const menuItems = computed<Item[]>(() =>
   padding-bottom: calc(var(--pwamenu-gb) + env(safe-area-inset-bottom));
   z-index: 110; 
   pointer-events: none;
+  display: block;// fix it
 
   .pwamenu__list {
     pointer-events: auto;

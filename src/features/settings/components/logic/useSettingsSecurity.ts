@@ -4,6 +4,7 @@ import { SessionFormatter } from 'InvestCommon/data/settings/session.formatter';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositorySettings } from 'InvestCommon/data/settings/settings.repository';
 import { IActivityRow, ISession, ISessionFormatted } from 'InvestCommon/data/settings/settings.types';
+import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 
 export function useSettingsSecurity() {
   const userSessionStore = useSessionStore();
@@ -12,7 +13,7 @@ export function useSettingsSecurity() {
   const { getAllSessionState, deleteOneSessionState, deleteAllSessionState } = storeToRefs(settingsRepository);
 
   const onDeleteId = ref<string>();
-  const isDialogContactUsOpen = ref(false);
+  const dialogsStore = useDialogs();
 
   const activityHeader = [
     { text: 'Date' },
@@ -53,7 +54,7 @@ export function useSettingsSecurity() {
   onMounted(initializeSessions);
 
   const onContactUsClick = () => {
-    isDialogContactUsOpen.value = true;
+    dialogsStore.openContactUsDialog('report an issue');
   };
 
   return {
@@ -62,7 +63,6 @@ export function useSettingsSecurity() {
     deleteOneSessionState,
     deleteAllSessionState,
     onDeleteId,
-    isDialogContactUsOpen,
     
     // Computed
     activityHeader,

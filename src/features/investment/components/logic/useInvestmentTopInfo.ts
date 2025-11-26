@@ -3,6 +3,7 @@ import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment
 import { useRouter } from 'vue-router';
 import { ROUTE_DASHBOARD_PORTFOLIO } from 'InvestCommon/domain/config/enums/routes';
 import { storeToRefs } from 'pinia';
+import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 
 export interface UseInvestmentTopInfoProps {
   investmentId: string;
@@ -16,8 +17,8 @@ export function useInvestmentTopInfo(props: UseInvestmentTopInfoProps) {
 
   const isDialogTransactionOpen = ref(false);
   const isDialogWireOpen = ref(false);
-  const isDialogContactUsOpen = ref(false);
   const isDialogCancelOpen = ref(false);
+  const dialogsStore = useDialogs();
 
   // Use the repository state instead of store
   const getInvestOneData = computed(() => getInvestOneState.value.data);
@@ -74,7 +75,7 @@ export function useInvestmentTopInfo(props: UseInvestmentTopInfoProps) {
   };
 
   const onContactUsClick = () => {
-    isDialogContactUsOpen.value = true;
+    dialogsStore.openContactUsDialog('investment');
   };
 
   return {
@@ -86,7 +87,6 @@ export function useInvestmentTopInfo(props: UseInvestmentTopInfoProps) {
     infoData,
     isDialogTransactionOpen,
     isDialogWireOpen,
-    isDialogContactUsOpen,
     isDialogCancelOpen,
     
     // Actions

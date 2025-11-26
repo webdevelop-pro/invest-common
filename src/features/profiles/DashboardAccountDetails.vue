@@ -7,8 +7,8 @@ import { computed } from 'vue';
 import DashboardAccountDetailsReadonlyForm from './components/DashboardAccountDetailsReadonlyForm.vue';
 import VTableBeneficialItem from './components/VTableBeneficialItem.vue';
 import VTableDefault from 'InvestCommon/shared/components/VTableDefault.vue';
-import { urlContactUs } from 'InvestCommon/domain/config/links';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
+import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 import { 
   ROUTE_DASHBOARD_PERSONAL_DETAILS,
   ROUTE_DASHBOARD_TRUSTED_CONTACT,
@@ -43,7 +43,10 @@ const formatPhoneNumber = (phoneNumber: string | undefined): string | undefined 
   return `${countryCode}(${areaCode}) ${middlePart}-${lastPart}`;
 };
 
-const formatName = (profileData: IUserDataIndividual) => {
+type NameLike = Pick<IUserDataIndividual, 'first_name' | 'middle_name' | 'last_name'>;
+type AddressLike = Pick<IUserDataIndividual, 'address1' | 'address2' | 'city' | 'state' | 'zip_code' | 'country'>;
+
+const formatName = (profileData?: Partial<NameLike>) => {
   if (!profileData) return 'N/A';
   const parts = [
     profileData?.first_name,
@@ -53,7 +56,7 @@ const formatName = (profileData: IUserDataIndividual) => {
   return parts.join(' ') || 'N/A';
 };
 
-const formatAddress = (profileData: IUserDataIndividual) => {
+const formatAddress = (profileData?: Partial<AddressLike>) => {
   if (!profileData) return 'N/A';
   const parts = [
     profileData?.address1,
@@ -212,14 +215,16 @@ const formSections = computed(() => {
   return sections.filter(section => section.show);
 });
 
+const dialogsStore = useDialogs();
+
+const handleContactUsClick = () => {
+  dialogsStore.openContactUsDialog('profile details');
+};
+
 const ACCOUNT_TAB_INFO = {
   title: 'Profile Details',
-  text: `
-    To help the government fight the funding of terrorism and money laundering activities, federal
-    law requires all financial institutions to obtain, verify, and record information that identifies
-    each person who opens an account. If you have any questions, feel free to 
-    <a class="is--link-2" href="${urlContactUs}">chat with us.</a>
-  `,
+  description: 'To help the government fight the funding of terrorism and money laundering activities, federal law requires all financial institutions to obtain, verify, and record information that identifies each person who opens an account. If you have any questions, feel free to',
+  ctaLabel: 'chat with us.',
 };
 </script>
 
@@ -227,8 +232,20 @@ const ACCOUNT_TAB_INFO = {
   <div class="DashboardAccountDetails dashboard-account-details">
     <DashboardTabsTopInfo
       :title="ACCOUNT_TAB_INFO.title"
-      :text="ACCOUNT_TAB_INFO.text"
-    />
+    >
+      <template #text>
+        <p>
+          {{ ACCOUNT_TAB_INFO.description }}
+          <button
+            type="button"
+            class="is--link-2"
+            @click="handleContactUsClick"
+          >
+            {{ ACCOUNT_TAB_INFO.ctaLabel }}
+          </button>
+        </p>
+      </template>
+    </DashboardTabsTopInfo>
     <div class="is--two-col-grid is--gap-40-80">
       <DashboardAccountDetailsReadonlyForm
         v-for="section in formSections"

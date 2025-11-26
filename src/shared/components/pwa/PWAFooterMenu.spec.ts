@@ -25,14 +25,14 @@ vi.mock('UiKit/components/Base/VNavigationMenu', () => {
   }
 })
 
-vi.mock('UiKit/assets/images/pwa_specific/home.svg',         () => ({ default: hoisted.mockIcon('HomeIcon') }))
-vi.mock('UiKit/assets/images/pwa_specific/dashboard__.svg',  () => ({ default: hoisted.mockIcon('DashboardIcon') }))
-vi.mock('UiKit/assets/images/pwa_specific/notification.svg', () => ({ default: hoisted.mockIcon('NotificationIcon') }))
-vi.mock('UiKit/assets/images/pwa_specific/investment.svg',   () => ({ default: hoisted.mockIcon('InvestmentIcon') }))
-vi.mock('UiKit/assets/images/pwa_specific/wallet.svg',       () => ({ default: hoisted.mockIcon('WalletIcon') }))
-vi.mock('UiKit/assets/images/pwa_specific/crypto-wallet.svg',() => ({ default: hoisted.mockIcon('CryptoIcon') }))
-vi.mock('UiKit/assets/images/pwa_specific/info_.svg',        () => ({ default: hoisted.mockIcon('HowIcon') }))
-vi.mock('UiKit/assets/images/pwa_specific/faq_.svg',         () => ({ default: hoisted.mockIcon('FaqIcon') }))
+vi.mock('UiKit/assets/images/menu_common/home.svg',         () => ({ default: hoisted.mockIcon('HomeIcon') }))
+vi.mock('UiKit/assets/images/menu_common/grid.svg',  () => ({ default: hoisted.mockIcon('DashboardIcon') }))
+vi.mock('UiKit/assets/images/menu_common/notifications.svg', () => ({ default: hoisted.mockIcon('NotificationIcon') }))
+vi.mock('UiKit/assets/images/menu_common/investments.svg',   () => ({ default: hoisted.mockIcon('InvestmentIcon') }))
+vi.mock('UiKit/assets/images/menu_common/wallet.svg',       () => ({ default: hoisted.mockIcon('WalletIcon') }))
+vi.mock('UiKit/assets/images/menu_common/cryptoq.svg',() => ({ default: hoisted.mockIcon('CryptoIcon') }))
+vi.mock('UiKit/assets/images/menu_common/help.svg',        () => ({ default: hoisted.mockIcon('HowIcon') }))
+vi.mock('UiKit/assets/images/menu_common/faq.svg',         () => ({ default: hoisted.mockIcon('FaqIcon') }))
 
 vi.mock('InvestCommon/domain/config/links.ts', () => ({
   urlHome: '/home',
@@ -43,7 +43,7 @@ vi.mock('InvestCommon/domain/config/links.ts', () => ({
   urlProfilePortfolio:   (id: string | number | null | undefined) => `/profiles/${id}/portfolio`,
   urlProfileWallet:      (id: string | number | null | undefined) => `/profiles/${id}/wallet`,
   urlProfileCryptoWallet:(id: string | number | null | undefined) => `/profiles/${id}/crypto`,
-}), { virtual: true })
+}))
 
 // Pinia-stores через storeToRefs()
 const userLoggedInRef = ref(false)
@@ -168,5 +168,5 @@ describe('PWAFooterMenu (jsdom)', { environment: 'jsdom' }, () => {
   })
   
 describe('PWAFooterMenu (node)', { environment: 'node' }, () => {
-    pwafMenuTests()
+  pwafMenuTests()
 })

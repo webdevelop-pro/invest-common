@@ -4,17 +4,11 @@ import VTableActivityItem from './VTableActivityItem.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import circleExclamation from 'UiKit/assets/images/circle-exclamation.svg';
 import { useSettingsSecurity } from './logic/useSettingsSecurity';
-import { defineAsyncComponent } from 'vue';
-
-const VDialogContactUs = defineAsyncComponent({
-  loader: () => import('InvestCommon/shared/components/dialogs/VDialogContactUs.vue'),
-});
 
 const {
   getAllSessionState,
   deleteOneSessionState,
   deleteAllSessionState,
-  isDialogContactUsOpen,
   onDeleteId,
   activityHeader,
   activityBody,
@@ -80,12 +74,6 @@ const {
         You have no data
       </template>
     </VTableDefault>
-
-
-    <VDialogContactUs
-      v-model:open="isDialogContactUsOpen"
-      :subject="'report an issue'"
-    />
   </div>
 </template>
 

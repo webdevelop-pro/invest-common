@@ -11,9 +11,6 @@ import VImage from 'UiKit/components/Base/VImage/VImage.vue';
 import { useInvestmentTopInfo } from './logic/useInvestmentTopInfo';
 import VTooltip from 'UiKit/components/VTooltip.vue';
 
-const VDialogContactUs = defineAsyncComponent({
-  loader: () => import('InvestCommon/shared/components/dialogs/VDialogContactUs.vue'),
-});
 const VDialogPortfolioTransaction = defineAsyncComponent({
   loader: () => import('InvestCommon/features/investment/components/VDialogPortfolioTransaction.vue'),
 });
@@ -39,7 +36,6 @@ const {
   infoData,
   isDialogTransactionOpen,
   isDialogWireOpen,
-  isDialogContactUsOpen,
   isDialogCancelOpen,
   onBackClick,
   onCancelInvestmentClick,
@@ -222,10 +218,6 @@ const {
         </InfoSlot>
       </div>
     </div>
-    <VDialogContactUs
-      v-model:open="isDialogContactUsOpen"
-      :subject="'investment'"
-    />
     <VDialogPortfolioTransaction
       v-if="getInvestOneData"
       v-model:open="isDialogTransactionOpen"

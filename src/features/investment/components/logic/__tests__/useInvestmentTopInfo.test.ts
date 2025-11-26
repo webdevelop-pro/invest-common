@@ -35,6 +35,8 @@ const mockInvestmentRepository = {
   getInvestOneState: mockGetInvestOneState,
 };
 
+const mockOpenContactUsDialog = vi.fn();
+
 vi.mock('InvestCommon/data/investment/investment.repository', () => ({
   useRepositoryInvestment: () => mockInvestmentRepository,
 }));
@@ -42,6 +44,12 @@ vi.mock('InvestCommon/data/investment/investment.repository', () => ({
 vi.mock('pinia', () => ({
   storeToRefs: (store: any) => ({
     getInvestOneState: store.getInvestOneState,
+  }),
+}));
+
+vi.mock('InvestCommon/domain/dialogs/store/useDialogs', () => ({
+  useDialogs: () => ({
+    openContactUsDialog: mockOpenContactUsDialog,
   }),
 }));
 
@@ -220,12 +228,10 @@ describe('useInvestmentTopInfo', () => {
     });
 
     describe('onContactUsClick', () => {
-      it('should open contact us dialog', () => {
-        expect(composable.isDialogContactUsOpen.value).toBe(false);
-
+      it('should open global contact dialog with investment subject', () => {
         composable.onContactUsClick();
 
-        expect(composable.isDialogContactUsOpen.value).toBe(true);
+        expect(mockOpenContactUsDialog).toHaveBeenCalledWith('investment');
       });
     });
   });

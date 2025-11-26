@@ -15,10 +15,12 @@ defineProps({
       {{ title }}
     </div>
     <div
-      v-if="text"
+      v-if="text || $slots.text"
       class="dashboard-tab-top-info__text is--small"
     >
-      <p v-dompurify-html="text" />
+      <slot name="text">
+        <p v-dompurify-html="text" />
+      </slot>
     </div>
   </div>
 </template>

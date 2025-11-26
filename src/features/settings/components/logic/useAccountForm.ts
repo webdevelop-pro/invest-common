@@ -1,6 +1,5 @@
 import {
   watch, computed,
-  ref, defineAsyncComponent,
 } from 'vue';
 import { storeToRefs } from 'pinia';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
@@ -10,6 +9,7 @@ import {
 } from 'UiKit/helpers/validation/rules';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
+import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 
 export interface FormModelAccount {
   first_name: string;
@@ -49,12 +49,7 @@ export function useAccountForm(props: UseAccountFormProps) {
   } as unknown as JSONSchemaType<FormModelAccount>));
 
   const fieldsPaths = ['first_name', 'last_name', 'email', 'phone'];
-
-  const isDialogContactUsOpen = ref(false);
-
-  const VDialogContactUs = defineAsyncComponent({
-    loader: () => import('InvestCommon/shared/components/dialogs/VDialogContactUs.vue'),
-  });
+  const dialogsStore = useDialogs();
 
   const {
     model,
@@ -84,6 +79,10 @@ export function useAccountForm(props: UseAccountFormProps) {
     if (!isValid.value) onValidate();
   }, { deep: true });
 
+  const openAccountContactDialog = () => {
+    dialogsStore.openContactUsDialog('other');
+  };
+
   return {
     model,
     validation,
@@ -93,9 +92,8 @@ export function useAccountForm(props: UseAccountFormProps) {
     errorData,
     schemaBackend,
     schema,
-    isDialogContactUsOpen,
-    VDialogContactUs,
     setUserState,
+    openAccountContactDialog,
     
     // Form validation helpers
     formErrors,
