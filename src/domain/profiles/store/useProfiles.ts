@@ -12,10 +12,10 @@ import { PROFILE_TYPES } from 'InvestCommon/domain/config/enums/profileTypes';
 import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository';
 import { useLogoutStore } from 'InvestCommon/features/auth/store/useLogout';
 
-const { IS_STATIC_SITE } = env;
+const isStaticSite = Number(env.IS_STATIC_SITE ?? 0);
 
 export const useProfilesStore = defineStore('profiles', () => {
-  const route = useRoute();
+  const route = isStaticSite ? null : useRoute();
 
   const userSessionStore = useSessionStore();
   const { userSession, userLoggedIn } = storeToRefs(userSessionStore);
@@ -42,7 +42,7 @@ export const useProfilesStore = defineStore('profiles', () => {
     getProfileByIdState.value?.loading || getUserState.value?.loading || false));
 
   const urlProfileId = computed(() => {
-    if (!+IS_STATIC_SITE) return route?.params?.profileId;
+    if (!isStaticSite) return route?.params?.profileId;
     return (window && window?.location?.pathname.split('/')[3]); // TODO change if url changes
   });
 
@@ -116,16 +116,22 @@ export const useProfilesStore = defineStore('profiles', () => {
     useRepositoryWallet().resetAll();
     selectedUserProfileId.value = Number(id);
     if (id === 0) return;
-    cookies.set('selectedUserProfileId', id, cookiesOptions((new Date(userSession.value?.expires_at))));
+    cookies.set(
+      'selectedUserProfileId',
+      id,
+      cookiesOptions(new Date(userSession.value?.expires_at)),
+    );
   };
 
   const updateSelectedAccount = () => {
-    useRepositoryProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
+    const profileType = selectedUserProfileType.value;
+    if (!profileType) return;
+    useRepositoryProfilesStore.getProfileById(profileType, selectedUserProfileId.value);
   };
 
-  const updateDataInProfile = (nameOfProperty: string, data: object | string | number) => {
+  const updateDataInProfile = (nameOfProperty: string, data: unknown) => {
     if (getProfileByIdState.value?.data) {
-      getProfileByIdState.value.data[nameOfProperty] = data;
+      (getProfileByIdState.value.data as Record<string, unknown>)[nameOfProperty] = data;
     }
   };
 
@@ -138,8 +144,9 @@ export const useProfilesStore = defineStore('profiles', () => {
       Object.assign(profile, notification.data.fields);
     }
 
-    if (getProfileByIdState.value?.data?.id === notification.data.fields?.object_id) {
-      Object.assign(getProfileByIdState.value.data, notification.data.fields);
+    const profileData = getProfileByIdState.value?.data;
+    if (profileData?.id === notification.data.fields?.object_id) {
+      Object.assign(profileData as Record<string, unknown>, notification.data.fields);
     }
   };
 
