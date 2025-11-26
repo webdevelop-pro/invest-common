@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
-import { ref, nextTick } from 'vue';
+import { nextTick } from 'vue';
 import type { ISession } from 'InvestCommon/types/api/auth';
 
 // ------------------- HOIST-SAFE HELPERS -------------------
