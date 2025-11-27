@@ -2,7 +2,7 @@ import defaultImage from 'InvestCommon/shared/assets/images/default.svg?url';
 import env from 'InvestCommon/domain/config/env';
 import {
   IOfferFormatted, IOffer, OfferStatuses, PaymentScheduleTypes, VotingRightsTypes,
-  DividendType,
+  DividendType, DividendFrequencyTypes,
 } from './offer.types';
 
 // Currency formatter function
@@ -250,6 +250,23 @@ export class OfferFormatter {
     return DividendType[dividendType as keyof typeof DividendType] || dividendType;
   }
 
+  get dividendRateFormatted(): string | undefined {
+    const dividendRate = this.offer.security_info?.dividend_rate;
+    if (!dividendRate || dividendRate.toLowerCase() === 'none') return undefined;
+
+    const numericValue = parseFloat(dividendRate);
+    if (Number.isNaN(numericValue)) return dividendRate;
+
+    return `${numericValue}%`;
+  }
+
+  get dividendPaymentFrequencyFormatted(): string | undefined {
+    const frequency = this.offer.security_info?.dividend_payment_frequency;
+    if (!frequency) return undefined;
+
+    return DividendFrequencyTypes[frequency as keyof typeof DividendFrequencyTypes] || frequency;
+  }
+
   get valuationCapFormatted(): string | undefined {
     const valuationCap = this.offer.security_info?.cn_valuation_cap;
     if (!valuationCap) return undefined;
@@ -370,6 +387,8 @@ export class OfferFormatter {
         voting_rights: '',
         liquidation_preference: '',
         dividend_type: '',
+        dividend_rate: '',
+        dividend_payment_frequency: '',
         cn_valuation_cap: '',
         cn_discount_rate: '',
         cn_interest_rate: '',
@@ -429,6 +448,8 @@ export class OfferFormatter {
       votingRightsFormatted: this.votingRightsFormatted,
       liquidationPreferenceFormatted: this.liquidationPreferenceFormatted,
       dividendTypeFormatted: this.dividendTypeFormatted,
+      dividendRateFormatted: this.dividendRateFormatted,
+      dividendPaymentFrequencyFormatted: this.dividendPaymentFrequencyFormatted,
       valuationCapFormatted: this.valuationCapFormatted,
       discountRateFormatted: this.discountRateFormatted,
       interestRateFormatted: this.interestRateFormatted,

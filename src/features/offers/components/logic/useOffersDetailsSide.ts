@@ -70,6 +70,14 @@ export function useOffersDetailsSide(offerRef: Ref<IOfferFormatted | undefined>)
       text: offerRef.value?.dividendTypeFormatted,
     },
     {
+      title: 'Dividend Rate:',
+      text: offerRef.value?.dividendRateFormatted,
+    },
+    {
+      title: 'Dividend Payment Frequency:',
+      text: offerRef.value?.dividendPaymentFrequencyFormatted,
+    },
+    {
       title: 'Valuation Cap:',
       text: offerRef.value?.valuationCapFormatted,
     },

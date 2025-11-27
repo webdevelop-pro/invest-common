@@ -30,6 +30,12 @@ export enum DividendType {
   non_cumulative = 'Non-Cumulative',
 }
 
+export enum DividendFrequencyTypes {
+  annually = 'Annually',
+  quarterly = 'Quarterly',
+  at_discretion_of_board = 'At Discretion of Board',
+}
+
 export enum SecurityType {
   equity = 'Equity',
   'preferred-equity' = 'Preferred Equity',
@@ -64,6 +70,8 @@ export interface ISecurityInfo {
   voting_rights?: string;
   liquidation_preference?: string;
   dividend_type?: string;
+  dividend_rate?: string;
+  dividend_payment_frequency?: string;
   cn_valuation_cap?: string;
   cn_discount_rate?: string;
   cn_interest_rate?: string;
@@ -183,6 +191,8 @@ export interface IOfferFormatted extends IOffer {
   votingRightsFormatted: string | undefined;
   liquidationPreferenceFormatted: string | undefined;
   dividendTypeFormatted: string | undefined;
+  dividendRateFormatted: string | undefined;
+  dividendPaymentFrequencyFormatted: string | undefined;
   valuationCapFormatted: string | undefined;
   discountRateFormatted: string | undefined;
   interestRateFormatted: string | undefined;
