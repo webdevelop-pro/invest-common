@@ -56,7 +56,7 @@ const valueFormatter = (tick: number) => (props.valueFormatter ? props.valueForm
       >
         <VSkeleton
           v-if="isLoading"
-          height="100px"
+          height="100%"
           width="100%"
         />
         <VShadcnChartDonut
