@@ -1,5 +1,6 @@
 import { computed, type Ref } from 'vue';
-import { marked } from 'marked';
+import MarkdownIt from 'markdown-it';
+import tableWrap from '../../../../../../ui-kit/src/markdown/plugins/table-wrap';
 import type { IOfferFormatted } from 'InvestCommon/data/offer/offer.types';
 import { storeToRefs } from 'pinia';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
@@ -41,6 +42,10 @@ export function useOffersDetailsContent(offerRef: Ref<IOfferFormatted | undefine
   const isFilesLoading = computed(() => (
     userLoggedIn.value ? getFilesState.value.loading : getPublicFilesState.value.loading));
 
+  // Create markdown-it instance matching VitePress configuration
+  const md = new MarkdownIt();
+  md.use(tableWrap);
+
   function cleanImageUrls(htmlContent: string): string {
     const regex = /(<img\s[^>]*src="[^"]+)(\?X-Goog-Algorithm[^"]*)(")/g;
     return htmlContent?.replace(regex, '$1$3');
@@ -48,7 +53,7 @@ export function useOffersDetailsContent(offerRef: Ref<IOfferFormatted | undefine
 
   function parseAndClean(markdownText?: string | null) {
     if (!markdownText) return null as unknown as string | null;
-    return cleanImageUrls(marked.parse(markdownText));
+    return cleanImageUrls(md.render(markdownText));
   }
 
   const parsedDescription = computed(() => parseAndClean(offerRef.value?.description));

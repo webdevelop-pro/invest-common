@@ -206,18 +206,13 @@ const { readOnlyInfo, investmentDocUrl, onShareClick, copied } = useOffersDetail
 
   &__details-value {
     color: $gray-80;
-    display: flex;
-    align-items: center;
+    width: fit-content;
+    display: inline-block;
+    text-align: end;
     gap: 6px;
 
     &.is--tooltip {
       cursor: help;
-
-      @media screen and (max-width: $tablet){
-        width: fit-content;
-        display: inline-block;
-        text-align: end;
-      }
     }
   }
 
