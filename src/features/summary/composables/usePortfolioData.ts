@@ -83,12 +83,17 @@ export function usePortfolioData() {
     DEFAULT_CHART_COLORS.slice(0, categoryDonutData.value.length)
   );
 
-  // Top invested offers (unique by offer ID)
+  // Top invested offers (unique by offer ID) - only include published offers
   const topInvestedOffers = computed(() => {
     const offerMap = new Map();
     
     portfolioData.value
-      .filter((inv: any) => inv.offer && inv.amount)
+      .filter(
+        (inv: any) =>
+          inv.offer &&
+          inv.amount &&
+          inv.offer.status === 'published',
+      )
       .forEach((inv: any) => {
         const offerId = inv.offer.id;
         if (offerMap.has(offerId)) {

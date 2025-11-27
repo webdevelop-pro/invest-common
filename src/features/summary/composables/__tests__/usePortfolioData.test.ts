@@ -4,9 +4,33 @@ import { ref } from 'vue';
 
 // Mock portfolio data
 const mockPortfolioData = [
-  { amount: 1000, offer: { id: 1, name: 'Offer A', security_type: 'Equity' } },
-  { amount: 500, offer: { id: 2, name: 'Offer B', security_type: 'Debt' } },
-  { amount: 1500, offer: { id: 1, name: 'Offer A', security_type: 'Equity' } },
+  {
+    amount: 1000,
+    offer: {
+      id: 1,
+      name: 'Offer A',
+      security_type: 'Equity',
+      status: 'published',
+    },
+  },
+  {
+    amount: 500,
+    offer: {
+      id: 2,
+      name: 'Offer B',
+      security_type: 'Debt',
+      status: 'published',
+    },
+  },
+  {
+    amount: 1500,
+    offer: {
+      id: 1,
+      name: 'Offer A',
+      security_type: 'Equity',
+      status: 'published',
+    },
+  },
 ];
 
 // Mock the portfolio store
