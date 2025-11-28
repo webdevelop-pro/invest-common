@@ -21,7 +21,9 @@ vi.mock('InvestCommon/data/evm/evm.repository', () => ({
   useRepositoryEvm: vi.fn(() => ({
     getEvmWalletState: ref({ data: testWalletData, loading: false, error: null }),
     withdrawFundsState: ref({ data: undefined, loading: false, error: null }),
+    withdrawFundsOptionsState: ref({ data: undefined, loading: false, error: null }),
     withdrawFunds: vi.fn().mockResolvedValue(undefined),
+    withdrawFundsOptions: vi.fn().mockResolvedValue(undefined),
     getEvmWalletByProfile: vi.fn(),
   })),
 }));
@@ -114,7 +116,9 @@ describe('useVFormFundsWithdraw', () => {
     
     expect(schemaAddTransaction.value).toBeDefined();
     
-    const requiredFields = schemaAddTransaction.value?.definitions?.Individual?.required;
+    const requiredFields = schemaAddTransaction.value?.definitions?.WalletWithdraw?.required;
+    expect(requiredFields).toBeDefined();
+    expect(Array.isArray(requiredFields)).toBe(true);
     expect(requiredFields).toContain('amount');
     expect(requiredFields).toContain('token');
     expect(requiredFields).toContain('to');

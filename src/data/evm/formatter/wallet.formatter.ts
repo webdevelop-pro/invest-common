@@ -3,6 +3,8 @@ import {
   IEvmTransactionDataFormatted,
 } from '../evm.types';
 import { EvmTransactionFormatter } from './transactions.formatter';
+import defaultImage from 'InvestCommon/shared/assets/images/default.svg?url';
+import env from 'InvestCommon/domain/config/env';
 
 export class EvmWalletFormatter {
   private data: IEvmWalletDataResponse;
@@ -76,6 +78,22 @@ export class EvmWalletFormatter {
     return Number(this.data.out_balance) || 0;
   }
 
+  getImage(iconLinkId?: number | string, icon?: string, metaSize: 'big' | 'small' | 'medium' = 'small'): string {
+    // Handle iconLinkId as number or string (number as string)
+    const iconId = typeof iconLinkId === 'string' ? Number(iconLinkId) : iconLinkId;
+    if (iconId && (iconId > 0)) {
+      return `${env.FILER_URL}/public/files/${iconId}?size=${metaSize}`;
+    }
+    // If iconLinkId is a string that looks like a URL, use it
+    if (typeof iconLinkId === 'string' && (iconLinkId.startsWith('http') || iconLinkId.startsWith('/'))) {
+      return iconLinkId;
+    }
+    if (icon) {
+      return icon;
+    }
+    return defaultImage;
+  }
+
   format(): IEvmWalletDataFormatted {
     // Normalize balances to an array regardless of backend shape (array or map)
     let balancesArray: IEvmWalletBalances[] = [];
@@ -87,7 +105,7 @@ export class EvmWalletFormatter {
         amount: Number(b.amount ?? 0),
         symbol: String(b.symbol ?? ''),
         name: b.name ? String(b.name) : undefined,
-        icon: b.icon ? String(b.icon) : undefined,
+        icon: b.icon ? this.getImage(b.icon) : undefined,
       }))
       // Hide zero-amount balances except USDC
       .filter((b: IEvmWalletBalances) => {
@@ -96,7 +114,7 @@ export class EvmWalletFormatter {
       });
 
     // Format transactions using the transaction formatter
-    const formattedTransactions: IEvmTransactionDataFormatted[] = this.data.transactions.map(transaction => 
+    const formattedTransactions: IEvmTransactionDataFormatted[] = this.data.transactions?.map(transaction => 
       new EvmTransactionFormatter(transaction).format()
     );
 

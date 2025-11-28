@@ -21,7 +21,9 @@ vi.mock('InvestCommon/data/evm/evm.repository', () => ({
   useRepositoryEvm: vi.fn(() => ({
     getEvmWalletState: ref({ data: testWalletData, loading: false, error: null }),
     exchangeTokensState: ref({ data: undefined, loading: false, error: null }),
+    exchangeTokensOptionsState: ref({ data: undefined, loading: false, error: null }),
     exchangeTokens: vi.fn().mockResolvedValue(undefined),
+    exchangeTokensOptions: vi.fn().mockResolvedValue(undefined),
     getEvmWalletByProfile: vi.fn().mockResolvedValue(undefined),
   })),
 }));
@@ -129,7 +131,9 @@ describe('useVFormFundsExchange', () => {
     
     expect(schemaExchangeTransaction.value).toBeDefined();
     
-    const requiredFields = schemaExchangeTransaction.value?.definitions?.Individual?.required;
+    const requiredFields = schemaExchangeTransaction.value?.definitions?.WalletExchange?.required;
+    expect(requiredFields).toBeDefined();
+    expect(Array.isArray(requiredFields)).toBe(true);
     expect(requiredFields).toContain('from');
     expect(requiredFields).toContain('to');
     expect(requiredFields).toContain('amount');

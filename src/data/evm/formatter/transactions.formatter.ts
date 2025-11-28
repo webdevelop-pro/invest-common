@@ -4,6 +4,8 @@ import {
   EvmTransactionStatusTypes,
   EvmTransactionTypes
 } from '../evm.types';
+import defaultImage from 'InvestCommon/shared/assets/images/default.svg?url';
+import env from 'InvestCommon/domain/config/env';
 
 const BASE_OPTIONS = {
   year: 'numeric',
@@ -72,9 +74,26 @@ export class EvmTransactionFormatter {
     return 'default';
   }
 
+  getImage(iconLinkId?: number | string, icon?: string, metaSize: 'big' | 'small' | 'medium' = 'small'): string {
+    // Handle iconLinkId as number or string (number as string)
+    const iconId = typeof iconLinkId === 'string' ? Number(iconLinkId) : iconLinkId;
+    if (iconId && (iconId > 0)) {
+      return `${env.FILER_URL}/public/files/${iconId}?size=${metaSize}`;
+    }
+    // If iconLinkId is a string that looks like a URL, use it
+    if (typeof iconLinkId === 'string' && (iconLinkId.startsWith('http') || iconLinkId.startsWith('/'))) {
+      return iconLinkId;
+    }
+    if (icon) {
+      return icon;
+    }
+    return defaultImage;
+  }
+
   format(): IEvmTransactionDataFormatted {
     return {
       ...this.data,
+      icon: this.data.image_link_id ? this.getImage(this.data.image_link_id) : undefined,
       isStatusPending: this.data.status === EvmTransactionStatusTypes.pending,
       isStatusProcessed: this.data.status === EvmTransactionStatusTypes.processed,
       isStatusFailed: this.data.status === EvmTransactionStatusTypes.failed,

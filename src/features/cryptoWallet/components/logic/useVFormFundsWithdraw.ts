@@ -1,5 +1,5 @@
 import {
-  computed, reactive, watch, nextTick,
+  computed, reactive, watch, nextTick, onMounted,
 } from 'vue';
 import { storeToRefs } from 'pinia';
 import { numberFormatter } from 'InvestCommon/helpers/numberFormatter';
@@ -13,20 +13,26 @@ export function useVFormFundsWithdraw(
   emitClose?: () => void,
 ) {
   const evmRepository = useRepositoryEvm();
-  const { getEvmWalletState, withdrawFundsState } = storeToRefs(evmRepository);
+  const { getEvmWalletState, withdrawFundsState, withdrawFundsOptionsState } = storeToRefs(evmRepository);
+
+  // Call options request when component is mounted
+  onMounted(() => {
+    evmRepository.withdrawFundsOptions();
+  });
+
+  const errorData = computed(() => (withdrawFundsState.value.error as any)?.data?.responseJson);
+  const schemaBackend = computed(() => withdrawFundsOptionsState.value.data);
+  const fieldsPaths = ['amount', 'token', 'to', 'wallet_id'];
 
   const selectedToken = computed(() => (
     getEvmWalletState.value.data?.balances?.find((item: IEvmWalletBalances) => item.address === model.token)));
   const maxWithdraw = computed((): number | undefined => selectedToken.value?.amount);
   const text = computed(() => `available ${maxWithdraw.value}`);
 
-  const errorData = computed(() => (withdrawFundsState.value.error as any)?.data?.responseJson);
-  const fieldsPaths = ['amount', 'token', 'to', 'wallet_id'];
-
   const schemaAddTransaction = computed(() => ({
     $schema: 'http://json-schema.org/draft-07/schema#',
     definitions: {
-      Individual: {
+      WalletWithdraw: {
         properties: {
           amount: {
             type: 'number',
@@ -50,12 +56,10 @@ export function useVFormFundsWithdraw(
         errorMessage: errorMessageRule,
       },
     },
-    $ref: '#/definitions/Individual',
+    $ref: '#/definitions/WalletWithdraw',
   } as unknown as JSONSchemaType<IEvmWithdrawRequestBody>));
 
-
   const schemaFrontend = schemaAddTransaction;
-  // Pass undefined directly for backend schema
   const {
     model,
     validation,
@@ -65,7 +69,7 @@ export function useVFormFundsWithdraw(
     getOptions, getReferenceType,
   } = useFormValidation<IEvmWithdrawRequestBody>(
     schemaFrontend,
-    undefined,
+    schemaBackend,
     reactive({
       wallet_id: getEvmWalletState.value.data?.id
     } as IEvmWithdrawRequestBody),
@@ -97,8 +101,16 @@ export function useVFormFundsWithdraw(
     if (emitClose) emitClose();
   };
 
+  watch(() => model.amount, (newAmount) => {
+    if (Number(newAmount) === 0) {
+      (model as any).amount = undefined;
+    }
+  });
+
   watch(() => getEvmWalletState.value.data, () => {
-    if (model.wallet_id) model.wallet_id = getEvmWalletState.value.data?.id;
+    if (model.wallet_id && getEvmWalletState.value.data?.id) {
+      model.wallet_id = getEvmWalletState.value.data.id;
+    }
   }, { immediate: true });
 
   // Helper function to format token data

@@ -89,6 +89,7 @@ export interface IEvmTransactionDataResponse {
   symbol?: string;
   name?: string;
   icon?: string;
+  image_link_id?: number | string;
   network: string;
   status: EvmTransactionStatusTypes;
   transaction_tx: string;

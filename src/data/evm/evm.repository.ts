@@ -25,7 +25,9 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
 
   const getEvmWalletState = createActionState<IEvmWalletDataFormatted>();
   const withdrawFundsState = createActionState<IEvmWalletDataResponse>();
+  const withdrawFundsOptionsState = createActionState<any>();
   const exchangeTokensState = createActionState<IEvmExchangeResponse>();
+  const exchangeTokensOptionsState = createActionState<any>();
 
   // Loading states for websocket updates
   const isLoadingNotificationTransaction = ref(false);
@@ -70,6 +72,22 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
     }
   };
 
+  const withdrawFundsOptions = async () => {
+    try {
+      withdrawFundsOptionsState.value.loading = true;
+      withdrawFundsOptionsState.value.error = null;
+      const response = await apiClient.options<any>(`/auth/withdrawal`);
+      withdrawFundsOptionsState.value.data = response.data;
+      return withdrawFundsOptionsState.value.data;
+    } catch (err) {
+      withdrawFundsOptionsState.value.error = err as Error;
+      toasterErrorHandling(err, 'Failed to fetch withdraw funds options');
+      throw err;
+    } finally {
+      withdrawFundsOptionsState.value.loading = false;
+    }
+  };
+
   const exchangeTokens = async (body: IEvmExchangeRequestBody) => {
     try {
       exchangeTokensState.value.loading = true;
@@ -83,6 +101,22 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
       throw err;
     } finally {
       exchangeTokensState.value.loading = false;
+    }
+  };
+
+  const exchangeTokensOptions = async () => {
+    try {
+      exchangeTokensOptionsState.value.loading = true;
+      exchangeTokensOptionsState.value.error = null;
+      const response = await apiClient.options<any>(`/auth/exchange`);
+      exchangeTokensOptionsState.value.data = response.data;
+      return exchangeTokensOptionsState.value.data;
+    } catch (err) {
+      exchangeTokensOptionsState.value.error = err as Error;
+      toasterErrorHandling(err, 'Failed to fetch exchange tokens options');
+      throw err;
+    } finally {
+      exchangeTokensOptionsState.value.loading = false;
     }
   };
 
@@ -107,10 +141,24 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
         wallet.transactions = [];
       }
       
+      // Extract token fields and map them to transaction structure
+      const tokenFields = fields.token ? {
+        address: fields.token.address,
+        name: fields.token.name,
+        symbol: fields.token.name, // Use name as symbol if symbol not provided
+      } : {};
+      
+      // Prepare transaction fields, excluding the nested token object
+      const { token, ...transactionFields } = fields;
+      const mergedFields = {
+        ...transactionFields,
+        ...tokenFields,
+      };
+      
       const index = wallet.transactions.findIndex((t: any) => t.id === objectId);
       
       if (index !== -1) {
-        Object.assign(wallet.transactions[index], fields);
+        Object.assign(wallet.transactions[index], mergedFields);
         // Re-format the updated transaction
         Object.assign(
           wallet.transactions[index], 
@@ -136,14 +184,14 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
         // Merge fields but preserve required structure
         const newItem = {
           ...baseItem,
-          ...fields,
+          ...mergedFields,
           // Ensure type and status are valid enum values
-          type: (fields.type && Object.values(EvmTransactionTypes).includes(fields.type as EvmTransactionTypes)) 
-            ? fields.type as EvmTransactionTypes 
+          type: (mergedFields.type && Object.values(EvmTransactionTypes).includes(mergedFields.type as EvmTransactionTypes)) 
+            ? mergedFields.type as EvmTransactionTypes 
             : EvmTransactionTypes.deposit,
-          status: (fields.status
-            && Object.values(EvmTransactionStatusTypes).includes(fields.status as EvmTransactionStatusTypes)) 
-            ? fields.status as EvmTransactionStatusTypes 
+          status: (mergedFields.status
+            && Object.values(EvmTransactionStatusTypes).includes(mergedFields.status as EvmTransactionStatusTypes)) 
+            ? mergedFields.status as EvmTransactionStatusTypes 
             : EvmTransactionStatusTypes.pending,
         };
         
@@ -234,7 +282,9 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
   const resetAll = () => {
     getEvmWalletState.value = { loading: false, error: null, data: undefined };
     withdrawFundsState.value = { loading: false, error: null, data: undefined };
+    withdrawFundsOptionsState.value = { loading: false, error: null, data: undefined };
     exchangeTokensState.value = { loading: false, error: null, data: undefined };
+    exchangeTokensOptionsState.value = { loading: false, error: null, data: undefined };
     isLoadingNotificationTransaction.value = false;
     isLoadingNotificationWallet.value = false;
   };
@@ -243,11 +293,15 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
     evmWalletId,
     getEvmWalletState,
     withdrawFundsState,
+    withdrawFundsOptionsState,
     exchangeTokensState,
+    exchangeTokensOptionsState,
     canLoadEvmWalletData,
     getEvmWalletByProfile,
     withdrawFunds,
+    withdrawFundsOptions,
     exchangeTokens,
+    exchangeTokensOptions,
     resetAll,
     updateNotificationData,
     isLoadingNotificationTransaction,

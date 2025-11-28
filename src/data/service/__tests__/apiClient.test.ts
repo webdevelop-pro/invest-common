@@ -291,7 +291,18 @@ describe('ApiClient', () => {
       await apiClient.options('/test');
 
       expect(mockFetch).toHaveBeenCalledWith(
-        `${baseURL}/test`,
+        `${baseURL}/test?schema=1`,
+        expect.objectContaining({
+          method: 'OPTIONS',
+        }),
+      );
+    });
+
+    it('should make OPTIONS request with additional params', async () => {
+      await apiClient.options('/test', { params: { page: 1 } });
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        `${baseURL}/test?page=1&schema=1`,
         expect.objectContaining({
           method: 'OPTIONS',
         }),

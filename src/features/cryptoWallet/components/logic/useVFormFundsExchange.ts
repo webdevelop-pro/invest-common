@@ -1,5 +1,5 @@
 import {
-  computed, reactive, watch, nextTick,
+  computed, reactive, watch, nextTick, onMounted,
 } from 'vue';
 import { storeToRefs } from 'pinia';
 import { numberFormatter } from 'InvestCommon/helpers/numberFormatter';
@@ -13,7 +13,12 @@ export function useVFormFundsExchange(
   emitClose?: () => void,
 ) {
   const evmRepository = useRepositoryEvm();
-  const { getEvmWalletState, exchangeTokensState } = storeToRefs(evmRepository);
+  const { getEvmWalletState, exchangeTokensState, exchangeTokensOptionsState } = storeToRefs(evmRepository);
+
+  // Call options request when component is mounted
+  onMounted(() => {
+    evmRepository.exchangeTokensOptions();
+  });
 
   // Helper function to format token data
   const formatToken = (item: any) => ({
@@ -21,7 +26,6 @@ export function useVFormFundsExchange(
     text: `${item.name}: ${item.symbol}`,
     id: item.address,
   });
-
 
   const tokenToFormatted = computed(() => {
     const balances = getEvmWalletState.value.data?.balances || [];
@@ -39,12 +43,14 @@ export function useVFormFundsExchange(
   });
 
   const errorData = computed(() => (exchangeTokensState.value.error as any)?.data?.responseJson);
+  const schemaBackend = computed(() => exchangeTokensOptionsState.value.data);
   const fieldsPaths = ['from', 'to', 'amount', 'wallet_id'];
 
   const schemaExchangeTransaction = computed(() => ({
     $schema: 'http://json-schema.org/draft-07/schema#',
     definitions: {
-      Individual: {
+      WalletExchange: {
+        additionalProperties: true,
         properties: {
           from: {
             type: 'string',
@@ -68,11 +74,10 @@ export function useVFormFundsExchange(
         errorMessage: errorMessageRule,
       },
     },
-    $ref: '#/definitions/Individual',
+    $ref: '#/definitions/WalletExchange',
   } as unknown as JSONSchemaType<IEvmExchangeRequestBody>));
 
   const schemaFrontend = schemaExchangeTransaction;
-  // Pass undefined directly for backend schema
   const {
     model,
     validation,
@@ -82,7 +87,7 @@ export function useVFormFundsExchange(
     getOptions, getReferenceType,
   } = useFormValidation<IEvmExchangeRequestBody>(
     schemaFrontend,
-    undefined,
+    schemaBackend,
     reactive({
       wallet_id: getEvmWalletState.value.data?.id,
       to: tokenToFormatted.value[0].id,
@@ -98,12 +103,9 @@ export function useVFormFundsExchange(
   const text = computed(() => `available ${maxExchange.value}`);
 
   const receiveAmount = computed(() => {
-    console.log('model.amount', model.amount);
-    console.log('selectedToken.value?.price_per_usd', selectedToken.value);
     if (!model.amount || !selectedToken.value?.price_per_usd) return undefined;
     const amount = Number(model.amount);
     const pricePerUsd = Number(selectedToken.value.price_per_usd);
-    console.log('amount', (amount * pricePerUsd).toFixed(6));
     return (amount * pricePerUsd).toFixed(6);
   });
 
@@ -135,8 +137,16 @@ export function useVFormFundsExchange(
     if (emitClose) emitClose();
   };
 
+  watch(() => model.amount, () => {
+    if (Number(model.amount) === 0) {
+      delete (model as any).amount;
+    }
+  });
+
   watch(() => getEvmWalletState.value.data, () => {
-    if (model.wallet_id) model.wallet_id = getEvmWalletState.value.data?.id;
+    if (model.wallet_id && getEvmWalletState.value.data?.id) {
+      model.wallet_id = getEvmWalletState.value.data.id;
+    }
   }, { immediate: true });
 
   // Helper function to get unique tokens from balances
