@@ -75,6 +75,7 @@ onMounted(async () => {
         :sub-title="topData.frontmatter.subTitle"
         :button-href="explore[0].url"
         :video-src="videoSrc"
+        content-class="view-home__hero-content"
         full-height
         :user-logged-in="userLoggedIn"
         :is-pwa="isPwa"
@@ -150,6 +151,14 @@ onMounted(async () => {
 
     @include media-lte(tablet) {
       margin-bottom: 100px;
+    }
+  }
+
+  &__hero-content {
+    @include media-lte(tablet) {
+      .v-button.is--margin-top-40 {
+        margin: 20px 0 40px;
+      }
     }
   }
 }
