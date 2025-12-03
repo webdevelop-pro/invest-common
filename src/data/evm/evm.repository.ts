@@ -186,6 +186,7 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
           ...baseItem,
           ...mergedFields,
           // Ensure type and status are valid enum values
+          // eslint-disable-next-line vue/max-len
           type: (mergedFields.type && Object.values(EvmTransactionTypes).includes(mergedFields.type as EvmTransactionTypes)) 
             ? mergedFields.type as EvmTransactionTypes 
             : EvmTransactionTypes.deposit,

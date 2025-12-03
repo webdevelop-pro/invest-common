@@ -131,6 +131,13 @@ onMounted(async () => {
     transform: translateX(-50%);
     width: 100%;
     z-index: 5;
+
+    @media screen and (width < $tablet){
+      position: initial;
+      transform: none;
+      padding: 70px 0;
+      background-color: $gray-10;
+    }
   }
 
   &__top-wrap {

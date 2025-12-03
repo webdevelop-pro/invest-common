@@ -34,6 +34,7 @@ useGlobalLoader().hide();
 <style lang="scss">
 .view-contact-us {
   width: 100%;
+  overflow: hidden;
 
   &__wrap {
     max-width: 753px;

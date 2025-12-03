@@ -26,6 +26,14 @@ const VButton = defineAsyncComponent({
 
 const props = defineProps({
   profileMenu: Array as PropType<MenuItem[]>,
+  path: {
+    type: String,
+    required: false,
+    default: () => window?.location?.pathname || '',
+  },
+  isMobilePWA: {
+    type: Boolean,
+  },
 });
 
 const sessionStore = useSessionStore();
@@ -61,6 +69,10 @@ const queryParams = computed(() => new URLSearchParams(window?.location?.search)
 // if there is flow in url it means it is from sso
 let queryFlow: string | null = null; // Explicitly type queryFlow
 
+const showMobileSidebar = computed(() => (
+  showNavigation.value
+));
+
 
 const signInHandler = () => {
   // Convert URLSearchParams to Record<string, string>
@@ -88,6 +100,7 @@ watchEffect(() => {
   <VHeader
     v-model="isMobileSidebarOpen"
     :show-navigation="showNavigation"
+    :show-mobile-sidebar="showMobileSidebar"
     class="VHeaderInvest v-header-invest"
   >
     <div class="v-header-invest__wrap">
@@ -173,6 +186,7 @@ watchEffect(() => {
       <VHeaderProfileMobile
         v-else-if="userLoggedIn"
         :menu="profileMenu"
+        :is-mobile-pwa="isMobilePWA"
         @click="isMobileSidebarOpen = false"
       />
     </template>

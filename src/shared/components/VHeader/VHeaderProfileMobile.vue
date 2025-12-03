@@ -16,6 +16,10 @@ const { IS_STATIC_SITE } = env;
 
 defineProps({
   menu: Array as PropType<MenuItem[]>,
+  isMobilePwa: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const emit = defineEmits(['click']);
@@ -63,6 +67,7 @@ const getComponentName = (item: MenuItem) => {
       <VNavigationMenuItem>
         <NotificationsSidebarButton
           :is-static-site="IS_STATIC_SITE"
+          :is-mobile-pwa="isMobilePwa"
           @click="onClick"
         />
       </VNavigationMenuItem>
@@ -101,6 +106,7 @@ const getComponentName = (item: MenuItem) => {
       >
         <VNavigationMenuLink class="v-header-profile-mobile__menu-link">
           <LogOutIcon
+            v-if="isMobilePwa"
             class="v-header-profile-mobile__icon"
             aria-hidden="true"
           />

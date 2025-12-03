@@ -13,6 +13,10 @@ const VNotificationSidebar = defineAsyncComponent({
 
 defineProps({
   isStaticSite: String,
+  isMobilePwa: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const notificationsStore = useNotifications();
@@ -44,6 +48,7 @@ onBeforeMount(() => {
     @keydown="handleKeyDown"
   >
     <message
+      v-if="isMobilePwa"
       alt="notification icon"
       class="notifications-sidebar-button__notification-icon"
     />
@@ -74,6 +79,7 @@ onBeforeMount(() => {
     height: 20px;
     color: colors.$gray-50;
     flex-shrink: 0;
+    margin-right: 12px;
     // margin: 5px 0;
 
     path {
@@ -87,7 +93,6 @@ onBeforeMount(() => {
 
   &__label {
     display: none;
-    margin-left: 12px;
 
     @media screen and (max-width: variables.$desktop-md) {
       display: inline-flex;
