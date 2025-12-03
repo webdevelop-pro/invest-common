@@ -13,7 +13,7 @@ const VNotificationSidebar = defineAsyncComponent({
 
 defineProps({
   isStaticSite: String,
-  isMobilePwa: {
+  showIcon: {
     type: Boolean,
     default: false,
   },
@@ -48,7 +48,7 @@ onBeforeMount(() => {
     @keydown="handleKeyDown"
   >
     <message
-      v-if="isMobilePwa"
+      v-if="showIcon"
       alt="notification icon"
       class="notifications-sidebar-button__notification-icon"
     />
@@ -56,7 +56,7 @@ onBeforeMount(() => {
       Notifications
     </span>
     <span
-      v-if="notificationUnreadLength && (notificationUnreadLength > 0)"
+      v-if="showIcon && notificationUnreadLength && (notificationUnreadLength > 0)"
       class="notifications-sidebar-button__notification-dot"
     />
     <VNotificationSidebar :is-static-site="isStaticSite" />
@@ -65,7 +65,7 @@ onBeforeMount(() => {
 
 <style lang="scss">
 @use 'UiKit/styles/_colors.scss' as colors;
-@use 'UiKit/styles/_variables.scss' as variables;
+@use 'UiKit/styles/_variables.scss' as *;
 
 .notifications-sidebar-button {
     display: flex;
@@ -79,8 +79,11 @@ onBeforeMount(() => {
     height: 20px;
     color: colors.$gray-50;
     flex-shrink: 0;
-    margin-right: 12px;
     // margin: 5px 0;
+
+    @media screen and (width < $desktop-md) {
+      margin-right: 12px;
+    }
 
     path {
       fill: currentcolor;
@@ -94,7 +97,7 @@ onBeforeMount(() => {
   &__label {
     display: none;
 
-    @media screen and (max-width: variables.$desktop-md) {
+    @media screen and (max-width: $desktop-md) {
       display: inline-flex;
       align-items: center;
     }
@@ -122,7 +125,7 @@ onBeforeMount(() => {
       z-index: 0;
     }
 
-    @media screen and (max-width: variables.$desktop-md) {
+    @media screen and (max-width: $desktop-md) {
       right: auto;
       left: 16px;
     }

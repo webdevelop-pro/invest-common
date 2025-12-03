@@ -50,7 +50,12 @@ const {
           :loading="deleteAllSessionState.loading"
           @click="onFinishAllSessions"
         >
-          Finish All Active Sessions
+          <span class="is--gt-tablet-show">
+            Finish All Active Sessions
+          </span>
+          <span class="is--lt-tablet-show">
+            Finish All Sessions
+          </span>
         </VButton>
       </div>
     </div>
@@ -107,8 +112,13 @@ const {
     gap: 12px;
 
     @media screen and (max-width: $tablet-xs) {
-      flex-direction: column;
-      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+  }
+
+  .v-table-header {
+    @media screen and (width < $desktop){
+      display: none;
     }
   }
 }

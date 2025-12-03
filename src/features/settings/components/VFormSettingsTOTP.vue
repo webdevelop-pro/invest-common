@@ -61,25 +61,27 @@ const handleSave = async () => {
             label="6-Digit Verification Code"
             class="form-settings-totp__input"
           >
-            <VFormInput
-              :model-value="model.totp_code"
-              :is-error="VFormGroupProps.isFieldError"
-              placeholder="Enter Code"
-              name="totp_code"
-              size="large"
-              data-testid="totp-code"
-              @update:model-value="model.totp_code = $event"
-            />
+            <div class="form-settings-totp__button-wrap">
+              <VFormInput
+                :model-value="model.totp_code"
+                :is-error="VFormGroupProps.isFieldError"
+                placeholder="Enter Code"
+                name="totp_code"
+                size="large"
+                data-testid="totp-code"
+                @update:model-value="model.totp_code = $event"
+              />
+              <VButton
+                size="large"
+                :uppercase="false"
+                data-testid="button"
+                class="form-settings-totp__btn is--margin-top-0"
+                @click="handleSave"
+              >
+                Verify
+              </VButton>
+            </div>
           </VFormGroup>
-          <VButton
-            size="large"
-            :uppercase="false"
-            data-testid="button"
-            class="form-settings-totp__btn"
-            @click="handleSave"
-          >
-            Verify
-          </VButton>
         </div>
         <p class="is--small is--color-gray-70 is--margin-top-4">
           Enter the verification code to confirm setup
@@ -146,6 +148,11 @@ const handleSave = async () => {
     width: 100%;
     display: flex;
     gap: 20px;
+
+
+    @media screen and (width < $desktop){
+      flex-direction: column;
+    }
   }
 
   &__btn {
@@ -154,6 +161,11 @@ const handleSave = async () => {
 
   &__skeleton {
     flex-shrink: 0;
+  }
+
+  &__button-wrap {
+    display: flex;
+    gap: 8px;
   }
 }
 </style>

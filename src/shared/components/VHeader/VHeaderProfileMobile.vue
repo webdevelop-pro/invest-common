@@ -67,7 +67,7 @@ const getComponentName = (item: MenuItem) => {
       <VNavigationMenuItem>
         <NotificationsSidebarButton
           :is-static-site="IS_STATIC_SITE"
-          :is-mobile-pwa="isMobilePwa"
+          :show-icon="isMobilePwa"
           @click="onClick"
         />
       </VNavigationMenuItem>

@@ -19,6 +19,14 @@ defineProps({
   showLogoutIcon: {
     type: Boolean,
     default: false,
+  },
+  isMobilePwa: {
+    type: Boolean,
+    default: false,
+  },
+  isDesktop: {
+    type: Boolean,
+    default: false,
   }
 });
 
@@ -43,6 +51,7 @@ const imageID = computed(() => getUserState.value.data?.image_link_id);
     <div class="v-header-profile__divider is--gt-tablet-show" />
     <NotificationsSidebarButton
       :is-static-site="IS_STATIC_SITE"
+      :show-icon="isMobilePwa || isDesktop"
     />
     <VDropdown
       with-chevron

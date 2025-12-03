@@ -10,6 +10,7 @@ import { urlSignin, urlSignup } from 'InvestCommon/domain/config/links';
 import VHeader from 'UiKit/components/VHeader/VHeader.vue';
 import { MenuItem } from 'InvestCommon/types/global'; // Use shared MenuItem type
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
+import { useBreakpoints } from 'UiKit/composables/useBreakpoints';
 
 const VHeaderProfile = defineAsyncComponent({
   loader: () => import('./VHeaderProfile.vue'),
@@ -35,6 +36,9 @@ const props = defineProps({
     type: Boolean,
   },
 });
+
+
+const { isDesktopMD } = storeToRefs(useBreakpoints());
 
 const sessionStore = useSessionStore();
 const { userLoggedIn } = storeToRefs(sessionStore);
@@ -154,6 +158,8 @@ watchEffect(() => {
       <VHeaderProfile
         v-else-if="userLoggedIn"
         :menu="profileMenu"
+        :is-mobile-pwa="isMobilePWA"
+        :is-desktop="isDesktopMD"
       />
     </div>
 

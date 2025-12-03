@@ -74,9 +74,43 @@ const onDeleteSession = () => {
 
 <style lang="scss">
 .v-table-activity-item {
+  width: 100%;
+
+  @media screen and (width < $desktop){
+    display: flex;
+    flex-wrap: wrap;
+  }
+
   &__cell-button {
     flex-shrink: 0;
     min-width: 142px;
+  }
+
+  .v-table-cell {
+    &:nth-child(1),
+    &:nth-child(2) {
+      @media screen and (width < $desktop){
+        flex: 0 0 50%;
+      }
+    }
+
+    &:nth-child(3) {
+      @media screen and (width < $desktop){
+        flex: 0 0 100%;
+      }
+    }
+  }
+
+  &__button {
+    @media screen and (width < $desktop){
+      width: 100%;
+    }
+  }
+
+  .v-tooltip-trigger {
+    @media screen and (width < $desktop){
+      width: 100%;
+    }
   }
 }
 </style>

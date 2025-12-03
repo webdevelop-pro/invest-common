@@ -88,26 +88,28 @@ const emit = defineEmits<{
             >
               {{ b.balance }}
             </span>
-            <span
-              v-if="b.incomingBalance"
-              class="wallet-tokens-and-transactions__balance-incoming is--small"
-            >
-              + {{ b.incomingBalance }}
-            </span>
-            <span v-if="b.outcomingBalance">|</span>
-            <VTooltip
-              class="wallet-tokens-and-transactions__tooltip"
-            >
+            <div class="wallet-tokens-and-transactions__pending-wrap">
               <span
-                v-if="b.outcomingBalance"
-                class="wallet-tokens-and-transactions__balance-outcoming is--small"
+                v-if="b.incomingBalance"
+                class="wallet-tokens-and-transactions__balance-incoming is--small"
               >
-                - {{ b.outcomingBalance }}
+                + {{ b.incomingBalance }}
               </span>
-              <template #content>
-                Pending investment
-              </template>
-            </VTooltip>
+              <span v-if="b.outcomingBalance">|</span>
+              <VTooltip
+                class="wallet-tokens-and-transactions__tooltip"
+              >
+                <span
+                  v-if="b.outcomingBalance"
+                  class="wallet-tokens-and-transactions__balance-outcoming is--small"
+                >
+                  - {{ b.outcomingBalance }}
+                </span>
+                <template #content>
+                  Pending investment
+                </template>
+              </VTooltip>
+            </div>
           </div>
         </div>
       </div>
@@ -220,8 +222,8 @@ const emit = defineEmits<{
     flex: 1 0 0;
 
     @media screen and (max-width: $tablet){
-      flex-direction: row;
-      align-items: center;
+      // flex-direction: row;
+      // align-items: center;
       gap: 8px;
     }
   }
@@ -245,6 +247,9 @@ const emit = defineEmits<{
 
   &__balance-numbers {
     color: $gray-40;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
   }
 
   &__balance-current {
@@ -253,6 +258,10 @@ const emit = defineEmits<{
     &:not(.is--link) {
       color: $black;
     }
+  }
+
+  &__pending_wrap {
+    flex-shrink: 0;
   }
 
   &__balance-incoming {
