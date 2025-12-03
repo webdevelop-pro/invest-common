@@ -29,7 +29,9 @@ const { readOnlyInfo, investmentDocUrl, onShareClick, copied } = useOffersDetail
 
 <template>
   <div class="OfferDetailsSide offer-details-side">
-    <div class="offer-details-side__share-wrap">
+    <div
+      class="offer-details-side__share-wrap is--gt-desktop-show"
+    >
       <VButton
         size="small"
         variant="tetriary"

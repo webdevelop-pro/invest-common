@@ -130,6 +130,10 @@ const {
   &__checkbox-wrap {
     display: flex;
     justify-content: space-between;
+
+    @media screen and (max-width: $desktop-md) {
+      flex-direction: column;;
+    }
   }
 
   .v-form-radio__item-input {
