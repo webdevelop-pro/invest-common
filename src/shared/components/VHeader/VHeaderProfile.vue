@@ -16,6 +16,10 @@ const { IS_STATIC_SITE, FILER_URL } = env;
 
 defineProps({
   menu: Array as PropType<MenuItem[]>,
+  showLogoutIcon: {
+    type: Boolean,
+    default: false,
+  }
 });
 
 const userSessionStore = useSessionStore();
@@ -61,6 +65,7 @@ const imageID = computed(() => getUserState.value.data?.image_link_id);
           @click="onLogout"
         >
           <LogOutIcon
+            v-if="showLogoutIcon"
             class="v-header-profile__icon"
             aria-hidden="true"
           />
