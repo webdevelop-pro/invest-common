@@ -199,6 +199,7 @@ watch(selectedUserProfileType, async (newType, oldType) => {
             size="large"
             as="router-link"
             :to="{ name: ROUTE_INVEST_AMOUNT, params: { slug, id, profileId } }"
+            class="is--gt-tablet-show"
           >
             <arrowLeft
               alt="arrow left"
@@ -207,6 +208,19 @@ watch(selectedUserProfileType, async (newType, oldType) => {
             Back
           </VButton>
           <div class="invest-form-ownership__btn">
+            <VButton
+              variant="link"
+              size="large"
+              as="router-link"
+              :to="{ name: ROUTE_INVEST_AMOUNT, params: { slug, id, profileId } }"
+              class="is--lt-tablet-show"
+            >
+              <arrowLeft
+                alt="arrow left"
+                class="invest-form-ownership__back-icon"
+              />
+              Back
+            </VButton>
             <VButton
               variant="outlined"
               size="large"
@@ -220,6 +234,7 @@ watch(selectedUserProfileType, async (newType, oldType) => {
               :loading="isLoading"
               size="large"
               data-testid="button"
+              class="invest-form-ownership__save"
               @click="continueHandler"
             >
               Continue
@@ -244,9 +259,10 @@ watch(selectedUserProfileType, async (newType, oldType) => {
     display: flex;
     justify-content: flex-end;
     gap: 12px;
+    flex-wrap: wrap;
 
-    @media screen and (max-width: $tablet){
-      flex-direction: column;
+    @media screen and (width < $tablet){
+      justify-content: space-between;
     }
   }
 
@@ -254,11 +270,8 @@ watch(selectedUserProfileType, async (newType, oldType) => {
     margin-top: 20px;
     display: flex;
     justify-content: space-between;
-
-    @media screen and (max-width: $tablet){
-      flex-direction: column;
-      gap: 12px;
-    }
+    gap: 12px;
+    flex-wrap: wrap;
   }
 
   &__back-icon {
@@ -272,6 +285,12 @@ watch(selectedUserProfileType, async (newType, oldType) => {
 
   &__forms {
     min-height: 600px;
+  }
+
+  &__save {
+    @media screen and (width < $tablet){
+      width: 100%;
+    }
   }
 }
 

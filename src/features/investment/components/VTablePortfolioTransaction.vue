@@ -29,7 +29,7 @@ const time = computed(() => (
     class="VTablePortfolioTransaction v-table-portfolio-transaction"
   >
     <VTableBody>
-      <VTableRow>
+      <VTableRow class="v-table-portfolio-transaction__row">
         <VTableCell>
           <div>
             {{ date }}
@@ -75,6 +75,15 @@ const time = computed(() => (
 
 <style lang="scss">
 .v-table-portfolio-transaction {
+  &__row {
+    width: 100%;
+
+    @media screen and (width < $desktop){
+      display: flex;
+      flex-wrap: wrap;
+    }
+  }
+
   &__amount {
     color: $black;
     text-align: right;
@@ -90,6 +99,39 @@ const time = computed(() => (
 
   &__transaction-id {
     color: $gray-80;
+  }
+
+  .v-table-cell {
+    &:nth-child(2) {
+      width: 135px;
+
+      @media screen and (width < $desktop){
+        text-align: right;
+      }
+    }
+
+    &:nth-child(1),
+    &:nth-child(2) {
+      @media screen and (width < $desktop){
+        flex: 0 0 50%;
+      }
+    }
+
+    &:nth-child(4) {
+      @media screen and (width < $desktop){
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+
+    &:nth-child(5) {
+      @media screen and (width < $desktop){
+        display: flex;
+        align-items: center;
+        justify-content: end;
+      }
+    }
   }
 }
 </style>

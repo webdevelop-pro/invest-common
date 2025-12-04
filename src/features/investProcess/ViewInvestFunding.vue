@@ -72,6 +72,7 @@ const {
             size="large"
             as="router-link"
             :to="{ name: ROUTE_INVEST_SIGNATURE, params: { slug, id, profileId } }"
+            class="is--gt-tablet-show"
           >
             <arrowLeft
               alt="arrow left"
@@ -80,6 +81,19 @@ const {
             Back
           </VButton>
           <div class="form-invest-funding__btn">
+            <VButton
+              variant="link"
+              size="large"
+              as="router-link"
+              :to="{ name: ROUTE_INVEST_SIGNATURE, params: { slug, id, profileId } }"
+              class="is--lt-tablet-show"
+            >
+              <arrowLeft
+                alt="arrow left"
+                class="form-invest-funding__back-icon"
+              />
+              Back
+            </VButton>
             <VButton
               variant="outlined"
               size="large"
@@ -92,6 +106,7 @@ const {
               :disabled="isBtnDisabled"
               :loading="setFundingState.loading"
               size="large"
+              class="form-invest-funding__save"
               @click="continueHandler"
             >
               Continue
@@ -116,9 +131,10 @@ const {
     display: flex;
     justify-content: flex-end;
     gap: 12px;
+    flex-wrap: wrap;
 
-    @media screen and (max-width: $tablet){
-      flex-direction: column;
+    @media screen and (width < $tablet){
+      justify-content: space-between;
     }
   }
 
@@ -126,15 +142,18 @@ const {
     margin-top: 20px;
     display: flex;
     justify-content: space-between;
-
-    @media screen and (max-width: $tablet){
-      flex-direction: column;
-      gap: 12px;
-    }
+    gap: 12px;
+    flex-wrap: wrap;
   }
 
   &__back-icon {
     width: 20px;
+  }
+
+  &__save {
+    @media screen and (width < $tablet){
+      width: 100%;
+    }
   }
 }
 </style>

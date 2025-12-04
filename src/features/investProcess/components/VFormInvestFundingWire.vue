@@ -70,6 +70,7 @@ defineProps({
     display: flex;
     gap: 12px;
     max-width: 475px;
+    width: 100%;
 
     @media screen and (max-width: $tablet){
       flex-direction: column;

@@ -126,6 +126,7 @@ const {
             size="large"
             as="router-link"
             :to="{ name: ROUTE_INVEST_OWNERSHIP, params: { slug, id, profileId } }"
+            class="is--gt-tablet-show"
           >
             <arrowLeft
               alt="arrow left"
@@ -135,6 +136,19 @@ const {
           </VButton>
           
           <div class="form-invest-signature__btn">
+            <VButton
+              variant="link"
+              size="large"
+              as="router-link"
+              :to="{ name: ROUTE_INVEST_OWNERSHIP, params: { slug, id, profileId } }"
+              class="is--lt-tablet-show"
+            >
+              <arrowLeft
+                alt="arrow left"
+                class="form-invest-signature__back-icon"
+              />
+              Back
+            </VButton>
             <VButton
               variant="outlined"
               size="large"
@@ -147,6 +161,7 @@ const {
               :disabled="!canContinue"
               size="large"
               data-testid="continue-button"
+              class="form-invest-signature__save"
               @click="handleContinue"
             >
               Continue
@@ -221,9 +236,10 @@ const {
     display: flex;
     justify-content: flex-end;
     gap: 12px;
+    flex-wrap: wrap;
 
-    @media screen and (max-width: $tablet) {
-      flex-direction: column;
+    @media screen and (width < $tablet){
+      justify-content: space-between;
     }
   }
 
@@ -231,11 +247,8 @@ const {
     margin-top: 40px;
     display: flex;
     justify-content: space-between;
-
-    @media screen and (max-width: $tablet) {
-      flex-direction: column;
-      gap: 12px;
-    }
+    gap: 12px;
+    flex-wrap: wrap;
   }
 
   &__document-icon {
@@ -250,6 +263,12 @@ const {
   &__link {
     margin-top: -2px;
     display: inline-block;
+  }
+
+  &__save {
+    @media screen and (width < $tablet){
+      width: 100%;
+    }
   }
 }
 </style>

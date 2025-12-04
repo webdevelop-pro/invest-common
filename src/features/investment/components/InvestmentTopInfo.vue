@@ -379,6 +379,7 @@ const {
     @media screen and (max-width: $tablet){
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       margin-top: 10px;
+      gap: 2px 12px !important;
     }
 
     @media screen and (max-width: $mobile-xs){
@@ -396,6 +397,10 @@ const {
 
     @media screen and (max-width: $desktop-lg){
       min-width: auto;
+    }
+
+    @media screen and (max-width: $tablet-xs){
+      justify-content: space-between;
     }
   }
 

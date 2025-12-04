@@ -121,10 +121,7 @@ const {
     justify-content: flex-end;
     gap: 12px;
     margin-top: 20px;
-
-    @media screen and (max-width: $tablet){
-      flex-direction: column;
-    }
+    flex-wrap: wrap;
   }
 
   &__limit-info {

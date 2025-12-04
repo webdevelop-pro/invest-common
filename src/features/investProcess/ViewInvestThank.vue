@@ -229,12 +229,6 @@ const {
     margin-top: 28px;
   }
 
-  &__table-tag {
-    @media screen and (max-width: $tablet){
-      align-self: flex-end;
-    }
-  }
-
   &__table-offer {
     display: flex;
     align-items: center;
@@ -245,6 +239,8 @@ const {
       // flex-direction: column;
       gap: 16px;
       flex-wrap: wrap;
+      flex-direction: column;
+      align-items: flex-start;
     }
   }
 
