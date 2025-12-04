@@ -238,8 +238,7 @@ const {
     @media screen and (max-width: $tablet){
       // flex-direction: column;
       gap: 16px;
-      flex-wrap: wrap;
-      flex-direction: column;
+      flex-flow: column wrap;
       align-items: flex-start;
     }
   }
