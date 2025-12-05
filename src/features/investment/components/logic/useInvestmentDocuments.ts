@@ -7,6 +7,7 @@ import { IFilerItemFormatted } from 'InvestCommon/data/filer/filer.type';
 import { useRepositoryFiler } from 'InvestCommon/data/filer/filer.repository';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
 import { useRepositoryEsign } from 'InvestCommon/data/esign/esign.repository';
+import { downloadURI } from 'UiKit/helpers/url';
 
 export interface UseInvestmentDocumentsOptions {
   investmentId: string;
@@ -104,10 +105,10 @@ export const useInvestmentDocuments = (options: UseInvestmentDocumentsOptions): 
       loadingDocId.value = doc.id;
       await esignRepository.getDocument(investmentId);
 
-      // Create URL from Blob for opening in new window
+      // Create URL from Blob
       if (getDocumentState.value.data) {
         const blobUrl = URL.createObjectURL(getDocumentState.value.data);
-        window.open(blobUrl, '_blank');
+        downloadURI(blobUrl, 'Subscription Agreement');
         // Clean up the URL after opening to prevent memory leaks
         setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
       }

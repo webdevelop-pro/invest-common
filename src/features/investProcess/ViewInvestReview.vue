@@ -264,6 +264,7 @@ const {
 
     @media screen and (width < $tablet){
       justify-content: space-between;
+      width: 100%;
     }
   }
 

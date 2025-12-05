@@ -7,6 +7,7 @@ import download from 'UiKit/assets/images/download.svg';
 import { VTableCell, VTableRow } from 'UiKit/components/Base/VTable';
 import { IFilerItemFormatted } from 'InvestCommon/data/filer/filer.type';
 import VTooltip from 'UiKit/components/VTooltip.vue';
+import { downloadURI } from 'UiKit/helpers/url';
 
 const props = defineProps({
   data: Object as PropType<IFilerItemFormatted>,
@@ -43,9 +44,17 @@ const onDocumentClick = async () => {
   emit('click', props.data);
   isLoading.value = true;
   const url = props.data?.url;
+  const filename = props.data?.filename || props.data?.name || 'document';
 
   if (url) {
-    window.open(url, '_blank');
+    // For Safari compatibility, use a temporary anchor element for downloads
+    // This is more reliable than window.open for document downloads
+    try {
+      downloadURI(url, filename);
+    } catch {
+      // Fallback to window.open if anchor method fails
+      window.open(url, '_blank');
+    }
   }
   isLoading.value = false;
 };
