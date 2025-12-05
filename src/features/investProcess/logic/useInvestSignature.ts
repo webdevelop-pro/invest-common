@@ -104,9 +104,6 @@ export function useInvestSignature() {
       
       if (setDocumentState.value.data?.sign_url) {
         state.value.isDialogDocumentOpen = true;
-        onClose(() => {
-          state.value.isDialogDocumentOpen = false;
-        });
       }
     } catch (error) {
       console.error('Failed to handle document:', error);
@@ -124,6 +121,40 @@ export function useInvestSignature() {
 
   // Setup signature handler
   onSign(handleSign);
+
+  // Flags to avoid infinite loops when syncing closes between HelloSign and dialog
+  const ignoreNextOnClose = ref(false);
+  const suppressDialogCloseWatcher = ref(false);
+
+  // When HelloSign notifies a close, ensure the dialog is closed too
+  onClose(() => {
+    if (ignoreNextOnClose.value) {
+      // This close originated from our programmatic call to close HelloSign
+      ignoreNextOnClose.value = false;
+      return;
+    }
+
+    // User closed HelloSign -> close dialog but suppress watcher reaction
+    suppressDialogCloseWatcher.value = true;
+    state.value.isDialogDocumentOpen = false;
+  });
+
+  // When dialog closes, close HelloSign (unless the close was triggered by HelloSign)
+  watch(
+    () => state.value.isDialogDocumentOpen,
+    (isOpen) => {
+      if (!isOpen) {
+        if (suppressDialogCloseWatcher.value) {
+          suppressDialogCloseWatcher.value = false;
+          return;
+        }
+
+        // Dialog was closed by user -> programmatically close HelloSign
+        ignoreNextOnClose.value = true;
+        closeHelloSign();
+      }
+    }
+  );
 
   return {
     state,
