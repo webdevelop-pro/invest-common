@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {
-  computed, defineAsyncComponent, hydrateOnVisible, PropType, watchEffect,
+  computed, defineAsyncComponent, hydrateOnVisible, onMounted, PropType, ref,
 } from 'vue';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { storeToRefs } from 'pinia';
@@ -11,6 +11,7 @@ import VHeader from 'UiKit/components/VHeader/VHeader.vue';
 import { MenuItem } from 'InvestCommon/types/global'; // Use shared MenuItem type
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useBreakpoints } from 'UiKit/composables/useBreakpoints';
+import ArrowRight from 'UiKit/assets/images/arrow-right.svg';
 
 const VHeaderProfile = defineAsyncComponent({
   loader: () => import('./VHeaderProfile.vue'),
@@ -29,12 +30,33 @@ const props = defineProps({
   profileMenu: Array as PropType<MenuItem[]>,
   path: {
     type: String,
-    required: false,
-    default: () => window?.location?.pathname || '',
+    default: '',
   },
   isMobilePWA: {
     type: Boolean,
+    default: false,
   },
+  showProfileLink: {
+    type: Boolean,
+    default: false,
+  },
+  urlProfile: {
+    type: [String, Function] as PropType<string | (() => string)>,
+    default: '',
+  },
+  layout: {
+    type: String,
+    default: '',
+  },
+  showPwaHomeLoginLink: {
+    type: Boolean,
+    default: false,
+  },
+});
+
+const runtimePath = ref('');
+onMounted(() => {
+  runtimePath.value = window.location.pathname;
 });
 
 
@@ -47,13 +69,20 @@ const { getUserState } = storeToRefs(useRepositoryProfilesStore);
 // Use props.path directly, no need for ref unless it is updated elsewhere
 const isMobileSidebarOpen = defineModel<boolean>();
 
+const resolvedPath = computed(() => props.path || runtimePath.value);
+
 const isLoading = computed(() => getUserState.value.loading);
-const isSignUpPage = computed(() => props.path?.includes('signup'));
-const isSignInPage = computed(() => props.path?.includes('signin'));
-const isRecoveryPage = computed(() => props.path?.includes('forgot'));
-const isCheckEmailPage = computed(() => props.path?.includes('check-email'));
-const isAuthenticatorPage = computed(() => props.path?.includes('authenticator'));
-const isKYCBoPage = computed(() => props.path?.includes('kyc-bo'));
+const isSignUpPage = computed(() => props.layout === 'auth-signup' || resolvedPath.value?.includes('signup'));
+const isSignInPage = computed(() => props.layout === 'auth-login' || resolvedPath.value?.includes('signin'));
+const isRecoveryPage = computed(() => props.layout === 'auth-forgot' || resolvedPath.value?.includes('forgot'));
+const isCheckEmailPage = computed(() => props.layout === 'auth-check-email' || resolvedPath.value?.includes('check-email'));
+const isAuthenticatorPage = computed(() => props.layout === 'auth-authenticator' || resolvedPath.value?.includes('authenticator'));
+const isKYCBoPage = computed(() => props.layout?.includes('kyc-bo') || resolvedPath.value?.includes('kyc-bo'));
+const isHomePage = computed(() => (
+  props.layout === 'home'
+  || resolvedPath.value === '/'
+  || resolvedPath.value === '/index'
+));
 
 const isAuthFlowPage = computed(() => (isRecoveryPage.value || isCheckEmailPage.value));
 
@@ -62,20 +91,27 @@ const showNavigation = computed(() => (
   && !isCheckEmailPage.value && !isAuthenticatorPage.value && !isKYCBoPage.value));
 
 const showAccountText = computed(() => (
-  !queryFlow && !userLoggedIn.value && !showNavigation.value && !isAuthenticatorPage.value && !isKYCBoPage.value))
-const showHaveAccount = computed(() => (!isSignInPage.value && !isAuthFlowPage.value))
-const showDontHaveAccount = computed(() => (!isSignUpPage.value))
+  !userLoggedIn.value && !showNavigation.value && !isAuthenticatorPage.value && !isKYCBoPage.value))
+const showHaveAccount = computed(() => (!isSignInPage.value && !isAuthFlowPage.value));
+const showDontHaveAccount = computed(() => (!isSignUpPage.value));
 const showAuthButtons = computed(() => (
-  !queryFlow && !userLoggedIn.value && !isAuthenticatorPage.value && !isKYCBoPage.value))
+  !userLoggedIn.value && !isAuthenticatorPage.value && !isKYCBoPage.value))
+const showPwaLoginLink = computed(() => (
+  (props.showPwaHomeLoginLink || (props.isMobilePWA && isHomePage.value))
+  && !userLoggedIn.value
+  && !isAuthenticatorPage.value
+  && !isKYCBoPage.value
+));
+const showPwaAuthCta = computed(() => (
+  !props.showPwaHomeLoginLink
+  && !userLoggedIn.value
+  && (isSignInPage.value || isSignUpPage.value)
+));
 
 
 const queryParams = computed(() => new URLSearchParams(window?.location?.search));
-// if there is flow in url it means it is from sso
-let queryFlow: string | null = null; // Explicitly type queryFlow
 
-const showMobileSidebar = computed(() => (
-  showNavigation.value
-));
+const showMobileSidebar = computed(() => showNavigation.value);
 
 
 const signInHandler = () => {
@@ -95,9 +131,6 @@ const signUpHandler = () => {
   navigateWithQueryParams(urlSignup, paramsObj);
 };
 
-watchEffect(() => {
-  queryFlow = (window && window?.location?.search) ? new URLSearchParams(window.location.search).get('flow') : null;
-});
 </script>
 
 <template>
@@ -105,24 +138,27 @@ watchEffect(() => {
     v-model="isMobileSidebarOpen"
     :show-navigation="showNavigation"
     :show-mobile-sidebar="showMobileSidebar"
+    :is-mobile-p-w-a="isMobilePWA"
+    :show-profile-link="showProfileLink"
+    :url-profile="urlProfile"
+    :user-logged-in="userLoggedIn"
     class="VHeaderInvest v-header-invest"
   >
     <div class="v-header-invest__wrap">
-      <span
-        v-if="showAccountText"
-        class="v-header-invest__auth-text is--body"
-      >
-        <span
-          v-if="showHaveAccount"
-        >
-          Already have an account?
+      <template v-if="showAccountText && !isMobilePWA">
+        <span class="v-header-invest__auth-text is--body">
+          <span
+            v-if="showHaveAccount"
+          >
+            Already have an account?
+          </span>
+          <span
+            v-if="showDontHaveAccount"
+          >
+            Don't have an account?
+          </span>
         </span>
-        <span
-          v-if="showDontHaveAccount"
-        >
-          Don't have an account?
-        </span>
-      </span>
+      </template>
 
       <VSkeleton
         v-if="isLoading"
@@ -131,7 +167,7 @@ watchEffect(() => {
         class="v-header-invest-btns__skeleton"
       />
       <div
-        v-else-if="showAuthButtons"
+        v-else-if="showAuthButtons && !isMobilePWA"
         class="v-header-invest-btns"
         :class="{
           'v-header-invest-sign-in': isSignInPage,
@@ -163,9 +199,45 @@ watchEffect(() => {
       />
     </div>
 
+    <template #pwa>
+      <button
+        v-if="showPwaLoginLink"
+        type="button"
+        class="v-header-invest__pwa-login"
+        @click="signInHandler"
+      >
+        <span>Log in</span>
+        <component
+          :is="ArrowRight"
+          class="v-header-invest__pwa-login-icon"
+        />
+      </button>
+      <div
+        v-else-if="showPwaAuthCta"
+        class="v-header-invest__pwa-auth"
+      >
+        <span class="v-header-invest__pwa-auth-text">
+          <template v-if="isSignInPage">
+            Don't have an account?
+          </template>
+          <template v-else-if="isSignUpPage">
+            Already have an account?
+          </template>
+        </span>
+        <VButton
+          size="medium"
+          class="v-header-invest__pwa-auth-btn"
+          :class="{ 'is--secondary': isSignInPage }"
+          @click="isSignInPage ? signUpHandler() : signInHandler()"
+        >
+          {{ isSignInPage ? 'Sign Up' : 'Log In' }}
+        </VButton>
+      </div>
+    </template>
+
     <template #mobile>
       <div
-        v-if="showAuthButtons"
+        v-if="showAuthButtons && !isMobilePWA"
         class="v-header-invest-btns"
         :class="{
           'v-header-invest-sign-in': isSignInPage,
@@ -251,6 +323,43 @@ watchEffect(() => {
 
   &__auth-text {
     color: $gray-80;
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  &__pwa-login {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    border: none;
+    background: transparent;
+    padding: 0;
+    color: $primary;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 20px;
+    cursor: pointer;
+  }
+
+  &__pwa-login-icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  &__pwa-auth {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: $gray-80;
+  }
+
+  &__pwa-auth-text {
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  &__pwa-auth-btn {
+    flex-shrink: 0;
   }
 
 }

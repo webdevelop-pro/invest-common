@@ -8,9 +8,6 @@ import { filterPages } from 'UiKit/helpers/allData';
 import { IFrontmatter } from 'UiKit/types/types';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import { useRepositoryOffer } from 'InvestCommon/data/offer/offer.repository';
-import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
-import { useAppStateStore } from 'InvestCommon/domain/pwa/store/useAppStateStore';
-import { urlSignin, urlSignup } from 'InvestCommon/domain/config/links';
 
 import { __pageData as topData } from 'Docs/home/top.md';
 import { __pageData as partnersData } from 'Docs/home/partners.md';
@@ -42,11 +39,6 @@ const { theme } = useData();
 const offerRepository = useRepositoryOffer();
 const { getOffersState } = storeToRefs(offerRepository);
 
-const sessionStore = useSessionStore();
-const appStore = useAppStateStore();
-const { userLoggedIn } = storeToRefs(sessionStore);
-const { isPwa, isMobile } = storeToRefs(appStore);
-
 const blogPosts = theme.navigation.rc.filterChilds('layout', 'resource-center-single')?.map((post) => post.data);
 const blog = theme.navigation.rc.data;
 const explore = filterPages(allPages as IFrontmatter[], 'layout', 'offers');
@@ -77,11 +69,6 @@ onMounted(async () => {
         :video-src="videoSrc"
         content-class="view-home__hero-content"
         full-height
-        :user-logged-in="userLoggedIn"
-        :is-pwa="isPwa"
-        :is-mobile="isMobile"
-        :url-signin="urlSignin"
-        :url-signup="urlSignup"
         video-cover-image="/images/main-header-banner.svg"
       >
         <template #buttonText>
