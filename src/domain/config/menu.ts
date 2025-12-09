@@ -36,33 +36,35 @@ export const MENU_HEADER_RIGHT = computed(() => (path: string, pwa?: boolean) =>
   },
 ]);
 
-export const MENU_FOOTER = computed(() => (path: string) => [
-  {
-    href: urlHowItWorks,
-    text: 'How It Works',
-    active: urlHowItWorks === path,
-  },
-  {
-    href: urlBlog,
-    text: 'Resource center',
-    active: urlBlog === path,
-  },
-  {
-    href: urlFaq,
-    text: 'FAQ',
-    active: urlFaq === path,
-  },
-  // {
-  //   href: urlOffers,
-  //   text: 'About',
-  //   active: urlOffers === path,
-  // },
-  {
-    href: urlContactUs,
-    text: 'Contact Us',
-    active: urlContactUs === path,
-  },
-]);
+export const MENU_FOOTER = computed(() => (path: string) => [{
+  children: [
+    {
+      href: urlHowItWorks,
+      text: 'How It Works',
+      active: urlHowItWorks === path,
+    },
+    {
+      href: urlBlog,
+      text: 'Resource center',
+      active: urlBlog === path,
+    },
+    {
+      href: urlFaq,
+      text: 'FAQ',
+      active: urlFaq === path,
+    },
+    // {
+    //   href: urlOffers,
+    //   text: 'About',
+    //   active: urlOffers === path,
+    // },
+    {
+      href: urlContactUs,
+      text: 'Contact Us',
+      active: urlContactUs === path,
+    },
+  ],
+}]);
 
 export const MENU_LEGAL = computed(() => (path: string) => [
   {

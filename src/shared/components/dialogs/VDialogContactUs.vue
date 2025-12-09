@@ -37,7 +37,7 @@ const { userSessionTraits } = storeToRefs(sessionStore);
         :subject="subject"
         :user-session-traits="userSessionTraits"
         :hubspot-form-id="env.HUBSPOT_FORM_ID_CONTACT_US"
-        class="is--margin-top-40"
+        class="is--margin-top-40 v-dialog-contact-us__form"
         @close="open = false"
       />
     </VDialogContent>
@@ -47,5 +47,9 @@ const { userSessionTraits } = storeToRefs(sessionStore);
 <style lang="scss">
 .v-dialog-contact-us {
   text-align: center;
+
+  &__form {
+    padding: 0 10px 60px;
+  }
 }
 </style>

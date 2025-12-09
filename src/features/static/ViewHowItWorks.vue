@@ -122,13 +122,5 @@ useGlobalLoader().hide();
       width: 100%;
     }
   }
-
-  
-
-  .v-timeline-item:not(.is--horizontal) .v-timeline-item__items {
-    @include media-lt(tablet) {
-      margin-left: 12px;
-    }
-  }
 }
 </style>
