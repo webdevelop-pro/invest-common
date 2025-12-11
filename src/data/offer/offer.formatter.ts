@@ -252,10 +252,14 @@ export class OfferFormatter {
 
   get dividendRateFormatted(): string | undefined {
     const dividendRate = this.offer.security_info?.dividend_rate;
-    if (!dividendRate || dividendRate.toLowerCase() === 'none') return undefined;
+    if (!dividendRate) return undefined;
+    
+    // Convert to string to handle both string and number types
+    const dividendRateStr = String(dividendRate);
+    if (dividendRateStr.toLowerCase() === 'none' || dividendRateStr.toLowerCase() === '') return undefined;
 
-    const numericValue = parseFloat(dividendRate);
-    if (Number.isNaN(numericValue)) return dividendRate;
+    const numericValue = parseFloat(dividendRateStr);
+    if (Number.isNaN(numericValue)) return dividendRateStr;
 
     return `${numericValue}%`;
   }
