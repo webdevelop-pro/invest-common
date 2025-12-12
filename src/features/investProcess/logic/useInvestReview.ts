@@ -9,6 +9,7 @@ import { urlOfferSingle } from 'InvestCommon/domain/config/links';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
 import { FundingTypes } from 'InvestCommon/helpers/enums/general';
+import { useSendAnalyticsEvent } from 'InvestCommon/domain/analytics/useSendAnalyticsEvent';
 
 export function useInvestReview() {
   const globalLoader = useGlobalLoader();
@@ -24,6 +25,7 @@ export function useInvestReview() {
   const { userSessionTraits } = storeToRefs(userSessionStore);
   const investmentRepository = useRepositoryInvestment();
   const { getInvestUnconfirmedOne, setReviewState } = storeToRefs(investmentRepository);
+  const { sendEvent } = useSendAnalyticsEvent();
 
   const { submitFormToHubspot } = useHubspotForm('23d573ec-3714-4fdb-97c2-a3b688d5008f');
 
@@ -50,6 +52,12 @@ export function useInvestReview() {
 
   const confirmInvest = async () => {
     await investmentRepository.setReview(slug as string, id as string, profileId as string);
+    void sendEvent({
+      event_type: 'send',
+      method: 'POST',
+      httpRequestMethod: 'POST',
+      service_name: 'vue3-app',
+    });
   };
 
   // Handle successful investment review

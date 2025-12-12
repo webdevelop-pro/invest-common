@@ -10,6 +10,10 @@ export const AnalyticsLogLevel = {
 
 export type AnalyticsLogLevel = typeof AnalyticsLogLevel[keyof typeof AnalyticsLogLevel];
 
+export type AnalyticsEventType = 'open' | 'click' | 'send' | 'close';
+
+export type AnalyticsHttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD' | 'OPTIONS' | 'PATCH';
+
 /**
  * HTTP request information for analytics context
  */
@@ -32,6 +36,21 @@ export interface IServiceContext {
   user?: string;
   request_id?: string;
   service_name?: string;
+}
+
+export interface IServiceContextEvent {
+  httpRequest: {
+    method: AnalyticsHttpMethod;
+    url: string;
+    userAgent: string;
+    referer: string;
+    remoteIp: string;
+    protocol: string;
+  };
+  user: string;
+  request_id: string;
+  service_name: string;
+  version: string;
 }
 
 /**
@@ -84,6 +103,15 @@ export interface IAnalyticsMessage {
   message: string;
   error: string;
   data: IAnalyticsData;
+}
+
+export interface IAnalyticsEventRequest {
+  event_type: AnalyticsEventType;
+  method: AnalyticsHttpMethod;
+  status_code: number;
+  identity_id: string;
+  request_path: string;
+  service_context: IServiceContextEvent;
 }
 
 /**

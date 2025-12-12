@@ -14,6 +14,7 @@ import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
 import { useRepositoryOffer } from 'InvestCommon/data/offer/offer.repository';
 import { useRepositoryFiler } from 'InvestCommon/data/filer/filer.repository';
+import { useSendAnalyticsEvent } from 'InvestCommon/domain/analytics/useSendAnalyticsEvent';
 
 const defaultInvestSteps = {
   [InvestStepTypes.amount]: {
@@ -61,6 +62,7 @@ const { getOfferOneState } = storeToRefs(offerRepository);
 const investmentRepository = useRepositoryInvestment();
 const { setInvestState, getInvestUnconfirmedOne } = storeToRefs(investmentRepository);
 const filerRepository = useRepositoryFiler();
+const { sendEvent } = useSendAnalyticsEvent();
 
 const investSteps = computed(() => defaultInvestSteps);
 const offer = ref(params.value?.data || null);
@@ -118,6 +120,10 @@ onBeforeMount(() => {
   }
   if (params.value?.slug) {
     offerRepository.getOfferOne(String(params.value?.slug));
+    void sendEvent({
+      event_type: 'open',
+      service_name: 'vitepress-app',
+    });
   }
 });
 

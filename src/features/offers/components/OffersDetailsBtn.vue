@@ -8,6 +8,7 @@ import { urlSignin } from 'InvestCommon/domain/config/links';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useKycButton } from 'InvestCommon/features/kyc/store/useKycButton';
+import { useSendAnalyticsEvent } from 'InvestCommon/domain/analytics/useSendAnalyticsEvent';
 
 const props = defineProps({
   isSharesReached: {
@@ -17,7 +18,7 @@ const props = defineProps({
   loading: Boolean,
 });
 
-defineEmits(['invest']);
+const emit = defineEmits(['invest']);
 
 const userSessionStore = useSessionStore();
 const { userLoggedIn } = storeToRefs(userSessionStore);
@@ -25,6 +26,7 @@ const profilesStore = useProfilesStore();
 const { selectedUserProfileData, hasAnyKycApprovedProfile } = storeToRefs(profilesStore);
 const kycButtonStore = useKycButton();
 const route = useRoute();
+const { sendEvent } = useSendAnalyticsEvent();
 
 const showInvestBtn = computed(() => (
   selectedUserProfileData.value?.isKycApproved
@@ -40,6 +42,14 @@ const showKYCBtn = computed(() => (
 const signInHandler = () => {
   const redirect = `${route.path}${window.location.search}${window.location.hash}`;
   navigateWithQueryParams(urlSignin, { redirect });
+};
+
+const investClickHandler = async () => {
+  await sendEvent({
+    event_type: 'click',
+    service_name: 'vitepress-app',
+  });
+  emit('invest');
 };
 
 
@@ -63,7 +73,7 @@ const startKycHandler = () => {
       class="offer-details-btn__btn"
       size="large"
       :disabled="loading || isSharesReached"
-      @click="$emit('invest')"
+      @click="investClickHandler"
     >
       Invest Now
     </VButton>
