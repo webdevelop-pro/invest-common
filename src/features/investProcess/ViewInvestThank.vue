@@ -272,6 +272,7 @@ const {
 
   &__info {
     border-top: 1px solid $gray-20;
+    flex: 0 0 auto;
 
     @media screen and (max-width: $tablet){
       padding: 16px 0;

@@ -7,7 +7,7 @@ import { PostLinkTypes } from 'InvestCommon/types/api/blog';
 import VFormTextarea from 'UiKit/components/Base/VForm/VFormTextarea.vue';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import arrowLeft from 'UiKit/assets/images/arrow-left.svg';
-import { urlContactUs, urlBlogSingle } from 'InvestCommon/domain/config/links';
+import { urlBlogSingle } from 'InvestCommon/domain/config/links';
 import VDialogContent from 'UiKit/components/Base/VDialog/VDialogContent.vue';
 import VDialogFooter from 'UiKit/components/Base/VDialog/VDialogFooter.vue';
 import VDialog from 'UiKit/components/Base/VDialog/VDialog.vue';
@@ -15,6 +15,7 @@ import VDialogTitle from 'UiKit/components/Base/VDialog/VDialogTitle.vue';
 import VDialogHeader from 'UiKit/components/Base/VDialog/VDialogHeader.vue';
 import { IInvestmentFormatted } from 'InvestCommon/data/investment/investment.types';
 import { usePortfolioCancelInvestment } from './logic/usePortfolioCancelInvestment';
+import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 
 const props = defineProps({
   investment: {
@@ -26,11 +27,18 @@ const props = defineProps({
 const emit = defineEmits(['close']);
 const open = defineModel<boolean>();
 
+const dialogsStore = useDialogs();
+
 const {
   model, errorData, isBtnDisabled,
   cancelInvestState, cancelInvestHandler,
   onBackClick, isFieldRequired, getErrorText,
 } = usePortfolioCancelInvestment(props.investment, open as Ref<boolean>, emit);
+
+const onContactUsClick = async () => {
+  open.value = false;
+  dialogsStore.openContactUsDialog('investment');
+};
 </script>
 
 <template>
@@ -64,14 +72,13 @@ const {
             >
               Can I cancel my investment and get a refund
             </a> article or
-            <a
-              :href="urlContactUs"
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              type="button"
               class="is--link-1"
+              @click="onContactUsClick"
             >
               Contact us
-            </a>
+            </button>
             with any question.
           </p>
           <VFormGroup

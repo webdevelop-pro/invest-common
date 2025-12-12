@@ -8,7 +8,6 @@ import { urlOfferSingle, urlOffers } from 'InvestCommon/domain/config/links';
 import VWalletTokensAndTransactions from 'InvestCommon/shared/components/VWalletTokensAndTransactions.vue';
 import VCardGoal from 'InvestCommon/shared/components/VCardGoal.vue';
 import VCardOfferFunded from 'InvestCommon/shared/components/VCardOfferFunded.vue';
-import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 
 const {
   cryptoItems,
@@ -67,14 +66,12 @@ const {
             <div class="is--subheading-2">
               Discover live asset-backed investments available today.
             </div>
-            <VButton
-              size="small"
-              color="primary"
-              class="is--margin-top-20"
+            <a
               :href="urlOffers"
+              class="is--link-1"
             >
               View Opportunities
-            </VButton>
+            </a>
           </template>
         </CardDonutUnified> 
 
@@ -98,14 +95,12 @@ const {
             <div class="is--subheading-2">
               Discover live asset-backed investments available today.
             </div>
-            <VButton
-              size="small"
-              color="primary"
-              class="is--margin-top-20"
+            <a
               :href="urlOffers"
+              class="is--link-1"
             >
               View Opportunities
-            </VButton>
+            </a>
           </template>
         </CardDonutUnified>
       </div>

@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { PropType, computed } from 'vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
-import { urlContactUs } from 'InvestCommon/domain/config/links';
 import {
   VDialogContent, VDialogFooter, VDialogTitle, VDialog,
   VDialogHeader,
 } from 'UiKit/components/Base/VDialog';
 import VTablePortfolioTransaction from 'InvestCommon/features/investment/components/VTablePortfolioTransaction.vue';
 import { IInvestmentFormatted } from 'InvestCommon/data/investment/investment.types';
+import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 
 const props = defineProps({
   investment: {
@@ -18,11 +18,18 @@ const props = defineProps({
 });
 const open = defineModel<boolean>();
 
+const dialogsStore = useDialogs();
+
 const title = computed(() => {
   if (props.investment?.funding_type?.toLowerCase() === 'ach') return 'ACH Transaction';
   if (props.investment?.funding_type?.toLowerCase() === 'wallet') return 'Wallet Transaction';
   return 'Transaction';
 });
+
+const onContactUsClick = async () => {
+  open.value = false;
+  dialogsStore.openContactUsDialog('investment');
+};
 </script>
 
 <template>
@@ -50,10 +57,9 @@ const title = computed(() => {
       <VDialogFooter>
         <div class="v-dialog-portfolio-transaction__footer-btns">
           <VButton
-            as="a"
-            :href="urlContactUs"
             variant="outlined"
             data-testid="button"
+            @click="onContactUsClick"
           >
             Contact Us
           </VButton>

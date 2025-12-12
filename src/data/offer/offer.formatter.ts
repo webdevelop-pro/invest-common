@@ -142,8 +142,12 @@ export class OfferFormatter {
     return Math.ceil(percent);
   }
 
+  get isFullyFunded(): boolean {
+    return this.offerFundedPercent >= 100;
+  }
+
   get isClosingSoon(): boolean {
-    return this.offerFundedPercent > 90;
+    return this.offerFundedPercent > 90 && !this.isFullyFunded;
   }
 
   get isSharesReached(): boolean {
@@ -175,15 +179,19 @@ export class OfferFormatter {
   }
 
   get tagText(): string {
-    return this.isClosingSoon ? '🔥 Closing Soon' : 'New';
+    if (this.isFullyFunded) return 'Funded';
+    if (this.isClosingSoon) return '🔥 Closing Soon';
+    return 'New';
   }
 
   get tagBackground(): string {
-    return this.isClosingSoon ? 'is--background-yellow-light' : 'is--background-secondary-light';
+    if (this.isFullyFunded) return 'is--background-secondary-light';
+    if (this.isClosingSoon) return 'is--background-yellow-light';
+    return 'is--background-secondary-light';
   }
 
   get showTag(): boolean {
-    return this.isClosingSoon || this.isNew;
+    return this.isFullyFunded || this.isClosingSoon || this.isNew;
   }
 
   get isStatusNew(): boolean {
