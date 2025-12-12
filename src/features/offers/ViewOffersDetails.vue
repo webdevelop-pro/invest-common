@@ -122,6 +122,8 @@ onBeforeMount(() => {
     offerRepository.getOfferOne(String(params.value?.slug));
     void sendEvent({
       event_type: 'open',
+      method: 'POST',
+      httpRequestMethod: 'POST',
       service_name: 'vitepress-app',
       request_path: route.path,
     });

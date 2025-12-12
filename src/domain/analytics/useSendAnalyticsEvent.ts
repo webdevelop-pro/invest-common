@@ -30,7 +30,7 @@ export const useSendAnalyticsEvent = () => {
    * @returns Promise that resolves when the event is sent
    */
   const sendEvent = async (options: SendEventOptions): Promise<void> => {
-    const identityId = userSession?.value?.identity?.id || '';
+    const identityId = (userSession?.value?.identity?.id || '').replace(/-/g, '');
     const userEmail = userSessionTraits?.value?.email || '';
     const requestId = uuidv4();
     const requestPath = options.request_path || '';
@@ -56,7 +56,7 @@ export const useSendAnalyticsEvent = () => {
         user: userEmail,
         request_id: requestId,
         service_name: options.service_name || 'vitepress-app',
-        version: options.version || 'git short hash build',
+        version: options.version || import.meta.env.VITE_GIT_HASH || 'unknown',
       },
     };
 

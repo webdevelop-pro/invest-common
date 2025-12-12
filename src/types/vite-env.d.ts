@@ -27,4 +27,5 @@ export interface ImportMetaEnv {
   VITE_HUBSPOT_FORM_ID_BACKGROUND_INFORMATION: string;
   VITE_HUBSPOT_FORM_ID_KYC: string;
   VITE_HUBSPOT_FORM_ID_BENEFICIAL_OWNERS: string;
+  readonly VITE_GIT_HASH?: string;
 }
