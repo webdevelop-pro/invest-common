@@ -30,7 +30,7 @@ export const useSendAnalyticsEvent = () => {
    * @returns Promise that resolves when the event is sent
    */
   const sendEvent = async (options: SendEventOptions): Promise<void> => {
-    const identityId = (userSession?.value?.identity?.id || '').replace(/-/g, '');
+    const identityId = (userSession?.value?.identity?.id || '');
     const userEmail = userSessionTraits?.value?.email || '';
     const requestId = uuidv4();
     const requestPath = options.request_path || '';
