@@ -48,6 +48,7 @@ const investClickHandler = async () => {
   await sendEvent({
     event_type: 'click',
     service_name: 'vitepress-app',
+    request_path: route.path,
   });
   emit('invest');
 };

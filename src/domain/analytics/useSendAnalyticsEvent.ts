@@ -1,4 +1,4 @@
-import { useRoute } from 'vitepress';
+
 import { storeToRefs } from 'pinia';
 import { v4 as uuidv4 } from 'uuid';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
@@ -20,7 +20,6 @@ export interface SendEventOptions {
  * Handles common event payload construction and error handling
  */
 export const useSendAnalyticsEvent = () => {
-  const route = useRoute();
   const userSessionStore = useSessionStore();
   const { userSession, userSessionTraits } = storeToRefs(userSessionStore);
   const analytics = useRepositoryAnalytics();
@@ -34,7 +33,7 @@ export const useSendAnalyticsEvent = () => {
     const identityId = userSession?.value?.identity?.id || '';
     const userEmail = userSessionTraits?.value?.email || '';
     const requestId = uuidv4();
-    const requestPath = options.request_path || route.path || '';
+    const requestPath = options.request_path || '';
     const protocol = typeof window !== 'undefined' ? window.location.protocol.replace(':', '') : '';
     const userAgent = typeof navigator !== 'undefined' ? navigator.userAgent : '';
     const referer = typeof document !== 'undefined' ? document.referrer || '' : '';

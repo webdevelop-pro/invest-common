@@ -57,6 +57,7 @@ export function useInvestReview() {
       method: 'POST',
       httpRequestMethod: 'POST',
       service_name: 'vue3-app',
+      request_path: route.path,
     });
   };
 

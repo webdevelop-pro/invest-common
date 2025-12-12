@@ -123,6 +123,7 @@ onBeforeMount(() => {
     void sendEvent({
       event_type: 'open',
       service_name: 'vitepress-app',
+      request_path: route.path,
     });
   }
 });
