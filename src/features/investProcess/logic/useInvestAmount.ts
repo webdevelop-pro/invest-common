@@ -140,17 +140,17 @@ export function useInvestAmount() {
     if (!amountFormRef.value || !ownershipFormRef.value || !fundingFormRef.value) return;
     
     amountFormRef.value.onValidate();
+    ownershipFormRef.value.onValidate();
+    fundingFormRef.value.onValidate();
     if (!amountFormRef.value.isValid) {
       nextTick(() => amountFormRef.value?.scrollToError('FormInvestAmount'));
       return;
     }
-    ownershipFormRef.value.onValidate();
     if (!ownershipFormRef.value.isValid) {
       nextTick(() => ownershipFormRef.value?.scrollToError('VFormInvestOwnership'));
       return;
     }
 
-    fundingFormRef.value.onValidate();
     if (!fundingFormRef.value.isValid) {
       nextTick(() => fundingFormRef.value?.scrollToError('InvestFormFunding'));
       return;
