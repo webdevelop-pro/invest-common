@@ -130,13 +130,11 @@ export const useRepositoryInvestment = defineStore('repository-investment', () =
     }
   };
 
-  const setAmount = async (slug: string, id: string, profileId: string, shares: number) => {
+  const setAmount = async (slug: string, id: string, profileId: string, data: object) => {
     try {
       setAmountState.value.loading = true;
       setAmountState.value.error = null;
-      const response = await apiClient.put(`/auth/invest/${slug}/amount/${id}/${profileId}`, {
-        number_of_shares: shares,
-      });
+      const response = await apiClient.put(`/auth/invest/${slug}/amount/${id}/${profileId}`, data);
       setAmountState.value.data = response.data as {number_of_shares: number};
       return response.data as {number_of_shares: number};
     } catch (err) {

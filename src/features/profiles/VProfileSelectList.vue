@@ -3,22 +3,31 @@ import { PropType, computed } from 'vue';
 import VFormSelect from 'UiKit/components/Base/VForm/VFormSelect.vue';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import { useProfileSelectStore } from './store/useProfileSelect';
+import circleExclamation from 'UiKit/assets/images/circle-exclamation.svg';
 
 const props = defineProps({
   size: String as PropType<'large' | 'medium' | 'small'>,
   label: String,
   defaultValue: String,
+  updateSelected: Boolean,
+  loading: Boolean,
+  hideDisabled: Boolean,
 });
 
+const emit = defineEmits<{
+  (e: 'select', value: string): void;
+}>();
+
 const {
-  userListFormatted, isLoading, defaultValue: storeDefaultValue, onUpdateSelectedProfile,
-} = useProfileSelectStore();
+  userListFormatted, isLoading: loadingStore, defaultValue: storeDefaultValue, onUpdateSelectedProfile,
+} = useProfileSelectStore({ hideDisabled: props.hideDisabled });
 
 // Use prop defaultValue if provided, otherwise use store defaultValue
 const selectedValue = computed(() => props.defaultValue || storeDefaultValue.value);
 
 const onUpdate = (value: string) => {
-  onUpdateSelectedProfile(value);
+  if (props.updateSelected) onUpdateSelectedProfile(value);
+  emit('select', String(value));
 };
 </script>
 
@@ -35,9 +44,40 @@ const onUpdate = (value: string) => {
         item-label="text"
         item-value="id"
         :options="userListFormatted"
-        :loading="isLoading"
+        :loading="loadingStore || loading"
         @update:model-value="onUpdate"
-      />
+      >
+        <template #item="slotProps">
+          <div class="v-profile-select-list__option-wrap">
+            <div
+              class="v-profile-select-list__option"
+              :class="{ 'is--disabled': (slotProps.item as any).disabled }"
+            >
+              <span class="v-profile-select-list__option-text">
+                {{ (slotProps.item as any).text }}
+              </span>
+              <span
+                v-if="(slotProps.item as any).kycStatus"
+                class="v-profile-select-list__option-status is--small"
+              >
+                {{ (slotProps.item as any).kycStatus }}
+              </span>
+            </div>
+            <div
+              v-if="(slotProps.item as any).disabledMessage?.length > 0"
+              class="v-profile-select-list__option-message  is--color-red"
+            >
+              <circleExclamation
+                alt="Exclamation icon"
+                class="v-profile-select-list__option-icon"
+              />
+              <span class="is--small">
+                {{ (slotProps.item as any).disabledMessage }}
+              </span>
+            </div>
+          </div>
+        </template>
+      </VFormSelect>
     </VFormGroup>
   </div>
 </template>
@@ -50,6 +90,44 @@ const onUpdate = (value: string) => {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    width: 100%;
+    justify-content: space-between;
+
+  }
+
+  &__option-wrap {
+    width: 100%;
+    gap: 4px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+
+    &.is--disabled {
+      opacity: 0.3;
+    }
+  }
+
+  &__option-icon {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+
+  &__option-message {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  &__option-status {
+    text-align: right;
   }
 }
 </style>

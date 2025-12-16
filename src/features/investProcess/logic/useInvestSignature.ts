@@ -2,7 +2,7 @@ import { computed, ref, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useHelloSign } from 'InvestCommon/shared/composables/useHelloSign';
 import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
-import { ROUTE_INVEST_FUNDING } from 'InvestCommon/domain/config/enums/routes';
+import { ROUTE_INVEST_REVIEW } from 'InvestCommon/domain/config/enums/routes';
 import { ISignature } from 'InvestCommon/types/api/invest';
 import { storeToRefs } from 'pinia';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
@@ -33,12 +33,15 @@ export function useInvestSignature() {
   const id = ref((route.params.id as string) || '');
   const profileId = ref((route.params.profileId as string) || '');
 
-  // Reactive state
-  const state = ref({
-    isDialogDocumentOpen: false,
-    checkbox1: false,
-    checkbox2: false,
-  });
+  // Reference to the signature form instance (exposed from VFormInvestSignature)
+  const formRef = ref<{
+    canContinue: boolean;
+    state: {
+      isDialogDocumentOpen: boolean;
+      checkbox1: boolean;
+      checkbox2: boolean;
+    };
+  } | null>(null);
 
   // Local signId ref for managing signature state
   const signId = ref(getInvestUnconfirmedOne.value?.signature_data?.signature_id);
@@ -47,14 +50,11 @@ export function useInvestSignature() {
   const signUrl = computed(() => setDocumentState.value.data?.sign_url || '');
   const isLoading = computed(() => 
     setSignatureState.value.loading || 
-    setDocumentState.value.loading || 
+    setDocumentState.value.loading ||
     getDocumentState.value.loading
   );
-  const canContinue = computed(() => 
-    state.value.checkbox1 && 
-    state.value.checkbox2 && 
-    Boolean(signId.value)
-  );
+  // Mirror form-level canContinue flag so the view can easily bind footer button state
+  const canContinue = computed(() => Boolean(formRef.value?.canContinue));
 
   // Methods
   const handleSign = async (data: ISignature): Promise<void> => {
@@ -72,14 +72,14 @@ export function useInvestSignature() {
   };
 
   const handleContinue = (): void => {
-    if (!canContinue.value) return;
+    if (!formRef.value || !formRef.value.canContinue) return;
     
-    router.push({ name: ROUTE_INVEST_FUNDING });
+    router.push({ name: ROUTE_INVEST_REVIEW });
     
     submitFormToHubspot({
       email: userSessionTraits.value?.email,
-      invest_checkbox_1: state.value.checkbox1,
-      invest_checkbox_2: state.value.checkbox2,
+      invest_checkbox_1: formRef.value.state.checkbox1,
+      invest_checkbox_2: formRef.value.state.checkbox2,
       sign_id: signId.value,
     });
   };
@@ -102,8 +102,8 @@ export function useInvestSignature() {
 
       await esignRepository.setDocument(slug.value, id.value, profileId.value);
       
-      if (setDocumentState.value.data?.sign_url) {
-        state.value.isDialogDocumentOpen = true;
+      if (setDocumentState.value.data?.sign_url && formRef.value) {
+        formRef.value.state.isDialogDocumentOpen = true;
       }
     } catch (error) {
       console.error('Failed to handle document:', error);
@@ -122,42 +122,25 @@ export function useInvestSignature() {
   // Setup signature handler
   onSign(handleSign);
 
-  // Flags to avoid infinite loops when syncing closes between HelloSign and dialog
-  const ignoreNextOnClose = ref(false);
-  const suppressDialogCloseWatcher = ref(false);
-
-  // When HelloSign notifies a close, ensure the dialog is closed too
   onClose(() => {
-    if (ignoreNextOnClose.value) {
-      // This close originated from our programmatic call to close HelloSign
-      ignoreNextOnClose.value = false;
-      return;
+    if (formRef.value) {
+      formRef.value.state.isDialogDocumentOpen = false;
     }
-
-    // User closed HelloSign -> close dialog but suppress watcher reaction
-    suppressDialogCloseWatcher.value = true;
-    state.value.isDialogDocumentOpen = false;
   });
 
-  // When dialog closes, close HelloSign (unless the close was triggered by HelloSign)
-  watch(
-    () => state.value.isDialogDocumentOpen,
-    (isOpen) => {
-      if (!isOpen) {
-        if (suppressDialogCloseWatcher.value) {
-          suppressDialogCloseWatcher.value = false;
-          return;
-        }
+  const handleDialogOpen = (url: string, domEl: string): void => {
+    openHelloSign(url, domEl);
+  };
 
-        // Dialog was closed by user -> programmatically close HelloSign
-        ignoreNextOnClose.value = true;
-        closeHelloSign();
-      }
+  const handleDialogClose = (): void => {
+    closeHelloSign();
+    if (formRef.value) {
+      formRef.value.state.isDialogDocumentOpen = false;
     }
-  );
+  };
 
   return {
-    state,
+    formRef,
     signId,
     signUrl,
     isLoading,
@@ -168,6 +151,8 @@ export function useInvestSignature() {
     handleSign,
     handleContinue,
     handleDocument,
+    handleDialogOpen,
+    handleDialogClose,
     openHelloSign,
     closeHelloSign,
     setSignatureState,

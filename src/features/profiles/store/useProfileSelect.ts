@@ -4,13 +4,21 @@ import { useRouter } from 'vue-router';
 import { capitalizeFirstLetter } from 'UiKit/helpers/text';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { ROUTE_CREATE_PROFILE } from 'InvestCommon/domain/config/enums/routes';
+import { InvestKycTypes } from 'InvestCommon/types/api/invest';
 
 interface ISelectedProfile {
   text: string;
   id: number | string;
+  kycStatus?: string;
+  disabled?: boolean;
+  disabledMessage?: string;
 }
 
-export const useProfileSelectStore = () => {
+interface IUseProfileSelectOptions {
+  hideDisabled?: boolean;
+}
+
+export const useProfileSelectStore = (options?: IUseProfileSelectOptions) => {
   const router = useRouter();
   const userProfilesStore = useProfilesStore();
   const { selectedUserProfileId, userProfiles } = storeToRefs(userProfilesStore);
@@ -25,12 +33,12 @@ export const useProfileSelectStore = () => {
     }
   }, { immediate: true });
 
-  const getId = (profile) => {
+  const getId = (profile: any) => {
     const type = profile.type?.slice(0, 2).toUpperCase();
     return `${type}${profile.id}`;
   };
 
-  const getName = (profile) => {
+  const getName = (profile: any) => {
     if (profile.type === 'individual') {
       return capitalizeFirstLetter(profile.type || '');
     }
@@ -40,19 +48,45 @@ export const useProfileSelectStore = () => {
     return capitalizeFirstLetter(profile.data.name || '');
   };
 
+  const getKycStatusLabel = (profile: any) => {
+    switch (profile.kyc_status) {
+      case InvestKycTypes.approved:
+        return 'KYC: Approved';
+      case InvestKycTypes.pending:
+      case InvestKycTypes.in_progress:
+        return 'KYC: In Progress';
+      case InvestKycTypes.declined:
+        return 'KYC: Declined';
+      case InvestKycTypes.new:
+      case InvestKycTypes.none:
+        return 'KYC: None';
+      default:
+        return '';
+    }
+  };
+
   const userListFormatted = computed(() => {
     const userProfilesList: ISelectedProfile[] = [];
-    userProfiles.value?.reverse().forEach((item) => {
+
+    userProfiles.value?.forEach((item) => {
       const text = `${getId(item)}: ${getName(item)} Investment Profile`;
+      const isDisabled = options?.hideDisabled && (item.kyc_status !== InvestKycTypes.approved);
+
       userProfilesList.push({
         text: text.charAt(0).toUpperCase() + text.slice(1),
         id: `${item.id}`,
+        kycStatus: getKycStatusLabel(item),
+        // Do not pass `disabled` to keep v-select-item[data-disabled] unused when using slot.
+        disabledMessage: isDisabled ? 'Identity verification is needed.' : undefined,
+        disabled: isDisabled,
       });
     });
+
     userProfilesList.push({
-      text: '+ Add A New Investment Account',
+      text: '+ Add A New Investment Profile',
       id: 'new',
     });
+
     return userProfilesList;
   });
 

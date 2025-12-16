@@ -1,105 +1,90 @@
 <script setup lang="ts">
-import { useInvestAmount } from 'InvestCommon/features/investProcess/logic/useInvestAmount';
-import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
-import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
-import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
-import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
-import VButton from 'UiKit/components/Base/VButton/VButton.vue';
-import InvestStep from 'InvestCommon/features/investProcess/components/InvestStep.vue';
-import { urlOfferSingle } from 'InvestCommon/domain/config/links';
 import { useRoute } from 'vue-router';
-import { numberFormatter } from 'InvestCommon/helpers/numberFormatter';
+import { useInvestAmount } from 'InvestCommon/features/investProcess/logic/useInvestAmount';
+import InvestStep from 'InvestCommon/features/investProcess/components/InvestStep.vue';
+import VFormInvestAmount from 'InvestCommon/features/investProcess/components/VFormInvestAmount.vue';
+import VFormInvestOwnership from 'InvestCommon/features/investProcess/components/VFormInvestOwnership.vue';
+import VFormInvestFunding from 'InvestCommon/features/investProcess/components/VFormInvestFunding.vue';
+import { urlOfferSingle } from 'InvestCommon/domain/config/links';
 
 const route = useRoute();
 
 const {
-  model,
-  maxInvestment,
-  minInvestment,
-  investmentAmountShow,
   errorData,
-  isLeftLessThanMin,
+  schemaBackend,
+  getInvestUnconfirmedOne,
+  formModel,
+  handleContinue,
+  amountFormRef,
+  ownershipFormRef,
+  fundingFormRef,
+  getWalletState,
+  walletId,
+  getEvmWalletState,
+  evmWalletId,
+  selectedUserProfileData,
   isBtnDisabled,
-  continueHandler,
-  setAmountState,
-  isFieldRequired,
-  getErrorText,
+  isLoading,
 } = useInvestAmount();
+
 </script>
 
 <template>
   <div class="ViewInvestAmount view-invest-amount is--no-margin">
     <InvestStep
-      title="Investment Information"
+      title="Investment"
       :step-number="1"
-      :is-loading="setAmountState.loading"
+      :is-loading="isLoading"
+      :footer="{
+        cancel: { href: urlOfferSingle(route.params.slug as string) },
+        primary: {
+          text: 'Continue',
+          disabled: isBtnDisabled,
+          loading: isLoading,
+        }
+      }"
+      @footer-primary="handleContinue"
     >
       <div class="FormInvestAmount form-invest-amount">
-        <FormRow>
-          <FormCol col2>
-            <VFormGroup
-              v-slot="VFormGroupProps"
-              :required="isFieldRequired('number_of_shares')"
-              :error-text="getErrorText('number_of_shares', errorData)"
-              data-testid="shares-amount-group"
-              label="Amount of Shares"
-            >
-              <VFormInput
-                :model-value="model.number_of_shares ? String(model.number_of_shares) : null"
-                :is-error="VFormGroupProps.isFieldError"
-                placeholder="Amount"
-                name="shares-amount"
-                size="large"
-                allow-integer-only
-                @update:model-value="model.number_of_shares = numberFormatter($event)"
-              />
-            </VFormGroup>
-            <p
-              v-if="isLeftLessThanMin"
-              class="form-invest-amount__limit-info"
-            >
-              Please enter either the maximum number of shares available - {{ maxInvestment }},
-              or reduce your order size by {{ minInvestment - maxInvestment + model.number_of_shares }}
-            </p>
-            <p class="form-invest-amount__info is--small">
-              Minimum - {{ minInvestment }} shares,
-              Maximum - {{ maxInvestment }} shares
-            </p>
-          </FormCol>
+        <VFormInvestAmount
+          ref="amountFormRef"
+          v-model="formModel"
+          :error-data="errorData"
+          :data="getInvestUnconfirmedOne"
+          :backend-schema="schemaBackend"
+          :is-loading="isLoading"
+        />
 
-          <FormCol col2>
-            <VFormGroup
-              label="Investment Amount"
-            >
-              <VFormInput
-                :model-value="investmentAmountShow"
-                placeholder="$"
-                name="amount-of-investment"
-                readonly
-                size="large"
-              />
-            </VFormGroup>
-          </FormCol>
-        </FormRow>
-
-        <div class="form-invest-amount__btn">
-          <VButton
-            variant="outlined"
-            size="large"
-            as="a"
-            :href="urlOfferSingle(route.params.slug as string)"
-          >
-            Cancel
-          </VButton>
-          <VButton
-            :disabled="isBtnDisabled"
-            size="large"
-            :loading="setAmountState.loading"
-            @click="continueHandler"
-          >
-            Continue
-          </VButton>
+        <div class="view-invest-amount__subtitle is--h3__title">
+          Ownership
         </div>
+
+        <VFormInvestOwnership
+          ref="ownershipFormRef"
+          v-model="formModel"
+          :error-data="errorData"
+          :data="getInvestUnconfirmedOne"
+          :backend-schema="schemaBackend"
+          :is-loading="isLoading"
+        />
+
+        <div class="view-invest-amount__subtitle is--h3__title">
+          Funding
+        </div>
+
+        <VFormInvestFunding
+          ref="fundingFormRef"
+          v-model="formModel"
+          :error-data="errorData"
+          :data="getInvestUnconfirmedOne"
+          :backend-schema="schemaBackend"
+          :is-loading="isLoading"
+          :get-wallet-state="getWalletState"
+          :wallet-id="walletId"
+          :get-evm-wallet-state="getEvmWalletState"
+          :evm-wallet-id="evmWalletId"
+          :selected-user-profile-data="selectedUserProfileData"
+        />
       </div>
     </InvestStep>
   </div>
@@ -111,29 +96,14 @@ const {
 .view-invest-amount{
   width: 100%;
   padding-top: $header-height;
+
+  &__subtitle {
+    margin-bottom: 20px;
+    margin-top: 12px;
+  }
 }
 
 .form-invest-amount {
   width: 100%;
-
-  &__btn {
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-    margin-top: 20px;
-    flex-wrap: wrap;
-  }
-
-  &__limit-info {
-    font-size: 12px;
-    margin-top: 5px;
-    color: $red-dark;
-    opacity: 1;
-  }
-
-  &__info {
-    color: $gray-70;
-    margin-top: 4px;
-  }
 }
 </style>

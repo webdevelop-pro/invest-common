@@ -50,7 +50,6 @@ onBeforeUnmount(() => {
     <VDialogContent
       :aria-describedby="undefined"
       full-screen
-      data-testid="document-modal"
       class="v-dialog-document"
     >
       <div

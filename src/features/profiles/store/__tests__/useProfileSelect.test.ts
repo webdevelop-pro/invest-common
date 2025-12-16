@@ -1,12 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useRouter } from 'vue-router';
 import { ref } from 'vue';
+import { InvestKycTypes } from 'InvestCommon/types/api/invest';
 import { useProfileSelectStore } from '../useProfileSelect';
 
 const mockPush = vi.fn();
 const mockSetSelectedUserProfileById = vi.fn();
 
-vi.mock('InvestCommon/helpers/enums/routes', () => ({
+vi.mock('InvestCommon/domain/config/enums/routes', () => ({
   ROUTE_CREATE_PROFILE: 'ROUTE_CREATE_PROFILE',
 }));
 
@@ -21,8 +22,8 @@ vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
   useProfilesStore: vi.fn(() => ({
     selectedUserProfileId: ref(1),
     userProfiles: ref([
-      { id: 1, type: 'individual', data: { name: 'John Doe' } },
-      { id: 2, type: 'entity', data: { name: 'Company Inc' } },
+      { id: 1, type: 'individual', data: { name: 'John Doe' }, kyc_status: InvestKycTypes.approved },
+      { id: 2, type: 'entity', data: { name: 'Company Inc' }, kyc_status: InvestKycTypes.pending },
     ]),
     setSelectedUserProfileById: mockSetSelectedUserProfileById,
   })),
@@ -34,31 +35,47 @@ describe('useProfileSelectStore', () => {
     mockSetSelectedUserProfileById.mockClear();
   });
 
-  it('should initialize with correct default values', () => {
+  it('initializes with default value and loading resolved when profile is selected', () => {
     const composable = useProfileSelectStore();
     expect(composable.defaultValue.value).toBe('1');
+    // watch with immediate:true should flip loading to false when id > 0
+    expect(composable.isLoading.value).toBe(false);
   });
 
-  it('should format user profiles list correctly', () => {
+  it('formats user profiles list correctly and appends add-new option', () => {
     const composable = useProfileSelectStore();
     const formattedList = composable.userListFormatted.value;
 
     expect(formattedList).toHaveLength(3);
-    expect(formattedList[0]).toEqual({
-      text: 'EN2: Company Inc Investment Profile',
-      id: '2',
-    });
-    expect(formattedList[1]).toEqual({
+
+    expect(formattedList[0]).toMatchObject({
       text: 'IN1: Individual Investment Profile',
       id: '1',
+      kycStatus: 'KYC: Approved',
     });
+
+    expect(formattedList[1]).toMatchObject({
+      text: 'EN2: Company Inc Investment Profile',
+      id: '2',
+      kycStatus: 'KYC: In Progress',
+    });
+
     expect(formattedList[2]).toEqual({
-      text: '+ Add A New Investment Account',
+      text: '+ Add A New Investment Profile',
       id: 'new',
     });
   });
 
-  it('should handle profile selection for existing profile', () => {
+  it('marks non-approved profiles as disabled when hideDisabled option is used', () => {
+    const composable = useProfileSelectStore({ hideDisabled: true });
+    const formattedList = composable.userListFormatted.value;
+
+    const pendingProfile = formattedList.find((item) => item.id === '2')!;
+    expect(pendingProfile.disabled).toBe(true);
+    expect(pendingProfile.disabledMessage).toBe('Identity verification is needed.');
+  });
+
+  it('handles profile selection for existing profile', () => {
     const composable = useProfileSelectStore();
     composable.onUpdateSelectedProfile('2');
 
@@ -70,7 +87,7 @@ describe('useProfileSelectStore', () => {
     });
   });
 
-  it('should handle "new" profile selection', () => {
+  it('handles \"new\" profile selection by routing to create-profile route', () => {
     const composable = useProfileSelectStore();
     composable.onUpdateSelectedProfile('new');
     expect(mockPush).toHaveBeenCalledWith({
@@ -78,15 +95,14 @@ describe('useProfileSelectStore', () => {
     });
   });
 
-  it('should preserve query parameters when selecting existing profile', () => {
-    // Mock router with query parameters
+  it('preserves query parameters when selecting existing profile', () => {
     const mockRouterWithQuery = {
       push: mockPush,
       currentRoute: { value: { name: 'test-route', query: { tab: 'overview', filter: 'active' } } },
     } as any;
-    
+
     vi.mocked(useRouter).mockReturnValue(mockRouterWithQuery);
-    
+
     const composable = useProfileSelectStore();
     composable.onUpdateSelectedProfile('1');
 
@@ -98,7 +114,7 @@ describe('useProfileSelectStore', () => {
     });
   });
 
-  it('should not update selection for invalid id', () => {
+  it('does not update selection for invalid id', () => {
     const composable = useProfileSelectStore();
     const router = useRouter();
     composable.onUpdateSelectedProfile('');
@@ -106,10 +122,5 @@ describe('useProfileSelectStore', () => {
     expect(mockSetSelectedUserProfileById).not.toHaveBeenCalled();
     expect(router.push).not.toHaveBeenCalled();
   });
-
-  it('should update loading state when profile is selected', async () => {
-    const composable = useProfileSelectStore();
-    mockSetSelectedUserProfileById(1);
-    expect(composable.isLoading.value).toBe(false);
-  });
 });
+

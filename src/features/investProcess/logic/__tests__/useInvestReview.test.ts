@@ -2,13 +2,14 @@ import {
   describe, it, expect, vi, beforeEach, afterEach,
 } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
-import { ref, nextTick } from 'vue';
+import { ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
+import { useSendAnalyticsEvent } from 'InvestCommon/domain/analytics/useSendAnalyticsEvent';
 import { ROUTE_INVEST_THANK } from 'InvestCommon/domain/config/enums/routes';
 import { useInvestReview } from '../useInvestReview';
 
@@ -37,10 +38,15 @@ vi.mock('InvestCommon/data/investment/investment.repository', () => ({
   useRepositoryInvestment: vi.fn(),
 }));
 
-describe('useInvestReview', () => {
+vi.mock('InvestCommon/domain/analytics/useSendAnalyticsEvent', () => ({
+  useSendAnalyticsEvent: vi.fn(),
+}));
+
+describe('useInvestReview (logic)', () => {
   const mockRouter = { push: vi.fn() };
   const mockRoute = {
     params: { slug: 'test-slug', id: 'test-id', profileId: 'test-profile-id' },
+    path: '/invest/review',
   };
   const mockGlobalLoader = { hide: vi.fn() };
   const mockHubspotForm = { submitFormToHubspot: vi.fn() };
@@ -59,17 +65,17 @@ describe('useInvestReview', () => {
   const mockInvestmentRepository = {
     setReview: vi.fn(),
     getInvestUnconfirmedOne: ref({
-      funding_type: 'wallet',
       offer: {
         name: 'Test Offer',
         slug: 'test-offer',
       },
     }),
-    setReviewState: ref({ loading: false, data: null }),
+    setReviewState: ref({ loading: false, data: null as any }),
     $onAction: vi.fn(),
   };
+  const mockSendEvent = vi.fn();
 
-  let actionCallback: any;
+  let registeredActionHandler: any;
 
   beforeEach(() => {
     setActivePinia(createPinia());
@@ -82,9 +88,10 @@ describe('useInvestReview', () => {
     (useProfilesStore as any).mockReturnValue(mockProfilesStore);
     (useSessionStore as any).mockReturnValue(mockSessionStore);
     (useRepositoryInvestment as any).mockReturnValue(mockInvestmentRepository);
+    (useSendAnalyticsEvent as any).mockReturnValue({ sendEvent: mockSendEvent });
 
-    mockInvestmentRepository.$onAction.mockImplementation((callback) => {
-      actionCallback = callback;
+    mockInvestmentRepository.$onAction.mockImplementation((handler) => {
+      registeredActionHandler = handler;
     });
   });
 
@@ -92,139 +99,101 @@ describe('useInvestReview', () => {
     vi.restoreAllMocks();
   });
 
-  describe('computed properties', () => {
-    describe('investorName', () => {
-      it('should combine name parts correctly', () => {
-        const composable = useInvestReview();
-        expect(composable.investorName.value).toBe('John Michael Doe');
-      });
+  it('initializes with loader hidden and exposes route params and store refs', () => {
+    const composable = useInvestReview();
 
-      it('should handle missing name parts', () => {
-        (mockProfilesStore.selectedUserProfileData as any).value = {
-          data: {
-            first_name: 'John',
-            middle_name: undefined,
-            last_name: 'Doe',
-          },
-        };
-        
-        const composable = useInvestReview();
-        expect(composable.investorName.value).toBe('John Doe');
-      });
-    });
+    expect(mockGlobalLoader.hide).toHaveBeenCalled();
+    expect(composable.slug).toBe('test-slug');
+    expect(composable.id).toBe('test-id');
+    expect(composable.profileId).toBe('test-profile-id');
+    expect(composable.getInvestUnconfirmedOne.value.offer.name).toBe('Test Offer');
+  });
 
-    describe('fundingSourceDataToShow', () => {
-      it('should format wallet funding type correctly', () => {
-        (mockInvestmentRepository.getInvestUnconfirmedOne as any).value.funding_type = 'wallet';
-        
-        const composable = useInvestReview();
-        expect(composable.fundingSourceDataToShow.value).toBe('Wallet');
-      });
+  it('confirmInvest calls repository.setReview and sends analytics event', async () => {
+    const composable = useInvestReview();
 
-      it('should format non-wallet funding type correctly', () => {
-        (mockInvestmentRepository.getInvestUnconfirmedOne as any).value.funding_type = 'bank transfer';
-        
-        const composable = useInvestReview();
-        expect(composable.fundingSourceDataToShow.value).toBe('BANK TRANSFER');
-      });
+    await composable.confirmInvest();
 
-      it('should handle missing funding type', () => {
-        (mockInvestmentRepository.getInvestUnconfirmedOne as any).value.funding_type = null;
-        
-        const composable = useInvestReview();
-        expect(composable.fundingSourceDataToShow.value).toBe('');
-      });
+    expect(mockInvestmentRepository.setReview).toHaveBeenCalledWith(
+      'test-slug',
+      'test-id',
+      'test-profile-id',
+    );
+
+    expect(mockSendEvent).toHaveBeenCalledWith({
+      event_type: 'send',
+      method: 'POST',
+      httpRequestMethod: 'POST',
+      service_name: 'vue3-app',
+      request_path: mockRoute.path,
     });
   });
 
-  describe('confirmInvest method', () => {
-    it('should call setReview with correct parameters', async () => {
-      const composable = useInvestReview();
-      
-      await composable.confirmInvest();
-      
-      expect(mockInvestmentRepository.setReview).toHaveBeenCalledWith(
-        'test-slug',
-        'test-id',
-        'test-profile-id'
-      );
+  it('handles successful setReview action and navigates to thank you', async () => {
+    useInvestReview();
+
+    mockInvestmentRepository.setReviewState.value = {
+      loading: false,
+      data: {
+        investment: {
+          id: 'investment-123',
+          status: 'confirmed',
+        },
+      },
+    };
+
+    if (registeredActionHandler) {
+      registeredActionHandler({
+        name: 'setReview',
+        after: (cb: () => void) => cb(),
+      });
+    }
+
+    expect(mockRouter.push).toHaveBeenCalledWith({
+      name: ROUTE_INVEST_THANK,
+      params: { id: 'investment-123' },
+    });
+
+    expect(mockHubspotForm.submitFormToHubspot).toHaveBeenCalledWith({
+      email: 'test@example.com',
+      investment_id: 'investment-123',
+      offer_name: 'Test Offer',
+      offer_slug: 'test-offer',
+      investment_status: 'confirmed',
     });
   });
 
-  describe('action listener behavior', () => {
-    it('should handle successful setReview action', async () => {
+  it('ignores non-setReview actions', () => {
+    useInvestReview();
 
-      (mockInvestmentRepository.setReviewState as any).value = { 
-        loading: false, 
-        data: {
-          investment: {
-            id: 'investment-123',
-            status: 'confirmed',
-          },
-        }
-      };
-
-      if (actionCallback) {
-        actionCallback({
-          name: 'setReview',
-          after: (callback: any) => {
-            if (callback && typeof callback === 'function') {
-              callback();
-            }
-          },
-        });
-      }
-
-      await nextTick();
-
-      expect(mockRouter.push).toHaveBeenCalledWith({
-        name: ROUTE_INVEST_THANK,
-        params: { id: 'investment-123' },
+    if (registeredActionHandler) {
+      registeredActionHandler({
+        name: 'otherAction',
+        after: (cb: () => void) => cb(),
       });
+    }
 
-      expect(mockHubspotForm.submitFormToHubspot).toHaveBeenCalledWith({
-        email: 'test@example.com',
-        investment_id: 'investment-123',
-        offer_name: 'Test Offer',
-        offer_slug: 'test-offer',
-        investment_status: 'confirmed',
+    expect(mockRouter.push).not.toHaveBeenCalled();
+    expect(mockHubspotForm.submitFormToHubspot).not.toHaveBeenCalled();
+  });
+
+  it('does not navigate when setReviewState has no investment data', () => {
+    useInvestReview();
+
+    mockInvestmentRepository.setReviewState.value = {
+      loading: false,
+      data: null,
+    };
+
+    if (registeredActionHandler) {
+      registeredActionHandler({
+        name: 'setReview',
+        after: (cb: () => void) => cb(),
       });
-    });
+    }
 
-    it('should not handle non-setReview actions', () => {
-
-      if (actionCallback) {
-        actionCallback({
-          name: 'otherAction',
-          after: (callback: any) => {
-            if (callback && typeof callback === 'function') {
-              callback();
-            }
-          },
-        });
-      }
-
-      expect(mockRouter.push).not.toHaveBeenCalled();
-      expect(mockHubspotForm.submitFormToHubspot).not.toHaveBeenCalled();
-    });
-
-    it('should not handle setReview action without investment data', () => {
-
-      (mockInvestmentRepository.setReviewState as any).value = { loading: false, data: null };
-
-      if (actionCallback) {
-        actionCallback({
-          name: 'setReview',
-          after: (callback: any) => {
-            if (callback && typeof callback === 'function') {
-              callback();
-            }
-          },
-        });
-      }
-
-      expect(mockRouter.push).not.toHaveBeenCalled();
-      expect(mockHubspotForm.submitFormToHubspot).not.toHaveBeenCalled();
-    });
+    expect(mockRouter.push).not.toHaveBeenCalled();
+    expect(mockHubspotForm.submitFormToHubspot).not.toHaveBeenCalled();
   });
 });
+

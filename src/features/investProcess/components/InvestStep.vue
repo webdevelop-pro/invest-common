@@ -1,19 +1,64 @@
 <script setup lang="ts">
+import { computed } from 'vue';
+import type { RouteLocationRaw } from 'vue-router';
 import VStepper from 'UiKit/components/VStepper.vue';
+import InvestStepFooter from 'InvestCommon/features/investProcess/components/InvestStepFooter.vue';
 import { useInvestStep } from './logic/useInvestStep';
 
 interface Props {
   title?: string;
   stepNumber: number;
   isLoading?: boolean;
+  footer?: {
+    back?: {
+      to: RouteLocationRaw | null;
+      text?: string;
+    } | null;
+    cancel?: {
+      href: string | null;
+      text?: string;
+    } | null;
+    primary?: {
+      text: string;
+      disabled?: boolean;
+      loading?: boolean;
+      testId?: string;
+    } | null;
+  } | null;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   title: '',
   isLoading: false,
+  footer: () => ({
+    back: {
+      to: null,
+      text: 'Back',
+    },
+    cancel: {
+      href: null,
+      text: 'Cancel',
+    },
+    primary: {
+      text: '',
+      disabled: false,
+      loading: false,
+      testId: undefined,
+    },
+  }),
 });
 
-const { currentTab, isRouteValid, steps } = useInvestStep(props);
+const emit = defineEmits<{
+  (e: 'footerPrimary'): void;
+}>();
+
+const { currentTab, steps } = useInvestStep(props);
+
+const hasFooter = computed(() => {
+  const footer = props.footer;
+  if (!footer) return false;
+  return Boolean(footer.primary?.text ?? footer.back?.to ?? footer.cancel?.href);
+});
 </script>
 
 <template>
@@ -22,7 +67,6 @@ const { currentTab, isRouteValid, steps } = useInvestStep(props);
     :class="{ 'is--loading': isLoading }"
   >
     <div
-      v-if="isRouteValid"
       class="wd-container invest-step__container"
     >
       <aside class="invest-step__side">
@@ -38,15 +82,15 @@ const { currentTab, isRouteValid, steps } = useInvestStep(props);
           {{ title }}
         </h1>
         <slot />
+        <InvestStepFooter
+          v-if="hasFooter"
+          :back="footer?.back"
+          :cancel="footer?.cancel"
+          :primary="footer?.primary"
+          @primary="emit('footerPrimary')"
+        />
       </section>
     </div>
-
-    <p
-      v-else
-      class="invest-step__not-found"
-    >
-      Investment not found
-    </p>
   </div>
 </template>
 
@@ -120,15 +164,6 @@ const { currentTab, isRouteValid, steps } = useInvestStep(props);
     #{$root}.is--loading & {
       opacity: 0.5;
       pointer-events: none;
-    }
-  }
-
-  &__not-found {
-    text-align: center;
-    font-size: 20px;
-
-    strong {
-      font-weight: 800;
     }
   }
 }

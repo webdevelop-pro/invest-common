@@ -69,13 +69,16 @@ vi.mock('InvestCommon/data/filer/filer.repository', () => ({
   useRepositoryFiler: vi.fn(() => mockFilerRepository),
 }));
 
-const mockWindowOpen = vi.fn();
 const mockCreateObjectURL = vi.fn(() => 'blob:mock-url');
 const mockRevokeObjectURL = vi.fn();
+const mockDownloadURI = vi.fn();
 
-Object.defineProperty(window, 'open', { value: mockWindowOpen, writable: true });
 Object.defineProperty(URL, 'createObjectURL', { value: mockCreateObjectURL, writable: true });
 Object.defineProperty(URL, 'revokeObjectURL', { value: mockRevokeObjectURL, writable: true });
+
+vi.mock('UiKit/helpers/url', () => ({
+  downloadURI: (...args: unknown[]) => mockDownloadURI(...args),
+}));
 
 describe('useInvestmentDocuments', () => {
   let composable: ReturnType<typeof useInvestmentDocuments>;
@@ -143,7 +146,7 @@ describe('useInvestmentDocuments', () => {
 
       expect(mockEsignRepository.getDocument).toHaveBeenCalledWith('test-123');
       expect(mockCreateObjectURL).toHaveBeenCalled();
-      expect(mockWindowOpen).toHaveBeenCalledWith(expect.any(String), '_blank');
+      expect(mockDownloadURI).toHaveBeenCalledWith('blob:mock-url', 'Subscription Agreement');
       expect(composable.loadingDocId.value).toBeUndefined();
     });
 
@@ -172,7 +175,7 @@ describe('useInvestmentDocuments', () => {
 
       expect(mockEsignRepository.getDocument).not.toHaveBeenCalled();
       expect(mockCreateObjectURL).not.toHaveBeenCalled();
-      expect(mockWindowOpen).not.toHaveBeenCalled();
+      expect(mockDownloadURI).not.toHaveBeenCalled();
     });
 
     it('should handle document fetch error', async () => {

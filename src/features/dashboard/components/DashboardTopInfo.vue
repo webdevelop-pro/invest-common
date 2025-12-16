@@ -40,6 +40,7 @@ const isLoading = computed(() => (getUserState.value.loading || getProfileByIdSt
       <div class="dashboard-top-info__select-profile">
         <VProfileSelectList
           size="medium"
+          update-selected
         />
       </div>
       <div class="dashboard-top-info__item-status">

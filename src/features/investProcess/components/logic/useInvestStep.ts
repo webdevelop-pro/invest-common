@@ -1,6 +1,6 @@
 import { useRoute, useRouter } from 'vue-router';
 import {
-  computed, onBeforeMount, onMounted, ref, watch,
+  computed, onBeforeMount, ref, watch,
 } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
@@ -21,7 +21,7 @@ interface Props {
 const INVEST_STEPS_CONFIG = {
   [InvestStepTypes.amount]: {
     step: 1,
-    description: 'Amount',
+    description: 'Investment',
     value: InvestStepTypes.amount,
     to: { name: ROUTE_INVEST_AMOUNT },
   },
@@ -32,7 +32,7 @@ const INVEST_STEPS_CONFIG = {
     to: { name: ROUTE_INVEST_OWNERSHIP },
   },
   [InvestStepTypes.signature]: {
-    step: 3,
+    step: 2,
     description: 'Signature',
     value: InvestStepTypes.signature,
     to: { name: ROUTE_INVEST_SIGNATURE },
@@ -44,7 +44,7 @@ const INVEST_STEPS_CONFIG = {
     to: { name: ROUTE_INVEST_FUNDING },
   },
   [InvestStepTypes.review]: {
-    step: 5,
+    step: 3,
     description: 'Confirmation',
     value: InvestStepTypes.review,
     to: { name: ROUTE_INVEST_REVIEW },
@@ -54,9 +54,7 @@ const INVEST_STEPS_CONFIG = {
 // Memoized steps array - moved outside computed to prevent recreation
 const steps = [
   INVEST_STEPS_CONFIG.amount,
-  INVEST_STEPS_CONFIG.ownership,
   INVEST_STEPS_CONFIG.signature,
-  INVEST_STEPS_CONFIG.funding,
   INVEST_STEPS_CONFIG.review,
 ];
 
@@ -78,7 +76,6 @@ export function useInvestStep(props: Props) {
   });
 
   const currentTab = ref(props.stepNumber);
-  const isRouteValid = ref(true);
 
   // Optimized watch with better error handling
   watch(
@@ -113,13 +110,8 @@ export function useInvestStep(props: Props) {
     }
   });
 
-  onMounted(() => {
-    isRouteValid.value = Boolean(routeParams.value.slug);
-  });
-
   return {
     currentTab,
-    isRouteValid,
     steps,
     routeParams,
   };

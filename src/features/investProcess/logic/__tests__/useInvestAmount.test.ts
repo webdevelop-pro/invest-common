@@ -2,13 +2,17 @@ import {
   describe, it, expect, vi, beforeEach,
 } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
-import { ref, reactive, nextTick } from 'vue';
+import { ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
-import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
+import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository';
+import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
+import { FundingTypes } from 'InvestCommon/helpers/enums/general';
+import { ROUTE_INVEST_SIGNATURE } from 'InvestCommon/domain/config/enums/routes';
 import { useInvestAmount } from '../useInvestAmount';
 
 vi.mock('vue-router', () => ({
@@ -24,10 +28,6 @@ vi.mock('UiKit/composables/useHubspotForm', () => ({
   useHubspotForm: vi.fn(),
 }));
 
-vi.mock('UiKit/helpers/validation/useFormValidation', () => ({
-  useFormValidation: vi.fn(),
-}));
-
 vi.mock('InvestCommon/domain/session/store/useSession', () => ({
   useSessionStore: vi.fn(),
 }));
@@ -36,131 +36,273 @@ vi.mock('InvestCommon/data/investment/investment.repository', () => ({
   useRepositoryInvestment: vi.fn(),
 }));
 
-vi.mock('UiKit/helpers/validation/general', () => ({
-  scrollToError: vi.fn(),
+vi.mock('InvestCommon/data/wallet/wallet.repository', () => ({
+  useRepositoryWallet: vi.fn(),
 }));
 
-const mockFormValidation = {
-  model: reactive({ number_of_shares: 100 }),
-  validation: ref({}),
-  isValid: ref(true),
-  onValidate: vi.fn(),
-  scrollToError: vi.fn(),
-  formErrors: ref({}),
-  isFieldRequired: vi.fn(),
-  getErrorText: vi.fn(),
-  getOptions: vi.fn(),
-  getReferenceType: vi.fn(),
-};
+vi.mock('InvestCommon/data/evm/evm.repository', () => ({
+  useRepositoryEvm: vi.fn(),
+}));
 
-const mockInvestmentRepository = {
-  setAmount: vi.fn(),
-  setAmountOptionsState: ref({ data: {} }),
-  setAmountState: ref({ error: null as any, data: null as any }),
-  getInvestUnconfirmedOne: ref({
-    offer: {
-      price_per_share: 10,
-      total_shares: 1000,
-      subscribed_shares: 100,
-      min_investment: 50,
-    },
-    number_of_shares: 100,
-  }),
-};
+vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
+  useProfilesStore: vi.fn(),
+}));
 
-describe('useInvestAmount', () => {
+describe('useInvestAmount (logic)', () => {
+  const mockRouter = { push: vi.fn() };
+  const mockRoute = {
+    params: { slug: 'test-slug', id: '123', profileId: '456' },
+  };
+  const mockGlobalLoader = { hide: vi.fn() };
+  const mockHubspotForm = { submitFormToHubspot: vi.fn() };
+  const mockSessionStore = {
+    userLoggedIn: ref(true),
+    userSessionTraits: ref({ email: 'test@example.com' }),
+  };
+
+  const mockInvestmentRepository = {
+    setAmount: vi.fn().mockResolvedValue(undefined),
+    setAmountState: ref({ loading: false, error: null as any }),
+    setAmountOptionsState: ref({ data: {} }),
+    getInvestUnconfirmedOne: ref({}),
+  };
+
+  const mockWalletRepository = {
+    getWalletByProfile: vi.fn(),
+    getWalletState: ref({ data: { totalBalance: 1000 } }),
+    walletId: ref(1),
+    canLoadWalletData: ref(true),
+  };
+
+  const mockEvmRepository = {
+    getEvmWalletByProfile: vi.fn(),
+    getEvmWalletState: ref({ data: { fundingBalance: 500 } }),
+    evmWalletId: ref(2),
+    canLoadEvmWalletData: ref(true),
+  };
+
+  const mockProfilesStore = {
+    selectedUserProfileData: ref({ data: { id: 10 } }),
+    selectedUserProfileId: ref(10),
+  };
+
   beforeEach(() => {
     setActivePinia(createPinia());
     vi.clearAllMocks();
-    
-    (useRouter as any).mockReturnValue({ push: vi.fn() });
-    (useRoute as any).mockReturnValue({ params: { slug: 'test', id: '123', profileId: '456' } });
-    (useGlobalLoader as any).mockReturnValue({ hide: vi.fn() });
-    (useHubspotForm as any).mockReturnValue({ submitFormToHubspot: vi.fn() });
-    (useFormValidation as any).mockReturnValue(mockFormValidation);
-    (useSessionStore as any).mockReturnValue({ userSessionTraits: ref({ email: 'test@example.com' }) });
+
+    (useRouter as any).mockReturnValue(mockRouter);
+    (useRoute as any).mockReturnValue(mockRoute);
+    (useGlobalLoader as any).mockReturnValue(mockGlobalLoader);
+    (useHubspotForm as any).mockReturnValue(mockHubspotForm);
+    (useSessionStore as any).mockReturnValue(mockSessionStore);
     (useRepositoryInvestment as any).mockReturnValue(mockInvestmentRepository);
+    (useRepositoryWallet as any).mockReturnValue(mockWalletRepository);
+    (useRepositoryEvm as any).mockReturnValue(mockEvmRepository);
+    (useProfilesStore as any).mockReturnValue(mockProfilesStore);
   });
 
-  describe('computed values', () => {
-    it('should calculate basic values correctly', () => {
-      const composable = useInvestAmount();
-      
-      expect(composable.sharesAmount.value).toBe(100);
-      expect(composable.investmentAmount.value).toBe(1000);
-      expect(composable.investmentAmountShow.value).toBeDefined();
+  it('initializes with loader hidden and exposes repository state', () => {
+    const composable = useInvestAmount();
+
+    expect(mockGlobalLoader.hide).toHaveBeenCalled();
+    expect(composable.setAmountState).toBeDefined();
+    expect(composable.setAmountOptionsState).toBeDefined();
+    expect(composable.getInvestUnconfirmedOne).toBeDefined();
+  });
+
+  it('computes isBtnDisabled based on child form refs', () => {
+    const composable = useInvestAmount();
+
+    // Initially no refs set -> disabled
+    expect(composable.isBtnDisabled.value).toBe(true);
+
+    composable.amountFormRef.value = {
+      isValid: true,
+      isBtnDisabled: false,
+      onValidate: vi.fn(),
+      scrollToError: vi.fn(),
+      model: { number_of_shares: 10 },
+    } as any;
+
+    composable.ownershipFormRef.value = {
+      isValid: true,
+      isBtnDisabled: false,
+      onValidate: vi.fn(),
+      scrollToError: vi.fn(),
+      model: { profile_id: 5 },
+    } as any;
+
+    composable.fundingFormRef.value = {
+      isValid: true,
+      isBtnDisabled: false,
+      onValidate: vi.fn(),
+      scrollToError: vi.fn(),
+      model: { funding_type: FundingTypes.wallet },
+      componentData: {
+        isInvalid: false,
+        accountHolderName: '',
+        accountType: '',
+        accountNumber: '',
+        routingNumber: '',
+      },
+    } as any;
+
+    expect(composable.isBtnDisabled.value).toBe(false);
+  });
+
+  it('handles validation failures in handleContinue', async () => {
+    const composable = useInvestAmount();
+
+    const amountRef = {
+      isValid: false,
+      isBtnDisabled: false,
+      onValidate: vi.fn(),
+      scrollToError: vi.fn(),
+      model: { number_of_shares: 10 },
+    } as any;
+
+    composable.amountFormRef.value = amountRef;
+    composable.ownershipFormRef.value = {
+      isValid: true,
+      isBtnDisabled: false,
+      onValidate: vi.fn(),
+      scrollToError: vi.fn(),
+      model: { profile_id: 5 },
+    } as any;
+    composable.fundingFormRef.value = {
+      isValid: true,
+      isBtnDisabled: false,
+      onValidate: vi.fn(),
+      scrollToError: vi.fn(),
+      model: { funding_type: FundingTypes.wallet },
+      componentData: {
+        isInvalid: false,
+        accountHolderName: '',
+        accountType: '',
+        accountNumber: '',
+        routingNumber: '',
+      },
+    } as any;
+
+    await composable.handleContinue();
+
+    expect(amountRef.onValidate).toHaveBeenCalled();
+    expect(mockInvestmentRepository.setAmount).not.toHaveBeenCalled();
+    expect(mockRouter.push).not.toHaveBeenCalled();
+  });
+
+  it('submits combined payload and navigates on successful handleContinue', async () => {
+    const composable = useInvestAmount();
+
+    composable.amountFormRef.value = {
+      isValid: true,
+      isBtnDisabled: false,
+      onValidate: vi.fn(),
+      scrollToError: vi.fn(),
+      model: { number_of_shares: 20 },
+      investmentAmount: 2000,
+    } as any;
+
+    composable.ownershipFormRef.value = {
+      isValid: true,
+      isBtnDisabled: false,
+      onValidate: vi.fn(),
+      scrollToError: vi.fn(),
+      model: { profile_id: 7 },
+    } as any;
+
+    composable.fundingFormRef.value = {
+      isValid: true,
+      isBtnDisabled: false,
+      onValidate: vi.fn(),
+      scrollToError: vi.fn(),
+      model: { funding_type: FundingTypes.wallet },
+      componentData: {
+        isInvalid: false,
+        accountHolderName: 'John Doe',
+        accountType: 'checking',
+        accountNumber: '1234',
+        routingNumber: '5678',
+      },
+    } as any;
+
+    await composable.handleContinue();
+
+    expect(mockInvestmentRepository.setAmount).toHaveBeenCalledWith(
+      'test-slug',
+      '123',
+      '456',
+      expect.objectContaining({
+        number_of_shares: 20,
+        profile_id: 7,
+      }),
+    );
+
+    expect(mockHubspotForm.submitFormToHubspot).toHaveBeenCalledWith(
+      expect.objectContaining({
+        email: 'test@example.com',
+        shares_amount: 20,
+        investment_amount: 2000,
+      }),
+    );
+
+    expect(mockRouter.push).toHaveBeenCalledWith({
+      name: ROUTE_INVEST_SIGNATURE,
+      params: expect.objectContaining({ profileId: '7' }),
     });
   });
 
-  describe('validation logic', () => {
-    it('should determine if remaining shares is less than minimum', () => {
-      mockFormValidation.model.number_of_shares = 850;
-      const composable = useInvestAmount();
-      expect(composable.isLeftLessThanMin.value).toBe(false);
-      
-      mockFormValidation.model.number_of_shares = 860;
-      expect(composable.isLeftLessThanMin.value).toBe(true);
-    });
+  it('builds ACH funding payload with payment data', async () => {
+    const composable = useInvestAmount();
 
-    it('should enable button when validation passes', () => {
-      mockFormValidation.isValid.value = true;
-      const composable = useInvestAmount();
-      expect(composable.isBtnDisabled.value).toBe(false);
-    });
+    composable.amountFormRef.value = {
+      isValid: true,
+      isBtnDisabled: false,
+      onValidate: vi.fn(),
+      scrollToError: vi.fn(),
+      model: { number_of_shares: 5 },
+      investmentAmount: 500,
+    } as any;
+
+    composable.ownershipFormRef.value = {
+      isValid: true,
+      isBtnDisabled: false,
+      onValidate: vi.fn(),
+      scrollToError: vi.fn(),
+      model: { profile_id: 3 },
+    } as any;
+
+    composable.fundingFormRef.value = {
+      isValid: true,
+      isBtnDisabled: false,
+      onValidate: vi.fn(),
+      scrollToError: vi.fn(),
+      model: { funding_type: FundingTypes.ach },
+      componentData: {
+        isInvalid: false,
+        accountHolderName: 'John Doe',
+        accountType: 'checking',
+        accountNumber: '1234',
+        routingNumber: '5678',
+      },
+    } as any;
+
+    await composable.handleContinue();
+
+    expect(mockInvestmentRepository.setAmount).toHaveBeenCalledWith(
+      'test-slug',
+      '123',
+      '456',
+      expect.objectContaining({
+        funding_type: FundingTypes.ach,
+        payment_data: {
+          account_number: '1234',
+          routing_number: '5678',
+          account_holder_name: 'John Doe',
+          account_type: 'checking',
+        },
+      }),
+    );
   });
+});
 
-  describe('schema generation', () => {
-    it('should generate schema with correct validation rules', () => {
-      const composable = useInvestAmount();
-      
-      expect(composable.schemaFrontend.value.definitions?.AmountStep?.properties?.number_of_shares?.minimum).toBe(50);
-      expect(composable.schemaFrontend.value.definitions?.AmountStep?.properties?.number_of_shares?.maximum).toBe(900);
-    });
-  });
-
-  describe('continueHandler', () => {
-    it('should validate form and proceed when valid', async () => {
-      mockFormValidation.isValid.value = true;
-      mockInvestmentRepository.setAmount.mockResolvedValue({});
-      const composable = useInvestAmount();
-      
-      await composable.continueHandler();
-      
-      expect(mockFormValidation.onValidate).toHaveBeenCalled();
-      expect(mockInvestmentRepository.setAmount).toHaveBeenCalledWith('test', '123', '456', 100);
-    });
-
-    it('should handle validation failure', async () => {
-      mockFormValidation.isValid.value = false;
-      const composable = useInvestAmount();
-      
-      await composable.continueHandler();
-      
-      expect(mockFormValidation.onValidate).toHaveBeenCalled();
-      expect(mockInvestmentRepository.setAmount).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('watchers', () => {
-    it('should update model when numberOfShares changes', async () => {
-      const composable = useInvestAmount();
-      mockInvestmentRepository.getInvestUnconfirmedOne.value.number_of_shares = 150;
-      
-      await nextTick();
-      
-      expect(composable.model.number_of_shares).toBe(150);
-    });
-  });
-
-  describe('error handling', () => {
-    it('should expose error and schema data', () => {
-      mockInvestmentRepository.setAmountState.value.error = { data: { responseJson: 'Error' } };
-      mockInvestmentRepository.setAmountOptionsState.value.data = { schema: 'test' };
-      
-      const composable = useInvestAmount();
-      
-      expect(composable.errorData.value).toBe('Error');
-      expect(composable.schemaBackend.value).toEqual({ schema: 'test' });
-    });
-  });
-}); 

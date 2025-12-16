@@ -1,24 +1,12 @@
 <script setup lang="ts">
-import { defineAsyncComponent } from 'vue';
-import { ROUTE_INVEST_OWNERSHIP } from 'InvestCommon/domain/config/enums/routes';
-import VButton from 'UiKit/components/Base/VButton/VButton.vue';
-import VFormCheckbox from 'UiKit/components/Base/VForm/VFormCheckbox.vue';
-import VBadge from 'UiKit/components/Base/VBadge/VBadge.vue';
-import arrowLeft from 'UiKit/assets/images/arrow-left.svg?component';
-import file from 'UiKit/assets/images/file.svg';
-import { urlTerms, urlPrivacy, urlOfferSingle } from 'InvestCommon/domain/config/links';
+import { ROUTE_INVEST_AMOUNT } from 'InvestCommon/domain/config/enums/routes';
 import InvestStep from 'InvestCommon/features/investProcess/components/InvestStep.vue';
+import VFormInvestSignature from 'InvestCommon/features/investProcess/components/VFormInvestSignature.vue';
+import { urlOfferSingle } from 'InvestCommon/domain/config/links';
 import { useInvestSignature } from './logic/useInvestSignature';
 
-const VDialogDocument = defineAsyncComponent({
-  loader: () => import('./components/VDialogDocument.vue'),
-  onError: (error) => {
-    console.error('Failed to load VDialogDocument:', error);
-  },
-});
-
 const {
-  state,
+  formRef,
   signId,
   signUrl,
   isLoading,
@@ -28,8 +16,8 @@ const {
   profileId,
   handleDocument,
   handleContinue,
-  openHelloSign,
-  closeHelloSign,
+  handleDialogOpen,
+  handleDialogClose,
 } = useInvestSignature();
 </script>
 
@@ -37,146 +25,29 @@ const {
   <div class="ViewInvestSignature view-invest-signature is--no-margin">
     <InvestStep
       title="Signature"
-      :step-number="3"
+      :step-number="2"
       :is-loading="isLoading"
+      :footer="{
+        back: { to: { name: ROUTE_INVEST_AMOUNT, params: { slug, id, profileId } } },
+        cancel: { href: urlOfferSingle(slug as string) },
+        primary: {
+          text: 'Continue',
+          disabled: !canContinue,
+          loading: isLoading,
+          testId: 'continue-button',
+        }
+      }"
+      @footer-primary="handleContinue"
     >
-      <div class="FormInvestSignature form-invest-signature">
-        <!-- Header -->
-        <div class="form-invest-signature__label is--h6__title">
-          Review and sign the agreement:
-        </div>
-
-        <!-- Document Section -->
-        <div
-          class="form-invest-signature__document"
-          role="button"
-          tabindex="0"
-          @click="handleDocument"
-          @keydown.enter="handleDocument"
-          @keydown.space="handleDocument"
-        >
-          <VButton
-            size="large"
-            variant="link"
-            color="secondary"
-            :loading="isLoading"
-            :disabled="isLoading"
-            class="form-invest-signature__document-button"
-          >
-            <file
-              alt="file icon"
-              class="form-invest-signature__document-icon"
-            />
-            Investment Agreement
-          </VButton>
-
-          <VBadge
-            size="medium"
-            :color="signId ? 'secondary-light' : undefined"
-            class="form-invest-signature__tag"
-            data-testid="document-sign"
-            :class="{ 'is-signed': signId }"
-          >
-            {{ signId ? 'Signed' : 'Signature Needed' }}
-          </VBadge>
-        </div>
-
-        <!-- Checkboxes -->
-        <div class="form-invest-signature__checkbox-wrap">
-          <VFormCheckbox
-            v-model="state.checkbox1"
-            data-testid="V-checkbox"
-            class="form-invest-signature__checkbox"
-            has-asterisk
-          >
-            I have reviewed and agree to the terms of the offering document
-            and I agree to complete the investment process using HelloSign.
-          </VFormCheckbox>
-          
-          <VFormCheckbox
-            v-model="state.checkbox2"
-            data-testid="V-checkbox"
-            class="form-invest-signature__checkbox"
-            has-asterisk
-          >
-            I have reviewed and agree to the
-            <a
-              :href="urlTerms"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="form-invest-signature__link is--link-1"
-            >
-              Terms of use
-            </a> and the
-            <a
-              :href="urlPrivacy"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="form-invest-signature__link is--link-1"
-            >
-              Privacy Policy
-            </a>.
-          </VFormCheckbox>
-        </div>
-
-        <!-- Footer -->
-        <div class="form-invest-signature__footer">
-          <VButton
-            variant="link"
-            size="large"
-            as="router-link"
-            :to="{ name: ROUTE_INVEST_OWNERSHIP, params: { slug, id, profileId } }"
-            class="is--gt-tablet-show"
-          >
-            <arrowLeft
-              alt="arrow left"
-              class="form-invest-signature__back-icon"
-            />
-            Back
-          </VButton>
-          
-          <div class="form-invest-signature__btn">
-            <VButton
-              variant="link"
-              size="large"
-              as="router-link"
-              :to="{ name: ROUTE_INVEST_OWNERSHIP, params: { slug, id, profileId } }"
-              class="is--lt-tablet-show"
-            >
-              <arrowLeft
-                alt="arrow left"
-                class="form-invest-signature__back-icon"
-              />
-              Back
-            </VButton>
-            <VButton
-              variant="outlined"
-              size="large"
-              as="a"
-              :href="urlOfferSingle(slug)"
-            >
-              Cancel
-            </VButton>
-            <VButton
-              :disabled="!canContinue"
-              size="large"
-              data-testid="continue-button"
-              class="form-invest-signature__save"
-              @click="handleContinue"
-            >
-              Continue
-            </VButton>
-          </div>
-        </div>
-
-        <!-- Document Dialog -->
-        <VDialogDocument
-          v-model="state.isDialogDocumentOpen"
-          :sign-url="signUrl"
-          :close="closeHelloSign"
-          :open="openHelloSign"
-        />
-      </div>
+      <VFormInvestSignature
+        ref="formRef"
+        :sign-id="signId"
+        :is-loading="isLoading"
+        :sign-url="signUrl"
+        @document-click="handleDocument"
+        @dialog-open="handleDialogOpen"
+        @dialog-close="handleDialogClose"
+      />
     </InvestStep>
   </div>
 </template>
@@ -232,33 +103,9 @@ const {
     }
   }
 
-  &__btn {
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-    flex-wrap: wrap;
-
-    @media screen and (width < $tablet){
-      justify-content: space-between;
-      width: 100%;
-    }
-  }
-
-  &__footer {
-    margin-top: 40px;
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
-
   &__document-icon {
     width: 19px;
     flex-shrink: 0;
-  }
-
-  &__back-icon {
-    width: 20px;
   }
 
   &__link {
@@ -266,10 +113,5 @@ const {
     display: inline-block;
   }
 
-  &__save {
-    @media screen and (width < $tablet){
-      width: 100%;
-    }
-  }
 }
 </style>

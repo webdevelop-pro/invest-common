@@ -3,10 +3,6 @@ import { ref } from 'vue';
 import { setActivePinia, createPinia } from 'pinia';
 import { useOffersDetailsContent, OfferTabTypes } from '../useOffersDetailsContent';
 
-vi.mock('marked', () => ({
-  marked: { parse: vi.fn((md: string) => `<p>${md}</p>`) },
-}));
-
 vi.mock('InvestCommon/domain/session/store/useSession', () => ({
   useSessionStore: vi.fn(() => ({ userLoggedIn: ref(true) })),
 }));

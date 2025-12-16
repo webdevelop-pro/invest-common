@@ -1,4 +1,3 @@
-import { computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
@@ -8,7 +7,6 @@ import { storeToRefs } from 'pinia';
 import { urlOfferSingle } from 'InvestCommon/domain/config/links';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
-import { FundingTypes } from 'InvestCommon/helpers/enums/general';
 import { useSendAnalyticsEvent } from 'InvestCommon/domain/analytics/useSendAnalyticsEvent';
 
 export function useInvestReview() {
@@ -29,26 +27,6 @@ export function useInvestReview() {
 
   const { submitFormToHubspot } = useHubspotForm('23d573ec-3714-4fdb-97c2-a3b688d5008f');
 
-  // Computed properties
-  const investorName = computed(() => {
-    const { first_name, middle_name, last_name } = selectedUserProfileData.value?.data || {};
-    return [first_name, middle_name, last_name].filter(Boolean).join(' ');
-  });
-  const isSsnHidden = computed(() => selectedUserProfileData.value?.data?.is_full_ssn_provided === true);
-
-  const fundingSourceDataToShow = computed(() => {
-    const fundingType = getInvestUnconfirmedOne.value?.funding_type;
-    if (!fundingType) return '';
-    
-    if (fundingType.toLowerCase() === FundingTypes.cryptoWallet) {
-      return 'Crypto Wallet';
-    }
-    
-    if (fundingType.toLowerCase().includes('wallet')) {
-      return fundingType.charAt(0).toUpperCase() + fundingType.slice(1);
-    }
-    return fundingType.toUpperCase();
-  });
 
   const confirmInvest = async () => {
     await investmentRepository.setReview(slug as string, id as string, profileId as string);
@@ -94,12 +72,7 @@ export function useInvestReview() {
     getInvestUnconfirmedOne,
     setReviewState,
     
-    // Computed properties
-    investorName,
-    fundingSourceDataToShow,
-    isSsnHidden,
-    
-    // Methods
+    // Actions
     confirmInvest,
     
     // Utilities
