@@ -29,14 +29,26 @@ export function useInvestReview() {
 
 
   const confirmInvest = async () => {
-    await investmentRepository.setReview(slug as string, id as string, profileId as string);
-    void sendEvent({
-      event_type: 'send',
-      method: 'POST',
-      httpRequestMethod: 'POST',
-      service_name: 'vue3-app',
-      request_path: route.path,
-    });
+    try {
+      await investmentRepository.setReview(slug as string, id as string, profileId as string);
+      void sendEvent({
+        event_type: 'send',
+        method: 'POST',
+        httpRequestMethod: 'POST',
+        service_name: 'vue3-app',
+        request_path: route.path,
+        status_code: 200,
+      });
+    } catch (error) {
+      void sendEvent({
+        event_type: 'send',
+        method: 'POST',
+        httpRequestMethod: 'POST',
+        service_name: 'vue3-app',
+        request_path: route.path,
+        status_code: 400,
+      });
+    }
   };
 
   // Handle successful investment review

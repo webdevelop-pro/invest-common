@@ -4,6 +4,13 @@ import { v4 as uuidv4 } from 'uuid';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryAnalytics } from 'InvestCommon/data/analytics/analytics.repository';
 import type { AnalyticsEventType, AnalyticsHttpMethod, IAnalyticsEventRequest } from 'InvestCommon/data/analytics/analytics.type';
+import env from 'InvestCommon/domain/config/env';
+
+// Controlled via VITE_ENABLE_ANALYTICS env variable
+// Example:
+//   VITE_ENABLE_ANALYTICS=1  -> events are sent
+//   VITE_ENABLE_ANALYTICS=0 -> events are skipped (recommended for local)
+const isAnalyticsEnabled = env.ENABLE_ANALYTICS === '1';
 
 export interface SendEventOptions {
   event_type: AnalyticsEventType;
@@ -30,6 +37,11 @@ export const useSendAnalyticsEvent = () => {
    * @returns Promise that resolves when the event is sent
    */
   const sendEvent = async (options: SendEventOptions): Promise<void> => {
+    // Don't send analytics when disabled via env (e.g. local development)
+    if (!isAnalyticsEnabled) {
+      return;
+    }
+
     const identityId = (userSession?.value?.identity?.id || '');
     const userEmail = userSessionTraits?.value?.email || '';
     const requestId = uuidv4();

@@ -23,6 +23,7 @@ declare module 'InvestCommon/domain/config/env' {
     FILER_URL: MaybeString;
     DISTRIBUTIONS_URL: MaybeString;
     ANALYTIC_URL: MaybeString;
+    ENABLE_ANALYTICS: MaybeString;
     HUBSPOT_FORM_ID_RECEIVE_LATEST_NEWS: MaybeString;
     HUBSPOT_FORM_ID_CONTACT_US: MaybeString;
     HUBSPOT_FORM_ID_INVESTMENT_OBJECTIVES: MaybeString;

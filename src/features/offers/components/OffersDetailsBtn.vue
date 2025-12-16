@@ -47,8 +47,8 @@ const signInHandler = () => {
 const investClickHandler = async () => {
   await sendEvent({
     event_type: 'click',
-    method: 'POST',
-    httpRequestMethod: 'POST',
+    method: 'GET',
+    httpRequestMethod: 'GET',
     service_name: 'vitepress-app',
     request_path: route.path,
   });
