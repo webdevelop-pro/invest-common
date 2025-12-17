@@ -51,13 +51,13 @@ describe('useProfileSelectStore', () => {
     expect(formattedList[0]).toMatchObject({
       text: 'IN1: Individual Investment Profile',
       id: '1',
-      kycStatus: 'KYC: Approved',
+      kycStatusLabel: 'Can Invest',
     });
 
     expect(formattedList[1]).toMatchObject({
       text: 'EN2: Company Inc Investment Profile',
       id: '2',
-      kycStatus: 'KYC: In Progress',
+      kycStatusLabel: 'Cannot Invest',
     });
 
     expect(formattedList[2]).toEqual({
