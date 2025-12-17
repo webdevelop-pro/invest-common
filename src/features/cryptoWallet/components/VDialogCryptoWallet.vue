@@ -71,5 +71,6 @@ watch(() => props.transactionType, (newVal: EvmTransactionTypes) => {
 <style lang="scss">
 .v-dialog-wallet-add-transaction {
   width: 100%;
+  max-width: 800px;
 }
 </style>
