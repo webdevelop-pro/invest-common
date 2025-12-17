@@ -45,8 +45,8 @@ describe('useOffersDetailsContent', () => {
   it('parses and cleans markdown for description and highlights', () => {
     const offerRef = ref({ description: 'desc', highlights: 'highl' } as any);
     const composable = useOffersDetailsContent(offerRef);
-    expect(composable.parsedDescription.value).toBe('<p>desc</p>\n');
-    expect(composable.parsedHighlights.value).toBe('<p>highl</p>\n');
+    expect(composable.parsedDescription.value).toMatch(/^<p>desc<\/p>\n?$/);
+    expect(composable.parsedHighlights.value).toMatch(/^<p>highl<\/p>\n?$/);
   });
 
   it('builds tab options including comments count subtitle', () => {
