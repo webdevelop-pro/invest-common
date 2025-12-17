@@ -43,6 +43,7 @@ const {
   isBtnDisabled,
   onValidate,
   scrollToError,
+  isDirty,
 } = useInvestSignatureForm(props);
 
 const handleDocument = () => {
@@ -64,6 +65,7 @@ defineExpose({
   onValidate,
   scrollToError,
   isBtnDisabled,
+  isDirty,
   // Signature-specific contract
   canContinue,
   state,

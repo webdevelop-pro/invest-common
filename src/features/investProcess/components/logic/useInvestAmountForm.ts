@@ -1,6 +1,7 @@
 import { computed, watch } from 'vue';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
+import { useForm } from 'UiKit/composables/useForm';
 import { numberFormatter } from 'InvestCommon/helpers/numberFormatter';
 import { currency } from 'InvestCommon/helpers/currency';
 
@@ -11,8 +12,8 @@ export type FormModelInvestAmount = {
 export interface UseInvestAmountFormProps {
   modelValue?: any;
   errorData?: any;
-  data: any;
-  backendSchema: any;
+  data?: any;
+  backendSchema?: any;
   isLoading: boolean;
 }
 
@@ -24,13 +25,14 @@ export function useInvestAmountForm(
   props: UseInvestAmountFormProps,
   emit: UseInvestAmountFormEmits
 ) {
-
-  const price = computed(() => (props.data?.offer?.price_per_share || 0));
+  // Extract offer data once
+  const offer = computed(() => props.data?.offer || {});
+  const price = computed(() => offer.value.price_per_share || 0);
   const numberOfShares = computed(() => props.data?.number_of_shares);
-  const totalShares = computed(() => props.data?.offer?.total_shares || 1000);
-  const subscribedShares = computed(() => props.data?.offer?.subscribed_shares || 10);
-  const maxInvestment = computed(() => (totalShares.value - subscribedShares.value));
-  const minInvestment = computed(() => (props.data?.offer?.min_investment || 10));
+  const totalShares = computed(() => offer.value.total_shares || 1000);
+  const subscribedShares = computed(() => offer.value.subscribed_shares || 10);
+  const maxInvestment = computed(() => totalShares.value - subscribedShares.value);
+  const minInvestment = computed(() => offer.value.min_investment || 10);
 
   // Dynamic schema with computed validation rules
   const schemaFrontend = computed(() => ({
@@ -40,11 +42,11 @@ export function useInvestAmountForm(
         properties: {
           number_of_shares: {
             type: 'number',
-            minimum: minInvestment.value || 0,
-            maximum: maxInvestment.value || 1000,
+            minimum: minInvestment.value,
+            maximum: maxInvestment.value,
             errorMessage: {
-              minimum: `${minInvestment.value || 0} share(s) is minimum`,
-              maximum: `${maxInvestment.value || 1000} share(s) is maximum`,
+              minimum: `${minInvestment.value} share(s) is minimum`,
+              maximum: `${maxInvestment.value} share(s) is maximum`,
             },
           },
         },
@@ -78,43 +80,35 @@ export function useInvestAmountForm(
 
   // Amount calculations
   const sharesAmount = computed(() => numberFormatter(model.number_of_shares || 0));
-  const investmentAmount = computed(() => sharesAmount.value * (price.value || 0));
-  const investmentAmountShow = computed(() => (
+  const investmentAmount = computed(() => sharesAmount.value * price.value);
+  const investmentAmountShow = computed(() => 
     investmentAmount.value > 0 ? currency(+investmentAmount.value.toFixed(2)) : undefined
-  ));
+  );
   const isLeftLessThanMin = computed(() => {
-    const min = minInvestment.value || 0;
-    const max = maxInvestment.value || 1000;
-    return (
-      (max - sharesAmount.value) < min &&
-      sharesAmount.value < max &&
-      sharesAmount.value > min
-    );
+    const remaining = maxInvestment.value - sharesAmount.value;
+    return remaining < minInvestment.value && 
+           sharesAmount.value < maxInvestment.value && 
+           sharesAmount.value > minInvestment.value;
   });
 
   const isBtnDisabled = computed(() => !isValid.value || isLeftLessThanMin.value);
 
+  // Track form dirty state
+  const { isDirty } = useForm<FormModelInvestAmount>({
+    initialValues: computed(() => ({ number_of_shares: numberOfShares.value || 0 })),
+    currentValues: model,
+  });
+
   // Emit form updates
-  const emitFormUpdate = () => {
-    emit('update:modelValue', {
-      number_of_shares: model.number_of_shares,
-    });
-  };
+  watch(model, () => {
+    emit('update:modelValue', { number_of_shares: model.number_of_shares });
+  }, { deep: true });
 
-  // Watch for validation and model changes
-  watch(model, emitFormUpdate, { deep: true });
-
-  // Watch for external model value changes
-  watch(() => props.modelValue, (newValue) => {
-    if (newValue?.number_of_shares !== undefined && newValue.number_of_shares !== model.number_of_shares) {
-      model.number_of_shares = newValue.number_of_shares;
-    }
-  }, { immediate: true });
-
-  // Watch for number of shares changes from offer data
-  watch(() => numberOfShares.value, () => {
-    if (numberOfShares.value) {
-      model.number_of_shares = numberOfShares.value;
+  // Sync model with external changes (modelValue prop or backend data)
+  watch([() => props.modelValue?.number_of_shares, numberOfShares], ([modelValue, backendValue]) => {
+    const newValue = modelValue ?? backendValue;
+    if (newValue !== undefined && newValue !== model.number_of_shares) {
+      model.number_of_shares = newValue;
     }
   }, { immediate: true });
 
@@ -129,16 +123,15 @@ export function useInvestAmountForm(
     investmentAmountShow,
     isLeftLessThanMin,
     isBtnDisabled,
-    // computed
     maxInvestment,
     minInvestment,
-    // Form validation helpers
     formErrors,
     isFieldRequired,
     getErrorText,
     getOptions,
     getReferenceType,
     scrollToError,
+    isDirty,
   };
 }
 

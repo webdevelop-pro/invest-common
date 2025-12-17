@@ -1,4 +1,5 @@
 import { computed, ref } from 'vue';
+import { useForm } from 'UiKit/composables/useForm';
 
 export interface UseInvestSignatureFormProps {
   signId?: string | number | null;
@@ -31,6 +32,12 @@ export function useInvestSignatureForm(
   const onValidate = () => {};
   const scrollToError = () => {};
 
+  // Track dirty state relative to initial unchecked state
+  const { isDirty } = useForm<{ checkbox1: boolean; checkbox2: boolean }>({
+    initialValues: { checkbox1: false, checkbox2: false },
+    currentValues: state,
+  });
+
   return {
     // Form state
     state,
@@ -44,5 +51,8 @@ export function useInvestSignatureForm(
     // Validation interface
     onValidate,
     scrollToError,
+
+    // Dirty state
+    isDirty,
   };
 }

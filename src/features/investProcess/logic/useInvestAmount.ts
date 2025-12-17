@@ -4,7 +4,11 @@ import {
 import { useRouter, useRoute } from 'vue-router';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
-import { ROUTE_INVEST_SIGNATURE } from 'InvestCommon/domain/config/enums/routes';
+import {
+  ROUTE_INVEST_AMOUNT,
+  ROUTE_INVEST_REVIEW,
+  ROUTE_INVEST_SIGNATURE,
+} from 'InvestCommon/domain/config/enums/routes';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
 import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository';
@@ -20,6 +24,8 @@ export type formRef = {
   scrollToError: (selector: string) => void;
   isBtnDisabled: boolean;
   model: any;
+  isDirty?: boolean;
+  componentData?: any;
 };
 
 export function useInvestAmount() {
@@ -135,34 +141,85 @@ export function useInvestAmount() {
     return fundingPayload;
   });
 
-  // Continue handler
-  const handleContinue = async () => {
-    if (!amountFormRef.value || !ownershipFormRef.value || !fundingFormRef.value) return;
-    
+  const isAnyFormDirty = computed(() => (
+    Boolean(
+      amountFormRef.value?.isDirty
+      || ownershipFormRef.value?.isDirty
+      || fundingFormRef.value?.isDirty,
+    )
+  ));
+
+  const navigateToBackendStepIfNeeded = () => {
+    const backendStepName = getInvestUnconfirmedOne.value?.step as string | undefined;
+    const currentStepName = 'amount';
+
+    if (!backendStepName || backendStepName === currentStepName) return false;
+
+    const normalizedStepName = backendStepName.toLowerCase();
+    const stepToRouteName: Record<string, string> = {
+      amount: ROUTE_INVEST_AMOUNT,
+      signature: ROUTE_INVEST_SIGNATURE,
+      review: ROUTE_INVEST_REVIEW,
+    };
+
+    const targetRouteName = stepToRouteName[normalizedStepName];
+    if (!targetRouteName) return false;
+
+    router.push({
+      name: targetRouteName,
+      params: {
+        ...route.params,
+      },
+    });
+
+    return true;
+  };
+
+  const validateAllForms = async () => {
+    if (!amountFormRef.value || !ownershipFormRef.value || !fundingFormRef.value) return false;
+
     amountFormRef.value.onValidate();
     ownershipFormRef.value.onValidate();
     fundingFormRef.value.onValidate();
+
+    await nextTick();
+
     if (!amountFormRef.value.isValid) {
       nextTick(() => amountFormRef.value?.scrollToError('FormInvestAmount'));
-      return;
+      return false;
     }
     if (!ownershipFormRef.value.isValid) {
       nextTick(() => ownershipFormRef.value?.scrollToError('VFormInvestOwnership'));
-      return;
+      return false;
     }
 
     if (!fundingFormRef.value.isValid) {
       nextTick(() => fundingFormRef.value?.scrollToError('InvestFormFunding'));
-      return;
+      return false;
     }
 
+    return true;
+  };
+
+  const buildAmountPayload = () => ({
+    number_of_shares: amountFormRef.value?.model.number_of_shares,
+    profile_id: ownershipFormRef.value?.model.profile_id,
+    ...fundingPayload.value,
+  });
+
+  // Continue handler
+  const handleContinue = async () => {
+    const isValid = await validateAllForms();
+    if (!isValid) return;
+
+    // If nothing was changed on any of the subforms, respect backend step without saving
+    if (!isAnyFormDirty.value) {
+      const redirected = navigateToBackendStepIfNeeded();
+      if (redirected) return;
+    }
 
     const { slug, id, profileId } = route.params;
-    const dataToSend = {
-      number_of_shares: amountFormRef.value?.model.number_of_shares,
-      profile_id: ownershipFormRef.value?.model.profile_id,
-      ...fundingPayload.value,
-    }
+    const dataToSend = buildAmountPayload();
     await investmentRepository.setAmount(
       slug as string,
       id as string,

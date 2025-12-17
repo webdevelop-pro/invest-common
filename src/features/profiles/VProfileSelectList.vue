@@ -57,10 +57,11 @@ const onUpdate = (value: string) => {
                 {{ (slotProps.item as any).text }}
               </span>
               <span
-                v-if="(slotProps.item as any).kycStatus"
+                v-if="(slotProps.item as any).kycStatusLabel"
                 class="v-profile-select-list__option-status is--small"
+                :class="(slotProps.item as any).kycStatusClass"
               >
-                {{ (slotProps.item as any).kycStatus }}
+                {{ (slotProps.item as any).kycStatusLabel }}
               </span>
             </div>
             <div

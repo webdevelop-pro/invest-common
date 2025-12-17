@@ -1,9 +1,10 @@
-import { nextTick, watch } from 'vue';
+import { nextTick, watch, computed } from 'vue';
 import {
   accountHolderNameRule, accountNumberRule, accountTypeRule, errorMessageRule, routingNumbeRuler,
 } from 'UiKit/helpers/validation/rules';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
+import { useForm } from 'UiKit/composables/useForm';
 
 export const ACCOUNT_TYPES = [
   { value: 'checking', text: 'Checking' },
@@ -104,6 +105,23 @@ export function useInvestFundingAch(
     }
   }, { immediate: true, deep: true });
 
+  // Track dirty state relative to initial payment data
+  const initialValues = computed<FormModelInvestmentFundingAch>(() => {
+    const paymentData = props.paymentData || {};
+    return {
+      accountHolderName: paymentData.account_holder_name || '',
+      accountType: paymentData.account_type || '',
+      accountNumber: paymentData.account_number || '',
+      routingNumber: paymentData.routing_number || '',
+      authorizeDebit: false,
+    };
+  });
+
+  const { isDirty } = useForm<FormModelInvestmentFundingAch>({
+    initialValues,
+    currentValues: model,
+  });
+
   return {
     model,
     validation,
@@ -118,5 +136,8 @@ export function useInvestFundingAch(
     getOptions,
     getReferenceType,
     scrollToError,
+
+    // Dirty state
+    isDirty,
   };
 }

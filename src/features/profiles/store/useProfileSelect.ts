@@ -9,7 +9,8 @@ import { InvestKycTypes } from 'InvestCommon/types/api/invest';
 interface ISelectedProfile {
   text: string;
   id: number | string;
-  kycStatus?: string;
+  kycStatusLabel?: string;
+  kycStatusClass?: string;
   disabled?: boolean;
   disabledMessage?: string;
 }
@@ -51,17 +52,14 @@ export const useProfileSelectStore = (options?: IUseProfileSelectOptions) => {
   const getKycStatusLabel = (profile: any) => {
     switch (profile.kyc_status) {
       case InvestKycTypes.approved:
-        return 'KYC: Approved';
+        return 'Can Invest';
       case InvestKycTypes.pending:
       case InvestKycTypes.in_progress:
-        return 'KYC: In Progress';
       case InvestKycTypes.declined:
-        return 'KYC: Declined';
       case InvestKycTypes.new:
       case InvestKycTypes.none:
-        return 'KYC: None';
       default:
-        return '';
+        return 'Cannot Invest';
     }
   };
 
@@ -70,12 +68,13 @@ export const useProfileSelectStore = (options?: IUseProfileSelectOptions) => {
 
     userProfiles.value?.forEach((item) => {
       const text = `${getId(item)}: ${getName(item)} Investment Profile`;
-      const isDisabled = options?.hideDisabled && (item.kyc_status !== InvestKycTypes.approved);
+      const isDisabled = options?.hideDisabled && !item.isKycApproved;
 
       userProfilesList.push({
         text: text.charAt(0).toUpperCase() + text.slice(1),
         id: `${item.id}`,
-        kycStatus: getKycStatusLabel(item),
+        kycStatusLabel: getKycStatusLabel(item),
+        kycStatusClass: item.isKycApproved ? 'is--color-secondary' : 'is--color-red',
         // Do not pass `disabled` to keep v-select-item[data-disabled] unused when using slot.
         disabledMessage: isDisabled ? 'Identity verification is needed.' : undefined,
         disabled: isDisabled,

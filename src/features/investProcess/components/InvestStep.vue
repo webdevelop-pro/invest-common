@@ -52,7 +52,7 @@ const emit = defineEmits<{
   (e: 'footerPrimary'): void;
 }>();
 
-const { currentTab, steps } = useInvestStep(props);
+const { currentTab, steps, maxAvailableStep } = useInvestStep(props);
 
 const hasFooter = computed(() => {
   const footer = props.footer;
@@ -74,6 +74,7 @@ const hasFooter = computed(() => {
           v-model="currentTab"
           :steps="steps"
           :default-value="currentTab"
+          :max-available-step="maxAvailableStep"
           class="invest-step__step"
         />
       </aside>

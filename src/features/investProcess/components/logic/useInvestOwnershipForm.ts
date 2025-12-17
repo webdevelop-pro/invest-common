@@ -1,6 +1,7 @@
 import { computed, watch } from 'vue';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
+import { useForm } from 'UiKit/composables/useForm';
 
 export type FormModelInvestOwnership = {
   profile_id: number;
@@ -87,6 +88,14 @@ export function useInvesOwnershipForm(
     }
   }, { immediate: true });
 
+  // Track dirty state based on backend profile_id
+  const { isDirty } = useForm<FormModelInvestOwnership>({
+    initialValues: computed(() => ({
+      profile_id: props.data?.profile_id as number | undefined,
+    })),
+    currentValues: model,
+  });
+
   return {
     model,
     validation,
@@ -101,6 +110,9 @@ export function useInvesOwnershipForm(
     getOptions,
     getReferenceType,
     scrollToError,
+
+    // Dirty state
+    isDirty,
   };
 }
 

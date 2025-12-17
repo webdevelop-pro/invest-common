@@ -30,6 +30,7 @@ const {
   isValid,
   isBtnDisabled,
   onValidate,
+  isDirty,
 } = useInvesOwnershipForm(props, emit);
 
 // Expose validation state to parent component
@@ -39,6 +40,7 @@ defineExpose({
   // button depends only on ownership validity here
   isBtnDisabled,
   model,
+  isDirty,
 });
 </script>
 

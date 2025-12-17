@@ -34,14 +34,16 @@ const {
   onValidate,
   isFieldRequired,
   getErrorText,
-  scrollToError
+  scrollToError,
+  isDirty,
 } = useInvestFundingAch(props, emit);
 
 // Expose validation state to parent component
 defineExpose({
   isValid,
   onValidate,
-  scrollToError
+  scrollToError,
+  isDirty,
 });
 </script>
 

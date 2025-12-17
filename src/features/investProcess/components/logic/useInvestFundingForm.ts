@@ -2,6 +2,7 @@ import {
   ref, computed, watch, Ref,
 } from 'vue';
 import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
+import { useForm } from 'UiKit/composables/useForm';
 import { FundingTypes } from 'InvestCommon/helpers/enums/general';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
@@ -242,6 +243,14 @@ export function useInvestFundingForm(
     }, { deep: true });
   }
 
+  // Track dirty state for the main funding_type form field
+  const { isDirty } = useForm<FormModelInvestmentFunding>({
+    initialValues: computed(() => ({
+      funding_type: props.data?.funding_type as FundingTypes | undefined,
+    })),
+    currentValues: model,
+  });
+
   return {
     // Form state
     model,
@@ -274,5 +283,8 @@ export function useInvestFundingForm(
     getErrorText,
     getOptions,
     getReferenceType,
+
+    // Dirty state
+    isDirty,
   };
 }

@@ -39,6 +39,7 @@ const {
   scrollToError,
   investmentAmount,
   isBtnDisabled,
+  isDirty,
 } = useInvestAmountForm(props, emit);
 
 
@@ -50,6 +51,7 @@ defineExpose({
   isBtnDisabled,
   model,
   investmentAmount,
+  isDirty,
 });
 </script>
 

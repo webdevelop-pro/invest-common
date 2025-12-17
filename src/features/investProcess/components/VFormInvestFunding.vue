@@ -55,6 +55,7 @@ const {
   currentProps,
   componentData,
   isFieldRequired,
+  isDirty,
 } = useInvestFundingForm(props, emit, dynamicFormRef);
 
 // Expose validation state to parent component
@@ -65,6 +66,7 @@ defineExpose({
   isBtnDisabled,
   componentData,
   model,
+  isDirty,
 });
 </script>
 

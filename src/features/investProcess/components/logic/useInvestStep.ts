@@ -6,8 +6,7 @@ import { storeToRefs } from 'pinia';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { InvestStepTypes } from 'InvestCommon/types/api/invest';
 import {
-  ROUTE_INVEST_AMOUNT, ROUTE_INVEST_FUNDING, ROUTE_INVEST_OWNERSHIP, ROUTE_INVEST_REVIEW,
-  ROUTE_INVEST_SIGNATURE,
+  ROUTE_INVEST_AMOUNT, ROUTE_INVEST_REVIEW, ROUTE_INVEST_SIGNATURE,
 } from 'InvestCommon/domain/config/enums/routes';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
 
@@ -25,23 +24,11 @@ const INVEST_STEPS_CONFIG = {
     value: InvestStepTypes.amount,
     to: { name: ROUTE_INVEST_AMOUNT },
   },
-  [InvestStepTypes.ownership]: {
-    step: 2,
-    description: 'Ownership',
-    value: InvestStepTypes.ownership,
-    to: { name: ROUTE_INVEST_OWNERSHIP },
-  },
   [InvestStepTypes.signature]: {
     step: 2,
     description: 'Signature',
     value: InvestStepTypes.signature,
     to: { name: ROUTE_INVEST_SIGNATURE },
-  },
-  [InvestStepTypes.funding]: {
-    step: 4,
-    description: 'Funding',
-    value: InvestStepTypes.funding,
-    to: { name: ROUTE_INVEST_FUNDING },
   },
   [InvestStepTypes.review]: {
     step: 3,
@@ -64,6 +51,7 @@ export function useInvestStep(props: Props) {
   const sessionStore = useSessionStore();
   const { userLoggedIn } = storeToRefs(sessionStore);
   const investmentRepository = useRepositoryInvestment();
+  const { getInvestUnconfirmedOne } = storeToRefs(investmentRepository);
 
   // Extract route params once with better type safety
   const routeParams = computed(() => {
@@ -76,6 +64,14 @@ export function useInvestStep(props: Props) {
   });
 
   const currentTab = ref(props.stepNumber);
+
+  const maxAvailableStep = computed(() => {
+    const backendStep = getInvestUnconfirmedOne.value?.step as InvestStepTypes | undefined;
+    if (!backendStep) return props.stepNumber;
+
+    const config = INVEST_STEPS_CONFIG[backendStep];
+    return config?.step ?? props.stepNumber;
+  });
 
   // Optimized watch with better error handling
   watch(
@@ -114,5 +110,6 @@ export function useInvestStep(props: Props) {
     currentTab,
     steps,
     routeParams,
+    maxAvailableStep,
   };
 } 

@@ -126,6 +126,30 @@ describe('useInvestReview (logic)', () => {
       httpRequestMethod: 'POST',
       service_name: 'vue3-app',
       request_path: mockRoute.path,
+      status_code: 200,
+    });
+  });
+
+  it('confirmInvest sends analytics error event when repository.setReview throws', async () => {
+    const composable = useInvestReview();
+
+    (mockInvestmentRepository.setReview as any).mockRejectedValueOnce(new Error('Network error'));
+
+    await composable.confirmInvest();
+
+    expect(mockInvestmentRepository.setReview).toHaveBeenCalledWith(
+      'test-slug',
+      'test-id',
+      'test-profile-id',
+    );
+
+    expect(mockSendEvent).toHaveBeenCalledWith({
+      event_type: 'send',
+      method: 'POST',
+      httpRequestMethod: 'POST',
+      service_name: 'vue3-app',
+      request_path: mockRoute.path,
+      status_code: 400,
     });
   });
 
