@@ -30,6 +30,7 @@ defineOptions({ name: 'PWAFooterMenu' });
 
 const props = defineProps<{
   currentPath?: string
+  currentLayout?: string
   withBase?: (to: string) => string
   baseUrl?: string
 }>();
@@ -46,6 +47,10 @@ function defaultWithBase(to: string): string {
 
 const withBaseUniversal = (to: string) => (props.withBase ? props.withBase(to) : defaultWithBase(to));
 
+const layoutActiveFallbackMap: Record<string, string[]> = {
+  'offer-single': [urlOffers],
+};
+
 function isActive(to: string): boolean {
 
   const target = withBaseUniversal(to);
@@ -56,7 +61,17 @@ function isActive(to: string): boolean {
   const targetPath = new URL(target, origin).pathname;
 
   const p = (currentPath.value || '/').split('#')[0].split('?')[0];
-  return p === targetPath || p.startsWith(`${targetPath}/`);
+
+  if (p === targetPath || p.startsWith(`${targetPath}/`)) {
+    return true;
+  }
+
+  const layout = props.currentLayout;
+  if (!layout) return false;
+
+  const layoutFallbackTargets = layoutActiveFallbackMap[layout];
+
+  return layoutFallbackTargets?.includes(to) ?? false;
 
 }
 

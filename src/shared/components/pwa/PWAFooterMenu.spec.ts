@@ -123,6 +123,11 @@ function pwafMenuTests() {
     const offers = wrapper.findAll('a.pwamenu__link').find(a => a.attributes('href') === '/offers')!
     expect(offers.classes()).toContain('is-active')
   })
+  it('uses layout fallback when URL does not share the section path', () => {
+    const wrapper = mountMenu({ currentPath: '/deal-1', currentLayout: 'offer-single' })
+    const offers = wrapper.findAll('a.pwamenu__link').find(a => a.attributes('href') === '/offers')!
+    expect(offers.classes()).toContain('is-active')
+  })
 
   it('uses withBase only for active detection (href remains raw)', () => {
     const withBase = (to: string) => `/base${to}`
