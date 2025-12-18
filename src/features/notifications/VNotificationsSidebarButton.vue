@@ -97,7 +97,7 @@ onBeforeMount(() => {
   &__label {
     display: none;
 
-    @media screen and (max-width: $desktop-md) {
+    @media screen and (width < $desktop-md) {
       display: inline-flex;
       align-items: center;
     }

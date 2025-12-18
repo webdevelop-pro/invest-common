@@ -100,7 +100,7 @@ const imageID = computed(() => getUserState.value.data?.image_link_id);
   gap: 28px;
   z-index: 0;
 
-  @media screen and (max-width: $tablet){
+  @media screen and (width < $tablet){
     flex-direction: column;
   }
 
