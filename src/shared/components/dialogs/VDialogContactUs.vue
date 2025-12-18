@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { onUnmounted, watch } from 'vue';
 import ContactUsForm from 'UiKit/components/VForms/VFormContactUs.vue';
 import {
   VDialogContent, VDialogHeader, VDialogTitle, VDialog,
@@ -15,6 +16,25 @@ defineProps({
 
 const sessionStore = useSessionStore();
 const { userSessionTraits } = storeToRefs(sessionStore);
+
+const clearContactUsQueryParams = () => {
+  if (typeof window === 'undefined') return;
+  const url = new URL(window.location.href);
+  ['name', 'email', 'subject'].forEach((key) => {
+    url.searchParams.delete(key);
+  });
+  window.history.replaceState(null, '', url.toString());
+};
+
+watch(open, (isOpen) => {
+  if (!isOpen) {
+    clearContactUsQueryParams();
+  }
+});
+
+onUnmounted(() => {
+  clearContactUsQueryParams();
+});
 </script>
 
 <template>
