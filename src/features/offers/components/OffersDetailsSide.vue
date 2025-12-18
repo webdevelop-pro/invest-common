@@ -68,7 +68,7 @@ const { readOnlyInfo, investmentDocUrl, onShareClick, copied } = useOffersDetail
           :key="index"
         >
           <div
-            v-if="item.text"
+            v-if="item.text && item.show !== false"
             class="offer-details-side__side-details-info"
           >
             <span class="offer-details-side__side-details-label is--h6__title">

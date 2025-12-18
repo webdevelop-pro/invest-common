@@ -41,12 +41,12 @@ export class OfferFormatter {
     return currency(this.offer.amount_raised);
   }
 
-  get pricePerShareFormatted() {
-    return currency(this.offer.price_per_share);
+  get targetRaiseFormatted() {
+    return this.offer.target_raise ? currency(this.offer.target_raise) : '-';
   }
 
-  get valuationFormatted() {
-    return this.offer.valuation ? currency(this.offer.valuation) : '-';
+  get pricePerShareFormatted() {
+    return currency(this.offer.price_per_share);
   }
 
   get securityTypeFormatted() {
@@ -84,7 +84,15 @@ export class OfferFormatter {
     if (this.isSecurityTypeDebt || this.isSecurityTypeConvertibleNote) {
       return 'Funding Goal:';
     }
-    return 'Pre-Money Valuation:';
+    return 'Target Raise:';
+  }
+
+  get valuationFormatted() {
+    return this.offer.valuation ? currency(this.offer.valuation) : '-';
+  }
+
+  get preMoneyValuationFormatted() {
+    return this.offer.security_info?.pre_money_valuation ? currency(this.offer.security_info?.pre_money_valuation) : this.offer.security_info?.pre_money_valuation;
   }
 
   get approvedAtFormatted(): string {
@@ -379,6 +387,7 @@ export class OfferFormatter {
       title: '',
       total_shares: 0,
       valuation: 0,
+      target_raise: 0,
       additional_details: '',
       website: '',
       security_type: '',
@@ -411,6 +420,7 @@ export class OfferFormatter {
         debt_interest_rate: '',
         debt_term_length: '',
         debt_term_unit: '',
+        pre_money_valuation: 0,
       },
       linkedin: '',
       facebook: '',
@@ -426,8 +436,10 @@ export class OfferFormatter {
     return {
       ...this.offer,
       amountRaisedFormatted: this.amountRaisedFormatted,
+      targetRaiseFormatted: this.targetRaiseFormatted,
       pricePerShareFormatted: this.pricePerShareFormatted,
       valuationFormatted: this.valuationFormatted,
+      preMoneyValuationFormatted: this.preMoneyValuationFormatted,
       securityTypeFormatted: this.securityTypeFormatted,
       securityTypeTooltip: this.securityTypeTooltip,
       statusFormatted: this.statusFormatted,

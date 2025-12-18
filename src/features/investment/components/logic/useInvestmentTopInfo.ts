@@ -25,6 +25,7 @@ export function useInvestmentTopInfo(props: UseInvestmentTopInfoProps) {
 
   const userName = computed(() => `${props.profileData?.data?.first_name} ${props.profileData?.data?.last_name}`);
   const profileType = computed(() => props.profileData?.type || '');
+  const targetRaiseText = computed(() => (getInvestOneData.value?.offer?.isSecurityTypeDebt || getInvestOneData.value?.offer?.isSecurityTypeConvertibleDebt || getInvestOneData.value?.offer?.isSecurityTypeConvertibleNote) ? 'Funding Goal:' : 'Target Raise:');
 
   const infoData = computed(() => ([
     {
@@ -45,8 +46,8 @@ export function useInvestmentTopInfo(props: UseInvestmentTopInfoProps) {
       value: getInvestOneData.value?.offer?.securityTypeFormatted,
     },
     {
-      text: 'Valuation:',
-      value: getInvestOneData.value?.offer?.valuationFormatted,
+      text: targetRaiseText.value,
+      value: getInvestOneData.value?.offer?.targetRaiseFormatted,
     },
     {
       text: 'Close Date:',

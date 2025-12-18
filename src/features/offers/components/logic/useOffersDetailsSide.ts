@@ -10,6 +10,7 @@ export interface ReadOnlyInfoItem {
   text?: string;
   value?: string;
   tooltip?: string;
+  show?: boolean;
 }
 
 
@@ -28,8 +29,23 @@ export function useOffersDetailsSide(offerRef: Ref<IOfferFormatted | undefined>)
       text: offerRef.value?.pricePerShareFormatted,
     },
     {
-      title: offerRef.value?.valuationLabel,
-      text: offerRef.value?.valuationFormatted,
+      title: 'Funding Goal:',
+      text: offerRef.value?.targetRaiseFormatted,
+      show: !!(offerRef.value?.targetRaiseFormatted
+        && (offerRef.value?.isSecurityTypeDebt || offerRef.value?.isSecurityTypeConvertibleDebt
+        || offerRef.value?.isSecurityTypeConvertibleNote)),
+    },
+    {
+      title: 'Target Raise:',
+      text: offerRef.value?.targetRaiseFormatted,
+      show: !!(offerRef.value?.targetRaiseFormatted
+        && (offerRef.value?.isSecurityTypeEquity || offerRef.value?.isSecurityTypePreferredEquity)),
+    },
+    {
+      title: 'Pre-money Valuation:',
+      text: offerRef.value?.preMoneyValuationFormatted,
+      show: !!(offerRef.value?.preMoneyValuationFormatted
+        && (offerRef.value?.isSecurityTypeEquity || offerRef.value?.isSecurityTypePreferredEquity)),
     },
     {
       title: 'Security Type:',

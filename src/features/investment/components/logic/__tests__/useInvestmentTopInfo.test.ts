@@ -23,8 +23,11 @@ const mockGetInvestOneState = ref({
     isFundingTypeWire: true,
     offer: {
       securityTypeFormatted: 'Equity',
-      valuationFormatted: '$5,000,000',
+      targetRaiseFormatted: '$1,000,000',
       closeAtFormatted: '2024-12-31',
+      isSecurityTypeEquity: true,
+      isSecurityTypeDebt: false,
+      isSecurityTypeConvertibleNote: false,
     },
   } as any,
   loading: false,
@@ -59,6 +62,27 @@ describe('useInvestmentTopInfo', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+
+    // Reset mock state to default
+    mockGetInvestOneState.value = {
+      data: {
+        id: 123,
+        createdAtFormatted: '2024-01-15',
+        fundingTypeFormatted: 'Wire Transfer',
+        isFundingClickable: true,
+        isFundingTypeWire: true,
+        offer: {
+          securityTypeFormatted: 'Equity',
+          targetRaiseFormatted: '$1,000,000',
+          closeAtFormatted: '2024-12-31',
+          isSecurityTypeEquity: true,
+          isSecurityTypeDebt: false,
+          isSecurityTypeConvertibleNote: false,
+        },
+      } as any,
+      loading: false,
+      error: null,
+    };
 
     props = {
       investmentId: '123',
@@ -97,8 +121,8 @@ describe('useInvestmentTopInfo', () => {
             value: 'Equity',
           },
           {
-            text: 'Valuation:',
-            value: '$5,000,000',
+            text: 'Target Raise:',
+            value: '$1,000,000',
           },
           {
             text: 'Close Date:',
@@ -136,6 +160,66 @@ describe('useInvestmentTopInfo', () => {
         const fundingItem = composableWithNonClickableFunding.infoData.value.find(item => item.text === 'Funding Type:');
         
         expect(fundingItem?.funding).toBe(false);
+      });
+
+      it('should show Target Raise for equity security type', () => {
+        mockGetInvestOneState.value.data = {
+          ...mockGetInvestOneState.value.data,
+          offer: {
+            securityTypeFormatted: 'Equity',
+            targetRaiseFormatted: '$1,000,000',
+            closeAtFormatted: '2024-12-31',
+            isSecurityTypeEquity: true,
+            isSecurityTypeDebt: false,
+            isSecurityTypeConvertibleNote: false,
+          },
+        };
+
+        const composable = useInvestmentTopInfo(props);
+        const targetRaiseItem = composable.infoData.value.find(item => item.text === 'Target Raise:');
+        
+        expect(targetRaiseItem).toBeDefined();
+        expect(targetRaiseItem?.value).toBe('$1,000,000');
+      });
+
+      it('should show Funding Goal for debt security type', () => {
+        mockGetInvestOneState.value.data = {
+          ...mockGetInvestOneState.value.data,
+          offer: {
+            securityTypeFormatted: 'Debt',
+            targetRaiseFormatted: '$500,000',
+            closeAtFormatted: '2024-12-31',
+            isSecurityTypeEquity: false,
+            isSecurityTypeDebt: true,
+            isSecurityTypeConvertibleNote: false,
+          },
+        };
+
+        const composable = useInvestmentTopInfo(props);
+        const fundingGoalItem = composable.infoData.value.find(item => item.text === 'Funding Goal:');
+        
+        expect(fundingGoalItem).toBeDefined();
+        expect(fundingGoalItem?.value).toBe('$500,000');
+      });
+
+      it('should show Funding Goal for convertible note security type', () => {
+        mockGetInvestOneState.value.data = {
+          ...mockGetInvestOneState.value.data,
+          offer: {
+            securityTypeFormatted: 'Convertible Note',
+            targetRaiseFormatted: '$500,000',
+            closeAtFormatted: '2024-12-31',
+            isSecurityTypeEquity: false,
+            isSecurityTypeDebt: false,
+            isSecurityTypeConvertibleNote: true,
+          },
+        };
+
+        const composable = useInvestmentTopInfo(props);
+        const fundingGoalItem = composable.infoData.value.find(item => item.text === 'Funding Goal:');
+        
+        expect(fundingGoalItem).toBeDefined();
+        expect(fundingGoalItem?.value).toBe('$500,000');
       });
     });
   });

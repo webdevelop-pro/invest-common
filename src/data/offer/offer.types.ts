@@ -82,6 +82,7 @@ export interface ISecurityInfo {
   debt_interest_rate?: string;
   debt_term_length?: string;
   debt_term_unit?: string;
+  pre_money_valuation?: number;
 }
 
 export interface IOffer {
@@ -119,6 +120,7 @@ export interface IOffer {
   telegram?: string;
   mastodon?: string;
   amount_raised: number;
+  target_raise: number;
 }
 
 export interface IOfferData {
@@ -154,8 +156,10 @@ export interface IOfferCommentPayload {
 
 export interface IOfferFormatted extends IOffer {
   amountRaisedFormatted: string;
+  targetRaiseFormatted: string;
   pricePerShareFormatted: string;
   valuationFormatted: string;
+  preMoneyValuationFormatted: string;
   securityTypeFormatted: string;
   securityTypeTooltip: string | undefined;
   statusFormatted: {
