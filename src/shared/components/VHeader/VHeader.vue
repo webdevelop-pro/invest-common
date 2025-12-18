@@ -309,7 +309,7 @@ const signUpHandler = () => {
       flex-shrink: 0;
     }
 
-    @include media-lte(desktop-md) {
+    @media screen and (width < $desktop-md){
       flex-direction: column;
     }
 
