@@ -7,7 +7,7 @@ import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { storeToRefs } from 'pinia';
 import env from 'InvestCommon/domain/config/env';
 
-const open = defineModel<boolean>();
+const open = defineModel<boolean>('open');
 
 defineProps({
   subject: String,

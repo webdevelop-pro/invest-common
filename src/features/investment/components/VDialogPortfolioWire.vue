@@ -15,7 +15,7 @@ const props = defineProps({
   },
   userName: String,
 });
-const open = defineModel<boolean>();
+const open = defineModel<boolean>('open');
 
 const DownloadComp = ref<HTMLElement | null>(null);
 

@@ -25,7 +25,7 @@ const props = defineProps({
   userName: String,
 });
 const emit = defineEmits(['close']);
-const open = defineModel<boolean>();
+const open = defineModel<boolean>('open');
 
 const dialogsStore = useDialogs();
 
