@@ -92,7 +92,9 @@ export class OfferFormatter {
   }
 
   get preMoneyValuationFormatted() {
-    return this.offer.security_info?.pre_money_valuation ? currency(this.offer.security_info?.pre_money_valuation) : this.offer.security_info?.pre_money_valuation;
+    return this.offer.security_info?.pre_money_valuation
+      ? currency(this.offer.security_info?.pre_money_valuation)
+      : this.offer.security_info?.pre_money_valuation;
   }
 
   get approvedAtFormatted(): string {

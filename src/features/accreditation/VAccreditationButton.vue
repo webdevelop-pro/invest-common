@@ -88,6 +88,7 @@ defineProps({
     display: flex;
     align-items: center;
     gap: 12px;
+    padding: 0 12px;
   }
 
   &__button-icon {
