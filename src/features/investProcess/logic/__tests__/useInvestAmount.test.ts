@@ -15,10 +15,15 @@ import { FundingTypes } from 'InvestCommon/helpers/enums/general';
 import { ROUTE_INVEST_SIGNATURE } from 'InvestCommon/domain/config/enums/routes';
 import { useInvestAmount } from '../useInvestAmount';
 
-vi.mock('vue-router', () => ({
-  useRouter: vi.fn(),
-  useRoute: vi.fn(),
-}));
+vi.mock('vue-router', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('vue-router')>();
+  return {
+    ...actual,
+    useRouter: vi.fn(),
+    useRoute: vi.fn(),
+    onBeforeRouteLeave: vi.fn(),
+  };
+});
 
 vi.mock('UiKit/store/useGlobalLoader', () => ({
   useGlobalLoader: vi.fn(),
