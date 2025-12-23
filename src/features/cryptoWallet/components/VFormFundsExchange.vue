@@ -44,7 +44,7 @@ const {
             :required="isFieldRequired('from')"
             :error-text="getErrorText('from', errorData)"
             data-testid="from-token-group"
-            label="From:"
+            label="You sell:"
             class="form-wallet-add-transaction__input"
           >
             <VFormSelect
@@ -106,7 +106,7 @@ const {
             :required="isFieldRequired('to')"
             :error-text="getErrorText('to', errorData)"
             data-testid="to-token-group"
-            label="To:"
+            label="You buy:"
             class="form-wallet-add-transaction__input"
           >
             <VFormSelect

@@ -1,7 +1,7 @@
 import {
   computed, nextTick, onBeforeMount, ref, watch,
 } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
+import { useRouter, useRoute, onBeforeRouteLeave } from 'vue-router';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
 import {
@@ -276,6 +276,12 @@ export function useInvestAmount() {
         evmRepository.getEvmWalletByProfile(selectedUserProfileId.value);
       }
     }
+  });
+
+  // Reset wallet and EVM data when leaving invest process
+  onBeforeRouteLeave(() => {
+    evmRepository.resetAll();
+    walletRepository.resetAll();
   });
 
   return {
