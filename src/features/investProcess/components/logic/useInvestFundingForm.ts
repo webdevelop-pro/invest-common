@@ -28,6 +28,11 @@ export type ComponentData = {
 }
 
 export interface UseInvestFundingFormProps {
+  // Shared step model from parent (ViewInvestAmount)
+  // Currently only number_of_shares is needed here
+  modelValue?: {
+    number_of_shares?: number;
+  };
   errorData?: any;
   schemaBackend?: any;
   data?: any;
@@ -102,8 +107,30 @@ export function useInvestFundingForm(
     (props.walletId || 0) > 0 && !props.getWalletState?.data?.isWalletStatusAnyError
   );
 
+  // Calculate investment amount - prioritize shared modelValue.number_of_shares, then saved data
+  const investmentAmount = computed(() => {
+    const mv = props.modelValue || {};
+    console.log('mv', mv);
+
+    // 1) derive from current shared modelValue.number_of_shares (live form value)
+    if (mv.number_of_shares != null) {
+      const pricePerShare = props.data?.offer?.price_per_share || 0;
+      return mv.number_of_shares * pricePerShare;
+    }
+
+    // 2) saved backend amount (e.g. when returning to an existing investment)
+    if (props.data?.amount != null) {
+      return props.data.amount;
+    }
+
+    // 3) fallback: derive from backend number_of_shares * price_per_share
+    const numberOfShares = props.data?.number_of_shares ?? 0;
+    const pricePerShare = props.data?.offer?.price_per_share || 0;
+    return numberOfShares * pricePerShare;
+  });
+
   const notEnoughWalletFunds = computed(() =>
-    (props.data?.amount || 0) > (props.getWalletState?.data?.totalBalance || 0)
+    investmentAmount.value > (props.getWalletState?.data?.totalBalance || 0)
   );
 
   const hasEvmWallet = computed(() => 
@@ -111,7 +138,7 @@ export function useInvestFundingForm(
   );
 
   const notEnoughEvmWalletFunds = computed(() =>
-    (props.data?.amount || 0) > (props.getEvmWalletState?.data?.fundingBalance || 0)
+    investmentAmount.value > (props.getEvmWalletState?.data?.fundingBalance || 0)
   );
 
   const selectOptions = computed(() => {
@@ -143,6 +170,13 @@ export function useInvestFundingForm(
   });
 
   const selectErrors = computed(() => {
+    // 1) Schema / frontend validation errors (required, enum, etc.)
+    const formValidationError = formErrors.getFieldError('funding_type');
+    if (formValidationError) {
+      return [formValidationError];
+    }
+
+    // 2) Business logic errors for insufficient funds
     if (model.funding_type === FundingTypes.cryptoWallet && notEnoughEvmWalletFunds.value) {
       return ['Crypto wallet does not have enough funds'];
     }
@@ -156,6 +190,7 @@ export function useInvestFundingForm(
       }
     }
     
+    // 3) Backend/API errors for funding_type, if any
     return getErrorText('funding_type', props.errorData);
   });
 
@@ -164,20 +199,39 @@ export function useInvestFundingForm(
     return `${data?.first_name || ''} ${data?.last_name || ''}`.trim();
   });
 
-  // Combined validation that includes ACH form if ACH is selected
+  // Combined validation that includes ACH form and funds checks
   const isValid = computed(() => {
     const mainValid = mainFormIsValid.value;
+    if (!mainValid) return false;
+
+    // Check if there are any select errors (insufficient funds, API errors, etc.)
+    const errors = selectErrors.value;
+    const hasErrors = Array.isArray(errors) 
+      ? errors.some(error => error && String(error).trim() !== '')
+      : errors && String(errors).trim() !== '';
+    
+    if (hasErrors) return false;
+
+    // For ACH, also check the nested ACH form
     if (model.funding_type === FundingTypes.ach && dynamicFormRef?.value) {
-      return mainValid && dynamicFormRef.value.isValid;
+      return dynamicFormRef.value.isValid;
     }
-    return mainValid;
+
+    return true;
   });
 
   // Combined validation function
+  // Ensures validation is synchronous and validates nested ACH form when needed
   const onValidate = () => {
+    // Validate main form first
     onValidateMainForm();
+    
+    // For ACH forms, validate the nested form and immediately update componentData.isInvalid
     if (model.funding_type === FundingTypes.ach && dynamicFormRef?.value) {
       dynamicFormRef.value.onValidate();
+      // Immediately update componentData.isInvalid synchronously
+      const achFormIsValid = dynamicFormRef.value.isValid;
+      componentData.value.isInvalid = !achFormIsValid;
     }
   };
 
@@ -286,5 +340,8 @@ export function useInvestFundingForm(
 
     // Dirty state
     isDirty,
+
+    // Expose for testing and potential consumers
+    investmentAmount,
   };
 }

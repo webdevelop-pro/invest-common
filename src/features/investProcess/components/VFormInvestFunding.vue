@@ -7,6 +7,9 @@ import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import { useInvestFundingForm } from './logic/useInvestFundingForm';
 
 const props = defineProps({
+  modelValue: {
+    type: Object,
+  },
   errorData: {
     type: Object,
   },

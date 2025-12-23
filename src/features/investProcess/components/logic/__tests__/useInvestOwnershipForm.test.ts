@@ -28,7 +28,7 @@ describe('useInvesOwnershipForm', () => {
     const emit = vi.fn();
 
     const props = reactive({
-      modelValue: undefined as any,
+      modelValue: { number_of_shares: 1 } as any,
       errorData: undefined as any,
       data: {
         profile_id: 5,
@@ -48,7 +48,7 @@ describe('useInvesOwnershipForm', () => {
 
     const lastCall = emit.mock.calls.at(-1);
     expect(lastCall?.[0]).toBe('update:modelValue');
-    expect(lastCall?.[1]).toEqual({ profile_id: 7 });
+    expect(lastCall?.[1]).toEqual({ number_of_shares: 1, profile_id: 7 });
   });
 
   it('updates model when external modelValue changes', () => {

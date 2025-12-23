@@ -1,5 +1,5 @@
 import {
-  computed, nextTick, onBeforeMount, ref,
+  computed, nextTick, onBeforeMount, ref, watch,
 } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
@@ -88,49 +88,28 @@ export function useInvestAmount() {
   const isLoading = computed(() => setAmountState.value.loading);
 
   const fundingPayload = computed(() => {
-    // Prepare funding payload
-    let fundingPayload: any = { funding_type: fundingFormRef.value?.model.funding_type };
+    const fundingType = fundingFormRef.value?.model.funding_type;
     const componentData = fundingFormRef.value?.componentData;
 
-    // Additional check for ACH form validity
-    if (
-      fundingFormRef.value?.model.funding_type === FundingTypes.ach &&
-      componentData.isInvalid
-    ) {
-      return;
-    }
+    if (!fundingType) return undefined;
 
-    const paymentData = {
-      account_number: componentData.accountNumber,
-      routing_number: componentData.routingNumber,
-      account_holder_name: componentData.accountHolderName,
-      account_type: componentData.accountType,
-    };
-
-    if (fundingFormRef.value?.model.funding_type === FundingTypes.ach) {
-      fundingPayload = {
-        funding_type: fundingFormRef.value?.model.funding_type,
-        payment_data: paymentData,
+    // ACH funding
+    if (fundingType === FundingTypes.ach) {
+      if (componentData?.isInvalid) return undefined;
+      return {
+        funding_type: FundingTypes.ach,
+        payment_data: {
+          account_number: componentData.accountNumber,
+          routing_number: componentData.routingNumber,
+          account_holder_name: componentData.accountHolderName,
+          account_type: componentData.accountType,
+        },
       };
     }
 
-    if (
-      fundingFormRef.value?.model.funding_type !== FundingTypes.ach
-      && fundingFormRef.value?.model.funding_type !== FundingTypes.wallet
-      && fundingFormRef.value?.model.funding_type !== FundingTypes.wire
-      && fundingFormRef.value?.model.funding_type !== FundingTypes.cryptoWallet
-    ) {
-      fundingPayload = {
-        funding_source_id: Number(fundingFormRef.value?.model.funding_type),
-        funding_type: FundingTypes.wallet,
-      };
-    }
-
-    if (
-      fundingFormRef.value?.model.funding_type !== FundingTypes.ach
-      && fundingFormRef.value?.model.funding_type === FundingTypes.cryptoWallet
-    ) {
-      fundingPayload = {
+    // Crypto wallet funding
+    if (fundingType === FundingTypes.cryptoWallet) {
+      return {
         funding_type: FundingTypes.cryptoWallet,
         payment_data: {
           wallet: getEvmWalletState.value.data?.address || '',
@@ -138,7 +117,19 @@ export function useInvestAmount() {
       };
     }
 
-    return fundingPayload;
+    // Wallet funding (from saved funding source)
+    if (
+      fundingType !== FundingTypes.wallet &&
+      fundingType !== FundingTypes.wire
+    ) {
+      return {
+        funding_source_id: Number(fundingType),
+        funding_type: FundingTypes.wallet,
+      };
+    }
+
+    // Default: wallet or wire
+    return { funding_type: fundingType };
   });
 
   const isAnyFormDirty = computed(() => (
@@ -175,30 +166,59 @@ export function useInvestAmount() {
     return true;
   };
 
-  const validateAllForms = async () => {
+  // React to profile_id changes: reset funding method and reload wallets for the selected profile
+  watch(
+    () => formModel.value.profile_id,
+    (newProfileId, oldProfileId) => {
+      if (!newProfileId || newProfileId === oldProfileId) return;
+
+      // Reset selected funding method when profile changes
+      if (fundingFormRef.value?.model) {
+        fundingFormRef.value.model.funding_type = undefined;
+      }
+
+      // Reload wallet and EVM wallet data for the new profile
+      if (userLoggedIn.value) {
+        if (canLoadWalletData.value) {
+          walletRepository.getWalletByProfile(newProfileId);
+        }
+        if (canLoadEvmWalletData.value) {
+          evmRepository.getEvmWalletByProfile(newProfileId);
+        }
+      }
+    },
+  );
+
+  const validateAllForms = () => {
     if (!amountFormRef.value || !ownershipFormRef.value || !fundingFormRef.value) return false;
 
-    amountFormRef.value.onValidate();
-    ownershipFormRef.value.onValidate();
-    fundingFormRef.value.onValidate();
+    const forms = [
+      { ref: amountFormRef.value, selector: 'FormInvestAmount' },
+      { ref: ownershipFormRef.value, selector: 'VFormInvestOwnership' },
+      { ref: fundingFormRef.value, selector: 'InvestFormFunding' },
+    ];
 
-    await nextTick();
+    // 1) Trigger validation on all forms so every subform updates its errors
+    forms.forEach(({ ref }) => {
+      ref.onValidate();
+    });
 
-    if (!amountFormRef.value.isValid) {
-      nextTick(() => amountFormRef.value?.scrollToError('FormInvestAmount'));
-      return false;
+    // 2) Check validity for each form, remembering the first invalid to scroll to
+    let allValid = true;
+    let firstInvalid: { ref: formRef; selector: string } | null = null;
+
+    for (const entry of forms) {
+      const { ref, selector } = entry;
+      if (!ref.isValid) {
+        allValid = false;
+        if (!firstInvalid) {
+          firstInvalid = entry;
+          nextTick(() => ref.scrollToError(selector));
+        }
+      }
     }
-    if (!ownershipFormRef.value.isValid) {
-      nextTick(() => ownershipFormRef.value?.scrollToError('VFormInvestOwnership'));
-      return false;
-    }
 
-    if (!fundingFormRef.value.isValid) {
-      nextTick(() => fundingFormRef.value?.scrollToError('InvestFormFunding'));
-      return false;
-    }
-
-    return true;
+    return allValid;
   };
 
   const buildAmountPayload = () => ({
@@ -209,7 +229,7 @@ export function useInvestAmount() {
 
   // Continue handler
   const handleContinue = async () => {
-    const isValid = await validateAllForms();
+    const isValid = validateAllForms();
     if (!isValid) return;
 
     // If nothing was changed on any of the subforms, respect backend step without saving

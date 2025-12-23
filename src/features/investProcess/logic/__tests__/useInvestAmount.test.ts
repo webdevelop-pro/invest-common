@@ -2,7 +2,7 @@ import {
   describe, it, expect, vi, beforeEach,
 } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
-import { ref } from 'vue';
+import { ref, nextTick } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
@@ -303,6 +303,39 @@ describe('useInvestAmount (logic)', () => {
         },
       }),
     );
+  });
+
+  it('resets funding method and reloads wallets when profile_id changes', async () => {
+    const composable = useInvestAmount();
+
+    // Set initial funding form state
+    const fundingRef = {
+      isValid: true,
+      isBtnDisabled: false,
+      onValidate: vi.fn(),
+      scrollToError: vi.fn(),
+      model: { funding_type: FundingTypes.wallet },
+      componentData: {
+        isInvalid: false,
+        accountHolderName: '',
+        accountType: '',
+        accountNumber: '',
+        routingNumber: '',
+      },
+    } as any;
+
+    composable.fundingFormRef.value = fundingRef;
+
+    // Change profile_id in shared formModel
+    composable.formModel.value.profile_id = 42;
+    await nextTick();
+
+    // funding_type should be reset
+    expect(fundingRef.model.funding_type).toBeUndefined();
+
+    // Wallet repositories should be called with new profile id
+    expect(mockWalletRepository.getWalletByProfile).toHaveBeenCalledWith(42);
+    expect(mockEvmRepository.getEvmWalletByProfile).toHaveBeenCalledWith(42);
   });
 });
 

@@ -44,6 +44,7 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
       return formatted;
     } catch (err) {
       getWalletState.value.error = err as Error;
+      getWalletState.value.data = undefined;
       toasterErrorHandling(err, 'Failed to fetch wallet');
       throw err;
     } finally {

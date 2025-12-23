@@ -7,13 +7,17 @@ import { useInvestFundingForm } from '../useInvestFundingForm';
 describe('useInvestFundingForm', () => {
   const baseProps = () =>
     reactive({
+      modelValue: {
+        number_of_shares: 10,
+      },
       errorData: {},
       schemaBackend: {},
       data: {
         id: 1,
-        amount: 100,
+        amount: null,
         offer: {
           min_investment: 10,
+          price_per_share: 10,
         },
         payment_data: {},
         funding_type: FundingTypes.ach,
@@ -64,13 +68,32 @@ describe('useInvestFundingForm', () => {
     expect(cryptoOption?.text).toContain('Crypto Wallet');
   });
 
+  it('is invalid and disables button when no funding method is selected', () => {
+    const emit = vi.fn();
+    const props = baseProps();
+
+    // Simulate no initial funding_type selected
+    props.data.funding_type = undefined as any;
+
+    const composable = useInvestFundingForm(props, emit);
+
+    // After validation is triggered without a funding_type, form should be invalid
+    composable.onValidate();
+
+    expect(composable.isValid.value).toBe(false);
+    // Required error from schema should be surfaced via selectErrors
+    expect(composable.selectErrors.value[0]).toBeTruthy();
+    expect(composable.isBtnDisabled.value).toBe(true);
+  });
+
   it('computes selectErrors based on wallet and crypto balances', () => {
     const emit = vi.fn();
     const props = baseProps();
 
     const composable = useInvestFundingForm(props, emit);
 
-    // not enough funds in wallet
+    // not enough funds in wallet: investmentAmount = 10 shares * $10 = 100
+    // so wallet with 50 is insufficient
     props.getWalletState.data.totalBalance = 50;
     composable.model.funding_type = FundingTypes.wallet;
     expect(composable.selectErrors.value[0]).toContain('Wallet does not have enough funds');
@@ -78,6 +101,39 @@ describe('useInvestFundingForm', () => {
     // not enough funds in crypto wallet
     props.getEvmWalletState.data.fundingBalance = 50;
     composable.model.funding_type = FundingTypes.cryptoWallet;
+    expect(composable.selectErrors.value[0]).toContain('Crypto wallet does not have enough funds');
+  });
+
+  it('prioritizes modelValue.number_of_shares over backend amount when computing investmentAmount', () => {
+    const emit = vi.fn();
+    const props = baseProps();
+
+    // backend has amount, but modelValue.number_of_shares should win
+    props.data.amount = 999 as any;
+    const composable = useInvestFundingForm(props, emit);
+
+    // 10 shares * 10 price_per_share = 100
+    expect(composable.investmentAmount.value).toBe(100);
+  });
+
+  it('updates selectErrors when modelValue.number_of_shares changes (crypto wallet)', async () => {
+    const emit = vi.fn();
+    const props = baseProps();
+
+    // crypto wallet has 500 available
+    props.getEvmWalletState.data.fundingBalance = 500;
+    const composable = useInvestFundingForm(props, emit);
+
+    // Start with small investment: 5 shares * 10 = 50 < 500 → no error
+    props.modelValue.number_of_shares = 5;
+    composable.model.funding_type = FundingTypes.cryptoWallet;
+    await nextTick();
+    const initialError = composable.selectErrors.value[0] || '';
+    expect(initialError).not.toContain('Crypto wallet does not have enough funds');
+
+    // Increase shares so amount exceeds fundingBalance: 60 * 10 = 600 > 500 → error
+    props.modelValue.number_of_shares = 60;
+    await nextTick();
     expect(composable.selectErrors.value[0]).toContain('Crypto wallet does not have enough funds');
   });
 

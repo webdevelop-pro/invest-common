@@ -67,12 +67,14 @@ export function useInvesOwnershipForm(
   // Emit form updates
   const emitFormUpdate = () => {
     emit('update:modelValue', {
+      ...(props.modelValue || {}),
       profile_id: model.profile_id,
     });
   };
 
   // Watch for validation and model changes
-  watch(model, emitFormUpdate, { deep: true });
+  // immediate: true ensures initial backend/profile value is pushed into parent modelValue on mount
+  watch(model, emitFormUpdate, { deep: true, immediate: true });
 
   // Watch for external model value changes
   watch(() => props.modelValue, (newValue) => {
