@@ -26,6 +26,7 @@ export const useRepositoryAnalytics = () => {
       return response.data;
     } catch (err) {
       setMessageState.value.error = err as Error;
+      setMessageState.value.data = undefined;
       console.error('Analytics setMessage error:', err);
       throw err;
     } finally {
@@ -43,6 +44,7 @@ export const useRepositoryAnalytics = () => {
       return response.data;
     } catch (err) {
       setEventState.value.error = err as Error;
+      setEventState.value.data = undefined;
       throw err;
     } finally {
       setEventState.value.loading = false;

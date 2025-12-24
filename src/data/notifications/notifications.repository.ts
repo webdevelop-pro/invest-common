@@ -33,6 +33,7 @@ export const useRepositoryNotifications = defineStore('repository-notifications'
       return getAllState.value.data;
     } catch (err) {
       getAllState.value.error = err as Error;
+      getAllState.value.data = undefined;
       toasterErrorHandling(err, 'Failed to fetch notifications');
       throw err;
     } finally {
@@ -52,6 +53,7 @@ export const useRepositoryNotifications = defineStore('repository-notifications'
       markAllAsReadState.value.data = undefined;
     } catch (err) {
       markAllAsReadState.value.error = err as Error;
+      markAllAsReadState.value.data = undefined;
       toasterErrorHandling(err, 'Failed to mark all notifications as read');
       throw err;
     } finally {
@@ -70,6 +72,7 @@ export const useRepositoryNotifications = defineStore('repository-notifications'
       markAsReadByIdState.value.data = undefined;
     } catch (err) {
       markAsReadByIdState.value.error = err as Error;
+      markAsReadByIdState.value.data = undefined;
       toasterErrorHandling(err, 'Failed to mark notification as read');
       throw err;
     } finally {

@@ -51,6 +51,7 @@ export const useRepositoryKyc = defineStore('repository-kyc', () => {
       return response.data;
     } catch (err) {
       tokenState.value.error = err as Error;
+      tokenState.value.data = undefined;
       toasterErrorHandling(err, 'Failed to create KYC token');
       throw err;
     } finally {

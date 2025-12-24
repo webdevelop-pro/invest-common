@@ -50,6 +50,7 @@ export const useRepositoryFiler = defineStore('repository-filer', () => {
       return response.data;
     } catch (err) {
       getFilesState.value.error = err as Error;
+      getFilesState.value.data = undefined;
       toasterErrorHandling(err, 'Failed to fetch files');
       throw err;
     } finally {
@@ -66,6 +67,7 @@ export const useRepositoryFiler = defineStore('repository-filer', () => {
       return response.data;
     } catch (err) {
       getPublicFilesState.value.error = err as Error;
+      getPublicFilesState.value.data = undefined;
       toasterErrorHandling(err, 'Failed to fetch public files');
       throw err;
     } finally {
@@ -88,6 +90,7 @@ export const useRepositoryFiler = defineStore('repository-filer', () => {
       return response.data;
     } catch (err) {
       postSignurlState.value.error = err as Error;
+      postSignurlState.value.data = undefined;
       toasterErrorHandling(err, 'Failed to get signurl');
       throw err;
     } finally {
@@ -104,6 +107,7 @@ export const useRepositoryFiler = defineStore('repository-filer', () => {
       return result;
     } catch (err) {
       uploadFileState.value.error = err as Error;
+      uploadFileState.value.data = undefined;
       toasterErrorHandling(err, 'Failed to upload file');
       throw err;
     } finally {
@@ -123,6 +127,7 @@ export const useRepositoryFiler = defineStore('repository-filer', () => {
       return response.data;
     } catch (err) {
       getFileByIdLinkState.value.error = err as Error;
+      getFileByIdLinkState.value.data = undefined;
       toasterErrorHandling(err, 'Failed to fetch image by id');
       throw err;
     } finally {

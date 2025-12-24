@@ -62,6 +62,7 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
       return response.data.items;
     } catch (err) {
       getTransactionsState.value.error = err as Error;
+      getTransactionsState.value.data = undefined;
       toasterErrorHandling(err, 'Failed to fetch wallet transactions');
       throw err;
     } finally {
@@ -78,6 +79,7 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
       return response.data;
     } catch (err) {
       addBankAccountState.value.error = err as Error;
+      addBankAccountState.value.data = undefined;
       toasterErrorHandling(err, 'Failed to add bank account');
       throw err;
     } finally {
@@ -94,6 +96,7 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
       return response.data;
     } catch (err) {
       addTransactionState.value.error = err as Error;
+      addTransactionState.value.data = undefined;
       toasterErrorHandling(err, 'Failed to add transaction');
       throw err;
     } finally {
@@ -110,6 +113,7 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
       return response.data;
     } catch (err) {
       cancelTransactionState.value.error = err as Error;
+      cancelTransactionState.value.data = undefined;
       toasterErrorHandling(err, 'Failed to cancel transaction');
       throw err;
     } finally {
@@ -126,6 +130,7 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
       return response.data;
     } catch (err) {
       createLinkTokenState.value.error = err as Error;
+      createLinkTokenState.value.data = undefined;
       toasterErrorHandling(err, 'Failed to create link token');
       throw err;
     } finally {
@@ -142,6 +147,7 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
       return response.data;
     } catch (err) {
       createLinkExchangeState.value.error = err as Error;
+      createLinkExchangeState.value.data = undefined;
       toasterErrorHandling(err, 'Failed to exchange link token');
       throw err;
     } finally {
@@ -158,6 +164,7 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
       return response.data;
     } catch (err) {
       createLinkProcessState.value.error = err as Error;
+      createLinkProcessState.value.data = undefined;
       toasterErrorHandling(err, 'Failed to process link token');
       throw err;
     } finally {
@@ -174,6 +181,7 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
       return response.data;
     } catch (err) {
       deleteLinkedAccountState.value.error = err as Error;
+      deleteLinkedAccountState.value.data = undefined;
       toasterErrorHandling(err, 'Failed to delete linked account');
       throw err;
     } finally {

@@ -8,6 +8,7 @@ import { useCookies } from '@vueuse/integrations/useCookies';
 import { useRoute } from 'vue-router';
 import { ref, computed } from 'vue';
 import { useProfilesStore } from '../useProfiles';
+import { resetAllProfileData } from 'InvestCommon/domain/resetAllData';
 
 // Mock dependencies
 vi.mock('vue-router', () => ({
@@ -26,9 +27,16 @@ vi.mock('InvestCommon/data/profiles/profiles.repository', () => ({
   useRepositoryProfiles: vi.fn(),
 }));
 
+vi.mock('InvestCommon/domain/resetAllData', () => ({
+  resetAllProfileData: vi.fn(),
+}));
+
 describe('useProfilesStore', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
+    
+    // Clear all mocks
+    vi.clearAllMocks();
 
     // Mock route
     (useRoute as any).mockReturnValue({
@@ -73,6 +81,7 @@ describe('useProfilesStore', () => {
       getUser: vi.fn(),
       getProfileById: vi.fn(),
       getProfileByIdOptions: vi.fn(),
+      resetProfileData: vi.fn(),
     };
     (useRepositoryProfiles as any).mockReturnValue(mockRepository);
   });
@@ -126,6 +135,7 @@ describe('useProfilesStore', () => {
       getUser: vi.fn(),
       getProfileById: vi.fn(),
       getProfileByIdOptions: vi.fn(),
+      resetProfileData: vi.fn(),
     };
     (useRepositoryProfiles as any).mockReturnValue(mockRepository);
 
@@ -172,6 +182,7 @@ describe('useProfilesStore', () => {
       getUser: vi.fn(),
       getProfileById: vi.fn(),
       getProfileByIdOptions: vi.fn(),
+      resetProfileData: vi.fn(),
     };
     (useRepositoryProfiles as any).mockReturnValue(mockRepository);
 
@@ -183,16 +194,24 @@ describe('useProfilesStore', () => {
     const store = useProfilesStore();
     store.setSelectedUserProfileById(123);
     expect(store.selectedUserProfileId).toBe(123);
+    expect(resetAllProfileData).toHaveBeenCalled();
   });
 
   it('should not set selected user profile if id is 0', () => {
     const store = useProfilesStore();
+    
+    // Clear mocks after store initialization to ignore initialization calls
+    // The watcher may have triggered setSelectedUserProfileById during initialization
+    vi.clearAllMocks();
+    
     // First set to a valid ID, then try to set to 0
     store.setSelectedUserProfileById(123);
     expect(store.selectedUserProfileId).toBe(123);
+    expect(resetAllProfileData).toHaveBeenCalledTimes(1);
 
     store.setSelectedUserProfileById(0);
     expect(store.selectedUserProfileId).toBe(0);
+    expect(resetAllProfileData).toHaveBeenCalledTimes(2);
   });
 
   it('should update selected account', () => {
@@ -237,6 +256,21 @@ describe('useProfilesStore', () => {
     store.setSelectedUserProfileById(123);
     store.updateSelectedAccount();
 
+    expect(resetAllProfileData).toHaveBeenCalled();
     expect(repository.getProfileById).toHaveBeenCalledWith('individual', 123);
+  });
+
+  it('should reset all profile data when switching profiles', () => {
+    const store = useProfilesStore();
+    
+    // Clear previous calls
+    vi.clearAllMocks();
+    
+    // Switch to a different profile
+    store.setSelectedUserProfileById(456);
+    
+    // Verify resetAllProfileData was called to clear stale data
+    expect(resetAllProfileData).toHaveBeenCalledTimes(1);
+    expect(store.selectedUserProfileId).toBe(456);
   });
 });

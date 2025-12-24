@@ -19,6 +19,11 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
 
   // State
   const profileOptions = ref<ISchema>();
+  
+  // Request tracking to prevent stale data from being applied
+  // Track the latest request ID for each profile fetch
+  let currentProfileRequestId = 0;
+  let currentProfileOptionsRequestId = 0;
 
   // Action states
   const setProfileByIdState = createActionState<IProfileIndividual>();
@@ -47,6 +52,7 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
       return getProfileOptionsState.value.data;
     } catch (err) {
       getProfileOptionsState.value.error = err as Error;
+      getProfileOptionsState.value.data = undefined;
       toasterErrorHandling(err, 'Failed to fetch profile options');
       throw err;
     } finally {
@@ -63,6 +69,7 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
       return setProfileState.value.data;
     } catch (err) {
       setProfileState.value.error = err as Error;
+      setProfileState.value.data = undefined;
       toasterErrorHandling(err, 'Failed to set profile');
       throw err;
     } finally {
@@ -71,34 +78,65 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
   };
 
   const getProfileById = async (type: string, id: string | number) => {
+    // Increment request ID to track this request
+    const requestId = ++currentProfileRequestId;
+    
     try {
       getProfileByIdState.value.loading = true;
       getProfileByIdState.value.error = null;
       const response = await apiClient.get<IProfileIndividual>(`/auth/profile/${type}/${id}`);
-      getProfileByIdState.value.data = new ProfileFormatter(response.data).format();
+      
+      // Only apply the response if this is still the latest request
+      // This prevents stale responses from overwriting current profile data
+      if (requestId === currentProfileRequestId) {
+        getProfileByIdState.value.data = new ProfileFormatter(response.data).format();
+      }
+      
       return getProfileByIdState.value.data;
     } catch (err) {
-      getProfileByIdState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to fetch profile by ID');
+      // Only apply error if this is still the latest request
+      if (requestId === currentProfileRequestId) {
+        getProfileByIdState.value.error = err as Error;
+        getProfileByIdState.value.data = undefined;
+        toasterErrorHandling(err, 'Failed to fetch profile by ID');
+      }
       throw err;
     } finally {
-      getProfileByIdState.value.loading = false;
+      // Only update loading state if this is still the latest request
+      if (requestId === currentProfileRequestId) {
+        getProfileByIdState.value.loading = false;
+      }
     }
   };
 
   const getProfileByIdOptions = async (type: string, id: string | number) => {
+    // Increment request ID to track this request
+    const requestId = ++currentProfileOptionsRequestId;
+    
     try {
       getProfileByIdOptionsState.value.loading = true;
       getProfileByIdOptionsState.value.error = null;
       const response = await apiClient.options<IProfileIndividual>(`/auth/profile/${type}/${id}`);
-      getProfileByIdOptionsState.value.data = response.data;
+      
+      // Only apply the response if this is still the latest request
+      if (requestId === currentProfileOptionsRequestId) {
+        getProfileByIdOptionsState.value.data = response.data;
+      }
+      
       return getProfileByIdOptionsState.value.data;
     } catch (err) {
-      getProfileByIdOptionsState.value.error = err as Error;
-      toasterErrorHandling(err, 'Failed to fetch profile by ID options');
+      // Only apply error if this is still the latest request
+      if (requestId === currentProfileOptionsRequestId) {
+        getProfileByIdOptionsState.value.error = err as Error;
+        getProfileByIdOptionsState.value.data = undefined;
+        toasterErrorHandling(err, 'Failed to fetch profile by ID options');
+      }
       throw err;
     } finally {
-      getProfileByIdOptionsState.value.loading = false;
+      // Only update loading state if this is still the latest request
+      if (requestId === currentProfileOptionsRequestId) {
+        getProfileByIdOptionsState.value.loading = false;
+      }
     }
   };
 
@@ -111,6 +149,7 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
       return setProfileByIdState.value.data;
     } catch (err) {
       setProfileByIdState.value.error = err as Error;
+      setProfileByIdState.value.data = undefined;
       toasterErrorHandling(err, 'Failed to update profile');
       throw err;
     } finally {
@@ -127,6 +166,7 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
       return getUserState.value.data;
     } catch (err) {
       getUserState.value.error = err as Error;
+      getUserState.value.data = undefined;
       toasterErrorHandling(err, 'Failed to fetch user data');
       throw err;
     } finally {
@@ -143,6 +183,7 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
       return setUserState.value.data;
     } catch (err) {
       setUserState.value.error = err as Error;
+      setUserState.value.data = undefined;
       toasterErrorHandling(err, 'Failed to update user data');
       throw err;
     } finally {
@@ -159,6 +200,7 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
       return setUserOptionsState.value.data;
     } catch (err) {
       setUserOptionsState.value.error = err as Error;
+      setUserOptionsState.value.data = undefined;
       toasterErrorHandling(err, 'Failed to fetch user options');
       throw err;
     } finally {
@@ -181,6 +223,7 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
       return updateUserDataState.value.data;
     } catch (err) {
       updateUserDataState.value.error = err as Error;
+      updateUserDataState.value.data = undefined;
       toasterErrorHandling(err, 'Failed to update user data');
       throw err;
     } finally {
@@ -221,6 +264,25 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
     getProfileOptionsState.value = { loading: false, error: null, data: undefined };
   };
 
+  /**
+   * Reset only profile-specific data (not user/profiles list data)
+   * This is used when switching profiles to clear stale profile data
+   * while preserving the profiles list
+   */
+  const resetProfileData = () => {
+    // Increment request IDs to invalidate any in-flight requests
+    // This ensures stale responses are ignored
+    currentProfileRequestId++;
+    currentProfileOptionsRequestId++;
+    
+    // Reset only profile-specific states, NOT getUserState which contains the profiles list
+    setProfileByIdState.value = { loading: false, error: null, data: undefined };
+    getProfileByIdState.value = { loading: false, error: null, data: undefined };
+    getProfileByIdOptionsState.value = { loading: false, error: null, data: undefined };
+    setProfileState.value = { loading: false, error: null, data: undefined };
+    // Note: getUserState is NOT reset as it contains the profiles list which is shared across profiles
+  };
+
   return {
     // State
     profileOptions,
@@ -246,6 +308,7 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
     setUserOptions,
     updateUserData,
     resetAll,
+    resetProfileData,
     updateNotificationData,
   };
 });

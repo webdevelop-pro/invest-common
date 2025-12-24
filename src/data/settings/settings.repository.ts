@@ -32,6 +32,7 @@ export const useRepositorySettings = defineStore('repository-settings', () => {
       return formatted;
     } catch (err) {
       getAllSessionState.value.error = err as Error;
+      getAllSessionState.value.data = undefined;
       oryErrorHandling(err, 'session', () => {}, 'Failed to get all sessions');
       throw err;
     } finally {
@@ -48,6 +49,7 @@ export const useRepositorySettings = defineStore('repository-settings', () => {
       return response.data;
     } catch (err) {
       deleteAllSessionState.value.error = err as Error;
+      deleteAllSessionState.value.data = undefined;
       oryErrorHandling(err, 'session', () => {}, 'Failed to delete all sessions');
       throw err;
     } finally {
@@ -65,6 +67,7 @@ export const useRepositorySettings = defineStore('repository-settings', () => {
       return result;
     } catch (err) {
       deleteOneSessionState.value.error = err as Error;
+      deleteOneSessionState.value.data = undefined;
       oryErrorHandling(err, 'session', () => {}, 'Failed to delete session');
       throw err;
     } finally {
@@ -81,6 +84,7 @@ export const useRepositorySettings = defineStore('repository-settings', () => {
       return response;
     } catch (err) {
       getAuthFlowState.value.error = err as Error;
+      getAuthFlowState.value.data = undefined;
       oryErrorHandling(err, 'session', () => {}, 'Failed to get auth flow');
       throw err;
     } finally {
@@ -97,6 +101,7 @@ export const useRepositorySettings = defineStore('repository-settings', () => {
       return response.data;
     } catch (err) {
       setSettingsState.value.error = err as Error;
+      setSettingsState.value.data = undefined;
       await oryErrorHandling(
         err, 
         'session', 
@@ -119,6 +124,7 @@ export const useRepositorySettings = defineStore('repository-settings', () => {
       return response.data;
     } catch (err) {
       getSettingsState.value.error = err as Error;
+      getSettingsState.value.data = undefined;
       oryErrorHandling(err, 'session', () => {}, 'Failed to get settings');
       throw err;
     } finally {

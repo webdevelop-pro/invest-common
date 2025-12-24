@@ -45,6 +45,7 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
       return formatted;
     } catch (err) {
       getEvmWalletState.value.error = err as Error;
+      getEvmWalletState.value.data = undefined;
       if ((err as any)?.data?.statusCode !== 404) {
         toasterErrorHandling(err, 'Failed to fetch EVM wallet');
       }
@@ -63,6 +64,7 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
       return withdrawFundsState.value.data;
     } catch (err) {
       withdrawFundsState.value.error = err as Error;
+      withdrawFundsState.value.data = undefined;
       if ((err as any)?.data?.statusCode !== 404) {
         toasterErrorHandling(err, 'Failed to withdraw funds');
       }
@@ -81,6 +83,7 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
       return withdrawFundsOptionsState.value.data;
     } catch (err) {
       withdrawFundsOptionsState.value.error = err as Error;
+      withdrawFundsOptionsState.value.data = undefined;
       toasterErrorHandling(err, 'Failed to fetch withdraw funds options');
       throw err;
     } finally {
@@ -97,6 +100,7 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
       return response.data;
     } catch (err) {
       exchangeTokensState.value.error = err as Error;
+      exchangeTokensState.value.data = undefined;
       toasterErrorHandling(err, 'Failed to exchange tokens');
       throw err;
     } finally {
@@ -113,6 +117,7 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
       return exchangeTokensOptionsState.value.data;
     } catch (err) {
       exchangeTokensOptionsState.value.error = err as Error;
+      exchangeTokensOptionsState.value.data = undefined;
       toasterErrorHandling(err, 'Failed to fetch exchange tokens options');
       throw err;
     } finally {

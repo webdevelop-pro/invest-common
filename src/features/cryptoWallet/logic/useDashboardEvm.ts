@@ -101,6 +101,8 @@ export function useDashboardEvm() {
   const updateData = async () => {
     if (canLoadEvmWalletData.value && !getEvmWalletState.value.loading && !getEvmWalletState.value.error) {
       await evmRepository.getEvmWalletByProfile(selectedUserProfileId.value);
+    } else if (!canLoadEvmWalletData.value && getEvmWalletState.value.data ){
+      evmRepository.resetAll();
     }
   };
 
@@ -112,7 +114,7 @@ export function useDashboardEvm() {
 
   watch(() => [selectedUserProfileData.value.id, selectedUserProfileData.value.kyc_status], () => {
     nextTick(() => {
-      if (canLoadEvmWalletData.value) updateData();
+      updateData();
     });
   });
 

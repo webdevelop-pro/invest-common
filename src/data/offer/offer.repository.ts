@@ -48,6 +48,7 @@ export const useRepositoryOffer = defineStore('repository-offer', () => {
       return formattedData;
     } catch (err) {
       getOffersState.value.error = err as Error;
+      getOffersState.value.data = undefined;
       toasterErrorHandling(err, 'Failed to fetch offers');
       throw err;
     } finally {
@@ -67,6 +68,7 @@ export const useRepositoryOffer = defineStore('repository-offer', () => {
       return formattedData;
     } catch (err) {
       getOfferOneState.value.error = err as Error;
+      getOfferOneState.value.data = undefined;
       toasterErrorHandling(err, 'Failed to fetch offer');
       throw err;
     } finally {
@@ -84,6 +86,7 @@ export const useRepositoryOffer = defineStore('repository-offer', () => {
       return commentsData;
     } catch (err) {
       getOfferCommentsState.value.error = err as Error;
+      getOfferCommentsState.value.data = undefined;
       toasterErrorHandling(err, 'Failed to fetch offer comments');
       throw err;
     } finally {
@@ -101,6 +104,7 @@ export const useRepositoryOffer = defineStore('repository-offer', () => {
       return commentData;
     } catch (err) {
       setOfferCommentState.value.error = err as Error;
+      setOfferCommentState.value.data = undefined;
       toasterErrorHandling(err, 'Failed to set offer comment');
       throw err;
     } finally {
@@ -117,6 +121,7 @@ export const useRepositoryOffer = defineStore('repository-offer', () => {
       return response.data;
     } catch (err) {
       setOfferCommentOptionsState.value.error = err as Error;
+      setOfferCommentOptionsState.value.data = undefined;
       toasterErrorHandling(err, 'Failed to fetch offer comment options');
       throw err;
     } finally {

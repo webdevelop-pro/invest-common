@@ -89,6 +89,8 @@ export function useWalletMain() {
   const updateData = async () => {
     if (canLoadWalletData.value && !getWalletState.value.loading && !getWalletState.value.error) {
       await walletRepository.getWalletByProfile(selectedUserProfileId.value);
+    } else if (!canLoadWalletData.value && getWalletState.value.data ){
+      walletRepository.resetAll();
     }
   };
 
@@ -100,7 +102,7 @@ export function useWalletMain() {
 
   watch(() => [selectedUserProfileData.value.id, selectedUserProfileData.value.kyc_status], () => {
     nextTick(() => {
-      if (canLoadWalletData.value) updateData();
+      updateData();
     });
   });
 

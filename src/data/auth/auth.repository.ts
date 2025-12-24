@@ -42,6 +42,7 @@ export const useRepositoryAuth = () => {
       return response.data;
     } catch (err) {
       getSessionState.value.error = err as Error;
+      getSessionState.value.data = undefined;
       if (err?.data?.statusCode === 401) {
         // Session is invalid, clear it from store
         useSessionStore().resetAll();
@@ -67,6 +68,7 @@ export const useRepositoryAuth = () => {
       return response.data;
     } catch (err) {
       getAuthFlowState.value.error = err as Error;
+      getAuthFlowState.value.data = undefined;
       oryErrorHandling(err, 'browser', () => {}, 'Failed to get auth flow');
       throw err;
     } finally {
@@ -83,6 +85,7 @@ export const useRepositoryAuth = () => {
       return response.data;
     } catch (err) {
       setLoginState.value.error = err as Error;
+      setLoginState.value.data = undefined;
       oryErrorHandling(err, 'login', () => getAuthFlow(SELFSERVICE.login), 'Failed to login');
       throw err;
     } finally {
@@ -99,6 +102,7 @@ export const useRepositoryAuth = () => {
       return response.data;
     } catch (err) {
       getLoginState.value.error = err as Error;
+      getLoginState.value.data = undefined;
       oryErrorHandling(err, 'login', () => getAuthFlow(SELFSERVICE.login), 'Failed to get login data');
       throw err;
     } finally {
@@ -114,6 +118,7 @@ export const useRepositoryAuth = () => {
       return response;
     } catch (err) {
       getLogoutState.value.error = err as Error;
+      getLogoutState.value.data = undefined;
       oryErrorHandling(err, 'logout', () => getAuthFlow(SELFSERVICE.logout), 'Failed to logout');
       throw err;
     } finally {
@@ -130,6 +135,7 @@ export const useRepositoryAuth = () => {
       return response.data;
     } catch (err) {
       getSignupState.value.error = err as Error;
+      getSignupState.value.data = undefined;
       oryErrorHandling(err, 'signup', () => getAuthFlow(SELFSERVICE.registration), 'Failed to get signup data');
       throw err;
     } finally {
@@ -146,6 +152,7 @@ export const useRepositoryAuth = () => {
       return response.data;
     } catch (err) {
       setSignupState.value.error = err as Error;
+      setSignupState.value.data = undefined;
       oryErrorHandling(err, 'signup', () => getAuthFlow(SELFSERVICE.registration), 'Failed to signup');
       throw err;
     } finally {
@@ -162,6 +169,7 @@ export const useRepositoryAuth = () => {
       return response.data;
     } catch (err) {
       setRecoveryState.value.error = err as Error;
+      setRecoveryState.value.data = undefined;
       oryErrorHandling(err, 'recovery', () => getAuthFlow(SELFSERVICE.recovery), 'Failed to set recovery');
       throw err;
     } finally {
@@ -178,6 +186,7 @@ export const useRepositoryAuth = () => {
       return response.data;
     } catch (err) {
       getSchemaState.value.error = err as Error;
+      getSchemaState.value.data = undefined;
       toasterErrorHandling(err, 'Failed to get schema');
       throw err;
     } finally {

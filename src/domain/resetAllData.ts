@@ -20,24 +20,32 @@ import { cookiesOptions } from 'InvestCommon/domain/config/cookies';
 function clearAllCookies() {
   const cookies = useCookies();
   Object.keys(cookies.getAll()).forEach((key) => {
-    cookies.remove(key, cookiesOptions());
+    // Pass a date in the past to expire the cookie
+    cookies.remove(key, cookiesOptions(new Date(0)));
   });
 }
 
-export const resetAllData = () => {
-  clearAllCookies();
-  useSessionStore().resetAll();
-  useRepositoryAuth().resetAll();
+export const resetAllProfileData = () => {
+  // Reset profile-specific data (NOT the profiles list)
+  useRepositoryProfiles().resetProfileData();
+  
+  // Reset all other profile-dependent repositories
   useRepositoryAccreditation().resetAll();
-  useRepositoryNotifications().resetAll();
-  useRepositoryProfiles().resetAll();
   useRepositoryKyc().resetAll();
   useRepositoryWallet().resetAll();
   useRepositoryFiler().resetAll();
   useRepositoryInvestment().resetAll();
   useRepositorySettings().resetAll();
-  useRepositoryOffer().resetAll();
   useRepositoryEvm().resetAll();
   useRepositoryDistributions().resetAll();
   useRepositoryEsign().resetAll();
+};
+
+export const resetAllData = () => {
+  clearAllCookies();
+  useSessionStore().resetAll();
+  useRepositoryAuth().resetAll();
+  resetAllProfileData();
+  useRepositoryOffer().resetAll();
+  useRepositoryNotifications().resetAll();
 };

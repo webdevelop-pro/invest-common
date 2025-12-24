@@ -31,11 +31,17 @@ export function useWalletData() {
       evmRepository.resetAll();
     }
   };
-  watch(() => [selectedUserProfileData.value.id, selectedUserProfileData.value.kyc_status], () => {
-    nextTick(() => {
-      updateWalletData();
-      updateCryptoWalletData();
-    });
+  watch(() => [
+    selectedUserProfileData.value?.id, 
+    selectedUserProfileData.value?.kyc_status
+  ], () => {
+    // Only update if profile data exists to prevent errors when data is reset
+    if (selectedUserProfileData.value?.id) {
+      nextTick(() => {
+        updateWalletData();
+        updateCryptoWalletData();
+      });
+    }
   }, { immediate: true });
 
   const walletTokensTop5 = computed(() => 

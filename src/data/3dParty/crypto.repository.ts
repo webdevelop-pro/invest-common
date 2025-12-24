@@ -35,6 +35,7 @@ export const useRepositoryCryptoo = defineStore('repository-cryptoo', () => {
       return data;
     } catch (err) {
       getPricesState.value.error = err as Error;
+      getPricesState.value.data = undefined;
       throw err;
     } finally {
       getPricesState.value.loading = false;

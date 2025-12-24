@@ -166,6 +166,24 @@ export function useInvestAmount() {
     return true;
   };
 
+  const updateData = (profileId?: number) => {
+    // Use provided profileId or fall back to selectedUserProfileId from store
+    const targetProfileId = profileId ?? selectedUserProfileId.value;
+    
+    if (userLoggedIn.value) {
+      if (canLoadWalletData.value) {
+        walletRepository.getWalletByProfile(targetProfileId);
+      } else if (!canLoadWalletData.value && getWalletState.value.data ){
+        walletRepository.resetAll();
+      }
+      if (canLoadEvmWalletData.value) {
+        evmRepository.getEvmWalletByProfile(targetProfileId);
+      } else if (!canLoadEvmWalletData.value && getEvmWalletState.value.data ){
+        evmRepository.resetAll();
+      }
+    }
+  }
+
   // React to profile_id changes: reset funding method and reload wallets for the selected profile
   watch(
     () => formModel.value.profile_id,
@@ -178,14 +196,8 @@ export function useInvestAmount() {
       }
 
       // Reload wallet and EVM wallet data for the new profile
-      if (userLoggedIn.value) {
-        if (canLoadWalletData.value) {
-          walletRepository.getWalletByProfile(newProfileId);
-        }
-        if (canLoadEvmWalletData.value) {
-          evmRepository.getEvmWalletByProfile(newProfileId);
-        }
-      }
+      // Pass newProfileId explicitly to ensure we use the correct profile ID
+      updateData(newProfileId);
     },
   );
 
@@ -268,14 +280,7 @@ export function useInvestAmount() {
   };
 
   onBeforeMount(() => {
-    if (userLoggedIn.value) {
-      if (canLoadWalletData.value) {
-        walletRepository.getWalletByProfile(selectedUserProfileId.value);
-      }
-      if (canLoadEvmWalletData.value) {
-        evmRepository.getEvmWalletByProfile(selectedUserProfileId.value);
-      }
-    }
+    updateData();
   });
 
   // Reset wallet and EVM data when leaving invest process

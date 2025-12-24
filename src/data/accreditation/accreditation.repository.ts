@@ -26,6 +26,7 @@ export const useRepositoryAccreditation = () => {
       return response.data;
     } catch (err) {
       getAllState.value.error = err as Error;
+      getAllState.value.data = undefined;
       toasterErrorHandling(err, 'Failed to fetch accreditation data');
       throw err;
     } finally {
@@ -45,6 +46,7 @@ export const useRepositoryAccreditation = () => {
       return response.data;
     } catch (err) {
       createState.value.error = err as Error;
+      createState.value.data = undefined;
       toasterErrorHandling(err, 'Failed to create accreditation');
       throw err;
     } finally {
@@ -65,6 +67,7 @@ export const useRepositoryAccreditation = () => {
       return response.data;
     } catch (err) {
       updateState.value.error = err as Error;
+      updateState.value.data = undefined;
       toasterErrorHandling(err, 'Failed to update accreditation');
       throw err;
     } finally {
@@ -86,6 +89,7 @@ export const useRepositoryAccreditation = () => {
       return response.data;
     } catch (err) {
       uploadDocumentState.value.error = err as Error;
+      uploadDocumentState.value.data = undefined;
       toasterErrorHandling(err, 'Failed to upload accreditation document');
       throw err;
     } finally {
@@ -108,6 +112,7 @@ export const useRepositoryAccreditation = () => {
       return response.data;
     } catch (err) {
       createEscrowState.value.error = err as Error;
+      createEscrowState.value.data = undefined;
       toasterErrorHandling(err, 'Failed to create escrow');
       throw err;
     } finally {

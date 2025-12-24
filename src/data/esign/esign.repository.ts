@@ -24,6 +24,7 @@ export const useRepositoryEsign = defineStore('repositoryEsign', () => {
       return response.data as IInvestDocumentSign;
     } catch (err) {
       setDocumentState.value.error = err as Error;
+      setDocumentState.value.data = undefined;
       toasterErrorHandling(err, 'Failed to set document');
       throw err;
     } finally {
@@ -47,6 +48,7 @@ export const useRepositoryEsign = defineStore('repositoryEsign', () => {
       return response.data as Blob;
     } catch (err) {
       getDocumentState.value.error = err as Error;
+      getDocumentState.value.data = undefined;
       toasterErrorHandling(err, 'Failed to get document');
       throw err;
     } finally {

@@ -9,8 +9,8 @@ import { useCookies } from '@vueuse/integrations/useCookies';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { PROFILE_TYPES } from 'InvestCommon/domain/config/enums/profileTypes';
-import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository';
 import { useLogoutStore } from 'InvestCommon/features/auth/store/useLogout';
+import { resetAllProfileData } from 'InvestCommon/domain/resetAllData';
 
 const isStaticSite = Number(env.IS_STATIC_SITE ?? 0);
 
@@ -113,9 +113,16 @@ export const useProfilesStore = defineStore('profiles', () => {
 
   const setSelectedUserProfileById = (id: number) => {
     console.log('selectedUserProfileId', id);
-    useRepositoryWallet().resetAll();
+    
+    // Reset all profile-dependent repositories to prevent stale data
+    resetAllProfileData();
+    
+    // Update the selected profile ID
     selectedUserProfileId.value = Number(id);
+    
     if (id === 0) return;
+    
+    // Save to cookies
     cookies.set(
       'selectedUserProfileId',
       id,
@@ -161,6 +168,11 @@ export const useProfilesStore = defineStore('profiles', () => {
   watch(() => [selectedUserProfileId.value, selectedUserProfileType.value, isUrlProfileSameAsSelected.value], () => {
     if (userLoggedIn.value && isUrlProfileSameAsSelected.value
       && selectedUserProfileType.value && (selectedUserProfileId.value > 0)) {
+      // Clear profile data before fetching to prevent brief flash of old data
+      // This ensures the UI shows loading state instead of stale data
+      useRepositoryProfilesStore.resetProfileData();
+      
+      // Fetch new profile data
       useRepositoryProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
       useRepositoryProfilesStore.getProfileByIdOptions(selectedUserProfileType.value, selectedUserProfileId.value);
     }

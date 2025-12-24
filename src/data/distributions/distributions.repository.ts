@@ -27,6 +27,7 @@ export const useRepositoryDistributions = defineStore('repository-distributions'
       return getDistributionsState.value.data;
     } catch (err) {
       getDistributionsState.value.error = err as Error;
+      getDistributionsState.value.data = undefined;
       toasterErrorHandling(err, 'Failed to fetch distributions');
       throw err;
     } finally {
