@@ -47,12 +47,12 @@ export function useInvestAmount() {
 
   const walletRepository = useRepositoryWallet();
   const {
-    getWalletState, walletId, canLoadWalletData,
+    getWalletState, walletId,
   } = storeToRefs(walletRepository);
 
   const evmRepository = useRepositoryEvm();
   const {
-    getEvmWalletState, evmWalletId, canLoadEvmWalletData,
+    getEvmWalletState, evmWalletId,
   } = storeToRefs(evmRepository);
 
   const profilesStore = useProfilesStore();
