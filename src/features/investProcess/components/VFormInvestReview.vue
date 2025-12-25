@@ -16,7 +16,6 @@ const props = defineProps({
 
 const {
   investorName,
-  isSsnHidden,
   fundingSourceDataToShow,
   isAchFunding,
 } = useInvestReviewForm(props);
