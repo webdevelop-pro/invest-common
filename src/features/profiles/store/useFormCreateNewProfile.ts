@@ -229,16 +229,24 @@ export const useFormCreateNewProfile = () => {
     );
 
     if (!setProfileState.value.error) {
+      // Capture the profile ID before it gets cleared by setSelectedUserProfileById
+      const profileId = setProfileState.value.data?.id;
+      
+      if (!profileId) {
+        isLoading.value = false;
+        return;
+      }
+      
       handleHubspot();
       await accreditationRepository.createEscrow(
         selectedUserProfileData.value?.user_id,
-        setProfileState.value.data?.id,
+        profileId,
       );
       await useRepositoryProfilesStore.getUser();
-      await userProfileStore.setSelectedUserProfileById(Number(setProfileState.value.data?.id));
-      useRepositoryProfilesStore.getProfileById(selectedType.value, String(setProfileState.value.data?.id));
+      await userProfileStore.setSelectedUserProfileById(Number(profileId));
+      useRepositoryProfilesStore.getProfileById(selectedType.value, String(profileId));
       isLoading.value = false;
-      router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: String(setProfileState.value.data?.id) } });
+      router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: String(profileId) } });
     }
   };
 
@@ -258,12 +266,20 @@ export const useFormCreateNewProfile = () => {
     }
 
     if (!setProfileState.value.error) {
+      // Capture the profile ID before it gets cleared by setSelectedUserProfileById
+      const profileId = setProfileState.value.data?.id;
+      
+      if (!profileId) {
+        isLoading.value = false;
+        return;
+      }
+      
       handleHubspot();
       await useRepositoryProfilesStore.getUser();
-      await userProfileStore.setSelectedUserProfileById(Number(setProfileState.value.data?.id));
-      useRepositoryProfilesStore.getProfileById(selectedType.value, String(setProfileState.value.data?.id));
+      await userProfileStore.setSelectedUserProfileById(Number(profileId));
+      useRepositoryProfilesStore.getProfileById(selectedType.value, String(profileId));
       isLoading.value = false;
-      router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: String(setProfileState.value.data?.id) } });
+      router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: String(profileId) } });
     }
   };
 
