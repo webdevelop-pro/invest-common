@@ -3,6 +3,7 @@ import { storeToRefs } from 'pinia';
 import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
 import { EvmTransactionTypes } from 'InvestCommon/data/evm/evm.types';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
+import { hasRestrictedWalletBehavior } from 'InvestCommon/features/wallet/helpers/walletProfileHelpers';
 import addFunds from 'InvestCommon/shared/assets/images/icons/add-funds.svg';
 import withdraw from 'InvestCommon/shared/assets/images/icons/withdraw.svg';
 import exchange from 'InvestCommon/shared/assets/images/icons/exchange.svg';
@@ -36,18 +37,19 @@ export const useDashboardEvmWalletTokens = () => {
     (getEvmWalletState.value.data?.balances?.length ?? 0) > 0
   ));
 
+  const hasRestrictedWallet = computed(() => hasRestrictedWalletBehavior(selectedUserProfileData.value));
   const canAddFunds = computed(() => (
-    !getEvmWalletState.value.loading && !selectedUserProfileData.value.isTypeSolo401k
+    !getEvmWalletState.value.loading && !hasRestrictedWallet.value
     && selectedUserProfileData.value.isKycApproved
   ));
 
   const canEarn = computed(() => (
-    !getEvmWalletState.value.loading && !selectedUserProfileData.value.isTypeSolo401k
+    !getEvmWalletState.value.loading && !hasRestrictedWallet.value
     && selectedUserProfileData.value.isKycApproved
   ));
 
   const canBuy = computed(() => (
-    !getEvmWalletState.value.loading && !selectedUserProfileData.value.isTypeSolo401k
+    !getEvmWalletState.value.loading && !hasRestrictedWallet.value
     && selectedUserProfileData.value.isKycApproved
   ));
 

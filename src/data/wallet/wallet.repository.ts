@@ -12,6 +12,8 @@ import {
 } from './wallet.types';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
+import { hasRestrictedWalletBehavior } from 'InvestCommon/features/wallet/helpers/walletProfileHelpers';
+import { IProfileFormatted } from '../profiles/profiles.types';
 
 export const useRepositoryWallet = defineStore('repository-wallet', () => {
 
@@ -223,10 +225,17 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
 
   const selectedIdAsDataIs = computed(() => selectedUserProfileData.value.id === selectedUserProfileId.value);
   const canLoadWalletData = computed(() => (
-    !selectedUserProfileData.value.isTypeSdira && !selectedUserProfileData.value.isTypeSolo401k
+    !hasRestrictedWalletBehavior(selectedUserProfileData.value)
     && selectedIdAsDataIs.value && userLoggedIn.value
     &&  selectedUserProfileData.value.isKycApproved && (selectedUserProfileId.value > 0)
     && !getWalletState.value.loading));
+
+  const canLoadWalletDataNotSelected = (profile: IProfileFormatted | undefined) => (
+      profile !== undefined
+      && !hasRestrictedWalletBehavior(profile)
+      && userLoggedIn.value
+      && profile.isKycApproved && (profile.id > 0)
+      && !getWalletState.value.loading);
 
   const resetAll = () => {
     getWalletState.value = { loading: false, error: null, data: undefined };
@@ -263,6 +272,7 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
     deleteLinkedAccount,
     resetAll,
     updateNotificationData,
+    canLoadWalletDataNotSelected,
   };
 });
 

@@ -6,6 +6,7 @@ import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useRouter } from 'vue-router';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
+import { hasRestrictedWalletBehavior } from '../helpers/walletProfileHelpers';
 
 const FUNDING_TAB_INFO = {
   title: 'Wallet',
@@ -39,22 +40,23 @@ export function useWalletMain() {
     selectedUserProfileData.value.isKycInProgress && !isWalletError.value));
   const isWalletCreated = computed(() => (
     getWalletState.value.data?.isWalletStatusCreated && !isWalletError.value));
+  const hasRestrictedWallet = computed(() => hasRestrictedWalletBehavior(selectedUserProfileData.value));
   const isError = computed(() => (
-    selectedUserProfileData.value.isKycDeclined || isWalletError.value || selectedUserProfileData.value.isTypeSdira));
+    selectedUserProfileData.value.isKycDeclined || isWalletError.value || hasRestrictedWallet.value));
 
   const isAlertShow = computed(() => (
-    selectedUserProfileData.value.isTypeSdira || selectedUserProfileData.value.isTypeSolo401k
+    hasRestrictedWallet.value
     || (isKYCNeedToPass.value || isKYCInProgress.value || isWalletCreated.value || isError.value)
     && !getProfileByIdState.value.loading
   ));
 
   const isTopTextShow = computed(() => (
-    !selectedUserProfileData.value.isTypeSdira
+    !hasRestrictedWallet.value
     && !isWalletError.value && !selectedUserProfileData.value.isKycDeclined
   ));
   
   const showWalletTable = computed(() => (
-    !selectedUserProfileData.value.isTypeSdira
+    !hasRestrictedWallet.value
     && !isWalletError.value
   ));
 

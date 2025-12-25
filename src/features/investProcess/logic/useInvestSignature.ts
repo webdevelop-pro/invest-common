@@ -1,9 +1,9 @@
-import { computed, ref, watch } from 'vue';
+import { computed, ref, watch, nextTick } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useHelloSign } from 'InvestCommon/shared/composables/useHelloSign';
 import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
 import { ROUTE_INVEST_REVIEW } from 'InvestCommon/domain/config/enums/routes';
-import { ISignature } from 'InvestCommon/types/api/invest';
+import { ISignature, InvestStepTypes } from 'InvestCommon/types/api/invest';
 import { storeToRefs } from 'pinia';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
@@ -116,6 +116,22 @@ export function useInvestSignature() {
     (newSignatureId) => {
       signId.value = newSignatureId;
     },
+    { immediate: true }
+  );
+
+  // Mark checkboxes as true if step is 'review' (user came back from review step)
+  const markCheckboxesIfReview = async () => {
+    if (getInvestUnconfirmedOne.value?.step === InvestStepTypes.review && formRef.value) {
+      await nextTick();
+      formRef.value.state.checkbox1 = true;
+      formRef.value.state.checkbox2 = true;
+    }
+  };
+
+  // Watch both step and formRef to handle all scenarios
+  watch(
+    [() => getInvestUnconfirmedOne.value?.step, () => formRef.value],
+    markCheckboxesIfReview,
     { immediate: true }
   );
 

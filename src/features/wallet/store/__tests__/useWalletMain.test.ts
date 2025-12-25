@@ -17,6 +17,10 @@ let mockSelectedUserProfileData: Ref<{
   isKycPending: boolean;
   isKycInProgress: boolean;
   isKycDeclined: boolean;
+  isTypeSdira: boolean;
+  isTypeSolo401k: boolean;
+  isTypeTrust: boolean;
+  isTypeEntity: boolean;
 }>;
 let mockSelectedUserProfileId: Ref<number>;
 let mockUserLoggedIn: Ref<boolean>;
@@ -74,6 +78,8 @@ describe('useWalletMain', () => {
       isKycDeclined: false,
       isTypeSdira: false,
       isTypeSolo401k: false,
+      isTypeTrust: false,
+      isTypeEntity: false,
     });
     mockSelectedUserProfileId = ref(1);
     mockUserLoggedIn = ref(true);
@@ -172,6 +178,18 @@ describe('useWalletMain', () => {
     expect(store.isAlertShow.value).toBe(true);
   });
 
+  it('isAlertShow is true when profile type is Trust', () => {
+    mockSelectedUserProfileData.value.isTypeTrust = true;
+    const store = useWalletMain();
+    expect(store.isAlertShow.value).toBe(true);
+  });
+
+  it('isAlertShow is true when profile type is Entity', () => {
+    mockSelectedUserProfileData.value.isTypeEntity = true;
+    const store = useWalletMain();
+    expect(store.isAlertShow.value).toBe(true);
+  });
+
   it('isAlertShow is false when profile is loading', () => {
     mockSelectedUserProfileData.value.isKycNone = true;
     mockGetProfileByIdState.value.loading = true;
@@ -202,6 +220,18 @@ describe('useWalletMain', () => {
     expect(store.isTopTextShow.value).toBe(false);
   });
 
+  it('isTopTextShow is false when profile type is Trust', () => {
+    mockSelectedUserProfileData.value.isTypeTrust = true;
+    const store = useWalletMain();
+    expect(store.isTopTextShow.value).toBe(false);
+  });
+
+  it('isTopTextShow is false when profile type is Entity', () => {
+    mockSelectedUserProfileData.value.isTypeEntity = true;
+    const store = useWalletMain();
+    expect(store.isTopTextShow.value).toBe(false);
+  });
+
   it('showWalletTable is true when not SDIRA and no wallet error', () => {
     const store = useWalletMain();
     expect(store.showWalletTable.value).toBe(true);
@@ -211,6 +241,30 @@ describe('useWalletMain', () => {
     mockSelectedUserProfileData.value.isTypeSdira = true;
     const store = useWalletMain();
     expect(store.showWalletTable.value).toBe(false);
+  });
+
+  it('showWalletTable is false when profile type is Trust', () => {
+    mockSelectedUserProfileData.value.isTypeTrust = true;
+    const store = useWalletMain();
+    expect(store.showWalletTable.value).toBe(false);
+  });
+
+  it('showWalletTable is false when profile type is Entity', () => {
+    mockSelectedUserProfileData.value.isTypeEntity = true;
+    const store = useWalletMain();
+    expect(store.showWalletTable.value).toBe(false);
+  });
+
+  it('isError is true when profile type is Trust', () => {
+    mockSelectedUserProfileData.value.isTypeTrust = true;
+    const store = useWalletMain();
+    expect(store.isError.value).toBe(true);
+  });
+
+  it('isError is true when profile type is Entity', () => {
+    mockSelectedUserProfileData.value.isTypeEntity = true;
+    const store = useWalletMain();
+    expect(store.isError.value).toBe(true);
   });
 
   it('showWalletTable is false when wallet has error', () => {

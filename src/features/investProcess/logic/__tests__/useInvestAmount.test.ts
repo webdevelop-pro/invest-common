@@ -10,6 +10,7 @@ import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
 import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository';
 import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
+import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { FundingTypes } from 'InvestCommon/helpers/enums/general';
 import { ROUTE_INVEST_SIGNATURE } from 'InvestCommon/domain/config/enums/routes';
@@ -49,6 +50,10 @@ vi.mock('InvestCommon/data/evm/evm.repository', () => ({
   useRepositoryEvm: vi.fn(),
 }));
 
+vi.mock('InvestCommon/data/profiles/profiles.repository', () => ({
+  useRepositoryProfiles: vi.fn(),
+}));
+
 vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
   useProfilesStore: vi.fn(),
 }));
@@ -74,16 +79,31 @@ describe('useInvestAmount (logic)', () => {
 
   const mockWalletRepository = {
     getWalletByProfile: vi.fn(),
+    resetAll: vi.fn(),
     getWalletState: ref({ data: { totalBalance: 1000 } }),
     walletId: ref(1),
     canLoadWalletData: ref(true),
+    canLoadWalletDataNotSelected: vi.fn().mockReturnValue(true),
   };
 
   const mockEvmRepository = {
     getEvmWalletByProfile: vi.fn(),
+    resetAll: vi.fn(),
     getEvmWalletState: ref({ data: { fundingBalance: 500 } }),
     evmWalletId: ref(2),
     canLoadEvmWalletData: ref(true),
+    canLoadEvmWalletDataNotSelected: vi.fn().mockReturnValue(true),
+  };
+
+  const mockRepositoryProfiles = {
+    getUserState: ref({
+      data: {
+        profiles: [
+          { id: 10, type: 'individual', isKycApproved: true },
+          { id: 42, type: 'individual', isKycApproved: true },
+        ],
+      },
+    }),
   };
 
   const mockProfilesStore = {
@@ -95,6 +115,13 @@ describe('useInvestAmount (logic)', () => {
     setActivePinia(createPinia());
     vi.clearAllMocks();
 
+    // Reset refs
+    mockSessionStore.userLoggedIn.value = true;
+    mockWalletRepository.canLoadWalletDataNotSelected.mockReturnValue(true);
+    mockEvmRepository.canLoadEvmWalletDataNotSelected.mockReturnValue(true);
+    mockWalletRepository.getWalletState.value = { data: { totalBalance: 1000 } };
+    mockEvmRepository.getEvmWalletState.value = { data: { fundingBalance: 500 } };
+
     (useRouter as any).mockReturnValue(mockRouter);
     (useRoute as any).mockReturnValue(mockRoute);
     (useGlobalLoader as any).mockReturnValue(mockGlobalLoader);
@@ -103,6 +130,7 @@ describe('useInvestAmount (logic)', () => {
     (useRepositoryInvestment as any).mockReturnValue(mockInvestmentRepository);
     (useRepositoryWallet as any).mockReturnValue(mockWalletRepository);
     (useRepositoryEvm as any).mockReturnValue(mockEvmRepository);
+    (useRepositoryProfiles as any).mockReturnValue(mockRepositoryProfiles);
     (useProfilesStore as any).mockReturnValue(mockProfilesStore);
   });
 
@@ -339,8 +367,45 @@ describe('useInvestAmount (logic)', () => {
     expect(fundingRef.model.funding_type).toBeUndefined();
 
     // Wallet repositories should be called with new profile id
+    expect(mockWalletRepository.canLoadWalletDataNotSelected).toHaveBeenCalled();
+    expect(mockEvmRepository.canLoadEvmWalletDataNotSelected).toHaveBeenCalled();
     expect(mockWalletRepository.getWalletByProfile).toHaveBeenCalledWith(42);
     expect(mockEvmRepository.getEvmWalletByProfile).toHaveBeenCalledWith(42);
+  });
+
+  it('resets wallet data when profile cannot load wallet data', async () => {
+    const composable = useInvestAmount();
+
+    // Mock canLoad methods to return false
+    mockWalletRepository.canLoadWalletDataNotSelected.mockReturnValue(false);
+    mockEvmRepository.canLoadEvmWalletDataNotSelected.mockReturnValue(false);
+
+    // Set wallet state to have data
+    mockWalletRepository.getWalletState.value = { data: { totalBalance: 1000 } };
+    mockEvmRepository.getEvmWalletState.value = { data: { fundingBalance: 500 } };
+
+    // Change profile_id
+    composable.formModel.value.profile_id = 42;
+    await nextTick();
+
+    // Should reset both wallets
+    expect(mockWalletRepository.resetAll).toHaveBeenCalled();
+    expect(mockEvmRepository.resetAll).toHaveBeenCalled();
+    expect(mockWalletRepository.getWalletByProfile).not.toHaveBeenCalled();
+    expect(mockEvmRepository.getEvmWalletByProfile).not.toHaveBeenCalled();
+  });
+
+  it('does not load wallet data when user is not logged in', async () => {
+    mockSessionStore.userLoggedIn.value = false;
+    const composable = useInvestAmount();
+
+    composable.formModel.value.profile_id = 42;
+    await nextTick();
+
+    expect(mockWalletRepository.canLoadWalletDataNotSelected).not.toHaveBeenCalled();
+    expect(mockEvmRepository.canLoadEvmWalletDataNotSelected).not.toHaveBeenCalled();
+    expect(mockWalletRepository.getWalletByProfile).not.toHaveBeenCalled();
+    expect(mockEvmRepository.getEvmWalletByProfile).not.toHaveBeenCalled();
   });
 });
 

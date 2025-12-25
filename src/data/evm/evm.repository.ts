@@ -13,6 +13,8 @@ import {
 } from './evm.types';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
+import { hasRestrictedWalletBehavior } from 'InvestCommon/features/wallet/helpers/walletProfileHelpers';
+import { IProfileFormatted } from '../profiles/profiles.types';
 
 export const useRepositoryEvm = defineStore('repository-evm', () => {
 
@@ -280,10 +282,17 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
 
   const selectedIdAsDataIs = computed(() => selectedUserProfileData.value.id === selectedUserProfileId.value);
   const canLoadEvmWalletData = computed(() => (
-    !selectedUserProfileData.value.isTypeSdira && !selectedUserProfileData.value.isTypeSolo401k
+    !hasRestrictedWalletBehavior(selectedUserProfileData.value)
     && selectedIdAsDataIs.value && userLoggedIn.value
     &&  selectedUserProfileData.value.isKycApproved && (selectedUserProfileId.value > 0)
     && !getEvmWalletState.value.loading && (selectedUserProfileId.value > 0)));
+
+  const canLoadEvmWalletDataNotSelected = (profile: IProfileFormatted | undefined) => (
+    profile !== undefined
+    && !hasRestrictedWalletBehavior(profile)
+    && userLoggedIn.value
+    && profile.isKycApproved && (profile.id > 0)
+    && !getEvmWalletState.value.loading);
 
   const resetAll = () => {
     getEvmWalletState.value = { loading: false, error: null, data: undefined };
@@ -303,6 +312,7 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
     exchangeTokensState,
     exchangeTokensOptionsState,
     canLoadEvmWalletData,
+    canLoadEvmWalletDataNotSelected,
     getEvmWalletByProfile,
     withdrawFunds,
     withdrawFundsOptions,

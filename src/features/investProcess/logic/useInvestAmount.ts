@@ -13,6 +13,7 @@ import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
 import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository';
 import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
+import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { FundingTypes } from 'InvestCommon/helpers/enums/general';
 import { storeToRefs } from 'pinia';
@@ -58,6 +59,9 @@ export function useInvestAmount() {
   const {
     selectedUserProfileData, selectedUserProfileId,
   } = storeToRefs(profilesStore);
+
+  const repositoryProfiles = useRepositoryProfiles();
+  const { getUserState } = storeToRefs(repositoryProfiles);
 
   const router = useRouter();
   const route = useRoute();
@@ -167,20 +171,27 @@ export function useInvestAmount() {
   };
 
   const updateData = (profileId?: number) => {
-    // Use provided profileId or fall back to selectedUserProfileId from store
+    if (!userLoggedIn.value) return;
+
     const targetProfileId = profileId ?? selectedUserProfileId.value;
+    const targetProfile = getUserState.value?.data?.profiles?.find(
+      (profile) => profile.id === targetProfileId
+    );
     
-    if (userLoggedIn.value) {
-      if (canLoadWalletData.value) {
-        walletRepository.getWalletByProfile(targetProfileId);
-      } else if (!canLoadWalletData.value && getWalletState.value.data ){
-        walletRepository.resetAll();
-      }
-      if (canLoadEvmWalletData.value) {
-        evmRepository.getEvmWalletByProfile(targetProfileId);
-      } else if (!canLoadEvmWalletData.value && getEvmWalletState.value.data ){
-        evmRepository.resetAll();
-      }
+    // Wallet data loading logic
+    const canLoadWallet = walletRepository.canLoadWalletDataNotSelected(targetProfile);
+    if (canLoadWallet) {
+      walletRepository.getWalletByProfile(targetProfileId);
+    } else if (getWalletState.value.data) {
+      walletRepository.resetAll();
+    }
+    
+    // EVM wallet (crypto) data loading logic
+    const canLoadEvmWallet = evmRepository.canLoadEvmWalletDataNotSelected(targetProfile);
+    if (canLoadEvmWallet) {
+      evmRepository.getEvmWalletByProfile(targetProfileId);
+    } else if (getEvmWalletState.value.data) {
+      evmRepository.resetAll();
     }
   }
 

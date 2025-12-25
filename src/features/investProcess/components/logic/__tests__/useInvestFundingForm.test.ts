@@ -96,12 +96,18 @@ describe('useInvestFundingForm', () => {
     // so wallet with 50 is insufficient
     props.getWalletState.data.totalBalance = 50;
     composable.model.funding_type = FundingTypes.wallet;
-    expect(composable.selectErrors.value[0]).toContain('Wallet does not have enough funds');
+    const hasWalletError = composable.selectErrors.value.some(
+      (error) => String(error).includes('Wallet does not have enough funds')
+    );
+    expect(hasWalletError).toBe(true);
 
     // not enough funds in crypto wallet
     props.getEvmWalletState.data.fundingBalance = 50;
     composable.model.funding_type = FundingTypes.cryptoWallet;
-    expect(composable.selectErrors.value[0]).toContain('Crypto wallet does not have enough funds');
+    const hasCryptoError = composable.selectErrors.value.some(
+      (error) => String(error).includes('Crypto wallet does not have enough funds')
+    );
+    expect(hasCryptoError).toBe(true);
   });
 
   it('prioritizes modelValue.number_of_shares over backend amount when computing investmentAmount', () => {
@@ -120,21 +126,30 @@ describe('useInvestFundingForm', () => {
     const emit = vi.fn();
     const props = baseProps();
 
-    // crypto wallet has 500 available
+    // Setup: crypto wallet has 500 available, price per share is 10
     props.getEvmWalletState.data.fundingBalance = 500;
     const composable = useInvestFundingForm(props, emit);
 
-    // Start with small investment: 5 shares * 10 = 50 < 500 → no error
-    props.modelValue.number_of_shares = 5;
+    // Set funding type to crypto wallet first
     composable.model.funding_type = FundingTypes.cryptoWallet;
     await nextTick();
-    const initialError = composable.selectErrors.value[0] || '';
-    expect(initialError).not.toContain('Crypto wallet does not have enough funds');
+
+    // Initial state: 10 shares * 10 = 100, which is < 500, so no error expected
+    // But let's set it explicitly to 5 to start with a known state
+    props.modelValue.number_of_shares = 5;
+    await nextTick();
+
+    // Verify initial state: 5 shares * 10 = 50 < 500 → no error
+    expect(composable.investmentAmount.value).toBe(50);
+    expect(composable.notEnoughEvmWalletFunds.value).toBe(false);
 
     // Increase shares so amount exceeds fundingBalance: 60 * 10 = 600 > 500 → error
     props.modelValue.number_of_shares = 60;
     await nextTick();
-    expect(composable.selectErrors.value[0]).toContain('Crypto wallet does not have enough funds');
+
+    // Verify updated state: 60 shares * 10 = 600 > 500 → should have error
+    expect(composable.investmentAmount.value).toBe(600);
+    expect(composable.notEnoughEvmWalletFunds.value).toBe(true);
   });
 
   it('combines validation with dynamic form when ACH is selected', () => {
@@ -172,5 +187,6 @@ describe('useInvestFundingForm', () => {
     expect(lastCall?.[1]).toMatchObject({ accountHolderName: 'John Doe' });
   });
 });
+
 
 

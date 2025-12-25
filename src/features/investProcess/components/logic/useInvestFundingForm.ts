@@ -1,5 +1,5 @@
 import {
-  ref, computed, watch, Ref,
+  ref, computed, watch, Ref, nextTick,
 } from 'vue';
 import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { useForm } from 'UiKit/composables/useForm';
@@ -107,15 +107,21 @@ export function useInvestFundingForm(
     (props.walletId || 0) > 0 && !props.getWalletState?.data?.isWalletStatusAnyError
   );
 
+  // Create a computed ref for number_of_shares to ensure proper reactivity tracking
+  // This ensures Vue tracks changes to props.modelValue.number_of_shares
+  const numberOfShares = computed(() => {
+    const modelValue = props.modelValue;
+    return modelValue?.number_of_shares;
+  });
+
   // Calculate investment amount - prioritize shared modelValue.number_of_shares, then saved data
   const investmentAmount = computed(() => {
-    const mv = props.modelValue || {};
-    console.log('mv', mv);
-
     // 1) derive from current shared modelValue.number_of_shares (live form value)
-    if (mv.number_of_shares != null) {
+    // Use the computed ref to ensure Vue properly tracks changes
+    const shares = numberOfShares.value;
+    if (shares != null) {
       const pricePerShare = props.data?.offer?.price_per_share || 0;
-      return mv.number_of_shares * pricePerShare;
+      return shares * pricePerShare;
     }
 
     // 2) saved backend amount (e.g. when returning to an existing investment)
@@ -124,9 +130,9 @@ export function useInvestFundingForm(
     }
 
     // 3) fallback: derive from backend number_of_shares * price_per_share
-    const numberOfShares = props.data?.number_of_shares ?? 0;
+    const backendNumberOfShares = props.data?.number_of_shares ?? 0;
     const pricePerShare = props.data?.offer?.price_per_share || 0;
-    return numberOfShares * pricePerShare;
+    return backendNumberOfShares * pricePerShare;
   });
 
   const notEnoughWalletFunds = computed(() =>
@@ -290,6 +296,27 @@ export function useInvestFundingForm(
     }
   }, { immediate: true });
 
+  // Watch for when selectOptions become available and sync the value
+  // This ensures the select displays the value even if it was set before options were ready
+  watch(
+    [() => selectOptions.value.length, () => props.data?.funding_type],
+    async ([optionsLength, fundingType]) => {
+      if (optionsLength > 0 && fundingType && fundingType !== 'none' as any) {
+        // Check if the value exists in options
+        const optionExists = selectOptions.value.some(
+          (opt) => String(opt.value).toLowerCase() === String(fundingType).toLowerCase()
+        );
+        if (optionExists) {
+          // Force update after nextTick to ensure select component has processed options
+          await nextTick();
+          // Reassign to trigger reactivity in the select component
+          model.funding_type = fundingType;
+        }
+      }
+    },
+    { immediate: true }
+  );
+
   // Watch componentData and emit updates
   if (emit) {
     watch(componentData, (newValue) => {
@@ -300,7 +327,7 @@ export function useInvestFundingForm(
   // Track dirty state for the main funding_type form field
   const { isDirty } = useForm<FormModelInvestmentFunding>({
     initialValues: computed(() => ({
-      funding_type: props.data?.funding_type as FundingTypes | undefined,
+      funding_type: (props.data?.funding_type || undefined) as FundingTypes,
     })),
     currentValues: model,
   });

@@ -13,6 +13,7 @@ import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { EvmTransactionTypes } from 'InvestCommon/data/evm/evm.types';
+import { hasRestrictedWalletBehavior } from 'InvestCommon/features/wallet/helpers/walletProfileHelpers';
 
 export const EVM_WALLET_TAB_INFO = {
   title: 'Crypto Wallet',
@@ -50,23 +51,24 @@ export function useDashboardEvm() {
   const isWalletCreated = computed(() => (
     getEvmWalletState.value.data?.isStatusCreated && !isWalletError.value));
 
+  const hasRestrictedWallet = computed(() => hasRestrictedWalletBehavior(selectedUserProfileData.value));
   const isError = computed(() => (
-    selectedUserProfileData.value.isKycDeclined || isWalletError.value || selectedUserProfileData.value.isTypeSdira));
+    selectedUserProfileData.value.isKycDeclined || isWalletError.value || hasRestrictedWallet.value));
 
   const isAlertShow = computed(() => (
-    selectedUserProfileData.value.isTypeSdira || selectedUserProfileData.value.isTypeSolo401k
+    hasRestrictedWallet.value
     || (isKYCNeedToPass.value || isKYCInProgress.value || isError.value)
     && !getProfileByIdState.value.loading
   ));
 
   const isTopTextShow = computed(() => (
-    !selectedUserProfileData.value.isTypeSdira
+    !hasRestrictedWallet.value
     && !isWalletError.value && !selectedUserProfileData.value.isKycDeclined
   ));
 
 
   const showWalletTable = computed(() => (
-    !selectedUserProfileData.value.isTypeSdira
+    !hasRestrictedWallet.value
     && !isWalletError.value
   ));
 
