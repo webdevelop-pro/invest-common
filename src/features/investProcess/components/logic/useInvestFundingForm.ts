@@ -29,9 +29,10 @@ export type ComponentData = {
 
 export interface UseInvestFundingFormProps {
   // Shared step model from parent (ViewInvestAmount)
-  // Currently only number_of_shares is needed here
+  // Contains number_of_shares and profile_id
   modelValue?: {
     number_of_shares?: number;
+    profile_id?: number;
   };
   errorData?: any;
   schemaBackend?: any;
@@ -290,27 +291,35 @@ export function useInvestFundingForm(
   });
 
   // Watch for funding type changes from offer data
+  // Only fill if the profile_id in data matches the currently selected profile_id
   watch(() => props.data?.funding_type, (newType) => {
-    if (newType && newType !== 'none' as any) {
+    const currentProfileId = props.modelValue?.profile_id;
+    const dataProfileId = props.data?.profile_id;
+    // Only fill if profile matches or if no profile is selected yet
+    if (newType && newType !== 'none' as any && (!currentProfileId || currentProfileId === dataProfileId)) {
       model.funding_type = newType;
     }
   }, { immediate: true });
 
   // Watch for when selectOptions become available and sync the value
   // This ensures the select displays the value even if it was set before options were ready
+  // Only fill if the profile_id in data matches the currently selected profile_id
   watch(
-    [() => selectOptions.value.length, () => props.data?.funding_type],
-    async ([optionsLength, fundingType]) => {
+    [() => selectOptions.value.length, () => props.data?.funding_type, () => props.modelValue?.profile_id, () => props.data?.profile_id],
+    async ([optionsLength, fundingType, currentProfileId, dataProfileId]) => {
       if (optionsLength > 0 && fundingType && fundingType !== 'none' as any) {
-        // Check if the value exists in options
-        const optionExists = selectOptions.value.some(
-          (opt) => String(opt.value).toLowerCase() === String(fundingType).toLowerCase()
-        );
-        if (optionExists) {
-          // Force update after nextTick to ensure select component has processed options
-          await nextTick();
-          // Reassign to trigger reactivity in the select component
-          model.funding_type = fundingType;
+        // Only fill if profile matches or if no profile is selected yet
+        if (!currentProfileId || currentProfileId === dataProfileId) {
+          // Check if the value exists in options
+          const optionExists = selectOptions.value.some(
+            (opt) => String(opt.value).toLowerCase() === String(fundingType).toLowerCase()
+          );
+          if (optionExists) {
+            // Force update after nextTick to ensure select component has processed options
+            await nextTick();
+            // Reassign to trigger reactivity in the select component
+            model.funding_type = fundingType;
+          }
         }
       }
     },

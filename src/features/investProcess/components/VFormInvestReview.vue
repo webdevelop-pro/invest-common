@@ -99,22 +99,6 @@ const {
           />
         </VFormGroup>
       </FormCol>
-      <FormCol
-        v-if="!isSsnHidden"
-        col2
-      >
-        <VFormGroup label="SSN">
-          <VFormInput
-            :model-value="selectedUserProfileData?.data?.ssn"
-            name="ssn"
-            mask="###-##-####"
-            disallow-special-chars
-            readonly
-            size="large"
-            data-testid="ssn"
-          />
-        </VFormGroup>
-      </FormCol>
     </FormRow>
 
     <div class="form-invest-review__subtitle is--h3__title">
