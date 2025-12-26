@@ -5,6 +5,7 @@ import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { storeToRefs } from 'pinia';
 import { VNavigationMenuLink } from 'UiKit/components/Base/VNavigationMenu';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
+import VNotificationBadge from 'InvestCommon/shared/components/VNotificationBadge.vue';
 
 import HomeIcon from 'UiKit/assets/images/menu_common/home.svg';
 import DashboardIcon from 'UiKit/assets/images/menu_common/grid.svg';
@@ -125,6 +126,12 @@ const menuItems = computed<Item[]>(() =>
             aria-hidden="true"
           />
           <span class="pwamenu__label">{{ item.text }}</span>
+
+          <VNotificationBadge
+            v-if="item.to === urlNotifications"
+            position="absolute"
+            custom-class="pwamenu__notification-badge"
+          />
         </VNavigationMenuLink>
       </li>
     </ul>
@@ -210,6 +217,12 @@ const menuItems = computed<Item[]>(() =>
         font-weight: 600;  
         color: #111827;    
       }
+    }
+
+    .pwamenu__notification-badge {
+      top: 4px;
+      right: 50%;
+      transform: translateX(calc(50% + 8px));
     }
   }
 }

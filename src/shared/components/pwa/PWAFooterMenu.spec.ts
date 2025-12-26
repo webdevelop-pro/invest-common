@@ -48,6 +48,7 @@ vi.mock('InvestCommon/domain/config/links.ts', () => ({
 // Pinia-stores через storeToRefs()
 const userLoggedInRef = ref(false)
 const selectedUserProfileIdRef = ref<string | number>('u-1')
+const notificationUnreadLengthRef = ref(0)
 
 vi.mock('InvestCommon/domain/session/store/useSession', () => ({
   useSessionStore: () => ({ userLoggedIn: userLoggedInRef }),
@@ -55,6 +56,32 @@ vi.mock('InvestCommon/domain/session/store/useSession', () => ({
 vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
   useProfilesStore: () => ({ selectedUserProfileId: selectedUserProfileIdRef }),
 }))
+
+vi.mock('InvestCommon/features/notifications/store/useNotifications', () => ({
+  useNotifications: () => ({
+    notificationUnreadLength: notificationUnreadLengthRef,
+  }),
+}))
+
+// Mock storeToRefs to handle refs properly
+vi.mock('pinia', async () => {
+  const actual = await vi.importActual('pinia')
+  return {
+    ...actual,
+    storeToRefs: (store: any) => {
+      if (!store) return {}
+      const refs: any = {}
+      for (const key in store) {
+        if (store[key] && typeof store[key] === 'object' && 'value' in store[key]) {
+          refs[key] = store[key]
+        } else if (store[key] !== null && store[key] !== undefined) {
+          refs[key] = { value: store[key] }
+        }
+      }
+      return refs
+    },
+  }
+})
 
 // ------------------- IMPORT SUT -------------------
 import PWAFooterMenu from './PWAFooterMenu.vue'

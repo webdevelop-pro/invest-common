@@ -305,7 +305,11 @@ export function useInvestFundingForm(
   // This ensures the select displays the value even if it was set before options were ready
   // Only fill if the profile_id in data matches the currently selected profile_id
   watch(
-    [() => selectOptions.value.length, () => props.data?.funding_type, () => props.modelValue?.profile_id, () => props.data?.profile_id],
+    [
+      () => selectOptions.value.length,
+      () => props.data?.funding_type,
+      () => props.modelValue?.profile_id,
+      () => props.data?.profile_id],
     async ([optionsLength, fundingType, currentProfileId, dataProfileId]) => {
       if (optionsLength > 0 && fundingType && fundingType !== 'none' as any) {
         // Only fill if profile matches or if no profile is selected yet

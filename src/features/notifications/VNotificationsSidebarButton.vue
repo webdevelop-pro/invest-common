@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { useNotifications } from 'InvestCommon/features/notifications/store/useNotifications';
-import { storeToRefs } from 'pinia';
 import {
   defineAsyncComponent, hydrateOnVisible, onBeforeMount,
 } from 'vue';
+import { useNotifications } from 'InvestCommon/features/notifications/store/useNotifications';
+import VNotificationBadge from 'InvestCommon/shared/components/VNotificationBadge.vue';
 import message from 'UiKit/assets/images/message.svg';
 
 const VNotificationSidebar = defineAsyncComponent({
@@ -20,7 +20,6 @@ defineProps({
 });
 
 const notificationsStore = useNotifications();
-const { notificationUnreadLength } = storeToRefs(notificationsStore);
 
 const onSidebarOpen = () => {
   notificationsStore.onSidebarToggle(true);
@@ -55,9 +54,9 @@ onBeforeMount(() => {
     <span class="notifications-sidebar-button__label is--h6__title">
       Notifications
     </span>
-    <span
-      v-if="showIcon && notificationUnreadLength && (notificationUnreadLength > 0)"
-      class="notifications-sidebar-button__notification-dot"
+    <VNotificationBadge
+      :position="showIcon ? 'absolute' : 'inline'"
+      custom-class="notifications-sidebar-button__badge"
     />
     <VNotificationSidebar :is-static-site="isStaticSite" />
   </div>
@@ -79,6 +78,7 @@ onBeforeMount(() => {
     height: 20px;
     color: colors.$gray-50;
     flex-shrink: 0;
+    position: relative;
     // margin: 5px 0;
 
     @media screen and (width < $desktop-md) {
@@ -128,6 +128,19 @@ onBeforeMount(() => {
     @media screen and (max-width: $desktop-md) {
       right: auto;
       left: 16px;
+    }
+  }
+
+  // Position the notification badge
+  &__badge {
+    @media screen and (width > $desktop-md) {
+      top: 8px;
+      left: 14px; // Position at top-right of icon (icon is 20px wide)
+    }
+
+    @media screen and (width < $desktop-md) {
+      margin-left: 4px;
+      align-self: baseline;
     }
   }
 }
