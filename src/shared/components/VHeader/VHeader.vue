@@ -48,10 +48,6 @@ const props = defineProps({
     type: String,
     default: '',
   },
-  showPwaHomeLoginLink: {
-    type: Boolean,
-    default: false,
-  },
 });
 
 const runtimePath = ref('');
@@ -78,12 +74,6 @@ const isRecoveryPage = computed(() => props.layout === 'auth-forgot' || resolved
 const isCheckEmailPage = computed(() => props.layout === 'auth-check-email' || resolvedPath.value?.includes('check-email'));
 const isAuthenticatorPage = computed(() => props.layout === 'auth-authenticator' || resolvedPath.value?.includes('authenticator'));
 const isKYCBoPage = computed(() => props.layout?.includes('kyc-bo') || resolvedPath.value?.includes('kyc-bo'));
-const isHomePage = computed(() => (
-  props.layout === 'home'
-  || resolvedPath.value === '/'
-  || resolvedPath.value === '/index'
-));
-
 const isAuthFlowPage = computed(() => (isRecoveryPage.value || isCheckEmailPage.value));
 
 const showNavigation = computed(() => (
@@ -97,13 +87,16 @@ const showDontHaveAccount = computed(() => (!isSignUpPage.value));
 const showAuthButtons = computed(() => (
   !userLoggedIn.value && !isAuthenticatorPage.value && !isKYCBoPage.value))
 const showPwaLoginLink = computed(() => (
-  (props.showPwaHomeLoginLink || (props.isMobilePWA && isHomePage.value))
+  props.isMobilePWA
   && !userLoggedIn.value
+  && !isSignInPage.value
+  && !isSignUpPage.value
+  && !isAuthFlowPage.value
   && !isAuthenticatorPage.value
   && !isKYCBoPage.value
 ));
 const showPwaAuthCta = computed(() => (
-  !props.showPwaHomeLoginLink
+  props.isMobilePWA
   && !userLoggedIn.value
   && (isSignInPage.value || isSignUpPage.value)
 ));
