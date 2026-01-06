@@ -12,6 +12,8 @@ import { MenuItem } from 'InvestCommon/types/global'; // Use shared MenuItem typ
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useBreakpoints } from 'UiKit/composables/useBreakpoints';
 import ArrowRight from 'UiKit/assets/images/arrow-right.svg';
+import LogOutIcon from 'UiKit/assets/images/menu_common/logout.svg';
+import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 
 const VHeaderProfile = defineAsyncComponent({
   loader: () => import('./VHeaderProfile.vue'),
@@ -62,6 +64,8 @@ const sessionStore = useSessionStore();
 const { userLoggedIn } = storeToRefs(sessionStore);
 const useRepositoryProfilesStore = useRepositoryProfiles();
 const { getUserState } = storeToRefs(useRepositoryProfilesStore);
+const useDialogsStore = useDialogs();
+const { isDialogLogoutOpen } = storeToRefs(useDialogsStore);
 // Use props.path directly, no need for ref unless it is updated elsewhere
 const isMobileSidebarOpen = defineModel<boolean>();
 
@@ -95,6 +99,12 @@ const showPwaLoginLink = computed(() => (
   && !isAuthenticatorPage.value
   && !isKYCBoPage.value
 ));
+const showPwaLogoutIcon = computed(() => (
+  props.isMobilePWA
+  && userLoggedIn.value
+  && !isAuthenticatorPage.value
+  && !isKYCBoPage.value
+));
 const showPwaAuthCta = computed(() => (
   props.isMobilePWA
   && !userLoggedIn.value
@@ -124,6 +134,10 @@ const signUpHandler = () => {
   navigateWithQueryParams(urlSignup, paramsObj);
 };
 
+const logoutHandler = () => {
+  isDialogLogoutOpen.value = true;
+};
+
 </script>
 
 <template>
@@ -132,7 +146,7 @@ const signUpHandler = () => {
     :show-navigation="showNavigation"
     :show-mobile-sidebar="showMobileSidebar"
     :is-mobile-p-w-a="isMobilePWA"
-    :show-profile-link="showProfileLink"
+    :show-profile-link="showProfileLink && !isMobilePWA"
     :url-profile="urlProfile"
     :user-logged-in="userLoggedIn"
     class="VHeaderInvest v-header-invest"
@@ -203,6 +217,19 @@ const signUpHandler = () => {
         <component
           :is="ArrowRight"
           class="v-header-invest__pwa-login-icon"
+        />
+      </button>
+      <button
+        v-else-if="showPwaLogoutIcon"
+        type="button"
+        class="v-header-invest__pwa-logout"
+        aria-label="Log out"
+        @click="logoutHandler"
+      >
+        <component
+          :is="LogOutIcon"
+          class="v-header-invest__pwa-logout-icon"
+          aria-hidden="true"
         />
       </button>
       <div
@@ -337,6 +364,22 @@ const signUpHandler = () => {
   &__pwa-login-icon {
     width: 16px;
     height: 16px;
+  }
+
+  &__pwa-logout {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    padding: 0;
+    color: $gray-80;
+    cursor: pointer;
+  }
+
+  &__pwa-logout-icon {
+    width: 20px;
+    height: 20px;
   }
 
   &__pwa-auth {
