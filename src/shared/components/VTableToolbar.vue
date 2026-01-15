@@ -37,6 +37,7 @@ const onApplyFilter = (items: IVFilter[]) => {
         />
       </div>
       <VFilter
+        v-if="filterItems"
         :items="filterItems"
         :disabled="!isActiveToolbar"
         class="v-table-toolbar__filter"

@@ -131,8 +131,13 @@ export function useDashboardEvm() {
   const initTransactionTypeFromQuery = () => {
     const queryVal = route.query['add-transaction'];
     const value = Array.isArray(queryVal) ? queryVal[0] : queryVal;
-    if (value === EvmTransactionTypes.withdrawal || value === EvmTransactionTypes.deposit) {
+    if (
+      value === EvmTransactionTypes.withdrawal
+      || value === EvmTransactionTypes.deposit
+      || value === EvmTransactionTypes.exchange
+    ) {
       transactiontType.value = value as EvmTransactionTypes;
+      isDialogTransactionOpen.value = true;
     }
   };
 

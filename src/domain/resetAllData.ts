@@ -14,6 +14,7 @@ import { useRepositoryOffer } from 'InvestCommon/data/offer/offer.repository';
 import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
 import { useRepositoryDistributions } from 'InvestCommon/data/distributions/distributions.repository';
 import { useRepositoryEsign } from 'InvestCommon/data/esign/esign.repository';
+import { useRepositoryEarn } from 'InvestCommon/data/earn/earn.repository';
 
 import { cookiesOptions } from 'InvestCommon/domain/config/cookies';
 
@@ -39,6 +40,8 @@ export const resetAllProfileData = () => {
   useRepositoryEvm().resetAll();
   useRepositoryDistributions().resetAll();
   useRepositoryEsign().resetAll();
+  // Note: useRepositoryEarn is NOT reset here to preserve positions data across page navigation
+  // It will only be reset on logout via resetAllData()
 };
 
 export const resetAllData = () => {
@@ -48,4 +51,6 @@ export const resetAllData = () => {
   resetAllProfileData();
   useRepositoryOffer().resetAll();
   useRepositoryNotifications().resetAll();
+  // Reset earn data on full logout/reset
+  useRepositoryEarn().resetAll();
 };

@@ -16,6 +16,18 @@ const props = defineProps({
     required: true,
   },
   data: Object,
+  defaultBuySymbol: {
+    type: String,
+    required: false,
+  },
+  poolId: {
+    type: String,
+    required: false,
+  },
+  profileId: {
+    type: [String, Number],
+    required: false,
+  },
 });
 
 const isTypeDeposit = ref((props.transactionType === EvmTransactionTypes.deposit));
@@ -56,6 +68,9 @@ watch(() => props.transactionType, (newVal: EvmTransactionTypes) => {
         v-else-if="isTypeExchange"
         class="is--margin-top-20"
         :data="data"
+        :default-buy-symbol="defaultBuySymbol"
+        :pool-id="poolId"
+        :profile-id="profileId"
         @close="open = false"
       />
       <VFormFundsWithdraw

@@ -1,23 +1,54 @@
 import { computed } from 'vue';
 import { storeToRefs } from 'pinia';
+import { useRouter } from 'vue-router';
 import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
 import { EvmTransactionTypes } from 'InvestCommon/data/evm/evm.types';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { hasRestrictedWalletBehavior } from 'InvestCommon/features/wallet/helpers/walletProfileHelpers';
+import type { IProfileFormatted } from 'InvestCommon/data/profiles/profiles.types';
+import { currency } from 'InvestCommon/helpers/currency';
+import env from 'InvestCommon/domain/config/env';
+import { ROUTE_DASHBOARD_EARN } from 'InvestCommon/domain/config/enums/routes';
+import VTableWalletTokensItem from '../VTableWalletTokensItem.vue';
+import VTableWalletTransactionsItem from '../VTableWalletTransactionsItem.vue';
 import addFunds from 'InvestCommon/shared/assets/images/icons/add-funds.svg';
 import withdraw from 'InvestCommon/shared/assets/images/icons/withdraw.svg';
 import exchange from 'InvestCommon/shared/assets/images/icons/exchange.svg';
 import buy from 'InvestCommon/shared/assets/images/icons/buy.svg';
 import earn from 'InvestCommon/shared/assets/images/icons/earn.svg';
 
-export const useDashboardEvmWalletTokens = () => {
+const transactionsTableHeader = [
+  { text: 'Date' },
+  { text: 'Token' },
+  { text: 'Amount' },
+  { text: 'Investment ID' },
+  { text: 'Status' },
+  { text: 'Transaction TX/Network' },
+];
+
+const balanceTableHeader = [
+  { text: 'Icon' },
+  { text: 'Name' },
+  { text: 'Symbol' },
+  { text: 'Amount' },
+  { text: 'Network link' },
+];
+
+// Help TS resolve env property in template binding
+const WALLET_SCAN_URL = env.CRYPTO_WALLET_SCAN_URL as string;
+
+export const useDashboardEvmWalletTokens = (
+  props: { isError?: boolean },
+  emit?: (e: 'click', type: EvmTransactionTypes) => void
+) => {
+  const router = useRouter();
   const evmRepository = useRepositoryEvm();
   const {
     getEvmWalletState, isLoadingNotificationTransaction, isLoadingNotificationWallet,
   } = storeToRefs(evmRepository);
   
   const profilesStore = useProfilesStore();
-  const { selectedUserProfileData } = storeToRefs(profilesStore);
+  const { selectedUserProfileData, selectedUserProfileId } = storeToRefs(profilesStore);
 
   const tableOptions = computed(() => getEvmWalletState.value.data?.balances);
 
@@ -37,7 +68,9 @@ export const useDashboardEvmWalletTokens = () => {
     (getEvmWalletState.value.data?.balances?.length ?? 0) > 0
   ));
 
-  const hasRestrictedWallet = computed(() => hasRestrictedWalletBehavior(selectedUserProfileData.value));
+  const hasRestrictedWallet = computed(() => 
+    hasRestrictedWalletBehavior((selectedUserProfileData.value ?? null) as IProfileFormatted | null)
+  );
   const canAddFunds = computed(() => (
     !getEvmWalletState.value.loading && !hasRestrictedWallet.value
     && selectedUserProfileData.value.isKycApproved
@@ -106,18 +139,59 @@ export const useDashboardEvmWalletTokens = () => {
     },
   ]);
 
+  const balances = computed(() => [
+    {
+      title: 'Wallet Balance:',
+      balance: currency(getEvmWalletState.value.data?.fundingBalance),
+      href: `${WALLET_SCAN_URL}/address/${getEvmWalletState.value.data?.address}`,
+    },
+    ...(isShowIncomingBalance.value ? [{
+      title: 'Incoming:',
+      balance: `+ ${currency(getEvmWalletState.value.data?.pendingIncomingBalance)}`,
+      label: 'Pending',
+    }] : []),
+    ...(isShowOutgoingBalance.value ? [{
+      title: 'Outgoing:',
+      balance: `- ${currency(getEvmWalletState.value.data?.pendingOutcomingBalance)}`,
+      label: 'Pending investment',
+    }] : []),
+  ]);
+
+  const tables = computed(() => [
+    {
+      title: 'Tokens:',
+      header: balanceTableHeader,
+      data: tableOptions.value || [],
+      loading: (isSkeleton.value && !props.isError) || isLoadingNotificationWallet.value,
+      rowLength: 5,
+      colspan: balanceTableHeader.length,
+      tableRowComponent: VTableWalletTokensItem,
+    },
+    {
+      title: 'Latest Transactions:',
+      viewAllHref: '#',
+      header: transactionsTableHeader,
+      data: transactionsOptions.value || [],
+      loading: (isSkeleton.value && !props.isError) || isLoadingNotificationTransaction.value,
+      rowLength: 5,
+      colspan: transactionsTableHeader.length,
+      tableRowComponent: VTableWalletTransactionsItem,
+    },
+  ]);
+
+  const handleButtonClick = (payload: { id: string | number, transactionType?: unknown }) => {
+    if (payload.id === 'earn') {
+      router.push({ name: ROUTE_DASHBOARD_EARN, params: { profileId: selectedUserProfileId.value } });
+    } else if (payload.transactionType && emit) {
+      emit('click', payload.transactionType as EvmTransactionTypes);
+    }
+  };
+
   return {
-    getEvmWalletState,
-    tableOptions,
-    transactionsOptions,
-    isShowIncomingBalance,
-    isShowOutgoingBalance,
-    canWithdraw,
-    canExchange,
-    isSkeleton,
+    balances,
+    tables,
     buttonConfigs,
-    isLoadingNotificationTransaction,
-    isLoadingNotificationWallet,
+    handleButtonClick,
   };
 };
 

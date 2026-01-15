@@ -11,8 +11,20 @@ import { useVFormFundsExchange } from './logic/useVFormFundsExchange';
 
 const emit = defineEmits(['close']);
 
-defineProps({
+const props = defineProps({
   data: Object,
+  defaultBuySymbol: {
+    type: String,
+    required: false,
+  },
+  poolId: {
+    type: String,
+    required: false,
+  },
+  profileId: {
+    type: [String, Number],
+    required: false,
+  },
 });
 
 const {
@@ -31,7 +43,7 @@ const {
   getErrorText,
   exchangeRate,
   selectedToken,
-} = useVFormFundsExchange(() => emit('close'));
+} = useVFormFundsExchange(() => emit('close'), props.defaultBuySymbol, props.poolId, props.profileId);
 </script>
 
 <template>

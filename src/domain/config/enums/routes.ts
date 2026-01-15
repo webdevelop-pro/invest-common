@@ -20,6 +20,10 @@ export const ROUTE_DASHBOARD_TRUST_INFORMATION = 'ROUTE_DASHBOARD_TRUST_INFORMAT
 export const ROUTE_DASHBOARD_FINANCIAL_AND_INVESTMENT_INFO = 'ROUTE_DASHBOARD_FINANCIAL_AND_INVESTMENT_INFO';
 export const ROUTE_DASHBOARD_DISTRIBUTIONS = 'ROUTE_DASHBOARD_DISTRIBUTIONS';
 export const ROUTE_DASHBOARD_SUMMARY = 'ROUTE_DASHBOARD_SUMMARY';
+export const ROUTE_DASHBOARD_EARN = 'ROUTE_DASHBOARD_EARN';
+export const ROUTE_EARN_OVERVIEW = 'ROUTE_EARN_OVERVIEW';
+export const ROUTE_EARN_YOUR_POSITION = 'ROUTE_EARN_YOUR_POSITION';
+export const ROUTE_EARN_RISK = 'ROUTE_EARN_RISK';
 
 export const ROUTE_NOTIFICATIONS = 'ROUTE_NOTIFICATIONS';
 
@@ -114,6 +118,10 @@ export const PAGE_TITLES = {
   [ROUTE_DASHBOARD_BUSINESS_CONTROLLER]: `Business Controller | ${DEFAULT_PAGE_TITLE}`,
   [ROUTE_DASHBOARD_FINANCIAL_AND_INVESTMENT_INFO]: `Financial and Investment Information | ${DEFAULT_PAGE_TITLE}`,
   [ROUTE_DASHBOARD_SUMMARY]: `Summary | ${DEFAULT_PAGE_TITLE}`,
+  [ROUTE_DASHBOARD_EARN]: `Earn | ${DEFAULT_PAGE_TITLE}`,
+  [ROUTE_EARN_OVERVIEW]: `Earn Overview | ${DEFAULT_PAGE_TITLE}`,
+  [ROUTE_EARN_YOUR_POSITION]: `Your Position | ${DEFAULT_PAGE_TITLE}`,
+  [ROUTE_EARN_RISK]: `Risk | ${DEFAULT_PAGE_TITLE}`,
 
   [ROUTE_INVESTMENT_DOCUMENTS]: `Investment Documents | ${DEFAULT_PAGE_TITLE}`,
   [ROUTE_INVESTMENT_TIMELINE]: `Investment Timeline | ${DEFAULT_PAGE_TITLE}`,
@@ -176,6 +184,9 @@ export const PAGE_DESCRIPTIONS = {
   [ROUTE_DASHBOARD_PLAN_INFO]: 'Manage plan information',
   [ROUTE_DASHBOARD_BUSINESS_CONTROLLER]: 'Manage business controller',
   [ROUTE_DASHBOARD_FINANCIAL_AND_INVESTMENT_INFO]: 'Submit financial data. Share investment details for tailored recommendations.',
+  [ROUTE_DASHBOARD_EARN]: 'Discover earning opportunities. Explore ways to grow your wealth and maximize returns.',
+  [ROUTE_EARN_OVERVIEW]: 'Overview of this earning opportunity. Explore APY, TVL, and other key metrics.',
+  [ROUTE_EARN_YOUR_POSITION]: 'View your position in this earning opportunity. Track your staked amount and earnings.',
 
   [ROUTE_INVESTMENT_DOCUMENTS]: 'Investment document checklist. Ensure all required documents are submitted for your investment.',
   [ROUTE_INVESTMENT_TIMELINE]: 'Track investment progress. Monitor milestones and projected growth over time.',

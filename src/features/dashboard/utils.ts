@@ -5,4 +5,5 @@ export enum DashboardTabTypes {
   evmwallet = 'evmwallet',
   distributions = 'distributions',
   summary = 'summary',
+  earn = 'earn',
 }

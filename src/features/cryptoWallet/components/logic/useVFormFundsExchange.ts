@@ -7,13 +7,18 @@ import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
+import { useRepositoryEarn } from 'InvestCommon/data/earn/earn.repository';
 import { IEvmExchangeRequestBody, IEvmWalletBalances } from 'InvestCommon/data/evm/evm.types';
 
 export function useVFormFundsExchange(
   emitClose?: () => void,
+  defaultBuySymbol?: string,
+  poolId?: string,
+  profileId?: string | number,
 ) {
   const evmRepository = useRepositoryEvm();
   const { getEvmWalletState, exchangeTokensState, exchangeTokensOptionsState } = storeToRefs(evmRepository);
+  const earnRepository = useRepositoryEarn();
 
   // Call options request when component is mounted
   onMounted(() => {
@@ -28,6 +33,12 @@ export function useVFormFundsExchange(
   });
 
   const tokenToFormatted = computed(() => {
+    if (defaultBuySymbol) return [{
+      text: defaultBuySymbol, 
+      id: '0xe2cCb3fc0153584e5C70c65849078b55597b4032',
+      symbol: defaultBuySymbol,
+      name: defaultBuySymbol
+    }];
     const balances = getEvmWalletState.value.data?.balances || [];
     const usdcToken = balances.find((item: any) => 
       item.name?.toLowerCase().includes('usdc')
@@ -120,16 +131,33 @@ export function useVFormFundsExchange(
       nextTick(() => scrollToError('VFormWalletExchangeTransaction'));
       return;
     }
+    const amount = Number(model.amount);
+
+    // If opened from Earn (defaultBuySymbol provided), mock exchange in positionsPools
+    if (defaultBuySymbol) {
+      const fromSymbol = selectedToken.value?.symbol || 'USDC';
+
+      earnRepository.mockExchangePositions({
+        profileId: profileId as string | number,
+        fromSymbol,
+        toSymbol: defaultBuySymbol,
+        toPoolId: poolId as string,
+        amount,
+      });
+
+      if (emitClose) emitClose();
+      return;
+    }
+
     const data: IEvmExchangeRequestBody = {
       from: String(model.from),
       to: String(model.to),
-      amount: Number(model.amount),
+      amount,
       wallet_id: Number(model.wallet_id),
     };
     await evmRepository.exchangeTokens(data);
     if (getEvmWalletState.value.error) return;
-    
-    // evmRepository.getEvmWalletByProfile(selectedUserProfileId.value);
+
     if (emitClose) emitClose();
   };
 
@@ -171,7 +199,7 @@ export function useVFormFundsExchange(
   const tokensFromFormatted = computed(() => 
     getUniqueTokens(
       getEvmWalletState.value.data?.balances || [],
-      (item: any) => !item.name?.toLowerCase().includes('usdc')
+      defaultBuySymbol ? undefined : (item: any) => !item.name?.toLowerCase().includes('usdc')
     )
   );
 

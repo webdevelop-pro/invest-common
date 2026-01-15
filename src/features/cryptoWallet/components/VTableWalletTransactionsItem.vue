@@ -52,6 +52,12 @@ const { selectedUserProfileId } = storeToRefs(profilesStore);
         >
           {{ data?.symbol }}
         </a>
+        <span
+          v-else
+          class="is--h6__title"
+        >
+          {{ data?.symbol }}
+        </span>
       </div>
     </VTableCell>
     

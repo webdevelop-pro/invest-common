@@ -9,6 +9,7 @@ import { computed, PropType, watch, onMounted, nextTick, type Component } from '
 import {
   ROUTE_DASHBOARD_PORTFOLIO, ROUTE_DASHBOARD_ACCOUNT, ROUTE_DASHBOARD_WALLET,
   ROUTE_DASHBOARD_DISTRIBUTIONS, ROUTE_DASHBOARD_EVMWALLET, ROUTE_DASHBOARD_SUMMARY,
+  ROUTE_DASHBOARD_EARN,
 } from 'InvestCommon/domain/config/enums/routes';
 import { VTabsContent } from 'UiKit/components/Base/VTabs';
 import DashboardPortfolio from 'InvestCommon/features/investment/DashboardPortfolio.vue';
@@ -17,6 +18,7 @@ import DashboardWallet from 'InvestCommon/features/wallet/DashboardWallet.vue';
 import DashboardEvm from 'InvestCommon/features/cryptoWallet/DashboardEvm.vue';
 import DashboardDistributions from 'InvestCommon/features/distributions/DashboardDistributions.vue';
 import DashboardSummary from 'InvestCommon/features/summary/DashboardSummary.vue';
+import DashboardEarn from 'InvestCommon/features/earn/DashboardEarn.vue';
 import { useRoute } from 'vue-router';
 
 defineProps({
@@ -69,6 +71,11 @@ const tabs = computed(() => ({
     // subTitle: '+1',
     to: { name: ROUTE_DASHBOARD_DISTRIBUTIONS, params: { profileId: selectedUserProfileId.value } },
   },
+  [DashboardTabTypes.earn]: {
+    value: DashboardTabTypes.earn,
+    label: 'Earn',
+    to: { name: ROUTE_DASHBOARD_EARN, params: { profileId: selectedUserProfileId.value } },
+  },
 }) as const);
 
 const tabsList = computed(() => Object.values(tabs.value));
@@ -80,6 +87,7 @@ const tabComponents: Record<DashboardTabTypes, Component> = {
   [DashboardTabTypes.evmwallet]: DashboardEvm,
   [DashboardTabTypes.distributions]: DashboardDistributions,
   [DashboardTabTypes.summary]: DashboardSummary,
+  [DashboardTabTypes.earn]: DashboardEarn,
 };
 
 watch(

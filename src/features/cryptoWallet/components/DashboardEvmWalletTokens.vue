@@ -1,11 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-import { currency } from 'InvestCommon/helpers/currency';
-import VWalletTokensAndTransactions from 'InvestCommon/shared/components/VWalletTokensAndTransactions.vue';
-import VTableWalletTokensItem from './VTableWalletTokensItem.vue';
-import VTableWalletTransactionsItem from './VTableWalletTransactionsItem.vue';
-import env from 'InvestCommon/domain/config/env';
 import { EvmTransactionTypes } from 'InvestCommon/data/evm/evm.types';
+import VWalletTokensAndTransactions from 'InvestCommon/shared/components/VWalletTokensAndTransactions.vue';
 import { useDashboardEvmWalletTokens } from './logic/useDashboardEvmWalletTokens';
 
 const props = defineProps({
@@ -24,77 +19,12 @@ const emit = defineEmits<{
   (e: 'click', type: EvmTransactionTypes): void,
 }>();
 
-const transactionsTableHeader = [
-  { text: 'Date' },
-  { text: 'Token' },
-  { text: 'Amount' },
-  { text: 'Investment ID' },
-  { text: 'Status' },
-  { text: 'Transaction TX/Network' },
-];
-
-const balanceTableHeader = [
-  { text: 'Icon' },
-  { text: 'Name' },
-  { text: 'Symbol' },
-  { text: 'Amount' },
-  { text: 'Network link' },
-];
-
 const {
-  getEvmWalletState,
-  tableOptions,
-  transactionsOptions,
-  isShowIncomingBalance,
-  isShowOutgoingBalance,
-  isSkeleton,
+  balances,
+  tables,
   buttonConfigs,
-  isLoadingNotificationTransaction,
-  isLoadingNotificationWallet,
-} = useDashboardEvmWalletTokens();
-
-// Help TS resolve env property in template binding
-const WALLET_SCAN_URL = env.CRYPTO_WALLET_SCAN_URL as string;
-
-const balances = computed(() => [
-  {
-    title: 'Wallet Balance:',
-    balance: currency(getEvmWalletState.value.data?.fundingBalance),
-    href: `${WALLET_SCAN_URL}/address/${getEvmWalletState.value.data?.address}`,
-  },
-  ...(isShowIncomingBalance.value ? [{
-    title: 'Incoming:',
-    balance: `+ ${currency(getEvmWalletState.value.data?.pendingIncomingBalance)}`,
-    label: 'Pending',
-  }] : []),
-  ...(isShowOutgoingBalance.value ? [{
-    title: 'Outgoing:',
-    balance: `- ${currency(getEvmWalletState.value.data?.pendingOutcomingBalance)}`,
-    label: 'Pending investment',
-  }] : []),
-]);
-
-const tables = computed(() => [
-  {
-    title: 'Tokens:',
-    header: balanceTableHeader,
-    data: tableOptions.value || [],
-    loading: (isSkeleton.value && !props.isError) || isLoadingNotificationWallet.value,
-    rowLength: 5,
-    colspan: balanceTableHeader.length,
-    tableRowComponent: VTableWalletTokensItem,
-  },
-  {
-    title: 'Latest Transactions:',
-    viewAllHref: '#',
-    header: transactionsTableHeader,
-    data: transactionsOptions.value || [],
-    loading: (isSkeleton.value && !props.isError) || isLoadingNotificationTransaction.value,
-    rowLength: 5,
-    colspan: transactionsTableHeader.length,
-    tableRowComponent: VTableWalletTransactionsItem,
-  },
-]);
+  handleButtonClick,
+} = useDashboardEvmWalletTokens(props, emit);
 </script>
 
 <template>
@@ -103,7 +33,7 @@ const tables = computed(() => [
     :tables="tables"
     :action-buttons="buttonConfigs"
     class="DashboardEvmWalletTokens dashboard-evm-wallet-tokens"
-    @button-click="payload => payload.transactionType ? emit('click', payload.transactionType) : null"
+    @button-click="handleButtonClick"
   />
 </template>
 

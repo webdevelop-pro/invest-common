@@ -1,4 +1,4 @@
-import { computed, ref } from 'vue';
+import { computed, ref, unref } from 'vue';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import env from 'InvestCommon/domain/config/env';
@@ -10,11 +10,13 @@ import { EvmTransactionFormatter } from './formatter/transactions.formatter';
 import {
   IEvmWalletDataFormatted, IEvmWalletDataResponse, IEvmWithdrawRequestBody,
   IEvmExchangeRequestBody, IEvmExchangeResponse, EvmTransactionTypes, EvmTransactionStatusTypes,
+  IEvmTransactionDataResponse,
 } from './evm.types';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { hasRestrictedWalletBehavior } from 'InvestCommon/features/wallet/helpers/walletProfileHelpers';
 import { IProfileFormatted } from '../profiles/profiles.types';
+import { useRepositoryEarn } from '../earn/earn.repository';
 
 export const useRepositoryEvm = defineStore('repository-evm', () => {
 
@@ -37,12 +39,81 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
 
   const evmWalletId = computed(() => getEvmWalletState.value.data?.id || 0);
 
+  /**
+   * Mock function that adds all earn transactions to crypto wallet transactions
+   */
+  const addEarnTransactionsToWallet = (
+    walletData: IEvmWalletDataResponse,
+    profileId: number,
+  ): IEvmWalletDataResponse => {
+    const earnPositions = unref(useRepositoryEarn().positionsPools) || [];
+    const existingTxIds = new Set((walletData.transactions || []).map(tx => tx.id));
+    
+    // Type and status mapping
+    const typeMap: Record<string, EvmTransactionTypes> = {
+      deposit: EvmTransactionTypes.deposit,
+      withdraw: EvmTransactionTypes.withdrawal,
+    };
+    const statusMap: Record<string, EvmTransactionStatusTypes> = {
+      completed: EvmTransactionStatusTypes.processed,
+      pending: EvmTransactionStatusTypes.pending,
+    };
+
+    // Collect and convert earn transactions in a single pass
+    const newTransactions = earnPositions
+      .filter(p => p.profileId === profileId && p.transactions?.length && p.symbol)
+      .flatMap(position => 
+        position.transactions!
+          .filter(tx => !existingTxIds.has(tx.id))
+          .map(tx => {
+            const symbol = position.symbol || 'USDC';
+            const dateTime = tx.date && tx.time 
+              ? new Date(`${tx.date} ${tx.time}`).toISOString() 
+              : new Date().toISOString();
+            const type = typeMap[tx.type] || EvmTransactionTypes.deposit;
+            
+            return {
+              id: tx.id,
+              user_id: profileId,
+              dest_wallet_id: type === EvmTransactionTypes.deposit ? walletData.id : null,
+              source_wallet_id: type === EvmTransactionTypes.withdrawal ? walletData.id : null,
+              investment_id: null,
+              type,
+              amount: String(tx.amountUsd),
+              symbol,
+              name: symbol,
+              network: 'ethereum',
+              status: statusMap[tx.status] || EvmTransactionStatusTypes.pending,
+              transaction_tx: tx.txId,
+              created_at: dateTime,
+              updated_at: dateTime,
+            } as IEvmTransactionDataResponse;
+          })
+      );
+
+    if (newTransactions.length === 0) {
+      return walletData;
+    }
+
+    return {
+      ...walletData,
+      transactions: [...(walletData.transactions || []), ...newTransactions],
+    };
+  };
+
   const getEvmWalletByProfile = async (profileId: number) => {
     try {
       getEvmWalletState.value.loading = true;
       getEvmWalletState.value.error = null;
       const response = await apiClient.get<IEvmWalletDataResponse>(`/auth/wallet/${profileId}`);
-      const formatted = new EvmWalletFormatter(response.data as any).format();
+      
+      // Mock: Add earn transactions to wallet transactions
+      const walletDataWithEarnTransactions = addEarnTransactionsToWallet(
+        response.data as any,
+        profileId,
+      );
+      
+      const formatted = new EvmWalletFormatter(walletDataWithEarnTransactions as any).format();
       getEvmWalletState.value.data = formatted;
       return formatted;
     } catch (err) {

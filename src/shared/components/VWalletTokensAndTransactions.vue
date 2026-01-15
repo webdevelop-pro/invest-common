@@ -2,6 +2,7 @@
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import VTableDefault from 'InvestCommon/shared/components/VTableDefault.vue';
 import VTooltip from 'UiKit/components/VTooltip.vue';
+import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 
 type ActionButton = {
   id: string | number,
@@ -46,6 +47,11 @@ defineProps({
     required: false,
     default: () => [],
   },
+  balancesLoading: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
 });
 
 const emit = defineEmits<{
@@ -66,28 +72,36 @@ const emit = defineEmits<{
             {{ b.title }}
           </div>
           <div class="wallet-tokens-and-transactions__balance-numbers">
-            <a
-              v-if="b.href"
-              :href="b.href"
-              class="wallet-tokens-and-transactions__balance-current is--subheading-1 is--link"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {{ b.balance }}
-            </a>
-            <router-link
-              v-else-if="b.to"
-              :to="b.to"
-              class="wallet-tokens-and-transactions__balance-current is--subheading-1 is--link"
-            >
-              {{ b.balance }}
-            </router-link>
-            <span
-              v-else
-              class="wallet-tokens-and-transactions__balance-current is--subheading-1"
-            >
-              {{ b.balance }}
-            </span>
+            <VSkeleton
+              v-if="balancesLoading"
+              height="24px"
+              width="100px"
+              class="wallet-tokens-and-transactions__balance-skeleton"
+            />
+            <template v-else>
+              <a
+                v-if="b.href"
+                :href="b.href"
+                class="wallet-tokens-and-transactions__balance-current is--subheading-1 is--link"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {{ b.balance }}
+              </a>
+              <router-link
+                v-else-if="b.to"
+                :to="b.to"
+                class="wallet-tokens-and-transactions__balance-current is--subheading-1 is--link"
+              >
+                {{ b.balance }}
+              </router-link>
+              <span
+                v-else
+                class="wallet-tokens-and-transactions__balance-current is--subheading-1"
+              >
+                {{ b.balance }}
+              </span>
+            </template>
             <div class="wallet-tokens-and-transactions__pending-wrap">
               <span
                 v-if="b.incomingBalance"
@@ -294,6 +308,10 @@ const emit = defineEmits<{
 
   &__button-icon {
     width: 16px;
+  }
+
+  &__balance-skeleton {
+    margin-right: 8px;
   }
 
   .v-table-head:last-of-type {
