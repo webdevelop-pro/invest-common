@@ -43,6 +43,7 @@ const {
   getErrorText,
   exchangeRate,
   selectedToken,
+  destinationTokenSymbol,
 } = useVFormFundsExchange(() => emit('close'), props.defaultBuySymbol, props.poolId, props.profileId);
 </script>
 
@@ -173,7 +174,7 @@ const {
       v-if="exchangeRate && model.from"
       class="form-wallet-add-transaction__exchange-rate is--h6__title"
     >
-      1 {{ selectedToken?.symbol || 'Token' }} = {{ exchangeRate.toFixed(6) }} USDC
+      1 {{ selectedToken?.symbol || 'Token' }} = {{ exchangeRate.toFixed(6) }} {{ destinationTokenSymbol }}
     </div>
     
     <div class="form-wallet-add-transaction__footer">

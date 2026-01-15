@@ -192,6 +192,11 @@ export const useDashboardEvmWalletTokens = (
     tables,
     buttonConfigs,
     handleButtonClick,
+    tableOptions,
+    isShowIncomingBalance,
+    isShowOutgoingBalance,
+    canWithdraw,
+    isSkeleton,
   };
 };
 

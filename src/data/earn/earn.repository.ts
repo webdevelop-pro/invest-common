@@ -2,7 +2,6 @@ import { acceptHMRUpdate, defineStore } from 'pinia';
 import { ref } from 'vue';
 import { createActionState } from 'InvestCommon/data/repository/repository';
 import { EarnPositionFormatter, type EarnPositionsResponseFormatted } from './earn.formatter';
-import { useRepositoryEvm } from '../evm/evm.repository';
 
 export interface EarnDepositRequest {
   poolId: string;
@@ -84,51 +83,49 @@ export const useRepositoryEarn = defineStore('repository-earn', () => {
           p.poolId === payload.poolId && p.profileId === payload.profileId,
       );
 
+      const now = new Date();
       const newTransaction: EarnPositionTransaction = {
         id: Date.now(),
-        date: new Date().toLocaleDateString(),
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        date: now.toLocaleDateString(),
+        time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         amountUsd: payload.amount,
         txId: mockResponse.txId,
-        type: 'withdraw',
+        type: 'withdraw', // Withdraw from available balance to stake
         status: 'completed',
       };
 
+      const updatedList = [...list];
+      const symbol = payload.symbol || 'USDC';
+      const EARN_RATE = 0.05; // 5% earned rate
+
       if (index !== -1) {
-        // Accumulate: add new deposit to existing staked amount
-        const existing = list[index] as EarnPositionsResponse;
+        // Update existing position
+        const existing = list[index];
         const newStakedAmount = existing.stakedAmountUsd + payload.amount;
-        const newEarnedAmount = Number((newStakedAmount * 0.05).toFixed(2));
+        const currentAvailable = existing.availableAmountUsd ?? 0;
 
-        // Use symbol from payload, fallback to existing or default
-        const symbol = payload.symbol || existing.symbol || 'USDC';
-
-        const updated: EarnPositionsResponse = {
+        updatedList[index] = {
           ...existing,
-          symbol, // Ensure symbol is set
+          symbol: payload.symbol || existing.symbol || symbol,
           stakedAmountUsd: newStakedAmount,
-          earnedAmountUsd: newEarnedAmount,
+          earnedAmountUsd: Number((newStakedAmount * EARN_RATE).toFixed(2)),
+          availableAmountUsd: Math.max(0, currentAvailable - payload.amount),
           transactions: [newTransaction, ...existing.transactions],
         };
-
-        const updatedList = [...list];
-        updatedList[index] = updated;
-        positionsPools.value = updatedList;
       } else {
-        // Create new position data (first deposit for this pool/profile)
-        const symbol = payload.symbol || 'USDC';
-        
-        const newPosition: EarnPositionsResponse = {
+        // Create new position
+        updatedList.push({
           poolId: payload.poolId,
           profileId: payload.profileId,
           symbol,
           stakedAmountUsd: payload.amount,
-          earnedAmountUsd: Number((payload.amount * 0.05).toFixed(2)),
+          earnedAmountUsd: Number((payload.amount * EARN_RATE).toFixed(2)),
+          availableAmountUsd: 0,
           transactions: [newTransaction],
-        };
-
-        positionsPools.value = [...list, newPosition];
+        });
       }
+
+      positionsPools.value = updatedList;
 
       return mockResponse;
     } catch (err) {
@@ -178,123 +175,106 @@ export const useRepositoryEarn = defineStore('repository-earn', () => {
     }
   };
 
-  // Helper to get balance from crypto wallet for a given symbol
-  const getWalletBalanceForSymbol = (symbol: string): number => {
-    const evmRepository = useRepositoryEvm();
-    const walletData = evmRepository.getEvmWalletState.data;
-    if (!walletData?.balances) return 0;
-    
-    const balance = walletData.balances.find(
-      (b: any) => b.symbol?.toUpperCase() === symbol.toUpperCase()
-    );
-    
-    return balance ? Number(balance.amount || 0) : 0;
+  /**
+   * Helper to create transaction with current timestamp
+   */
+  const createTransaction = (
+    amountUsd: number,
+    type: 'deposit' | 'withdraw',
+    suffix: 'sell' | 'buy',
+  ): EarnPositionTransaction => {
+    const now = new Date();
+    return {
+      id: Date.now(),
+      date: now.toLocaleDateString(),
+      time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      amountUsd: Math.abs(amountUsd),
+      txId: `mock-exchange-${suffix}-${Date.now()}`,
+      type,
+      status: 'completed',
+    };
   };
 
+  /**
+   * Helper to get or create position and update availableAmountUsd
+   */
+  const updatePositionAvailableAmount = (
+    list: EarnPositionsResponse[],
+    profileId: string | number,
+    symbol: string,
+    poolId: string,
+    amountDelta: number,
+    transaction: EarnPositionTransaction,
+  ): void => {
+    const symbolUpper = symbol.toUpperCase();
+    const index = list.findIndex(
+      (p) =>
+        p.profileId === profileId &&
+        (poolId ? p.poolId === poolId : p.symbol?.toUpperCase() === symbolUpper)
+    );
+
+    if (index !== -1) {
+      const existing = list[index];
+      const currentAvailable = existing.availableAmountUsd ?? existing.stakedAmountUsd ?? 0;
+      list[index] = {
+        ...existing,
+        availableAmountUsd: currentAvailable + amountDelta,
+        transactions: [transaction, ...existing.transactions],
+      };
+    } else {
+      // Find existing position for the symbol to get current available amount
+      const existingPosition = positionsPools.value.find(
+        (p) => p.profileId === profileId && p.symbol?.toUpperCase() === symbolUpper
+      );
+      const currentAvailable = existingPosition?.availableAmountUsd ?? existingPosition?.stakedAmountUsd ?? 0;
+
+      list.push({
+        poolId: poolId || '',
+        profileId,
+        symbol,
+        stakedAmountUsd: 0,
+        earnedAmountUsd: 0,
+        availableAmountUsd: currentAvailable + amountDelta,
+        transactions: [transaction],
+      });
+    }
+  };
+
+  /**
+   * Mock exchange positions - updates positionsPools with exchange transactions
+   * Uses positionsPools as single source of truth for balances
+   */
   const mockExchangePositions = (payload: {
     profileId: string | number;
     fromSymbol: string;
     toSymbol: string;
     toPoolId: string;
-    amount: number;
+    fromAmount: number;
+    toAmount: number;
   }) => {
-    const list = positionsPools.value;
-    const now = new Date();
+    const updatedList: EarnPositionsResponse[] = [...positionsPools.value];
 
-    const baseDate = now.toLocaleDateString();
-    const baseTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-    const updatedList: EarnPositionsResponse[] = [...list];
-
-    // Helper to create transaction
-    const createTx = (
-      amountUsd: number,
-      type: 'deposit' | 'withdraw',
-      suffix: 'sell' | 'buy',
-    ): EarnPositionTransaction => ({
-      id: Date.now(),
-      date: baseDate,
-      time: baseTime,
-      amountUsd: Math.abs(amountUsd), // Always use positive amount
-      txId: `mock-exchange-${suffix}-${Date.now()}`,
-      type,
-      status: 'completed',
-    });
-
-    // 1) Add a withdraw transaction for the coin we sell (fromSymbol)
-    //    If the position doesn't exist, create it using wallet balance as base
-    const fromIndex = updatedList.findIndex(
-      (p) =>
-        p.profileId === payload.profileId
-        && p.symbol?.toUpperCase() === payload.fromSymbol.toUpperCase(),
+    // Update fromSymbol position (decrease availableAmountUsd)
+    const sellTx = createTransaction(payload.fromAmount, 'withdraw', 'sell');
+    updatePositionAvailableAmount(
+      updatedList,
+      payload.profileId,
+      payload.fromSymbol,
+      '',
+      -payload.fromAmount,
+      sellTx
     );
 
-    const sellTx = createTx(payload.amount, 'withdraw', 'sell');
-
-    if (fromIndex !== -1) {
-      const existing = updatedList[fromIndex];
-      // Use wallet balance as base if availableAmountUsd is not set, otherwise use existing
-      const walletBalance = getWalletBalanceForSymbol(payload.fromSymbol);
-      const currentAvailable = existing.availableAmountUsd ?? walletBalance ?? existing.stakedAmountUsd ?? 0;
-      const newAvailableAmountUsd = currentAvailable - payload.amount;
-
-      updatedList[fromIndex] = {
-        ...existing,
-        availableAmountUsd: newAvailableAmountUsd,
-        transactions: [sellTx, ...existing.transactions],
-      };
-    } else {
-      // Get wallet balance for fromSymbol and subtract the amount
-      const walletBalance = getWalletBalanceForSymbol(payload.fromSymbol);
-      const newFromPosition: EarnPositionsResponse = {
-        poolId: '', // unknown pool for pure "from" coin; can be filled later if needed
-        profileId: payload.profileId,
-        symbol: payload.fromSymbol,
-        stakedAmountUsd: 0,
-        earnedAmountUsd: 0,
-        availableAmountUsd: walletBalance - payload.amount,
-        transactions: [sellTx],
-      };
-
-      updatedList.push(newFromPosition);
-    }
-
-    // 2) Add to the coin we buy (toSymbol) for the target pool/profile
-    const toIndex = updatedList.findIndex(
-      (p) =>
-        p.profileId === payload.profileId
-        && p.poolId === payload.toPoolId,
+    // Update toSymbol position (increase availableAmountUsd)
+    const buyTx = createTransaction(payload.toAmount, 'deposit', 'buy');
+    updatePositionAvailableAmount(
+      updatedList,
+      payload.profileId,
+      payload.toSymbol,
+      payload.toPoolId,
+      payload.toAmount,
+      buyTx
     );
-
-    const buyTx = createTx(payload.amount, 'deposit', 'buy');
-
-    if (toIndex !== -1) {
-      const existing = updatedList[toIndex];
-      // Use wallet balance as base if availableAmountUsd is not set, otherwise use existing
-      const walletBalance = getWalletBalanceForSymbol(payload.toSymbol);
-      const currentAvailable = existing.availableAmountUsd ?? walletBalance ?? existing.stakedAmountUsd ?? 0;
-      const newavailableAmountUsd = currentAvailable + payload.amount;
-
-      updatedList[toIndex] = {
-        ...existing,
-        availableAmountUsd: newavailableAmountUsd,
-        transactions: [buyTx, ...existing.transactions],
-      };
-    } else {
-      // Get wallet balance for toSymbol and add the amount
-      const walletBalance = getWalletBalanceForSymbol(payload.toSymbol);
-      const newPosition: EarnPositionsResponse = {
-        poolId: payload.toPoolId,
-        profileId: payload.profileId,
-        symbol: payload.toSymbol,
-        stakedAmountUsd: 0,
-        earnedAmountUsd: 0,
-        availableAmountUsd: walletBalance + payload.amount,
-        transactions: [buyTx],
-      };
-
-      updatedList.push(newPosition);
-    }
 
     positionsPools.value = updatedList;
   };

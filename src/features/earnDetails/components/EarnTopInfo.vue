@@ -1,42 +1,25 @@
 <script setup lang="ts">
-import { PropType } from 'vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import InfoSlot from 'UiKit/components/VInfo/VInfoSlot.vue';
 import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 import arrowLeft from 'UiKit/assets/images/arrow-left.svg';
 import EarnDepositCard from './EarnDepositCard.vue';
+import { useEarnTopInfo, type InfoDataItem } from './composables/useEarnTopInfo';
 import type { DefiLlamaYieldPoolFormatted } from 'InvestCommon/data/3dParty/formatter/yields.formatter';
 
-interface InfoDataItem {
-  text: string;
-  value: string;
+interface Props {
+  poolData?: DefiLlamaYieldPoolFormatted;
+  loading?: boolean;
+  infoData?: InfoDataItem[];
+  profileId?: string | number;
+  coinBalance?: number;
+  walletLoading?: boolean;
 }
 
-defineProps({
-  poolData: {
-    type: Object as PropType<DefiLlamaYieldPoolFormatted | undefined>,
-    default: undefined,
-  },
-  loading: {
-    type: Boolean,
-    default: false,
-  },
-  infoData: {
-    type: Array as PropType<InfoDataItem[]>,
-    default: () => [],
-  },
-  profileId: {
-    type: [String, Number] as PropType<string | number | undefined>,
-    required: false,
-  },
-  coinBalance: {
-    type: Number as PropType<number | undefined>,
-    required: false,
-  },
-  walletLoading: {
-    type: Boolean,
-    default: false,
-  },
+const props = withDefaults(defineProps<Props>(), {
+  loading: false,
+  infoData: () => [],
+  walletLoading: false,
 });
 
 const emit = defineEmits<{
@@ -44,9 +27,11 @@ const emit = defineEmits<{
   (e: 'exchange-click'): void;
 }>();
 
-const onBackClick = () => {
-  emit('back-click');
-};
+const {
+  defaultSymbol,
+  hasPoolData,
+  displayInfoData,
+} = useEarnTopInfo(props);
 </script>
 
 <template>
@@ -56,10 +41,10 @@ const onBackClick = () => {
         variant="link"
         size="large"
         icon-placement="left"
-        @click.stop="onBackClick"
+        @click.stop="emit('back-click')"
       >
         <arrowLeft
-          alt="arrow left"
+          alt="Back to Earn"
           class="earn-top-info__back-icon"
         />
         Back to Earn
@@ -67,7 +52,7 @@ const onBackClick = () => {
     </div>
     <div class="earn-top-info__content is--gap-80">
       <div class="earn-top-info__left">
-        <div class="earn-top-info__right-top">
+        <div class="earn-top-info__header">
           <div>
             <VSkeleton
               v-if="loading"
@@ -76,10 +61,10 @@ const onBackClick = () => {
               class="earn-top-info__skeleton"
             />
             <div
-              v-else-if="poolData"
+              v-else-if="hasPoolData"
               class="earn-top-info__symbol-title is--h6__title"
             >
-              {{ poolData.project }}
+              {{ poolData?.project }}
             </div>
             <VSkeleton
               v-if="loading"
@@ -88,20 +73,21 @@ const onBackClick = () => {
               class="earn-top-info__skeleton"
             />
             <div
-              v-else-if="poolData"
+              v-else-if="hasPoolData"
               class="earn-top-info__project is--h3__title"
             >
-              {{ poolData.symbol }}
+              {{ poolData?.symbol }}
             </div>
           </div>
         </div>
         <InfoSlot
+          v-if="displayInfoData.length > 0 || loading"
           size="small"
           class="earn-top-info__info-wrap"
         >
           <span
-            v-for="(info, infoIndex) in infoData"
-            :key="infoIndex"
+            v-for="(info, infoIndex) in displayInfoData"
+            :key="`${info.text}-${infoIndex}`"
             class="earn-top-info__info-item"
           >
             <span class="earn-top-info__info-text is--small-2">
@@ -124,7 +110,7 @@ const onBackClick = () => {
       </div>
       <EarnDepositCard
         :loading="loading"
-        :symbol="poolData?.symbol || 'USDC'"
+        :symbol="defaultSymbol"
         :pool-id="poolData?.pool"
         :profile-id="profileId"
         :coin-balance="coinBalance"
@@ -137,15 +123,12 @@ const onBackClick = () => {
 
 <style lang="scss">
 .earn-top-info {
-  $root: &;
-
   margin: 40px 0 45px;
 
   &__content {
     display: flex;
-    // gap: 20px;
 
-    @media screen and (max-width: $desktop){
+    @media screen and (max-width: $desktop) {
       flex-direction: column;
     }
   }
@@ -154,17 +137,16 @@ const onBackClick = () => {
     width: 100%;
   }
 
-
   &__button-wrap {
     margin-bottom: 12px;
   }
 
-  &__right-top {
+  &__header {
     width: 100%;
     display: flex;
     justify-content: space-between;
 
-    @media screen and (max-width: $tablet-xs){
+    @media screen and (max-width: $tablet-xs) {
       flex-direction: column;
       gap: 8px;
     }
@@ -179,21 +161,6 @@ const onBackClick = () => {
     margin-bottom: 4px;
   }
 
-  &__apy {
-    color: $black;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  &__details {
-    color: $gray-80;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding-top: 8px;
-  }
-
   &__info-wrap {
     margin-top: 27px;
     display: grid;
@@ -202,14 +169,14 @@ const onBackClick = () => {
     color: $gray-80;
     width: 100%;
 
-    @media screen and (max-width: $tablet){
+    @media screen and (max-width: $tablet) {
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       margin-top: 10px;
-      gap: 2px 12px !important;
+      gap: 2px 12px;
     }
 
-    @media screen and (max-width: $mobile-xs){
-      grid-template-columns: repeat(1, minmax(0, 1fr));
+    @media screen and (max-width: $mobile-xs) {
+      grid-template-columns: 1fr;
     }
   }
 
@@ -219,14 +186,12 @@ const onBackClick = () => {
     display: flex;
     gap: 12px;
     align-items: center;
-    text-align: initial;
-    overflow: visible;
 
-    @media screen and (max-width: $desktop-lg){
+    @media screen and (max-width: $desktop-lg) {
       min-width: auto;
     }
 
-    @media screen and (max-width: $tablet-xs){
+    @media screen and (max-width: $tablet-xs) {
       justify-content: space-between;
     }
   }
@@ -234,7 +199,6 @@ const onBackClick = () => {
   &__info-text {
     color: $gray-70;
     min-width: 79px;
-    text-align: initial;
     white-space: nowrap;
     flex-shrink: 0;
   }

@@ -125,34 +125,75 @@ export function useVFormFundsExchange(
     return Number(selectedToken.value.price_per_usd);
   });
 
+  // Inverse rate for earn pages: 1 USDC = X pool coin
+  const inverseExchangeRate = computed(() => {
+    if (!exchangeRate.value) return undefined;
+    return 1 / exchangeRate.value;
+  });
+
+  // Get the destination token symbol (the "to" token)
+  const destinationTokenSymbol = computed(() => {
+    if (!model.to) return 'USDC';
+    const destinationToken = tokenToFormatted.value.find((token: any) => token.id === model.to);
+    return destinationToken?.symbol || defaultBuySymbol || 'USDC';
+  });
+
+  /**
+   * Handle exchange for Earn positions
+   * Calculates the buy amount based on conversion rate and updates positionsPools
+   * This is an Earn-specific function for handling exchanges within earn pools
+   */
+  const handleEarnExchange = async (fromAmount: number) => {
+    if (!defaultBuySymbol || !poolId || !profileId) {
+      return;
+    }
+
+    const fromSymbol = selectedToken.value?.symbol || 'USDC';
+    const rate = exchangeRate.value || 1;
+    const usdcEquivalent = fromAmount * rate;
+    
+    // Find destination token for price conversion
+    const destinationToken = getEvmWalletState.value.data?.balances?.find(
+      (token: any) => token.symbol === defaultBuySymbol
+    );
+    
+    // Convert USDC to token amount if price available, otherwise use USDC equivalent
+    const buyAmount = destinationToken?.price_per_usd
+      ? usdcEquivalent / destinationToken.price_per_usd
+      : usdcEquivalent;
+
+    earnRepository.mockExchangePositions({
+      profileId,
+      fromSymbol,
+      toSymbol: defaultBuySymbol,
+      toPoolId: poolId,
+      fromAmount,
+      toAmount: buyAmount,
+    });
+
+    // Refresh positions data to show the new transaction in the position tab
+    earnRepository.getPositions(poolId, profileId);
+  };
+
   const saveHandler = async () => {
     onValidate();
     if (!isValid.value) {
       nextTick(() => scrollToError('VFormWalletExchangeTransaction'));
       return;
     }
-    const amount = Number(model.amount);
+    const fromAmount = Number(model.amount);
 
-    // If opened from Earn (defaultBuySymbol provided), mock exchange in positionsPools
+    // If opened from Earn (defaultBuySymbol provided), use earn exchange handler
     if (defaultBuySymbol) {
-      const fromSymbol = selectedToken.value?.symbol || 'USDC';
-
-      earnRepository.mockExchangePositions({
-        profileId: profileId as string | number,
-        fromSymbol,
-        toSymbol: defaultBuySymbol,
-        toPoolId: poolId as string,
-        amount,
-      });
-
+      await handleEarnExchange(fromAmount);
       if (emitClose) emitClose();
       return;
     }
-
+    
     const data: IEvmExchangeRequestBody = {
       from: String(model.from),
       to: String(model.to),
-      amount,
+      amount: fromAmount,
       wallet_id: Number(model.wallet_id),
     };
     await evmRepository.exchangeTokens(data);
@@ -235,6 +276,8 @@ export function useVFormFundsExchange(
     scrollToError,
     receiveAmount,
     exchangeRate,
+    inverseExchangeRate,
     selectedToken,
+    destinationTokenSymbol,
   };
 }

@@ -1,18 +1,21 @@
 <script setup lang="ts">
-import { toRefs } from 'vue';
 import VWalletTokensAndTransactions from 'InvestCommon/shared/components/VWalletTokensAndTransactions.vue';
-import { useEarnYourPosition, type StatItem } from '../composables/useEarnYourPosition';
-import type { IEarnTransaction } from './VTableEarnTransactionItem.vue';
+import { useEarnYourPosition, type StatItem } from './composables/useEarnYourPosition';
+import type { IEarnTransaction } from './composables/useEarnTransactionItem';
 
-const props = defineProps<{
-  stats: StatItem[];
-  transactions: IEarnTransaction[];
-  loading: boolean;
-}>();
+interface Props {
+  stats?: StatItem[];
+  transactions?: IEarnTransaction[];
+  loading?: boolean;
+}
 
-const { stats, transactions, loading } = toRefs(props);
+const props = withDefaults(defineProps<Props>(), {
+  stats: () => [],
+  transactions: () => [],
+  loading: false,
+});
 
-const { balances, tables } = useEarnYourPosition(stats, transactions, loading);
+const { balances, tables } = useEarnYourPosition(props);
 </script>
 
 <template>
@@ -29,8 +32,19 @@ const { balances, tables } = useEarnYourPosition(stats, transactions, loading);
 <style lang="scss">
 .earn-your-position {
   &__wallet {
-        max-width: 800px;
-        margin: 0 auto;
+    max-width: 800px;
+    margin: 0 auto;
+
+    @media screen and (max-width: $tablet) {
+      width: 100%;
+      overflow: auto;
+    }
+  }
+
+  .v-table-header {
+    @media screen and (width < $tablet) {
+      display: none;
+    }
   }
 }
 </style>

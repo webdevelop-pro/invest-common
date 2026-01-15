@@ -3,6 +3,7 @@ import type { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { useRepositoryEarn } from 'InvestCommon/data/earn/earn.repository';
+import { storeToRefs } from 'pinia';
 
 export interface FormModelEarnDeposit {
   amount: number | null;
@@ -150,6 +151,9 @@ export function useEarnDepositCard(options: UseEarnDepositCardOptions = {}) {
     formErrors.clearErrors();
   };
 
+  const { depositState } = storeToRefs(earnRepository);
+  const errorData = computed(() => (depositState.value.error as any)?.data?.responseJson || {});
+
   return {
     // form core
     model,
@@ -170,7 +174,8 @@ export function useEarnDepositCard(options: UseEarnDepositCardOptions = {}) {
     submitHandler,
     onMax,
     resetFormValidation,
+    errorData,
+    depositState,
   };
 }
-
 

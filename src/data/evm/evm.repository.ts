@@ -101,6 +101,51 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
     };
   };
 
+  /**
+   * Updates crypto wallet balances based on earn positions
+   * Uses availableAmountUsd from positionsPools as single source of truth
+   */
+  const addEarnBalancesToWallet = (
+    walletData: IEvmWalletDataResponse,
+    profileId: number,
+  ): IEvmWalletDataResponse => {
+    const earnPositions = unref(useRepositoryEarn().positionsPools) || [];
+    const balances = { ...((walletData.balances as any) || {}) };
+    
+    // Update balances based on availableAmountUsd from positionsPools
+    earnPositions
+      .filter(p => p.profileId === profileId && p.symbol)
+      .forEach(position => {
+        const symbol = position.symbol.toUpperCase();
+        const balanceAmount = position.availableAmountUsd ?? position.stakedAmountUsd ?? 0;
+        
+        if (balanceAmount <= 0) return;
+        
+        const balanceKey = Object.keys(balances).find(
+          key => balances[key]?.symbol?.toUpperCase() === symbol
+        );
+        
+        if (balanceKey) {
+          balances[balanceKey] = {
+            ...balances[balanceKey],
+            amount: String(balanceAmount),
+          };
+        } else {
+          balances[symbol.toLowerCase()] = {
+            address: `0x${Math.random().toString(16).substr(2, 40)}`,
+            amount: String(balanceAmount),
+            symbol: position.symbol,
+            name: position.symbol,
+          };
+        }
+      });
+
+    return {
+      ...walletData,
+      balances,
+    };
+  };
+
   const getEvmWalletByProfile = async (profileId: number) => {
     try {
       getEvmWalletState.value.loading = true;
@@ -108,12 +153,18 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
       const response = await apiClient.get<IEvmWalletDataResponse>(`/auth/wallet/${profileId}`);
       
       // Mock: Add earn transactions to wallet transactions
-      const walletDataWithEarnTransactions = addEarnTransactionsToWallet(
+      let walletDataWithEarn = addEarnTransactionsToWallet(
         response.data as any,
         profileId,
       );
       
-      const formatted = new EvmWalletFormatter(walletDataWithEarnTransactions as any).format();
+      // Mock: Update balances from earn exchanges
+      walletDataWithEarn = addEarnBalancesToWallet(
+        walletDataWithEarn,
+        profileId,
+      );
+      
+      const formatted = new EvmWalletFormatter(walletDataWithEarn as any).format();
       getEvmWalletState.value.data = formatted;
       return formatted;
     } catch (err) {

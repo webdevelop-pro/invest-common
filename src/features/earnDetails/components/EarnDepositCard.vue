@@ -4,49 +4,29 @@ import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
-import { useEarnDepositCard } from '../composables/useEarnDepositCard';
-import { useRepositoryEarn } from 'InvestCommon/data/earn/earn.repository';
-import { storeToRefs } from 'pinia';
+import { useEarnDepositCard } from './composables/useEarnDepositCard';
 import { numberFormatter } from 'InvestCommon/helpers/numberFormatter';
 
-const props = defineProps({
-  loading: {
-    type: Boolean,
-    default: false,
-  },
-  symbol: {
-    type: String,
-    default: 'USDC',
-  },
-  poolId: {
-    type: String,
-    required: false,
-  },
-  profileId: {
-    type: [String, Number],
-    required: false,
-  },
-  coinBalance: {
-    type: Number,
-    required: false,
-  },
-  walletLoading: {
-    type: Boolean,
-    default: false,
-  },
+interface Props {
+  loading?: boolean;
+  symbol?: string;
+  poolId?: string;
+  profileId?: string | number;
+  coinBalance?: number;
+  walletLoading?: boolean;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  loading: false,
+  symbol: 'USDC',
+  walletLoading: false,
 });
 
 const { poolId, profileId, symbol } = toRefs(props);
 
-const earnRepository = useRepositoryEarn();
-const { depositState } = storeToRefs(earnRepository);
-
 const emit = defineEmits<{
   (e: 'exchange-click'): void;
 }>();
-
-// Use coinBalance from prop as single source of truth (computed in ViewEarnDetail)
-const coinBalance = computed(() => props.coinBalance ?? undefined);
 
 const {
   model,
@@ -58,16 +38,15 @@ const {
   getErrorText,
   scrollToError,
   resetFormValidation,
+  errorData,
+  depositState,
 } = useEarnDepositCard({
   scrollId: 'EarnDepositCard',
   poolId,
   profileId,
   symbol: computed(() => props.symbol),
-  maxAmount: coinBalance,
+  maxAmount: computed(() => props.coinBalance ?? undefined),
 });
-
-const errorData = computed(() => (depositState.value.error as any)?.data?.responseJson || {});
-
 
 const onExchangeClick = () => {
   resetFormValidation();
@@ -176,7 +155,6 @@ defineExpose({
 
   @media screen and (max-width: $desktop){
     width: 100%;
-    margin-top: 20px;
   }
 
   &__balance {

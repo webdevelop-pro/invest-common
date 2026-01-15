@@ -9,6 +9,28 @@ import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles
 
 export type { DefiLlamaYieldPool, DefiLlamaYieldPoolFormatted };
 
+const INITIAL_VISIBLE_COUNT = 10;
+const LOAD_MORE_INCREMENT = 10;
+const PROTOCOL_NAME = 'aave' as const;
+const INTERSECTION_ROOT_MARGIN = '100px';
+
+/**
+ * Filters pools by search query (symbol matching)
+ */
+function filterPoolsBySearch(
+  pools: DefiLlamaYieldPoolFormatted[],
+  searchQuery: string,
+): DefiLlamaYieldPoolFormatted[] {
+  if (!searchQuery.trim()) {
+    return pools;
+  }
+
+  const searchLower = searchQuery.toLowerCase().trim();
+  return pools.filter((pool) =>
+    pool.symbol?.toLowerCase().includes(searchLower),
+  );
+}
+
 export function useEarnTable() {
   const defiLlamaRepo = useRepositoryDefiLlama();
   const { getYieldsState } = storeToRefs(defiLlamaRepo);
@@ -16,59 +38,57 @@ export function useEarnTable() {
   const profilesStore = useProfilesStore();
   const { selectedUserProfileId } = storeToRefs(profilesStore);
 
-  const yieldsData = computed(() => getYieldsState.value.data || []);
+  const yieldsData = computed(() => getYieldsState.value.data ?? []);
   const loading = computed(() => getYieldsState.value.loading);
   const error = computed(() => getYieldsState.value.error);
-  
+
   const search = ref('');
-  const visibleCount = ref(10);
+  const visibleCount = ref(INITIAL_VISIBLE_COUNT);
   const sentinel = ref<HTMLElement | null>(null);
 
-  const filteredData = computed(() => {
-    // Filter only stablecoins
-    let pools = yieldsData.value.filter((pool) => pool.stablecoin === true);
-    
-    // Apply search filter by symbol if provided
-    if (search.value.trim()) {
-      const searchLower = search.value.toLowerCase();
-      pools = pools.filter((pool) => 
-        pool.symbol?.toLowerCase().includes(searchLower)
-      );
-    }
-    
-    return pools;
-  });
+  // Memoize stablecoin pools to avoid recalculating
+  const stablecoinPools = computed(() =>
+    yieldsData.value.filter((pool) => pool.stablecoin === true),
+  );
 
-  const totalResults = computed(() => yieldsData.value.filter((pool) => pool.stablecoin === true).length);
+  const filteredData = computed(() =>
+    filterPoolsBySearch(stablecoinPools.value, search.value),
+  );
+
+  const totalResults = computed(() => stablecoinPools.value.length);
   const filterResults = computed(() => filteredData.value.length);
 
-  const visibleData = computed(() => {
-    return filteredData.value.slice(0, visibleCount.value);
-  });
+  const visibleData = computed(() =>
+    filteredData.value.slice(0, visibleCount.value),
+  );
 
   const hasMore = computed(() => visibleCount.value < filteredData.value.length);
 
+  // Infinite scroll using intersection observer
   useIntersectionObserver(
     sentinel,
     ([{ isIntersecting }]) => {
-      if (isIntersecting && hasMore.value) {
-        visibleCount.value += 10;
+      if (isIntersecting && hasMore.value && !loading.value) {
+        visibleCount.value += LOAD_MORE_INCREMENT;
       }
     },
     {
-      rootMargin: '100px'
-    }
+      rootMargin: INTERSECTION_ROOT_MARGIN,
+    },
   );
 
-  // Reset visible count and scroll back to top when search changes
+  // Reset visible count and scroll to top when search changes
   watch(search, () => {
-    visibleCount.value = 10;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    visibleCount.value = INITIAL_VISIBLE_COUNT;
+    // Use requestAnimationFrame for smoother scroll
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
   });
 
   // Load yields on mount
   onMounted(() => {
-    void defiLlamaRepo.getYields('aave');
+    void defiLlamaRepo.getYields(PROTOCOL_NAME);
   });
 
   const onRowClick = (pool: DefiLlamaYieldPoolFormatted) => {
@@ -79,6 +99,10 @@ export function useEarnTable() {
         poolId: pool.pool,
       },
     });
+  };
+
+  const refetch = () => {
+    defiLlamaRepo.getYields(PROTOCOL_NAME);
   };
 
   return {
@@ -92,7 +116,7 @@ export function useEarnTable() {
     hasMore,
     sentinel,
     onRowClick,
-    refetch: () => defiLlamaRepo.getYields('aave'),
+    refetch,
   };
 }
 
