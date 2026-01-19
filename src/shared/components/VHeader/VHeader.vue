@@ -145,7 +145,7 @@ const getPathname = (url: string) => {
   }
   try {
     return normalizePath(new URL(url, window.location.origin).pathname);
-  } catch (error) {
+  } catch (_error) {
     return normalizePath(url);
   }
 };
