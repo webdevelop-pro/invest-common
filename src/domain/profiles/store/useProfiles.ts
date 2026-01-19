@@ -114,11 +114,17 @@ export const useProfilesStore = defineStore('profiles', () => {
   const setSelectedUserProfileById = (id: number) => {
     console.log('selectedUserProfileId', id);
     
-    // Reset all profile-dependent repositories to prevent stale data
-    resetAllProfileData();
+    const newProfileId = Number(id);
+    const profileChanged = selectedUserProfileId.value !== newProfileId;
+    
+    // Only reset all profile-dependent repositories if profile actually changed
+    // This prevents unnecessary data clearing when navigating between routes with the same profile
+    if (profileChanged) {
+      resetAllProfileData();
+    }
     
     // Update the selected profile ID
-    selectedUserProfileId.value = Number(id);
+    selectedUserProfileId.value = newProfileId;
     
     if (id === 0) return;
     
