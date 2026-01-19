@@ -6,14 +6,28 @@ import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { storeToRefs } from 'pinia';
 import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
-import { urlSignin, urlSignup } from 'InvestCommon/domain/config/links';
+import {
+  urlFaq,
+  urlHome,
+  urlHowItWorks,
+  urlNotifications,
+  urlOffers,
+  urlProfileCryptoWallet,
+  urlProfilePortfolio,
+  urlProfileWallet,
+  urlSignin,
+  urlSignup,
+} from 'InvestCommon/domain/config/links';
 import VHeader from 'UiKit/components/VHeader/VHeader.vue';
 import { MenuItem } from 'InvestCommon/types/global'; // Use shared MenuItem type
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useBreakpoints } from 'UiKit/composables/useBreakpoints';
 import ArrowRight from 'UiKit/assets/images/arrow-right.svg';
+import ArrowLeft from 'UiKit/assets/images/arrow-left.svg';
 import LogOutIcon from 'UiKit/assets/images/menu_common/logout.svg';
 import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
+import VLogo from 'UiKit/components/VLogo.vue';
 
 const VHeaderProfile = defineAsyncComponent({
   loader: () => import('./VHeaderProfile.vue'),
@@ -66,6 +80,8 @@ const useRepositoryProfilesStore = useRepositoryProfiles();
 const { getUserState } = storeToRefs(useRepositoryProfilesStore);
 const useDialogsStore = useDialogs();
 const { isDialogLogoutOpen } = storeToRefs(useDialogsStore);
+const profilesStore = useProfilesStore();
+const { selectedUserProfileId } = storeToRefs(profilesStore);
 // Use props.path directly, no need for ref unless it is updated elsewhere
 const isMobileSidebarOpen = defineModel<boolean>();
 
@@ -111,6 +127,92 @@ const showPwaAuthCta = computed(() => (
   && (isSignInPage.value || isSignUpPage.value)
 ));
 
+const normalizePath = (path: string) => {
+  const trimmed = path.split('#')[0].split('?')[0];
+  let normalized = trimmed.replace(/\/+$/, '');
+  if (!normalized.startsWith('/')) {
+    normalized = `/${normalized}`;
+  }
+  if (normalized === '/index') {
+    return '/';
+  }
+  return normalized || '/';
+};
+
+const getPathname = (url: string) => {
+  if (typeof window === 'undefined') {
+    return normalizePath(url);
+  }
+  try {
+    return normalizePath(new URL(url, window.location.origin).pathname);
+  } catch (error) {
+    return normalizePath(url);
+  }
+};
+
+const getProfileSectionKey = (pathname: string) => {
+  const match = pathname.match(/\/profile\/[^/]+\/([^/]+)/);
+  return match ? `profile/${match[1]}` : null;
+};
+
+const pwaRootPaths = computed(() => {
+  if (!userLoggedIn.value) {
+    return [
+      urlHome,
+      urlOffers,
+      urlHowItWorks,
+      urlFaq,
+    ].map(getPathname);
+  }
+
+  const profileId = Number(selectedUserProfileId.value);
+  const profilePaths = Number.isFinite(profileId)
+    ? [
+        urlProfilePortfolio(profileId),
+        urlProfileWallet(profileId),
+        urlProfileCryptoWallet(profileId),
+      ]
+    : [];
+
+  return [
+    ...profilePaths,
+    urlOffers,
+    urlNotifications,
+  ].map(getPathname);
+});
+
+const currentPath = computed(() => {
+  const rawPath = resolvedPath.value
+    || (typeof window !== 'undefined' ? window.location.pathname : '/');
+  return normalizePath(rawPath);
+});
+
+const showPwaBackButton = computed(() => {
+  if (!props.isMobilePWA) {
+    return false;
+  }
+
+  if (props.layout === 'auth-login' || props.layout === 'auth-signup') {
+    return false;
+  }
+
+  const current = currentPath.value;
+  if (current === '/') {
+    return false;
+  }
+  if (pwaRootPaths.value.includes(current)) {
+    return false;
+  }
+  const currentProfileSection = getProfileSectionKey(current);
+  if (!currentProfileSection) {
+    return true;
+  }
+  const rootProfileSections = pwaRootPaths.value
+    .map(getProfileSectionKey)
+    .filter(Boolean) as string[];
+  return !rootProfileSections.includes(currentProfileSection);
+});
+
 
 const queryParams = computed(() => new URLSearchParams(window?.location?.search));
 
@@ -138,6 +240,17 @@ const logoutHandler = () => {
   isDialogLogoutOpen.value = true;
 };
 
+const backHandler = () => {
+  if (typeof window === 'undefined') {
+    return;
+  }
+  if (window.history.length > 1) {
+    window.history.back();
+    return;
+  }
+  navigateWithQueryParams(urlHome);
+};
+
 </script>
 
 <template>
@@ -151,6 +264,31 @@ const logoutHandler = () => {
     :user-logged-in="userLoggedIn"
     class="VHeaderInvest v-header-invest"
   >
+    <template #leading>
+      <button
+        v-if="showPwaBackButton"
+        type="button"
+        class="v-header-invest__pwa-back"
+        aria-label="Go back"
+        @click="backHandler"
+      >
+        <component
+          :is="ArrowLeft"
+          class="v-header-invest__pwa-back-icon"
+          aria-hidden="true"
+        />
+      </button>
+    </template>
+    <template
+      v-if="isMobilePWA"
+      #logo
+    >
+      <VLogo
+        :href="urlHome"
+        :show-desktop="false"
+        class="v-header__logo v-header-invest__pwa-logo"
+      />
+    </template>
     <div class="v-header-invest__wrap">
       <template v-if="showAccountText && !isMobilePWA">
         <span class="v-header-invest__auth-text is--body">
@@ -236,14 +374,6 @@ const logoutHandler = () => {
         v-else-if="showPwaAuthCta"
         class="v-header-invest__pwa-auth"
       >
-        <span class="v-header-invest__pwa-auth-text">
-          <template v-if="isSignInPage">
-            Don't have an account?
-          </template>
-          <template v-else-if="isSignUpPage">
-            Already have an account?
-          </template>
-        </span>
         <VButton
           size="medium"
           class="v-header-invest__pwa-auth-btn"
@@ -353,7 +483,7 @@ const logoutHandler = () => {
     gap: 4px;
     border: none;
     background: transparent;
-    padding: 0;
+    padding: 4px 8px;
     color: $primary;
     font-size: 14px;
     font-weight: 600;
@@ -378,6 +508,22 @@ const logoutHandler = () => {
   }
 
   &__pwa-logout-icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  &__pwa-back {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    padding: 0;
+    color: $gray-80;
+    cursor: pointer;
+  }
+
+  &__pwa-back-icon {
     width: 20px;
     height: 20px;
   }

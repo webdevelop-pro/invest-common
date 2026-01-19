@@ -11,13 +11,18 @@ import {
   urlTerms, urlPrivacy, urlBlog,
 } from 'InvestCommon/domain/config/links';
 import { useSignupStore } from '../store/useSignup';
-import { onMounted } from 'vue';
+import { onMounted, ref, watch } from 'vue';
+import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 
 const signupStore = useSignupStore();
 const {
   isLoading, model, isDisabledButton,
   setSignupState, queryFlow, checkbox,
 } = storeToRefs(signupStore);
+
+const globalLoader = useGlobalLoader();
+const { isLoading: isGlobalLoading } = storeToRefs(globalLoader);
+const isAuthLoading = ref(false);
 
 const onLogin = () => {
   signupStore.onLogin();
@@ -29,14 +34,29 @@ const signupHandler = async () => {
   signupStore.signupPasswordHandler();
 };
 
+const syncAuthLoading = (active: boolean) => {
+  isAuthLoading.value = active;
+  if (!active || typeof document === 'undefined') {
+    return;
+  }
+  const activeElement = document.activeElement as HTMLElement | null;
+  activeElement?.blur?.();
+};
+
 onMounted(() => {
   signupStore.onMountedHandler();
+  syncAuthLoading(isGlobalLoading.value);
+});
+
+watch(isGlobalLoading, (active) => {
+  syncAuthLoading(active);
 });
 </script>
 
 <template>
   <form
     class="VFormAuthSignup signup-form"
+    :class="{ 'is--auth-loading': isAuthLoading }"
     novalidate
   >
     <div class="signup-form__wrap">
@@ -228,6 +248,12 @@ onMounted(() => {
 
 .signup-form {
   $root: &;
+
+  &.is--auth-loading,
+  &.is--auth-loading input,
+  &.is--auth-loading textarea {
+    caret-color: transparent;
+  }
 
   &__signup-wrap {
     display: flex;

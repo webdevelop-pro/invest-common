@@ -3,8 +3,9 @@ import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { useRouter, type RouteLocationRaw } from 'vue-router';
 import VBreadcrumbs from 'UiKit/components/VBreadcrumb/VBreadcrumbsList.vue';
 import type { IBreadcrumb } from 'UiKit/components/VBreadcrumb/VBreadcrumbsList.vue';
-import { PropType } from 'vue';
+import { PropType, onMounted, ref } from 'vue';
 import arrowLeft from 'UiKit/assets/images/arrow-left.svg';
+import { isPwaMobile } from 'InvestCommon/domain/pwa/pwaDetector';
 
 const props = defineProps({
   buttonText: String,
@@ -27,6 +28,12 @@ const emit = defineEmits(['save']);
 
 const router = useRouter();
 
+const isPwa = ref(false);
+
+onMounted(() => {
+  isPwa.value = isPwaMobile();
+});
+
 const onBackClick = () => {
   if (props.buttonRoute) {
     router.push(props.buttonRoute);
@@ -43,11 +50,12 @@ const saveHandler = () => {
 <template>
   <div
     class="VLayoutForm layout-back-button"
-    :class="{ 'is--loading': isLoading }"
+    :class="{ 'is--loading': isLoading, 'is--pwa': isPwa }"
   >
     <div class="is--container layout-back-button__container">
       <div class="layout-back-button__left">
         <VButton
+          v-if="!isPwa"
           variant="link"
           size="large"
           icon-placement="left"
@@ -99,6 +107,10 @@ const saveHandler = () => {
   width: 100%;
   padding-top: $header-height;
   margin-bottom: 60px;
+
+  &.is--pwa {
+    padding-top: 0;
+  }
 
   &.is--loading {
     cursor: wait !important;

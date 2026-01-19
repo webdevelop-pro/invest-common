@@ -1,17 +1,23 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
+import { onMounted, ref, watch } from 'vue';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
 import VFormInputPassword from 'UiKit/components/Base/VForm/VFormInputPassword.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { urlForgot } from 'InvestCommon/domain/config/links';
 import { useLoginStore } from '../store/useLogin';
+import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 
 const loginStore = useLoginStore();
 const {
   isLoading, model, isDisabledButton,
   setLoginState,
 } = storeToRefs(loginStore);
+
+const globalLoader = useGlobalLoader();
+const { isLoading: isGlobalLoading } = storeToRefs(globalLoader);
+const isAuthLoading = ref(false);
 
 const onSignup = () => {
   loginStore.onSignup();
@@ -20,11 +26,29 @@ const onSignup = () => {
 const loginHandler = async () => {
   loginStore.loginPasswordHandler();
 };
+
+const syncAuthLoading = (active: boolean) => {
+  isAuthLoading.value = active;
+  if (!active || typeof document === 'undefined') {
+    return;
+  }
+  const activeElement = document.activeElement as HTMLElement | null;
+  activeElement?.blur?.();
+};
+
+onMounted(() => {
+  syncAuthLoading(isGlobalLoading.value);
+});
+
+watch(isGlobalLoading, (active) => {
+  syncAuthLoading(active);
+});
 </script>
 
 <template>
   <form
     class="LogInForm login-form"
+    :class="{ 'is--auth-loading': isAuthLoading }"
     novalidate
     data-testid="login-form"
   >
@@ -109,6 +133,12 @@ const loginHandler = async () => {
 @use 'UiKit/styles/_variables.scss' as *;
 
 .login-form {
+
+  &.is--auth-loading,
+  &.is--auth-loading input,
+  &.is--auth-loading textarea {
+    caret-color: transparent;
+  }
 
   &__forgot {
     margin-top: 4px;

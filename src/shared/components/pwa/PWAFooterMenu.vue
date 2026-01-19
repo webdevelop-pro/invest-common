@@ -52,6 +52,11 @@ const layoutActiveFallbackMap: Record<string, string[]> = {
   'offer-single': [urlOffers],
 };
 
+function getProfileSectionKey(pathname: string): string | null {
+  const match = pathname.match(/\/profile\/[^/]+\/([^/]+)/);
+  return match ? `profile/${match[1]}` : null;
+}
+
 function isActive(to: string): boolean {
 
   const target = withBaseUniversal(to);
@@ -64,6 +69,12 @@ function isActive(to: string): boolean {
   const p = (currentPath.value || '/').split('#')[0].split('?')[0];
 
   if (p === targetPath || p.startsWith(`${targetPath}/`)) {
+    return true;
+  }
+
+  const currentProfileSection = getProfileSectionKey(p);
+  const targetProfileSection = getProfileSectionKey(targetPath);
+  if (currentProfileSection && targetProfileSection && currentProfileSection === targetProfileSection) {
     return true;
   }
 
