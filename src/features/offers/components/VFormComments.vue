@@ -68,8 +68,8 @@ const {
 
         <VButton
           v-if="!isAuth"
-          class="is--margin-top-0"
           size="large"
+          class="v-form-comments__button"
           :loading="loading"
           @click="signInHandler"
         >
@@ -80,6 +80,7 @@ const {
           :loading="loading || setOfferCommentState.loading || setOfferCommentOptionsState.loading"
           :disabled="isDisabledButton"
           size="large"
+          class="v-form-comments__button"
           @click="sendQuestion"
         >
           Post
@@ -133,6 +134,18 @@ const {
 
     @media screen and (max-width: $desktop-md) {
       flex-direction: column;;
+    }
+  }
+
+  &__related {
+    @media screen and (max-width: $tablet) {
+      margin-top: 40px;
+    }
+  }
+
+  &__button {
+    @media screen and (width > $tablet) {
+      margin-top: 0 !important;
     }
   }
 

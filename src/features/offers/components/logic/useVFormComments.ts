@@ -5,7 +5,6 @@ import { urlSignin } from 'InvestCommon/domain/config/links';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryOffer } from 'InvestCommon/data/offer/offer.repository';
 import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
-import { getOptions } from 'UiKit/helpers/model';
 import { useRoute } from 'vitepress';
 
 export type FormModelOfferComment = {
@@ -49,7 +48,7 @@ export function useVFormComments(offerId: number) {
 
   const disclosureCheckbox = ref(false);
 
-  const relatedOptions = computed(() => getOptions('related', schemaObject));
+  const relatedOptions = computed(() => getOptionsFromValidation('related'));
   const relatedOptionsFormatted = computed(() => (
     relatedOptions.value?.map((option: any) => ({ value: option.value, text: option.name })) || []
   ));
