@@ -67,7 +67,7 @@ const getComponentName = (item: MenuItem) => {
       <VNavigationMenuItem>
         <NotificationsSidebarButton
           :is-static-site="IS_STATIC_SITE"
-          :show-icon="isMobilePwa"
+          show-icon
           @click="onClick"
         />
       </VNavigationMenuItem>
@@ -106,7 +106,6 @@ const getComponentName = (item: MenuItem) => {
       >
         <VNavigationMenuLink class="v-header-profile-mobile__menu-link">
           <LogOutIcon
-            v-if="isMobilePwa"
             class="v-header-profile-mobile__icon"
             aria-hidden="true"
           />

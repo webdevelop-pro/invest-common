@@ -9,29 +9,29 @@ import ResourceCenterMenuIcon from 'UiKit/assets/images/menu_common/crypto2.svg'
 import FaqMenuIcon from 'UiKit/assets/images/menu_common/faq.svg';
 export type { MenuItem } from 'InvestCommon/types/global';
 
-export const MENU_HEADER_RIGHT = computed(() => (path: string, pwa?: boolean) => [
+export const MENU_HEADER_RIGHT = computed(() => (path: string) => [
   {
     href: urlOffers,
     text: 'Explore',
-    icon: pwa ? ExploreMenuIcon : undefined,
+    icon: ExploreMenuIcon,
     active: urlOffers === path,
   },
   {
     href: urlHowItWorks,
     text: 'How It Works',
-    icon: pwa ? HowItWorksMenuIcon : undefined,
+    icon: HowItWorksMenuIcon,
     active: urlHowItWorks === path,
   },
   {
     href: urlBlog,
     text: 'Resource center',
-    icon: pwa ? ResourceCenterMenuIcon: undefined,
+    icon: ResourceCenterMenuIcon,
     active: urlBlog === path,
   },
   {
     href: urlFaq,
     text: 'FAQ',
-    icon: pwa ? FaqMenuIcon : undefined,
+    icon: FaqMenuIcon,
     active: urlFaq === path,
   },
 ]);

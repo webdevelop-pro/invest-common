@@ -341,6 +341,7 @@ const backHandler = () => {
         :menu="profileMenu"
         :is-mobile-pwa="isMobilePWA"
         :is-desktop="isDesktopMD"
+        show-logout-icon
       />
     </div>
 

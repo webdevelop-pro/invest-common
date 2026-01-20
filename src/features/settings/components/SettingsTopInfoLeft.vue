@@ -155,10 +155,6 @@ const onUploadId = async (id: string) => {
       flex-direction: column;
       align-items: flex-start;
       word-break: break-all;
-
-      .v-button {
-        width: 100%;
-      }
     }
 
   &__date {

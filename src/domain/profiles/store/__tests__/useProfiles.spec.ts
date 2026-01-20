@@ -197,21 +197,26 @@ describe('useProfilesStore', () => {
     expect(resetAllProfileData).toHaveBeenCalled();
   });
 
-  it('should not set selected user profile if id is 0', () => {
+  it('should clear selected user profile and reset data if id is 0', () => {
     const store = useProfilesStore();
     
     // Clear mocks after store initialization to ignore initialization calls
     // The watcher may have triggered setSelectedUserProfileById during initialization
     vi.clearAllMocks();
     
-    // First set to a valid ID, then try to set to 0
+    // Store should already have a selected profile from initialization
+    expect(store.selectedUserProfileId).toBe(123);
+    expect(resetAllProfileData).not.toHaveBeenCalled();
+
+    // Calling with the same ID should not reset data
     store.setSelectedUserProfileById(123);
     expect(store.selectedUserProfileId).toBe(123);
-    expect(resetAllProfileData).toHaveBeenCalledTimes(1);
+    expect(resetAllProfileData).not.toHaveBeenCalled();
 
+    // Calling with 0 should clear the selected profile and reset data once
     store.setSelectedUserProfileById(0);
     expect(store.selectedUserProfileId).toBe(0);
-    expect(resetAllProfileData).toHaveBeenCalledTimes(2);
+    expect(resetAllProfileData).toHaveBeenCalledTimes(1);
   });
 
   it('should update selected account', () => {

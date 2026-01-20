@@ -10,6 +10,7 @@ interface ISelectedProfile {
   text: string;
   id: number | string;
   kycStatusLabel?: string;
+  kycStatusShortLabel?: string;
   kycStatusClass?: string;
   disabled?: boolean;
   disabledMessage?: string;
@@ -63,6 +64,20 @@ export const useProfileSelectStore = (options?: IUseProfileSelectOptions) => {
     }
   };
 
+  const getKycStatusShortLabel = (profile: any) => {
+    switch (profile.kyc_status) {
+      case InvestKycTypes.approved:
+        return 'Eligible';
+      case InvestKycTypes.pending:
+      case InvestKycTypes.in_progress:
+      case InvestKycTypes.declined:
+      case InvestKycTypes.new:
+      case InvestKycTypes.none:
+      default:
+        return 'Not eligible';
+    }
+  };
+
   const userListFormatted = computed(() => {
     const userProfilesList: ISelectedProfile[] = [];
 
@@ -74,6 +89,7 @@ export const useProfileSelectStore = (options?: IUseProfileSelectOptions) => {
         text: text.charAt(0).toUpperCase() + text.slice(1),
         id: `${item.id}`,
         kycStatusLabel: getKycStatusLabel(item),
+        kycStatusShortLabel: getKycStatusShortLabel(item),
         kycStatusClass: item.isKycApproved ? 'is--color-secondary' : 'is--color-red',
         // Do not pass `disabled` to keep v-select-item[data-disabled] unused when using slot.
         disabledMessage: isDisabled ? 'Identity verification is needed.' : undefined,

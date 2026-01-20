@@ -6,7 +6,7 @@ import { useProfileSelectStore } from './store/useProfileSelect';
 import circleExclamation from 'UiKit/assets/images/circle-exclamation.svg';
 
 const props = defineProps({
-  size: String as PropType<'large' | 'medium' | 'small'>,
+  size: String as PropType<'large' | 'medium'>,
   label: String,
   defaultValue: String,
   updateSelected: Boolean,
@@ -22,12 +22,18 @@ const {
   userListFormatted, isLoading: loadingStore, defaultValue: storeDefaultValue, onUpdateSelectedProfile,
 } = useProfileSelectStore({ hideDisabled: props.hideDisabled });
 
+type ObjectOptionValue = string | number | boolean;
+type ObjectOption = Record<string, ObjectOptionValue>;
+
+const options = computed<ObjectOption[]>(() => userListFormatted.value as unknown as ObjectOption[]);
+
 // Use prop defaultValue if provided, otherwise use store defaultValue
 const selectedValue = computed(() => props.defaultValue || storeDefaultValue.value);
 
-const onUpdate = (value: string) => {
-  if (props.updateSelected) onUpdateSelectedProfile(value);
-  emit('select', String(value));
+const onUpdate = (value: unknown) => {
+  const stringValue = String(value ?? '');
+  if (props.updateSelected) onUpdateSelectedProfile(stringValue);
+  emit('select', stringValue);
 };
 </script>
 
@@ -43,7 +49,7 @@ const onUpdate = (value: string) => {
         data-testid="investAccount"
         item-label="text"
         item-value="id"
-        :options="userListFormatted"
+        :options="options"
         :loading="loadingStore || loading"
         @update:model-value="onUpdate"
       >
@@ -61,7 +67,16 @@ const onUpdate = (value: string) => {
                 class="v-profile-select-list__option-status is--small"
                 :class="(slotProps.item as any).kycStatusClass"
               >
-                {{ (slotProps.item as any).kycStatusLabel }}
+                <span
+                  class="v-profile-select-list__option-status-text v-profile-select-list__option-status-text--full"
+                >
+                  {{ (slotProps.item as any).kycStatusLabel }}
+                </span>
+                <span
+                  class="v-profile-select-list__option-status-text v-profile-select-list__option-status-text--short"
+                >
+                  {{ (slotProps.item as any).kycStatusShortLabel || (slotProps.item as any).kycStatusLabel }}
+                </span>
               </span>
             </div>
             <div
@@ -129,6 +144,20 @@ const onUpdate = (value: string) => {
 
   &__option-status {
     text-align: right;
+  }
+
+  &__option-status-text--short {
+    display: none;
+  }
+
+  @media screen and (width < $tablet) {
+    &__option-status-text--full {
+      display: none;
+    }
+
+    &__option-status-text--short {
+      display: inline;
+    }
   }
 }
 </style>
