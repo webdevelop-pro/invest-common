@@ -1,4 +1,4 @@
-import lodashIsEmpty from 'lodash/isEmpty';
+import lodashIsEmpty from 'lodash-es/isEmpty';
 export function isEmpty(obj: object) {
   return lodashIsEmpty(obj);
 }

@@ -1,5 +1,5 @@
 import { IFilerItem, IFilerItemFormatted } from 'InvestCommon/types/api/filer.type';
-import merge from 'lodash/merge';
+import merge from 'lodash-es/merge';
 
 /**
  * Utility class for formatting and merging filer items.
