@@ -34,6 +34,27 @@ vi.mock('UiKit/helpers/validation/useFormValidation', () => ({
   })),
 }));
 
+// Mock toast
+const mockToast = vi.fn();
+
+vi.mock('UiKit/components/Base/VToast/use-toast', () => ({
+  useToast: () => ({
+    toast: mockToast,
+  }),
+}));
+
+// Mock vue-router
+const mockRouterPush = vi.fn().mockResolvedValue(undefined);
+
+vi.mock('vue-router', () => ({
+  useRouter: () => ({
+    push: mockRouterPush,
+  }),
+  useRoute: () => ({
+    query: {},
+  }),
+}));
+
 // Mock earn repository
 const mockDepositState = ref({
   loading: false,
@@ -56,6 +77,7 @@ vi.mock('InvestCommon/data/earn/earn.repository', () => ({
     deposit: mockDeposit,
     getPositions: mockGetPositions,
     depositState: mockDepositState,
+    mockApprovalTransaction: vi.fn(),
   })),
 }));
 

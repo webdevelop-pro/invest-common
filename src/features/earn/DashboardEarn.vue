@@ -15,7 +15,7 @@ interface TableHeader {
 const globalLoader = useGlobalLoader();
 
 const TABLE_HEADERS: TableHeader[] = [
-  { text: 'Symbol' },
+  { text: 'Asset' },
   { text: 'TVL' },
   { text: 'APY' },
   { text: 'Base APY' },
@@ -59,7 +59,7 @@ onMounted(() => {
     />
     <div class="dashboard-earn__tablet">
       <h3 class="dashboard-earn__title is--h3__title">
-        Aave Yield Opportunities
+        Available Assets to Supply
       </h3>
 
       <VTableToolbar
@@ -120,6 +120,15 @@ onMounted(() => {
   &__sentinel {
     height: 1px;
     width: 100%;
+  }
+
+  // Align first and last columns consistently with cell content
+  .v-table-head:first-of-type {
+    text-align: left;
+  }
+
+  .v-table-head:last-of-type {
+    text-align: right;
   }
 
   .v-table-header {

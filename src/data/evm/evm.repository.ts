@@ -62,16 +62,15 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
     // Collect and convert earn transactions in a single pass
     const newTransactions = earnPositions
       .filter(p => p.profileId === profileId && p.transactions?.length && p.symbol)
-      .flatMap(position => 
+      .flatMap(position =>
         position.transactions!
           .filter(tx => !existingTxIds.has(tx.id))
           .map(tx => {
             const symbol = position.symbol || 'USDC';
-            const dateTime = tx.date && tx.time 
-              ? new Date(`${tx.date} ${tx.time}`).toISOString() 
-              : new Date().toISOString();
+            // Use a safe ISO timestamp instead of parsing formatted date/time strings
+            const dateTime = new Date().toISOString();
             const type = typeMap[tx.type] || EvmTransactionTypes.deposit;
-            
+
             return {
               id: tx.id,
               user_id: profileId,

@@ -61,6 +61,12 @@ export class EarnDetailFormatter {
       .filter((point): point is DefiLlamaChartDataPoint & { apy: number } => point.apy !== null)
       .map((point) => {
         const date = new Date(point.timestamp);
+        if (Number.isNaN(date.getTime())) {
+          return {
+            date: '',
+            apy: point.apy as number,
+          };
+        }
         return {
           date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
           apy: point.apy, // Already in percent
@@ -69,6 +75,12 @@ export class EarnDetailFormatter {
     
     const tvlChartData: TvlChartDataPoint[] = rawChartData.map((point) => {
       const date = new Date(point.timestamp);
+      if (Number.isNaN(date.getTime())) {
+        return {
+          date: '',
+          tvl: point.tvlUsd / 1000000,
+        };
+      }
       return {
         date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
         tvl: point.tvlUsd / 1000000, // Convert to millions

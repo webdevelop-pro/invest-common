@@ -40,6 +40,10 @@ const {
   resetFormValidation,
   errorData,
   depositState,
+  isMaxDisabled,
+  hasApproved,
+  isApproving,
+  approveToken,
 } = useEarnDepositCard({
   scrollId: 'EarnDepositCard',
   poolId,
@@ -70,7 +74,7 @@ defineExpose({
         v-slot="VFormGroupProps"
         :required="isFieldRequired('amount')"
         :error-text="getErrorText('amount', errorData) as string[]"
-        label="Deposit Amount"
+        label="Supply Amount"
         class="earn-deposit-card__form-group"
         data-testid="deposit-amount-group"
       >
@@ -97,6 +101,7 @@ defineExpose({
               v-else
               variant="link"
               size="small"
+              :disabled="isMaxDisabled"
               @click="onMax"
             >
               Max
@@ -120,24 +125,36 @@ defineExpose({
       </div>
       <div class="earn-deposit-card__balance is--small">
         Don't have enough balance?
-        <VButton
-          variant="link"
-          size="small"
-          class="earn-deposit-card__exchange-button"
-          @click="onExchangeClick"
+        <a
+          href="#"
+          class="earn-deposit-card__exchange-button is--link-2"
+          @click.prevent="onExchangeClick"
         >
           Exchange
-        </VButton>
+        </a>
       </div>
       <VButton
+        v-if="!hasApproved"
+        block
+        size="large"
+        :disabled="loading || walletLoading || isApproving"
+        :loading="isApproving"
+        class="is--margin-top-8"
+        @click="approveToken"
+      >
+        Approve {{ symbol }}
+      </VButton>
+      <VButton
+        v-else
         block
         size="large"
         :disabled="!isValid || loading || depositState.loading"
         :loading="isSubmitting || depositState.loading"
         data-testid="deposit-button"
+        class="is--margin-top-8"
         @click="submitHandler"
       >
-        Deposit
+        Supply
       </VButton>
     </div>
   </div>

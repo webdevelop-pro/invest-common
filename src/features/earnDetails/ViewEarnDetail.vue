@@ -86,6 +86,9 @@ const {
           :stats="stats"
           :transactions="transactions"
           :loading="positionsLoading"
+          :pool-id="poolId"
+          :profile-id="selectedUserProfileId"
+          :symbol="poolData?.symbol"
         />
       </VTabsContent>
       <VTabsContent

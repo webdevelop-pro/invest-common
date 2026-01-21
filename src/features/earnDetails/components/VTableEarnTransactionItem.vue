@@ -100,7 +100,12 @@ const { formattedType, hasTransactionId, badgeColor } = useEarnTransactionItem(p
   &__table-amount {
     text-align: right;
     color: $black;
-    width: max-content;
+    width: 100%;
+
+
+    @media screen and (width < $desktop) {
+      width: max-content;
+    }
   }
 
   &__table-type {

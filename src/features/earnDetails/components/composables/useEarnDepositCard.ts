@@ -3,7 +3,9 @@ import type { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { useRepositoryEarn } from 'InvestCommon/data/earn/earn.repository';
+import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 import { storeToRefs } from 'pinia';
+import { useRoute, useRouter } from 'vue-router';
 
 export interface FormModelEarnDeposit {
   amount: number | null;
@@ -92,6 +94,14 @@ export function useEarnDepositCard(options: UseEarnDepositCardOptions = {}) {
 
   const isSubmitting = ref(false);
   const earnRepository = useRepositoryEarn();
+  const { toast } = useToast();
+  const router = useRouter();
+  const route = useRoute();
+
+  const hasApproved = ref(false);
+  const isApproving = ref(false);
+
+  const isMaxDisabled = computed(() => !maxAmount.value || maxAmount.value <= 0);
 
   const submitHandler = async () => {
     onValidate();
@@ -130,7 +140,35 @@ export function useEarnDepositCard(options: UseEarnDepositCardOptions = {}) {
         });
       }
 
+      toast({
+        title: 'Supply completed',
+        description: `${amount} ${symbol.value ?? ''} supplied successfully`,
+        variant: 'success',
+      });
+
       model.amount = null;
+
+      // Update current route query to "your-position" tab and scroll to positions table
+      await router.push({
+        query: {
+          ...route.query,
+          tab: 'your-position',
+        },
+      });
+
+      nextTick(() => {
+        const el = document.getElementById('earn-your-position-table');
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          const offset = window.pageYOffset || document.documentElement.scrollTop || 0;
+          const targetY = rect.top + offset - 150;
+
+          window.scrollTo({
+            top: targetY,
+            behavior: 'smooth',
+          });
+        }
+      });
     } finally {
       isSubmitting.value = false;
     }
@@ -154,6 +192,40 @@ export function useEarnDepositCard(options: UseEarnDepositCardOptions = {}) {
   const { depositState } = storeToRefs(earnRepository);
   const errorData = computed(() => (depositState.value.error as any)?.data?.responseJson || {});
 
+  const approveToken = async () => {
+    if (hasApproved.value || isApproving.value) return;
+
+    isApproving.value = true;
+
+    try {
+      // Simulate on-chain approval delay
+      await new Promise((resolve) => {
+        setTimeout(resolve, 2000);
+      });
+
+      hasApproved.value = true;
+
+      if (poolId.value && profileId.value && symbol.value) {
+        earnRepository.mockApprovalTransaction({
+          profileId: profileId.value,
+          poolId: poolId.value,
+          symbol: symbol.value,
+        });
+
+        // Refresh positions so "Your Position" tab updates after approval
+        await earnRepository.getPositions(poolId.value, profileId.value);
+      }
+
+      toast({
+        title: 'Approved',
+        description: `${symbol.value ?? 'Token'} approved successfully`,
+        variant: 'success',
+      });
+    } finally {
+      isApproving.value = false;
+    }
+  };
+
   return {
     // form core
     model,
@@ -176,6 +248,10 @@ export function useEarnDepositCard(options: UseEarnDepositCardOptions = {}) {
     resetFormValidation,
     errorData,
     depositState,
+    isMaxDisabled,
+    hasApproved,
+    isApproving,
+    approveToken,
   };
 }
 

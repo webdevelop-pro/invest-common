@@ -39,12 +39,19 @@ const DATE_FORMATTER = new Intl.DateTimeFormat('en-US', DATE_OPTIONS);
 
 export function formatDate(date: string | undefined): string {
   if (!date) return '-';
-  return DATE_FORMATTER.format(new Date(date));
+  const d = new Date(date);
+  if (Number.isNaN(d.getTime())) return '-';
+  try {
+    return DATE_FORMATTER.format(d);
+  } catch {
+    return '-';
+  }
 }
 
 export function formatTime(date: string | undefined): string {
   if (!date) return '-';
   const d = new Date(date);
+  if (Number.isNaN(d.getTime())) return '-';
   const hours = d.getHours().toString().padStart(2, '0');
   const minutes = d.getMinutes().toString().padStart(2, '0');
   return `${hours}:${minutes}`;
@@ -98,20 +105,52 @@ export class EarnPositionFormatter {
   }
 
   formatTransaction(tx: EarnPositionTransaction): EarnPositionTransactionFormatted {
+    const isExchangeTx = tx.txId?.startsWith('mock-exchange-');
+    const isApprovalTx = tx.txId?.startsWith('mock-approval-') || tx.type === 'approval';
+
+    // Map raw transaction type to display type:
+    // - For mock exchange transactions: always show "exchange"
+    // - For approval transactions: show "approval"
+    // - For regular deposits: display as "supply"
+    // - For withdraw: keep as "withdraw"
+    let type: string;
+    if (isExchangeTx) {
+      type = 'exchange';
+    } else if (isApprovalTx) {
+      type = 'approval';
+    } else if (tx.type === 'deposit') {
+      type = 'supply';
+    } else {
+      type = tx.type;
+    }
+
+    // Derive tag color:
+    // - For normal deposit/withdraw: green for deposit, red for withdraw
+    // - For exchange: green for buy leg, red for sell leg (based on txId suffix)
+    // - For approval: yellow
+    let tagColor: string;
+    if (isExchangeTx) {
+      tagColor = tx.txId.includes('-sell-') ? 'red' : 'green';
+    } else if (isApprovalTx) {
+      tagColor = 'yellow';
+    } else {
+      tagColor = tx.type === 'deposit' ? 'green' : 'red';
+    }
+
     return {
       id: tx.id,
       date: tx.date || formatDate(tx.date),
       time: tx.time || formatTime(tx.time),
       amount: currency(tx.amountUsd),
       transaction_id: tx.txId,
-      type: tx.type,
+      type,
       status: {
         text: tx.status === 'completed' ? 'Completed' : 'Pending',
         tooltip: tx.status === 'completed'
           ? 'Transaction completed'
           : 'Transaction is pending',
       },
-      tagColor: tx.type === 'deposit' ? 'green' : 'red',
+      tagColor,
     };
   }
 

@@ -164,13 +164,12 @@ const {
   &__info-wrap {
     margin-top: 27px;
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     border-top: 1px solid $gray-20;
     color: $gray-80;
     width: 100%;
 
     @media screen and (max-width: $tablet) {
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       margin-top: 10px;
       gap: 2px 12px;
     }

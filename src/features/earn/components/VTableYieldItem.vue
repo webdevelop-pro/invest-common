@@ -3,7 +3,6 @@ import { computed } from 'vue';
 import VTableCell from 'UiKit/components/Base/VTable/VTableCell.vue';
 import VTableRow from 'UiKit/components/Base/VTable/VTableRow.vue';
 import VBadge from 'UiKit/components/Base/VBadge/VBadge.vue';
-import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import type { DefiLlamaYieldPoolFormatted } from 'InvestCommon/data/3dParty/formatter/yields.formatter';
 
 interface Props {
@@ -19,10 +18,10 @@ const emit = defineEmits<{
   (e: 'row-click', pool: DefiLlamaYieldPoolFormatted): void;
 }>();
 
-type BadgeColor = 'secondary' | 'default';
+type BadgeColor = 'secondary-light' | 'default';
 
 const badgeConfig = computed<{ color: BadgeColor; text: string }>(() => ({
-  color: (props.data.stablecoin ? 'secondary' : 'default') as BadgeColor,
+  color: (props.data.stablecoin ? 'secondary-light' : 'default') as BadgeColor,
   text: props.data.stablecoin ? 'Stablecoin' : 'Volatile',
 }));
 
@@ -44,17 +43,21 @@ const handleDetailsClick = (event: Event) => {
     @keydown.enter="handleRowClick"
     @keydown.space.prevent="handleRowClick"
   >
-    <VTableCell
-      v-highlight="search"
-      class="is--h5__title"
-    >
-      {{ data.symbol }}
+    <VTableCell>
+      <span
+        v-highlight="search"
+        class="is--h5__title"
+      >
+        {{ data.symbol }}
+      </span>
     </VTableCell>
     <VTableCell>
       {{ data.tvlFormatted }}
     </VTableCell>
-    <VTableCell class="is--h5__title">
-      {{ data.apyFormatted }}
+    <VTableCell>
+      <span class="is--h5__title">
+        {{ data.apyFormatted }}
+      </span>
     </VTableCell>
     <VTableCell class="is--gt-desktop-show">
       {{ data.apyBaseFormatted }}
@@ -71,13 +74,13 @@ const handleDetailsClick = (event: Event) => {
       </VBadge>
     </VTableCell>
     <VTableCell class="v-table-yield-item__actions">
-      <VButton
-        size="small"
-        variant="link"
-        @click="handleDetailsClick"
+      <a
+        href="#"
+        class="is--link-2"
+        @click.prevent="handleDetailsClick"
       >
-        Details
-      </VButton>
+        Supply
+      </a>
     </VTableCell>
   </VTableRow>
 </template>

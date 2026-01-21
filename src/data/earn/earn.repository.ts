@@ -18,13 +18,28 @@ export interface EarnDepositResponse {
   txId: string;
 }
 
+export interface EarnWithdrawRequest {
+  poolId: string;
+  profileId: string | number;
+  amount: number;
+  symbol?: string;
+}
+
+export interface EarnWithdrawResponse {
+  poolId: string;
+  profileId: string | number;
+  amount: number;
+  status: 'success';
+  txId: string;
+}
+
 export interface EarnPositionTransaction {
   id: number;
   date: string;
   time: string;
   amountUsd: number;
   txId: string;
-  type: 'deposit' | 'withdraw';
+  type: 'deposit' | 'withdraw' | 'approval';
   status: 'completed' | 'pending';
 }
 
@@ -41,6 +56,7 @@ export interface EarnPositionsResponse {
 
 export const useRepositoryEarn = defineStore('repository-earn', () => {
   const depositState = createActionState<EarnDepositResponse>();
+  const withdrawState = createActionState<EarnWithdrawResponse>();
   /**
    * Holds the list of all positions across pools for the current session.
    * Used to preserve data when navigating between different pools.
@@ -51,6 +67,8 @@ export const useRepositoryEarn = defineStore('repository-earn', () => {
    * Data is already formatted when retrieved from the repository.
    */
   const positionsState = createActionState<EarnPositionsResponseFormatted>();
+
+  const EARN_RATE = 0.05; // 5% earned rate
 
   /**
    * Mock deposit request.
@@ -90,13 +108,12 @@ export const useRepositoryEarn = defineStore('repository-earn', () => {
         time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         amountUsd: payload.amount,
         txId: mockResponse.txId,
-        type: 'withdraw', // Withdraw from available balance to stake
+        type: 'deposit', // Supply from available balance to stake
         status: 'completed',
       };
 
       const updatedList = [...list];
       const symbol = payload.symbol || 'USDC';
-      const EARN_RATE = 0.05; // 5% earned rate
 
       if (index !== -1) {
         // Update existing position
@@ -134,6 +151,87 @@ export const useRepositoryEarn = defineStore('repository-earn', () => {
       throw err;
     } finally {
       depositState.value.loading = false;
+    }
+  };
+
+  /**
+   * Mock withdraw request.
+   * Decreases staked amount and increases available balance, and adds a withdraw transaction.
+   */
+  const withdraw = async (payload: EarnWithdrawRequest) => {
+    try {
+      withdrawState.value.loading = true;
+      withdrawState.value.error = null;
+
+      await new Promise((resolve) => {
+        setTimeout(resolve, 800);
+      });
+
+      const mockResponse: EarnWithdrawResponse = {
+        poolId: payload.poolId,
+        profileId: payload.profileId,
+        amount: payload.amount,
+        status: 'success',
+        txId: `mock-withdraw-${Date.now()}`,
+      };
+
+      withdrawState.value.data = mockResponse;
+
+      const list = positionsPools.value;
+      const index = list.findIndex(
+        (p: EarnPositionsResponse) =>
+          p.poolId === payload.poolId && p.profileId === payload.profileId,
+      );
+
+      const now = new Date();
+      const newTransaction: EarnPositionTransaction = {
+        id: Date.now(),
+        date: now.toLocaleDateString(),
+        time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        amountUsd: payload.amount,
+        txId: mockResponse.txId,
+        type: 'withdraw',
+        status: 'completed',
+      };
+
+      const updatedList = [...list];
+      const symbol = payload.symbol || 'USDC';
+
+      if (index !== -1) {
+        const existing = list[index];
+        const newStakedAmount = Math.max(0, existing.stakedAmountUsd - payload.amount);
+        const currentAvailable = existing.availableAmountUsd ?? 0;
+
+        updatedList[index] = {
+          ...existing,
+          symbol: payload.symbol || existing.symbol || symbol,
+          stakedAmountUsd: newStakedAmount,
+          earnedAmountUsd: Number((newStakedAmount * EARN_RATE).toFixed(2)),
+          availableAmountUsd: currentAvailable + payload.amount,
+          transactions: [newTransaction, ...existing.transactions],
+        };
+      } else {
+        // If no existing position, create one with only available balance updated
+        updatedList.push({
+          poolId: payload.poolId,
+          profileId: payload.profileId,
+          symbol,
+          stakedAmountUsd: 0,
+          earnedAmountUsd: 0,
+          availableAmountUsd: payload.amount,
+          transactions: [newTransaction],
+        });
+      }
+
+      positionsPools.value = updatedList;
+
+      return mockResponse;
+    } catch (err) {
+      withdrawState.value.error = err as Error;
+      withdrawState.value.data = undefined;
+      throw err;
+    } finally {
+      withdrawState.value.loading = false;
     }
   };
 
@@ -176,7 +274,7 @@ export const useRepositoryEarn = defineStore('repository-earn', () => {
   };
 
   /**
-   * Helper to create transaction with current timestamp
+   * Helper to create transaction with current timestamp (used for exchange)
    */
   const createTransaction = (
     amountUsd: number,
@@ -191,6 +289,22 @@ export const useRepositoryEarn = defineStore('repository-earn', () => {
       amountUsd: Math.abs(amountUsd),
       txId: `mock-exchange-${suffix}-${Date.now()}`,
       type,
+      status: 'completed',
+    };
+  };
+
+  /**
+   * Helper to create approval transaction with current timestamp
+   */
+  const createApprovalTransaction = (): EarnPositionTransaction => {
+    const now = new Date();
+    return {
+      id: Date.now(),
+      date: now.toLocaleDateString(),
+      time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      amountUsd: 0,
+      txId: `mock-approval-${Date.now()}`,
+      type: 'approval',
       status: 'completed',
     };
   };
@@ -241,6 +355,42 @@ export const useRepositoryEarn = defineStore('repository-earn', () => {
   };
 
   /**
+   * Add an approval transaction for the given position without changing balances
+   */
+  const mockApprovalTransaction = (payload: {
+    profileId: string | number;
+    poolId: string;
+    symbol: string;
+  }) => {
+    const updatedList: EarnPositionsResponse[] = [...positionsPools.value];
+    const approvalTx = createApprovalTransaction();
+
+    const index = updatedList.findIndex(
+      (p) => p.profileId === payload.profileId && p.poolId === payload.poolId,
+    );
+
+    if (index !== -1) {
+      const existing = updatedList[index];
+      updatedList[index] = {
+        ...existing,
+        transactions: [approvalTx, ...existing.transactions],
+      };
+    } else {
+      updatedList.push({
+        poolId: payload.poolId,
+        profileId: payload.profileId,
+        symbol: payload.symbol,
+        stakedAmountUsd: 0,
+        earnedAmountUsd: 0,
+        availableAmountUsd: 0,
+        transactions: [approvalTx],
+      });
+    }
+
+    positionsPools.value = updatedList;
+  };
+
+  /**
    * Mock exchange positions - updates positionsPools with exchange transactions
    * Uses positionsPools as single source of truth for balances
    */
@@ -285,6 +435,11 @@ export const useRepositoryEarn = defineStore('repository-earn', () => {
       error: null,
       data: undefined,
     };
+    withdrawState.value = {
+      loading: false,
+      error: null,
+      data: undefined,
+    };
     positionsState.value = {
       loading: false,
       error: null,
@@ -295,10 +450,13 @@ export const useRepositoryEarn = defineStore('repository-earn', () => {
 
   return {
     depositState,
+    withdrawState,
     positionsState,
     positionsPools,
     deposit,
+    withdraw,
     getPositions,
+    mockApprovalTransaction,
     mockExchangePositions,
     resetAll,
   };
