@@ -53,14 +53,14 @@ export const useProfileSelectStore = (options?: IUseProfileSelectOptions) => {
   const getKycStatusLabel = (profile: any) => {
     switch (profile.kyc_status) {
       case InvestKycTypes.approved:
-        return 'Can Invest';
+        return 'Eligible';
       case InvestKycTypes.pending:
       case InvestKycTypes.in_progress:
       case InvestKycTypes.declined:
       case InvestKycTypes.new:
       case InvestKycTypes.none:
       default:
-        return 'Cannot Invest';
+        return 'Not eligible';
     }
   };
 

@@ -1,4 +1,3 @@
-import { urlContactUs } from 'InvestCommon/domain/config/links';
 import {
   ROUTE_ACCREDITATION_UPLOAD,
 } from 'InvestCommon/domain/config/enums/routes';
@@ -125,17 +124,27 @@ export const INVEST_KYC_HISTORY: Record<InvestKycTypes, ITimelineItemsHistory> =
     `,
     buttonText: 'Verify Identity',
   },
+  [InvestKycTypes.in_progress]: {
+    value: InvestKycTypes.in_progress,
+    title: 'Your KYC verification is in progress',
+    duration: '~1-5 days.',
+    text: `
+      Know Your Customer guidelines in financial services 
+      require that professionals make an effort to verify the identity, 
+      suitability, and risks involved with maintaining a business relationship.
+    `,
+    buttonText: 'Verify Identity',
+  },
   [InvestKycTypes.declined]: {
     value: InvestKycTypes.declined,
     title: 'Your KYC procedure is declined',
     duration: '~1-5 days.',
     text: `
       Full KYC failure may occur due to multiple reasons, like certain details mismatch 
-      or incorrect document submission. <a href="${urlContactUs}" class="is--link-1">Please contact our support team</a> 
+      or incorrect document submission. <a href="#contact-us-dialog" class="is--link-1" data-action="contact-us">Please contact our support team</a> 
       and we will help you to resolve your issues.
     `,
     buttonText: 'Contact Us',
-    buttonHref: urlContactUs,
   },
   [InvestKycTypes.approved]: {
     value: InvestKycTypes.approved,
@@ -144,7 +153,7 @@ export const INVEST_KYC_HISTORY: Record<InvestKycTypes, ITimelineItemsHistory> =
     text: `
       Congratulations, you successfully pass KYC procedure. 
       If you need to update your information please
-      <a href="#" class="is--link-1">contact our support team</a>.
+      <a href="#contact-us-dialog" class="is--link-1" data-action="contact-us">contact our support team</a>.
     `,
   },
 };

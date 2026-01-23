@@ -6,15 +6,21 @@ import VTooltip from 'UiKit/components/VTooltip.vue';
 import arrowRight from 'UiKit/assets/images/arrow-right.svg?component';
 import { useKycButton } from './store/useKycButton';
 import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
+import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 
 const kycButtonStore = useKycButton();
 const {
   data, tagBackground, isButtonLoading, isButtonDisabled, showContactUs,
   showSkeleton,
 } = storeToRefs(kycButtonStore);
+const dialogsStore = useDialogs();
 
 const handleClick = () => {
   kycButtonStore.onClick();
+};
+
+const handleContactUsClick = () => {
+  dialogsStore.openContactUsDialog('kyc');
 };
 
 defineProps({
@@ -84,8 +90,10 @@ defineProps({
       </VTooltip>
       <a
         v-if="showContactUs"
-        :href="data.contactUsUrl"
+        href="#contact-us-dialog"
         class="is--link-2"
+        data-action="contact-us"
+        @click.prevent="handleContactUsClick"
       >
         Contact Us
       </a>

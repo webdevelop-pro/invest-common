@@ -9,6 +9,7 @@ import {
 import { ACCREDITATION_HISTORY, INVEST_KYC_HISTORY, ITimelineItemsHistory } from '../../utils';
 import { PostLinkTypes } from 'InvestCommon/types/api/blog';
 import { urlBlogSingle } from 'InvestCommon/domain/config/links';
+import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 
 export const useInvestmentTimeline = () => {
   const investmentRepository = useRepositoryInvestment();
@@ -17,6 +18,7 @@ export const useInvestmentTimeline = () => {
   const { selectedUserProfileId, selectedUserProfileData } = storeToRefs(profilesStore);
   const useRepositoryKycStore = useRepositoryKyc();
   const { tokenState } = storeToRefs(useRepositoryKycStore);
+  const dialogsStore = useDialogs();
 
   // Simplified date difference calculation
   const getDateDifference = (created: string, completed: string) => {
@@ -156,16 +158,20 @@ export const useInvestmentTimeline = () => {
     {
       circleType: selectedUserProfileData.value?.isKycApproved ? 'complete' : 'highlight',
       items: kycParsedHistory.value,
-      onButtonClick() {
-        if (selectedUserProfileData.value?.isCanCallKycPlaid) {
-          useRepositoryKycStore.handlePlaidKyc();
+      onButtonClick(item?: ITimelineItemsHistory) {
+        if (item?.buttonText === 'Contact Us') {
+          dialogsStore.openContactUsDialog('investment');
+          return;
+        }
+        if (selectedUserProfileData.value?.isCanCallKycPlaid && selectedUserProfileId.value) {
+          useRepositoryKycStore.handlePlaidKyc(Number(selectedUserProfileId.value));
         }
       },
     },
     {
       circleType: selectedUserProfileData.value?.isAccreditationApproved ? 'complete' : 'highlight',
       items: accreditationParsedHistory.value,
-      onButtonClick() { },
+      onButtonClick: noOp,
     },
     {
       circleType: getInvestOneState.value.data?.offer.isFundingCompleted ? 'complete' : 'active',
@@ -179,7 +185,7 @@ export const useInvestmentTimeline = () => {
           type: getInvestOneState.value.data?.offer.isFundingCompleted ? 'complete' : 'active',
         },
       ] as unknown as ITimelineItemsHistory[],
-      onButtonClick() { },
+      onButtonClick: noOp,
     },
     {
       circleType: getLegalCircleType.value,
@@ -192,7 +198,7 @@ export const useInvestmentTimeline = () => {
           type: getLegalCardType.value,
         },
       ] as unknown as ITimelineItemsHistory[],
-      onButtonClick() { },
+      onButtonClick: noOp,
     },
     {
       circleType: getInvestOneState.value.data?.offer.isStatusClosedSuccessfully ? 'active' : 'not-complete',
@@ -207,20 +213,29 @@ export const useInvestmentTimeline = () => {
           type: getInvestOneState.value.data?.offer.isStatusClosedSuccessfully ? 'active' : 'not-complete',
         },
       ] as unknown as ITimelineItemsHistory[],
-      onButtonClick() { },
+      onButtonClick: noOp,
     },
   ]));
 
-  const getButtonTag = (item: ITimelineItemsHistory) => {
-    if (item.buttonRoute) return 'router-link';
-    if (item.buttonHref) return 'a';
-    return 'button';
+  const getButtonTag = (item: ITimelineItemsHistory) => 
+    item.buttonRoute ? 'router-link' : item.buttonHref ? 'a' : 'button';
+
+  const handleContactUsClick = (event: Event) => {
+    const target = (event.target as HTMLElement)?.closest('[data-action="contact-us"]');
+    if (target) {
+      event.preventDefault();
+      event.stopPropagation();
+      dialogsStore.openContactUsDialog('investment');
+    }
   };
+
+  const noOp = () => {};
 
   return {
     data,
     getButtonTag,
     selectedUserProfileId,
     tokenState,
+    handleContactUsClick,
   };
 }; 

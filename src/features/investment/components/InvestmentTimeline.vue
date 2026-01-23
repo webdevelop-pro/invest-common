@@ -5,7 +5,7 @@ import VTimelineCard from 'UiKit/components/Base/VTimeline/VTimelineCard.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { useInvestmentTimeline } from './logic/useInvestmentTimeline';
 
-const { data, getButtonTag, selectedUserProfileId, tokenState } = useInvestmentTimeline();
+const { data, getButtonTag, selectedUserProfileId, tokenState, handleContactUsClick } = useInvestmentTimeline();
 </script>
 
 <template>
@@ -37,6 +37,11 @@ const { data, getButtonTag, selectedUserProfileId, tokenState } = useInvestmentT
             <p
               v-dompurify-html="item.text"
               class="investment-timeline__text"
+              role="button"
+              tabindex="0"
+              @click="handleContactUsClick"
+              @keydown.enter="handleContactUsClick"
+              @keydown.space.prevent="handleContactUsClick"
             />
             <VButton
               v-if="item.buttonText && item.showButton"
@@ -45,7 +50,7 @@ const { data, getButtonTag, selectedUserProfileId, tokenState } = useInvestmentT
               :href="item.buttonHref"
               :loading="tokenState.loading"
               class="investment-timeline__timeline-button"
-              @click.stop="dataItem.onButtonClick"
+              @click.stop="dataItem.onButtonClick(item)"
             >
               {{ item.buttonText }}
             </VButton>
@@ -58,8 +63,6 @@ const { data, getButtonTag, selectedUserProfileId, tokenState } = useInvestmentT
 
 <style lang="scss">
 .investment-timeline {
-  $root: &;
-
   &__title {
     color: $black;
     margin-bottom: 24px;

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { IOfferFormatted } from 'InvestCommon/data/offer/offer.types';
 import { PropType, computed } from 'vue';
-import { urlContactUs } from 'InvestCommon/domain/config/links';
 import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 import share from 'UiKit/assets/images/share.svg';
 import file from 'UiKit/assets/images/file.svg';
@@ -11,6 +10,7 @@ import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import VTooltip from 'UiKit/components/VTooltip.vue';
 import { useOffersDetailsSide } from './logic/useOffersDetailsSide';
 import infoIcon from 'UiKit/assets/images/circle-info.svg';
+import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 
 const props = defineProps({
   offer: {
@@ -25,6 +25,11 @@ defineEmits(['invest']);
 
 const offerRef = computed(() => props.offer);
 const { readOnlyInfo, investmentDocUrl, onShareClick, copied } = useOffersDetailsSide(offerRef);
+const dialogsStore = useDialogs();
+
+const handleContactUsClick = () => {
+  dialogsStore.openContactUsDialog('offers');
+};
 </script>
 
 <template>
@@ -137,11 +142,10 @@ const { readOnlyInfo, investmentDocUrl, onShareClick, copied } = useOffersDetail
       </div>
     </div>
     <VButton
-      as="a"
-      :href="urlContactUs"
       size="small"
       variant="link"
       block
+      @click="handleContactUsClick"
     >
       Contact Investor Relation Team
     </VButton>

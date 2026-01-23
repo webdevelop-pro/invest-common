@@ -3,6 +3,7 @@ import { defineAsyncComponent } from 'vue';
 import DashboardTabsTopInfo from 'InvestCommon/features/dashboard/components/DashboardTabsTopInfo.vue';
 import DashboardEvmWalletTokens from './components/DashboardEvmWalletTokens.vue';
 import { useDashboardEvm, EVM_WALLET_TAB_INFO } from './logic/useDashboardEvm';
+import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 
 const VDialogCryptoWallet = defineAsyncComponent({
   loader: () => import('./components/VDialogCryptoWallet.vue'),
@@ -39,13 +40,24 @@ const {
   isDialogTransactionOpen,
   transactiontType,
 } = useDashboardEvm();
+
+const dialogsStore = useDialogs();
+
+const handleContactUsClick = (event: Event) => {
+  const target = (event.target as HTMLElement)?.closest('[data-action="contact-us"]');
+  if (target) {
+    event.preventDefault();
+    event.stopPropagation();
+    dialogsStore.openContactUsDialog('crypto wallet');
+  }
+};
 </script>
 
 <template>
   <div class="DashboardEvmWallet dashboard-evm-wallet">
     <DashboardTabsTopInfo
       :title="EVM_WALLET_TAB_INFO.title"
-      :text="isTopTextShow ? EVM_WALLET_TAB_INFO.text : null"
+      :text="isTopTextShow ? EVM_WALLET_TAB_INFO.text : undefined"
     />
     <VAlert
       v-if="isAlertShow"
@@ -55,11 +67,24 @@ const {
       :button-text="alertButtonText"
       @click="onAlertButtonClick"
     >
-      <template #title>
+      <template
+        v-if="alertTitle"
+        #title
+      >
         {{ alertTitle }}
       </template>
-      <template #description>
-        <span v-dompurify-html="isAlertText" />
+      <template
+        v-if="isAlertText"
+        #description
+      >
+        <span
+          v-dompurify-html="isAlertText"
+          role="button"
+          tabindex="0"
+          @click="handleContactUsClick"
+          @keydown.enter="handleContactUsClick"
+          @keydown.space.prevent="handleContactUsClick"
+        />
       </template>
     </VAlert>
     <div

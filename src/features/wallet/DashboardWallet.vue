@@ -7,6 +7,7 @@ import DashboardWalletBankAccounts from 'InvestCommon/features/wallet/DashboardW
 import DashboardWalletTransactions from 'InvestCommon/features/wallet/DashboardWalletTransactions.vue';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useWalletMain } from './store/useWalletMain';
+import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 
 const VAlert = defineAsyncComponent({
   loader: () => import('UiKit/components/VAlert.vue'),
@@ -16,6 +17,7 @@ const userProfileStore = useProfilesStore();
 const { selectedUserProfileData, selectedUserProfileId } = storeToRefs(userProfileStore);
 const userSessionStore = useSessionStore();
 const { userLoggedIn } = storeToRefs(userSessionStore);
+const dialogsStore = useDialogs();
 
 const {
   isAlertShow,
@@ -29,6 +31,15 @@ const {
   updateData,
   onAlertButtonClick,
 } = useWalletMain();
+
+const handleContactUsClick = (event: Event) => {
+  const target = (event.target as HTMLElement)?.closest('[data-action="contact-us"]');
+  if (target) {
+    event.preventDefault();
+    event.stopPropagation();
+    dialogsStore.openContactUsDialog('wallet');
+  }
+};
 
 onBeforeMount(() => {
   updateData();
@@ -49,11 +60,24 @@ onBeforeMount(() => {
       :button-text="alertButtonText"
       @click="onAlertButtonClick"
     >
-      <template #title>
+      <template
+        v-if="alertTitle"
+        #title
+      >
         {{ alertTitle }}
       </template>
-      <template #description>
-        <span v-dompurify-html="isAlertText" />
+      <template
+        v-if="isAlertText"
+        #description
+      >
+        <span
+          v-dompurify-html="isAlertText"
+          role="button"
+          tabindex="0"
+          @click="handleContactUsClick"
+          @keydown.enter="handleContactUsClick"
+          @keydown.space.prevent="handleContactUsClick"
+        />
       </template>
     </VAlert>
     <div

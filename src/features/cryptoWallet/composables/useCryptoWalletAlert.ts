@@ -1,51 +1,46 @@
-import { computed, watch, nextTick } from 'vue';
-import { storeToRefs } from 'pinia';
-import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository';
-import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
-import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
+import { computed, onBeforeMount, nextTick, watch } from 'vue';
 import { useRouter } from 'vue-router';
+import { storeToRefs } from 'pinia';
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
+import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
-import { hasRestrictedWalletBehavior } from '../helpers/walletProfileHelpers';
+import { hasRestrictedWalletBehavior } from 'InvestCommon/features/wallet/helpers/walletProfileHelpers';
+import type { IProfileFormatted } from 'InvestCommon/data/profiles/profiles.types';
 
-const FUNDING_TAB_INFO = {
-  title: 'Wallet',
-  text: `
-      You can link a bank account in preparation for investing. This will simplify your
-      investment process and will allow to invest more quickly. Enter the required information
-      for your bank account, including the account number and routing number. You may also
-      need to verify your ownership of the bank account by confirming small deposits made
-      by the investment platform.
-    `,
-};
-
-export function useWalletMain() {
+export function useCryptoWalletAlert() {
   const router = useRouter();
-  const userProfileStore = useProfilesStore();
-  const { selectedUserProfileData, selectedUserProfileId } = storeToRefs(userProfileStore);
-  const userSessionStore = useSessionStore();
-  const { userLoggedIn } = storeToRefs(userSessionStore);
+
+  const profilesStore = useProfilesStore();
+  const { selectedUserProfileId, selectedUserProfileData } = storeToRefs(profilesStore);
+
   const useRepositoryProfilesStore = useRepositoryProfiles();
   const { getProfileByIdState } = storeToRefs(useRepositoryProfilesStore);
-  // Stores
-  const walletRepository = useRepositoryWallet();
-  const { getWalletState, canLoadWalletData } = storeToRefs(walletRepository);
+
+  const evmRepository = useRepositoryEvm();
+  const { getEvmWalletState, canLoadEvmWalletData } = storeToRefs(evmRepository);
 
   // KYC and wallet status logic
-  const isWalletError = computed(() => getWalletState.value.data?.isWalletStatusAnyError || getWalletState.value.error);
+  const isWalletError = computed(() => getEvmWalletState.value.data?.isStatusAnyError || getEvmWalletState.value.error);
+
   const isKYCNeedToPass = computed(() => ((
     selectedUserProfileData.value.isKycNone || selectedUserProfileData.value.isKycNew
     || selectedUserProfileData.value.isKycPending) && !isWalletError.value));
+
   const isKYCInProgress = computed(() => (
     selectedUserProfileData.value.isKycInProgress && !isWalletError.value));
+
   const isWalletCreated = computed(() => (
-    getWalletState.value.data?.isWalletStatusCreated && !isWalletError.value));
-  const hasRestrictedWallet = computed(() => hasRestrictedWalletBehavior(selectedUserProfileData.value));
+    getEvmWalletState.value.data?.isStatusCreated && !isWalletError.value));
+
+  const hasRestrictedWallet = computed(() => 
+    hasRestrictedWalletBehavior((selectedUserProfileData.value ?? null) as IProfileFormatted | null)
+  );
   const isError = computed(() => (
     selectedUserProfileData.value.isKycDeclined || isWalletError.value || hasRestrictedWallet.value));
 
   const isAlertShow = computed(() => (
     hasRestrictedWallet.value
-    || (isKYCNeedToPass.value || isKYCInProgress.value || isWalletCreated.value || isError.value)
+    || (isKYCNeedToPass.value || isKYCInProgress.value || isError.value)
     && !getProfileByIdState.value.loading
   ));
 
@@ -53,15 +48,16 @@ export function useWalletMain() {
     !hasRestrictedWallet.value
     && !isWalletError.value && !selectedUserProfileData.value.isKycDeclined
   ));
-  
-  const showWalletTable = computed(() => (
-    !hasRestrictedWallet.value
+
+  const showTable = computed(() => (
+    !isAlertShow.value
+    && !hasRestrictedWallet.value
     && !isWalletError.value
   ));
 
   const isAlertType = computed(() => {
-    if (isWalletCreated.value) return 'info';
-    return 'error';
+    if (isWalletCreated.value) return 'info' as const;
+    return 'error' as const;
   });
 
   const isAlertText = computed(() => {
@@ -72,7 +68,7 @@ export function useWalletMain() {
       return `This usually takes a few moments. If \n    it takes longer than expected, <a href="#contact-us-dialog" class="is--link-1" data-action="contact-us">contact us</a> for assistance.`;
     }
     if (isKYCNeedToPass.value) return `You need to <a href="/profile/${selectedUserProfileId.value}/kyc">pass KYC </a>\n    before you can make a transfer`;
-    if (isKYCInProgress.value) return `Your KYC is in progress. You need to pass KYC before you can make a transfer`;
+    if (isKYCInProgress.value) return 'Your KYC is in progress. You need to pass KYC before you can make a transfer';
     return `Unfortunately, we were not able to create a wallet for you. Please <a href="#contact-us-dialog" class="is--link-1" data-action="contact-us">contact us</a>\n    to resolve the issue.`;
   });
 
@@ -88,10 +84,10 @@ export function useWalletMain() {
   });
 
   const updateData = async () => {
-    if (canLoadWalletData.value && !getWalletState.value.loading && !getWalletState.value.error) {
-      await walletRepository.getWalletByProfile(selectedUserProfileId.value);
-    } else if (!canLoadWalletData.value && getWalletState.value.data ){
-      walletRepository.resetAll();
+    if (canLoadEvmWalletData.value && !getEvmWalletState.value.loading && !getEvmWalletState.value.error) {
+      await evmRepository.getEvmWalletByProfile(selectedUserProfileId.value);
+    } else if (!canLoadEvmWalletData.value && getEvmWalletState.value.data) {
+      evmRepository.resetAll();
     }
   };
 
@@ -107,29 +103,18 @@ export function useWalletMain() {
     });
   });
 
+  onBeforeMount(() => {
+    updateData();
+  });
+
   return {
-    // State
-    selectedUserProfileData,
-    selectedUserProfileId,
-    userLoggedIn,
-    // Computed
-    isWalletError,
-    isKYCNeedToPass,
-    isKYCInProgress,
-    isWalletCreated,
-    isError,
     isAlertShow,
     isTopTextShow,
+    showTable,
     isAlertType,
     isAlertText,
     alertTitle,
     alertButtonText,
-    canLoadWalletData,
-    showWalletTable,
-    // Action
-    updateData,
     onAlertButtonClick,
-    getWalletState,
-    FUNDING_TAB_INFO,
   };
 }

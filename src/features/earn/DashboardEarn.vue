@@ -1,11 +1,17 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue';
+import { computed, defineAsyncComponent, onMounted } from 'vue';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import DashboardTabsTopInfo from 'InvestCommon/features/dashboard/components/DashboardTabsTopInfo.vue';
 import VTableDefault from 'InvestCommon/shared/components/VTableDefault.vue';
 import VTableToolbar from 'InvestCommon/shared/components/VTableToolbar.vue';
 import VTableYieldItem from './components/VTableYieldItem.vue';
 import { useEarnTable } from './composables/useEarnTable';
+import { useCryptoWalletAlert } from 'InvestCommon/features/cryptoWallet/composables/useCryptoWalletAlert';
+import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
+
+const VAlert = defineAsyncComponent({
+  loader: () => import('UiKit/components/VAlert.vue'),
+});
 
 interface TableHeader {
   text: string;
@@ -42,6 +48,28 @@ const {
   onRowClick,
 } = useEarnTable();
 
+const {
+  isAlertShow,
+  isTopTextShow,
+  showTable,
+  isAlertType,
+  isAlertText,
+  alertTitle,
+  alertButtonText,
+  onAlertButtonClick,
+} = useCryptoWalletAlert();
+
+const dialogsStore = useDialogs();
+
+const handleContactUsClick = (event: Event) => {
+  const target = (event.target as HTMLElement)?.closest('[data-action="contact-us"]');
+  if (target) {
+    event.preventDefault();
+    event.stopPropagation();
+    dialogsStore.openContactUsDialog('earn');
+  }
+};
+
 const isLoading = computed(() => loading.value && visibleData.value.length === 0);
 const showEmptyMessage = computed(() => filterResults.value === 0 && search.value.trim().length > 0);
 
@@ -55,9 +83,40 @@ onMounted(() => {
     <DashboardTabsTopInfo
       :title="EARN_TAB_INFO.title"
       :sub-title="EARN_TAB_INFO.subTitle"
-      :text="EARN_TAB_INFO.text"
+      :text="isTopTextShow ? EARN_TAB_INFO.text : undefined"
     />
-    <div class="dashboard-earn__tablet">
+    <VAlert
+      v-if="isAlertShow"
+      :variant="isAlertType"
+      data-testid="earn-alert"
+      class="dashboard-earn__alert"
+      :button-text="alertButtonText"
+      @click="onAlertButtonClick"
+    >
+      <template
+        v-if="alertTitle"
+        #title
+      >
+        {{ alertTitle }}
+      </template>
+      <template 
+        v-if="isAlertText"
+        #description
+      >
+        <span
+          v-dompurify-html="isAlertText"
+          role="button"
+          tabindex="0"
+          @click="handleContactUsClick"
+          @keydown.enter="handleContactUsClick"
+          @keydown.space.prevent="handleContactUsClick"
+        />
+      </template>
+    </VAlert>
+    <div
+      v-if="showTable"
+      class="dashboard-earn__tablet"
+    >
       <h3 class="dashboard-earn__title is--h3__title">
         Available Assets to Supply
       </h3>
@@ -135,6 +194,10 @@ onMounted(() => {
     @media screen and (width < $desktop) {
       display: none;
     }
+  }
+
+  &__alert {
+    margin-bottom: 40px !important;
   }
 }
 </style>

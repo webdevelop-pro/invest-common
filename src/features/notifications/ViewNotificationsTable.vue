@@ -21,13 +21,16 @@ onBeforeMount(() => {
   <div class="ViewnotificationsStore view-notifications-table">
     <div class="is--container">
       <h1 class="view-notifications-table__title">
-        Notifications
+        <span class="view-notifications-table__title-text">Notifications</span>
         <VSkeleton
           v-if="isLoading"
           height="69px"
           width="94px"
         />
-        <span v-else-if="notificationUnreadLength">
+        <span
+          v-else-if="notificationUnreadLength"
+          class="view-notifications-table__title-count"
+        >
           (+{{ notificationUnreadLength }})
         </span>
       </h1>
@@ -58,6 +61,9 @@ onBeforeMount(() => {
     display: flex;
     align-items: center;
     gap: 8px;
+    flex-wrap: wrap;
+    min-width: 0;
+    max-width: 100%;
   }
 
   &__text {

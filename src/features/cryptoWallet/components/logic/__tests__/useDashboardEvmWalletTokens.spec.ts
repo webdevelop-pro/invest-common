@@ -7,8 +7,12 @@ const getEvmWalletStateRef = ref({
     balances: [],
     pendingIncomingBalance: 0,
     pendingOutcomingBalance: 0,
+    isStatusCreated: true,
+    isStatusVerified: false,
+    isStatusAnyError: false,
   },
   loading: false,
+  error: false,
 });
 
 vi.mock('InvestCommon/data/evm/evm.repository', () => {
@@ -34,8 +38,12 @@ describe('useDashboardEvmWalletTokens', () => {
         balances: [],
         pendingIncomingBalance: 0,
         pendingOutcomingBalance: 0,
+        isStatusCreated: true,
+        isStatusVerified: false,
+        isStatusAnyError: false,
       },
       loading: false,
+      error: false,
     };
   });
 
@@ -59,7 +67,7 @@ describe('useDashboardEvmWalletTokens', () => {
   it('can withdraw when balances exist', () => {
     const { canWithdraw } = useDashboardEvmWalletTokens();
     expect(canWithdraw.value).toBe(false);
-    getEvmWalletStateRef.value.data.balances = [{} as never];
+    getEvmWalletStateRef.value.data.balances = [{ amount: '1' } as never];
     expect(canWithdraw.value).toBe(true);
   });
 

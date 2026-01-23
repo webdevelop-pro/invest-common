@@ -1,6 +1,6 @@
 import { computed } from 'vue';
 import { storeToRefs } from 'pinia';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
 import { EvmTransactionTypes } from 'InvestCommon/data/evm/evm.types';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
@@ -38,10 +38,11 @@ const balanceTableHeader = [
 const WALLET_SCAN_URL = env.CRYPTO_WALLET_SCAN_URL as string;
 
 export const useDashboardEvmWalletTokens = (
-  props: { isError?: boolean },
+  props: { isError?: boolean } = {},
   emit?: (e: 'click', type: EvmTransactionTypes) => void
 ) => {
   const router = useRouter();
+  const route = useRoute();
   const evmRepository = useRepositoryEvm();
   const {
     getEvmWalletState, isLoadingNotificationTransaction, isLoadingNotificationWallet,
@@ -60,29 +61,50 @@ export const useDashboardEvmWalletTokens = (
     (getEvmWalletState.value.data?.pendingOutcomingBalance ?? 0) > 0
   ));
 
-  const canWithdraw = computed(() => (
-    (getEvmWalletState.value.data?.balances?.length ?? 0) > 0
-  ));
-
-  const canExchange = computed(() => (
-    (getEvmWalletState.value.data?.balances?.length ?? 0) > 0
-  ));
-
   const hasRestrictedWallet = computed(() => 
     hasRestrictedWalletBehavior((selectedUserProfileData.value ?? null) as IProfileFormatted | null)
   );
+
+  const isWalletReady = computed(() => {
+    const walletData = getEvmWalletState.value.data;
+    return !getEvmWalletState.value.loading
+      && !getEvmWalletState.value.error
+      && !props.isError
+      && walletData
+      && (walletData.isStatusCreated || walletData.isStatusVerified)
+      && !walletData.isStatusAnyError;
+  });
+
   const canAddFunds = computed(() => (
-    !getEvmWalletState.value.loading && !hasRestrictedWallet.value
+    isWalletReady.value
+    && !hasRestrictedWallet.value
     && selectedUserProfileData.value.isKycApproved
   ));
 
-  const canEarn = computed(() => (
-    !getEvmWalletState.value.loading && !hasRestrictedWallet.value
+  const hasAvailableBalances = computed(() => {
+    const balances = getEvmWalletState.value.data?.balances || [];
+    return balances.some(balance => (Number(balance.amount) || 0) > 0);
+  });
+
+  const canWithdraw = computed(() => (
+    isWalletReady.value
+    && hasAvailableBalances.value
+  ));
+
+  const canExchange = computed(() => (
+    isWalletReady.value
+    && hasAvailableBalances.value
+  ));
+
+  const canNavigateToEarn = computed(() => (
+    isWalletReady.value
+    && !hasRestrictedWallet.value
     && selectedUserProfileData.value.isKycApproved
   ));
 
   const canBuy = computed(() => (
-    !getEvmWalletState.value.loading && !hasRestrictedWallet.value
+    isWalletReady.value
+    && !hasRestrictedWallet.value
     && selectedUserProfileData.value.isKycApproved
   ));
 
@@ -134,7 +156,7 @@ export const useDashboardEvmWalletTokens = (
       label: 'Earn',
       variant: 'outlined',
       icon: earn,
-      disabled: !canEarn.value,
+      disabled: !canNavigateToEarn.value,
       transactionType: null,
     },
   ]);
@@ -181,7 +203,23 @@ export const useDashboardEvmWalletTokens = (
 
   const handleButtonClick = (payload: { id: string | number, transactionType?: unknown }) => {
     if (payload.id === 'earn') {
-      router.push({ name: ROUTE_DASHBOARD_EARN, params: { profileId: selectedUserProfileId.value } });
+      if (route.name === ROUTE_DASHBOARD_EARN) {
+        // Clear all query parameters by replacing the URL without query params
+        const url = new URL(window.location.href);
+        url.search = '';
+        window.history.replaceState({}, '', url.toString());
+        // Trigger router update by replacing with current route but empty query
+        router.replace({
+          path: route.path,
+          query: {},
+        });
+      } else {
+        router.push({ 
+          name: ROUTE_DASHBOARD_EARN, 
+          params: { profileId: selectedUserProfileId.value },
+          query: {},
+        });
+      }
     } else if (payload.transactionType && emit) {
       emit('click', payload.transactionType as EvmTransactionTypes);
     }

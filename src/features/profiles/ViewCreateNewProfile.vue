@@ -136,9 +136,6 @@ const handleSave = () => {
     min-height: 75px;
   }
 
-  &__forms {
-    min-height: 100vh;
-  }
 }
 
 // Smooth transitions for profile switching
