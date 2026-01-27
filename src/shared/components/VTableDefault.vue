@@ -22,12 +22,14 @@ const props = defineProps<{
 
 const loadingRowLength = computed(() => props.loadingRowLength ?? 1);
 const headerLength = computed(() => props.colspan ?? (props.header?.length || 0));
+const isEmpty = computed(() => !props.loading && props.data.length === 0);
 </script>
 
 <template>
   <VTable
     :size="size"
     class="VTableDefault v-table-default"
+    :class="{ 'is--empty': isEmpty }"
   >
     <VTableHeader v-if="headerLength > 0">
       <VTableRow>
@@ -86,7 +88,9 @@ const headerLength = computed(() => props.colspan ?? (props.header?.length || 0)
   </VTable>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
+@use 'UiKit/styles/_variables.scss' as *;
+
 .fade-enter-active,
 .fade-leave-active {
   transition: all 0.3s ease;
@@ -102,5 +106,12 @@ const headerLength = computed(() => props.colspan ?? (props.header?.length || 0)
 
 .fade-move {
   transition: transform 0.3s ease;
+}
+
+/* Hide header on mobile when table is empty */
+@media screen and (max-width: $tablet) {
+  .VTableDefault.is--empty :deep(.v-table-header) {
+    display: none;
+  }
 }
 </style>
