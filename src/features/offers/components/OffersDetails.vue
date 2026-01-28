@@ -266,5 +266,11 @@ useGlobalLoader().hide();
   &__side {
     position: relative;
   }
+
+  .offer-details-side {
+    @media screen and (width < $tablet) {
+      margin-top: 24px !important;
+    }
+  }
 }
 </style>

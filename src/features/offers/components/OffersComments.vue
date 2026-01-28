@@ -72,6 +72,10 @@ onBeforeMount(() => {
     text-align: center;
     font-size: 20px;
     line-height: 32px;
+
+    @media screen and (width < $tablet) {
+      margin-top: 20px;
+    }
   }
 }
 </style>

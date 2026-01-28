@@ -119,6 +119,10 @@ const {
   padding-bottom: 60px;
   border-bottom: 1px solid $gray-40;
 
+  @media screen and (width < $tablet) {
+    padding-bottom: 24px;
+  }
+
   &__comment-wrap {
     width: 100%;
     margin-bottom: 20px;
@@ -138,14 +142,18 @@ const {
   }
 
   &__related {
-    @media screen and (max-width: $tablet) {
-      margin-top: 40px;
+    @media screen and (width < $tablet) {
+      margin-top: 20px;
     }
   }
 
   &__button {
     @media screen and (width > $tablet) {
       margin-top: 0 !important;
+    }
+
+    @media screen and (width < $tablet) {
+      margin-top: 20px !important;
     }
   }
 

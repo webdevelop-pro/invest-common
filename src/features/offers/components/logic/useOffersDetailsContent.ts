@@ -7,6 +7,7 @@ import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryFiler } from 'InvestCommon/data/filer/filer.repository';
 import { FilerFormatter } from 'InvestCommon/data/filer/filer.formatter';
 import { useRepositoryOffer } from 'InvestCommon/data/offer/offer.repository';
+import { useBreakpoints } from 'UiKit/composables/useBreakpoints';
 
 export enum OfferTabTypes {
   description = 'description',
@@ -22,6 +23,7 @@ export function useOffersDetailsContent(offerRef: Ref<IOfferFormatted | undefine
   const { getFilesState, getPublicFilesState } = storeToRefs(filerRepository);
   const offerRepository = useRepositoryOffer();
   const { getOfferCommentsState } = storeToRefs(offerRepository);
+  const { isTablet } = storeToRefs(useBreakpoints());
 
   const commentsLength = computed(() => (
     getOfferCommentsState.value.data?.count || null
@@ -70,11 +72,11 @@ export function useOffersDetailsContent(offerRef: Ref<IOfferFormatted | undefine
     },
     {
       value: OfferTabTypes.documents,
-      label: 'Financial Documents',
+      label: isTablet.value ? 'Docs' : 'Financial Documents',
     },
     {
       value: OfferTabTypes.comments,
-      label: 'Ask a Question',
+      label: isTablet.value ? 'Question' : 'Ask a Question',
       subTitle: commentsLength.value,
     },
   ]));

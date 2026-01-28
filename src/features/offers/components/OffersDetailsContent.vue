@@ -8,10 +8,14 @@ import { navigateWithQueryParams } from 'InvestCommon/helpers/general';
 import { urlSignin } from 'InvestCommon/domain/config/links';
 import { useRoute } from 'vitepress';
 import OffersComments from './OffersComments.vue';
+import { useBreakpoints } from 'UiKit/composables/useBreakpoints';
+import { storeToRefs } from 'pinia';
 
 // const OffersComments = defineAsyncComponent({
 //   loader: () => import('./OffersComments.vue'),
 // });
+
+const { isTablet } = storeToRefs(useBreakpoints());
 
 const VButton = defineAsyncComponent({
   loader: () => import('UiKit/components/Base/VButton/VButton.vue'),
@@ -49,13 +53,18 @@ const signInHandler = () => {
   <VTabs
     tabs-to-url
     :default-value="tabOptions[0].value"
+    :variant="isTablet ? 'secondary' : 'primary'"
     class="OffersDetailsContent offer-details-content with-default-distance"
   >
-    <VTabsList>
+    <VTabsList
+      :variant="isTablet ? 'secondary' : 'primary'"
+      class="offer-details-content__tabs-list"
+    >
       <VTabsTrigger
         v-for="(tab, tabIndex) in tabOptions"
         :key="tabIndex"
         :value="tab.value"
+        :variant="isTablet ? 'secondary' : 'primary'"
       >
         {{ tab.label }}
         <template
@@ -147,6 +156,10 @@ const signInHandler = () => {
     margin-bottom: 40px;
   }
 
+  @media screen and (width < $tablet) {
+      margin-top: 24px !important;
+  }
+
   &__title {
     margin-bottom: 24px;
   }
@@ -165,6 +178,12 @@ const signInHandler = () => {
 
   &__date-header {
     width: 130px;
+  }
+
+  &__tabs-list {
+    @media screen and (width < $tablet) {
+      margin: 0 auto;
+    }
   }
 
   h1, h2, h3, h4, h5, h6 {

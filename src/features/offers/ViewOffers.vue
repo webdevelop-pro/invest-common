@@ -112,5 +112,11 @@ watch(
       grid-template-columns: repeat(1, 1fr);
     }
   }
+
+  .v-section__content {
+    @media screen and (width < $tablet) {
+      margin-top: 20px !important;
+    }
+  }
 }
 </style>
