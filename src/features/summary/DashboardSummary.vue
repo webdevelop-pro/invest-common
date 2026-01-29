@@ -154,6 +154,7 @@ const {
 
       @media screen and (width < $tablet){
         grid-template-columns: 1fr;
+        margin-top: 20px;
       }
     }
 

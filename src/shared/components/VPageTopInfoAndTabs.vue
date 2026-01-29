@@ -76,11 +76,21 @@ defineProps({
 
   &__top-info {
     margin: 40px 0 45px;
+
+    @media screen and (max-width: $tablet){
+      margin: 26px 0;
+    }
   }
 
   &__tabs-content {
     background: $white;
     padding-bottom: 40px;
+  }
+
+  .v-tabs-content {
+    @media screen and (width < $tablet) {
+      padding-top: 24px;
+    }
   }
 }
 </style>

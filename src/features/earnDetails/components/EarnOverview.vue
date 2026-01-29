@@ -131,8 +131,16 @@ const { isEmpty, isChartSection, getYFormatter } = useEarnOverview(props);
   &__section {
     margin-bottom: 40px;
 
+    @media screen and (width < $tablet) {
+      margin-bottom: 30px;
+    }
+
     &--chart {
       margin-bottom: 60px;
+
+      @media screen and (width < $tablet) {
+        margin-bottom: 30px;
+      }
     }
 
     &:last-child {
@@ -147,6 +155,10 @@ const { isEmpty, isChartSection, getYFormatter } = useEarnOverview(props);
   &__title {
     margin-bottom: 24px;
     color: $black;
+
+    @media screen and (width < $tablet) {
+      margin-bottom: 16px;
+    }
   }
 
   &__info-wrap {

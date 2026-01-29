@@ -123,6 +123,10 @@ const { isEmpty, hasData } = useEarnRisk(props);
   &__section {
     margin-bottom: 40px;
 
+    @media screen and (width < $tablet) {
+      margin-bottom: 30px;
+    }
+
     &:last-child {
       margin-bottom: 0;
     }

@@ -130,6 +130,7 @@ const {
 
     @media screen and (max-width: $desktop) {
       flex-direction: column;
+      gap: 20px;
     }
   }
 

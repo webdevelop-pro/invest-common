@@ -85,6 +85,10 @@ const {
 @use 'UiKit/styles/_variables.scss' as *;
 
 .v-account-photo {
+  @media screen and (width < $tablet) {
+      margin-top: 20px !important;
+    }
+
   &__content {
     display: flex;
     flex-direction: row;

@@ -108,9 +108,10 @@ const data = computed(() => ([
   align-items: flex-start;
   gap: 20px;
   width: 100%;
-
-  @media screen and (max-width: $tablet-xs){
-    flex-direction: column;
+  flex-wrap: wrap;
+  
+  @media screen and (width < $desktop-md){
+    gap: 8px;
   }
 
   &__item {
@@ -121,6 +122,7 @@ const data = computed(() => ([
     gap: 4px;
     flex: 1 0 0;
     width: 100%;
+    min-width: 172px;
   }
 
   &__item-label {

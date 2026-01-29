@@ -9,6 +9,7 @@ import DashboardTopInfoRight from './DashboardTopInfoRight.vue';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
+import { useBreakpoints } from 'UiKit/composables/useBreakpoints';
 
 const userSessionStore = useSessionStore();
 const { userSessionTraits } = storeToRefs(userSessionStore);
@@ -16,6 +17,8 @@ const { getSessionState } = useRepositoryAuth();
 
 const useRepositoryProfilesStore = useRepositoryProfiles();
 const { getUserState, getProfileByIdState } = storeToRefs(useRepositoryProfilesStore);
+
+const { isTablet } = useBreakpoints();
 
 const isLoading = computed(() => (getUserState.value.loading || getProfileByIdState.value.loading));
 
@@ -25,7 +28,13 @@ const isLoading = computed(() => (getUserState.value.loading || getProfileByIdSt
   <div class="dashboard-top-info">
     <div class="dashboard-top-info__content-left">
       <div class="dashboard-top-info__title-wrap">
-        <div class="dashboard-top-info__title is--h3__title">
+        <div
+          class="dashboard-top-info__title"
+          :class="{
+            'is--h3__title': !isTablet,
+            'is--h5__title': isTablet,
+          }"
+        >
           Welcome back,
 
           <VSkeleton
@@ -77,7 +86,7 @@ const isLoading = computed(() => (getUserState.value.loading || getProfileByIdSt
     @media screen and (max-width: $desktop-md){
       flex-direction: column;
       align-items: flex-start;
-      gap: 40px;
+      gap: 20px;
     }
 
   &__content-left {

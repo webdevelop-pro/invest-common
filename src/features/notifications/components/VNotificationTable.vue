@@ -46,6 +46,7 @@ const onApplyFilter = (items: IVFilter[]) => {
           v-model="currentTab"
           :default-value="currentTab"
           variant="secondary"
+          query-key="notification-tab"
           tabs-to-url
           class="wd-notification-table__tabs"
         >
@@ -208,6 +209,7 @@ const onApplyFilter = (items: IVFilter[]) => {
 
     @media screen and (max-width: $tablet){
       width: 100%;
+      margin-right: 0;
     }
   }
 

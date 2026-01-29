@@ -127,7 +127,9 @@ const saveHandler = () => {
 
     @media screen and (max-width: $desktop){
       flex-direction: column;
-      gap: 40px;
+      gap: 24px;
+      padding-top: 24px;
+      margin-bottom: 100px;
     }
   }
 
@@ -154,6 +156,10 @@ const saveHandler = () => {
     align-items: flex-start;
     gap: 12px;
     margin-top: 40px;
+
+    @media screen and (max-width: $desktop){
+      margin-top: 20px;
+    }
   }
 }
 </style>

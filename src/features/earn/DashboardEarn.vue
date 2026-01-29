@@ -24,11 +24,11 @@ const TABLE_HEADERS: TableHeader[] = [
   { text: 'Asset' },
   { text: 'TVL' },
   { text: 'APY' },
-  { text: 'Base APY' },
-  { text: 'Reward APY' },
-  { text: '30d Avg APY' },
-  { text: 'Type' },
-  { text: 'Actions' },
+  { text: 'Base APY', class: 'is--gt-desktop-show' },
+  { text: 'Reward APY', class: 'is--gt-desktop-show' },
+  { text: '30d Avg APY', class: 'is--gt-desktop-show' },
+  { text: 'Type', class: 'is--gt-desktop-show' },
+  { text: 'Actions', class: 'is--gt-desktop-show' },
 ];
 
 const EARN_TAB_INFO = {
@@ -163,12 +163,17 @@ onMounted(() => {
 .dashboard-earn {
   $root: &;
 
+  .v-table-toolbar__search {
+    width: 50%;
+  }
+
   &__tablet {
     margin-top: 40px;
 
     @media screen and (max-width: $tablet) {
       width: 100%;
       overflow: auto;
+      margin-top: 20px;
     }
   }
 
@@ -188,12 +193,6 @@ onMounted(() => {
 
   .v-table-head:last-of-type {
     text-align: right;
-  }
-
-  .v-table-header {
-    @media screen and (width < $desktop) {
-      display: none;
-    }
   }
 
   &__alert {

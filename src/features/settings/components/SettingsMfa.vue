@@ -28,7 +28,7 @@ onMounted(() => {
     <h2>
       MFA & Password
     </h2>
-    <div class="is--two-col-grid is--margin-top-40">
+    <div class="settings-mfa__grid is--two-col-grid is--margin-top-40">
       <div class="settings-mfa__left">
         <h3 class="settings-mfa__subtitle is--h3__title">
           Multi-Factor Authentication
@@ -66,3 +66,13 @@ onMounted(() => {
     />
   </div>
 </template>
+
+<style lang="scss">
+.settings-mfa {
+  &__grid {
+    @media screen and (width < $tablet) {
+      margin-top: 20px !important;
+    }
+  }
+}
+</style>

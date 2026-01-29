@@ -1,23 +1,12 @@
 <script setup lang="ts">
-import { urlOffers, urlBlogSingle } from 'InvestCommon/domain/config/links';
+import { ref } from 'vue';
+import { urlBlogSingle } from 'InvestCommon/domain/config/links';
 import DashboardTabsTopInfo from 'InvestCommon/features/dashboard/components/DashboardTabsTopInfo.vue';;
-import { storeToRefs } from 'pinia';
-import VTableDefault from 'InvestCommon/shared/components/VTableDefault.vue';
-import VTablePortfolioItem from './components/VTablePortfolioItem.vue';
-import VTableToolbar from 'InvestCommon/shared/components/VTableToolbar.vue';
-import { useDashboardPortfolioStore } from './store/useDashboardPortfolio';
 import { PostLinkTypes } from 'InvestCommon/types/api/blog';
+import { VTabs, VTabsList, VTabsTrigger, VTabsContent } from 'UiKit/components/Base/VTabs';
+import DashboardDistributions from 'InvestCommon/features/distributions/DashboardDistributions.vue';
+import PortfolioInvestmentsTable from './components/PortfolioInvestmentsTable.vue';
 
-const portfolioTableHeader = [
-  { text: 'ID' },
-  { text: 'Offer' },
-  { text: 'Date' },
-  { text: 'Amount' },
-  { text: 'Ownership' },
-  { text: 'Funding Type' },
-  { text: 'Status' },
-  { text: '' },
-];
 const PORTFOLIO_TAB_INFO = {
   title: 'Portfolio',
   subTitle: 'Your holdings and belongings',
@@ -30,20 +19,7 @@ const PORTFOLIO_TAB_INFO = {
   `,
 };
 
-const portfolioStore = useDashboardPortfolioStore();
-
-const {
-  search,
-  filterPortfolio,
-  totalResults,
-  isFiltering,
-  filteredData,
-  filterResults,
-  queryId,
-  getInvestmentsState,
-} = storeToRefs(portfolioStore);
-
-const { onApplyFilter } = portfolioStore;
+const activeTab = ref('investments');
 </script>
 
 <template>
@@ -57,43 +33,37 @@ const { onApplyFilter } = portfolioStore;
       <h3 class="is--h3__title">
         Your Investments
       </h3>
-      <VTableToolbar
-        v-model="search"
-        :filter-items="filterPortfolio"
-        :filter-results-length="filterResults"
-        :total-results-length="totalResults"
-        @filter-items="onApplyFilter"
-      />
-      <VTableDefault
-        :loading-row-length="10"
-        :header="portfolioTableHeader"
-        :loading="getInvestmentsState.loading && filteredData.length === 0"
-        :data="filteredData"
-        :colspan="9"
+      <VTabs
+        v-model="activeTab"
+        variant="secondary"
+        query-key="portfolio-tab"
+        default-value="investments"
+        class="dashboard-portfolio__mobile-tabs"
       >
-        <VTablePortfolioItem
-          v-for="item in filteredData"
-          :key="item.id"
-          :item="item"
-          :search="search"
-          :active-id="queryId"
-          :colspan="portfolioTableHeader.length"
-        />
-        <template #empty>
-          You have no investment
-          <span v-if="filterResults === 0 && isFiltering">
-            matching your criteria
-          </span>
-          <span v-else> yet. </span>
-          Check out
-          <a
-            :href="urlOffers"
-            class="is--link-1"
+        <VTabsList variant="secondary">
+          <VTabsTrigger
+            value="investments"
+            variant="secondary"
           >
-            open offerings.
-          </a>
-        </template>
-      </VTableDefault>
+            Investments
+          </VTabsTrigger>
+          <VTabsTrigger
+            value="distributions"
+            variant="secondary"
+          >
+            Distributions
+          </VTabsTrigger>
+        </VTabsList>
+        <VTabsContent value="investments">
+          <PortfolioInvestmentsTable />
+        </VTabsContent>
+        <VTabsContent value="distributions">
+          <DashboardDistributions />
+        </VTabsContent>
+      </VTabs>
+      <div class="dashboard-portfolio__desktop-content">
+        <PortfolioInvestmentsTable />
+      </div>
     </div>
   </div>
 </template>
@@ -236,6 +206,25 @@ const { onApplyFilter } = portfolioStore;
 
   &__search {
     width: 34.5%;
+  }
+
+  &__mobile-tabs {
+    display: none;
+
+    @media screen and (max-width: $tablet) {
+      display: block;
+      margin-top: 16px;
+
+      .v-tabs-content {
+        padding-top: 24px;
+      }
+    }
+  }
+
+  &__desktop-content {
+    @media screen and (max-width: $tablet) {
+      display: none;
+    }
   }
 }
 </style>

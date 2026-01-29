@@ -98,6 +98,7 @@ const {
       flex-direction: column;
       align-items: flex-start;
       gap: 12px;
+      margin-top: 20px !important;
     }
   }
 

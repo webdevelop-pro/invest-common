@@ -134,6 +134,10 @@ const handleSave = () => {
   &__header {
     margin-bottom: 40px;
     min-height: 75px;
+
+    @media screen and (max-width: $tablet){
+      margin-bottom: 20px;
+    }
   }
 
 }

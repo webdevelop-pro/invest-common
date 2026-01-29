@@ -68,12 +68,12 @@ const handleDetailsClick = (event: Event) => {
     <VTableCell class="is--gt-desktop-show">
       {{ data.apyMean30dFormatted }}
     </VTableCell>
-    <VTableCell>
+    <VTableCell class="is--gt-desktop-show">
       <VBadge :color="badgeConfig.color">
         {{ badgeConfig.text }}
       </VBadge>
     </VTableCell>
-    <VTableCell class="v-table-yield-item__actions">
+    <VTableCell class="v-table-yield-item__actions is--gt-desktop-show">
       <a
         href="#"
         class="is--link-2"
@@ -91,61 +91,10 @@ const handleDetailsClick = (event: Event) => {
 .v-table-yield-item {
   cursor: pointer !important;
 
-  @media screen and (width < $desktop) {
-    display: flex;
-    flex-wrap: wrap;
-  }
-
   &__actions {
     text-align: right;
 
-    @media screen and (width < $desktop) {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex: 0 0 100%;
-    }
-  }
 
-  .v-table-cell {
-    @media screen and (width < $desktop) {
-      display: flex;
-      align-items: center;
-      padding: 8px;
-    }
-
-    &:nth-child(1) {
-      @media screen and (width < $desktop) {
-        flex: 0 0 50%;
-      }
-    }
-
-    &:nth-child(2) {
-      @media screen and (width < $desktop) {
-        flex: 0 0 50%;
-        justify-content: flex-end;
-      }
-    }
-
-    &:nth-child(3) {
-      @media screen and (width < $desktop) {
-        flex: 0 0 50%;
-      }
-    }
-
-    &:nth-child(6) {
-      @media screen and (width < $desktop) {
-        flex: 0 0 50%;
-        justify-content: flex-end;
-      }
-    }
-
-    &:nth-child(7) {
-      @media screen and (width < $desktop) {
-        flex: 0 0 50%;
-        justify-content: flex-end;
-      }
-    }
   }
 }
 </style>

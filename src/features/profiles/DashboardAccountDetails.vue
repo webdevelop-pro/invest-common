@@ -246,7 +246,7 @@ const ACCOUNT_TAB_INFO = {
         </p>
       </template>
     </DashboardTabsTopInfo>
-    <div class="is--two-col-grid is--gap-40-80">
+    <div class="dashboard-account-details__form is--two-col-grid is--gap-40-80">
       <DashboardAccountDetailsReadonlyForm
         v-for="section in formSections"
         :key="section.id"
@@ -316,6 +316,13 @@ const ACCOUNT_TAB_INFO = {
 
   &__beneficials-table {
     margin-top: 20px;
+  }
+
+  &__form {
+    @media screen and (width < $tablet) {
+      gap: 20px;
+      margin-top: 20px;
+    }
   }
 }
 </style>

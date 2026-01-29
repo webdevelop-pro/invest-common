@@ -7,6 +7,7 @@ import { useRepositoryNotifications } from 'InvestCommon/data/notifications/noti
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import type { INotification } from 'InvestCommon/data/notifications/notifications.types';
 import { IVFilter } from 'UiKit/components/VFilter/VFilter.vue';
+import { useBreakpoints } from 'UiKit/composables/useBreakpoints';
 
 export const useNotifications = defineStore('notifications', () => {
   const notificationsRepository = useRepositoryNotifications();
@@ -15,6 +16,7 @@ export const useNotifications = defineStore('notifications', () => {
   } = storeToRefs(notificationsRepository);
   const userSessionStore = useSessionStore();
   const { userLoggedIn } = storeToRefs(userSessionStore);
+  const { isTablet } = useBreakpoints();
 
   /* * Loading State * */
   const isLoading = ref(true);
@@ -86,7 +88,7 @@ export const useNotifications = defineStore('notifications', () => {
     },
   ] as IVFilter[]);
 
-  const tabsSettings = ref([
+  const tabsSettingsBase = [
     {
       value: 'all',
       label: 'All',
@@ -98,13 +100,19 @@ export const useNotifications = defineStore('notifications', () => {
     {
       value: 'accounts',
       label: 'Investment Profiles',
+      labelMobile: 'Profiles',
     },
     {
       value: 'document',
       label: 'Documents',
     },
-  ]);
-  const currentTab = ref(tabsSettings.value[0].value);
+  ];
+
+  const tabsSettings = computed(() => tabsSettingsBase.map((tab) => ({
+    ...tab,
+    label: tab.labelMobile && isTablet.value ? tab.labelMobile : tab.label,
+  })));
+  const currentTab = ref(tabsSettingsBase[0].value);
   const search = ref('');
   const filterStatus = ref<string[]>([]);
   const filterType = ref<string[]>([]);
