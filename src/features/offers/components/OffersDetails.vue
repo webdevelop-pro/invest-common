@@ -32,7 +32,7 @@ const props = defineProps({
 const emit = defineEmits(['invest']);
 
 const offerRef = computed(() => props.offer);
-const { breadcrumbsList, carouselFiles, frontmatter, socialLinks } = useOffersDetails(offerRef);
+const { breadcrumbsList, carouselFiles, frontmatter, socialLinks, filesLoading } = useOffersDetails(offerRef);
 
 useGlobalLoader().hide();
 </script>
@@ -55,7 +55,7 @@ useGlobalLoader().hide();
           {{ offer?.name }}
         </h1>
         <VSkeleton
-          v-if="loading"
+          v-if="loading || filesLoading"
           height="491px"
           width="100%"
           class="offer-details__img-wrap"

@@ -38,6 +38,7 @@ export function useOffersDetails(offerRef: Ref<IOfferFormatted | undefined>) {
   const { getPublicFilesState } = storeToRefs(filerRepository);
 
   const filesData = computed(() => getPublicFilesState.value.data);
+  const filesLoading = computed(() => getPublicFilesState.value.loading);
   const videoSrc = computed(() => offerRef.value?.data?.video);
   const imageID = computed(() => offerRef.value?.image_link_id as number | undefined);
   const documentsMedia = computed(() => filesData.value?.entities?.media?.entities || {});
@@ -76,6 +77,7 @@ export function useOffersDetails(offerRef: Ref<IOfferFormatted | undefined>) {
     tags,
     carouselFiles,
     socialLinks,
+    filesLoading,
   };
 }
 
