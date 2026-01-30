@@ -20,6 +20,7 @@ import DashboardDistributions from 'InvestCommon/features/distributions/Dashboar
 import DashboardSummary from 'InvestCommon/features/summary/DashboardSummary.vue';
 import DashboardEarn from 'InvestCommon/features/earn/DashboardEarn.vue';
 import { useRoute } from 'vue-router';
+import { useBreakpoints } from 'UiKit/composables/useBreakpoints';
 
 defineProps({
   tab: {
@@ -38,6 +39,8 @@ const route = useRoute();
 
 const profilesStore = useProfilesStore();
 const { selectedUserProfileId } = storeToRefs(profilesStore);
+
+const { isTablet } = useBreakpoints();
 
 const tabs = computed(() => ({
   [DashboardTabTypes.summary]: {
@@ -78,7 +81,21 @@ const tabs = computed(() => ({
   },
 }) as const);
 
-const tabsList = computed(() => Object.values(tabs.value));
+const filteredTabs = computed(() => {
+  const allTabs = { ...tabs.value };
+  // Hide distributions tab on mobile
+  if (isTablet.value) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { [DashboardTabTypes.distributions]: _, ...rest } = allTabs;
+    return rest;
+  }
+  return allTabs;
+});
+
+const tabsList = computed(() => {
+  const allTabs = Object.values(filteredTabs.value);
+  return allTabs;
+});
 
 const tabComponents: Record<DashboardTabTypes, Component> = {
   [DashboardTabTypes.portfolio]: DashboardPortfolio,
@@ -103,7 +120,7 @@ watch(
 <template>
   <VPageTopInfoAndTabs
     :tab="tab"
-    :tabs="tabs"
+    :tabs="filteredTabs"
     class="ViewDashboard view-dashboard is--no-margin"
   >
     <template #top-info>

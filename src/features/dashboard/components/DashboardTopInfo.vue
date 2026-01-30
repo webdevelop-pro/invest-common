@@ -71,7 +71,9 @@ const isLoading = computed(() => (getUserState.value.loading || getProfileByIdSt
         />
       </div>
     </div>
-    <DashboardTopInfoRight />
+    <DashboardTopInfoRight
+      class="is--gt-tablet-show"
+    />
   </div>
 </template>
 

@@ -72,6 +72,8 @@ const hasPercent = computed(() => props.showPercent !== false);
     display: flex;
     flex-direction: column;
     gap: 12px;
+    max-height: 226px;
+    overflow: auto;
   }
 
   &__item {

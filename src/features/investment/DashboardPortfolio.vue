@@ -38,6 +38,7 @@ const activeTab = ref('investments');
         variant="secondary"
         query-key="portfolio-tab"
         default-value="investments"
+        tabs-to-url
         class="dashboard-portfolio__mobile-tabs"
       >
         <VTabsList variant="secondary">
@@ -142,6 +143,11 @@ const activeTab = ref('investments');
     width: 55px;
     height: 55px;
     object-fit: cover;
+  }
+
+  .v-tabs-list {
+    width: fit-content;
+    max-width: 100%;  
   }
 }
 </style>

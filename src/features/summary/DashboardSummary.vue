@@ -8,6 +8,10 @@ import { urlOfferSingle, urlOffers } from 'InvestCommon/domain/config/links';
 import VWalletTokensAndTransactions from 'InvestCommon/shared/components/VWalletTokensAndTransactions.vue';
 import VCardGoal from 'InvestCommon/shared/components/VCardGoal.vue';
 import VCardOfferFunded from 'InvestCommon/shared/components/VCardOfferFunded.vue';
+import VSliderCards from 'UiKit/components/VSlider/VSliderCards.vue';
+import DashboardTopInfoCard from 'InvestCommon/features/dashboard/components/DashboardTopInfoCard.vue';
+import { useDashboardTopInfoRight } from 'InvestCommon/features/dashboard/composables/useDashboardTopInfoRight';
+import { useBreakpoints } from 'UiKit/composables/useBreakpoints';
 
 const {
   cryptoItems,
@@ -30,6 +34,9 @@ const {
   tables,
 } = useSummaryData();
 
+const { isTablet } = useBreakpoints();
+const { sliderData: dashboardTopInfoData, isLoading: isDashboardTopInfoLoading } = useDashboardTopInfoRight();
+
 </script>
 
 <template>
@@ -45,6 +52,16 @@ const {
         :error="getPricesState.error?.message"
         :duration-sec="durationSec"
       />
+      <div
+        v-if="isTablet && !isDashboardTopInfoLoading"
+        class="dashboard-summary__mobile-slider is--margin-top-20"
+      >
+        <VSliderCards :data="dashboardTopInfoData">
+          <template #default="{ slide }">
+            <DashboardTopInfoCard :slide="slide" />
+          </template>
+        </VSliderCards>
+      </div>
       <div class="dashboard-summary__grid">
         <CardDonutUnified
           class-name="investment-categories-card"
