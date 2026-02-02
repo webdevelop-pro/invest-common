@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build-vue": "vue-tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:header": "vitest run src/shared/components/VHeader/__tests__/VHeader.test.ts src/shared/components/pwa/__tests__/VHeaderPWA.test.ts"
   },
   "dependencies": {
     "@pinia/testing": "^1.0.3",
@@ -40,12 +43,19 @@
     "@types/luxon": "^3.7.1",
     "@types/node": "^24.10.1",
     "@vitejs/plugin-vue": "^6.0.1",
+    "@vitest/coverage-v8": "^4.0.17",
+    "@vue/test-utils": "^2.4.6",
+    "@vueuse/integrations": "^14.0.0",
+    "happy-dom": "^18.0.1",
+    "jsdom": "^27.4.0",
+    "pinia": "^3.0.4",
     "maska": "^3.2.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
     "vite": "^7.2.2",
+    "vitest": "^4.0.17",
     "vue-tsc": "^3.1.4"
   },
   "packageManager": "yarn@3.8.0"

@@ -7,20 +7,34 @@ import { storeToRefs } from 'pinia';
 import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import {
+  urlFaq,
+  urlHome,
+  urlHowItWorks,
+  urlNotifications,
+  urlOffers,
+  urlProfileCryptoWallet,
+  urlProfilePortfolio,
+  urlProfileWallet,
   urlSignin,
   urlSignup,
 } from 'InvestCommon/domain/config/links';
 import VHeader from 'UiKit/components/VHeader/VHeader.vue';
-import { MenuItem } from 'InvestCommon/types/global'; // Use shared MenuItem type
+import { MenuItem } from 'InvestCommon/types/global';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useBreakpoints } from 'UiKit/composables/useBreakpoints';
+import ArrowRight from 'UiKit/assets/images/arrow-right.svg';
+import ArrowLeft from 'UiKit/assets/images/arrow-left.svg';
+import LogOutIcon from 'UiKit/assets/images/menu_common/logout.svg';
+import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
+import VLogo from 'UiKit/components/VLogo.vue';
 
 const VHeaderProfile = defineAsyncComponent({
-  loader: () => import('./VHeaderProfile.vue'),
+  loader: () => import('../VHeader/VHeaderProfile.vue'),
   hydrate: hydrateOnVisible(),
 });
 const VHeaderProfileMobile = defineAsyncComponent({
-  loader: () => import('./VHeaderProfileMobile.vue'),
+  loader: () => import('../VHeader/VHeaderProfileMobile.vue'),
   hydrate: hydrateOnVisible(),
 });
 const VButton = defineAsyncComponent({
@@ -48,11 +62,11 @@ const props = defineProps({
   },
 });
 
+const isMobilePWA = true;
 const runtimePath = ref('');
 onMounted(() => {
   runtimePath.value = window.location.pathname;
 });
-
 
 const { isDesktopMD } = storeToRefs(useBreakpoints());
 
@@ -60,11 +74,14 @@ const sessionStore = useSessionStore();
 const { userLoggedIn } = storeToRefs(sessionStore);
 const useRepositoryProfilesStore = useRepositoryProfiles();
 const { getUserState } = storeToRefs(useRepositoryProfilesStore);
-// Use props.path directly, no need for ref unless it is updated elsewhere
+const useDialogsStore = useDialogs();
+const { isDialogLogoutOpen } = storeToRefs(useDialogsStore);
+const profilesStore = useProfilesStore();
+const { selectedUserProfileId } = storeToRefs(profilesStore);
+
 const isMobileSidebarOpen = defineModel<boolean>();
 
 const resolvedPath = computed(() => props.path || runtimePath.value);
-
 const isLoading = computed(() => getUserState.value.loading);
 const isSignUpPage = computed(() => props.layout === 'auth-signup' || resolvedPath.value?.includes('signup'));
 const isSignInPage = computed(() => props.layout === 'auth-login' || resolvedPath.value?.includes('signin'));
@@ -78,20 +95,110 @@ const showNavigation = computed(() => (
   !isSignInPage.value && !isSignUpPage.value && !isRecoveryPage.value
   && !isCheckEmailPage.value && !isAuthenticatorPage.value && !isKYCBoPage.value));
 
-const showAccountText = computed(() => (
-  !userLoggedIn.value && !showNavigation.value && !isAuthenticatorPage.value && !isKYCBoPage.value))
-const showHaveAccount = computed(() => (!isSignInPage.value && !isAuthFlowPage.value));
-const showDontHaveAccount = computed(() => (!isSignUpPage.value));
-const showAuthButtons = computed(() => (
-  !userLoggedIn.value && !isAuthenticatorPage.value && !isKYCBoPage.value))
+const showPwaLoginLink = computed(() => (
+  !userLoggedIn.value
+  && !isSignInPage.value
+  && !isSignUpPage.value
+  && !isAuthFlowPage.value
+  && !isAuthenticatorPage.value
+  && !isKYCBoPage.value
+));
+const showPwaLogoutIcon = computed(() => (
+  userLoggedIn.value
+  && !isAuthenticatorPage.value
+  && !isKYCBoPage.value
+));
+const showPwaAuthCta = computed(() => (
+  !userLoggedIn.value
+  && (isSignInPage.value || isSignUpPage.value)
+));
+
+const normalizePath = (path: string) => {
+  const trimmed = path.split('#')[0].split('?')[0];
+  let normalized = trimmed.replace(/\/+$/, '');
+  if (!normalized.startsWith('/')) {
+    normalized = `/${normalized}`;
+  }
+  if (normalized === '/index') {
+    return '/';
+  }
+  return normalized || '/';
+};
+
+const getPathname = (url: string) => {
+  if (typeof window === 'undefined') {
+    return normalizePath(url);
+  }
+  try {
+    return normalizePath(new URL(url, window.location.origin).pathname);
+  } catch {
+    return normalizePath(url);
+  }
+};
+
+const getProfileSectionKey = (pathname: string) => {
+  const match = pathname.match(/\/profile\/[^/]+\/([^/]+)/);
+  return match ? `profile/${match[1]}` : null;
+};
+
+const pwaRootPaths = computed(() => {
+  if (!userLoggedIn.value) {
+    return [
+      urlHome,
+      urlOffers,
+      urlHowItWorks,
+      urlFaq,
+    ].map(getPathname);
+  }
+
+  const profileId = Number(selectedUserProfileId.value);
+  const profilePaths = Number.isFinite(profileId)
+    ? [
+        urlProfilePortfolio(profileId),
+        urlProfileWallet(profileId),
+        urlProfileCryptoWallet(profileId),
+      ]
+    : [];
+
+  return [
+    ...profilePaths,
+    urlOffers,
+    urlNotifications,
+  ].map(getPathname);
+});
+
+const currentPath = computed(() => {
+  const rawPath = resolvedPath.value
+    || (typeof window !== 'undefined' ? window.location.pathname : '/');
+  return normalizePath(rawPath);
+});
+
+const showPwaBackButton = computed(() => {
+  if (props.layout === 'auth-login' || props.layout === 'auth-signup') {
+    return false;
+  }
+
+  const current = currentPath.value;
+  if (current === '/') {
+    return false;
+  }
+  if (pwaRootPaths.value.includes(current)) {
+    return false;
+  }
+  const currentProfileSection = getProfileSectionKey(current);
+  if (!currentProfileSection) {
+    return true;
+  }
+  const rootProfileSections = pwaRootPaths.value
+    .map(getProfileSectionKey)
+    .filter(Boolean) as string[];
+  return !rootProfileSections.includes(currentProfileSection);
+});
 
 const queryParams = computed(() => new URLSearchParams(window?.location?.search));
-
 const showMobileSidebar = computed(() => showNavigation.value);
 
-
 const signInHandler = () => {
-  // Convert URLSearchParams to Record<string, string>
   const paramsObj: Record<string, string> = {};
   queryParams.value.forEach((value, key) => {
     paramsObj[key] = value;
@@ -107,6 +214,20 @@ const signUpHandler = () => {
   navigateWithQueryParams(urlSignup, paramsObj);
 };
 
+const logoutHandler = () => {
+  isDialogLogoutOpen.value = true;
+};
+
+const backHandler = () => {
+  if (typeof window === 'undefined') {
+    return;
+  }
+  if (window.history.length > 1) {
+    window.history.back();
+    return;
+  }
+  navigateWithQueryParams(urlHome);
+};
 </script>
 
 <template>
@@ -114,98 +235,99 @@ const signUpHandler = () => {
     v-model="isMobileSidebarOpen"
     :show-navigation="showNavigation"
     :show-mobile-sidebar="showMobileSidebar"
-    :is-mobile-p-w-a="false"
-    :show-profile-link="showProfileLink"
+    :is-mobile-p-w-a="isMobilePWA"
+    :show-profile-link="false"
     :url-profile="urlProfile"
     :user-logged-in="userLoggedIn"
     class="VHeaderInvest v-header-invest"
   >
+    <template #leading>
+      <button
+        v-if="showPwaBackButton"
+        type="button"
+        class="v-header-invest__pwa-back"
+        aria-label="Go back"
+        @click="backHandler"
+      >
+        <component
+          :is="ArrowLeft"
+          class="v-header-invest__pwa-back-icon"
+          aria-hidden="true"
+        />
+      </button>
+    </template>
+    <template #logo>
+      <VLogo
+        :href="urlHome"
+        :show-desktop="false"
+        class="v-header__logo v-header-invest__pwa-logo"
+      />
+    </template>
     <div class="v-header-invest__wrap">
-      <template v-if="showAccountText">
-        <span class="v-header-invest__auth-text is--body">
-          <span
-            v-if="showHaveAccount"
-          >
-            Already have an account?
-          </span>
-          <span
-            v-if="showDontHaveAccount"
-          >
-            Don't have an account?
-          </span>
-        </span>
-      </template>
-
       <VSkeleton
         v-if="isLoading"
         height="25px"
         width="250px"
         class="v-header-invest-btns__skeleton"
       />
-      <div
-        v-else-if="showAuthButtons"
-        class="v-header-invest-btns"
-        :class="{
-          'v-header-invest-sign-in': isSignInPage,
-          'v-header-invest-sign-up': isSignUpPage,
-        }"
-      >
-        <VButton
-          v-if="showHaveAccount"
-          class="v-header-invest-btns__sign-in"
-          :variant="!isSignUpPage ? 'link' : null"
-          @click="signInHandler"
-        >
-          Log In
-        </VButton>
-
-        <VButton
-          v-if="showDontHaveAccount"
-          class="v-header-invest-btns__sign-up"
-          @click="signUpHandler"
-        >
-          Sign Up
-        </VButton>
-      </div>
       <VHeaderProfile
         v-else-if="userLoggedIn"
         :menu="profileMenu"
-        :is-mobile-pwa="false"
+        :is-mobile-pwa="true"
         :is-desktop="isDesktopMD"
         show-logout-icon
       />
     </div>
 
-    <template #mobile>
-      <div
-        v-if="showAuthButtons"
-        class="v-header-invest-btns"
-        :class="{
-          'v-header-invest-sign-in': isSignInPage,
-          'v-header-invest-sign-up': isSignUpPage,
-        }"
+    <template #pwa>
+      <button
+        v-if="showPwaLoginLink"
+        type="button"
+        class="v-header-invest__pwa-login"
+        @click="signInHandler"
       >
+        <span>Log in</span>
+        <component
+          :is="ArrowRight"
+          class="v-header-invest__pwa-login-icon"
+        />
+      </button>
+      <button
+        v-else-if="showPwaLogoutIcon"
+        type="button"
+        class="v-header-invest__pwa-logout"
+        aria-label="Log out"
+        @click="logoutHandler"
+      >
+        <component
+          :is="LogOutIcon"
+          class="v-header-invest__pwa-logout-icon"
+          aria-hidden="true"
+        />
+      </button>
+      <div
+        v-else-if="showPwaAuthCta"
+        class="v-header-invest__pwa-auth"
+      >
+        <span class="v-header-invest__pwa-auth-text">
+          {{ isSignInPage ? "Don't have an account?" : 'Already have an account?' }}
+        </span>
         <VButton
-          v-if="showHaveAccount"
-          class="v-header-invest-btns__sign-in"
-          :variant="!isSignUpPage ? 'link' : null"
-          @click="signInHandler"
+          size="medium"
+          class="v-header-invest__pwa-auth-btn"
+          :class="{ 'is--secondary': isSignInPage }"
+          @click="isSignInPage ? signUpHandler() : signInHandler()"
         >
-          Log In
-        </VButton>
-
-        <VButton
-          v-if="showDontHaveAccount"
-          class="v-header-invest-btns__sign-up"
-          @click="signUpHandler"
-        >
-          Sign Up
+          {{ isSignInPage ? 'Sign Up' : 'Log In' }}
         </VButton>
       </div>
+    </template>
+
+    <template #mobile>
       <VHeaderProfileMobile
-        v-else-if="userLoggedIn"
+        v-if="userLoggedIn"
         :menu="profileMenu"
-        :is-mobile-pwa="false"
+        :is-mobile-pwa="true"
         @click="isMobileSidebarOpen = false"
       />
     </template>
@@ -340,4 +462,14 @@ const signUpHandler = () => {
   .v-header-mobile__list {
     border-top: none !important;
   }
+
+.v-header-invest.is--pwa {
+  @media screen and (width <= 768px) {
+    .v-header__logo.v-header-invest__pwa-logo {
+      position: static;
+      transform: none;
+      margin-right: 0;
+    }
+  }
+}
 </style>
