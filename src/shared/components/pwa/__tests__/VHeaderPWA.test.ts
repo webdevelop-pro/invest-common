@@ -36,11 +36,6 @@ vi.mock('InvestCommon/data/profiles/profiles.repository', () => ({
     getUserState: userState.value,
   }),
 }));
-vi.mock('InvestCommon/domain/dialogs/store/useDialogs', () => ({
-  useDialogs: () => ({
-    isDialogLogoutOpen: ref(false),
-  }),
-}));
 vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
   useProfilesStore: () => ({
     selectedUserProfileId,
@@ -78,11 +73,14 @@ const mountHeader = async (layout = '', path = '/some') => {
         template: '<button><slot /></button>',
       },
       VLogo: true,
-      VHeaderProfile: {
+      VHeaderProfilePWA: {
         template: '<div data-testid="profile-menu" />',
       },
       VHeaderProfileMobile: {
         template: '<div data-testid="profile-menu-mobile" />',
+      },
+      NotificationsSidebarButton: {
+        template: '<div class="notifications-sidebar-button" />',
       },
       VHeader: {
         template: '<div><slot name="leading" /><slot name="logo" /><slot /><slot name="pwa" /><slot name="mobile" /></div>',
@@ -115,10 +113,22 @@ describe('VHeaderPWA', () => {
     expect(wrapper.text()).toContain('Log in');
   });
 
-  it('shows logout icon when logged in', async () => {
+  it('shows notifications icon when logged in', async () => {
     userLoggedIn.value = true;
     const wrapper = await mountHeader('', '/offers');
-    expect(wrapper.find('.v-header-invest__pwa-logout').exists()).toBe(true);
+    expect(wrapper.find('.v-header-invest__pwa-notifications').exists()).toBe(true);
+  });
+
+  it('shows notifications icon on auth pages for logged in users', async () => {
+    userLoggedIn.value = true;
+    const wrapper = await mountHeader('auth-login', '/signin');
+    expect(wrapper.find('.v-header-invest__pwa-notifications').exists()).toBe(true);
+  });
+
+  it('hides notifications icon on kyc-bo pages', async () => {
+    userLoggedIn.value = true;
+    const wrapper = await mountHeader('kyc-bo', '/kyc-bo');
+    expect(wrapper.find('.v-header-invest__pwa-notifications').exists()).toBe(false);
   });
 
   it('shows Sign Up CTA on sign-in page', async () => {
@@ -136,5 +146,17 @@ describe('VHeaderPWA', () => {
     selectedUserProfileId.value = 10;
     const wrapper = await mountHeader('', urlProfilePortfolio(10));
     expect(wrapper.find('[data-testid="profile-menu"]').exists()).toBe(true);
+  });
+
+  it('shows only back button on offer details page', async () => {
+    userLoggedIn.value = true;
+    const wrapper = await mountHeader('offer-single', '/offers/some-offer');
+    expect(wrapper.find('[data-testid="profile-menu"]').exists()).toBe(false);
+    expect(wrapper.find('.v-header-invest__pwa-notifications').exists()).toBe(false);
+    expect(wrapper.find('.v-header-invest__pwa-logo').exists()).toBe(false);
+    expect(wrapper.find('.v-header__logo').exists()).toBe(false);
+    expect(wrapper.find('.v-header-invest__pwa-login').exists()).toBe(false);
+    expect(wrapper.find('.v-header-invest__pwa-auth').exists()).toBe(false);
+    expect(wrapper.find('.v-header-invest__pwa-logout').exists()).toBe(false);
   });
 });

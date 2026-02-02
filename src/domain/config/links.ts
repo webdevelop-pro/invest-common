@@ -18,6 +18,13 @@ export const urlCookie = `${env.FRONTEND_URL_STATIC}/legal/cookie`;
 export const urlServerError = `${env.FRONTEND_URL_DASHBOARD}/500`;
 export const urlNotifications = `${env.FRONTEND_URL_DASHBOARD}/notifications`;
 export const urlSettings = (profileId: number) => `${env.FRONTEND_URL_DASHBOARD}/settings/${profileId}/mfa`;
+export const urlSettingsAccountDetails = (profileId: number) => (
+  `${env.FRONTEND_URL_DASHBOARD}/settings/${profileId}/account-details`
+);
+export const urlSettingsMfa = (profileId: number) => `${env.FRONTEND_URL_DASHBOARD}/settings/${profileId}/mfa`;
+export const urlSettingsSecurity = (profileId: number) => (
+  `${env.FRONTEND_URL_DASHBOARD}/settings/${profileId}/account-security`
+);
 export const urlProfileAccreditation = (profileId: number) => `${env.FRONTEND_URL_DASHBOARD}/profile/${profileId}/accreditation`;
 export const urlInvestmentTimeline = (profileId: number, investId: string) => (
   `${env.FRONTEND_URL_DASHBOARD}/profile/${profileId}/investment/${investId}/timeline`

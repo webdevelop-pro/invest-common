@@ -24,13 +24,13 @@ import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repos
 import { useBreakpoints } from 'UiKit/composables/useBreakpoints';
 import ArrowRight from 'UiKit/assets/images/arrow-right.svg';
 import ArrowLeft from 'UiKit/assets/images/arrow-left.svg';
-import LogOutIcon from 'UiKit/assets/images/menu_common/logout.svg';
-import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
+import NotificationsSidebarButton from 'InvestCommon/features/notifications/VNotificationsSidebarButton.vue';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import VLogo from 'UiKit/components/VLogo.vue';
+import env from 'InvestCommon/domain/config/env';
 
-const VHeaderProfile = defineAsyncComponent({
-  loader: () => import('../VHeader/VHeaderProfile.vue'),
+const VHeaderProfilePWA = defineAsyncComponent({
+  loader: () => import('../VHeader/VHeaderProfilePWA.vue'),
   hydrate: hydrateOnVisible(),
 });
 const VHeaderProfileMobile = defineAsyncComponent({
@@ -74,10 +74,9 @@ const sessionStore = useSessionStore();
 const { userLoggedIn } = storeToRefs(sessionStore);
 const useRepositoryProfilesStore = useRepositoryProfiles();
 const { getUserState } = storeToRefs(useRepositoryProfilesStore);
-const useDialogsStore = useDialogs();
-const { isDialogLogoutOpen } = storeToRefs(useDialogsStore);
 const profilesStore = useProfilesStore();
 const { selectedUserProfileId } = storeToRefs(profilesStore);
+const { IS_STATIC_SITE } = env;
 
 const isMobileSidebarOpen = defineModel<boolean>();
 
@@ -89,6 +88,7 @@ const isRecoveryPage = computed(() => props.layout === 'auth-forgot' || resolved
 const isCheckEmailPage = computed(() => props.layout === 'auth-check-email' || resolvedPath.value?.includes('check-email'));
 const isAuthenticatorPage = computed(() => props.layout === 'auth-authenticator' || resolvedPath.value?.includes('authenticator'));
 const isKYCBoPage = computed(() => props.layout?.includes('kyc-bo') || resolvedPath.value?.includes('kyc-bo'));
+const isOfferDetailsPage = computed(() => props.layout === 'offer-single');
 const isAuthFlowPage = computed(() => (isRecoveryPage.value || isCheckEmailPage.value));
 
 const showNavigation = computed(() => (
@@ -102,15 +102,18 @@ const showPwaLoginLink = computed(() => (
   && !isAuthFlowPage.value
   && !isAuthenticatorPage.value
   && !isKYCBoPage.value
+  && !isOfferDetailsPage.value
 ));
-const showPwaLogoutIcon = computed(() => (
+const showPwaNotifications = computed(() => (
   userLoggedIn.value
   && !isAuthenticatorPage.value
   && !isKYCBoPage.value
+  && !isOfferDetailsPage.value
 ));
 const showPwaAuthCta = computed(() => (
   !userLoggedIn.value
   && (isSignInPage.value || isSignUpPage.value)
+  && !isOfferDetailsPage.value
 ));
 
 const normalizePath = (path: string) => {
@@ -214,10 +217,6 @@ const signUpHandler = () => {
   navigateWithQueryParams(urlSignup, paramsObj);
 };
 
-const logoutHandler = () => {
-  isDialogLogoutOpen.value = true;
-};
-
 const backHandler = () => {
   if (typeof window === 'undefined') {
     return;
@@ -257,10 +256,19 @@ const backHandler = () => {
       </button>
     </template>
     <template #logo>
+      <VHeaderProfilePWA
+        v-if="userLoggedIn && !isOfferDetailsPage"
+      />
       <VLogo
+        v-else-if="!isOfferDetailsPage"
         :href="urlHome"
         :show-desktop="false"
         class="v-header__logo v-header-invest__pwa-logo"
+      />
+      <span
+        v-else
+        class="v-header-invest__pwa-logo-empty"
+        aria-hidden="true"
       />
     </template>
     <div class="v-header-invest__wrap">
@@ -270,16 +278,12 @@ const backHandler = () => {
         width="250px"
         class="v-header-invest-btns__skeleton"
       />
-      <VHeaderProfile
-        v-else-if="userLoggedIn"
-        :menu="profileMenu"
-        :is-mobile-pwa="true"
-        :is-desktop="isDesktopMD"
-        show-logout-icon
-      />
     </div>
 
-    <template #pwa>
+    <template
+      v-if="!isOfferDetailsPage"
+      #pwa
+    >
       <button
         v-if="showPwaLoginLink"
         type="button"
@@ -292,19 +296,15 @@ const backHandler = () => {
           class="v-header-invest__pwa-login-icon"
         />
       </button>
-      <button
-        v-else-if="showPwaLogoutIcon"
-        type="button"
-        class="v-header-invest__pwa-logout"
-        aria-label="Log out"
-        @click="logoutHandler"
+      <div
+        v-else-if="showPwaNotifications"
+        class="v-header-invest__pwa-notifications"
       >
-        <component
-          :is="LogOutIcon"
-          class="v-header-invest__pwa-logout-icon"
-          aria-hidden="true"
+        <NotificationsSidebarButton
+          :is-static-site="IS_STATIC_SITE"
+          :show-icon="true"
         />
-      </button>
+      </div>
       <div
         v-else-if="showPwaAuthCta"
         class="v-header-invest__pwa-auth"
@@ -323,7 +323,10 @@ const backHandler = () => {
       </div>
     </template>
 
-    <template #mobile>
+    <template
+      v-if="!isOfferDetailsPage"
+      #mobile
+    >
       <VHeaderProfileMobile
         v-if="userLoggedIn"
         :menu="profileMenu"
@@ -423,6 +426,33 @@ const backHandler = () => {
   &__pwa-logout-icon {
     width: 20px;
     height: 20px;
+  }
+
+  &__pwa-notifications {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    .notifications-sidebar-button {
+      padding: 0;
+    }
+
+    .notifications-sidebar-button__label {
+      display: none;
+    }
+
+    .notifications-sidebar-button__notification-icon {
+      margin-right: 0;
+      color: $gray-80;
+      width: 24px;
+      height: 24px;
+    }
+
+    .notifications-sidebar-button__badge {
+      top: -6px;
+      left: auto;
+      right: -8px;
+    }
   }
 
   &__pwa-back {

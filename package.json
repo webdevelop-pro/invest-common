@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:run": "vitest run",
-    "test:header": "vitest run src/shared/components/VHeader/__tests__/VHeader.test.ts src/shared/components/pwa/__tests__/VHeaderPWA.test.ts"
+    "test:header": "vitest run src/shared/components/VHeader/__tests__/VHeader.test.ts src/shared/components/pwa/__tests__/VHeaderPWA.test.ts src/shared/components/VHeader/__tests__/VHeaderProfilePWA.test.ts src/shared/components/pwa/__tests__/VHeaderProfileOverlayPWA.test.ts src/shared/components/pwa/__tests__/VHeaderPwaNotificationsFlow.test.ts"
   },
   "dependencies": {
     "@pinia/testing": "^1.0.3",
