@@ -27,7 +27,6 @@ vi.mock('UiKit/components/Base/VNavigationMenu', () => {
 
 vi.mock('UiKit/assets/images/menu_common/home.svg',         () => ({ default: hoisted.mockIcon('HomeIcon') }))
 vi.mock('UiKit/assets/images/menu_common/grid.svg',  () => ({ default: hoisted.mockIcon('DashboardIcon') }))
-vi.mock('UiKit/assets/images/menu_common/notifications.svg', () => ({ default: hoisted.mockIcon('NotificationIcon') }))
 vi.mock('UiKit/assets/images/menu_common/investments.svg',   () => ({ default: hoisted.mockIcon('InvestmentIcon') }))
 vi.mock('UiKit/assets/images/menu_common/wallet.svg',       () => ({ default: hoisted.mockIcon('WalletIcon') }))
 vi.mock('UiKit/assets/images/menu_common/cryptoq.svg',() => ({ default: hoisted.mockIcon('CryptoIcon') }))
@@ -39,7 +38,6 @@ vi.mock('InvestCommon/domain/config/links.ts', () => ({
   urlOffers: '/offers',
   urlHowItWorks: '/how-it-works',
   urlFaq: '/faq',
-  urlNotifications: '/notifications',
   urlProfilePortfolio:   (id: string | number | null | undefined) => `/profiles/${id}/portfolio`,
   urlProfileWallet:      (id: string | number | null | undefined) => `/profiles/${id}/wallet`,
   urlProfileCryptoWallet:(id: string | number | null | undefined) => `/profiles/${id}/crypto`,
@@ -48,7 +46,7 @@ vi.mock('InvestCommon/domain/config/links.ts', () => ({
 // Pinia-stores через storeToRefs()
 const userLoggedInRef = ref(false)
 const selectedUserProfileIdRef = ref<string | number>('u-1')
-const notificationUnreadLengthRef = ref(0)
+const notificationsSidebarOpenRef = ref(false)
 
 vi.mock('InvestCommon/domain/session/store/useSession', () => ({
   useSessionStore: () => ({ userLoggedIn: userLoggedInRef }),
@@ -59,7 +57,7 @@ vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
 
 vi.mock('InvestCommon/features/notifications/store/useNotifications', () => ({
   useNotifications: () => ({
-    notificationUnreadLength: notificationUnreadLengthRef,
+    isSidebarOpen: notificationsSidebarOpenRef,
   }),
 }))
 
@@ -99,6 +97,7 @@ function pwafMenuTests() {
   beforeEach(() => {
     userLoggedInRef.value = false
     selectedUserProfileIdRef.value = 'u-1'
+    notificationsSidebarOpenRef.value = false
   })
 
   it('renders guest menu (4 items) when logged out', () => {
@@ -117,14 +116,14 @@ function pwafMenuTests() {
     expect(hrefs).toEqual(['/home', '/offers', '/how-it-works', '/faq'])
   })
 
-  it('renders auth menu (5 items) when logged in', () => {
+  it('renders auth menu (4 items) when logged in', () => {
     userLoggedInRef.value = true
     selectedUserProfileIdRef.value = 'abc'
 
     const wrapper = mountMenu({ currentPath: '/profiles/abc/portfolio' })
 
     const ul = wrapper.get('ul.pwamenu__list')
-    expect(ul.classes()).toContain('cols-5')
+    expect(ul.classes()).toContain('cols-4')
 
     const hrefs = wrapper.findAll('a.pwamenu__link').map(a => a.attributes('href'))
     expect(hrefs).toEqual([
@@ -132,11 +131,10 @@ function pwafMenuTests() {
       '/profiles/abc/wallet',
       '/offers',
       '/profiles/abc/crypto',
-      '/notifications',
     ])
 
     const labels = wrapper.findAll('.pwamenu__label').map(n => n.text())
-    expect(labels).toEqual(['Dashboard', 'Wallet', 'Invest', 'Crypto', 'Notifications'])
+    expect(labels).toEqual(['Dashboard', 'Wallet', 'Invest', 'Crypto'])
   })
 
   it('applies is-active when currentPath equals link target', () => {
@@ -194,6 +192,18 @@ function pwafMenuTests() {
       expect(icon.exists()).toBe(true)
     })
   })
+
+  it('hides menu on offer details layout', () => {
+    const wrapper = mountMenu({ currentPath: '/offers/some-offer', currentLayout: 'offer-single' })
+    expect(wrapper.find('nav[aria-label="PWA Bottom Menu"]').exists()).toBe(false)
+  })
+
+  it('hides menu when notifications sidebar is open', () => {
+    notificationsSidebarOpenRef.value = true
+    const wrapper = mountMenu({ currentPath: '/home' })
+    expect(wrapper.find('nav[aria-label="PWA Bottom Menu"]').exists()).toBe(false)
+  })
+
 }
 describe('PWAFooterMenu (jsdom)', { environment: 'jsdom' }, () => {
     pwafMenuTests()

@@ -5,11 +5,10 @@ import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { storeToRefs } from 'pinia';
 import { VNavigationMenuLink } from 'UiKit/components/Base/VNavigationMenu';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
-import VNotificationBadge from 'InvestCommon/shared/components/VNotificationBadge.vue';
+import { useNotifications } from 'InvestCommon/features/notifications/store/useNotifications';
 
 import HomeIcon from 'UiKit/assets/images/menu_common/home.svg';
 import DashboardIcon from 'UiKit/assets/images/menu_common/grid.svg';
-import NotificationIcon from 'UiKit/assets/images/menu_common/notifications.svg';
 import InvestmentIcon from 'UiKit/assets/images/menu_common/investments.svg';
 import WalletIcon from 'UiKit/assets/images/menu_common/wallet.svg';
 import CryptoIcon from 'UiKit/assets/images/menu_common/crypto1.svg';
@@ -19,7 +18,6 @@ import {
   urlHome, 
   urlHowItWorks, 
   urlFaq, 
-  urlNotifications, 
   urlOffers,
   urlProfileCryptoWallet, 
   urlProfileWallet, 
@@ -92,6 +90,8 @@ const { userLoggedIn } = storeToRefs(sessionStore);
 
 const profilesStore = useProfilesStore();
 const { selectedUserProfileId } = storeToRefs(profilesStore);
+const notificationsStore = useNotifications();
+const { isSidebarOpen } = storeToRefs(notificationsStore);
 
 type Item = { to: string; icon: Component; text: string };
 
@@ -102,7 +102,6 @@ const menuItems = computed<Item[]>(() =>
       { to: urlProfileWallet(selectedUserProfileId.value), icon: WalletIcon, text: 'Wallet' },
       { to: urlOffers, icon: InvestmentIcon, text: 'Invest' },
       { to: urlProfileCryptoWallet(selectedUserProfileId.value), icon: CryptoIcon, text: 'Crypto' },
-      { to: urlNotifications, icon: NotificationIcon, text: 'Notifications' },  
     ]
   : [
       { to: urlHome, icon: HomeIcon, text: 'Home' },  
@@ -111,10 +110,16 @@ const menuItems = computed<Item[]>(() =>
       { to: urlFaq, icon: FaqIcon, text: 'FAQ' },   
     ]
 );
+
+const shouldHideMenu = computed(() => (
+  isSidebarOpen.value
+  || props.currentLayout === 'offer-single'
+));
 </script>
 
 <template>
   <nav
+    v-if="!shouldHideMenu"
     class="pwamenu"
     role="navigation"
     aria-label="PWA Bottom Menu"
@@ -137,12 +142,6 @@ const menuItems = computed<Item[]>(() =>
             aria-hidden="true"
           />
           <span class="pwamenu__label">{{ item.text }}</span>
-
-          <VNotificationBadge
-            v-if="item.to === urlNotifications"
-            position="absolute"
-            custom-class="pwamenu__notification-badge"
-          />
         </VNavigationMenuLink>
       </li>
     </ul>
@@ -171,6 +170,10 @@ const menuItems = computed<Item[]>(() =>
   z-index: 110; 
   pointer-events: none;
   display: block;// fix it
+
+  &.is-hidden {
+    display: none;
+  }
 
   .pwamenu__list {
     pointer-events: auto;
