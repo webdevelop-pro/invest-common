@@ -18,7 +18,7 @@ defineProps({
   tab: {
     type: String as PropType<DashboardEarnTabTypes>,
     required: true,
-    validator: (prop: DashboardEarnTabTypes) => prop in DashboardEarnTabTypes,
+    validator: (prop: string) => Object.values(DashboardEarnTabTypes).includes(prop as DashboardEarnTabTypes),
   },
 });
 

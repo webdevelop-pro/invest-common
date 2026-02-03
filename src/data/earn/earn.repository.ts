@@ -68,6 +68,25 @@ export const useRepositoryEarn = defineStore('repository-earn', () => {
    */
   const positionsState = createActionState<EarnPositionsResponseFormatted>();
 
+  /**
+   * Tracks approved tokens per pool/profile/symbol so approval state survives
+   * route changes (e.g. switching to "your-position" tab remounts the view).
+   */
+  const approvedTokens = ref<Set<string>>(new Set());
+
+  const approvalKey = (poolId: string, profileId: string | number, symbol: string) =>
+    `${poolId}-${profileId}-${symbol}`;
+
+  const isTokenApproved = (poolId: string, profileId: string | number, symbol: string) =>
+    approvedTokens.value.has(approvalKey(poolId, profileId, symbol));
+
+  const setTokenApproved = (poolId: string, profileId: string | number, symbol: string) => {
+    approvedTokens.value = new Set([
+      ...approvedTokens.value,
+      approvalKey(poolId, profileId, symbol),
+    ]);
+  };
+
   const EARN_RATE = 0.05; // 5% earned rate
 
   /**
@@ -388,6 +407,7 @@ export const useRepositoryEarn = defineStore('repository-earn', () => {
     }
 
     positionsPools.value = updatedList;
+    setTokenApproved(payload.poolId, payload.profileId, payload.symbol);
   };
 
   /**
@@ -446,6 +466,7 @@ export const useRepositoryEarn = defineStore('repository-earn', () => {
       data: undefined,
     };
     positionsPools.value = [];
+    approvedTokens.value = new Set();
   };
 
   return {
@@ -458,6 +479,7 @@ export const useRepositoryEarn = defineStore('repository-earn', () => {
     getPositions,
     mockApprovalTransaction,
     mockExchangePositions,
+    isTokenApproved,
     resetAll,
   };
 });

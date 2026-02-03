@@ -23,7 +23,7 @@ const clearContactUsQueryParams = () => {
   ['name', 'email', 'subject'].forEach((key) => {
     url.searchParams.delete(key);
   });
-  window.history.replaceState(null, '', url.toString());
+  window.history.replaceState(history.state, '', url.toString());
 };
 
 watch(open, (isOpen) => {

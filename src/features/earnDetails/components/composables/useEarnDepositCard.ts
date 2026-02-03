@@ -5,7 +5,8 @@ import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { useRepositoryEarn } from 'InvestCommon/data/earn/earn.repository';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 import { storeToRefs } from 'pinia';
-import { useRoute, useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
+import { ROUTE_EARN_YOUR_POSITION } from 'InvestCommon/domain/config/enums/routes';
 
 export interface FormModelEarnDeposit {
   amount: number | null;
@@ -96,9 +97,16 @@ export function useEarnDepositCard(options: UseEarnDepositCardOptions = {}) {
   const earnRepository = useRepositoryEarn();
   const { toast } = useToast();
   const router = useRouter();
-  const route = useRoute();
 
-  const hasApproved = ref(false);
+  const hasApproved = computed(
+    () =>
+      Boolean(
+        poolId.value &&
+          profileId.value != null &&
+          symbol.value &&
+          earnRepository.isTokenApproved(poolId.value, profileId.value, symbol.value),
+      ),
+  );
   const isApproving = ref(false);
 
   const isMaxDisabled = computed(() => !maxAmount.value || maxAmount.value <= 0);
@@ -148,14 +156,17 @@ export function useEarnDepositCard(options: UseEarnDepositCardOptions = {}) {
 
       model.amount = null;
 
-      // Update current route query to "your-position" tab and scroll to positions table
-      await router.push({
-        query: {
-          ...route.query,
-          tab: 'your-position',
-        },
-      });
-
+      // Navigate to "your-position" tab; explicitly clear query so tab (and any other) query is removed from URL
+      if (poolId.value && profileId.value != null) {
+        await router.push({
+          name: ROUTE_EARN_YOUR_POSITION,
+          params: {
+            profileId: String(profileId.value),
+            poolId: poolId.value,
+          },
+          query: {},
+        });
+      }
       nextTick(() => {
         const el = document.getElementById('earn-your-position-table');
         if (el) {
@@ -202,8 +213,6 @@ export function useEarnDepositCard(options: UseEarnDepositCardOptions = {}) {
       await new Promise((resolve) => {
         setTimeout(resolve, 2000);
       });
-
-      hasApproved.value = true;
 
       if (poolId.value && profileId.value && symbol.value) {
         earnRepository.mockApprovalTransaction({

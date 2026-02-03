@@ -207,7 +207,7 @@ export const useDashboardEvmWalletTokens = (
         // Clear all query parameters by replacing the URL without query params
         const url = new URL(window.location.href);
         url.search = '';
-        window.history.replaceState({}, '', url.toString());
+        window.history.replaceState(history.state, '', url.toString());
         // Trigger router update by replacing with current route but empty query
         router.replace({
           path: route.path,
