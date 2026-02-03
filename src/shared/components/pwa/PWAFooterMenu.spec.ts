@@ -28,6 +28,7 @@ vi.mock('UiKit/components/Base/VNavigationMenu', () => {
 vi.mock('UiKit/assets/images/menu_common/home.svg',         () => ({ default: hoisted.mockIcon('HomeIcon') }))
 vi.mock('UiKit/assets/images/menu_common/grid.svg',  () => ({ default: hoisted.mockIcon('DashboardIcon') }))
 vi.mock('UiKit/assets/images/menu_common/investments.svg',   () => ({ default: hoisted.mockIcon('InvestmentIcon') }))
+vi.mock('UiKit/assets/images/menu_common/portfolio.svg',   () => ({ default: hoisted.mockIcon('PortfolioIcon') }))
 vi.mock('UiKit/assets/images/menu_common/wallet.svg',       () => ({ default: hoisted.mockIcon('WalletIcon') }))
 vi.mock('UiKit/assets/images/menu_common/cryptoq.svg',() => ({ default: hoisted.mockIcon('CryptoIcon') }))
 vi.mock('UiKit/assets/images/menu_common/help.svg',        () => ({ default: hoisted.mockIcon('HowIcon') }))
@@ -39,6 +40,7 @@ vi.mock('InvestCommon/domain/config/links.ts', () => ({
   urlHowItWorks: '/how-it-works',
   urlFaq: '/faq',
   urlProfilePortfolio:   (id: string | number | null | undefined) => `/profiles/${id}/portfolio`,
+  urlProfileSummary:     (id: string | number | null | undefined) => `/profiles/${id}/summary`,
   urlProfileWallet:      (id: string | number | null | undefined) => `/profiles/${id}/wallet`,
   urlProfileCryptoWallet:(id: string | number | null | undefined) => `/profiles/${id}/crypto`,
 }))
@@ -116,17 +118,18 @@ function pwafMenuTests() {
     expect(hrefs).toEqual(['/home', '/offers', '/how-it-works', '/faq'])
   })
 
-  it('renders auth menu (4 items) when logged in', () => {
+  it('renders auth menu (5 items) when logged in', () => {
     userLoggedInRef.value = true
     selectedUserProfileIdRef.value = 'abc'
 
     const wrapper = mountMenu({ currentPath: '/profiles/abc/portfolio' })
 
     const ul = wrapper.get('ul.pwamenu__list')
-    expect(ul.classes()).toContain('cols-4')
+    expect(ul.classes()).toContain('cols-5')
 
     const hrefs = wrapper.findAll('a.pwamenu__link').map(a => a.attributes('href'))
     expect(hrefs).toEqual([
+      '/profiles/abc/summary',
       '/profiles/abc/portfolio',
       '/profiles/abc/wallet',
       '/offers',
@@ -134,7 +137,7 @@ function pwafMenuTests() {
     ])
 
     const labels = wrapper.findAll('.pwamenu__label').map(n => n.text())
-    expect(labels).toEqual(['Dashboard', 'Wallet', 'Invest', 'Crypto'])
+    expect(labels).toEqual(['Home', 'Portfolio', 'Wallet', 'Invest', 'Crypto'])
   })
 
   it('applies is-active when currentPath equals link target', () => {

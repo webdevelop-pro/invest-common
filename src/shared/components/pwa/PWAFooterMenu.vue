@@ -8,8 +8,8 @@ import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles
 import { useNotifications } from 'InvestCommon/features/notifications/store/useNotifications';
 
 import HomeIcon from 'UiKit/assets/images/menu_common/home.svg';
-import DashboardIcon from 'UiKit/assets/images/menu_common/grid.svg';
 import InvestmentIcon from 'UiKit/assets/images/menu_common/investments.svg';
+import PortfolioIcon from 'UiKit/assets/images/menu_common/portfolio.svg';
 import WalletIcon from 'UiKit/assets/images/menu_common/wallet.svg';
 import CryptoIcon from 'UiKit/assets/images/menu_common/crypto1.svg';
 import HelpIcon from 'UiKit/assets/images/menu_common/help.svg';
@@ -20,6 +20,7 @@ import {
   urlFaq, 
   urlOffers,
   urlProfileCryptoWallet, 
+  urlProfileSummary,
   urlProfileWallet, 
   urlProfilePortfolio
 } from 'InvestCommon/domain/config/links';
@@ -98,7 +99,8 @@ type Item = { to: string; icon: Component; text: string };
 const menuItems = computed<Item[]>(() =>
   userLoggedIn.value
   ? [
-      { to: urlProfilePortfolio(selectedUserProfileId.value), icon: DashboardIcon, text: 'Dashboard' },  
+      { to: urlProfileSummary(selectedUserProfileId.value), icon: HomeIcon, text: 'Home' },  
+      { to: urlProfilePortfolio(selectedUserProfileId.value), icon: PortfolioIcon, text: 'Portfolio' },
       { to: urlProfileWallet(selectedUserProfileId.value), icon: WalletIcon, text: 'Wallet' },
       { to: urlOffers, icon: InvestmentIcon, text: 'Invest' },
       { to: urlProfileCryptoWallet(selectedUserProfileId.value), icon: CryptoIcon, text: 'Crypto' },
