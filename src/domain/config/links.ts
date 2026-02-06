@@ -25,6 +25,9 @@ export const urlSettingsMfa = (profileId: number) => `${env.FRONTEND_URL_DASHBOA
 export const urlSettingsSecurity = (profileId: number) => (
   `${env.FRONTEND_URL_DASHBOARD}/settings/${profileId}/account-security`
 );
+export const urlSettingsBankAccounts = (profileId: number) => (
+  `${env.FRONTEND_URL_DASHBOARD}/settings/${profileId}/bank-accounts`
+);
 export const urlProfileAccreditation = (profileId: number) => `${env.FRONTEND_URL_DASHBOARD}/profile/${profileId}/accreditation`;
 export const urlInvestmentTimeline = (profileId: number, investId: string) => (
   `${env.FRONTEND_URL_DASHBOARD}/profile/${profileId}/investment/${investId}/timeline`
@@ -32,6 +35,16 @@ export const urlInvestmentTimeline = (profileId: number, investId: string) => (
 export const urlProfileCryptoWallet = (profileId: number) => `${env.FRONTEND_URL_DASHBOARD}/profile/${profileId}/evmwallet`;
 export const urlProfileWallet = (profileId: number) => `${env.FRONTEND_URL_DASHBOARD}/profile/${profileId}/wallet`;
 export const urlProfileAccount = (profileId: number) => `${env.FRONTEND_URL_DASHBOARD}/profile/${profileId}/account`;
+export const urlProfileEarn = (profileId: number) => `${env.FRONTEND_URL_DASHBOARD}/profile/${profileId}/earn`;
+export const urlEarnOverview = (profileId: number, poolId: string | number) => (
+  `${env.FRONTEND_URL_DASHBOARD}/profile/${profileId}/earn/${poolId}/overview`
+);
+export const urlEarnYourPosition = (profileId: number, poolId: string | number) => (
+  `${env.FRONTEND_URL_DASHBOARD}/profile/${profileId}/earn/${poolId}/your-position`
+);
+export const urlEarnRisk = (profileId: number, poolId: string | number) => (
+  `${env.FRONTEND_URL_DASHBOARD}/profile/${profileId}/earn/${poolId}/risk`
+);
 export const urlProfileKYC = (profileId: number) => `${env.FRONTEND_URL_DASHBOARD}/profile/${profileId}/kyc`;
 export const urlProfilePortfolio = (profileId: number) => `${env.FRONTEND_URL_DASHBOARD}/profile/${profileId}/portfolio`;
 export const urlProfile = () => `${env.FRONTEND_URL_DASHBOARD}/profile`;

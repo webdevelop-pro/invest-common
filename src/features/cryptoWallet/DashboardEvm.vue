@@ -2,44 +2,35 @@
 import { defineAsyncComponent } from 'vue';
 import DashboardTabsTopInfo from 'InvestCommon/features/dashboard/components/DashboardTabsTopInfo.vue';
 import DashboardEvmWalletTokens from './components/DashboardEvmWalletTokens.vue';
-import { useDashboardEvm, EVM_WALLET_TAB_INFO } from './logic/useDashboardEvm';
+import {
+  useDashboardWallet,
+  EVM_WALLET_TAB_INFO,
+} from 'InvestCommon/features/wallet/logic/useDashboardWallet';
 import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 
-const VDialogCryptoWallet = defineAsyncComponent({
-  loader: () => import('./components/VDialogCryptoWallet.vue'),
+const VDialogWallet = defineAsyncComponent({
+  loader: () => import('InvestCommon/features/wallet/components/VDialogWallet.vue'),
 });
 const VAlert = defineAsyncComponent({
   loader: () => import('UiKit/components/VAlert.vue'),
 });
 
-// Keep VAlert as a static import to preserve slot typings
 const {
-  // state
   selectedUserProfileId,
   userLoggedIn,
-
-  // repository state
-  getEvmWalletState,
-
-  // ui constants
-
-  // computed
-  showWalletTable,
+  summaryEvmWalletState,
+  showTable: showWalletTable,
   isAlertShow,
   isTopTextShow,
   isAlertType,
   isAlertText,
   alertTitle,
   alertButtonText,
-
-  // actions
   onAlertButtonClick,
   onTransactionClick,
-
-  // dialog state
   isDialogTransactionOpen,
-  transactiontType,
-} = useDashboardEvm();
+  transactionType,
+} = useDashboardWallet();
 
 const dialogsStore = useDialogs();
 
@@ -101,10 +92,10 @@ const handleContactUsClick = (event: Event) => {
       </div>
     </div>
 
-    <VDialogCryptoWallet
+    <VDialogWallet
       v-model="isDialogTransactionOpen"
-      :transaction-type="transactiontType"
-      :data="getEvmWalletState.data"
+      :transaction-type="transactionType"
+      :data="summaryEvmWalletState.data"
     />
   </div>
 </template>

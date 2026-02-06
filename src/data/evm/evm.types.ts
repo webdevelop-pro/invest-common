@@ -68,6 +68,7 @@ export interface IEvmWalletDataFormatted extends Omit<IEvmWalletDataResponse, 'b
   currentBalance: number;
   totalBalance: number;
   fundingBalance: number;
+  rwaBalance: number;
   pendingIncomingBalance: number;
   pendingOutcomingBalance: number;
   formattedTransactions: IEvmTransactionDataFormatted[];
@@ -121,6 +122,12 @@ export interface IEvmTransactionDataFormatted extends IEvmTransactionDataRespons
   amountFormatted: string;
   networkFormatted: string;
   tagColor?: string;
+
+  // Display helpers for UI
+  txShort: string;
+  typeDisplay: string;
+  description: string;
+  scanTxUrl: string;
 }
 
 export interface IEvmWithdrawRequestBody {

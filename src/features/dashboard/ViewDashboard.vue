@@ -5,20 +5,29 @@ import DashboardTopInfo from './components/DashboardTopInfo.vue';
 import VPageTopInfoAndTabs from 'InvestCommon/shared/components/VPageTopInfoAndTabs.vue';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { storeToRefs } from 'pinia';
-import { computed, PropType, watch, onMounted, nextTick, type Component } from 'vue';
 import {
-  ROUTE_DASHBOARD_PORTFOLIO, ROUTE_DASHBOARD_ACCOUNT, ROUTE_DASHBOARD_WALLET,
-  ROUTE_DASHBOARD_DISTRIBUTIONS, ROUTE_DASHBOARD_EVMWALLET, ROUTE_DASHBOARD_SUMMARY,
+  computed,
+  PropType,
+  watch,
+  onMounted,
+  nextTick,
+  type Component,
+} from 'vue';
+import {
+  ROUTE_DASHBOARD_PORTFOLIO,
+  ROUTE_DASHBOARD_ACCOUNT,
+  ROUTE_DASHBOARD_WALLET,
+  ROUTE_DASHBOARD_DISTRIBUTIONS,
+  ROUTE_DASHBOARD_SUMMARY,
   ROUTE_DASHBOARD_EARN,
 } from 'InvestCommon/domain/config/enums/routes';
 import { VTabsContent } from 'UiKit/components/Base/VTabs';
 import DashboardPortfolio from 'InvestCommon/features/investment/DashboardPortfolio.vue';
 import DashboardAccountDetails from 'InvestCommon/features/profiles/DashboardAccountDetails.vue';
-import DashboardWallet from 'InvestCommon/features/wallet/DashboardWallet.vue';
-import DashboardEvm from 'InvestCommon/features/cryptoWallet/DashboardEvm.vue';
 import DashboardDistributions from 'InvestCommon/features/distributions/DashboardDistributions.vue';
 import DashboardSummary from 'InvestCommon/features/summary/DashboardSummary.vue';
 import DashboardEarn from 'InvestCommon/features/earn/DashboardEarn.vue';
+import DashboardWallet from 'InvestCommon/features/wallet/DashboardWallet.vue';
 import { useRoute } from 'vue-router';
 import { useBreakpoints } from 'UiKit/composables/useBreakpoints';
 
@@ -63,11 +72,6 @@ const tabs = computed(() => ({
     label: 'Wallet',
     to: { name: ROUTE_DASHBOARD_WALLET, params: { profileId: selectedUserProfileId.value } },
   },
-  [DashboardTabTypes.evmwallet]: {
-    value: DashboardTabTypes.evmwallet,
-    label: 'Crypto Wallet',
-    to: { name: ROUTE_DASHBOARD_EVMWALLET, params: { profileId: selectedUserProfileId.value } },
-  },
   [DashboardTabTypes.distributions]: {
     value: DashboardTabTypes.distributions,
     label: 'Distributions',
@@ -100,8 +104,9 @@ const tabsList = computed(() => {
 const tabComponents: Record<DashboardTabTypes, Component> = {
   [DashboardTabTypes.portfolio]: DashboardPortfolio,
   [DashboardTabTypes.acount]: DashboardAccountDetails,
+  // Wallet and Crypto Wallet are combined into a single tab
   [DashboardTabTypes.wallet]: DashboardWallet,
-  [DashboardTabTypes.evmwallet]: DashboardEvm,
+  [DashboardTabTypes.evmwallet]: DashboardWallet,
   [DashboardTabTypes.distributions]: DashboardDistributions,
   [DashboardTabTypes.summary]: DashboardSummary,
   [DashboardTabTypes.earn]: DashboardEarn,

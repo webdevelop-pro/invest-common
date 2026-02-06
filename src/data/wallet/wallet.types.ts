@@ -41,6 +41,7 @@ export interface IFundingSourceDataFormatted {
   type: string;
   status: string;
   bank_name: string;
+  last4?: string;
   isAttachmentMethodManual: boolean;
   isAttachmentMethodAutomatic: boolean;
   isStatusPending: boolean;
@@ -109,6 +110,20 @@ export interface ITransactionDataFormatted extends ITransactionDataResponse {
     text: string;
     tooltip?: string;
   };
+  txShort: string;
+  typeDisplay: string;
+  description: string;
+  scanTxUrl: string;
+  /** Alias for row component compatibility (same as submited_at_date) */
+  submitted_at_date?: string;
+  /** Alias for row component compatibility (same as submited_at_time) */
+  submitted_at_time?: string;
+  statusText?: string;
+  statusColor?: string;
+  /** Optional for row component compatibility (EVM has it) */
+  transaction_tx?: string;
+  /** Optional for row component compatibility (EVM has it) */
+  networkFormatted?: string;
 }
 
 export interface IPlaidLinkTokenResponse {

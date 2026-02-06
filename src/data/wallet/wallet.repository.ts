@@ -8,7 +8,7 @@ import { INotification } from 'InvestCommon/data/notifications/notifications.typ
 import { TransactionFormatter } from './formatter/transactions.formatter';
 import { WalletFormatter } from './formatter/wallet.formatter';
 import {
-  ITransactionDataResponse, IWalletDataFormatted, IWalletDataResponse,
+  ITransactionDataResponse, ITransactionDataFormatted, IWalletDataFormatted, IWalletDataResponse,
 } from './wallet.types';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
@@ -25,7 +25,7 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
   const apiClient = new ApiClient(env.WALLET_URL);
 
   const getWalletState = createActionState<IWalletDataFormatted>();
-  const getTransactionsState = createActionState<ITransactionDataResponse[]>();
+  const getTransactionsState = createActionState<ITransactionDataFormatted[]>();
   const addBankAccountState = createActionState<any>();
   const addTransactionState = createActionState<any>();
   const cancelTransactionState = createActionState<any>();
@@ -140,7 +140,7 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
     }
   };
 
-  const createLinkExchange = async (profileId: number, body: string) => {
+  const createLinkExchange = async (profileId: number, body: unknown) => {
     try {
       createLinkExchangeState.value.loading = true;
       createLinkExchangeState.value.error = null;
@@ -157,7 +157,7 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
     }
   };
 
-  const createLinkProcess = async (profileId: number, body: string) => {
+  const createLinkProcess = async (profileId: number, body: unknown) => {
     try {
       createLinkProcessState.value.loading = true;
       createLinkProcessState.value.error = null;
@@ -174,7 +174,7 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
     }
   };
 
-  const deleteLinkedAccount = async (profileId: number, body: string) => {
+  const deleteLinkedAccount = async (profileId: number, body: unknown) => {
     try {
       deleteLinkedAccountState.value.loading = true;
       deleteLinkedAccountState.value.error = null;

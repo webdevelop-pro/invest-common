@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
-import DashboardTopInfoCard from './DashboardTopInfoCard.vue';
+import { VCardInfo } from 'UiKit/components/Base/VCard';
 import { useDashboardTopInfoRight } from '../composables/useDashboardTopInfoRight';
 
 const { isLoading, sliderData } = useDashboardTopInfoRight();
@@ -8,22 +7,19 @@ const { isLoading, sliderData } = useDashboardTopInfoRight();
 
 <template>
   <div class="DashboardTopInfoRight dashboard-top-info-right">
-    <template
+    <VCardInfo
       v-for="item in sliderData"
       :key="item.id"
-    >
-      <VSkeleton
-        v-if="isLoading"
-        height="54px"
-        width="100px"
-        class="dashboard-top-info-right__skeleton"
-      />
-      <DashboardTopInfoCard
-        v-else
-        :slide="item"
-        class="dashboard-top-info-right__item"
-      />
-    </template>
+      class="dashboard-top-info-right__item"
+      min-width="172px"
+      :amount="item?.currency"
+      :unit="item?.coin"
+      :title="item?.title"
+      :loading="isLoading"
+      :secondary-text="item?.secondaryText"
+      :secondary-value="item?.secondaryValue"
+      :value-props="{ amountClass: 'is--h2__title' }"
+    />
   </div>
 </template>
 
@@ -34,19 +30,14 @@ const { isLoading, sliderData } = useDashboardTopInfoRight();
   gap: 20px;
   width: 100%;
   flex-wrap: wrap;
-  
-  @media screen and (width < $desktop-md){
+
+  @media screen and (width < $desktop-md) {
     gap: 8px;
   }
 
   &__item {
     flex: 1 0 0;
     width: 100%;
-    min-width: 172px;
-  }
-
-  &__skeleton {
-    flex: 1 0 0;
     min-width: 172px;
   }
 }

@@ -81,7 +81,7 @@ export function useVFormFundsWithdraw(
   const saveHandler = async () => {
     onValidate();
     if (!isValid.value) {
-      nextTick(() => scrollToError('VFormWalletAddTransaction'));
+      nextTick(() => scrollToError('VFormWithdrawCrypto'));
       return;
     }
     const data: IEvmWithdrawRequestBody = {

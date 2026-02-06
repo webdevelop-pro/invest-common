@@ -1,13 +1,14 @@
 <script setup lang="ts">
+import type { IEvmWalletDataFormatted } from 'InvestCommon/data/evm/evm.types';
 import { EvmTransactionTypes } from 'InvestCommon/data/evm/evm.types';
 import { computed, PropType, ref, watch } from 'vue';
 import VDialog from 'UiKit/components/Base/VDialog/VDialog.vue';
 import VDialogContent from 'UiKit/components/Base/VDialog/VDialogContent.vue';
 import VDialogHeader from 'UiKit/components/Base/VDialog/VDialogHeader.vue';
 import VDialogTitle from 'UiKit/components/Base/VDialog/VDialogTitle.vue';
-import VFormFundsAdd from './VFormFundsAdd.vue';
-import VFormFundsWithdraw from './VFormFundsWithdraw.vue';
-import VFormFundsExchange from './VFormFundsExchange.vue';
+import VFormAddFunds from './VFormAddFunds.vue';
+import VFormExchange from './VFormExchange.vue';
+import VFormWithdraw from './VFormWithdraw.vue';
 
 const open = defineModel<boolean>();
 const props = defineProps({
@@ -15,7 +16,10 @@ const props = defineProps({
     type: String as PropType<EvmTransactionTypes>,
     required: true,
   },
-  data: Object,
+  data: {
+    type: Object as PropType<IEvmWalletDataFormatted | undefined>,
+    required: false,
+  },
   defaultBuySymbol: {
     type: String,
     required: false,
@@ -52,19 +56,20 @@ watch(() => props.transactionType, (newVal: EvmTransactionTypes) => {
   >
     <VDialogContent
       :aria-describedby="undefined"
-      class="VDialogWalletAddTransaction v-dialog-wallet-add-transaction"
+      class="VDialogWallet v-dialog-wallet"
     >
       <VDialogHeader>
         <VDialogTitle>
           {{ titile }}
         </VDialogTitle>
       </VDialogHeader>
-      <VFormFundsAdd
+      <VFormAddFunds
         v-if="isTypeDeposit"
         class="is--margin-top-20"
         :data="data"
+        @close="open = false"
       />
-      <VFormFundsExchange
+      <VFormExchange
         v-else-if="isTypeExchange"
         class="is--margin-top-20"
         :data="data"
@@ -73,18 +78,16 @@ watch(() => props.transactionType, (newVal: EvmTransactionTypes) => {
         :profile-id="profileId"
         @close="open = false"
       />
-      <VFormFundsWithdraw
+      <VFormWithdraw
         v-else
         class="is--margin-top-20"
-        :data="data"
         @close="open = false"
       />
     </VDialogContent>
   </VDialog>
 </template>
-
-<style lang="scss">
-.v-dialog-wallet-add-transaction {
+<style lang="scss" scoped>
+.v-dialog-wallet {
   width: 100%;
   max-width: 800px;
 }

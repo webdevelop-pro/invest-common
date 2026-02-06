@@ -57,6 +57,7 @@ export const ROUTE_CHECK_EMAIL = 'ROUTE_CHECK_EMAIL';
 export const ROUTE_SETTINGS_MFA = 'ROUTE_SETTINGS_MFA';
 export const ROUTE_SETTINGS_SECURITY = 'ROUTE_SETTINGS_SECURITY';
 export const ROUTE_SETTINGS_ACCOUNT_DETAILS = 'ROUTE_SETTINGS_ACCOUNT_DETAILS';
+export const ROUTE_SETTINGS_BANK_ACCOUNTS = 'ROUTE_SETTINGS_BANK_ACCOUNTS';
 
 export const ROUTE_ACCREDITATION_UPLOAD = 'ROUTE_ACCREDITATION_UPLOAD';
 
@@ -102,6 +103,7 @@ export const PAGE_TITLES = {
   [ROUTE_SETTINGS_MFA]: `Settings MFA | ${DEFAULT_PAGE_TITLE}`,
   [ROUTE_SETTINGS_SECURITY]: `Settings Security | ${DEFAULT_PAGE_TITLE}`,
   [ROUTE_SETTINGS_ACCOUNT_DETAILS]: `Settings Account Details | ${DEFAULT_PAGE_TITLE}`,
+  [ROUTE_SETTINGS_BANK_ACCOUNTS]: `Settings Bank Accounts | ${DEFAULT_PAGE_TITLE}`,
 
   [ROUTE_DASHBOARD_PORTFOLIO]: `Portfolio | ${DEFAULT_PAGE_TITLE}`,
   [ROUTE_DASHBOARD_ACCOUNT]: `Account details | ${DEFAULT_PAGE_TITLE}`,
@@ -167,6 +169,7 @@ export const PAGE_DESCRIPTIONS = {
   [ROUTE_SETTINGS_MFA]: 'Manage your preferences. Customize your investment experience with our settings options.',
   [ROUTE_SETTINGS_SECURITY]: 'Manage your preferences. Customize your investment experience with our settings options.',
   [ROUTE_SETTINGS_ACCOUNT_DETAILS]: 'Manage your preferences. Customize your investment experience with our settings options.',
+  [ROUTE_SETTINGS_BANK_ACCOUNTS]: 'Manage your connected bank accounts used for funding.',
   [ROUTE_CHECK_EMAIL]: 'Check your email. Confirm your identity and stay updated on investment opportunities.',
 
   [ROUTE_DASHBOARD_PORTFOLIO]: 'Track your investments. Monitor your portfolio performance and make informed decisions.',

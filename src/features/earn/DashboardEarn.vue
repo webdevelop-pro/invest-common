@@ -6,7 +6,7 @@ import VTableDefault from 'InvestCommon/shared/components/VTableDefault.vue';
 import VTableToolbar from 'InvestCommon/shared/components/VTableToolbar.vue';
 import VTableYieldItem from './components/VTableYieldItem.vue';
 import { useEarnTable } from './composables/useEarnTable';
-import { useCryptoWalletAlert } from 'InvestCommon/features/cryptoWallet/composables/useCryptoWalletAlert';
+import { useWalletAlert } from 'InvestCommon/features/wallet/logic/useWalletAlert';
 import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 
 const VAlert = defineAsyncComponent({
@@ -57,7 +57,7 @@ const {
   alertTitle,
   alertButtonText,
   onAlertButtonClick,
-} = useCryptoWalletAlert();
+} = useWalletAlert();
 
 const dialogsStore = useDialogs();
 

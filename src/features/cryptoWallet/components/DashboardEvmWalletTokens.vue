@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { EvmTransactionTypes } from 'InvestCommon/data/evm/evm.types';
 import VWalletTokensAndTransactions from 'InvestCommon/shared/components/VWalletTokensAndTransactions.vue';
-import { useDashboardEvmWalletTokens } from './logic/useDashboardEvmWalletTokens';
+import { useWalletTokens } from './logic/useWalletTokens';
+import { useWalletActions } from 'InvestCommon/features/wallet/logic/useWalletActions';
 
 const props = defineProps({
   profileId: {
@@ -19,12 +20,12 @@ const emit = defineEmits<{
   (e: 'click', type: EvmTransactionTypes): void,
 }>();
 
+const { tables } = useWalletTokens();
 const {
   balances,
-  tables,
   buttonConfigs,
   handleButtonClick,
-} = useDashboardEvmWalletTokens(props, emit);
+} = useWalletActions(props, emit);
 </script>
 
 <template>

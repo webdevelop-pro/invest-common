@@ -9,7 +9,7 @@ import VWalletTokensAndTransactions from 'InvestCommon/shared/components/VWallet
 import VCardGoal from 'InvestCommon/shared/components/VCardGoal.vue';
 import VCardOfferFunded from 'InvestCommon/shared/components/VCardOfferFunded.vue';
 import VSliderCards from 'UiKit/components/VSlider/VSliderCards.vue';
-import DashboardTopInfoCard from 'InvestCommon/features/dashboard/components/DashboardTopInfoCard.vue';
+import { VCardInfo } from 'UiKit/components/Base/VCard';
 import { useDashboardTopInfoRight } from 'InvestCommon/features/dashboard/composables/useDashboardTopInfoRight';
 import { useBreakpoints } from 'UiKit/composables/useBreakpoints';
 
@@ -58,7 +58,16 @@ const { sliderData: dashboardTopInfoData, isLoading: isDashboardTopInfoLoading }
       >
         <VSliderCards :data="dashboardTopInfoData">
           <template #default="{ slide }">
-            <DashboardTopInfoCard :slide="slide" />
+            <VCardInfo
+              class="dashboard-summary__top-info-card"
+              min-width="172px"
+              :amount="slide?.currency"
+              :unit="slide?.coin"
+              :title="slide?.title"
+              :secondary-text="slide?.secondaryText"
+              :secondary-value="slide?.secondaryValue"
+              :value-props="{ amountClass: 'is--h2__title' }"
+            />
           </template>
         </VSliderCards>
       </div>
@@ -161,6 +170,10 @@ const { sliderData: dashboardTopInfoData, isLoading: isDashboardTopInfoLoading }
     &__content {
         display: flex;
         flex-direction: column;
+    }
+
+    &__top-info-card {
+      flex: 1 0 0;
     }
 
     &__grid {
