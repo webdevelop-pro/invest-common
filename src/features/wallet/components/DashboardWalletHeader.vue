@@ -1,19 +1,9 @@
 <script setup lang="ts">
-import { computed, PropType } from 'vue';
+import { PropType } from 'vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import VTextCurrencyWithUnit from 'UiKit/components/VText/VTextCurrencyWithUnit.vue';
 import { VMoreActions } from 'UiKit/components/Base/VMoreActions';
-import type { VMoreActionsItem } from 'UiKit/components/Base/VMoreActions';
-
-type PrimaryActionButton = {
-  id: string | number;
-  label: string;
-  variant?: string;
-  disabled?: boolean;
-  loading?: boolean;
-  icon?: unknown;
-  transactionType?: unknown;
-};
+import { useDashboardWalletHeader, type DashboardWalletHeaderProps, type PrimaryActionButton } from './logic/useDashboardWalletHeader';
 
 const props = defineProps({
   amount: {
@@ -24,6 +14,11 @@ const props = defineProps({
     type: String,
     required: false,
     default: '',
+  },
+  loading: {
+    type: Boolean,
+    required: false,
+    default: false,
   },
   buttons: {
     type: Array as PropType<PrimaryActionButton[]>,
@@ -39,23 +34,17 @@ const props = defineProps({
 const emit = defineEmits<{
   (e: 'click', id: string | number, transactionType?: unknown): void;
 }>();
-
-const visibleButtons = computed(() => props.buttons);
-const moreActionsItems = computed((): VMoreActionsItem[] => (props.moreButtons ?? []).map((b) => ({
-  id: b.id,
-  label: b.label,
-  icon: b.icon,
-  disabled: b.disabled,
-  transactionType: b.transactionType,
-})));
-
-const handleClick = (button: PrimaryActionButton) => {
-  emit('click', button.id, button.transactionType);
-};
-
-const handleMoreSelect = (item: VMoreActionsItem) => {
-  handleClick(item as PrimaryActionButton);
-};
+  
+const {
+  visibleButtons,
+  moreActionsItems,
+  handleClick,
+  handleMoreSelect,
+} = useDashboardWalletHeader(props as DashboardWalletHeaderProps, (event, id, transactionType) => {
+  if (event === 'click') {
+    emit('click', id, transactionType);
+  }
+});
 </script>
 
 <template>
@@ -68,6 +57,7 @@ const handleMoreSelect = (item: VMoreActionsItem) => {
         class="dashboard-wallet-header__total-value"
         :amount="amount"
         :unit="coin"
+        :loading="loading"
         amount-class="is--h1__title"
       />
       <div class="dashboard-wallet-header__total-subtitle is--small">

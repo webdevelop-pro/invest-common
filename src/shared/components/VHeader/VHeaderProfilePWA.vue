@@ -36,7 +36,6 @@ const imageID = computed(() => getUserState.value.data?.image_link_id);
 const avatarSrc = computed(() => (
   imageID.value > 0 ? `${FILER_URL}/auth/files/${imageID.value}?size=small` : undefined
 ));
-const userId = computed(() => getUserState.value.data?.id);
 const getProfileId = computed(() => Number(selectedUserProfileId.value));
 
 const toPathname = (url: string) => {

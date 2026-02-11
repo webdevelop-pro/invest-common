@@ -2,58 +2,79 @@
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
 import VFormSelect from 'UiKit/components/Base/VForm/VFormSelect.vue';
-import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
 import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import { numberFormatter } from 'InvestCommon/helpers/numberFormatter';
+import VLayoutDialogForm from 'InvestCommon/shared/layouts/VLayoutDialogForm.vue';
 
 defineProps<{
   amount?: number;
   fundingSourceId?: number | string;
-  fundingSourceOptions: { id: number; text: string }[];
+  fundingSourceOptions: { id: string; text: string }[];
   maxFiatAmountFormatted: string;
   loading?: boolean;
   disabled?: boolean;
+  errorData?: unknown;
+  isFieldRequired: (field: string) => boolean;
+  // getErrorText comes from useFormValidation and can have a complex signature,
+  // so we keep the prop type broad to avoid mismatches.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  getErrorText: (...args: any[]) => any;
 }>();
 
 const emit = defineEmits<{
-  'update:amount': [value: number | undefined];
-  'update:fundingSourceId': [value: number | string | undefined];
+  'update:amount': [value: number];
+  'update:fundingSourceId': [value: number | string];
   submit: [];
   cancel: [];
 }>();
 </script>
 
 <template>
-  <div class="VFormWithdrawFiat v-form-withdraw-fiat">
+  <VLayoutDialogForm
+    class="VFormWithdrawFiat v-form-withdraw-fiat"
+    primary-label="Withdraw"
+    :disabled="disabled"
+    :loading="loading"
+    primary-test-id="withdraw-fiat-submit"
+    footer-class="v-form-withdraw-fiat__footer"
+    @submit="emit('submit')"
+    @cancel="emit('cancel')"
+  >
     <FormRow class="v-form-withdraw-fiat__row">
       <FormCol>
         <VFormGroup
+          v-slot="VFormGroupProps"
           label="Amount"
-          required
+          :required="isFieldRequired('amount')"
+          :error-text="getErrorText('amount', errorData) ? [getErrorText('amount', errorData)!] : undefined"
+          :helper-text="`Maximum transaction is ${maxFiatAmountFormatted}`"
           class="v-form-withdraw-fiat__input"
         >
           <VFormInput
+            :is-error="VFormGroupProps.isFieldError"
             placeholder="$"
             :model-value="amount != null ? String(amount) : undefined"
             money-format
+            size="large"
             data-testid="withdraw-fiat-amount"
             @update:model-value="emit('update:amount', numberFormatter($event))"
           />
         </VFormGroup>
-        <div class="v-form-withdraw-fiat__hint">
-          Maximum transaction is {{ maxFiatAmountFormatted }}
-        </div>
       </FormCol>
     </FormRow>
     <FormRow class="v-form-withdraw-fiat__row">
       <FormCol>
         <VFormGroup
+          v-slot="VFormGroupProps"
           label="Funding Source"
-          required
+          :required="isFieldRequired('funding_source_id')"
+          :error-text="getErrorText('funding_source_id', errorData) ? [getErrorText('funding_source_id', errorData)!] : undefined"
+          helper-text="Select your bank account you want to withdraw the funds to."
           class="v-form-withdraw-fiat__input"
         >
           <VFormSelect
+            :is-error="VFormGroupProps.isFieldError"
             :model-value="fundingSourceId != null ? String(fundingSourceId) : undefined"
             :options="fundingSourceOptions"
             item-label="text"
@@ -64,28 +85,9 @@ const emit = defineEmits<{
             @update:model-value="emit('update:fundingSourceId', numberFormatter($event as string | number))"
           />
         </VFormGroup>
-        <div class="v-form-withdraw-fiat__helper">
-          Select your bank account you want to withdraw the funds to.
-        </div>
       </FormCol>
     </FormRow>
-    <div class="v-form-withdraw-fiat__footer">
-      <VButton
-        variant="outlined"
-        @click="emit('cancel')"
-      >
-        Cancel
-      </VButton>
-      <VButton
-        :disabled="disabled"
-        :loading="loading"
-        data-testid="withdraw-fiat-submit"
-        @click="emit('submit')"
-      >
-        Withdraw
-      </VButton>
-    </div>
-  </div>
+  </VLayoutDialogForm>
 </template>
 
 <style lang="scss" scoped>
@@ -96,13 +98,6 @@ const emit = defineEmits<{
 
   &__input {
     width: 100%;
-  }
-
-  &__hint,
-  &__helper {
-    color: $gray-70;
-    font-size: 14px;
-    margin-top: 4px;
   }
 
   &__footer {

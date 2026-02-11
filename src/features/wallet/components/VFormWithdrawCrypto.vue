@@ -3,10 +3,10 @@
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
 import VFormSelect from 'UiKit/components/Base/VForm/VFormSelect.vue';
-import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
 import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import VImage from 'UiKit/components/Base/VImage/VImage.vue';
+import VLayoutDialogForm from 'InvestCommon/shared/layouts/VLayoutDialogForm.vue';
 
 defineProps<{
   token?: string;
@@ -14,9 +14,12 @@ defineProps<{
   to?: string;
   tokenOptions: { id: string; text: string; icon?: string; symbol?: string }[];
   availableText: string;
-  errorData?: unknown;
-  isFieldRequired: (field: string) => boolean;
-  getErrorText: (field: string, errorData: unknown) => string | undefined;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  errorData?: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  isFieldRequired: (...args: any[]) => any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  getErrorText: (...args: any[]) => any;
   numberFormatter: (v: string | number) => number;
   loading?: boolean;
   disabled?: boolean;
@@ -32,48 +35,57 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="VFormWithdrawCrypto v-form-withdraw-crypto">
-    <VFormGroup
-      label="Asset to Withdraw"
-      required
-      class="v-form-withdraw-crypto__input"
-    >
-      <VFormSelect
-        :model-value="token || undefined"
-        :options="tokenOptions"
-        item-label="text"
-        item-value="id"
-        placeholder="Select"
-        dropdown-absolute
-        data-testid="withdraw-asset"
-        @update:model-value="emit('update:token', $event as string)"
-      >
-        <template #item="slotProps">
-          <div class="token-option">
-            <VImage
-              v-if="(slotProps.item as { icon?: string }).icon"
-              :src="(slotProps.item as { icon: string }).icon"
-              :alt="(slotProps.item as { symbol?: string }).symbol ?? ''"
-              class="token-option__icon"
-            />
-            <div class="token-option__content">
-              {{ (slotProps.item as { symbol?: string }).symbol }}
-            </div>
-          </div>
-        </template>
-      </VFormSelect>
-    </VFormGroup>
-    <div class="v-form-withdraw-crypto__helper v-form-withdraw-crypto__helper--asset">
-      Select the specific asset you wish to transfer out.
-    </div>
-
+  <VLayoutDialogForm
+    class="VFormWithdrawCrypto v-form-withdraw-crypto"
+    primary-label="Withdraw"
+    :disabled="disabled"
+    :loading="loading"
+    primary-test-id="withdraw-crypto-submit"
+    footer-class="v-form-withdraw-crypto__footer"
+    @submit="emit('submit')"
+    @cancel="emit('cancel')"
+  >
     <FormRow class="v-form-withdraw-crypto__row">
-      <FormCol>
+      <FormCol col2>
+        <VFormGroup
+          label="Asset to Withdraw"
+          required
+          helper-text="Select the specific asset you wish to transfer out."
+          class="v-form-withdraw-crypto__input"
+        >
+          <VFormSelect
+            :model-value="token || undefined"
+            :options="tokenOptions"
+            item-label="text"
+            item-value="id"
+            placeholder="Select"
+            dropdown-absolute
+            data-testid="withdraw-asset"
+            @update:model-value="emit('update:token', $event as string)"
+          >
+            <template #item="slotProps">
+              <div class="token-option">
+                <VImage
+                  v-if="(slotProps.item as { icon?: string }).icon"
+                  :src="(slotProps.item as { icon: string }).icon"
+                  :alt="(slotProps.item as { symbol?: string }).symbol ?? ''"
+                  class="token-option__icon"
+                />
+                <div class="token-option__content">
+                  {{ (slotProps.item as { symbol?: string }).symbol }}
+                </div>
+              </div>
+            </template>
+          </VFormSelect>
+        </VFormGroup>
+      </FormCol>
+      <FormCol col2>
         <VFormGroup
           v-slot="VFormGroupProps"
           :required="isFieldRequired('amount')"
           :error-text="getErrorText('amount', errorData) ? [getErrorText('amount', errorData)!] : undefined"
           data-testid="withdraw-amount-group"
+          :helper-text="`Available: ${availableText} (Max)`"
           label="Amount"
           class="v-form-withdraw-crypto__input"
         >
@@ -85,9 +97,6 @@ const emit = defineEmits<{
             size="large"
             @update:model-value="emit('update:amount', numberFormatter($event))"
           />
-          <div class="v-form-withdraw-crypto__hint">
-            Available: {{ availableText }} (Max)
-          </div>
         </VFormGroup>
       </FormCol>
     </FormRow>
@@ -99,6 +108,7 @@ const emit = defineEmits<{
           :required="isFieldRequired('to')"
           :error-text="getErrorText('to', errorData) ? [getErrorText('to', errorData)!] : undefined"
           label="Recipient Wallet Address"
+          helper-text="Send only to an Ethereum (ERC20) address. Transfers to other networks will result in permanent loss."
           class="v-form-withdraw-crypto__input"
         >
           <VFormInput
@@ -110,30 +120,10 @@ const emit = defineEmits<{
             data-testid="withdraw-address"
             @update:model-value="emit('update:to', $event as string)"
           />
-          <p class="v-form-withdraw-crypto__warning">
-            Send only to an Ethereum (ERC20) address. Transfers to other networks will result in permanent loss.
-          </p>
         </VFormGroup>
       </FormCol>
     </FormRow>
-
-    <div class="v-form-withdraw-crypto__footer">
-      <VButton
-        variant="outlined"
-        @click="emit('cancel')"
-      >
-        Cancel
-      </VButton>
-      <VButton
-        :disabled="disabled"
-        :loading="loading"
-        data-testid="withdraw-crypto-submit"
-        @click="emit('submit')"
-      >
-        Withdraw
-      </VButton>
-    </div>
-  </div>
+  </VLayoutDialogForm>
 </template>
 
 <style lang="scss" scoped>
@@ -146,22 +136,8 @@ const emit = defineEmits<{
     width: 100%;
   }
 
-  &__helper,
-  &__hint {
-    color: $gray-70;
-    font-size: 14px;
-    margin-top: 4px;
-  }
-
   &__helper--asset {
     margin-bottom: 16px;
-  }
-
-  &__warning {
-    margin-top: 8px;
-    font-size: 14px;
-    color: $gray-70;
-    line-height: 1.4;
   }
 
   &__footer {

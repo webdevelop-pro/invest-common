@@ -9,7 +9,7 @@ import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
 import { IEvmWithdrawRequestBody, IEvmWalletBalances } from 'InvestCommon/data/evm/evm.types';
 
-export function useVFormFundsWithdraw(
+export function useVFormWithdrawCrypto(
   emitClose?: () => void,
 ) {
   const evmRepository = useRepositoryEvm();
@@ -166,3 +166,4 @@ export function useVFormFundsWithdraw(
     scrollToError,
   };
 }
+

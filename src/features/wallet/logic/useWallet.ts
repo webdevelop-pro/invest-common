@@ -36,18 +36,30 @@ export function useWallet() {
   const cryptoParts = computed(() => formatBalanceParts(cryptoBalance.value));
   const cryptoBalanceMainFormatted = computed(() => cryptoParts.value.mainFormatted);
   const cryptoBalanceCoins = computed(() => cryptoParts.value.coins);
+  // Formatted 24h change for crypto; undefined when backend doesn't provide it
+  const crypto24hChange = computed(
+    () => getEvmWalletState.value.data?.cryptoChangeFormatted,
+  );
 
-  const rwaBalance = computed(() => getEvmWalletState.value.data?.rwaBalance ?? 0);
-  const rwaParts = computed(() => formatBalanceParts(rwaBalance.value));
-  const rwaBalanceMainFormatted = computed(() => rwaParts.value.mainFormatted);
-  const rwaBalanceCoins = computed(() => rwaParts.value.coins);
+  const rwaValue = computed(() => getEvmWalletState.value.data?.rwaValue ?? 0);
+  const rwaParts = computed(() => formatBalanceParts(rwaValue.value));
+  const rwaValueMainFormatted = computed(() => rwaParts.value.mainFormatted);
+  const rwaValueCoins = computed(() => rwaParts.value.coins);
+  // Formatted value change for RWA; undefined when backend doesn't provide it
+  const rwa24hChange = computed(
+    () => getEvmWalletState.value.data?.rwaChangeFormatted,
+  );
 
   const totalBalance = computed(
-    () => fiatBalance.value + cryptoBalance.value + rwaBalance.value,
+    () => fiatBalance.value + cryptoBalance.value + rwaValue.value,
   );
   const totalParts = computed(() => formatBalanceParts(totalBalance.value));
   const totalBalanceMainFormatted = computed(() => totalParts.value.mainFormatted);
   const totalBalanceCoins = computed(() => totalParts.value.coins);
+
+  const isWalletDataLoading = computed(
+    () => getWalletState.value.loading || getEvmWalletState.value.loading,
+  );
 
   const updateWalletData = async () => {
     if (canLoadWalletData.value && !getWalletState.value.loading && !getWalletState.value.error) {
@@ -86,14 +98,17 @@ export function useWallet() {
     cryptoBalanceMain: computed(() => cryptoParts.value.main),
     cryptoBalanceCoins,
     cryptoBalanceMainFormatted,
-    rwaBalance,
-    rwaBalanceMain: computed(() => rwaParts.value.main),
-    rwaBalanceCoins,
-    rwaBalanceMainFormatted,
+    crypto24hChange,
+    rwaValue,
+    rwaValueMain: computed(() => rwaParts.value.main),
+    rwaValueCoins,
+    rwaValueMainFormatted,
+    rwa24hChange,
     totalBalance,
     totalBalanceMain: computed(() => totalParts.value.main),
     totalBalanceCoins,
     totalBalanceMainFormatted,
     updateData,
+    isWalletDataLoading,
   };
 }

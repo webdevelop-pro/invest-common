@@ -2,13 +2,14 @@ import { computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRouter, useRoute } from 'vue-router';
 import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
+import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository';
 import { EvmTransactionTypes } from 'InvestCommon/data/evm/evm.types';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { hasRestrictedWalletBehavior } from 'InvestCommon/features/wallet/helpers/walletProfileHelpers';
 import type { IProfileFormatted } from 'InvestCommon/data/profiles/profiles.types';
 import { currency } from 'InvestCommon/helpers/currency';
 import env from 'InvestCommon/domain/config/env';
-import { ROUTE_DASHBOARD_EARN } from 'InvestCommon/domain/config/enums/routes';
+import { ROUTE_DASHBOARD_EARN, ROUTE_SETTINGS_BANK_ACCOUNTS } from 'InvestCommon/domain/config/enums/routes';
 import plus from 'UiKit/assets/images/plus.svg';
 
 const WALLET_SCAN_URL = env.CRYPTO_WALLET_SCAN_URL as string;
@@ -20,6 +21,7 @@ export function useWalletActions(
   const router = useRouter();
   const route = useRoute();
   const { getEvmWalletState } = storeToRefs(useRepositoryEvm());
+  const { getWalletState } = storeToRefs(useRepositoryWallet());
   const { selectedUserProfileData, selectedUserProfileId } = storeToRefs(useProfilesStore());
 
   const isShowIncomingBalance = computed(
@@ -54,8 +56,20 @@ export function useWalletActions(
     const balances = getEvmWalletState.value.data?.balances ?? [];
     return balances.some((b) => (Number(b?.amount) ?? 0) > 0);
   });
+  const fiatCurrentBalance = computed(
+    () => getWalletState.value.data?.currentBalance ?? 0,
+  );
+  const fiatPendingOutcomingBalance = computed(
+    () => getWalletState.value.data?.pendingOutcomingBalance ?? 0,
+  );
+  const fiatMaxWithdrawable = computed(
+    () => Math.max(0, fiatCurrentBalance.value - fiatPendingOutcomingBalance.value),
+  );
+  const hasFiatAvailable = computed(() => fiatMaxWithdrawable.value > 0);
 
-  const canWithdraw = computed(() => isWalletReady.value && hasAvailableBalances.value);
+  const canWithdraw = computed(
+    () => isWalletReady.value && (hasAvailableBalances.value || hasFiatAvailable.value),
+  );
   const canExchange = computed(() => isWalletReady.value && hasAvailableBalances.value);
 
   const buttonConfigs = computed(() => [
@@ -93,6 +107,13 @@ export function useWalletActions(
       label: 'Earn',
       variant: 'outlined',
       disabled: !canAccessKycFeatures.value,
+      transactionType: null,
+    },
+    {
+      id: 'bank-accounts',
+      label: 'Bank Accounts',
+      variant: 'outlined',
+      disabled: false,
       transactionType: null,
     },
   ]);
@@ -137,6 +158,13 @@ export function useWalletActions(
           query: {},
         });
       }
+      return;
+    }
+    if (payload.id === 'bank-accounts') {
+      router.push({
+        name: ROUTE_SETTINGS_BANK_ACCOUNTS,
+        params: { profileId: selectedUserProfileId.value },
+      });
       return;
     }
     if (payload.transactionType && emit) {

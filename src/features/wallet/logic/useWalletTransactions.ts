@@ -22,10 +22,11 @@ const TABLE_ROW_LENGTH = 5;
 
 const TABLE_HEADER = [
   { text: 'Date' },
-  { text: 'Type' },
-  { text: 'ID Transaction' },
-  { text: 'Description' },
-  { text: 'Status' },
+  { text: 'Type', class: 'is--gt-tablet-show' },
+  { text: 'Type / ID', class: 'is--lt-tablet-show' },
+  { text: 'ID Transaction', class: 'is--gt-tablet-show' },
+  { text: 'Description', class: 'is--gt-tablet-show' },
+  { text: 'Status', class: 'is--gt-tablet-show' },
   { text: 'Amount' },
 ];
 

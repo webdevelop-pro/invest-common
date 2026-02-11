@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import VAlert from 'UiKit/components/VAlert.vue';
+import { useDashboardWalletAlert, type DashboardWalletAlertEmit } from './logic/useDashboardWalletAlert';
 
 defineProps<{
   show: boolean;
@@ -14,14 +15,7 @@ const emit = defineEmits<{
   contactUsClick: [event: Event];
 }>();
 
-const handleDescriptionClick = (event: Event) => {
-  const target = (event.target as HTMLElement)?.closest('[data-action="contact-us"]');
-  if (target) {
-    event.preventDefault();
-    event.stopPropagation();
-    emit('contactUsClick', event);
-  }
-};
+const { handleDescriptionClick } = useDashboardWalletAlert(emit as DashboardWalletAlertEmit);
 </script>
 
 <template>

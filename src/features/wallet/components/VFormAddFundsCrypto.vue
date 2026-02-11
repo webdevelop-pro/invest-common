@@ -2,6 +2,8 @@
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
 import VFormSelect from 'UiKit/components/Base/VForm/VFormSelect.vue';
+import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
+import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import VImage from 'UiKit/components/Base/VImage/VImage.vue';
 import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
@@ -25,49 +27,62 @@ const emit = defineEmits<{
 
 <template>
   <div class="VFormAddFundsCrypto v-form-add-funds-crypto">
-    <VFormGroup
-      label="Asset to Deposit"
-      required
-      class="v-form-add-funds-crypto__input"
-    >
-      <VFormSelect
-        :model-value="selectedAsset"
-        :options="assetOptions"
-        item-label="text"
-        item-value="value"
-        placeholder="Select"
-        dropdown-absolute
-        data-testid="add-funds-asset"
-        @update:model-value="emit('update:selectedAsset', $event as string)"
-      />
-    </VFormGroup>
-    <div class="v-form-add-funds-crypto__helper v-form-add-funds-crypto__helper--asset">
-      Choose the specific asset you are sending to this wallet.
-    </div>
+    <FormRow>
+      <FormCol>
+        <VFormGroup
+          label="Asset to Deposit"
+          helper-text="Choose the specific asset you are sending to this wallet."
+          required
+          class="v-form-add-funds-crypto__input"
+        >
+          <VFormSelect
+            :model-value="selectedAsset"
+            :options="assetOptions"
+            item-label="text"
+            item-value="value"
+            placeholder="Select"
+            readonly
+            dropdown-absolute
+            data-testid="add-funds-asset"
+            @update:model-value="emit('update:selectedAsset', $event as string)"
+          />
+        </VFormGroup>
+      </FormCol>
+    </FormRow>
 
-    <div class="v-form-add-funds-crypto__content">
-      <VSkeleton
-        v-if="isGeneratingQR"
-        height="200px"
-        width="200px"
-        class="v-form-add-funds-crypto__skeleton"
-      />
-      <VImage
-        v-else-if="qrCodeDataURL"
-        :src="qrCodeDataURL"
-        alt="wallet qr code"
-        class="v-form-add-funds-crypto__qr"
-      />
-      <div class="v-form-add-funds-crypto__right">
-        <div class="v-form-add-funds-crypto__network-wrap">
-          <span class="v-form-add-funds-crypto__network-label">Deposit Network</span>
-          <span class="v-form-add-funds-crypto__network-value">{{ depositNetworkLabel }}</span>
+    <FormRow>
+      <div class="v-form-add-funds-crypto__content">
+        <VSkeleton
+          v-if="isGeneratingQR"
+          height="200px"
+          width="200px"
+          class="v-form-add-funds-crypto__skeleton"
+        />
+        <VImage
+          v-else-if="qrCodeDataURL"
+          :src="qrCodeDataURL"
+          alt="wallet qr code"
+          class="v-form-add-funds-crypto__qr"
+        />
+        <div class="v-form-add-funds-crypto__right">
+          <VFormGroup
+            label="Deposit Network"
+            helper-text="Scan the QR code with your external wallet app to send funds."
+            class="v-form-add-funds-crypto__input"
+          >
+            <VFormInput
+              :model-value="depositNetworkLabel"
+              readonly
+            />
+          </VFormGroup>
         </div>
-        <div class="v-form-add-funds-crypto__helper v-form-add-funds-crypto__helper--scan">
-          Scan the QR code with your external wallet app to send funds.
-        </div>
+      </div>
+    </FormRow>
+    <FormRow>
+      <FormCol>
         <VFormGroup
           label="Your Unique Deposit Address"
+          :helper-text="selectedAssetWarning"
           class="v-form-add-funds-crypto__input v-form-add-funds-crypto__address-wrap"
         >
           <div class="v-form-add-funds-crypto__input-wrap">
@@ -89,11 +104,8 @@ const emit = defineEmits<{
             </VButton>
           </div>
         </VFormGroup>
-        <p class="v-form-add-funds-crypto__warning">
-          {{ selectedAssetWarning }}
-        </p>
-      </div>
-    </div>
+      </FormCol>
+    </FormRow>
   </div>
 </template>
 
@@ -103,63 +115,34 @@ const emit = defineEmits<{
     width: 100%;
   }
 
-  &__helper {
-    color: $gray-70;
-    font-size: 14px;
-    margin-top: 4px;
-  }
-
-  &__helper--asset {
-    margin-bottom: 20px;
-  }
-
-  &__helper--scan {
-    margin-bottom: 12px;
-  }
-
   &__content {
     display: flex;
     gap: 20px;
-    align-items: flex-start;
-    margin-top: 20px;
+    align-items: center;
     flex-wrap: wrap;
+    width: 100%;
+
+    @media screen and (width < $tablet) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+    }
+  }
+
+  &__right {
+    flex: 1;
   }
 
   &__qr {
-    max-width: 200px;
+    max-width: 150px;
     width: 100%;
     height: auto;
-    max-height: 200px;
+    max-height: 150px;
     flex-shrink: 0;
   }
 
   &__skeleton {
     flex-shrink: 0;
-  }
-
-  &__right {
-    flex: 1;
-    min-width: 280px;
-  }
-
-  &__network-wrap {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    margin-bottom: 8px;
-  }
-
-  &__network-label {
-    font-size: 14px;
-    color: $gray-70;
-  }
-
-  &__network-value {
-    display: inline-block;
-    padding: 8px 12px;
-    background: $gray-10;
-    border-radius: 4px;
-    font-size: 14px;
   }
 
   &__address-wrap {
@@ -179,15 +162,7 @@ const emit = defineEmits<{
   }
 
   &__btn {
-    min-width: 101px;
     flex-shrink: 0;
-  }
-
-  &__warning {
-    margin-top: 16px;
-    font-size: 14px;
-    color: $gray-70;
-    line-height: 1.4;
   }
 }
 </style>

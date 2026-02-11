@@ -57,7 +57,6 @@ export function useVFormExchange(
   const selectedToken = computed(() => (
     getEvmWalletState.value.data?.balances?.find((item: IEvmWalletBalances) => item.address === model.from)));
   const maxExchange = computed((): number | undefined => selectedToken.value?.amount);
-  const text = computed(() => `available ${maxExchange.value}`);
 
   const schemaExchangeTransaction = computed(() => ({
     $schema: 'http://json-schema.org/draft-07/schema#',
@@ -115,6 +114,13 @@ export function useVFormExchange(
     if (!model.to) return 'USDC';
     const destinationToken = tokenToFormatted.value.find((token: any) => token.id === model.to);
     return destinationToken?.symbol || defaultBuySymbol || 'USDC';
+  });
+
+  const fromTokenSymbol = computed(() => selectedToken.value?.symbol || 'Token');
+
+  const exchangeRateLabel = computed(() => {
+    if (!exchangeRate.value || !model.from) return undefined;
+    return `1 ${fromTokenSymbol.value} = ${exchangeRate.value.toFixed(6)} ${destinationTokenSymbol.value}`;
   });
 
   const handleEarnExchange = async (fromAmount: number) => {
@@ -210,7 +216,7 @@ export function useVFormExchange(
     onValidate,
     saveHandler,
     cancelHandler,
-    text,
+    maxExchange,
     errorData,
     tokenFormatted,
     tokenToFormatted,
@@ -224,5 +230,7 @@ export function useVFormExchange(
     exchangeRate,
     selectedToken,
     destinationTokenSymbol,
+    fromTokenSymbol,
+    exchangeRateLabel,
   };
 }

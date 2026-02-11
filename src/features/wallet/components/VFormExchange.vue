@@ -2,12 +2,14 @@
 <script setup lang="ts">
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
-import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
 import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import VFormSelect from 'UiKit/components/Base/VForm/VFormSelect.vue';
 import VImage from 'UiKit/components/Base/VImage/VImage.vue';
+import VAlert from 'UiKit/components/VAlert.vue';
+import VLayoutDialogForm from 'InvestCommon/shared/layouts/VLayoutDialogForm.vue';
 import { useVFormExchange } from './logic/useVFormExchange';
+import { useBreakpoints } from 'UiKit/composables/useBreakpoints';
 
 const emit = defineEmits(['close']);
 
@@ -27,28 +29,37 @@ const props = defineProps({
   },
 });
 
+const { isTablet } = useBreakpoints();
+
 const {
   model,
   isDisabledButton,
   saveHandler,
   cancelHandler,
-  text,
+  maxExchange,
   errorData,
   exchangeTokensState,
   receiveAmount,
   tokenToFormatted,
   tokensFromFormatted,
   numberFormatter,
-  exchangeRate,
-  selectedToken,
-  destinationTokenSymbol,
+  exchangeRateLabel,
   isFieldRequired,
   getErrorText,
 } = useVFormExchange(() => emit('close'), props.defaultBuySymbol, props.poolId, props.profileId);
 </script>
 
 <template>
-  <div class="VFormExchange v-form-exchange">
+  <VLayoutDialogForm
+    class="VFormExchange v-form-exchange"
+    primary-label="Exchange"
+    :disabled="isDisabledButton"
+    :loading="exchangeTokensState.loading"
+    primary-test-id="button"
+    footer-class="v-form-exchange__footer"
+    @submit="saveHandler"
+    @cancel="cancelHandler"
+  >
     <div class="v-form-exchange__content">
       <FormRow>
         <FormCol col2>
@@ -57,7 +68,7 @@ const {
             :required="isFieldRequired('from')"
             :error-text="getErrorText('from', errorData)"
             data-testid="from-token-group"
-            label="You sell:"
+            label="YOU SELL"
             class="v-form-exchange__input"
           >
             <VFormSelect
@@ -90,10 +101,10 @@ const {
         <FormCol col2>
           <VFormGroup
             v-slot="VFormGroupProps"
-            :required="isFieldRequired('amount')"
             :error-text="getErrorText('amount', errorData)"
             data-testid="amount-group"
-            label="Amount"
+            :helper-text="`Maximum available: ${maxExchange}`"
+            :label="isTablet ? '' : '&nbsp;'"
             class="v-form-exchange__input"
           >
             <VFormInput
@@ -106,9 +117,6 @@ const {
               @update:model-value="model.amount = numberFormatter($event)"
             />
           </VFormGroup>
-          <div class="v-form-exchange__text is--small">
-            Maximum {{ text }}
-          </div>
         </FormCol>
       </FormRow>
       <FormRow>
@@ -118,7 +126,7 @@ const {
             :required="isFieldRequired('to')"
             :error-text="getErrorText('to', errorData)"
             data-testid="to-token-group"
-            label="You buy:"
+            label="YOU BUY"
             class="v-form-exchange__input"
           >
             <VFormSelect
@@ -152,7 +160,8 @@ const {
         <FormCol col2>
           <VFormGroup
             v-slot="VFormGroupProps"
-            label="Receive:"
+            helper-text="Amount you receive"
+            :label="isTablet ? '' : '&nbsp;'"
             class="v-form-exchange__input"
           >
             <VFormInput
@@ -166,29 +175,16 @@ const {
         </FormCol>
       </FormRow>
     </div>
-    <div
-      v-if="exchangeRate && model.from"
-      class="v-form-exchange__rate is--h6__title"
+    <VAlert
+      v-if="exchangeRateLabel"
+      variant="info"
+      class="v-form-exchange__rate"
     >
-      1 {{ selectedToken?.symbol || 'Token' }} = {{ exchangeRate.toFixed(6) }} {{ destinationTokenSymbol }}
-    </div>
-    <div class="v-form-exchange__footer">
-      <VButton
-        variant="outlined"
-        @click="cancelHandler"
-      >
-        Cancel
-      </VButton>
-      <VButton
-        :disabled="isDisabledButton"
-        :loading="exchangeTokensState.loading"
-        data-testid="button"
-        @click="saveHandler"
-      >
-        Exchange
-      </VButton>
-    </div>
-  </div>
+      <template #description>
+        {{ exchangeRateLabel }}
+      </template>
+    </VAlert>
+  </VLayoutDialogForm>
 </template>
 
 <style lang="scss" scoped>
@@ -213,15 +209,7 @@ const {
   }
 
   &__rate {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
     margin: 16px 0;
-    padding: 12px 16px;
-    background-color: $gray-10;
-    border-radius: 2px;
-    border: 1px solid $gray-20;
   }
 
   &__footer {

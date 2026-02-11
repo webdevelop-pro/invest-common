@@ -3,5 +3,7 @@ const instance = (digits: number = 2) => new Intl.NumberFormat('en-US', { style:
 
 export function currency(val: number | undefined, digits?: number) {
   const formatter = digits !== undefined ? instance(digits) : defaultInstance;
-  return val || val === 0 ? formatter.format(val) : formatter.format(0);
+  const n = Number(val);
+  const safe = Number.isFinite(n) && n >= 0 ? n : 0;
+  return formatter.format(safe);
 }

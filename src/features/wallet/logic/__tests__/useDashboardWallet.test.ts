@@ -10,7 +10,7 @@ const mockEvmData = {
     { id: 2, symbol: 'ETH', name: 'Ether', amount: 0.5 },
   ],
   fundingBalance: 2500,
-  rwaBalance: 500,
+  rwaValue: 500,
   isStatusCreated: false,
   isStatusVerified: true,
   isStatusAnyError: false,
@@ -117,6 +117,7 @@ describe('useDashboardWallet', () => {
     expect(api.handlePrimaryActionClick).toBeDefined();
     expect(api.handleWalletFilterApply).toBeDefined();
     expect(api.walletFilterItemsComputed).toBeDefined();
+    expect(api.isWalletDataLoading).toBeDefined();
     expect(api.isAlertShow).toBeDefined();
     expect(api.showTable).toBeDefined();
     expect(api.totalBalanceMainFormatted).toBeDefined();
@@ -131,6 +132,40 @@ describe('useDashboardWallet', () => {
   it('defaults activeTab to holdings', () => {
     const api = useDashboardWallet();
     expect(api.activeTab.value).toBe(HOLDINGS_TAB);
+  });
+
+  it('isWalletDataLoading reflects combined fiat and evm wallet loading state', () => {
+    // initial mocked state: both loading flags are false
+    let api = useDashboardWallet();
+    expect(api.isWalletDataLoading.value).toBe(false);
+
+    // when fiat wallet is loading
+    getWalletStateRef.value = {
+      ...getWalletStateRef.value,
+      loading: true,
+    };
+    api = useDashboardWallet();
+    expect(api.isWalletDataLoading.value).toBe(true);
+
+    // when only evm wallet is loading
+    getWalletStateRef.value = {
+      ...getWalletStateRef.value,
+      loading: false,
+    };
+    getEvmWalletStateRef.value = {
+      ...getEvmWalletStateRef.value,
+      loading: true,
+    };
+    api = useDashboardWallet();
+    expect(api.isWalletDataLoading.value).toBe(true);
+
+    // when neither is loading
+    getEvmWalletStateRef.value = {
+      ...getEvmWalletStateRef.value,
+      loading: false,
+    };
+    api = useDashboardWallet();
+    expect(api.isWalletDataLoading.value).toBe(false);
   });
 
   it('balanceCards has fiat, crypto, rwa entries', () => {

@@ -7,6 +7,10 @@ import { computed, ref } from 'vue';
 import { useIntersectionObserver } from '@vueuse/core';
 import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 
+defineOptions({
+  inheritAttrs: false,
+});
+
 interface IHead {
   text?: string;
   class?: string;
@@ -64,6 +68,7 @@ useIntersectionObserver(
     :size="size"
     class="VTableDefault v-table-default"
     :class="{ 'is--empty': isEmpty }"
+    v-bind="$attrs"
   >
     <VTableHeader v-if="headerLength > 0">
       <VTableRow>

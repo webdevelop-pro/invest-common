@@ -7,6 +7,7 @@ const getWalletStateRef = ref({
     isWalletStatusAnyError: false,
     isWalletStatusCreated: false,
     isWalletStatusVerified: true,
+    isSomeLinkedBankAccount: false,
   },
   loading: false,
   error: null as Error | null,
@@ -27,6 +28,7 @@ const selectedUserProfileDataRef = ref({
   isKycPending: false,
   isKycInProgress: false,
   isKycDeclined: false,
+  isKycApproved: false,
   isTypeSdira: false,
   isTypeSolo401k: false,
   isTypeTrust: false,
@@ -70,7 +72,12 @@ describe('useWalletAlert', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
     getWalletStateRef.value = {
-      data: { isWalletStatusAnyError: false, isWalletStatusCreated: false, isWalletStatusVerified: true },
+      data: {
+        isWalletStatusAnyError: false,
+        isWalletStatusCreated: false,
+        isWalletStatusVerified: true,
+        isSomeLinkedBankAccount: false,
+      },
       loading: false,
       error: null,
     };
@@ -86,6 +93,7 @@ describe('useWalletAlert', () => {
       isKycPending: false,
       isKycInProgress: false,
       isKycDeclined: false,
+      isKycApproved: false,
       isTypeSdira: false,
       isTypeSolo401k: false,
       isTypeTrust: false,
@@ -116,15 +124,31 @@ describe('useWalletAlert', () => {
       isKycPending: false,
       isKycInProgress: false,
       isKycDeclined: false,
+      isKycApproved: true,
       isTypeSdira: false,
       isTypeSolo401k: false,
       isTypeTrust: false,
       isTypeEntity: false,
     };
     const api = useWalletAlert();
-    expect(api.isAlertShow.value).toBe(false);
+    expect(api.isAlertShow.value).toBe(true);
+    expect(api.isAlertType.value).toBe('info');
+    expect(api.isAlertText.value).toContain('connect a bank account');
     expect(api.showTable.value).toBe(true);
     expect(api.isTopTextShow.value).toBe(true);
+  });
+
+  it('hides alert when bank accounts are connected', () => {
+    selectedUserProfileDataRef.value.isKycApproved = true;
+    getWalletStateRef.value.data = {
+      ...getWalletStateRef.value.data,
+      isWalletStatusAnyError: false,
+      isWalletStatusCreated: false,
+      isWalletStatusVerified: true,
+      isSomeLinkedBankAccount: true,
+    };
+    const api = useWalletAlert();
+    expect(api.isAlertShow.value).toBe(false);
   });
 
   it('shows info alert when wallet is being created', () => {

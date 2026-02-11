@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { IEvmWalletDataFormatted } from 'InvestCommon/data/evm/evm.types';
 import { EvmTransactionTypes } from 'InvestCommon/data/evm/evm.types';
-import { computed, PropType, ref, watch } from 'vue';
+import { PropType } from 'vue';
 import VDialog from 'UiKit/components/Base/VDialog/VDialog.vue';
 import VDialogContent from 'UiKit/components/Base/VDialog/VDialogContent.vue';
 import VDialogHeader from 'UiKit/components/Base/VDialog/VDialogHeader.vue';
@@ -9,6 +9,7 @@ import VDialogTitle from 'UiKit/components/Base/VDialog/VDialogTitle.vue';
 import VFormAddFunds from './VFormAddFunds.vue';
 import VFormExchange from './VFormExchange.vue';
 import VFormWithdraw from './VFormWithdraw.vue';
+import { useVDialogWallet } from './logic/useVDialogWallet';
 
 const open = defineModel<boolean>();
 const props = defineProps({
@@ -34,18 +35,7 @@ const props = defineProps({
   },
 });
 
-const isTypeDeposit = ref((props.transactionType === EvmTransactionTypes.deposit));
-const isTypeExchange = ref((props.transactionType === EvmTransactionTypes.exchange));
-const titile = computed(() => {
-  if (isTypeDeposit.value) return 'Add Funds';
-  if (isTypeExchange.value) return 'Exchange Tokens';
-  return 'Withdraw';
-});
-
-watch(() => props.transactionType, (newVal: EvmTransactionTypes) => {
-  isTypeDeposit.value = newVal === EvmTransactionTypes.deposit;
-  isTypeExchange.value = newVal === EvmTransactionTypes.exchange;
-});
+const { isTypeDeposit, isTypeExchange, title: dialogTitle } = useVDialogWallet(props);
 </script>
 
 <template>
@@ -60,13 +50,12 @@ watch(() => props.transactionType, (newVal: EvmTransactionTypes) => {
     >
       <VDialogHeader>
         <VDialogTitle>
-          {{ titile }}
+          {{ dialogTitle }}
         </VDialogTitle>
       </VDialogHeader>
       <VFormAddFunds
         v-if="isTypeDeposit"
         class="is--margin-top-20"
-        :data="data"
         @close="open = false"
       />
       <VFormExchange

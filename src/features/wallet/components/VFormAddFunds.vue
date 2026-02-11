@@ -1,20 +1,11 @@
 <script setup lang="ts">
-import { computed } from 'vue';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import VFormSelect from 'UiKit/components/Base/VForm/VFormSelect.vue';
 import VFormAddFundsFiat from './VFormAddFundsFiat.vue';
 import VFormAddFundsCrypto from './VFormAddFundsCrypto.vue';
 import { useVFormAddFunds } from './logic/useVFormAddFunds';
-import type { IEvmWalletDataFormatted } from 'InvestCommon/data/evm/evm.types';
-import { currency } from 'InvestCommon/helpers/currency';
 
 const emit = defineEmits(['close']);
-
-const props = defineProps<{
-  data?: IEvmWalletDataFormatted | Record<string, unknown> | null;
-}>();
-
-const evmData = computed(() => props.data);
 
 const {
   depositMethod,
@@ -23,7 +14,7 @@ const {
   isFiatSubmitDisabled,
   fiatSubmitHandler,
   addTransactionState,
-  maxFiatAmount,
+  maxFiatAmountFormatted,
   qrCodeDataURL,
   isGeneratingQR,
   copied,
@@ -32,16 +23,12 @@ const {
   selectedAsset,
   selectedAssetWarning,
   depositNetworkLabel,
-} = useVFormAddFunds(evmData, () => emit('close'));
-
-const depositMethodOptions = [
-  { value: 'fiat', text: 'Fiat' },
-  { value: 'crypto', text: 'Crypto' },
-];
-
-const maxFiatAmountFormatted = computed(() => currency(maxFiatAmount));
-
-const cryptoAddress = computed(() => (evmData?.value?.address as string | undefined) ?? null);
+  cryptoAddress,
+  errorData,
+  isFieldRequired,
+  getErrorText,
+  depositMethodOptions,
+} = useVFormAddFunds(() => emit('close'));
 </script>
 
 <template>
@@ -69,6 +56,9 @@ const cryptoAddress = computed(() => (evmData?.value?.address as string | undefi
       :max-fiat-amount-formatted="maxFiatAmountFormatted"
       :loading="addTransactionState.loading"
       :disabled="isFiatSubmitDisabled"
+      :error-data="errorData"
+      :is-field-required="isFieldRequired"
+      :get-error-text="getErrorText"
       @update:amount="fiatModel.amount = $event"
       @update:funding-source-id="fiatModel.funding_source_id = $event"
       @submit="fiatSubmitHandler"

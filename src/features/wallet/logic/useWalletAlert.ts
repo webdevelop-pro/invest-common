@@ -16,6 +16,8 @@ const KYC_NEED_MSG = (profileId: string | number) =>
   `You need to <a href="/profile/${profileId}/kyc">pass KYC </a> before you can make a transfer`;
 const KYC_IN_PROGRESS_MSG =
   'Your KYC is in progress. You need to pass KYC before you can make a transfer';
+const BANK_ACCOUNTS_NEED_MSG = (profileId: string | number) =>
+  `You need to <a href="/settings/${profileId}/bank-accounts">connect a bank account</a> before you can add funds`;
 
 /** Shared KYC + wallet alert state for both fiat and crypto wallet. */
 export function useWalletAlert() {
@@ -41,6 +43,10 @@ export function useWalletAlert() {
     () => isFiatWalletError.value || isEvmWalletError.value,
   );
 
+  const hasLinkedBankAccount = computed(
+    () => getWalletState.value.data?.isSomeLinkedBankAccount ?? false,
+  );
+
   const isWalletCreated = computed(
     () =>
       (getWalletState.value.data?.isWalletStatusCreated ||
@@ -63,21 +69,39 @@ export function useWalletAlert() {
       hasRestrictedWallet.value,
   );
 
+  const isKycPassed = computed(
+    () =>
+      (profile.value?.isKycApproved ?? false) ||
+      (!isKYCNeedToPass.value &&
+        !isKYCInProgress.value &&
+        !(profile.value?.isKycDeclined ?? false)),
+  );
+
+  const isBankAccountMissing = computed(
+    () => isKycPassed.value && !hasLinkedBankAccount.value && !isWalletError.value,
+  );
+
   const isAlertShow = computed(
     () =>
       (hasRestrictedWallet.value ||
         isKYCNeedToPass.value ||
         isKYCInProgress.value ||
         isWalletCreated.value ||
+        isBankAccountMissing.value ||
         isError.value) &&
       !getProfileByIdState.value.loading,
   );
-  const isAlertType = computed(() => (isWalletCreated.value ? 'info' : 'error'));
+  const isAlertType = computed(() =>
+    isWalletCreated.value || isBankAccountMissing.value ? 'info' : 'error',
+  );
   const isAlertText = computed(() => {
     if (isError.value) return CONTACT_US_MSG;
     if (isWalletCreated.value) return WALLET_CREATING_MSG;
     if (isKYCNeedToPass.value) return KYC_NEED_MSG(selectedUserProfileId.value);
     if (isKYCInProgress.value) return KYC_IN_PROGRESS_MSG;
+    if (isBankAccountMissing.value) {
+      return BANK_ACCOUNTS_NEED_MSG(selectedUserProfileId.value);
+    }
     return CONTACT_US_MSG;
   });
   const alertTitle = computed(() => {
@@ -91,7 +115,7 @@ export function useWalletAlert() {
 
   const showTable = computed(
     () =>
-      !isAlertShow.value && !hasRestrictedWallet.value && !isWalletError.value,
+      !hasRestrictedWallet.value && !isError.value,
   );
   const isTopTextShow = computed(
     () =>

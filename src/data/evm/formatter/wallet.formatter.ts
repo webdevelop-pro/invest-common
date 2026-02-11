@@ -1,10 +1,14 @@
 import {
-  IEvmWalletDataResponse, IEvmWalletDataFormatted, EvmWalletStatusTypes, IEvmWalletBalances,
+  IEvmWalletDataResponse,
+  IEvmWalletDataFormatted,
+  EvmWalletStatusTypes,
+  IEvmWalletBalances,
   IEvmTransactionDataFormatted,
 } from '../evm.types';
 import { EvmTransactionFormatter } from './transactions.formatter';
 import defaultImage from 'InvestCommon/shared/assets/images/default.svg?url';
 import env from 'InvestCommon/domain/config/env';
+import { currency } from 'InvestCommon/helpers/currency';
 
 export class EvmWalletFormatter {
   private data: IEvmWalletDataResponse;
@@ -70,8 +74,8 @@ export class EvmWalletFormatter {
     }, 0);
   }
 
-  get rwaBalance() {
-    // Sum of all balances that are not stablecoins
+  get rwaValue() {
+    // Sum of all non-stablecoin balances by USD value (amount * price_per_usd)
     const rawBalances: any = (this.data as any).balances;
     const balancesArray = Object.values(rawBalances);
     const stablecoinSymbols = ['USDC', 'USDT', 'DAI', 'BUSD', 'TUSD', 'USDP', 'FRAX', 'LUSD', 'SUSD', 'GUSD'];
@@ -79,7 +83,9 @@ export class EvmWalletFormatter {
       const symbol = String(balance.symbol || '').toUpperCase();
       const isStablecoin = stablecoinSymbols.includes(symbol);
       const amount = Number(balance.amount ?? 0);
-      return !isStablecoin ? sum + amount : sum;
+      const pricePerUsd = Number(balance.price_per_usd ?? 0);
+      const valueUsd = amount * pricePerUsd;
+      return !isStablecoin ? sum + valueUsd : sum;
     }, 0);
   }
 
@@ -112,14 +118,32 @@ export class EvmWalletFormatter {
     let balancesArray: IEvmWalletBalances[] = [];
     const rawBalances: any = (this.data as any).balances;
     balancesArray = Object.values(rawBalances)
-      .map((b: any) => ({
-        ...b,
-        address: String(b.address),
-        amount: Number(b.amount ?? 0),
-        symbol: String(b.symbol ?? ''),
-        name: b.name ? String(b.name) : undefined,
-        icon: b.icon ? this.getImage(b.icon) : undefined,
-      }))
+      .map((b: any) => {
+        const amount = Number(b.amount ?? 0);
+
+        // Token value (Book Value) in USD, preformatted for UI
+        // - If amount is missing or 0 => show value as 0
+        // - If amount > 0 but price_per_usd is missing/invalid => keep value undefined
+        let tokenValue: string | undefined;
+        if (!amount) {
+          tokenValue = currency(0);
+        } else if (b.price_per_usd !== undefined && b.price_per_usd !== null) {
+          const priceNum = Number(b.price_per_usd);
+          if (Number.isFinite(priceNum)) {
+            tokenValue = currency(amount * priceNum);
+          }
+        }
+
+        return {
+          ...b,
+          address: String(b.address),
+          amount,
+          symbol: String(b.symbol ?? ''),
+          name: b.name ? String(b.name) : undefined,
+          icon: b.icon ? this.getImage(b.icon) : undefined,
+          tokenValue,
+        };
+      })
       // Hide zero-amount balances except USDC
       .filter((b: IEvmWalletBalances) => {
         const isUsdc = (b.symbol || '').toUpperCase() === 'USDC';
@@ -145,7 +169,7 @@ export class EvmWalletFormatter {
       currentBalance: this.currentBalance,
       totalBalance: this.totalBalance,
       fundingBalance: this.fundingBalance,
-      rwaBalance: this.rwaBalance,
+      rwaValue: this.rwaValue,
       pendingIncomingBalance: this.pendingIncomingBalance,
       pendingOutcomingBalance: this.pendingOutcomingBalance,
       formattedTransactions,

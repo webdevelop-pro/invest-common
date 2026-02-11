@@ -13,6 +13,7 @@ import VDialogWallet from 'InvestCommon/features/wallet/components/VDialogWallet
 const {
   activeTab,
   summaryEvmWalletState,
+  isWalletDataLoading,
   isAlertShow,
   isAlertType,
   isAlertText,
@@ -52,6 +53,7 @@ const {
     <DashboardWalletHeader
       :amount="totalBalanceMainFormatted"
       :coin="totalBalanceCoins"
+      :loading="isWalletDataLoading"
       :buttons="primaryButtons"
       :more-buttons="moreButtons"
       @click="handlePrimaryActionClick"
@@ -61,7 +63,10 @@ const {
       v-if="showTable"
       class="dashboard-wallet__wrap"
     >
-      <DashboardWalletBalanceCards :cards="balanceCards" />
+      <DashboardWalletBalanceCards
+        :cards="balanceCards"
+        :loading="isWalletDataLoading"
+      />
 
       <section class="dashboard-wallet__main-card">
         <DashboardWalletTabs
@@ -98,6 +103,10 @@ const {
   &__wrap {
     background: $white;
     box-shadow: $box-shadow-medium;
+
+    @media screen and (width < $tablet){
+        margin: 0 -15px;
+    }
   }
 
   &__main-card {

@@ -1,83 +1,62 @@
-import { ref, computed, watch } from 'vue';
-import { storeToRefs } from 'pinia';
-import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository';
-import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
-import { numberFormatter } from 'InvestCommon/helpers/numberFormatter';
-import { useVFormFundsWithdraw } from 'InvestCommon/features/cryptoWallet/components/logic/useVFormFundsWithdraw';
+import { ref, computed } from 'vue';
+import { WalletAddTransactionTypes } from 'InvestCommon/data/wallet/wallet.types';
+import { useVFormWithdrawCrypto } from './useVFormWithdrawCrypto';
+import { useVFormWalletAddTransaction } from './useVFormWalletAddTransaction';
 
 export type WithdrawalMethodType = 'fiat' | 'crypto';
 
-const MAX_FIAT_WITHDRAW = 1_000_000;
-
 export function useVFormWithdraw(onClose: () => void) {
-  const withdrawalMethod = ref<WithdrawalMethodType>('crypto');
+  const withdrawalMethod = ref<WithdrawalMethodType>('fiat');
 
-  const profilesStore = useProfilesStore();
-  const { selectedUserProfileId } = storeToRefs(profilesStore);
-  const walletRepository = useRepositoryWallet();
-  const { getWalletState, addTransactionState } = storeToRefs(walletRepository);
-  const { getWalletByProfile, addTransaction } = walletRepository;
+  const transactionType = computed(() => WalletAddTransactionTypes.withdrawal);
+  const fiatApi = useVFormWalletAddTransaction(transactionType, onClose);
 
-  const profileId = computed(() => Number(selectedUserProfileId.value ?? 0));
+  const {
+    model: fiatModel,
+    fundingSourceFormatted,
+    isDisabledButton: isFiatSubmitDisabled,
+    addTransactionState,
+    maxFiatAmount,
+    maxFiatAmountFormatted,
+    getWalletState,
+    errorData: fiatErrorData,
+    isFieldRequired: fiatIsFieldRequired,
+    getErrorText: fiatGetErrorText,
+  } = fiatApi;
 
-  const fiatModel = ref({
-    amount: undefined as number | undefined,
-    funding_source_id: undefined as number | string | undefined,
-  });
+  const cryptoWithdraw = useVFormWithdrawCrypto(onClose);
+  const hasCryptoBalance = computed(() => cryptoWithdraw.tokenFormatted.value.length > 0);
 
-  const fundingSourceFormatted = computed(() =>
-    (getWalletState.value.data?.funding_source ?? []).map((item: { id: number; bank_name: string; name: string }) => ({
-      id: item.id,
-      text: `${item.bank_name}: ${item.name}`,
-    })),
-  );
+  const baseWithdrawalMethodOptions: { value: string; text: string; disabled?: boolean }[] = [
+    { value: 'fiat', text: 'Fiat' },
+    { value: 'crypto', text: 'Crypto' },
+  ];
 
-  const loadFiatWallet = () => {
-    if (profileId.value && withdrawalMethod.value === 'fiat') {
-      getWalletByProfile(profileId.value);
-    }
-  };
-
-  watch(withdrawalMethod, (method) => {
-    if (method === 'fiat') loadFiatWallet();
-  });
-
-  const isFiatSubmitDisabled = computed(
+  const withdrawalMethodOptions = computed(
     () =>
-      !fiatModel.value.amount ||
-      Number(fiatModel.value.amount) <= 0 ||
-      !fiatModel.value.funding_source_id ||
-      Number(fiatModel.value.amount) > MAX_FIAT_WITHDRAW ||
-      addTransactionState.value.loading,
+      baseWithdrawalMethodOptions.map((option) => ({
+        ...option,
+        disabled: option.value === 'crypto' ? !hasCryptoBalance.value : option.disabled,
+      })) as unknown as Record<string, string | number | boolean>[],
   );
-
-  const fiatSubmitHandler = async () => {
-    const wId = getWalletState.value.data?.id;
-    if (!wId || !fiatModel.value.amount || !fiatModel.value.funding_source_id) return;
-    try {
-      await addTransaction(wId, {
-        type: 'withdrawal',
-        amount: Number(fiatModel.value.amount),
-        funding_source_id: Number(fiatModel.value.funding_source_id),
-      });
-      onClose();
-    } catch {
-      // Error handled by repository toaster
-    }
-  };
-
-  const cryptoWithdraw = useVFormFundsWithdraw(onClose);
 
   return {
     withdrawalMethod,
+    hasCryptoBalance,
+    withdrawalMethodOptions,
+    // Fiat withdrawal values (mirrors useVFormAddFunds API)
     fiatModel,
     fundingSourceFormatted,
     isFiatSubmitDisabled,
-    fiatSubmitHandler,
-    loadFiatWallet,
-    numberFormatter,
+    fiatSubmitHandler: fiatApi.saveHandler,
     addTransactionState,
-    maxFiatWithdraw: MAX_FIAT_WITHDRAW,
+    maxFiatAmount,
+    maxFiatAmountFormatted,
+    getWalletState,
+    fiatErrorData,
+    fiatIsFieldRequired,
+    fiatGetErrorText,
+    // Crypto withdrawal values
     ...cryptoWithdraw,
   };
 }

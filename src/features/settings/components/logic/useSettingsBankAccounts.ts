@@ -3,7 +3,7 @@ import { storeToRefs } from 'pinia';
 import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository';
 import { loadPlaidScriptOnce, type PlaidHandler } from 'InvestCommon/data/plaid/loadPlaidScriptOnce';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
-import { useWalletMain } from 'InvestCommon/features/wallet/logic/useWalletMain';
+import { useWallet } from 'InvestCommon/features/wallet/logic/useWallet';
 import type { IProfileFormatted } from 'InvestCommon/data/profiles/profiles.types';
 import type { IFundingSourceDataFormatted } from 'InvestCommon/data/wallet/wallet.types';
 
@@ -23,7 +23,7 @@ export function useSettingsBankAccounts() {
     createLinkExchangeState,
     createLinkTokenState,
   } = storeToRefs(walletRepository);
-  const { updateData } = useWalletMain();
+  const { updateData } = useWallet();
 
   const profile = computed<IProfileFormatted | null | undefined>(
     () => selectedUserProfileData.value as IProfileFormatted | null | undefined,

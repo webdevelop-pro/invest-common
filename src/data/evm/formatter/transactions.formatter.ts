@@ -57,12 +57,13 @@ export class EvmTransactionFormatter {
   }
 
   get amountFormatted() {
-    if (!this.data?.amount) return this.data?.symbol ? `0 ${this.data.symbol}` : '0';
+    const currencyTicker = this.data?.ticker || this.data?.symbol;
+    if (!this.data?.amount) return currencyTicker ? `0 ${currencyTicker}` : '0';
     const amount = Number(this.data.amount);
     const formattedAmount = amount.toLocaleString();
-    const symbol = this.data?.symbol ? ` ${this.data.symbol}` : '';
-    if (this.isTypeDeposit) return `+ ${formattedAmount}${symbol}`.trim();
-    return `- ${formattedAmount}${symbol}`.trim();
+    const suffix = currencyTicker ? ` ${currencyTicker}` : '';
+    if (this.isTypeDeposit) return `+ ${formattedAmount}${suffix}`.trim();
+    return `- ${formattedAmount}${suffix}`.trim();
   }
 
   get networkFormatted() {

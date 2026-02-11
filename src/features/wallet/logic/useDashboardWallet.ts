@@ -31,9 +31,20 @@ export const EVM_WALLET_TAB_INFO = {
   text: 'View and manage your crypto assets.',
 } as const;
 
+const WALLET_TAB_QUERY_KEY = 'wallet-tab';
+const VALID_WALLET_TABS = [HOLDINGS_TAB, TRANSACTIONS_TAB] as const;
+
+function initialWalletTabFromRoute(query: Record<string, unknown>): string {
+  const raw = query[WALLET_TAB_QUERY_KEY];
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  return typeof value === 'string' && VALID_WALLET_TABS.includes(value as typeof VALID_WALLET_TABS[number])
+    ? value
+    : HOLDINGS_TAB;
+}
+
 export function useDashboardWallet() {
   const route = useRoute();
-  const activeTab = ref(HOLDINGS_TAB);
+  const activeTab = ref(initialWalletTabFromRoute(route.query as Record<string, unknown>));
 
   const isDialogTransactionOpen = ref(false);
   const transactionType = ref<EvmTransactionTypes>(EvmTransactionTypes.deposit);
@@ -56,10 +67,13 @@ export function useDashboardWallet() {
     fiatPendingDeposit,
     cryptoBalanceCoins,
     cryptoBalanceMainFormatted,
-    rwaBalanceCoins,
-    rwaBalanceMainFormatted,
+    crypto24hChange,
+    rwaValueCoins,
+    rwaValueMainFormatted,
+    rwa24hChange,
     totalBalanceMainFormatted,
     totalBalanceCoins,
+    isWalletDataLoading,
   } = useWallet();
 
   const profilesStore = useProfilesStore();
@@ -119,7 +133,7 @@ export function useDashboardWallet() {
     ),
   );
   const moreButtons = computed(() =>
-    buttonConfigs.value.filter((b) => ['earn', 'buy'].includes(String(b.id))),
+    buttonConfigs.value.filter((b) => ['earn', 'buy', 'bank-accounts'].includes(String(b.id))),
   );
 
   const handlePrimaryActionClick = (id: string | number, transactionType?: unknown) => {
@@ -140,14 +154,17 @@ export function useDashboardWallet() {
     const walletAddress = summaryEvmWalletState.value.data?.address;
     const profileId = Number(selectedUserProfileId.value ?? 0);
     const bankAccountsHref = profileId ? urlSettingsBankAccounts(profileId) : undefined;
+    const hasFiatPendingDeposit = fiatPendingDeposit.value != null;
+    const hasCrypto24hChange = crypto24hChange.value != null;
+    const hasRwa24hChange = rwa24hChange.value != null;
     return [
       {
         id: 'fiat',
         title: 'Fiat Balance:',
         value: fiatBalanceMainFormatted.value,
         unit: fiatBalanceCoins.value,
-        secondaryText: fiatPendingDeposit.value ? 'Pending Deposit' : undefined,
-        secondaryValue: fiatPendingDeposit.value ? `+ ${fiatPendingDeposit.value}` : undefined,
+        secondaryText: hasFiatPendingDeposit ? 'Pending Deposit' : undefined,
+        secondaryValue: hasFiatPendingDeposit ? `+ ${fiatPendingDeposit.value}` : undefined,
         action: {
           label: 'Your Bank Accounts',
           href: bankAccountsHref ?? '#',
@@ -159,8 +176,8 @@ export function useDashboardWallet() {
         title: 'Tradable Crypto Balance:',
         value: cryptoBalanceMainFormatted.value,
         unit: cryptoBalanceCoins.value,
-        secondaryText: '24h Change',
-        secondaryValue: '+$0.00 (0.00%)',
+        secondaryText: hasCrypto24hChange ? '24h Change' : undefined,
+        secondaryValue: hasCrypto24hChange ? crypto24hChange.value : undefined,
         action: {
           label: 'View on Etherscan',
           href: `${scanUrl}/address/${walletAddress}`,
@@ -171,10 +188,10 @@ export function useDashboardWallet() {
       {
         id: 'rwa',
         title: 'RWA Asset Balance:',
-        value: rwaBalanceMainFormatted.value,
-        unit: rwaBalanceCoins.value,
-        secondaryText: 'Value Change',
-        secondaryValue: '+$0.00 (0.00%)',
+        value: rwaValueMainFormatted.value,
+        unit: rwaValueCoins.value,
+        secondaryText: hasRwa24hChange ? 'Value Change' : undefined,
+        secondaryValue: hasRwa24hChange ? rwa24hChange.value : undefined,
         action: {
           label: 'View on Etherscan',
           href: `${scanUrl}/address/${walletAddress}`,
@@ -192,6 +209,7 @@ export function useDashboardWallet() {
   return {
     activeTab,
     summaryEvmWalletState,
+    isWalletDataLoading,
     isAlertShow,
     isAlertType,
     isAlertText,

@@ -11,7 +11,7 @@ const mockEvmWalletData = {
   inc_balance: 0,
   out_balance: 0,
   fundingBalance: 1500,
-  rwaBalance: 0,
+  rwaValue: 0,
   pendingIncomingBalance: 0,
   pendingOutcomingBalance: 0,
   isStatusCreated: false,
@@ -97,10 +97,10 @@ describe('useWalletActions', () => {
     expect(titles).toContain('Outgoing:');
   });
 
-  it('builds buttonConfigs with add-funds, withdraw, exchange, buy, earn', () => {
+  it('builds buttonConfigs with add-funds, withdraw, exchange, buy, earn, bank-accounts', () => {
     const api = useWalletActions();
     const ids = api.buttonConfigs.value.map((b: { id: string }) => b.id);
-    expect(ids).toEqual(['add-funds', 'withdraw', 'exchange', 'buy', 'earn']);
+    expect(ids).toEqual(['add-funds', 'withdraw', 'exchange', 'buy', 'earn', 'bank-accounts']);
     expect(api.buttonConfigs.value[0].label).toBe('Add Funds');
     expect(api.buttonConfigs.value[0].transactionType).toBe(EvmTransactionTypes.deposit);
   });

@@ -23,7 +23,7 @@ const mockEvmWallet = {
   address: '0xCABBAc435948510D24820746Ee29706a05A54369',
   status: 'verified',
   fundingBalance: 2500.75,
-  rwaBalance: 500.25,
+  rwaValue: 500.25,
   currentBalance: 3001,
   totalBalance: 3001,
   balances: [],
@@ -99,12 +99,12 @@ describe('useWallet', () => {
     expect(api.cryptoBalanceMainFormatted.value).toBeDefined();
   });
 
-  it('computes rwa balance from evm state', () => {
+  it('computes rwa value from evm state', () => {
     const api = useWallet();
-    expect(api.rwaBalance.value).toBe(500.25);
+    expect(api.rwaValue.value).toBe(500.25);
   });
 
-  it('computes total balance as sum of fiat, crypto, rwa', () => {
+  it('computes total balance as sum of fiat, crypto, rwa value', () => {
     const api = useWallet();
     expect(api.totalBalance.value).toBe(5000 + 2500.75 + 500.25);
     expect(api.totalBalanceMainFormatted.value).toBeDefined();
@@ -113,5 +113,39 @@ describe('useWallet', () => {
   it('exposes updateData', () => {
     const api = useWallet();
     expect(typeof api.updateData).toBe('function');
+  });
+
+  it('exposes isWalletDataLoading that reflects combined wallet loading state', () => {
+    // initial state: both repositories not loading
+    let api = useWallet();
+    expect(api.isWalletDataLoading.value).toBe(false);
+
+    // fiat wallet loading only
+    getWalletStateRef.value = {
+      ...getWalletStateRef.value,
+      loading: true,
+    };
+    api = useWallet();
+    expect(api.isWalletDataLoading.value).toBe(true);
+
+    // evm wallet loading only
+    getWalletStateRef.value = {
+      ...getWalletStateRef.value,
+      loading: false,
+    };
+    getEvmWalletStateRef.value = {
+      ...getEvmWalletStateRef.value,
+      loading: true,
+    };
+    api = useWallet();
+    expect(api.isWalletDataLoading.value).toBe(true);
+
+    // both not loading
+    getEvmWalletStateRef.value = {
+      ...getEvmWalletStateRef.value,
+      loading: false,
+    };
+    api = useWallet();
+    expect(api.isWalletDataLoading.value).toBe(false);
   });
 });

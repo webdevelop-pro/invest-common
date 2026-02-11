@@ -18,8 +18,8 @@ const HOLDING_TYPE_STABLE_COIN = 'Stable Coin';
 const TABLE_HEADER = [
   { text: 'Token' },
   { text: 'Amount' },
-  { text: 'Value' },
-  { text: 'Network Link' },
+  { text: 'Value', class: 'is--gt-tablet-show' },
+  { text: 'Network Link', class: 'is--gt-tablet-show' },
 ];
 
 function getHoldingType(balance: IEvmWalletBalances): string {

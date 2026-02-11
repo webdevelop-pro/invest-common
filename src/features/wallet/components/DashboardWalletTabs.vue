@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { computed } from 'vue';
 import {
   VTabs,
   VTabsList,
@@ -8,19 +7,11 @@ import {
 } from 'UiKit/components/Base/VTabs';
 import VFilter from 'UiKit/components/VFilter/VFilter.vue';
 import DashboardWalletTablePanel from 'InvestCommon/features/wallet/components/DashboardWalletTablePanel.vue';
-import type { DashboardWalletTableConfig } from 'InvestCommon/features/wallet/logic/walletLogic.types';
+import { useDashboardWalletTabs, type DashboardWalletTabsProps } from './logic/useDashboardWalletTabs';
 import type { WalletFilterItem } from 'InvestCommon/features/wallet/logic/walletLogic.types';
 
 const props = withDefaults(
-  defineProps<{
-    activeTab: string;
-    holdingsTab: string;
-    transactionsTab: string;
-    holdingsTable: DashboardWalletTableConfig | null;
-    transactionsTable: DashboardWalletTableConfig | null;
-    filterItems: WalletFilterItem[];
-    filterDisabled?: boolean;
-  }>(),
+  defineProps<DashboardWalletTabsProps>(),
   { filterDisabled: false },
 );
 
@@ -29,9 +20,10 @@ const emit = defineEmits<{
   filterApply: [items: { value: string; model: string[] }[]];
 }>();
 
-const activeTabModel = computed({
-  get: () => props.activeTab,
-  set: (value: string) => emit('update:activeTab', value),
+const { activeTabModel, filterDisabledComputed } = useDashboardWalletTabs(props, (event, value) => {
+  if (event === 'update:activeTab') {
+    emit('update:activeTab', value);
+  }
 });
 </script>
 
@@ -40,6 +32,8 @@ const activeTabModel = computed({
     v-model="activeTabModel"
     :default-value="holdingsTab"
     variant="secondary"
+    query-key="wallet-tab"
+    tabs-to-url
     class="dashboard-wallet__tabs"
   >
     <div class="dashboard-wallet__tabs-header">
@@ -60,7 +54,7 @@ const activeTabModel = computed({
 
       <VFilter
         :items="filterItems"
-        :disabled="filterDisabled"
+        :disabled="filterDisabledComputed"
         class="dashboard-wallet__filters-button"
         @apply="emit('filterApply', $event)"
       />

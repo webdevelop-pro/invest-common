@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { computed, type PropType } from 'vue';
+import { type PropType } from 'vue';
 import { VTableCell, VTableRow } from 'UiKit/components/Base/VTable';
 import VImage from 'UiKit/components/Base/VImage/VImage.vue';
 import VTooltip from 'UiKit/components/VTooltip.vue';
 import externalLink from 'UiKit/assets/images/external-link.svg';
 import infoIcon from 'UiKit/assets/images/circle-info.svg';
-import env from 'InvestCommon/domain/config/env';
-import { currency } from 'InvestCommon/helpers/currency';
+import { useVTableWalletTokensItem } from './logic/useVTableWalletTokensItem';
 
 interface ITableEvmWalletTransaction {
   name?: string;
@@ -15,6 +14,7 @@ interface ITableEvmWalletTransaction {
   address: string;
   icon?: string;
   price_per_usd?: number;
+  tokenValue?: string;
 }
 
 const props = defineProps({
@@ -22,14 +22,7 @@ const props = defineProps({
   loading: Boolean,
 });
 
-const tokenValue = computed(() => {
-  const d = props.data;
-  if (!d?.amount || !d.price_per_usd) return undefined;
-  const amountNum = Number(d.amount);
-  const priceNum = Number(d.price_per_usd);
-  if (!Number.isFinite(amountNum) || !Number.isFinite(priceNum)) return undefined;
-  return currency(amountNum * priceNum);
-});
+const { tokenScanUrl } = useVTableWalletTokensItem(props.data);
 </script>
 
 <template>
@@ -60,14 +53,22 @@ const tokenValue = computed(() => {
 
     <VTableCell>
       <div class="v-table-wallet-tokens-item__amount">
-        {{ data?.amount }}
+        <div class="v-table-wallet-tokens-item__amount-main">
+          {{ data?.amount }}
+        </div>
+        <div
+          v-if="data?.tokenValue != null"
+          class="v-table-wallet-tokens-item__amount-value-mobile is--small is--lt-tablet-show"
+        >
+          {{ data?.tokenValue }}
+        </div>
       </div>
     </VTableCell>
 
-    <VTableCell>
+    <VTableCell class="is--gt-tablet-show">
       <div class="v-table-wallet-tokens-item__value">
         <span class="v-table-wallet-tokens-item__value-amount">
-          {{ tokenValue ?? '—' }}
+          {{ data?.tokenValue ?? '—' }}
         </span>
         <VTooltip class="v-table-wallet-tokens-item__value-tooltip">
           <infoIcon class="v-table-wallet-tokens-item__info-icon" />
@@ -78,11 +79,11 @@ const tokenValue = computed(() => {
       </div>
     </VTableCell>
 
-    <VTableCell>
+    <VTableCell class="is--gt-tablet-show">
       <div class="v-table-wallet-tokens-item__link">
         <a
           v-if="data?.address"
-          :href="`${env.CRYPTO_WALLET_SCAN_URL}/token/${data?.address}`"
+          :href="tokenScanUrl"
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -137,6 +138,18 @@ const tokenValue = computed(() => {
 
   &__amount {
     color: $black;
+
+    @media screen and (width < $tablet) {
+      text-align: right;
+    }
+  }
+
+  &__amount-main {
+    color: $black;
+  }
+
+  &__amount-value-mobile {
+    color: $gray-60;
   }
 
   &__value {

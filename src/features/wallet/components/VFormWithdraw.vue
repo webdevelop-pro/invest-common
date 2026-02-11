@@ -1,28 +1,36 @@
 <script setup lang="ts">
-import { computed } from 'vue';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import VFormSelect from 'UiKit/components/Base/VForm/VFormSelect.vue';
 import VFormWithdrawFiat from './VFormWithdrawFiat.vue';
 import VFormWithdrawCrypto from './VFormWithdrawCrypto.vue';
 import { useVFormWithdraw } from './logic/useVFormWithdraw';
-import { currency } from 'InvestCommon/helpers/currency';
 
 const emit = defineEmits(['close']);
 
 const {
   withdrawalMethod,
+  hasCryptoBalance,
+  withdrawalMethodOptions,
   fiatModel,
   fundingSourceFormatted,
   isFiatSubmitDisabled,
   fiatSubmitHandler,
   addTransactionState,
-  maxFiatWithdraw,
+  maxFiatAmount,
+  maxFiatAmountFormatted,
   numberFormatter,
   model: cryptoModel,
   tokenFormatted,
   text: cryptoAvailableText,
+  fiatErrorData,
+  fiatIsFieldRequired,
+  fiatGetErrorText,
+  // Crypto validation helpers (keep broad types to match useFormValidation)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   errorData,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   isFieldRequired,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getErrorText,
   withdrawFundsState,
   saveHandler: cryptoSaveHandler,
@@ -30,12 +38,6 @@ const {
   isDisabledButton: cryptoDisabled,
 } = useVFormWithdraw(() => emit('close'));
 
-const withdrawalMethodOptions = [
-  { value: 'fiat', text: 'Fiat' },
-  { value: 'crypto', text: 'Crypto' },
-];
-
-const maxFiatAmountFormatted = computed(() => currency(maxFiatWithdraw));
 </script>
 
 <template>
@@ -63,6 +65,9 @@ const maxFiatAmountFormatted = computed(() => currency(maxFiatWithdraw));
       :max-fiat-amount-formatted="maxFiatAmountFormatted"
       :loading="addTransactionState.loading"
       :disabled="isFiatSubmitDisabled"
+      :error-data="fiatErrorData"
+      :is-field-required="fiatIsFieldRequired"
+      :get-error-text="fiatGetErrorText"
       @update:amount="fiatModel.amount = $event"
       @update:funding-source-id="fiatModel.funding_source_id = $event"
       @submit="fiatSubmitHandler"
@@ -83,7 +88,7 @@ const maxFiatAmountFormatted = computed(() => currency(maxFiatWithdraw));
       :loading="withdrawFundsState.loading"
       :disabled="cryptoDisabled"
       @update:token="cryptoModel.token = $event"
-      @update:amount="cryptoModel.amount = $event"
+      @update:amount="cryptoModel.amount = $event as number"
       @update:to="cryptoModel.to = $event"
       @submit="cryptoSaveHandler"
       @cancel="cryptoCancelHandler"

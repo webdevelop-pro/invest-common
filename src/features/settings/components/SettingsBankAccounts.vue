@@ -22,7 +22,10 @@ const {
       Connected Bank Accounts
     </h2>
 
-    <div class="settings-bank-accounts__list">
+    <div
+      v-if="fundingSource.length > 0"
+      class="settings-bank-accounts__list"
+    >
       <template v-if="showSkeletonPlaceholders">
         <VInfoBankAccountItem
           v-for="i in skeletonItemCount"
