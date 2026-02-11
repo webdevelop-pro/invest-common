@@ -59,6 +59,7 @@ const {
   componentData,
   isFieldRequired,
   isDirty,
+  isFundingReady,
 } = useInvestFundingForm(props, emit, dynamicFormRef);
 
 // Expose validation state to parent component
@@ -92,7 +93,7 @@ defineExpose({
             placeholder="Select"
             size="large"
             name="funding-type"
-            :loading="(selectOptions?.length === 0) || isLoading"
+            :loading="!isFundingReady || (selectOptions?.length === 0) || isLoading"
             :options="selectOptions"
           />
         </VFormGroup>

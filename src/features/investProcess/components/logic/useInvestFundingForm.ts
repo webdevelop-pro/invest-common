@@ -136,16 +136,39 @@ export function useInvestFundingForm(
     return backendNumberOfShares * pricePerShare;
   });
 
+  // Guard "not enough funds" checks so they only run once wallet data is loaded.
+  // This prevents a brief false error state while balances are still loading.
+  const isWalletReady = computed(() => (
+    !!props.getWalletState
+    && props.getWalletState.loading === false
+    && !!props.getWalletState.data
+  ));
+
   const notEnoughWalletFunds = computed(() =>
-    investmentAmount.value > (props.getWalletState?.data?.totalBalance || 0)
+    isWalletReady.value
+    && investmentAmount.value > (props.getWalletState?.data?.totalBalance || 0)
   );
 
   const hasEvmWallet = computed(() => 
     (props.evmWalletId || 0) > 0 && !(props.getEvmWalletState?.data?.isStatusAnyError || props.getEvmWalletState?.error)
   );
 
+  const isEvmWalletReady = computed(() => (
+    !!props.getEvmWalletState
+    && props.getEvmWalletState.loading === false
+    && !!props.getEvmWalletState.data
+  ));
+
+  // Overall readiness flag for funding-related data (wallet + crypto wallet)
+  // Used to control UI skeletons while balances are still loading.
+  const isFundingReady = computed(() => (
+    (!hasWallet.value || isWalletReady.value)
+    && (!hasEvmWallet.value || isEvmWalletReady.value)
+  ));
+
   const notEnoughEvmWalletFunds = computed(() =>
-    investmentAmount.value > (props.getEvmWalletState?.data?.fundingBalance || 0)
+    isEvmWalletReady.value
+    && investmentAmount.value > (props.getEvmWalletState?.data?.fundingBalance || 0)
   );
 
   const selectOptions = computed(() => {
@@ -370,6 +393,7 @@ export function useInvestFundingForm(
     isBtnDisabled,
     currentComponent,
     currentProps,
+    isFundingReady,
     
     // Form validation helpers
     formErrors,
