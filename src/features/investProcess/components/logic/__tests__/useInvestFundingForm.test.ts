@@ -23,6 +23,7 @@ describe('useInvestFundingForm', () => {
         funding_type: FundingTypes.ach,
       },
       getWalletState: {
+        loading: false,
         data: {
           totalBalance: 200,
           isWalletStatusAnyError: false,
@@ -33,6 +34,7 @@ describe('useInvestFundingForm', () => {
       },
       walletId: 1,
       getEvmWalletState: {
+        loading: false,
         data: {
           fundingBalance: 300,
           isStatusAnyError: false,
@@ -108,6 +110,68 @@ describe('useInvestFundingForm', () => {
       (error) => String(error).includes('Crypto wallet does not have enough funds')
     );
     expect(hasCryptoError).toBe(true);
+  });
+
+  it('does not compute insufficient wallet funds while wallet state is loading', () => {
+    const emit = vi.fn();
+    const props = baseProps();
+
+    // Simulate wallet data still loading
+    props.getWalletState.loading = true;
+    props.getWalletState.data.totalBalance = 50;
+
+    const composable = useInvestFundingForm(props, emit);
+
+    composable.model.funding_type = FundingTypes.wallet;
+
+    expect(composable.isFundingReady.value).toBe(false);
+    expect(composable.notEnoughWalletFunds.value).toBe(false);
+
+    const hasWalletError = composable.selectErrors.value.some(
+      (error) => String(error).includes('Wallet does not have enough funds')
+    );
+    expect(hasWalletError).toBe(false);
+  });
+
+  it('does not compute insufficient crypto wallet funds while EVM wallet state is loading', () => {
+    const emit = vi.fn();
+    const props = baseProps();
+
+    // Simulate crypto wallet data still loading
+    props.getEvmWalletState.loading = true;
+    props.getEvmWalletState.data.fundingBalance = 50;
+
+    const composable = useInvestFundingForm(props, emit);
+
+    composable.model.funding_type = FundingTypes.cryptoWallet;
+
+    expect(composable.isFundingReady.value).toBe(false);
+    expect(composable.notEnoughEvmWalletFunds.value).toBe(false);
+
+    const hasCryptoError = composable.selectErrors.value.some(
+      (error) => String(error).includes('Crypto wallet does not have enough funds')
+    );
+    expect(hasCryptoError).toBe(false);
+  });
+
+  it('sets isFundingReady to true once wallet and EVM wallet data are ready', async () => {
+    const emit = vi.fn();
+    const props = baseProps();
+
+    // Start in loading state for both funding sources
+    props.getWalletState.loading = true;
+    props.getEvmWalletState.loading = true;
+
+    const composable = useInvestFundingForm(props, emit);
+
+    expect(composable.isFundingReady.value).toBe(false);
+
+    // Mark both as ready
+    props.getWalletState.loading = false;
+    props.getEvmWalletState.loading = false;
+    await nextTick();
+
+    expect(composable.isFundingReady.value).toBe(true);
   });
 
   it('prioritizes modelValue.number_of_shares over backend amount when computing investmentAmount', () => {
