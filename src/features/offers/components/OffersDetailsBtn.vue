@@ -36,6 +36,7 @@ const isFloating = ref(false);
 const initialBottom = ref<number | null>(null);
 const footerEl = ref<HTMLElement | null>(null);
 const isClient = typeof window !== 'undefined';
+const isClientReady = ref(false);
 
 const showInvestBtn = computed(() => (
   selectedUserProfileData.value?.isKycApproved
@@ -114,6 +115,7 @@ onMounted(() => {
   }
 
   updateFloatingState();
+  isClientReady.value = true;
 });
 </script>
 
@@ -124,42 +126,52 @@ onMounted(() => {
     :class="{ 'offer-details-btn--floating': isFloating }"
   >
     <VButton
-      v-if="!userLoggedIn"
-      size="large"
-      class="offer-details-btn__btn"
-      @click="signInHandler"
-    >
-      Log in
-    </VButton>
-    <VButton
-      v-else-if="showInvestBtn"
+      v-if="!isClientReady"
       class="offer-details-btn__btn"
       size="large"
-      :disabled="loading || isSharesReached"
-      @click="investClickHandler"
+      disabled
     >
-      Invest Now
+      Loading...
     </VButton>
-    <VButton
-      v-else-if="showKYCBtn"
-      class="offer-details-btn__btn"
-      size="large"
-      @click="startKycHandler"
-    >
-      Start KYC
-    </VButton>
-    <p
-      v-else
-      class="offer-details-btn__info is--small"
-    >
-      You haven't passed KYC!
-    </p>
-    <p
-      v-if="isSharesReached && showInvestBtn"
-      class="offer-details-btn__info is--small"
-    >
-      Offer already reached subscription
-    </p>
+    <template v-else>
+      <VButton
+        v-if="!userLoggedIn"
+        size="large"
+        class="offer-details-btn__btn"
+        @click="signInHandler"
+      >
+        Log in
+      </VButton>
+      <VButton
+        v-else-if="showInvestBtn"
+        class="offer-details-btn__btn"
+        size="large"
+        :disabled="loading || isSharesReached"
+        @click="investClickHandler"
+      >
+        Invest Now
+      </VButton>
+      <VButton
+        v-else-if="showKYCBtn"
+        class="offer-details-btn__btn"
+        size="large"
+        @click="startKycHandler"
+      >
+        Start KYC
+      </VButton>
+      <p
+        v-else
+        class="offer-details-btn__info is--small"
+      >
+        You haven't passed KYC!
+      </p>
+      <p
+        v-if="isSharesReached && showInvestBtn"
+        class="offer-details-btn__info is--small"
+      >
+        Offer already reached subscription
+      </p>
+    </template>
   </div>
 </template>
 
