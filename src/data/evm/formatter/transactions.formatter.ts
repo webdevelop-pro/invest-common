@@ -26,10 +26,10 @@ const getTimeFormat = (fullDate: string) => {
 };
 
 const STATUS_CONFIG = {
-  [EvmTransactionStatusTypes.processed]: { color: 'secondary-light', text: 'Completed' },
-  [EvmTransactionStatusTypes.pending]: { color: 'purple-light', text: 'Pending' },
+  [EvmTransactionStatusTypes.processed]: { color: 'secondary-light', text: 'Processed' },
+  [EvmTransactionStatusTypes.pending]: { color: 'default', text: 'Pending' },
   [EvmTransactionStatusTypes.failed]: { color: 'red-light', text: 'Failed' },
-  [EvmTransactionStatusTypes.cancelled]: { color: 'default', text: 'Cancelled' },
+  [EvmTransactionStatusTypes.cancelled]: { color: 'red-light', text: 'Cancelled' },
   [EvmTransactionStatusTypes.wait]: { color: 'primary', text: 'Waiting' },
 } as const;
 
@@ -57,10 +57,13 @@ export class EvmTransactionFormatter {
   }
 
   get amountFormatted() {
-    if (!this.data?.amount) return '0';
+    const currencyTicker = this.data?.ticker || this.data?.symbol;
+    if (!this.data?.amount) return currencyTicker ? `0 ${currencyTicker}` : '0';
     const amount = Number(this.data.amount);
-    if (this.isTypeDeposit) return `+ ${amount}`;
-    return `- ${amount}`;
+    const formattedAmount = amount.toLocaleString();
+    const suffix = currencyTicker ? ` ${currencyTicker}` : '';
+    if (this.isTypeDeposit) return `+ ${formattedAmount}${suffix}`.trim();
+    return `- ${formattedAmount}${suffix}`.trim();
   }
 
   get networkFormatted() {
@@ -72,6 +75,52 @@ export class EvmTransactionFormatter {
     if (this.isTypeWithdrawal) return 'red-light';
     if (this.isTypeExchange) return 'purple-light';
     return 'default';
+  }
+
+  get txShort(): string {
+    const tx = this.data?.transaction_tx;
+    if (!tx || tx.length < 14) return tx ?? '';
+    return `${tx.slice(0, 6)}...${tx.slice(-6)}`;
+  }
+
+  get typeDisplay(): string {
+    if (!this.data?.type) return '';
+    switch (this.data.type) {
+      case EvmTransactionTypes.deposit:
+        return 'Crypto Deposit';
+      case EvmTransactionTypes.withdrawal:
+        return 'Crypto Withdrawal';
+      case EvmTransactionTypes.exchange:
+        return 'Token Issuance';
+      default:
+        return this.typeFormatted ?? '';
+    }
+  }
+
+  get description(): string {
+    const id = this.data?.investment_id;
+    const name = this.data?.name ?? '';
+    if (this.isTypeDeposit) {
+      return id
+        ? `Distribution from investment ID ${id} to crypto wallet balance.`
+        : 'Deposit to crypto wallet balance.';
+    }
+    if (this.isTypeWithdrawal) {
+      return 'Withdrawal from crypto wallet balance.';
+    }
+    if (this.isTypeExchange) {
+      return id
+        ? `Token issuance from investment ID ${id}${name ? ` in ${name}` : ''}.`
+        : 'Token exchange in wallet.';
+    }
+    return '';
+  }
+
+  get scanTxUrl(): string {
+    const tx = this.data?.transaction_tx;
+    if (!tx) return '';
+    const base = env.CRYPTO_WALLET_SCAN_URL as string;
+    return base ? `${base}/tx/${tx}` : '';
   }
 
   getImage(iconLinkId?: number | string, icon?: string, metaSize: 'big' | 'small' | 'medium' = 'small'): string {
@@ -116,6 +165,11 @@ export class EvmTransactionFormatter {
       amountFormatted: this.amountFormatted,
       networkFormatted: this.networkFormatted,
       tagColor: this.tagBackground,
+
+      txShort: this.txShort,
+      typeDisplay: this.typeDisplay,
+      description: this.description,
+      scanTxUrl: this.scanTxUrl,
     };
   }
 

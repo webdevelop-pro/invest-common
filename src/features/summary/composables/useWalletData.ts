@@ -3,7 +3,7 @@ import { storeToRefs } from 'pinia';
 import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
 import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
-import VTableWalletTokensItem from 'InvestCommon/features/cryptoWallet/components/VTableWalletTokensItem.vue';
+import VTableWalletTokensItem from 'InvestCommon/features/wallet/components/VTableWalletTokensItem.vue';
 import { currency } from 'InvestCommon/helpers/currency';
 import { ROUTE_DASHBOARD_EVMWALLET, ROUTE_DASHBOARD_WALLET } from 'InvestCommon/domain/config/enums/routes';
 

@@ -2,11 +2,16 @@
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import VPageTopInfoAndTabs from 'InvestCommon/shared/components/VPageTopInfoAndTabs.vue';
 import { computed, PropType } from 'vue'
-import { ROUTE_SETTINGS_MFA, ROUTE_SETTINGS_SECURITY } from 'InvestCommon/domain/config/enums/routes';
+import {
+  ROUTE_SETTINGS_MFA,
+  ROUTE_SETTINGS_SECURITY,
+  ROUTE_SETTINGS_BANK_ACCOUNTS,
+} from 'InvestCommon/domain/config/enums/routes';
 import { VTabsContent } from 'UiKit/components/Base/VTabs';
 import SettingsTopInfoLeft from './components/SettingsTopInfoLeft.vue';
-import SettingsSecurity from './components/SettingsSecurity.vue';
 import SettingsMfa from './components/SettingsMfa.vue';
+import SettingsSecurity from './components/SettingsSecurity.vue';
+import SettingsBankAccounts from './components/SettingsBankAccounts.vue';
 import { SettingsTabTypes } from './utils';
 // import VFormSettingsSocial from './components/VFormSettingsSocial.vue';
 
@@ -35,6 +40,13 @@ const tabs = computed(() => ({
       name: ROUTE_SETTINGS_SECURITY,
     },
   },
+  [SettingsTabTypes.bankAccounts]: {
+    value: SettingsTabTypes.bankAccounts,
+    label: 'Bank Accounts',
+    to: {
+      name: ROUTE_SETTINGS_BANK_ACCOUNTS,
+    },
+  },
 }) as const);
 </script>
 
@@ -52,14 +64,19 @@ const tabs = computed(() => ({
     </template>
     <template #tabs-content>
       <VTabsContent
-        :value="tabs.mfa.value"
+        :value="tabs[SettingsTabTypes.mfa].value"
       >
         <SettingsMfa />
       </VTabsContent>
       <VTabsContent
-        :value="tabs.security.value"
+        :value="tabs[SettingsTabTypes.security].value"
       >
         <SettingsSecurity />
+      </VTabsContent>
+      <VTabsContent
+        :value="tabs[SettingsTabTypes.bankAccounts].value"
+      >
+        <SettingsBankAccounts />
       </VTabsContent>
     </template>
   </VPageTopInfoAndTabs>

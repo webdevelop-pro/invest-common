@@ -3,26 +3,64 @@ import {
   VTable, VTableBody, VTableCell, VTableRow,
   VTableEmpty, VTableHead, VTableHeader,
 } from 'UiKit/components/Base/VTable';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
+import { useIntersectionObserver } from '@vueuse/core';
 import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
+
+defineOptions({
+  inheritAttrs: false,
+});
 
 interface IHead {
   text?: string;
   class?: string;
 }
 
-const props = defineProps<{
-  header?: IHead[];
-  data: unknown[];
-  loading?: boolean;
-  loadingRowLength?: number;
-  size?: 'large' | 'regular' | 'small';
-  colspan?: number;
+const props = withDefaults(
+  defineProps<{
+    header?: IHead[];
+    data: unknown[];
+    loading?: boolean;
+    loadingRowLength?: number;
+    size?: 'large' | 'regular' | 'small';
+    colspan?: number;
+    infiniteScroll?: boolean;
+    infiniteScrollRootMargin?: string;
+    infiniteScrollDisabled?: boolean;
+  }>(),
+  {
+    infiniteScroll: false,
+    infiniteScrollRootMargin: '100px',
+    infiniteScrollDisabled: false,
+  },
+);
+
+const emit = defineEmits<{
+  'load-more': [];
 }>();
 
 const loadingRowLength = computed(() => props.loadingRowLength ?? 1);
 const headerLength = computed(() => props.colspan ?? (props.header?.length || 0));
 const isEmpty = computed(() => !props.loading && props.data.length === 0);
+
+const sentinel = ref<HTMLElement | null>(null);
+
+useIntersectionObserver(
+  sentinel,
+  ([{ isIntersecting }]) => {
+    if (
+      isIntersecting &&
+      props.infiniteScroll &&
+      !props.infiniteScrollDisabled &&
+      !props.loading
+    ) {
+      emit('load-more');
+    }
+  },
+  {
+    rootMargin: props.infiniteScrollRootMargin,
+  },
+);
 </script>
 
 <template>
@@ -30,6 +68,7 @@ const isEmpty = computed(() => !props.loading && props.data.length === 0);
     :size="size"
     class="VTableDefault v-table-default"
     :class="{ 'is--empty': isEmpty }"
+    v-bind="$attrs"
   >
     <VTableHeader v-if="headerLength > 0">
       <VTableRow>
@@ -86,6 +125,12 @@ const isEmpty = computed(() => !props.loading && props.data.length === 0);
       </VTableEmpty>
     </VTableBody>
   </VTable>
+  <div
+    v-if="infiniteScroll"
+    ref="sentinel"
+    class="v-table-default__sentinel"
+    aria-hidden="true"
+  />
 </template>
 
 <style lang="scss" scoped>
@@ -106,6 +151,12 @@ const isEmpty = computed(() => !props.loading && props.data.length === 0);
 
 .fade-move {
   transition: transform 0.3s ease;
+}
+
+.v-table-default__sentinel {
+  height: 1px;
+  width: 100%;
+  pointer-events: none;
 }
 
 /* Hide header on mobile when table is empty */

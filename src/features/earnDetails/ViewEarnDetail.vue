@@ -12,13 +12,13 @@ import EarnYourPosition from './components/EarnYourPosition.vue';
 import EarnRisk from './components/EarnRisk.vue';
 import { useEarnDetail } from './useEarnDetail';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
-import VDialogCryptoWallet from 'InvestCommon/features/cryptoWallet/components/VDialogCryptoWallet.vue';
+import VDialogWallet from 'InvestCommon/features/wallet/components/VDialogWallet.vue';
 
 defineProps({
   tab: {
     type: String as PropType<DashboardEarnTabTypes>,
     required: true,
-    validator: (prop: string) => Object.values(DashboardEarnTabTypes).includes(prop as DashboardEarnTabTypes),
+    validator: (prop: DashboardEarnTabTypes) => prop in DashboardEarnTabTypes,
   },
 });
 
@@ -54,6 +54,7 @@ const {
 </script>
 
 <template>
+  {{ tab }}
   <VPageTopInfoAndTabs
     :tab="tab"
     :tabs="tabs"
@@ -112,7 +113,7 @@ const {
       </div>
     </template>
   </VPageTopInfoAndTabs>
-  <VDialogCryptoWallet
+  <VDialogWallet
     v-model="isDialogTransactionOpen"
     :transaction-type="transactionType"
     :data="getEvmWalletState.data"

@@ -5,13 +5,15 @@ import CardDonutUnified from 'InvestCommon/features/summary/components/CardDonut
 import { useSummaryData } from 'InvestCommon/features/summary/composables/useSummaryData';
 import VCardOffer from 'UiKit/components/VCard/VCardOffer.vue';
 import { urlOfferSingle, urlOffers } from 'InvestCommon/domain/config/links';
-import VWalletTokensAndTransactions from 'InvestCommon/shared/components/VWalletTokensAndTransactions.vue';
 import VCardGoal from 'InvestCommon/shared/components/VCardGoal.vue';
 import VCardOfferFunded from 'InvestCommon/shared/components/VCardOfferFunded.vue';
 import VSliderCards from 'UiKit/components/VSlider/VSliderCards.vue';
-import DashboardTopInfoCard from 'InvestCommon/features/dashboard/components/DashboardTopInfoCard.vue';
+import { VCardInfo } from 'UiKit/components/Base/VCard';
 import { useDashboardTopInfoRight } from 'InvestCommon/features/dashboard/composables/useDashboardTopInfoRight';
 import { useBreakpoints } from 'UiKit/composables/useBreakpoints';
+import { useDashboardWallet } from 'InvestCommon/features/wallet/logic/useDashboardWallet';
+import DashboardWalletBalanceCards from 'InvestCommon/features/wallet/components/DashboardWalletBalanceCards.vue';
+import DashboardWalletTablePanel from 'InvestCommon/features/wallet/components/DashboardWalletTablePanel.vue';
 
 const {
   cryptoItems,
@@ -29,10 +31,13 @@ const {
   topFundedOffer,
   // portfolio
   topInvestedOffers,
-  // wallet
-  balances,
-  tables,
 } = useSummaryData();
+
+const {
+  balanceCards,
+  holdingsTable,
+  isWalletDataLoading,
+} = useDashboardWallet();
 
 const { isTablet } = useBreakpoints();
 const { sliderData: dashboardTopInfoData, isLoading: isDashboardTopInfoLoading } = useDashboardTopInfoRight();
@@ -58,7 +63,16 @@ const { sliderData: dashboardTopInfoData, isLoading: isDashboardTopInfoLoading }
       >
         <VSliderCards :data="dashboardTopInfoData">
           <template #default="{ slide }">
-            <DashboardTopInfoCard :slide="slide" />
+            <VCardInfo
+              class="dashboard-summary__top-info-card"
+              min-width="172px"
+              :amount="slide?.currency"
+              :unit="slide?.coin"
+              :title="slide?.title"
+              :secondary-text="slide?.secondaryText"
+              :secondary-value="slide?.secondaryValue"
+              :value-props="{ amountClass: 'is--h2__title' }"
+            />
           </template>
         </VSliderCards>
       </div>
@@ -140,11 +154,17 @@ const { sliderData: dashboardTopInfoData, isLoading: isDashboardTopInfoLoading }
         />
       </div>
       <div class="dashboard-summary__grid-offer">
-        <VWalletTokensAndTransactions
-          :balances="balances"
-          :tables="tables"
-          class="dashboard-summary__wallet"
-        />
+        <div class="dashboard-summary__wallet">
+          <DashboardWalletBalanceCards
+            :cards="balanceCards"
+            :loading="isWalletDataLoading"
+          />
+          <section
+            class="dashboard-summary__wallet-tabs"
+          >
+            <DashboardWalletTablePanel :table="holdingsTable" />
+          </section>
+        </div>
         <VCardOffer
           v-if="topFundedOffer"
           :offer="topFundedOffer"
@@ -161,6 +181,10 @@ const { sliderData: dashboardTopInfoData, isLoading: isDashboardTopInfoLoading }
     &__content {
         display: flex;
         flex-direction: column;
+    }
+
+    &__top-info-card {
+      flex: 1 0 0;
     }
 
     &__grid {
@@ -187,10 +211,20 @@ const { sliderData: dashboardTopInfoData, isLoading: isDashboardTopInfoLoading }
     }
 
     &__wallet {
-      @media screen and (width < $tablet){
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      background: $white;
+      box-shadow: $box-shadow-medium;
+
+      @media screen and (width < $tablet) {
         width: 100%;
         overflow: auto;
       }
+    }
+
+    &__wallet-tabs {
+      padding: 20px;
     }
     
 }

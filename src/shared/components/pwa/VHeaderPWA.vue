@@ -21,7 +21,6 @@ import {
 import VHeader from 'UiKit/components/VHeader/VHeader.vue';
 import { MenuItem } from 'InvestCommon/types/global';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
-import { useBreakpoints } from 'UiKit/composables/useBreakpoints';
 import ArrowRight from 'UiKit/assets/images/arrow-right.svg';
 import ArrowLeft from 'UiKit/assets/images/arrow-left.svg';
 import NotificationsSidebarButton from 'InvestCommon/features/notifications/VNotificationsSidebarButton.vue';
@@ -68,7 +67,6 @@ onMounted(() => {
   runtimePath.value = window.location.pathname;
 });
 
-const { isDesktopMD } = storeToRefs(useBreakpoints());
 
 const sessionStore = useSessionStore();
 const { userLoggedIn } = storeToRefs(sessionStore);

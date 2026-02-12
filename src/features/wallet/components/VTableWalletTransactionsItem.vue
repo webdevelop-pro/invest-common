@@ -1,68 +1,105 @@
 <script setup lang="ts">
-import VBadge from 'UiKit/components/Base/VBadge/VBadge.vue';
+import { type PropType } from 'vue';
 import { VTableCell, VTableRow } from 'UiKit/components/Base/VTable';
-import { PropType } from 'vue';
+import VBadge from 'UiKit/components/Base/VBadge/VBadge.vue';
 import VTooltip from 'UiKit/components/VTooltip.vue';
-import { ITransactionDataFormatted } from 'InvestCommon/data/wallet/wallet.types';
+import { IEvmTransactionDataFormatted } from 'InvestCommon/data/evm/evm.types';
+import type { ITransactionDataFormatted } from 'InvestCommon/data/wallet/wallet.types';
+import { useVTableWalletTransactionsItem } from './logic/useVTableWalletTransactionsItem';
 
-defineProps({
-  data: Object as PropType<ITransactionDataFormatted>,
+const props = defineProps({
+  data: Object as PropType<IEvmTransactionDataFormatted | ITransactionDataFormatted>,
   loading: Boolean,
 });
 
+const { fullTxOrEntityId } = useVTableWalletTransactionsItem(props.data);
 </script>
 
 <template>
-  <VTableRow
-    class="VTableWalletTransactions v-table-wallet-transactions"
-  >
-    <VTableCell>
-      <div>
-        {{ data?.updated_at_date }}
-      </div>
-      <div class="is--color-gray-60">
-        {{ data?.updated_at_time }}
+  <VTableRow class="VTableWalletTransactionsItem v-table-wallet-transactions-item">
+    <VTableCell class="v-table-wallet-transactions-item__date-cell">
+      <div class="v-table-wallet-transactions-item__date">
+        <div>{{ data?.submitted_at_date }}</div>
+        <div class="is--color-gray-60 is--small-2">
+          {{ data?.submitted_at_time }}
+        </div>
       </div>
     </VTableCell>
+    <VTableCell class="is--gt-tablet-show">
+      <span class="v-table-wallet-transactions-item__type is--small-2">
+        {{ data?.typeDisplay }}
+      </span>
+    </VTableCell>
     <VTableCell>
-      <VTooltip v-if="data?.entity_id">
-        <div class="v-table-wallet-transactions__transaction-id is--small-2">
-          ID {{ data?.entity_id }}
+      <div class="v-table-wallet-transactions-item__type is--small-2 is--lt-tablet-show">
+        {{ data?.typeDisplay }}
+      </div>
+      <VTooltip v-if="fullTxOrEntityId">
+        <div class="v-table-wallet-transactions-item__tx">
+          <a
+            v-if="data?.transaction_tx"
+            :href="data?.scanTxUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="v-table-wallet-transactions-item__tx-link is--link-2"
+          >
+            {{ data?.txShort }}
+          </a>
+          <span
+            v-else
+            class="is--small-2"
+          >
+            {{ data?.txShort || '—' }}
+          </span>
+          <div
+            v-if="data?.networkFormatted"
+            class="is--color-gray-60 is--small v-table-wallet-transactions-item__network"
+          >
+            {{ data.networkFormatted }}
+          </div>
         </div>
         <template #content>
-          {{ data?.entity_id }}
+          {{ fullTxOrEntityId }}
         </template>
       </VTooltip>
-    </VTableCell>
-    <VTableCell>
-      <div class="v-table-wallet-transactions__table-type">
-        <VBadge
-          size="small"
-          :color="data?.tagColor"
-          class="profile-status-info__tag"
-        >
-          {{ data?.typeFormatted }}
-        </VBadge>
+      <div
+        v-else
+        class="v-table-wallet-transactions-item__tx is--small-2 is--gt-tablet-show"
+      >
+        <span class="is--color-gray-60">—</span>
+      </div>
+      <div class="v-table-wallet-transactions-item__description is--small is--lt-tablet-show">
+        {{ data?.description }}
       </div>
     </VTableCell>
-    <VTableCell>
-      <VTooltip>
-        <span
-          class="is--small"
-        >
-          {{ data?.statusFormated?.text }}
-        </span>
-        <template #content>
-          <p>
-            {{ data?.statusFormated?.tooltip }}
-          </p>
-        </template>
-      </VTooltip>
+    <VTableCell class="is--gt-tablet-show">
+      <span class="v-table-wallet-transactions-item__description is--small">
+        {{ data?.description }}
+      </span>
     </VTableCell>
-    <VTableCell>
-      <div class="v-table-wallet-transactions__table-amount is--h6__title">
+    <VTableCell class="is--gt-tablet-show">
+      <VBadge
+        :color="(data?.statusColor as 'secondary-light' | 'default' | 'red-light' | 'primary' | 'purple-light' | undefined)"
+        size="small"
+        class="v-table-wallet-transactions-item__status"
+      >
+        {{ data?.statusText }}
+      </VBadge>
+    </VTableCell>
+    <VTableCell class="v-table-wallet-transactions-item__amount-cell">
+      <div
+        class="v-table-wallet-transactions-item__amount is--body"
+      >
         {{ data?.amountFormatted }}
       </div>
+
+      <VBadge
+        :color="(data?.statusColor as 'secondary-light' | 'default' | 'red-light' | 'primary' | 'purple-light' | undefined)"
+        size="small"
+        class="v-table-wallet-transactions-item__status is--lt-tablet-show"
+      >
+        {{ data?.statusText }}
+      </VBadge>
     </VTableCell>
   </VTableRow>
 </template>
@@ -70,62 +107,77 @@ defineProps({
 <style lang="scss">
 @use 'UiKit/styles/_colors.scss' as *;
 
-.v-table-wallet-transactions {
-  @media screen and (width < $desktop){
+.v-table-wallet-transactions-item {
+  &__date {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
+    gap: 2px;
   }
 
-  &__table-amount {
+  &__date-cell {
+    @media screen and (width < $tablet) {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 12px;
+    }
+  }
+
+  &__tx {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    text-align: initial;
+  }
+
+  &__tx-link {
+    text-decoration: underline;
+    width: fit-content;
+  }
+
+  &__network {
+    margin-top: 2px;
+  }
+
+  &__type {
+    @media screen and (width < $tablet) {
+      margin-bottom: 12px;
+    }
+  }
+
+  &__description {
+    max-width: 280px;
+    @media screen and (width < $tablet) {
+      max-width: 100%;
+      margin-top: 12px;
+    }
+  }
+
+  &__status {
+    width: fit-content;
+  }
+
+  &__amount {
     text-align: right;
-    color: $black;
     width: max-content;
-  }
+    margin-left: auto;
+    color: $black;
 
-  &__table-type {
-    display: flex;
-  }
-
-  &__transaction-id {
-    color: $gray-80;
-    // width: 18%;
-    max-width: 110px;
-    width: 110px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .v-table-cell {
-    &:nth-child(2) {
-      width: 135px;
-
-      @media screen and (width < $desktop){
-        text-align: right;
-      }
+    &.is--positive {
+      color: $secondary;
     }
 
-    &:nth-child(1),
-    &:nth-child(2) {
-      @media screen and (width < $desktop){
-        flex: 0 0 50%;
-      }
+    &.is--negative {
+      color: $red;
     }
+  }
 
-    &:nth-child(4) {
-      @media screen and (width < $desktop){
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-    }
-
-    &:nth-child(5) {
-      @media screen and (width < $desktop){
-        display: flex;
-        align-items: center;
-        justify-content: end;
-      }
+  &__amount-cell {
+    @media screen and (width < $tablet) {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 12px;
     }
   }
 }

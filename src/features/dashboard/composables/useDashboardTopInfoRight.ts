@@ -10,8 +10,10 @@ export interface DashboardTopInfoRightCard {
   currency: string;
   coin: string;
   change: number;
-  changeClass: (string | { 'is--show': boolean })[];
-  changeText?: string;
+  /** Secondary line label (e.g. "change in 30 days"). */
+  secondaryText?: string;
+  /** Secondary line value (e.g. "+5%" or "-2%"). */
+  secondaryValue?: string;
 }
 
 export function useDashboardTopInfoRight() {
@@ -31,18 +33,8 @@ export function useDashboardTopInfoRight() {
   });
   const totalInvestedChange = computed(() => (
     selectedUserProfileData.value?.total_investments_change_percent || 0));
-  const totalInvestedClass = computed(() => {
-    if (totalInvestedChange.value > 0) return 'is--positive';
-    if (totalInvestedChange.value < 0) return 'is--negative';
-    return '';
-  });
   const totalDistributionsChange = computed(() => (
     selectedUserProfileData.value?.total_distributions_change_percent || 0));
-  const totalDistributionsClass = computed(() => {
-    if (totalDistributionsChange.value > 0) return 'is--positive';
-    if (totalDistributionsChange.value < 0) return 'is--negative';
-    return '';
-  });
   const totalDistributions = computed(() => (selectedUserProfileData.value?.total_distributions || 0));
   const totalDistributionsMain = computed(() => Math.floor(totalDistributions.value));
   const totalDistributionsCoins = computed(() => {
@@ -52,10 +44,11 @@ export function useDashboardTopInfoRight() {
   const showChange = computed(() => totalInvested.value > 0);
 
   const sliderData = computed((): DashboardTopInfoRightCard[] => {
-    const formatChangeText = (change: number) => {
+    const formatChangeValue = (change: number) => {
       const sign = change > 0 ? '+' : '';
-      return `${sign}${change}% change in 30 days`;
+      return `${sign}${change}%`;
     };
+    const secondaryText = 'change in 30 days';
 
     return [
       {
@@ -64,10 +57,8 @@ export function useDashboardTopInfoRight() {
         currency: currency(totalInvestedMain.value, 0),
         coin: totalInvestedCoins.value,
         change: totalInvestedChange.value,
-        changeClass: [totalInvestedClass.value, { 'is--show': showChange.value }],
-        changeText: isLoading.value || !showChange.value
-          ? undefined
-          : formatChangeText(totalInvestedChange.value),
+        secondaryText: showChange.value && !isLoading.value ? secondaryText : undefined,
+        secondaryValue: showChange.value && !isLoading.value ? formatChangeValue(totalInvestedChange.value) : undefined,
       },
       {
         id: 2,
@@ -75,10 +66,10 @@ export function useDashboardTopInfoRight() {
         currency: currency(totalDistributionsMain.value, 0),
         coin: totalDistributionsCoins.value,
         change: totalDistributionsChange.value,
-        changeClass: [totalDistributionsClass.value, { 'is--show': showChange.value }],
-        changeText: isLoading.value || !showChange.value
-          ? undefined
-          : formatChangeText(totalDistributionsChange.value),
+        secondaryText: showChange.value && !isLoading.value ? secondaryText : undefined,
+        secondaryValue: showChange.value && !isLoading.value
+          ? formatChangeValue(totalDistributionsChange.value)
+          : undefined,
       },
     ];
   });

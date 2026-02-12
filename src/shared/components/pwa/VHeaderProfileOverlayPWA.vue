@@ -68,45 +68,75 @@ defineEmits<{
                 :href="mfaHref"
                 class="v-header-profile-pwa__overlay-item"
               >
-                <UserIcon class="v-header-profile-pwa__overlay-icon" aria-hidden="true" />
+                <UserIcon
+                  class="v-header-profile-pwa__overlay-icon"
+                  aria-hidden="true"
+                />
                 <span>MFA &amp; Password</span>
-                <ArrowRight class="v-header-profile-pwa__overlay-chevron" aria-hidden="true" />
+                <ArrowRight
+                  class="v-header-profile-pwa__overlay-chevron"
+                  aria-hidden="true"
+                />
               </a>
               <a
                 v-if="securityHref"
                 :href="securityHref"
                 class="v-header-profile-pwa__overlay-item"
               >
-                <GearIcon class="v-header-profile-pwa__overlay-icon" aria-hidden="true" />
+                <GearIcon
+                  class="v-header-profile-pwa__overlay-icon"
+                  aria-hidden="true"
+                />
                 <span>Account Security</span>
-                <ArrowRight class="v-header-profile-pwa__overlay-chevron" aria-hidden="true" />
+                <ArrowRight
+                  class="v-header-profile-pwa__overlay-chevron"
+                  aria-hidden="true"
+                />
               </a>
               <a
                 v-if="helpHref"
                 :href="helpHref"
                 class="v-header-profile-pwa__overlay-item"
               >
-                <HelpIcon class="v-header-profile-pwa__overlay-icon" aria-hidden="true" />
+                <HelpIcon
+                  class="v-header-profile-pwa__overlay-icon"
+                  aria-hidden="true"
+                />
                 <span>Help Center</span>
-                <ArrowRight class="v-header-profile-pwa__overlay-chevron" aria-hidden="true" />
+                <ArrowRight
+                  class="v-header-profile-pwa__overlay-chevron"
+                  aria-hidden="true"
+                />
               </a>
               <a
                 v-if="contactHref"
                 :href="contactHref"
                 class="v-header-profile-pwa__overlay-item"
               >
-                <FaqIcon class="v-header-profile-pwa__overlay-icon" aria-hidden="true" />
+                <FaqIcon
+                  class="v-header-profile-pwa__overlay-icon"
+                  aria-hidden="true"
+                />
                 <span>Contact Us</span>
-                <ArrowRight class="v-header-profile-pwa__overlay-chevron" aria-hidden="true" />
+                <ArrowRight
+                  class="v-header-profile-pwa__overlay-chevron"
+                  aria-hidden="true"
+                />
               </a>
               <button
                 type="button"
                 class="v-header-profile-pwa__overlay-item v-header-profile-pwa__overlay-item--logout"
                 @click="$emit('logout')"
               >
-                <LogoutIcon class="v-header-profile-pwa__overlay-icon" aria-hidden="true" />
+                <LogoutIcon
+                  class="v-header-profile-pwa__overlay-icon"
+                  aria-hidden="true"
+                />
                 <span>Log Out</span>
-                <ArrowRight class="v-header-profile-pwa__overlay-chevron" aria-hidden="true" />
+                <ArrowRight
+                  class="v-header-profile-pwa__overlay-chevron"
+                  aria-hidden="true"
+                />
               </button>
             </div>
           </div>

@@ -40,6 +40,7 @@ export interface IEvmWalletBalances {
   name?: string;
   icon?: string;
   price_per_usd?: number;
+  tokenValue?: string;
 }
 
 export interface IEvmWalletDataResponse {
@@ -68,8 +69,11 @@ export interface IEvmWalletDataFormatted extends Omit<IEvmWalletDataResponse, 'b
   currentBalance: number;
   totalBalance: number;
   fundingBalance: number;
+  rwaValue: number;
   pendingIncomingBalance: number;
   pendingOutcomingBalance: number;
+  cryptoChangeFormatted?: string;
+  rwaChangeFormatted?: string;
   formattedTransactions: IEvmTransactionDataFormatted[];
 }
 
@@ -86,6 +90,7 @@ export interface IEvmTransactionDataResponse {
   investment_id: number | null;
   type: EvmTransactionTypes;
   amount: string;
+  ticker?: string;
   symbol?: string;
   name?: string;
   icon?: string;
@@ -121,6 +126,12 @@ export interface IEvmTransactionDataFormatted extends IEvmTransactionDataRespons
   amountFormatted: string;
   networkFormatted: string;
   tagColor?: string;
+
+  // Display helpers for UI
+  txShort: string;
+  typeDisplay: string;
+  description: string;
+  scanTxUrl: string;
 }
 
 export interface IEvmWithdrawRequestBody {
