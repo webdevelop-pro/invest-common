@@ -51,6 +51,7 @@ const {
     />
 
     <DashboardWalletHeader
+      v-if="showTable"
       :amount="totalBalanceMainFormatted"
       :coin="totalBalanceCoins"
       :loading="isWalletDataLoading"
@@ -72,6 +73,7 @@ const {
         <DashboardWalletTabs
           v-model:active-tab="activeTab"
           :holdings-tab="HOLDINGS_TAB"
+          :loading="isWalletDataLoading"
           :transactions-tab="TRANSACTIONS_TAB"
           :holdings-table="holdingsTable"
           :transactions-table="transactionsTable"

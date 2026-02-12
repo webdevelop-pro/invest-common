@@ -81,9 +81,10 @@ onMounted(() => {
 <template>
   <div class="DashboardEarn dashboard-earn">
     <DashboardTabsTopInfo
+      v-if="isTopTextShow"
       :title="EARN_TAB_INFO.title"
       :sub-title="EARN_TAB_INFO.subTitle"
-      :text="isTopTextShow ? EARN_TAB_INFO.text : undefined"
+      :text="EARN_TAB_INFO.text"
     />
     <VAlert
       v-if="isAlertShow"
@@ -181,6 +182,10 @@ onMounted(() => {
     margin-bottom: 0;
   }
 
+  &__alert {
+    margin-bottom: 0 !important;
+  }
+
   &__sentinel {
     height: 1px;
     width: 100%;
@@ -193,10 +198,6 @@ onMounted(() => {
 
   .v-table-head:last-of-type {
     text-align: right;
-  }
-
-  &__alert {
-    margin-bottom: 40px !important;
   }
 }
 </style>

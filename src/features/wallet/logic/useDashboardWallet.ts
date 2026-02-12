@@ -26,6 +26,8 @@ const VALID_TRANSACTION_QUERY = [
   EvmTransactionTypes.exchange,
 ];
 
+const ADD_TRANSACTION_QUERY_KEY = 'add-transaction';
+
 export const EVM_WALLET_TAB_INFO = {
   title: 'Crypto Wallet',
   text: 'View and manage your crypto assets.',
@@ -48,10 +50,16 @@ export function useDashboardWallet() {
 
   const isDialogTransactionOpen = ref(false);
   const transactionType = ref<EvmTransactionTypes>(EvmTransactionTypes.deposit);
-  const queryVal = route.query['add-transaction'];
-  const queryType = (Array.isArray(queryVal) ? queryVal[0] : queryVal) as string | undefined;
-  if (queryType && VALID_TRANSACTION_QUERY.includes(queryType as EvmTransactionTypes)) {
-    transactionType.value = queryType as EvmTransactionTypes;
+  const transactionQueryFromUrl =
+    typeof window !== 'undefined'
+      ? new URLSearchParams(window.location.search).get(ADD_TRANSACTION_QUERY_KEY) ?? undefined
+      : undefined;
+
+  if (
+    typeof transactionQueryFromUrl === 'string' &&
+    VALID_TRANSACTION_QUERY.includes(transactionQueryFromUrl as EvmTransactionTypes)
+  ) {
+    transactionType.value = transactionQueryFromUrl as EvmTransactionTypes;
     isDialogTransactionOpen.value = true;
   }
 

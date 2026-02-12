@@ -4,6 +4,7 @@ import { ref } from 'vue';
 
 const getWalletStateRef = ref({
   data: {
+    id: 1,
     isWalletStatusAnyError: false,
     isWalletStatusCreated: false,
     isWalletStatusVerified: true,
@@ -73,6 +74,7 @@ describe('useWalletAlert', () => {
     setActivePinia(createPinia());
     getWalletStateRef.value = {
       data: {
+        id: 1,
         isWalletStatusAnyError: false,
         isWalletStatusCreated: false,
         isWalletStatusVerified: true,

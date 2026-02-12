@@ -82,9 +82,9 @@ describe('useVFormWithdraw', () => {
     expect(api.maxFiatAmount.value).toBe(5000);
   });
 
-  it('defaults withdrawalMethod to crypto', () => {
+  it('defaults withdrawalMethod to fiat', () => {
     const api = useVFormWithdraw(onClose);
-    expect(api.withdrawalMethod.value).toBe('crypto');
+    expect(api.withdrawalMethod.value).toBe('fiat');
   });
 
   it('fundingSourceFormatted maps wallet funding_source', () => {

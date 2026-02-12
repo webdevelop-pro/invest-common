@@ -116,7 +116,7 @@ describe('useWallet', () => {
   });
 
   it('exposes isWalletDataLoading that reflects combined wallet loading state', () => {
-    // initial state: both repositories not loading
+    // initial state: both repositories not loading, data present
     let api = useWallet();
     expect(api.isWalletDataLoading.value).toBe(false);
 
@@ -140,10 +140,46 @@ describe('useWallet', () => {
     api = useWallet();
     expect(api.isWalletDataLoading.value).toBe(true);
 
-    // both not loading
+    // both not loading and both have data
     getEvmWalletStateRef.value = {
       ...getEvmWalletStateRef.value,
       loading: false,
+    };
+    api = useWallet();
+    expect(api.isWalletDataLoading.value).toBe(false);
+  });
+
+  it('treats missing fiat or evm data as loading when it can be loaded and there is no error', () => {
+    // reset to baseline: no loading, both have data
+    getWalletStateRef.value = { data: { ...mockFiatWallet }, loading: false, error: null };
+    getEvmWalletStateRef.value = { data: { ...mockEvmWallet }, loading: false, error: null };
+    let api = useWallet();
+    expect(api.isWalletDataLoading.value).toBe(false);
+
+    // no fiat data, canLoadWalletData is true (from mock), no error -> should be treated as loading
+    getWalletStateRef.value = {
+      data: undefined,
+      loading: false,
+      error: null,
+    };
+    api = useWallet();
+    expect(api.isWalletDataLoading.value).toBe(true);
+
+    // no evm data, canLoadEvmWalletData is true (from mock), no error -> should be treated as loading
+    getWalletStateRef.value = { data: { ...mockFiatWallet }, loading: false, error: null };
+    getEvmWalletStateRef.value = {
+      data: undefined,
+      loading: false,
+      error: null,
+    };
+    api = useWallet();
+    expect(api.isWalletDataLoading.value).toBe(true);
+
+    // if missing evm data but there is an error, we should not treat it as loading
+    getEvmWalletStateRef.value = {
+      data: undefined,
+      loading: false,
+      error: new Error('failed'),
     };
     api = useWallet();
     expect(api.isWalletDataLoading.value).toBe(false);

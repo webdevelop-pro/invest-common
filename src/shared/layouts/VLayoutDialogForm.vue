@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 
-const props = defineProps<{
+defineProps<{
   primaryLabel: string;
   cancelLabel?: string;
   disabled?: boolean;

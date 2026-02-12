@@ -9,14 +9,12 @@ const emit = defineEmits(['close']);
 
 const {
   withdrawalMethod,
-  hasCryptoBalance,
   withdrawalMethodOptions,
   fiatModel,
   fundingSourceFormatted,
   isFiatSubmitDisabled,
   fiatSubmitHandler,
   addTransactionState,
-  maxFiatAmount,
   maxFiatAmountFormatted,
   numberFormatter,
   model: cryptoModel,
@@ -25,12 +23,8 @@ const {
   fiatErrorData,
   fiatIsFieldRequired,
   fiatGetErrorText,
-  // Crypto validation helpers (keep broad types to match useFormValidation)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   errorData,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   isFieldRequired,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getErrorText,
   withdrawFundsState,
   saveHandler: cryptoSaveHandler,

@@ -8,7 +8,6 @@ import {
 import VFilter from 'UiKit/components/VFilter/VFilter.vue';
 import DashboardWalletTablePanel from 'InvestCommon/features/wallet/components/DashboardWalletTablePanel.vue';
 import { useDashboardWalletTabs, type DashboardWalletTabsProps } from './logic/useDashboardWalletTabs';
-import type { WalletFilterItem } from 'InvestCommon/features/wallet/logic/walletLogic.types';
 
 const props = withDefaults(
   defineProps<DashboardWalletTabsProps>(),
@@ -61,11 +60,17 @@ const { activeTabModel, filterDisabledComputed } = useDashboardWalletTabs(props,
     </div>
 
     <VTabsContent :value="holdingsTab">
-      <DashboardWalletTablePanel :table="holdingsTable" />
+      <DashboardWalletTablePanel
+        :table="holdingsTable"
+        :loading="loading"
+      />
     </VTabsContent>
 
     <VTabsContent :value="transactionsTab">
-      <DashboardWalletTablePanel :table="transactionsTable" />
+      <DashboardWalletTablePanel
+        :table="transactionsTable"
+        :loading="loading"
+      />
     </VTabsContent>
   </VTabs>
 </template>

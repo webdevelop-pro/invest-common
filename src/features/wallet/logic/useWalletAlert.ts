@@ -77,23 +77,40 @@ export function useWalletAlert() {
         !(profile.value?.isKycDeclined ?? false)),
   );
 
+  const hasWallet = computed(
+    () => (getWalletState.value.data?.id ?? 0) > 0 && !isWalletError.value,
+  );
+
   const isBankAccountMissing = computed(
-    () => isKycPassed.value && !hasLinkedBankAccount.value && !isWalletError.value,
+    () =>
+      hasWallet.value &&
+      isKycPassed.value &&
+      !hasLinkedBankAccount.value &&
+      !isWalletError.value,
+  );
+
+  const isDataLoading = computed(
+    () =>
+      getProfileByIdState.value.loading ||
+      getWalletState.value.loading ||
+      getEvmWalletState.value.loading,
   );
 
   const isAlertShow = computed(
     () =>
+      !isDataLoading.value &&
       (hasRestrictedWallet.value ||
         isKYCNeedToPass.value ||
         isKYCInProgress.value ||
         isWalletCreated.value ||
         isBankAccountMissing.value ||
-        isError.value) &&
-      !getProfileByIdState.value.loading,
+        isError.value),
   );
-  const isAlertType = computed(() =>
-    isWalletCreated.value || isBankAccountMissing.value ? 'info' : 'error',
-  );
+  const isAlertType = computed(() => {
+    if (isError.value) return 'error';
+    if (isWalletCreated.value || isBankAccountMissing.value) return 'info';
+    return 'error';
+  });
   const isAlertText = computed(() => {
     if (isError.value) return CONTACT_US_MSG;
     if (isWalletCreated.value) return WALLET_CREATING_MSG;

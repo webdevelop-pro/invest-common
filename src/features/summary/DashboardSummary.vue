@@ -37,7 +37,6 @@ const {
   balanceCards,
   holdingsTable,
   isWalletDataLoading,
-  showTable,
 } = useDashboardWallet();
 
 const { isTablet } = useBreakpoints();
@@ -161,7 +160,6 @@ const { sliderData: dashboardTopInfoData, isLoading: isDashboardTopInfoLoading }
             :loading="isWalletDataLoading"
           />
           <section
-            v-if="showTable"
             class="dashboard-summary__wallet-tabs"
           >
             <DashboardWalletTablePanel :table="holdingsTable" />

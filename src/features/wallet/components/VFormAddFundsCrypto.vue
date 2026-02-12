@@ -54,8 +54,8 @@ const emit = defineEmits<{
       <div class="v-form-add-funds-crypto__content">
         <VSkeleton
           v-if="isGeneratingQR"
-          height="200px"
-          width="200px"
+          height="150px"
+          width="150px"
           class="v-form-add-funds-crypto__skeleton"
         />
         <VImage

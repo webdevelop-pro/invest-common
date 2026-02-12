@@ -57,9 +57,36 @@ export function useWallet() {
   const totalBalanceMainFormatted = computed(() => totalParts.value.mainFormatted);
   const totalBalanceCoins = computed(() => totalParts.value.coins);
 
-  const isWalletDataLoading = computed(
-    () => getWalletState.value.loading || getEvmWalletState.value.loading,
-  );
+  const hasFiatWalletData = computed(() => !!getWalletState.value.data);
+  const hasEvmWalletData = computed(() => !!getEvmWalletState.value.data);
+
+  const isWalletDataLoading = computed(() => {
+    // Explicit loading flags from repositories
+    if (getWalletState.value.loading || getEvmWalletState.value.loading) {
+      return true;
+    }
+
+    // If we don't yet have fiat data but are allowed to load it (and no error),
+    // treat this as loading so the UI shows skeleton instead of an empty state.
+    if (
+      !hasFiatWalletData.value &&
+      canLoadWalletData.value &&
+      !getWalletState.value.error
+    ) {
+      return true;
+    }
+
+    // Same for EVM wallet: no data yet, but can load and no error → show skeleton.
+    if (
+      !hasEvmWalletData.value &&
+      canLoadEvmWalletData.value &&
+      !getEvmWalletState.value.error
+    ) {
+      return true;
+    }
+
+    return false;
+  });
 
   const updateWalletData = async () => {
     if (canLoadWalletData.value && !getWalletState.value.loading && !getWalletState.value.error) {

@@ -12,7 +12,7 @@ import { IEvmExchangeRequestBody, IEvmWalletBalances } from 'InvestCommon/data/e
 
 export function useVFormExchange(
   emitClose?: () => void,
-  defaultBuySymbol?: string,
+  defaultBuySymbol: string = 'USDC',
   poolId?: string,
   profileId?: string | number,
 ) {
