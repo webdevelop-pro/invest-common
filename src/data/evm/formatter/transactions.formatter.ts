@@ -26,7 +26,7 @@ const getTimeFormat = (fullDate: string) => {
 };
 
 const STATUS_CONFIG = {
-  [EvmTransactionStatusTypes.processed]: { color: 'secondary-light', text: 'Processed' },
+  [EvmTransactionStatusTypes.processed]: { color: 'secondary-light', text: 'Completed' },
   [EvmTransactionStatusTypes.pending]: { color: 'default', text: 'Pending' },
   [EvmTransactionStatusTypes.failed]: { color: 'red-light', text: 'Failed' },
   [EvmTransactionStatusTypes.cancelled]: { color: 'red-light', text: 'Cancelled' },
@@ -84,6 +84,7 @@ export class EvmTransactionFormatter {
   }
 
   get typeDisplay(): string {
+    if (this.data?.type_display) return this.data.type_display;
     if (!this.data?.type) return '';
     switch (this.data.type) {
       case EvmTransactionTypes.deposit:
@@ -98,6 +99,7 @@ export class EvmTransactionFormatter {
   }
 
   get description(): string {
+    if (this.data?.description) return this.data.description;
     const id = this.data?.investment_id;
     const name = this.data?.name ?? '';
     if (this.isTypeDeposit) {

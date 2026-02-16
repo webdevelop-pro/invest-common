@@ -30,23 +30,24 @@ export function useVFormExchange(
     id: item.address,
   });
 
+  const USDC_FALLBACK_ID = '0xe2cCb3fc0153584e5C70c65849078b55597b4032';
+
   const tokenToFormatted = computed(() => {
-    if (defaultBuySymbol) return [{
-      text: defaultBuySymbol,
-      id: '0xe2cCb3fc0153584e5C70c65849078b55597b4032',
-      symbol: defaultBuySymbol,
-      name: defaultBuySymbol
-    }];
     const balances = getEvmWalletState.value.data?.balances || [];
-    const usdcToken = balances.find((item: any) =>
-      item.name?.toLowerCase().includes('usdc')
-    );
-    return usdcToken ? [formatToken(usdcToken)] : [{
-      text: 'USDC',
-      id: '0xe2cCb3fc0153584e5C70c65849078b55597b4032',
-      icon: '/img/tokens/usdc.svg',
-      symbol: 'USDC',
-      name: 'USD Coin'
+    const matchInBalances = (symbol: string) =>
+      balances.find((item: any) =>
+        item.symbol?.toLowerCase() === symbol?.toLowerCase()
+        || item.name?.toLowerCase().includes(symbol?.toLowerCase() ?? '')
+      );
+    const symbol = defaultBuySymbol || 'USDC';
+    const token = matchInBalances(symbol);
+    if (token) return [formatToken(token)];
+    return [{
+      text: symbol,
+      id: USDC_FALLBACK_ID,
+      symbol,
+      name: symbol === 'USDC' ? 'USD Coin' : symbol,
+      ...(symbol === 'USDC' && { icon: '/img/tokens/usdc.svg' }),
     }];
   });
 
@@ -134,6 +135,8 @@ export function useVFormExchange(
     const buyAmount = destinationToken?.price_per_usd
       ? usdcEquivalent / destinationToken.price_per_usd
       : usdcEquivalent;
+
+    // Update Earn mock positions (Earn as bookkeeping of exchange)
     earnRepository.mockExchangePositions({
       profileId,
       fromSymbol,
@@ -143,6 +146,22 @@ export function useVFormExchange(
       toAmount: buyAmount,
     });
     earnRepository.getPositions(poolId, profileId);
+
+    // Mock: keep EVM wallet balances in sync with Earn exchange.
+    // - Decrease from-token balance in wallet
+    // - Increase destination-token balance in wallet
+    evmRepository.applyEarnSupplyToWallet(
+      Number(profileId),
+      fromSymbol,
+      selectedToken.value?.name,
+      fromAmount,
+    );
+    evmRepository.applyEarnWithdrawToWallet(
+      Number(profileId),
+      defaultBuySymbol,
+      destinationToken?.name,
+      buyAmount,
+    );
   };
 
   const saveHandler = async () => {
@@ -152,7 +171,8 @@ export function useVFormExchange(
       return;
     }
     const fromAmount = Number(model.amount);
-    if (defaultBuySymbol) {
+    const isEarnContext = defaultBuySymbol && poolId != null && profileId != null;
+    if (isEarnContext) {
       await handleEarnExchange(fromAmount);
       if (emitClose) emitClose();
       return;

@@ -2,12 +2,14 @@ import { acceptHMRUpdate, defineStore } from 'pinia';
 import { ref } from 'vue';
 import { createActionState } from 'InvestCommon/data/repository/repository';
 import { EarnPositionFormatter, type EarnPositionsResponseFormatted } from './earn.formatter';
+import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
 
 export interface EarnDepositRequest {
   poolId: string;
   profileId: string | number;
   amount: number;
   symbol?: string;
+  name?: string;
 }
 
 export interface EarnDepositResponse {
@@ -23,6 +25,7 @@ export interface EarnWithdrawRequest {
   profileId: string | number;
   amount: number;
   symbol?: string;
+  name?: string;
 }
 
 export interface EarnWithdrawResponse {
@@ -47,6 +50,7 @@ export interface EarnPositionsResponse {
   poolId: string;
   profileId: string | number;
   symbol: string;
+  name?: string;
   stakedAmountUsd: number;
   earnedAmountUsd: number;
   transactions: EarnPositionTransaction[];
@@ -117,7 +121,7 @@ export const useRepositoryEarn = defineStore('repository-earn', () => {
       const list = positionsPools.value;
       const index = list.findIndex(
         (p: EarnPositionsResponse) =>
-          p.poolId === payload.poolId && p.profileId === payload.profileId,
+          p.poolId === payload.poolId && p.profileId === payload.profileId || p.name === payload.name,
       );
 
       const now = new Date();
@@ -133,6 +137,7 @@ export const useRepositoryEarn = defineStore('repository-earn', () => {
 
       const updatedList = [...list];
       const symbol = payload.symbol || 'USDC';
+      const name = payload.name;
 
       if (index !== -1) {
         // Update existing position
@@ -143,6 +148,7 @@ export const useRepositoryEarn = defineStore('repository-earn', () => {
         updatedList[index] = {
           ...existing,
           symbol: payload.symbol || existing.symbol || symbol,
+          name: name || existing.name,
           stakedAmountUsd: newStakedAmount,
           earnedAmountUsd: Number((newStakedAmount * EARN_RATE).toFixed(2)),
           availableAmountUsd: Math.max(0, currentAvailable - payload.amount),
@@ -154,6 +160,7 @@ export const useRepositoryEarn = defineStore('repository-earn', () => {
           poolId: payload.poolId,
           profileId: payload.profileId,
           symbol,
+          name,
           stakedAmountUsd: payload.amount,
           earnedAmountUsd: Number((payload.amount * EARN_RATE).toFixed(2)),
           availableAmountUsd: 0,
@@ -162,6 +169,16 @@ export const useRepositoryEarn = defineStore('repository-earn', () => {
       }
 
       positionsPools.value = updatedList;
+
+      // Sync EVM wallet balances from positionsPools (single source of truth)
+      if (payload.symbol) {
+        useRepositoryEvm().applyEarnSupplyToWallet(
+          Number(payload.profileId),
+          symbol,
+          name,
+          payload.amount,
+        );
+      }
 
       return mockResponse;
     } catch (err) {
@@ -215,6 +232,7 @@ export const useRepositoryEarn = defineStore('repository-earn', () => {
 
       const updatedList = [...list];
       const symbol = payload.symbol || 'USDC';
+      const name = payload.name;
 
       if (index !== -1) {
         const existing = list[index];
@@ -224,6 +242,7 @@ export const useRepositoryEarn = defineStore('repository-earn', () => {
         updatedList[index] = {
           ...existing,
           symbol: payload.symbol || existing.symbol || symbol,
+          name: name || existing.name,
           stakedAmountUsd: newStakedAmount,
           earnedAmountUsd: Number((newStakedAmount * EARN_RATE).toFixed(2)),
           availableAmountUsd: currentAvailable + payload.amount,
@@ -235,6 +254,7 @@ export const useRepositoryEarn = defineStore('repository-earn', () => {
           poolId: payload.poolId,
           profileId: payload.profileId,
           symbol,
+          name,
           stakedAmountUsd: 0,
           earnedAmountUsd: 0,
           availableAmountUsd: payload.amount,
@@ -243,6 +263,16 @@ export const useRepositoryEarn = defineStore('repository-earn', () => {
       }
 
       positionsPools.value = updatedList;
+
+      // Sync EVM wallet balances from positionsPools (single source of truth)
+      if (symbol) {
+        useRepositoryEvm().applyEarnWithdrawToWallet(
+          Number(payload.profileId),
+          symbol,
+          name,
+          payload.amount,
+        );
+      }
 
       return mockResponse;
     } catch (err) {
@@ -374,12 +404,14 @@ export const useRepositoryEarn = defineStore('repository-earn', () => {
   };
 
   /**
-   * Add an approval transaction for the given position without changing balances
+   * Add an approval transaction for the given position without changing balances.
+   * Optionally persists a human-readable token name on the position.
    */
   const mockApprovalTransaction = (payload: {
     profileId: string | number;
     poolId: string;
     symbol: string;
+    name?: string;
   }) => {
     const updatedList: EarnPositionsResponse[] = [...positionsPools.value];
     const approvalTx = createApprovalTransaction();
@@ -392,6 +424,8 @@ export const useRepositoryEarn = defineStore('repository-earn', () => {
       const existing = updatedList[index];
       updatedList[index] = {
         ...existing,
+        // Preserve existing name, but allow payload.name to set it if missing
+        name: existing.name ?? payload.name,
         transactions: [approvalTx, ...existing.transactions],
       };
     } else {
@@ -399,6 +433,7 @@ export const useRepositoryEarn = defineStore('repository-earn', () => {
         poolId: payload.poolId,
         profileId: payload.profileId,
         symbol: payload.symbol,
+        name: payload.name,
         stakedAmountUsd: 0,
         earnedAmountUsd: 0,
         availableAmountUsd: 0,

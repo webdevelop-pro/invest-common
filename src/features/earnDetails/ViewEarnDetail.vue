@@ -1,9 +1,9 @@
 <script setup lang="ts">
+import { computed, PropType } from 'vue';
+import { storeToRefs } from 'pinia';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import { DashboardEarnTabTypes } from './utils';
 import VBreadcrumbs from 'UiKit/components/VBreadcrumb/VBreadcrumbsList.vue';
-import { PropType } from 'vue';
-import { storeToRefs } from 'pinia';
 import VPageTopInfoAndTabs from 'InvestCommon/shared/components/VPageTopInfoAndTabs.vue';
 import { VTabsContent } from 'UiKit/components/Base/VTabs';
 import EarnTopInfo from './components/EarnTopInfo.vue';
@@ -13,6 +13,7 @@ import EarnRisk from './components/EarnRisk.vue';
 import { useEarnDetail } from './useEarnDetail';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import VDialogWallet from 'InvestCommon/features/wallet/components/VDialogWallet.vue';
+import { urlOfferSingle } from 'InvestCommon/domain/config/links';
 
 defineProps({
   tab: {
@@ -36,7 +37,6 @@ const {
   loading,
   topInfoData,
   formattedRiskData,
-  riskLoading,
   ratingColorToCssColor,
   onBackClick,
   coinBalance,
@@ -50,11 +50,18 @@ const {
   breadcrumbs,
   tabs,
   getEvmWalletState,
+  isRwaPool,
+  rwaOfferSlug,
 } = useEarnDetail();
+
+const investUrl = computed(() =>
+  isRwaPool.value && rwaOfferSlug.value
+    ? urlOfferSingle(rwaOfferSlug.value)
+    : undefined,
+);
 </script>
 
 <template>
-  {{ tab }}
   <VPageTopInfoAndTabs
     :tab="tab"
     :tabs="tabs"
@@ -68,6 +75,8 @@ const {
         :profile-id="selectedUserProfileId"
         :coin-balance="coinBalance"
         :wallet-loading="walletLoading"
+        :is-rwa="isRwaPool"
+        :invest-url="investUrl"
         @back-click="onBackClick"
         @exchange-click="onExchangeClick"
       />
@@ -97,7 +106,7 @@ const {
       >
         <EarnRisk
           :formatted-risk-data="formattedRiskData"
-          :loading="riskLoading"
+          :loading="false"
           :rating-color-to-css-color="ratingColorToCssColor"
         />
       </VTabsContent>

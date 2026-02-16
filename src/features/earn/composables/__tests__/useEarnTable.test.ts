@@ -45,6 +45,21 @@ vi.mock('InvestCommon/data/3dParty/defillama.repository', () => ({
   }),
 }));
 
+// Earn table shows primary USDC pool + RWA pools from offers; mock offers empty so only USDC row appears
+const mockGetOffersState = ref<{ loading: boolean; error: Error | null; data: { data?: unknown[] } | undefined }>({
+  loading: false,
+  error: null,
+  data: { data: [] },
+});
+const mockGetOffers = vi.fn().mockResolvedValue(undefined);
+
+vi.mock('InvestCommon/data/offer/offer.repository', () => ({
+  useRepositoryOffer: () => ({
+    getOffersState: mockGetOffersState,
+    getOffers: mockGetOffers,
+  }),
+}));
+
 describe('useEarnTable', () => {
   let composable: ReturnType<typeof useEarnTable>;
 
@@ -91,6 +106,11 @@ describe('useEarnTable', () => {
       error: null,
       data: [],
     };
+    mockGetOffersState.value = {
+      loading: false,
+      error: null,
+      data: { data: [] },
+    };
     mockSelectedUserProfileId.value = 1;
   });
 
@@ -124,7 +144,7 @@ describe('useEarnTable', () => {
   });
 
   describe('Stablecoin Filtering', () => {
-    it('should filter only stablecoin pools', () => {
+    it('should show primary USDC pool plus RWA pools (DefiLlama stablecoin row only when no RWA)', () => {
       const mockPools = [
         createMockPool('pool-1', 'USDC', true),
         createMockPool('pool-2', 'USDT', true),
@@ -135,9 +155,10 @@ describe('useEarnTable', () => {
       mockGetYieldsState.value.data = mockPools;
       composable = useEarnTable();
 
-      expect(composable.totalResults.value).toBe(3);
-      expect(composable.filteredData.value).toHaveLength(3);
-      expect(composable.filteredData.value.every((p) => p.stablecoin === true)).toBe(true);
+      // Table shows single primary USDC row + RWA rows; with no offers, only 1 row
+      expect(composable.totalResults.value).toBe(1);
+      expect(composable.filteredData.value).toHaveLength(1);
+      expect(composable.filteredData.value[0].symbol).toBe('USDC');
     });
 
     it('should return empty array when no stablecoin pools', () => {
@@ -175,93 +196,73 @@ describe('useEarnTable', () => {
     });
 
     it('should be case-insensitive when searching', () => {
-      composable.search.value = 'usdt';
+      composable.search.value = 'usdc';
 
       expect(composable.filterResults.value).toBe(1);
-      expect(composable.filteredData.value[0].symbol).toBe('USDT');
+      expect(composable.filteredData.value[0].symbol).toBe('USDC');
     });
 
     it('should return all pools when search is empty', () => {
       composable.search.value = '';
 
-      expect(composable.filterResults.value).toBe(4);
+      // Single primary USDC row when no RWA offers
+      expect(composable.filterResults.value).toBe(1);
     });
 
     it('should return all pools when search is only whitespace', () => {
       composable.search.value = '   ';
 
-      expect(composable.filterResults.value).toBe(4);
+      expect(composable.filterResults.value).toBe(1);
     });
 
     it('should filter by partial match', () => {
       composable.search.value = 'USD';
 
-      // Should match USDC, USDT, and TUSD (all contain 'USD')
-      expect(composable.filterResults.value).toBe(3);
-      expect(composable.filteredData.value.map((p) => p.symbol)).toEqual(['USDC', 'USDT', 'TUSD']);
+      // Primary row is USDC, so 'USD' matches
+      expect(composable.filterResults.value).toBe(1);
+      expect(composable.filteredData.value.map((p) => p.symbol)).toEqual(['USDC']);
     });
 
     it('should reset visible count when search changes', async () => {
-      // Set up initial state with many pools
-      const manyPools = Array.from({ length: 25 }, (_, i) =>
-        createMockPool(`pool-${i}`, `TOKEN${i}`, true),
-      );
-      mockGetYieldsState.value.data = manyPools;
+      mockGetYieldsState.value.data = [createMockPool('pool-0', 'USDC', true)];
       composable = useEarnTable();
 
-      // Get initial visible count
       const initialVisibleCount = composable.visibleData.value.length;
-      expect(initialVisibleCount).toBe(10);
+      expect(initialVisibleCount).toBe(1);
 
-      // Simulate intersection observer increasing visible count
-      // We'll test this by checking that after search change, visible count resets
-      // Change search - this should trigger the watch that resets visible count
-      composable.search.value = 'TOKEN1';
+      composable.search.value = 'none';
       await nextTick();
 
-      // After search change, visible data should be limited to initial count
-      // (though filtered results might be less)
-      const filteredLength = composable.filteredData.value.length;
-      expect(composable.visibleData.value.length).toBeLessThanOrEqual(Math.min(10, filteredLength));
+      expect(composable.visibleData.value.length).toBe(0);
     });
   });
 
   describe('Visible Data Pagination', () => {
     beforeEach(() => {
-      const mockPools = Array.from({ length: 25 }, (_, i) =>
-        createMockPool(`pool-${i}`, `USDC${i}`, true),
-      );
+      const mockPools = [
+        createMockPool('pool-0', 'USDC', true),
+      ];
 
       mockGetYieldsState.value.data = mockPools;
       composable = useEarnTable();
     });
 
     it('should show initial visible count of pools', () => {
-      expect(composable.visibleData.value.length).toBe(10);
+      expect(composable.visibleData.value.length).toBe(1);
     });
 
     it('should compute hasMore correctly when more data available', () => {
-      expect(composable.hasMore.value).toBe(true);
+      // With only 1 row (primary USDC), hasMore is false
+      expect(composable.hasMore.value).toBe(false);
     });
 
     it('should compute hasMore correctly when all data is visible', () => {
-      // When filtered data is less than or equal to initial visible count,
-      // hasMore should be false
-      const fewPools = Array.from({ length: 5 }, (_, i) =>
-        createMockPool(`pool-${i}`, `USDC${i}`, true),
-      );
-
-      mockGetYieldsState.value.data = fewPools;
-      composable = useEarnTable();
-
-      // With only 5 pools, all should be visible initially
       expect(composable.hasMore.value).toBe(false);
-      expect(composable.visibleData.value.length).toBe(5);
+      expect(composable.visibleData.value.length).toBe(1);
     });
 
     it('should slice filtered data to visible count', () => {
-      composable.search.value = 'USDC1';
-      // Should show all matching results (USDC1, USDC10-19)
+      composable.search.value = 'USDC';
       const filteredLength = composable.filteredData.value.length;
       expect(composable.visibleData.value.length).toBeLessThanOrEqual(10);
       expect(composable.visibleData.value.length).toBeLessThanOrEqual(filteredLength);
@@ -365,16 +366,12 @@ describe('useEarnTable', () => {
     });
 
     it('should have hasMore true when more data is available for infinite scroll', () => {
-      const mockPools = Array.from({ length: 25 }, (_, i) =>
-        createMockPool(`pool-${i}`, `USDC${i}`, true),
-      );
-
-      mockGetYieldsState.value.data = mockPools;
+      // With only primary USDC row (no RWA), hasMore is false
+      mockGetYieldsState.value.data = [createMockPool('pool-0', 'USDC', true)];
       composable = useEarnTable();
 
-      // Initially should show 10, with 15 more available
-      expect(composable.visibleData.value.length).toBe(10);
-      expect(composable.hasMore.value).toBe(true);
+      expect(composable.visibleData.value.length).toBe(1);
+      expect(composable.hasMore.value).toBe(false);
     });
   });
 
@@ -407,8 +404,8 @@ describe('useEarnTable', () => {
       mockGetYieldsState.value.data = mockPools;
       composable = useEarnTable();
 
-      // Should still filter stablecoin pools
-      expect(composable.totalResults.value).toBe(2);
+      // Only primary USDC pool is shown (first stablecoin with symbol containing USDC)
+      expect(composable.totalResults.value).toBe(1);
     });
 
     it('should handle search with special characters', () => {

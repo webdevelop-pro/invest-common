@@ -6,6 +6,8 @@ export interface DefiLlamaYieldPoolFormatted extends DefiLlamaYieldPool {
   apyBaseFormatted: string;
   apyRewardFormatted: string;
   apyMean30dFormatted: string;
+  isRwa?: boolean;
+  offerSlug?: string;
 }
 
 export class DefiLlamaYieldsFormatter {

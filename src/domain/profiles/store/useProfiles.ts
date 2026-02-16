@@ -128,11 +128,17 @@ export const useProfilesStore = defineStore('profiles', () => {
     
     if (id === 0) return;
     
-    // Save to cookies
+    // Save to cookies - use session expires_at when valid, otherwise fallback to 1 year
+    const expiresAt = userSession.value?.expires_at;
+    const expireDate = expiresAt ? new Date(expiresAt) : null;
+    const validExpireDate = (expireDate && !Number.isNaN(expireDate.getTime()))
+      ? expireDate
+      : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000); // 1 year from now
+
     cookies.set(
       'selectedUserProfileId',
       id,
-      cookiesOptions(new Date(userSession.value?.expires_at)),
+      cookiesOptions(validExpireDate),
     );
   };
 

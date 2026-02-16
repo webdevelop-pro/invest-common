@@ -164,15 +164,11 @@ describe('useEarnDetail', () => {
       expect(composable.error.value).toBe(error);
     });
 
-    it('should compute riskLoading from risk state', () => {
-      mockDefiLlamaRepo.getPoolRiskState.value.loading = true;
-      composable = useEarnDetail();
-      
-      expect(composable.riskLoading.value).toBe(true);
-    });
-
-    it('should compute walletLoading from positions state', () => {
-      mockEarnRepo.positionsState.value.loading = true;
+    it('should compute walletLoading from EVM wallet state (for Available Balance)', () => {
+      mockEvmRepo.getEvmWalletState.value = {
+        ...mockEvmRepo.getEvmWalletState.value,
+        loading: true,
+      };
       composable = useEarnDetail();
       
       expect(composable.walletLoading.value).toBe(true);
@@ -187,12 +183,56 @@ describe('useEarnDetail', () => {
   });
 
   describe('Coin Balance', () => {
-    it('should compute coinBalance from positionsPools', () => {
+    it('should compute coinBalance from crypto wallet balances when available', () => {
       const mockPool = {
         pool: 'pool-123',
         symbol: 'USDC',
       };
       mockDefiLlamaRepo.getYieldsState.value.data = [mockPool];
+
+      mockEvmRepo.getEvmWalletState.value = {
+        loading: false,
+        error: null,
+        data: {
+          balances: [
+            {
+              id: 1,
+              address: '0xusdc',
+              amount: 750,
+              symbol: 'USDC',
+              name: 'USD Coin',
+            },
+          ],
+        } as any,
+      };
+      
+      composable = useEarnDetail();
+      
+      expect(composable.coinBalance.value).toBe(750);
+    });
+
+    it('should fallback to positionsPools when wallet has no matching token', () => {
+      const mockPool = {
+        pool: 'pool-123',
+        symbol: 'USDC',
+      };
+      mockDefiLlamaRepo.getYieldsState.value.data = [mockPool];
+
+      mockEvmRepo.getEvmWalletState.value = {
+        loading: false,
+        error: null,
+        data: {
+          balances: [
+            {
+              id: 1,
+              address: '0xeth',
+              amount: 1000,
+              symbol: 'ETH',
+              name: 'Ether',
+            },
+          ],
+        } as any,
+      };
       
       mockEarnRepo.positionsPools.value = [
         {
@@ -208,6 +248,7 @@ describe('useEarnDetail', () => {
       
       composable = useEarnDetail();
       
+      // Prefer availableAmountUsd when set, else stakedAmountUsd
       expect(composable.coinBalance.value).toBe(500);
     });
 
@@ -217,6 +258,14 @@ describe('useEarnDetail', () => {
         symbol: 'USDC',
       };
       mockDefiLlamaRepo.getYieldsState.value.data = [mockPool];
+
+      mockEvmRepo.getEvmWalletState.value = {
+        loading: false,
+        error: null,
+        data: {
+          balances: [],
+        } as any,
+      };
       
       mockEarnRepo.positionsPools.value = [
         {
@@ -234,12 +283,20 @@ describe('useEarnDetail', () => {
       expect(composable.coinBalance.value).toBe(1000);
     });
 
-    it('should return undefined when no position exists', () => {
+    it('should return undefined when no wallet balance or position exists', () => {
       const mockPool = {
         pool: 'pool-123',
         symbol: 'USDC',
       };
       mockDefiLlamaRepo.getYieldsState.value.data = [mockPool];
+
+      mockEvmRepo.getEvmWalletState.value = {
+        loading: false,
+        error: null,
+        data: {
+          balances: [],
+        } as any,
+      };
       mockEarnRepo.positionsPools.value = [];
       
       composable = useEarnDetail();
@@ -247,12 +304,20 @@ describe('useEarnDetail', () => {
       expect(composable.coinBalance.value).toBeUndefined();
     });
 
-    it('should match by symbol when poolId does not match', () => {
+    it('should match positions by symbol when poolId does not match and wallet has no matching token', () => {
       const mockPool = {
         pool: 'pool-123',
         symbol: 'USDC',
       };
       mockDefiLlamaRepo.getYieldsState.value.data = [mockPool];
+
+      mockEvmRepo.getEvmWalletState.value = {
+        loading: false,
+        error: null,
+        data: {
+          balances: [],
+        } as any,
+      };
       
       mockEarnRepo.positionsPools.value = [
         {

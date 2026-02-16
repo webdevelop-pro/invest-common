@@ -101,6 +101,10 @@ export interface IEvmTransactionDataResponse {
   created_at: string;
   updated_at: string;
   address?: string;
+  /** Optional display label (e.g. "Supply to Earn") when type alone is not enough */
+  type_display?: string;
+  /** Optional description for UI (e.g. mock Earn transactions) */
+  description?: string;
 }
 
 export interface IEvmTransactionDataFormatted extends IEvmTransactionDataResponse {

@@ -116,10 +116,7 @@ const { fullTxOrEntityId } = useVTableWalletTransactionsItem(props.data);
 
   &__date-cell {
     @media screen and (width < $tablet) {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 12px;
+      vertical-align: top;
     }
   }
 

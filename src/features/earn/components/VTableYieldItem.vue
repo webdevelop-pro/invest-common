@@ -18,12 +18,28 @@ const emit = defineEmits<{
   (e: 'row-click', pool: DefiLlamaYieldPoolFormatted): void;
 }>();
 
-type BadgeColor = 'secondary-light' | 'default';
+type BadgeColor = 'secondary-light' | 'purple-light' | 'default';
 
-const badgeConfig = computed<{ color: BadgeColor; text: string }>(() => ({
-  color: (props.data.stablecoin ? 'secondary-light' : 'default') as BadgeColor,
-  text: props.data.stablecoin ? 'Stablecoin' : 'Volatile',
-}));
+const badgeConfig = computed<{ color: BadgeColor; text: string }>(() => {
+  if (props.data.isRwa) {
+    return {
+      color: 'purple-light',
+      text: 'RWA',
+    };
+  }
+
+  if (props.data.stablecoin) {
+    return {
+      color: 'secondary-light',
+      text: 'Stablecoin',
+    };
+  }
+
+  return {
+    color: 'default',
+    text: 'Volatile',
+  };
+});
 
 const handleRowClick = () => {
   emit('row-click', props.data);

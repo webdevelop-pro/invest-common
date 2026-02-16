@@ -37,6 +37,10 @@ interface UseEarnDepositCardOptions {
    * Optional symbol used for repository calls
    */
   symbol?: MaybeRef<string | undefined>;
+  /**
+   * Optional human-readable token/offer name used for repository calls
+   */
+  name?: MaybeRef<string | undefined>;
 }
 
 export function useEarnDepositCard(options: UseEarnDepositCardOptions = {}) {
@@ -48,6 +52,7 @@ export function useEarnDepositCard(options: UseEarnDepositCardOptions = {}) {
   const poolId = computed(() => unref(options.poolId));
   const profileId = computed(() => unref(options.profileId));
   const symbol = computed(() => unref(options.symbol));
+  const name = computed(() => unref(options.name));
 
   const schema = computed(() => ({
     $schema: 'http://json-schema.org/draft-07/schema#',
@@ -137,6 +142,7 @@ export function useEarnDepositCard(options: UseEarnDepositCardOptions = {}) {
           profileId: profileId.value,
           amount,
           symbol: symbol.value,
+          name: name.value,
         });
         // After a successful deposit, refresh positions data for the position tab
         // The deposit function already updated the positions array, so we just need to trigger a refresh
@@ -156,7 +162,7 @@ export function useEarnDepositCard(options: UseEarnDepositCardOptions = {}) {
 
       model.amount = null;
 
-      // Navigate to "your-position" tab; explicitly clear query so tab (and any other) query is removed from URL
+      // Navigate to "your-position" tab (path-based route)
       if (poolId.value && profileId.value != null) {
         await router.push({
           name: ROUTE_EARN_YOUR_POSITION,
@@ -164,7 +170,9 @@ export function useEarnDepositCard(options: UseEarnDepositCardOptions = {}) {
             profileId: String(profileId.value),
             poolId: poolId.value,
           },
-          query: {},
+          query: {
+            tab: 'your-position',
+          },
         });
       }
       nextTick(() => {
@@ -219,6 +227,7 @@ export function useEarnDepositCard(options: UseEarnDepositCardOptions = {}) {
           profileId: profileId.value,
           poolId: poolId.value,
           symbol: symbol.value,
+          name: name.value,
         });
 
         // Refresh positions so "Your Position" tab updates after approval

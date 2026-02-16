@@ -81,6 +81,10 @@ vi.mock('InvestCommon/data/earn/earn.repository', () => ({
   })),
 }));
 
+vi.mock('InvestCommon/data/evm/evm.repository', () => ({
+  useRepositoryEvm: vi.fn(() => ({})),
+}));
+
 describe('useEarnDepositCard', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
@@ -186,6 +190,7 @@ describe('useEarnDepositCard', () => {
         profileId: 1,
         amount: 1000,
         symbol: 'USDC',
+        name: undefined,
       });
     });
 

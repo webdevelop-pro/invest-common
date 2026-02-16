@@ -14,12 +14,16 @@ interface Props {
   profileId?: string | number;
   coinBalance?: number;
   walletLoading?: boolean;
+  isRwa?: boolean;
+  investUrl?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   loading: false,
   infoData: () => [],
   walletLoading: false,
+  isRwa: false,
+  investUrl: undefined,
 });
 
 const emit = defineEmits<{
@@ -115,6 +119,9 @@ const {
         :profile-id="profileId"
         :coin-balance="coinBalance"
         :wallet-loading="walletLoading"
+        :is-rwa="isRwa"
+        :invest-url="investUrl"
+        :name="poolData?.name"
         @exchange-click="emit('exchange-click')"
       />
     </div>

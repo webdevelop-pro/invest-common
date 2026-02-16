@@ -12,14 +12,20 @@ interface Props {
   symbol?: string;
   poolId?: string;
   profileId?: string | number;
+  name?: string;
   coinBalance?: number;
   walletLoading?: boolean;
+  isRwa?: boolean;
+  investUrl?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   loading: false,
   symbol: 'USDC',
+  name: 'USDC',
   walletLoading: false,
+  isRwa: false,
+  investUrl: undefined,
 });
 
 const { poolId, profileId, symbol } = toRefs(props);
@@ -50,6 +56,7 @@ const {
   profileId,
   symbol: computed(() => props.symbol),
   maxAmount: computed(() => props.coinBalance ?? undefined),
+  name: computed(() => props.name),
 });
 
 const onExchangeClick = () => {
@@ -124,14 +131,25 @@ defineExpose({
         </span>
       </div>
       <div class="earn-deposit-card__balance is--small">
-        Don't have enough balance?
-        <a
-          href="#"
-          class="earn-deposit-card__exchange-button is--link-2"
-          @click.prevent="onExchangeClick"
-        >
-          Exchange
-        </a>
+        <template v-if="isRwa && investUrl">
+          Ready to invest?
+          <a
+            :href="investUrl"
+            class="earn-deposit-card__exchange-button is--link-2"
+          >
+            Invest
+          </a>
+        </template>
+        <template v-else>
+          Don't have enough balance?
+          <a
+            href="#"
+            class="earn-deposit-card__exchange-button is--link-2"
+            @click.prevent="onExchangeClick"
+          >
+            Exchange
+          </a>
+        </template>
       </div>
       <VButton
         v-if="!hasApproved"

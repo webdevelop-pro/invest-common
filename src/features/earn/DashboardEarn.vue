@@ -70,7 +70,6 @@ const handleContactUsClick = (event: Event) => {
   }
 };
 
-const isLoading = computed(() => loading.value && visibleData.value.length === 0);
 const showEmptyMessage = computed(() => filterResults.value === 0 && search.value.trim().length > 0);
 
 onMounted(() => {
@@ -130,7 +129,7 @@ onMounted(() => {
       <VTableDefault
         :loading-row-length="10"
         :header="TABLE_HEADERS"
-        :loading="isLoading"
+        :loading="loading"
         :data="visibleData"
         :colspan="TABLE_HEADERS.length"
       >

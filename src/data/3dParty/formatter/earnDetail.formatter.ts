@@ -193,7 +193,7 @@ export class EarnDetailFormatter {
     data.push({ text: '30d Avg APY:', value: poolData.apyMean30dFormatted });
 
     // Type (same as table - Stablecoin/Volatile)
-    data.push({ text: 'Type:', value: poolData.stablecoin ? 'Stablecoin' : 'Volatile' });
+    data.push({ text: 'Type:', value: poolData.stablecoin ? 'Stablecoin' : 'RWA' });
 
     return data;
   }
