@@ -20,6 +20,10 @@ defineProps({
     type: String,
     required: true,
   },
+  hideTabs: {
+    type: Boolean,
+    default: false,
+  },
   tabs: Object as PropType<{ [key: string]: ITab }>,
 });
 </script>
@@ -32,6 +36,7 @@ defineProps({
       </div>
     </section>
     <VTabs
+      v-if="!hideTabs"
       :default-value="tab"
       tabs-to-url
       class="v-page-top-info-and-tabs__tabs"
@@ -59,6 +64,14 @@ defineProps({
         </div>
       </div>
     </VTabs>
+    <div
+      v-else
+      class="v-page-top-info-and-tabs__tabs-content"
+    >
+      <div class="wd-container">
+        <slot name="tabs-content" />
+      </div>
+    </div>
     <slot name="content" />
   </div>
 </template>

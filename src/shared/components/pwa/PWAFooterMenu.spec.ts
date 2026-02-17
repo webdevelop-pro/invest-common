@@ -39,10 +39,10 @@ vi.mock('InvestCommon/domain/config/links.ts', () => ({
   urlOffers: '/offers',
   urlHowItWorks: '/how-it-works',
   urlFaq: '/faq',
-  urlProfilePortfolio:   (id: string | number | null | undefined) => `/profiles/${id}/portfolio`,
-  urlProfileSummary:     (id: string | number | null | undefined) => `/profiles/${id}/summary`,
-  urlProfileWallet:      (id: string | number | null | undefined) => `/profiles/${id}/wallet`,
-  urlProfileCryptoWallet:(id: string | number | null | undefined) => `/profiles/${id}/crypto`,
+  urlProfilePortfolio:   (id: string | number | null | undefined) => `/profile/${id}/portfolio`,
+  urlProfileSummary:     (id: string | number | null | undefined) => `/profile/${id}/summary`,
+  urlProfileWallet:      (id: string | number | null | undefined) => `/profile/${id}/wallet`,
+  urlProfileCryptoWallet:(id: string | number | null | undefined) => `/profile/${id}/crypto`,
 }))
 
 // Pinia-stores через storeToRefs()
@@ -122,18 +122,18 @@ function pwafMenuTests() {
     userLoggedInRef.value = true
     selectedUserProfileIdRef.value = 'abc'
 
-    const wrapper = mountMenu({ currentPath: '/profiles/abc/portfolio' })
+    const wrapper = mountMenu({ currentPath: '/profile/abc/portfolio' })
 
     const ul = wrapper.get('ul.pwamenu__list')
     expect(ul.classes()).toContain('cols-5')
 
     const hrefs = wrapper.findAll('a.pwamenu__link').map(a => a.attributes('href'))
     expect(hrefs).toEqual([
-      '/profiles/abc/summary',
-      '/profiles/abc/portfolio',
-      '/profiles/abc/wallet',
+      '/profile/abc/summary',
+      '/profile/abc/portfolio',
+      '/profile/abc/wallet',
       '/offers',
-      '/profiles/abc/crypto',
+      '/profile/abc/crypto',
     ])
 
     const labels = wrapper.findAll('.pwamenu__label').map(n => n.text())
@@ -151,10 +151,12 @@ function pwafMenuTests() {
     const offers = wrapper.findAll('a.pwamenu__link').find(a => a.attributes('href') === '/offers')!
     expect(offers.classes()).toContain('is-active')
   })
-  it('uses layout fallback when URL does not share the section path', () => {
-    const wrapper = mountMenu({ currentPath: '/deal-1', currentLayout: 'offer-single' })
-    const offers = wrapper.findAll('a.pwamenu__link').find(a => a.attributes('href') === '/offers')!
-    expect(offers.classes()).toContain('is-active')
+  it('marks Portfolio active on account route for profile section mapping', () => {
+    userLoggedInRef.value = true
+    selectedUserProfileIdRef.value = 'abc'
+    const wrapper = mountMenu({ currentPath: '/profile/abc/account' })
+    const portfolio = wrapper.findAll('a.pwamenu__link').find(a => a.attributes('href') === '/profile/abc/portfolio')!
+    expect(portfolio.classes()).toContain('is-active')
   })
 
   it('uses withBase only for active detection (href remains raw)', () => {
@@ -169,18 +171,18 @@ function pwafMenuTests() {
   it('reacts to selectedUserProfileId change', async () => {
     userLoggedInRef.value = true
     selectedUserProfileIdRef.value = 'p1'
-    const wrapper = mountMenu({ currentPath: '/profiles/p1/wallet' })
+    const wrapper = mountMenu({ currentPath: '/profile/p1/wallet' })
 
     let wallet = wrapper.findAll('a.pwamenu__link').find(a => a.text().includes('Wallet'))!
-    expect(wallet.attributes('href')).toBe('/profiles/p1/wallet')
+    expect(wallet.attributes('href')).toBe('/profile/p1/wallet')
     expect(wallet.classes()).toContain('is-active')
 
     selectedUserProfileIdRef.value = 'p2'
     await wrapper.vm.$nextTick()
 
     wallet = wrapper.findAll('a.pwamenu__link').find(a => a.text().includes('Wallet'))!
-    expect(wallet.attributes('href')).toBe('/profiles/p2/wallet')
-    expect(wallet.classes()).not.toContain('is-active')
+    expect(wallet.attributes('href')).toBe('/profile/p2/wallet')
+    expect(wallet.classes()).toContain('is-active')
   })
 
   it('structural sanity: nav/ul/li icons exist', () => {

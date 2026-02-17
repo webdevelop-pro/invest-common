@@ -73,6 +73,9 @@ function isActive(to: string): boolean {
 
   const currentProfileSection = getProfileSectionKey(p);
   const targetProfileSection = getProfileSectionKey(targetPath);
+  if (targetProfileSection === 'profile/portfolio' && currentProfileSection === 'profile/account') {
+    return true;
+  }
   if (currentProfileSection && targetProfileSection && currentProfileSection === targetProfileSection) {
     return true;
   }

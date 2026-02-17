@@ -30,8 +30,9 @@ import DashboardEarn from 'InvestCommon/features/earn/DashboardEarn.vue';
 import DashboardWallet from 'InvestCommon/features/wallet/DashboardWallet.vue';
 import { useRoute } from 'vue-router';
 import { useBreakpoints } from 'UiKit/composables/useBreakpoints';
+import { isPwaMobile } from 'InvestCommon/domain/pwa/pwaDetector';
 
-defineProps({
+const props = defineProps({
   tab: {
     type: String as PropType<DashboardTabTypes>,
     required: true,
@@ -50,6 +51,7 @@ const profilesStore = useProfilesStore();
 const { selectedUserProfileId } = storeToRefs(profilesStore);
 
 const { isTablet } = useBreakpoints();
+const isPwaMobileDashboard = computed(() => isTablet.value && isPwaMobile());
 
 const tabs = computed(() => ({
   [DashboardTabTypes.summary]: {
@@ -87,6 +89,11 @@ const tabs = computed(() => ({
 
 const filteredTabs = computed(() => {
   const allTabs = { ...tabs.value };
+  if (isPwaMobileDashboard.value) {
+    return {
+      [DashboardTabTypes.portfolio]: allTabs[DashboardTabTypes.portfolio],
+    };
+  }
   // Hide distributions tab on mobile
   if (isTablet.value) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -111,6 +118,7 @@ const tabComponents: Record<DashboardTabTypes, Component> = {
   [DashboardTabTypes.summary]: DashboardSummary,
   [DashboardTabTypes.earn]: DashboardEarn,
 };
+const currentPwaComponent = computed(() => tabComponents[props.tab] ?? tabComponents[DashboardTabTypes.portfolio]);
 
 watch(
   () => route.path,
@@ -124,21 +132,29 @@ watch(
 
 <template>
   <VPageTopInfoAndTabs
-    :tab="tab"
+    :tab="props.tab"
     :tabs="filteredTabs"
+    :hide-tabs="isPwaMobileDashboard"
     class="ViewDashboard view-dashboard is--no-margin"
   >
     <template #top-info>
       <DashboardTopInfo />
     </template>
     <template #tabs-content>
-      <VTabsContent
-        v-for="item in tabsList"
-        :key="item.value"
-        :value="item.value"
-      >
-        <component :is="tabComponents[item.value]" />
-      </VTabsContent>
+      <component
+        v-if="isPwaMobileDashboard"
+        :is="currentPwaComponent"
+        :key="props.tab"
+      />
+      <template v-else>
+        <VTabsContent
+          v-for="item in tabsList"
+          :key="item.value"
+          :value="item.value"
+        >
+          <component :is="tabComponents[item.value]" />
+        </VTabsContent>
+      </template>
     </template>
   </VPageTopInfoAndTabs>
 </template>

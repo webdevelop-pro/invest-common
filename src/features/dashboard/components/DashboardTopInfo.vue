@@ -10,6 +10,9 @@ import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useBreakpoints } from 'UiKit/composables/useBreakpoints';
+import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/domain/config/enums/routes';
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
+import { isPwaMobile } from 'InvestCommon/domain/pwa/pwaDetector';
 
 const userSessionStore = useSessionStore();
 const { userSessionTraits } = storeToRefs(userSessionStore);
@@ -17,10 +20,17 @@ const { getSessionState } = useRepositoryAuth();
 
 const useRepositoryProfilesStore = useRepositoryProfiles();
 const { getUserState, getProfileByIdState } = storeToRefs(useRepositoryProfilesStore);
+const profilesStore = useProfilesStore();
+const { selectedUserProfileId } = storeToRefs(profilesStore);
 
 const { isTablet } = useBreakpoints();
 
 const isLoading = computed(() => (getUserState.value.loading || getProfileByIdState.value.loading));
+const showPwaProfileDetailsLink = computed(() => isTablet.value && isPwaMobile());
+const profileDetailsLink = computed(() => ({
+  name: ROUTE_DASHBOARD_ACCOUNT,
+  params: { profileId: selectedUserProfileId.value || 0 },
+}));
 
 </script>
 
@@ -51,6 +61,13 @@ const isLoading = computed(() => (getUserState.value.loading || getProfileByIdSt
           size="medium"
           update-selected
         />
+        <RouterLink
+          v-if="showPwaProfileDetailsLink"
+          :to="profileDetailsLink"
+          class="dashboard-top-info__profile-details-link"
+        >
+          Profile Details
+        </RouterLink>
       </div>
       <div class="dashboard-top-info__item-status">
         <div class="dashboard-top-info__item-label is--h6__title">
@@ -125,6 +142,17 @@ const isLoading = computed(() => (getUserState.value.loading || getProfileByIdSt
   &__select-profile {
     width: 100%;
     margin-bottom: 12px;
+  }
+
+  &__profile-details-link {
+    display: block;
+    width: 100%;
+    margin-top: 8px;
+    font-size: 12px;
+    line-height: 1.3;
+    color: #0000ee;
+    text-decoration: underline;
+    text-align: left;
   }
 
   &__item-status {
