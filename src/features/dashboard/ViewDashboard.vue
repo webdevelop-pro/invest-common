@@ -142,8 +142,8 @@ watch(
     </template>
     <template #tabs-content>
       <component
-        v-if="isPwaMobileDashboard"
         :is="currentPwaComponent"
+        v-if="isPwaMobileDashboard"
         :key="props.tab"
       />
       <template v-else>

@@ -119,10 +119,12 @@ const onLogout = () => {
       />
     </button>
     <input
+      id="pwa-profile-avatar-upload"
       ref="refFiles"
       name="file"
       type="file"
       accept="image/png, image/jpeg, image/jpg"
+      aria-label="Upload avatar image"
       hidden
       @change="onFileChange"
     >
