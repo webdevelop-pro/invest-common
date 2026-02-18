@@ -149,24 +149,19 @@ describe('useWallet', () => {
     expect(api.isWalletDataLoading.value).toBe(false);
   });
 
-  it('treats missing fiat or evm data as loading when it can be loaded and there is no error', () => {
+  it('treats initial state with no fiat and no evm data as loading, but stops once some wallet data is present', () => {
     // reset to baseline: no loading, both have data
     getWalletStateRef.value = { data: { ...mockFiatWallet }, loading: false, error: null };
     getEvmWalletStateRef.value = { data: { ...mockEvmWallet }, loading: false, error: null };
     let api = useWallet();
     expect(api.isWalletDataLoading.value).toBe(false);
 
-    // no fiat data, canLoadWalletData is true (from mock), no error -> should be treated as loading
+    // no fiat or evm data, canLoad* flags are true (from mocks), no error -> initial loading state
     getWalletStateRef.value = {
       data: undefined,
       loading: false,
       error: null,
     };
-    api = useWallet();
-    expect(api.isWalletDataLoading.value).toBe(true);
-
-    // no evm data, canLoadEvmWalletData is true (from mock), no error -> should be treated as loading
-    getWalletStateRef.value = { data: { ...mockFiatWallet }, loading: false, error: null };
     getEvmWalletStateRef.value = {
       data: undefined,
       loading: false,
@@ -174,6 +169,17 @@ describe('useWallet', () => {
     };
     api = useWallet();
     expect(api.isWalletDataLoading.value).toBe(true);
+
+    // if fiat data is present but evm is still missing, we should no longer
+    // show the global skeleton – the page has usable wallet data already
+    getWalletStateRef.value = { data: { ...mockFiatWallet }, loading: false, error: null };
+    getEvmWalletStateRef.value = {
+      data: undefined,
+      loading: false,
+      error: null,
+    };
+    api = useWallet();
+    expect(api.isWalletDataLoading.value).toBe(false);
 
     // if missing evm data but there is an error, we should not treat it as loading
     getEvmWalletStateRef.value = {

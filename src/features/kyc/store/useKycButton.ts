@@ -81,8 +81,22 @@ export const useKycButton = defineStore('useKycButton', () => {
 
   const handleKycClick = async () => {
     if (selectedUserProfileShowKycInitForm.value) {
-      const to = urlProfileKYC(kycProfileId.value);
-      window.location.href = to;
+      const baseUrl = urlProfileKYC(kycProfileId.value);
+      try {
+        if (typeof window !== 'undefined') {
+          const redirectParam = `redirect=${encodeURIComponent(window.location.href)}`;
+          const url = baseUrl.includes('?')
+            ? `${baseUrl}&${redirectParam}`
+            : `${baseUrl}?${redirectParam}`;
+          window.location.href = url;
+          return;
+        }
+      } catch {
+        // If URL construction fails (e.g. invalid base or no window), fall back to base URL
+      }
+      if (typeof window !== 'undefined') {
+        window.location.href = baseUrl;
+      }
     } else {
       await useRepositoryKycStore.handlePlaidKyc(kycProfileId.value);
     }

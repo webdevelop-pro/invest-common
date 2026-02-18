@@ -189,7 +189,7 @@ export function useEarnDetail() {
     return [];
   });
 
-  const ratingColorToCssColor = (ratingColor: string | undefined): string => {
+  const ratingColorToCssColor = (ratingColor?: string): string => {
     if (!ratingColor) return 'inherit';
     const lower = ratingColor.toLowerCase();
     if (lower.includes('green')) return '#10b981';
@@ -334,7 +334,11 @@ export function useEarnDetail() {
       const match = positions.find(
         (p: EarnPositionsResponse) =>
           p.profileId === profileId &&
-          (p.poolId === currentPoolId || p.symbol?.toUpperCase() === id),
+          (
+            p.poolId === currentPoolId ||
+            p.symbol?.toUpperCase() === id ||
+            (p.name && String(p.name).toUpperCase() === id)
+          ),
       );
 
       if (match) return match;

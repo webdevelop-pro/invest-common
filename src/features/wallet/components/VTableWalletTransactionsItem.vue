@@ -144,6 +144,7 @@ const { fullTxOrEntityId } = useVTableWalletTransactionsItem(props.data);
 
   &__description {
     max-width: 280px;
+
     @media screen and (width < $tablet) {
       max-width: 100%;
       margin-top: 12px;

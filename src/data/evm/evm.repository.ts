@@ -33,6 +33,11 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
   const exchangeTokensState = createActionState<IEvmExchangeResponse>();
   const exchangeTokensOptionsState = createActionState<any>();
 
+  // Stores the latest raw wallet response from backend so we can
+  // deterministically recompute Earn overlays (transactions/balances)
+  // whenever mock Earn positions change.
+  const baseWalletSnapshot = ref<IEvmWalletDataResponse | null>(null);
+
   // Loading states for websocket updates
   const isLoadingNotificationTransaction = ref(false);
   const isLoadingNotificationWallet = ref(false);
@@ -67,9 +72,33 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
           .filter(tx => !existingTxIds.has(tx.id))
           .map(tx => {
             const symbol = position.symbol || 'USDC';
+            const positionName = position.name || symbol;
             // Use a safe ISO timestamp instead of parsing formatted date/time strings
             const dateTime = new Date().toISOString();
             const type = typeMap[tx.type] || EvmTransactionTypes.deposit;
+
+            // Provide explicit type label and description for Earn-originated transactions
+            let type_display: string;
+            let description: string;
+
+            switch (tx.type) {
+              case 'deposit':
+                type_display = 'Earn Supply';
+                description = `Supplied ${tx.amountUsd} ${symbol} to Earn (${positionName}).`;
+                break;
+              case 'withdraw':
+                type_display = 'Earn Withdraw';
+                description = `Withdrew ${tx.amountUsd} ${symbol} from Earn (${positionName}).`;
+                break;
+              case 'approval':
+                type_display = 'Earn Approval';
+                description = `Approved ${symbol} for Earn (${positionName}).`;
+                break;
+              default:
+                type_display = 'Earn Transaction';
+                description = `Earn ${tx.type} of ${tx.amountUsd} ${symbol}.`;
+                break;
+            }
 
             return {
               id: tx.id,
@@ -82,6 +111,8 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
               symbol,
               name: symbol,
               network: 'ethereum',
+              type_display,
+              description,
               status: statusMap[tx.status] || EvmTransactionStatusTypes.pending,
               transaction_tx: tx.txId,
               created_at: dateTime,
@@ -101,8 +132,10 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
   };
 
   /**
-   * Updates crypto wallet balances based on earn positions
-   * Uses availableAmountUsd from positionsPools as single source of truth
+   * Updates crypto wallet balances based on earn positions.
+   * For each token, we take the original wallet balance from the backend response
+   * and subtract the amount staked into Earn. This keeps the wallet as the source
+   * of truth and treats Earn positions as a separate "locked" portion.
    */
   const addEarnBalancesToWallet = (
     walletData: IEvmWalletDataResponse,
@@ -111,32 +144,44 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
     const earnPositions = unref(useRepositoryEarn().positionsPools) || [];
     const balances = { ...((walletData.balances as any) || {}) };
     
-    // Update balances based on availableAmountUsd from positionsPools
     earnPositions
       .filter(p => p.profileId === profileId && p.symbol)
       .forEach(position => {
-        const symbol = position.symbol.toUpperCase();
-        const balanceAmount = position.availableAmountUsd ?? position.stakedAmountUsd ?? 0;
-        
-        if (balanceAmount <= 0) return;
-        
-        const balanceKey = Object.keys(balances).find(
-          key => balances[key]?.symbol?.toUpperCase() === symbol
-        );
-        
-        if (balanceKey) {
-          balances[balanceKey] = {
-            ...balances[balanceKey],
-            amount: String(balanceAmount),
-          };
-        } else {
-          balances[symbol.toLowerCase()] = {
-            address: `0x${Math.random().toString(16).substr(2, 40)}`,
-            amount: String(balanceAmount),
-            symbol: position.symbol,
-            name: position.symbol,
-          };
+        const symbolKey = position.symbol.toLowerCase();
+        const nameLower = (position.name ?? '').toLowerCase();
+        const stakedAmount = position.stakedAmountUsd ?? 0;
+
+        if (stakedAmount <= 0) return;
+
+        // First try to find an existing balance by BOTH symbol and name (when name is provided)
+        let balanceKey = Object.keys(balances).find(key => {
+          const balance = balances[key];
+          if (!balance) return false;
+          const balanceSymbol = String(balance.symbol || '').toLowerCase();
+          const balanceName = String(balance.name || '').toLowerCase();
+          const symbolMatch = balanceSymbol === symbolKey;
+          const nameMatch = nameLower ? balanceName === nameLower : true;
+          return symbolMatch && nameMatch;
+        });
+
+        // Fallback: match by symbol only
+        if (!balanceKey) {
+          balanceKey = Object.keys(balances).find(
+            key => String(balances[key]?.symbol || '').toLowerCase() === symbolKey,
+          );
         }
+
+        // If there is no matching wallet balance for this token, we don't
+        // create a new one here – Earn represents a separate "locked" bucket.
+        if (!balanceKey) return;
+
+        const prevAmount = Number(balances[balanceKey]?.amount ?? 0);
+        const nextAmount = Math.max(0, prevAmount - stakedAmount);
+
+        balances[balanceKey] = {
+          ...balances[balanceKey],
+          amount: String(nextAmount),
+        };
       });
 
     return {
@@ -145,27 +190,65 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
     };
   };
 
+  /**
+   * Recompute wallet data from the latest backend snapshot plus current Earn positions.
+   * This is used by mock Earn flows to keep the crypto wallet in sync without
+   * mutating the snapshot or relying on already-formatted wallet state.
+   */
+  const recomputeWalletFromEarnOverlay = (profileId: number) => {
+    if (!baseWalletSnapshot.value) return;
+
+    const snapshot = baseWalletSnapshot.value;
+
+    // Clone balances and transactions so we never mutate the snapshot directly
+    const walletCopy: IEvmWalletDataResponse = {
+      ...(snapshot as IEvmWalletDataResponse),
+      balances: { ...((snapshot.balances as any) || {}) },
+      transactions: [...(snapshot.transactions || [])],
+    };
+
+    let walletWithEarn = addEarnTransactionsToWallet(walletCopy, profileId);
+    walletWithEarn = addEarnBalancesToWallet(walletWithEarn, profileId);
+
+    getEvmWalletState.value.data = new EvmWalletFormatter(walletWithEarn as any).format();
+  };
+
+  /**
+   * Sync helper that applies Earn "supply" (deposit into Earn) to the
+   * in-memory EVM wallet balances for mock flows.
+   *
+   * For now this simply recomputes balances from Earn positions for the
+   * given profile and updates the formatted wallet state.
+   */
+  const applyEarnSupplyToWallet = (
+    profileId: number,
+  ): void => {
+    recomputeWalletFromEarnOverlay(profileId);
+  };
+
+  /**
+   * Sync helper that applies Earn "withdraw" (withdraw from Earn back to
+   * wallet) to the in-memory EVM wallet balances for mock flows.
+   *
+   * Implementation is symmetrical to applyEarnSupplyToWallet – we rely on
+   * positionsPools as the source of truth and simply recompute.
+   */
+  const applyEarnWithdrawToWallet = (
+    profileId: number,
+  ): void => {
+    recomputeWalletFromEarnOverlay(profileId);
+  };
+
   const getEvmWalletByProfile = async (profileId: number) => {
     try {
       getEvmWalletState.value.loading = true;
       getEvmWalletState.value.error = null;
       const response = await apiClient.get<IEvmWalletDataResponse>(`/auth/wallet/${profileId}`);
-      
-      // Mock: Add earn transactions to wallet transactions
-      let walletDataWithEarn = addEarnTransactionsToWallet(
-        response.data as any,
-        profileId,
-      );
-      
-      // Mock: Update balances from earn exchanges
-      walletDataWithEarn = addEarnBalancesToWallet(
-        walletDataWithEarn,
-        profileId,
-      );
-      
-      const formatted = new EvmWalletFormatter(walletDataWithEarn as any).format();
-      getEvmWalletState.value.data = formatted;
-      return formatted;
+      baseWalletSnapshot.value = response.data as IEvmWalletDataResponse;
+
+      // Use snapshot + current Earn overlays to build the formatted wallet
+      recomputeWalletFromEarnOverlay(profileId);
+      return getEvmWalletState.value.data;
     } catch (err) {
       getEvmWalletState.value.error = err as Error;
       getEvmWalletState.value.data = undefined;
@@ -423,6 +506,7 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
     exchangeTokensOptionsState.value = { loading: false, error: null, data: undefined };
     isLoadingNotificationTransaction.value = false;
     isLoadingNotificationWallet.value = false;
+    baseWalletSnapshot.value = null;
   };
 
   return {
@@ -443,6 +527,8 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
     updateNotificationData,
     isLoadingNotificationTransaction,
     isLoadingNotificationWallet,
+    applyEarnSupplyToWallet,
+    applyEarnWithdrawToWallet,
   };
 });
 

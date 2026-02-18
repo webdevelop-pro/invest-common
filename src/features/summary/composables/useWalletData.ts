@@ -1,8 +1,9 @@
-import { computed, nextTick, watch } from 'vue';
+import { computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
 import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
+import { useWallet } from 'InvestCommon/features/wallet/logic/useWallet';
 import VTableWalletTokensItem from 'InvestCommon/features/wallet/components/VTableWalletTokensItem.vue';
 import { currency } from 'InvestCommon/helpers/currency';
 import { ROUTE_DASHBOARD_EVMWALLET, ROUTE_DASHBOARD_WALLET } from 'InvestCommon/domain/config/enums/routes';
@@ -12,37 +13,13 @@ export function useWalletData() {
   const walletRepository = useRepositoryWallet();
   const profilesStore = useProfilesStore();
   
-  const { selectedUserProfileId, selectedUserProfileData } = storeToRefs(profilesStore);
-  const { getEvmWalletState, canLoadEvmWalletData } = storeToRefs(evmRepository);
-  const { getWalletState, canLoadWalletData } = storeToRefs(walletRepository);
+  const { selectedUserProfileId } = storeToRefs(profilesStore);
+  const { getEvmWalletState } = storeToRefs(evmRepository);
+  const { getWalletState } = storeToRefs(walletRepository);
 
-  const updateWalletData = async () => {
-    if (canLoadWalletData.value && !getWalletState.value.loading && !getWalletState.value.error) {
-      walletRepository.getWalletByProfile(selectedUserProfileId.value);
-    } else {
-      walletRepository.resetAll();
-    }
-  };
-
-  const updateCryptoWalletData = async () => {
-    if (canLoadEvmWalletData.value && !getEvmWalletState.value.loading && !getEvmWalletState.value.error) {
-      evmRepository.getEvmWalletByProfile(selectedUserProfileId.value);
-    } else {
-      evmRepository.resetAll();
-    }
-  };
-  watch(() => [
-    selectedUserProfileData.value?.id, 
-    selectedUserProfileData.value?.kyc_status
-  ], () => {
-    // Only update if profile data exists to prevent errors when data is reset
-    if (selectedUserProfileData.value?.id) {
-      nextTick(() => {
-        updateWalletData();
-        updateCryptoWalletData();
-      });
-    }
-  }, { immediate: true });
+  // Ensure wallet fetching is initialized via `useWallet` (single source of truth).
+  // Internal singleton guard in `useWallet` prevents duplicate watchers/requests.
+  useWallet();
 
   const walletTokensTop5 = computed(() => 
     (getEvmWalletState.value.data?.balances || [])

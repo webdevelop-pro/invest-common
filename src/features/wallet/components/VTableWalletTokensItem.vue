@@ -169,6 +169,8 @@ const { tokenScanUrl } = useVTableWalletTokensItem(props.data);
     height: 14px;
     color: $gray-60;
     display: block;
+    position: relative;
+    top: -1px;
   }
 
   &__link {

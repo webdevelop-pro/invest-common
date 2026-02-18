@@ -37,6 +37,8 @@ const exchangeTokensOptionsStateRef = ref({
 const exchangeTokens = vi.fn().mockResolvedValue(undefined);
 const exchangeTokensOptions = vi.fn().mockResolvedValue(undefined);
 
+const mockSelectedUserProfileId = ref(1);
+
 vi.mock('InvestCommon/data/evm/evm.repository', () => ({
   useRepositoryEvm: () => ({
     getEvmWalletState: getEvmWalletStateRef,
@@ -44,12 +46,17 @@ vi.mock('InvestCommon/data/evm/evm.repository', () => ({
     exchangeTokensOptionsState: exchangeTokensOptionsStateRef,
     exchangeTokens,
     exchangeTokensOptions,
+    getEvmWalletByProfile: vi.fn().mockResolvedValue(undefined),
   }),
 }));
 vi.mock('InvestCommon/data/earn/earn.repository', () => ({
   useRepositoryEarn: () => ({
-    mockExchangePositions: vi.fn(),
     getPositions: vi.fn(),
+  }),
+}));
+vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
+  useProfilesStore: () => ({
+    selectedUserProfileId: mockSelectedUserProfileId,
   }),
 }));
 vi.mock('UiKit/helpers/validation/useFormValidation', () => ({

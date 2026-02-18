@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { PropType } from 'vue';
-import { VCardInfo } from 'UiKit/components/Base/VCard';
 import VSliderCards from 'UiKit/components/VSlider/VSliderCards.vue';
 import { useBreakpoints } from 'UiKit/composables/useBreakpoints';
-import { storeToRefs } from 'pinia';
+import DashboardWalletBalanceCardItem from './DashboardWalletBalanceCardItem.vue';
 
 export interface BalanceCardAction {
   label: string;
@@ -20,6 +19,10 @@ export interface BalanceCardItem {
   unit: string;
   secondaryText?: string;
   secondaryValue?: string;
+  secondaryDepositText?: string;
+  secondaryDepositValue?: string;
+  secondaryWithdrawText?: string;
+  secondaryWithdrawValue?: string;
   action: BalanceCardAction;
 }
 
@@ -35,7 +38,7 @@ defineProps({
   },
 });
 
-const { isTablet } = storeToRefs(useBreakpoints());
+const { isTablet } = useBreakpoints();
 </script>
 
 <template>
@@ -44,17 +47,11 @@ const { isTablet } = storeToRefs(useBreakpoints());
       v-if="!isTablet"
       class="dashboard-wallet-balance-cards__grid"
     >
-      <VCardInfo
+      <DashboardWalletBalanceCardItem
         v-for="card in cards"
         :key="card.id"
-        :title="card.title"
-        :amount="card.value"
-        :unit="card.unit"
+        :card="card"
         :loading="loading"
-        :secondary-text="card.secondaryText"
-        :secondary-value="card.secondaryValue"
-        :action="card.action"
-        :value-props="{ amountClass: 'is--subheading-1', unitClass: 'is--small' }"
       />
     </div>
     <div
@@ -63,15 +60,9 @@ const { isTablet } = storeToRefs(useBreakpoints());
     >
       <VSliderCards :data="cards">
         <template #default="{ slide }">
-          <VCardInfo
-            :title="slide.title"
-            :amount="slide.value"
-            :unit="slide.unit"
+          <DashboardWalletBalanceCardItem
+            :card="slide as BalanceCardItem"
             :loading="loading"
-            :secondary-text="slide.secondaryText"
-            :secondary-value="slide.secondaryValue"
-            :action="slide.action"
-            :value-props="{ amountClass: 'is--subheading-1', unitClass: 'is--small' }"
             class="dashboard-wallet-balance-cards__slider-item"
           />
         </template>

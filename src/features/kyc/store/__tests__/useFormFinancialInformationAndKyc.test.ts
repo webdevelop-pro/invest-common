@@ -10,8 +10,12 @@ const mockPush = vi.fn();
 const mockRouter = {
   push: mockPush,
 };
+const mockRoute: { query: Record<string, unknown> } = {
+  query: {},
+};
 vi.mock('vue-router', () => ({
   useRouter: () => mockRouter,
+  useRoute: () => mockRoute,
 }));
 
 const mockProfilesStore = {
@@ -180,6 +184,7 @@ describe('useFormFinancialInformationAndKyc', () => {
     });
 
     it('should save successfully when all forms are valid', async () => {
+      mockRoute.query = {};
       await composable.handleSave();
       expect(mockPersonalFormRef.value.onValidate).toHaveBeenCalled();
       expect(mockFinancialInfoFormRef.value.onValidate).toHaveBeenCalled();
@@ -205,6 +210,12 @@ describe('useFormFinancialInformationAndKyc', () => {
         params: { profileId: '123' },
       });
       expect(composable.isLoading.value).toBe(false);
+    });
+
+    it('should redirect back when redirect query param is present', async () => {
+      mockRoute.query = { redirect: '/profile/123/wallet?wallet-tab=holdings' };
+      await composable.handleSave();
+      expect(mockPush).toHaveBeenCalledWith('/profile/123/wallet?wallet-tab=holdings');
     });
 
     it('should not save and should scroll to error if any form is invalid', async () => {

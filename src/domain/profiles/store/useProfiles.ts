@@ -112,7 +112,6 @@ export const useProfilesStore = defineStore('profiles', () => {
   }, { immediate: true });
 
   const setSelectedUserProfileById = (id: number) => {
-    console.log('selectedUserProfileId', id);
     
     const newProfileId = Number(id);
     const profileChanged = selectedUserProfileId.value !== newProfileId;

@@ -13,6 +13,8 @@ const getWalletStateRef = ref({
   loading: false,
   error: null as Error | null,
 });
+const canLoadWalletDataRef = ref(true);
+
 const getEvmWalletStateRef = ref({
   data: {
     isStatusAnyError: false,
@@ -22,6 +24,7 @@ const getEvmWalletStateRef = ref({
   loading: false,
   error: null as Error | null,
 });
+const canLoadEvmWalletDataRef = ref(true);
 const selectedUserProfileDataRef = ref({
   id: 1,
   isKycNone: false,
@@ -41,11 +44,16 @@ const getProfileByIdStateRef = ref({ loading: false });
 vi.mock('InvestCommon/data/wallet/wallet.repository', () => ({
   useRepositoryWallet: () => ({
     getWalletState: getWalletStateRef,
+    canLoadWalletData: canLoadWalletDataRef,
+    // Minimal mocks for Plaid link states used in useWalletAlert
+    createLinkExchangeState: ref({ loading: false, error: null, data: null }),
+    createLinkProcessState: ref({ loading: false, error: null, data: null }),
   }),
 }));
 vi.mock('InvestCommon/data/evm/evm.repository', () => ({
   useRepositoryEvm: () => ({
     getEvmWalletState: getEvmWalletStateRef,
+    canLoadEvmWalletData: canLoadEvmWalletDataRef,
   }),
 }));
 vi.mock('InvestCommon/data/profiles/profiles.repository', () => ({
@@ -63,8 +71,12 @@ vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
   }),
 }));
 const mockPush = vi.fn();
+const mockRoute = {
+  fullPath: '/profile/1/wallet',
+};
 vi.mock('vue-router', () => ({
   useRouter: () => ({ push: mockPush }),
+  useRoute: () => mockRoute,
 }));
 
 import { useWalletAlert } from '../useWalletAlert';
@@ -103,6 +115,8 @@ describe('useWalletAlert', () => {
     };
     selectedUserProfileIdRef.value = 1;
     getProfileByIdStateRef.value = { loading: false };
+    canLoadWalletDataRef.value = true;
+    canLoadEvmWalletDataRef.value = true;
     mockPush.mockClear();
   });
 
@@ -111,6 +125,7 @@ describe('useWalletAlert', () => {
     expect(api.isAlertShow).toBeDefined();
     expect(api.isAlertType).toBeDefined();
     expect(api.isAlertText).toBeDefined();
+    expect(api.isWalletBlocked).toBeDefined();
     expect(api.showTable).toBeDefined();
     expect(api.isTopTextShow).toBeDefined();
     expect(api.alertTitle).toBeDefined();
@@ -151,6 +166,7 @@ describe('useWalletAlert', () => {
     };
     const api = useWalletAlert();
     expect(api.isAlertShow.value).toBe(false);
+    expect(api.isWalletBlocked.value).toBe(false);
   });
 
   it('shows info alert when wallet is being created', () => {
@@ -168,6 +184,7 @@ describe('useWalletAlert', () => {
     const api = useWalletAlert();
     expect(api.isAlertShow.value).toBe(true);
     expect(api.isAlertType.value).toBe('error');
+    expect(api.isWalletBlocked.value).toBe(true);
     expect(api.isAlertText.value).toContain('pass KYC');
     expect(api.alertTitle.value).toContain('Identity verification');
     expect(api.alertButtonText.value).toBe('Verify Identity');
@@ -180,6 +197,7 @@ describe('useWalletAlert', () => {
     expect(mockPush).toHaveBeenCalledWith({
       name: 'ROUTE_SUBMIT_KYC',
       params: { profileId: 1 },
+      query: { redirect: '/profile/1/wallet' },
     });
   });
 
@@ -188,5 +206,65 @@ describe('useWalletAlert', () => {
     const api = useWalletAlert();
     expect(api.isAlertShow.value).toBe(true);
     expect(api.isAlertText.value).toContain('contact us');
+  });
+
+  it('sets isDataLoading only for real loading or initial load when wallets can load', () => {
+    // Baseline: both have data and nothing is loading → not loading
+    let api = useWalletAlert();
+    expect(api.isDataLoading.value).toBe(false);
+
+    // Explicit loading flags from repositories
+    getWalletStateRef.value = {
+      ...getWalletStateRef.value,
+      loading: true,
+    };
+    api = useWalletAlert();
+    expect(api.isDataLoading.value).toBe(true);
+
+    getWalletStateRef.value = {
+      ...getWalletStateRef.value,
+      loading: false,
+    };
+    getEvmWalletStateRef.value = {
+      ...getEvmWalletStateRef.value,
+      loading: true,
+    };
+    api = useWalletAlert();
+    expect(api.isDataLoading.value).toBe(true);
+
+    // Initial state: no fiat or evm data, canLoad* true, no errors → loading
+    getWalletStateRef.value = { data: undefined, loading: false, error: null };
+    getEvmWalletStateRef.value = { data: undefined, loading: false, error: null };
+    api = useWalletAlert();
+    expect(api.isDataLoading.value).toBe(true);
+
+    // Once fiat data is present, even if evm is still missing, we stop
+    // treating it as loading at the alert level
+    getWalletStateRef.value = {
+      data: {
+        id: 1,
+        isWalletStatusAnyError: false,
+        isWalletStatusCreated: false,
+        isWalletStatusVerified: true,
+        isSomeLinkedBankAccount: false,
+      },
+      loading: false,
+      error: null,
+    };
+    getEvmWalletStateRef.value = { data: undefined, loading: false, error: null };
+    api = useWalletAlert();
+    expect(api.isDataLoading.value).toBe(false);
+  });
+
+  it('does not treat missing data as loading when wallets cannot load (e.g. before KYC)', () => {
+    // Simulate case where wallets are not allowed to load yet
+    canLoadWalletDataRef.value = false;
+    canLoadEvmWalletDataRef.value = false;
+    getWalletStateRef.value = { data: undefined, loading: false, error: null };
+    getEvmWalletStateRef.value = { data: undefined, loading: false, error: null };
+
+    const api = useWalletAlert();
+
+    expect(api.isDataLoading.value).toBe(false);
   });
 });

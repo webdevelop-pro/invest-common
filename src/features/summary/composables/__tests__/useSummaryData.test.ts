@@ -12,21 +12,6 @@ const mockPortfolioData = [
   { amount: 1000, offer: { id: 1, name: 'Test Offer', security_type: 'Equity' } },
 ];
 
-// Mock wallet data
-const mockEvmWalletData = {
-  id: 1,
-  currentBalance: 500,
-  balances: [],
-  transactions: [],
-};
-
-const mockWalletData = {
-  id: 2,
-  currentBalance: 1000,
-  isWalletStatusAnyError: false,
-  isWalletStatusCreated: true,
-};
-
 // Mock repositories
 vi.mock('InvestCommon/data/3dParty/crypto.repository', () => ({
   useRepositoryCryptoo: () => ({
@@ -39,24 +24,6 @@ vi.mock('InvestCommon/features/investment/store/useDashboardPortfolio', () => ({
   useDashboardPortfolioStore: () => ({
     portfolioData: ref(mockPortfolioData),
     getInvestmentsState: ref({ loading: false, error: null, data: { data: mockPortfolioData } }),
-  }),
-}));
-
-vi.mock('InvestCommon/data/wallet/wallet.repository', () => ({
-  useRepositoryWallet: () => ({
-    getWalletState: ref({ loading: false, error: null, data: mockWalletData }),
-    canLoadWalletData: ref(true),
-    getWalletByProfile: vi.fn(),
-    resetAll: vi.fn(),
-  }),
-}));
-
-vi.mock('InvestCommon/data/evm/evm.repository', () => ({
-  useRepositoryEvm: () => ({
-    getEvmWalletState: ref({ loading: false, error: null, data: mockEvmWalletData }),
-    canLoadEvmWalletData: ref(true),
-    getEvmWalletByProfile: vi.fn(),
-    resetAll: vi.fn(),
   }),
 }));
 
@@ -99,10 +66,9 @@ describe('useSummaryData', () => {
     // Combined loading state
     expect(api.isLoading.value).toBe(false);
 
-    // Data from child composables
+    // Data from child composables (crypto + portfolio)
     expect(api.cryptoItems.value).toBeDefined();
     expect(api.totalAmount.value).toBe(1000);
-    expect(api.balances.value).toHaveLength(2);
   });
 });
 

@@ -150,7 +150,6 @@ const profileDetailsLink = computed(() => ({
     margin-top: 8px;
     font-size: 12px;
     line-height: 1.3;
-    color: #0000ee;
     text-decoration: underline;
     text-align: left;
   }

@@ -1,7 +1,6 @@
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
-import { useWalletData } from 'InvestCommon/features/summary/composables/useWalletData';
 import { useWallet } from 'InvestCommon/features/wallet/logic/useWallet';
 import { useWalletAlert } from 'InvestCommon/features/wallet/logic/useWalletAlert';
 import { useWalletTokens } from 'InvestCommon/features/wallet/logic/useWalletTokens';
@@ -68,11 +67,12 @@ export function useDashboardWallet() {
     isDialogTransactionOpen.value = true;
   };
 
-  const { getEvmWalletState: summaryEvmWalletState } = useWalletData();
   const {
+    getEvmWalletState: summaryEvmWalletState,
     fiatBalanceCoins,
     fiatBalanceMainFormatted,
     fiatPendingDeposit,
+    fiatPendingWithdraw,
     cryptoBalanceCoins,
     cryptoBalanceMainFormatted,
     crypto24hChange,
@@ -82,7 +82,15 @@ export function useDashboardWallet() {
     totalBalanceMainFormatted,
     totalBalanceCoins,
     isWalletDataLoading,
+    updateData,
   } = useWallet();
+
+  // Whenever the Wallet tab/view is opened, explicitly refresh wallet data.
+  // `updateData` is idempotent and guarded inside `useWallet`, so this will
+  // only trigger real network calls when appropriate.
+  onMounted(() => {
+    void updateData();
+  });
 
   const profilesStore = useProfilesStore();
   const { selectedUserProfileId } = storeToRefs(profilesStore);
@@ -93,10 +101,12 @@ export function useDashboardWallet() {
     isAlertType,
     isAlertText,
     alertTitle,
+    isWalletBlocked,
     alertButtonText,
     onAlertButtonClick,
     showTable,
     isTopTextShow,
+    isDataLoading,
   } = useWalletAlert();
 
   const dialogsStore = useDialogs();
@@ -163,6 +173,7 @@ export function useDashboardWallet() {
     const profileId = Number(selectedUserProfileId.value ?? 0);
     const bankAccountsHref = profileId ? urlSettingsBankAccounts(profileId) : undefined;
     const hasFiatPendingDeposit = fiatPendingDeposit.value != null;
+    const hasFiatPendingWithdraw = fiatPendingWithdraw.value != null;
     const hasCrypto24hChange = crypto24hChange.value != null;
     const hasRwa24hChange = rwa24hChange.value != null;
     return [
@@ -171,8 +182,14 @@ export function useDashboardWallet() {
         title: 'Fiat Balance:',
         value: fiatBalanceMainFormatted.value,
         unit: fiatBalanceCoins.value,
-        secondaryText: hasFiatPendingDeposit ? 'Pending Deposit' : undefined,
-        secondaryValue: hasFiatPendingDeposit ? `+ ${fiatPendingDeposit.value}` : undefined,
+        secondaryDepositText: hasFiatPendingDeposit ? 'Pending Deposit' : undefined,
+        secondaryDepositValue: hasFiatPendingDeposit
+          ? `+ ${fiatPendingDeposit.value}`
+          : undefined,
+        secondaryWithdrawText: hasFiatPendingWithdraw ? 'Pending Withdraw' : undefined,
+        secondaryWithdrawValue: hasFiatPendingWithdraw
+          ? `- ${fiatPendingWithdraw.value}`
+          : undefined,
         action: {
           label: 'Your Bank Accounts',
           href: bankAccountsHref ?? '#',
@@ -218,6 +235,7 @@ export function useDashboardWallet() {
     activeTab,
     summaryEvmWalletState,
     isWalletDataLoading,
+    isAlertDataLoading: isDataLoading,
     isAlertShow,
     isAlertType,
     isAlertText,
@@ -243,5 +261,6 @@ export function useDashboardWallet() {
     onTransactionClick,
     selectedUserProfileId,
     userLoggedIn,
+    isWalletBlocked,
   };
 }

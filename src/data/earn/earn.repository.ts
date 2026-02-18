@@ -2,6 +2,7 @@ import { acceptHMRUpdate, defineStore } from 'pinia';
 import { ref } from 'vue';
 import { createActionState } from 'InvestCommon/data/repository/repository';
 import { EarnPositionFormatter, type EarnPositionsResponseFormatted } from './earn.formatter';
+import { createEarnPositionsService } from './earn.positions';
 import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
 
 export interface EarnDepositRequest {
@@ -92,6 +93,7 @@ export const useRepositoryEarn = defineStore('repository-earn', () => {
   };
 
   const EARN_RATE = 0.05; // 5% earned rate
+  const positionsService = createEarnPositionsService(EARN_RATE);
 
   /**
    * Mock deposit request.
@@ -107,77 +109,35 @@ export const useRepositoryEarn = defineStore('repository-earn', () => {
         setTimeout(resolve, 800);
       });
 
+      const baseTimestamp = Date.now();
+      const txId = `mock-tx-${baseTimestamp}`;
+
       const mockResponse: EarnDepositResponse = {
         poolId: payload.poolId,
         profileId: payload.profileId,
         amount: payload.amount,
         status: 'success',
-        txId: `mock-tx-${Date.now()}`,
+        txId,
       };
 
       depositState.value.data = mockResponse;
 
-      // Update positions array directly on deposit
-      const list = positionsPools.value;
-      const index = list.findIndex(
-        (p: EarnPositionsResponse) =>
-          p.poolId === payload.poolId && p.profileId === payload.profileId || p.name === payload.name,
+      const newTransaction: EarnPositionTransaction = createTimestampedTransaction(
+        payload.amount,
+        'deposit',
+        mockResponse.txId,
       );
 
-      const now = new Date();
-      const newTransaction: EarnPositionTransaction = {
-        id: Date.now(),
-        date: now.toLocaleDateString(),
-        time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        amountUsd: payload.amount,
-        txId: mockResponse.txId,
-        type: 'deposit', // Supply from available balance to stake
-        status: 'completed',
-      };
-
-      const updatedList = [...list];
-      const symbol = payload.symbol || 'USDC';
-      const name = payload.name;
-
-      if (index !== -1) {
-        // Update existing position
-        const existing = list[index];
-        const newStakedAmount = existing.stakedAmountUsd + payload.amount;
-        const currentAvailable = existing.availableAmountUsd ?? 0;
-
-        updatedList[index] = {
-          ...existing,
-          symbol: payload.symbol || existing.symbol || symbol,
-          name: name || existing.name,
-          stakedAmountUsd: newStakedAmount,
-          earnedAmountUsd: Number((newStakedAmount * EARN_RATE).toFixed(2)),
-          availableAmountUsd: Math.max(0, currentAvailable - payload.amount),
-          transactions: [newTransaction, ...existing.transactions],
-        };
-      } else {
-        // Create new position
-        updatedList.push({
-          poolId: payload.poolId,
-          profileId: payload.profileId,
-          symbol,
-          name,
-          stakedAmountUsd: payload.amount,
-          earnedAmountUsd: Number((payload.amount * EARN_RATE).toFixed(2)),
-          availableAmountUsd: 0,
-          transactions: [newTransaction],
-        });
-      }
-
+      const updatedList = positionsService.upsertForDeposit(
+        positionsPools.value,
+        payload,
+        newTransaction,
+      );
       positionsPools.value = updatedList;
 
       // Sync EVM wallet balances from positionsPools (single source of truth)
       if (payload.symbol) {
-        useRepositoryEvm().applyEarnSupplyToWallet(
-          Number(payload.profileId),
-          symbol,
-          name,
-          payload.amount,
-        );
+        useRepositoryEvm().applyEarnSupplyToWallet(Number(payload.profileId));
       }
 
       return mockResponse;
@@ -203,75 +163,35 @@ export const useRepositoryEarn = defineStore('repository-earn', () => {
         setTimeout(resolve, 800);
       });
 
+      const baseTimestamp = Date.now();
+      const txId = `mock-withdraw-${baseTimestamp}`;
+
       const mockResponse: EarnWithdrawResponse = {
         poolId: payload.poolId,
         profileId: payload.profileId,
         amount: payload.amount,
         status: 'success',
-        txId: `mock-withdraw-${Date.now()}`,
+        txId,
       };
 
       withdrawState.value.data = mockResponse;
 
-      const list = positionsPools.value;
-      const index = list.findIndex(
-        (p: EarnPositionsResponse) =>
-          p.poolId === payload.poolId && p.profileId === payload.profileId,
+      const newTransaction: EarnPositionTransaction = createTimestampedTransaction(
+        payload.amount,
+        'withdraw',
+        mockResponse.txId,
       );
 
-      const now = new Date();
-      const newTransaction: EarnPositionTransaction = {
-        id: Date.now(),
-        date: now.toLocaleDateString(),
-        time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        amountUsd: payload.amount,
-        txId: mockResponse.txId,
-        type: 'withdraw',
-        status: 'completed',
-      };
-
-      const updatedList = [...list];
-      const symbol = payload.symbol || 'USDC';
-      const name = payload.name;
-
-      if (index !== -1) {
-        const existing = list[index];
-        const newStakedAmount = Math.max(0, existing.stakedAmountUsd - payload.amount);
-        const currentAvailable = existing.availableAmountUsd ?? 0;
-
-        updatedList[index] = {
-          ...existing,
-          symbol: payload.symbol || existing.symbol || symbol,
-          name: name || existing.name,
-          stakedAmountUsd: newStakedAmount,
-          earnedAmountUsd: Number((newStakedAmount * EARN_RATE).toFixed(2)),
-          availableAmountUsd: currentAvailable + payload.amount,
-          transactions: [newTransaction, ...existing.transactions],
-        };
-      } else {
-        // If no existing position, create one with only available balance updated
-        updatedList.push({
-          poolId: payload.poolId,
-          profileId: payload.profileId,
-          symbol,
-          name,
-          stakedAmountUsd: 0,
-          earnedAmountUsd: 0,
-          availableAmountUsd: payload.amount,
-          transactions: [newTransaction],
-        });
-      }
-
+      const updatedList = positionsService.upsertForWithdraw(
+        positionsPools.value,
+        payload,
+        newTransaction,
+      );
       positionsPools.value = updatedList;
 
       // Sync EVM wallet balances from positionsPools (single source of truth)
-      if (symbol) {
-        useRepositoryEvm().applyEarnWithdrawToWallet(
-          Number(payload.profileId),
-          symbol,
-          name,
-          payload.amount,
-        );
+      if (payload.symbol) {
+        useRepositoryEvm().applyEarnWithdrawToWallet(Number(payload.profileId));
       }
 
       return mockResponse;
@@ -323,12 +243,12 @@ export const useRepositoryEarn = defineStore('repository-earn', () => {
   };
 
   /**
-   * Helper to create transaction with current timestamp (used for exchange)
+   * Helper to create a timestamped transaction with consistent date/time formatting.
    */
-  const createTransaction = (
+  const createTimestampedTransaction = (
     amountUsd: number,
-    type: 'deposit' | 'withdraw',
-    suffix: 'sell' | 'buy',
+    type: EarnPositionTransaction['type'],
+    txId: string,
   ): EarnPositionTransaction => {
     const now = new Date();
     return {
@@ -336,7 +256,7 @@ export const useRepositoryEarn = defineStore('repository-earn', () => {
       date: now.toLocaleDateString(),
       time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       amountUsd: Math.abs(amountUsd),
-      txId: `mock-exchange-${suffix}-${Date.now()}`,
+      txId,
       type,
       status: 'completed',
     };
@@ -346,61 +266,8 @@ export const useRepositoryEarn = defineStore('repository-earn', () => {
    * Helper to create approval transaction with current timestamp
    */
   const createApprovalTransaction = (): EarnPositionTransaction => {
-    const now = new Date();
-    return {
-      id: Date.now(),
-      date: now.toLocaleDateString(),
-      time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      amountUsd: 0,
-      txId: `mock-approval-${Date.now()}`,
-      type: 'approval',
-      status: 'completed',
-    };
-  };
-
-  /**
-   * Helper to get or create position and update availableAmountUsd
-   */
-  const updatePositionAvailableAmount = (
-    list: EarnPositionsResponse[],
-    profileId: string | number,
-    symbol: string,
-    poolId: string,
-    amountDelta: number,
-    transaction: EarnPositionTransaction,
-  ): void => {
-    const symbolUpper = symbol.toUpperCase();
-    const index = list.findIndex(
-      (p) =>
-        p.profileId === profileId &&
-        (poolId ? p.poolId === poolId : p.symbol?.toUpperCase() === symbolUpper)
-    );
-
-    if (index !== -1) {
-      const existing = list[index];
-      const currentAvailable = existing.availableAmountUsd ?? existing.stakedAmountUsd ?? 0;
-      list[index] = {
-        ...existing,
-        availableAmountUsd: currentAvailable + amountDelta,
-        transactions: [transaction, ...existing.transactions],
-      };
-    } else {
-      // Find existing position for the symbol to get current available amount
-      const existingPosition = positionsPools.value.find(
-        (p) => p.profileId === profileId && p.symbol?.toUpperCase() === symbolUpper
-      );
-      const currentAvailable = existingPosition?.availableAmountUsd ?? existingPosition?.stakedAmountUsd ?? 0;
-
-      list.push({
-        poolId: poolId || '',
-        profileId,
-        symbol,
-        stakedAmountUsd: 0,
-        earnedAmountUsd: 0,
-        availableAmountUsd: currentAvailable + amountDelta,
-        transactions: [transaction],
-      });
-    }
+    const txId = `mock-approval-${Date.now()}`;
+    return createTimestampedTransaction(0, 'approval', txId);
   };
 
   /**
@@ -445,45 +312,6 @@ export const useRepositoryEarn = defineStore('repository-earn', () => {
     setTokenApproved(payload.poolId, payload.profileId, payload.symbol);
   };
 
-  /**
-   * Mock exchange positions - updates positionsPools with exchange transactions
-   * Uses positionsPools as single source of truth for balances
-   */
-  const mockExchangePositions = (payload: {
-    profileId: string | number;
-    fromSymbol: string;
-    toSymbol: string;
-    toPoolId: string;
-    fromAmount: number;
-    toAmount: number;
-  }) => {
-    const updatedList: EarnPositionsResponse[] = [...positionsPools.value];
-
-    // Update fromSymbol position (decrease availableAmountUsd)
-    const sellTx = createTransaction(payload.fromAmount, 'withdraw', 'sell');
-    updatePositionAvailableAmount(
-      updatedList,
-      payload.profileId,
-      payload.fromSymbol,
-      '',
-      -payload.fromAmount,
-      sellTx
-    );
-
-    // Update toSymbol position (increase availableAmountUsd)
-    const buyTx = createTransaction(payload.toAmount, 'deposit', 'buy');
-    updatePositionAvailableAmount(
-      updatedList,
-      payload.profileId,
-      payload.toSymbol,
-      payload.toPoolId,
-      payload.toAmount,
-      buyTx
-    );
-
-    positionsPools.value = updatedList;
-  };
-
   const resetAll = () => {
     depositState.value = {
       loading: false,
@@ -513,7 +341,6 @@ export const useRepositoryEarn = defineStore('repository-earn', () => {
     withdraw,
     getPositions,
     mockApprovalTransaction,
-    mockExchangePositions,
     isTokenApproved,
     resetAll,
   };

@@ -9,6 +9,7 @@ import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
 import { useRepositoryEarn } from 'InvestCommon/data/earn/earn.repository';
 import { IEvmExchangeRequestBody, IEvmWalletBalances } from 'InvestCommon/data/evm/evm.types';
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 
 export function useVFormExchange(
   emitClose?: () => void,
@@ -19,6 +20,8 @@ export function useVFormExchange(
   const evmRepository = useRepositoryEvm();
   const { getEvmWalletState, exchangeTokensState, exchangeTokensOptionsState } = storeToRefs(evmRepository);
   const earnRepository = useRepositoryEarn();
+  const profilesStore = useProfilesStore();
+  const { selectedUserProfileId } = storeToRefs(profilesStore);
 
   onMounted(() => {
     evmRepository.exchangeTokensOptions();
@@ -126,42 +129,18 @@ export function useVFormExchange(
 
   const handleEarnExchange = async (fromAmount: number) => {
     if (!defaultBuySymbol || !poolId || !profileId) return;
-    const fromSymbol = selectedToken.value?.symbol || 'USDC';
-    const rate = exchangeRate.value || 1;
-    const usdcEquivalent = fromAmount * rate;
-    const destinationToken = getEvmWalletState.value.data?.balances?.find(
-      (token: any) => token.symbol === defaultBuySymbol
-    );
-    const buyAmount = destinationToken?.price_per_usd
-      ? usdcEquivalent / destinationToken.price_per_usd
-      : usdcEquivalent;
-
-    // Update Earn mock positions (Earn as bookkeeping of exchange)
-    earnRepository.mockExchangePositions({
-      profileId,
-      fromSymbol,
-      toSymbol: defaultBuySymbol,
-      toPoolId: poolId,
-      fromAmount,
-      toAmount: buyAmount,
-    });
-    earnRepository.getPositions(poolId, profileId);
-
-    // Mock: keep EVM wallet balances in sync with Earn exchange.
-    // - Decrease from-token balance in wallet
-    // - Increase destination-token balance in wallet
-    evmRepository.applyEarnSupplyToWallet(
-      Number(profileId),
-      fromSymbol,
-      selectedToken.value?.name,
-      fromAmount,
-    );
-    evmRepository.applyEarnWithdrawToWallet(
-      Number(profileId),
-      defaultBuySymbol,
-      destinationToken?.name,
-      buyAmount,
-    );
+    const data: IEvmExchangeRequestBody = {
+      from: String(model.from),
+      to: String(model.to),
+      amount: fromAmount,
+      wallet_id: Number(model.wallet_id),
+    };
+    await evmRepository.exchangeTokens(data);
+    if (!getEvmWalletState.value.error) {
+      // Refresh wallet and Earn positions for this pool/profile to reflect backend state
+      await evmRepository.getEvmWalletByProfile(Number(profileId));
+      await earnRepository.getPositions(poolId, profileId);
+    }
   };
 
   const saveHandler = async () => {
@@ -184,7 +163,10 @@ export function useVFormExchange(
       wallet_id: Number(model.wallet_id),
     };
     await evmRepository.exchangeTokens(data);
-    if (getEvmWalletState.value.error) return;
+    if (!getEvmWalletState.value.error && selectedUserProfileId.value) {
+      // Global wallet context: refresh wallet data after successful exchange.
+      await evmRepository.getEvmWalletByProfile(Number(selectedUserProfileId.value));
+    }
     if (emitClose) emitClose();
   };
 

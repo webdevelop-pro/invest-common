@@ -16,7 +16,7 @@ defineProps<{
   disabled?: boolean;
   errorData?: unknown;
   isFieldRequired: (field: string) => boolean;
-  getErrorText: (...args: any[]) => any;
+  getErrorText: (...args: unknown[]) => unknown;
 }>();
 
 const emit = defineEmits<{

@@ -345,7 +345,9 @@ describe('useKycButton', () => {
       
       await store.onClick();
       
-      expect(hrefSpy).toHaveBeenCalledWith(urlProfileKYC(555));
+      const expectedBaseUrl = urlProfileKYC(555);
+      expect(hrefSpy).toHaveBeenCalledWith(expect.stringContaining(expectedBaseUrl));
+      expect(hrefSpy.mock.calls[0][0]).toContain('redirect=');
       expect(mockKycRepository.handlePlaidKyc).not.toHaveBeenCalled();
     });
     it('should call handlePlaidKyc when selectedUserProfileShowKycInitForm is false', async () => {

@@ -8,6 +8,7 @@ import VTableYieldItem from './components/VTableYieldItem.vue';
 import { useEarnTable } from './composables/useEarnTable';
 import { useWalletAlert } from 'InvestCommon/features/wallet/logic/useWalletAlert';
 import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
+import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 
 const VAlert = defineAsyncComponent({
   loader: () => import('UiKit/components/VAlert.vue'),
@@ -57,7 +58,8 @@ const {
   alertTitle,
   alertButtonText,
   onAlertButtonClick,
-} = useWalletAlert();
+  isDataLoading,
+} = useWalletAlert({ hideFiatAlerts: true });
 
 const dialogsStore = useDialogs();
 
@@ -85,8 +87,19 @@ onMounted(() => {
       :sub-title="EARN_TAB_INFO.subTitle"
       :text="EARN_TAB_INFO.text"
     />
+    <div
+      v-if="isDataLoading"
+      class="dashboard-earn__alert dashboard-earn__alert-skeleton"
+      data-testid="earn-alert-skeleton"
+    >
+      <VSkeleton
+        height="50px"
+        width="100%"
+        class="dashboard-earn__alert-skeleton-line"
+      />
+    </div>
     <VAlert
-      v-if="isAlertShow"
+      v-else-if="isAlertShow"
       :variant="isAlertType"
       data-testid="earn-alert"
       class="dashboard-earn__alert"

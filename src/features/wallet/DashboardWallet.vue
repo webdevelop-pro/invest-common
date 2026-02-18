@@ -9,15 +9,18 @@ import DashboardWalletHeader from 'InvestCommon/features/wallet/components/Dashb
 import DashboardWalletBalanceCards from 'InvestCommon/features/wallet/components/DashboardWalletBalanceCards.vue';
 import DashboardWalletTabs from 'InvestCommon/features/wallet/components/DashboardWalletTabs.vue';
 import VDialogWallet from 'InvestCommon/features/wallet/components/VDialogWallet.vue';
+import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 
 const {
   activeTab,
   summaryEvmWalletState,
   isWalletDataLoading,
+  isAlertDataLoading,
   isAlertShow,
   isAlertType,
   isAlertText,
   alertTitle,
+  isWalletBlocked,
   alertButtonText,
   onAlertButtonClick,
   handleContactUsClick,
@@ -40,8 +43,20 @@ const {
 
 <template>
   <div class="DashboardWallet dashboard-wallet">
+    <div
+      v-if="isAlertDataLoading"
+      class="dashboard-wallet__alert dashboard-wallet__alert-skeleton"
+      data-testid="funding-alert-skeleton"
+    >
+      <VSkeleton
+        height="50px"
+        width="100%"
+        class="dashboard-wallet__alert-skeleton-line"
+      />
+    </div>
     <DashboardWalletAlert
-      :show="isAlertShow"
+      v-else-if="isAlertShow"
+      :show="true"
       :variant="isAlertType"
       :alert-text="isAlertText"
       :alert-title="alertTitle"
@@ -57,12 +72,20 @@ const {
       :loading="isWalletDataLoading"
       :buttons="primaryButtons"
       :more-buttons="moreButtons"
+      :class="[
+        'dashboard-wallet__content',
+        { 'dashboard-wallet__content--blocked': isWalletBlocked },
+      ]"
       @click="handlePrimaryActionClick"
     />
 
     <div
       v-if="showTable"
       class="dashboard-wallet__wrap"
+      :class="[
+        'dashboard-wallet__content',
+        { 'dashboard-wallet__content--blocked': isWalletBlocked },
+      ]"
     >
       <DashboardWalletBalanceCards
         :cards="balanceCards"
@@ -100,6 +123,19 @@ const {
 
   &__alert {
     margin-bottom: 0 !important;
+  }
+
+  &__alert-wrapper {
+    position: relative;
+  }
+
+  &__content {
+    transition: opacity 0.2s ease-in-out;
+  }
+
+  &__content--blocked {
+    opacity: 0.4;
+    pointer-events: none;
   }
 
   &__wrap {

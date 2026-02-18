@@ -1,7 +1,6 @@
 import { computed, onMounted } from 'vue';
 import { useCryptoData } from './useCryptoData';
 import { usePortfolioData } from './usePortfolioData';
-import { useWalletData } from './useWalletData';
 import { useRepositoryOffer } from 'InvestCommon/data/offer/offer.repository';
 
 // Re-export types for convenience
@@ -11,7 +10,6 @@ export type { DonutDatum, SideInfoItem } from './usePortfolioData';
 export function useSummaryData() {
   const cryptoData = useCryptoData();
   const portfolioData = usePortfolioData();
-  const walletData = useWalletData();
   const offerRepo = useRepositoryOffer();
 
   // Ensure offers are loaded for dependent computed values like topFundedOffer
@@ -64,9 +62,6 @@ export function useSummaryData() {
     
     // Portfolio data
     ...portfolioData,
-    
-    // Wallet data
-    ...walletData,
     
     // Combined loading state
     isLoading,

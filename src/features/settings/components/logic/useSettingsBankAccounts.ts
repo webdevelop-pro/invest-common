@@ -3,9 +3,9 @@ import { storeToRefs } from 'pinia';
 import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository';
 import { loadPlaidScriptOnce, type PlaidHandler } from 'InvestCommon/data/plaid/loadPlaidScriptOnce';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
-import { useWallet } from 'InvestCommon/features/wallet/logic/useWallet';
 import type { IProfileFormatted } from 'InvestCommon/data/profiles/profiles.types';
 import type { IFundingSourceDataFormatted } from 'InvestCommon/data/wallet/wallet.types';
+import { useWallet } from 'InvestCommon/features/wallet/logic/useWallet';
 
 let plaidHandler: PlaidHandler | null = null;
 let expectedLinkSessionId: string | null = null;
@@ -13,9 +13,19 @@ let expectedLinkSessionId: string | null = null;
 const SKELETON_ITEM_COUNT = 2;
 const PLAID_OPEN_DELAY_MS = 1000;
 
-export function useSettingsBankAccounts() {
+export interface UseSettingsBankAccountsOptions {
+  /**
+   * When true, skip the initial wallet fetch on mount.
+   * This is useful when reusing only the Plaid \"Add Bank Account\" flow
+   * outside of the Settings page (e.g. wallet alert), to avoid extra fetches.
+   */
+  skipInitialUpdate?: boolean;
+}
+
+export function useSettingsBankAccounts(options: UseSettingsBankAccountsOptions = {}) {
   const { selectedUserProfileData } = storeToRefs(useProfilesStore());
   const walletRepository = useRepositoryWallet();
+  const { updateData } = useWallet();
   const {
     getWalletState,
     deleteLinkedAccountState,
@@ -23,7 +33,6 @@ export function useSettingsBankAccounts() {
     createLinkExchangeState,
     createLinkTokenState,
   } = storeToRefs(walletRepository);
-  const { updateData } = useWallet();
 
   const profile = computed<IProfileFormatted | null | undefined>(
     () => selectedUserProfileData.value as IProfileFormatted | null | undefined,
@@ -50,7 +59,9 @@ export function useSettingsBankAccounts() {
   );
 
   onMounted(() => {
-    void updateData();
+    if (!options.skipInitialUpdate && profileId.value > 0) {
+      void updateData();
+    }
   });
 
   async function onDeleteAccountClick(sourceId: string | number) {
@@ -58,7 +69,7 @@ export function useSettingsBankAccounts() {
     await walletRepository.deleteLinkedAccount(profileId.value, {
       funding_source_id: String(sourceId),
     });
-    await walletRepository.getWalletByProfile(profileId.value);
+    await updateData();
   }
 
   async function plaidOnLinkSuccess(publicToken: string) {
@@ -78,7 +89,7 @@ export function useSettingsBankAccounts() {
       );
       await Promise.all(promises);
     }
-    await walletRepository.getWalletByProfile(profileId.value);
+    await updateData();
   }
 
   async function onAddAccountClick() {
@@ -102,13 +113,20 @@ export function useSettingsBankAccounts() {
           await plaidOnLinkSuccess(publicToken);
           isLinkBankAccountLoading.value = false;
         },
-        onLoad: () => {},
+        onLoad: () => {
+          isLinkBankAccountLoading.value = false;
+        },
         onExit: () => {
           isLinkBankAccountLoading.value = false;
         },
-        onEvent: (_eventName: string, metadata: { link_session_id?: string }) => {
+        onEvent: (eventName: string, metadata: { link_session_id?: string }) => {
           if (!expectedLinkSessionId && metadata?.link_session_id) {
             expectedLinkSessionId = metadata.link_session_id;
+          }
+          // As soon as the Plaid Link UI opens (and shows its own loader),
+          // hide our local loading spinner.
+          if (eventName === 'OPEN') {
+            isLinkBankAccountLoading.value = false;
           }
         },
         receivedRedirectUri: null,

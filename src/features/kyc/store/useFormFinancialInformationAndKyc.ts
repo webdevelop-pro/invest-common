@@ -5,7 +5,7 @@ import {
 import { storeToRefs } from 'pinia';
 import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/domain/config/enums/routes';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import env from 'InvestCommon/domain/config/env';
 import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
 import { scrollToError } from 'UiKit/helpers/validation/general';
@@ -17,6 +17,7 @@ import { useRepositoryKyc } from 'InvestCommon/data/kyc/kyc.repository';
 
 export const useFormFinancialInformationAndKyc = () => {
   const router = useRouter();
+  const route = useRoute();
   const userProfileStore = useProfilesStore();
   const { selectedUserProfileId, selectedUserProfileType, selectedUserProfileData } = storeToRefs(userProfileStore);
   const useRepositoryProfilesStore = useRepositoryProfiles();
@@ -116,10 +117,22 @@ export const useFormFinancialInformationAndKyc = () => {
           selectedUserProfileData.value?.id
         );
       }
-      isLoading.value = false;
       if (!setProfileByIdState.value.error) hubspotHandle();
       useRepositoryProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
-      router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
+      const redirectParam = route.query.redirect;
+
+      if (typeof redirectParam === 'string' && redirectParam) {
+        if (/^https?:\/\//.test(redirectParam)) {
+          window.location.href = redirectParam;
+        } else {
+          await router.push(redirectParam);
+        }
+      } else {
+        await router.push({
+          name: ROUTE_DASHBOARD_ACCOUNT,
+          params: { profileId: selectedUserProfileId.value },
+        });
+      }
     } finally {
       isLoading.value = false;
     }

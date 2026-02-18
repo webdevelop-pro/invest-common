@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
+import VAlert from 'UiKit/components/VAlert.vue';
 import plus from 'UiKit/assets/images/plus.svg?component';
 import VInfoBankAccountItem from 'UiKit/components/VInfo/VInfoBankAccountItem.vue';
+import { useWalletAlert } from 'InvestCommon/features/wallet/logic/useWalletAlert';
 import { useSettingsBankAccounts } from './logic/useSettingsBankAccounts';
 
 const {
@@ -14,6 +16,17 @@ const {
   showSkeletonPlaceholders,
   skeletonItemCount,
 } = useSettingsBankAccounts();
+
+// Show all fiat-related wallet alerts on the Bank Accounts settings tab,
+// except the "connect a bank account" info alert (redundant on this page).
+const {
+  isAlertShow,
+  isAlertType,
+  isAlertText,
+  alertTitle,
+  alertButtonText,
+  onAlertButtonClick,
+} = useWalletAlert({ hideBankAccountMissingInfo: true });
 </script>
 
 <template>
@@ -21,6 +34,27 @@ const {
     <h2 class="settings-bank-accounts__title">
       Connected Bank Accounts
     </h2>
+
+    <VAlert
+      v-if="isAlertShow"
+      :variant="isAlertType"
+      class="settings-bank-accounts__alert"
+      :button-text="alertButtonText"
+      @click="onAlertButtonClick"
+    >
+      <template
+        v-if="alertTitle"
+        #title
+      >
+        {{ alertTitle }}
+      </template>
+      <template
+        v-if="isAlertText"
+        #description
+      >
+        <span v-dompurify-html="isAlertText" />
+      </template>
+    </VAlert>
 
     <div
       v-if="fundingSource.length > 0"
@@ -77,6 +111,10 @@ const {
   }
 
   &__list {
+    width: 100%;
+  }
+
+  &__alert {
     width: 100%;
   }
 
