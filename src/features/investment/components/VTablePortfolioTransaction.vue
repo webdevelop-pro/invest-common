@@ -38,10 +38,21 @@ const time = computed(() => (
             {{ time }}
           </div>
         </VTableCell>
+
         <VTableCell
           v-if="investment?.payment_data?.transaction_id"
+          class="v-table-portfolio-transaction__transaction-cell"
         >
-          <VTooltip>
+          <div class="v-table-portfolio-transaction__type is--lt-tablet-show">
+            <VBadge
+              size="small"
+              class="is--background-purple-light"
+            >
+              Investment
+            </VBadge>
+          </div>
+
+          <VTooltip class="v-table-wallet-transactions__tooltip">
             <div class="v-table-wallet-transactions__transaction-id is--small-2">
               ID {{ investment?.payment_data?.transaction_id }}
             </div>
@@ -50,7 +61,8 @@ const time = computed(() => (
             </template>
           </VTooltip>
         </VTableCell>
-        <VTableCell>
+
+        <VTableCell class="is--gt-tablet-show">
           <div class="v-table-portfolio-transaction__type">
             <VBadge
               size="small"
@@ -60,12 +72,18 @@ const time = computed(() => (
             </VBadge>
           </div>
         </VTableCell>
-        <VTableCell>
+
+        <VTableCell class="is--gt-tablet-show">
           {{ InvestTransactionStatuses[investment.funding_status]?.text }}
         </VTableCell>
-        <VTableCell>
+  
+        <VTableCell class="v-table-portfolio-transaction__amount-cell">
           <div class="v-table-portfolio-transaction__amount is--h6__title">
             {{ investment.amountFormatted }}
+          </div>
+
+          <div class="is--lt-tablet-show">
+            {{ InvestTransactionStatuses[investment.funding_status]?.text }}
           </div>
         </VTableCell>
       </VTableRow>
@@ -87,6 +105,10 @@ const time = computed(() => (
   &__amount {
     color: $black;
     text-align: right;
+
+    @media screen and (width < $tablet){
+      margin-bottom: 12px !important;
+    }
   }
 
   &__time {
@@ -95,42 +117,19 @@ const time = computed(() => (
 
   &__type {
     display: flex;
+
+    @media screen and (width < $tablet){
+      margin-bottom: 12px;
+    }
   }
 
   &__transaction-id {
     color: $gray-80;
   }
 
-  .v-table-cell {
-    &:nth-child(2) {
-      width: 135px;
-
-      @media screen and (width < $desktop){
-        text-align: right;
-      }
-    }
-
-    &:nth-child(1),
-    &:nth-child(2) {
-      @media screen and (width < $desktop){
-        flex: 0 0 50%;
-      }
-    }
-
-    &:nth-child(4) {
-      @media screen and (width < $desktop){
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-    }
-
-    &:nth-child(5) {
-      @media screen and (width < $desktop){
-        display: flex;
-        align-items: center;
-        justify-content: end;
-      }
+  &__amount-cell {
+    @media screen and (width < $tablet){
+      text-align: right;
     }
   }
 }

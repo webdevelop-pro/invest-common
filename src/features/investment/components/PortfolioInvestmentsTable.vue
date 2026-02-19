@@ -7,14 +7,15 @@ import { useDashboardPortfolioStore } from '../store/useDashboardPortfolio';
 import VTablePortfolioItem from './VTablePortfolioItem.vue';
 
 const portfolioTableHeader = [
-  { text: 'ID' },
-  { text: 'Offer' },
-  { text: 'Date' },
+  { text: 'ID', class: 'is--gt-tablet-show' },
+  { text: 'Offer', class: 'is--gt-tablet-show' },
+  { text: 'Date', class: 'is--gt-tablet-show' },
+  { text: 'ID/Offer', class: 'is--lt-tablet-show' },
   { text: 'Amount' },
-  { text: 'Ownership' },
-  { text: 'Funding Type' },
-  { text: 'Status' },
-  { text: '' },
+  { text: 'Ownership', class: 'is--gt-tablet-show' },
+  { text: 'Funding Type', class: 'is--gt-tablet-show' },
+  { text: 'Status', class: 'is--gt-tablet-show' },
+  { text: '', class: 'is--gt-tablet-show' },
 ];
 
 const portfolioStore = useDashboardPortfolioStore();

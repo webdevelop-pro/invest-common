@@ -31,6 +31,7 @@ type TableItem = {
   loading?: boolean,
   rowLength?: number,
   colspan?: number,
+  emptyText?: string,
 };
 
 defineProps({
@@ -179,6 +180,11 @@ const emit = defineEmits<{
           :loading-row-length="table.rowLength ?? 5"
           :colspan="table.colspan ?? table.header.length"
         >
+          <template #empty>
+            <p>
+              {{ table.emptyText || 'No data available.' }}
+            </p>
+          </template>
           <component
             :is="table.tableRowComponent"
             v-for="(row, rIndex) in table.data"

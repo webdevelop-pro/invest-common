@@ -195,6 +195,7 @@ const { isEmpty, isChartSection, getYFormatter } = useEarnOverview(props);
 
   &__info-value {
     overflow-wrap: break-word;
+    word-break: break-word;
   }
 
   &__info-links {

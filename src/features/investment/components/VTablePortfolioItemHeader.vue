@@ -29,7 +29,10 @@ const profileType = computed(() => selectedUserProfileData.value?.type || '');
   <VTableRow
     class="VTableItemHeader v-table-item-header"
   >
-    <VTableCell v-highlight="search">
+    <VTableCell
+      v-highlight="search"
+      class="is--gt-tablet-show"
+    >
       <router-link
         :to="{ name: ROUTE_INVESTMENT_DOCUMENTS, params: { profileId: selectedUserProfileId, id: item.id } }"
         class="v-table-item-header__link is--link-1"
@@ -38,7 +41,17 @@ const profileType = computed(() => selectedUserProfileData.value?.type || '');
         {{ item.id }}
       </router-link>
     </VTableCell>
+
     <VTableCell>
+      <router-link
+        v-highlight="search"
+        :to="{ name: ROUTE_INVESTMENT_DOCUMENTS, params: { profileId: selectedUserProfileId, id: item.id } }"
+        class="v-table-item-header__link is--link-1 is--lt-tablet-show"
+        @click.stop
+      >
+        {{ item.id }}
+      </router-link>
+
       <div class="v-table-item-header__table-offer is--body">
         <div class="v-table-item-header__table-image-wrap">
           <VImage
@@ -59,22 +72,50 @@ const profileType = computed(() => selectedUserProfileData.value?.type || '');
         </div>
       </div>
     </VTableCell>
-    <VTableCell class="v-table-item-header__date">
+
+    <VTableCell class="v-table-item-header__date is--gt-tablet-show">
       {{ item.submitedAtFormatted }}
     </VTableCell>
-    <VTableCell class="v-table-item-header__amount is--color-black is--h5__title">
+
+    <VTableCell class="v-table-item-header__amount">
       <router-link
         :to="{ name: ROUTE_INVESTMENT_DOCUMENTS, params: { profileId: selectedUserProfileId, id: item.id } }"
-        class="v-table-item-header__link is--link-1"
+        class="v-table-item-header__link is--link-1 is--color-black is--h5__title"
         @click.stop
       >
         {{ item.amountFormattedZero }}
       </router-link>
+
+      <div class="is--lt-tablet-show">
+        {{ item.submitedAtFormatted }}
+      </div>
+
+      <div class="v-table-item-header__ownership is--lt-tablet-show">
+        {{ profileType.charAt(0).toUpperCase() + profileType.slice(1) }}
+      </div>
+
+      <button
+        class="v-table-item-header__table-funding-type is--lt-tablet-show"
+        :class="{ 'is--link-regular': item.isFundingClickable }"
+        @click.stop="emit('clickFundingType', item.id)"
+      >
+        {{ item.fundingTypeFormatted }}
+      </button>
+
+      <VBadge
+        :color="item.statusFormatted.color"
+        size="small"
+        class="is--lt-tablet-show"
+      >
+        {{ item.statusFormatted.text }}
+      </VBadge>
     </VTableCell>
-    <VTableCell class="v-table-item-header__ownership">
+
+    <VTableCell class="v-table-item-header__ownership is--gt-tablet-show">
       {{ profileType.charAt(0).toUpperCase() + profileType.slice(1) }}
     </VTableCell>
-    <VTableCell>
+
+    <VTableCell class="is--gt-tablet-show">
       <button
         class="v-table-item-header__table-funding-type"
         :class="{ 'is--link-regular': item.isFundingClickable }"
@@ -83,14 +124,16 @@ const profileType = computed(() => selectedUserProfileData.value?.type || '');
         {{ item.fundingTypeFormatted }}
       </button>
     </VTableCell>
-    <VTableCell class="v-table-item-header__status">
+
+    <VTableCell class="v-table-item-header__status is--gt-tablet-show">
       <VBadge
         :color="item.statusFormatted.color"
       >
         {{ item.statusFormatted.text }}
       </VBadge>
     </VTableCell>
-    <VTableCell>
+
+    <VTableCell class="is--gt-tablet-show">
       <chevronDownIcon class="v-table-item-header__chevron" />
     </VTableCell>
   </VTableRow>
@@ -104,6 +147,15 @@ const profileType = computed(() => selectedUserProfileData.value?.type || '');
 
   color: $gray-80;
   cursor: pointer !important;
+
+  &__amount {   
+    @media screen and (width < $tablet){
+      gap: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
 
   &__link {
     color: $gray-80;
@@ -173,6 +225,10 @@ const profileType = computed(() => selectedUserProfileData.value?.type || '');
     #{$root}__chevron {
       transform: rotate(180deg);
     }
+  }
+
+  .v-table-cell {
+    vertical-align: top;
   }
 }
 </style>

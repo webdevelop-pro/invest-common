@@ -10,6 +10,7 @@ export interface StatItem {
 
 interface TableHeader {
   text: string;
+  class?: string;
 }
 
 interface UseEarnYourPositionProps {
@@ -20,9 +21,10 @@ interface UseEarnYourPositionProps {
 
 const TABLE_HEADERS: TableHeader[] = [
   { text: 'Date' },
-  { text: 'Transaction ID' },
-  { text: 'Type' },
-  { text: 'Status' },
+  { text: 'Type', class: 'is--gt-tablet-show' },
+  { text: 'Transaction ID', class: 'is--gt-tablet-show' },
+  { text: 'Type / ID', class: 'is--lt-tablet-show' },
+  { text: 'Status', class: 'is--gt-tablet-show' },
   { text: 'Amount' },
 ];
 
@@ -47,6 +49,7 @@ export function useEarnYourPosition(props: UseEarnYourPositionProps) {
       rowLength: TABLE_ROW_LENGTH,
       colspan: TABLE_COLSPAN,
       tableRowComponent: VTableEarnTransactionItem,
+      emptyText: 'You don’t have any transactions yet.',
     },
   ]);
 

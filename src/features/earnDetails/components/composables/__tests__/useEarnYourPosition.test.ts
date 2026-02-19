@@ -99,12 +99,13 @@ describe('useEarnYourPosition', () => {
       
       const table = tables[0];
       expect(table.title).toBe('Transactions:');
-      expect(table.header).toHaveLength(5);
+      expect(table.header).toHaveLength(6);
       expect(table.header[0].text).toBe('Date');
-      expect(table.header[1].text).toBe('Transaction ID');
-      expect(table.header[2].text).toBe('Type');
-      expect(table.header[3].text).toBe('Status');
-      expect(table.header[4].text).toBe('Amount');
+      expect(table.header[1].text).toBe('Type');
+      expect(table.header[2].text).toBe('Transaction ID');
+      expect(table.header[3].text).toBe('Type / ID');
+      expect(table.header[4].text).toBe('Status');
+      expect(table.header[5].text).toBe('Amount');
       expect(table.data).toEqual(mockTransactions);
       expect(table.loading).toBe(false);
       expect(table.rowLength).toBe(5);

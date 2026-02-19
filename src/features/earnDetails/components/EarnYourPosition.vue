@@ -83,11 +83,11 @@ const canWithdraw = computed(() => {
     }
   }
 
-  .v-table-header {
-    @media screen and (width < $desktop) {
-      display: none;
-    }
-  }
+  // .v-table-header {
+  //   @media screen and (width < $desktop) {
+  //     display: none;
+  //   }
+  // }
 }
 </style>
 

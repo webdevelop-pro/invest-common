@@ -13,66 +13,57 @@ const props = withDefaults(defineProps<Props>(), {
   loading: false,
 });
 
-const { formattedType, hasTransactionId, badgeColor } = useEarnTransactionItem(props);
+const { formattedType, hasTransactionId } = useEarnTransactionItem(props);
 </script>
 
 <template>
   <VTableRow
     class="VTableEarnTransaction v-table-earn-transaction"
   >
-    <VTableCell>
-      <div>
-        {{ data?.date }}
-      </div>
-      <div class="is--color-gray-60">
-        {{ data?.time }}
+    <VTableCell class="v-table-earn-transaction__date-cell">
+      <div class="v-table-earn-transaction__date">
+        <div>{{ data?.date }}</div>
+        <div class="is--color-gray-60 is--small-2">
+          {{ data?.time }}
+        </div>
       </div>
     </VTableCell>
+
+    <VTableCell class="is--gt-tablet-show">
+      <span class="v-table-earn-transaction__type is--small-2">
+        {{ formattedType }}
+      </span>
+    </VTableCell>
+
     <VTableCell>
+      <div class="v-table-earn-transaction__type is--small-2  is--lt-tablet-show">
+        {{ formattedType }}
+      </div>
       <VTooltip v-if="hasTransactionId">
-        <div class="v-table-earn-transaction__transaction-id is--small-2">
+        <div class="v-table-earn-transaction__tx is--small-2">
           ID {{ data?.transaction_id }}
         </div>
         <template #content>
           {{ data?.transaction_id }}
         </template>
       </VTooltip>
-      <span
+      <div
         v-else
-        class="v-table-earn-transaction__transaction-id is--small-2 is--color-gray-60"
+        class="v-table-earn-transaction__tx is--small-2"
       >
-        —
-      </span>
-    </VTableCell>
-    <VTableCell>
-      <div class="v-table-earn-transaction__table-type">
-        <VBadge
-          v-if="badgeColor"
-          size="small"
-          :color="badgeColor"
-          class="profile-status-info__tag"
-        >
-          {{ formattedType }}
-        </VBadge>
-        <span
-          v-else
-          class="is--small"
-        >
-          {{ formattedType }}
-        </span>
+        <span class="is--color-gray-60">—</span>
       </div>
     </VTableCell>
-    <VTableCell>
-      <VTooltip v-if="data?.status">
-        <span class="is--small">
-          {{ data.status.text }}
-        </span>
-        <template #content>
-          <p>
-            {{ data.status.tooltip }}
-          </p>
-        </template>
-      </VTooltip>
+
+    <VTableCell class="is--gt-tablet-show">
+      <VBadge
+        v-if="data?.status"
+        color="secondary-light"
+        size="small"
+        class="v-table-earn-transaction__status"
+      >
+        {{ data.status.text }}
+      </VBadge>
       <span
         v-else
         class="is--small is--color-gray-60"
@@ -80,10 +71,20 @@ const { formattedType, hasTransactionId, badgeColor } = useEarnTransactionItem(p
         —
       </span>
     </VTableCell>
-    <VTableCell>
-      <div class="v-table-earn-transaction__table-amount is--h6__title">
+
+    <VTableCell class="v-table-earn-transaction__amount-cell">
+      <div class="v-table-earn-transaction__amount is--body">
         {{ data?.amount || '—' }}
       </div>
+
+      <VBadge
+        v-if="data?.status"
+        color="secondary-light"
+        size="small"
+        class="v-table-earn-transaction__status is--lt-tablet-show"
+      >
+        {{ data.status.text }}
+      </VBadge>
     </VTableCell>
   </VTableRow>
 </template>
@@ -92,65 +93,57 @@ const { formattedType, hasTransactionId, badgeColor } = useEarnTransactionItem(p
 @use 'UiKit/styles/_colors.scss' as *;
 
 .v-table-earn-transaction {
-  @media screen and (width < $desktop) {
+  &__date {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
+    gap: 2px;
   }
 
-  &__table-amount {
+  &__date-cell {
+    @media screen and (width < $tablet) {
+      vertical-align: top;
+    }
+  }
+
+  &__tx {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    text-align: initial;
+    word-break: break-word;
+  }
+
+  &__type {
+    @media screen and (width < $tablet) {
+      margin-bottom: 12px;
+    }
+  }
+
+  &__status {
+    width: fit-content;
+  }
+
+  &__amount {
     text-align: right;
+    width: max-content;
+    margin-left: auto;
     color: $black;
-    width: 100%;
 
+    &.is--positive {
+      color: $secondary;
+    }
 
-    @media screen and (width < $desktop) {
-      width: max-content;
+    &.is--negative {
+      color: $red;
     }
   }
 
-  &__table-type {
-    display: flex;
-  }
-
-  &__transaction-id {
-    color: $gray-80;
-    max-width: 110px;
-    width: 110px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .v-table-cell {
-    &:nth-child(2) {
-      width: 135px;
-
-      @media screen and (width < $desktop) {
-        text-align: right;
-      }
-    }
-
-    &:nth-child(1),
-    &:nth-child(2) {
-      @media screen and (width < $desktop) {
-        flex: 0 0 50%;
-      }
-    }
-
-    &:nth-child(4) {
-      @media screen and (width < $desktop) {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-    }
-
-    &:nth-child(5) {
-      @media screen and (width < $desktop) {
-        display: flex;
-        align-items: center;
-        justify-content: end;
-      }
+  &__amount-cell {
+    @media screen and (width < $tablet) {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 12px;
     }
   }
 }

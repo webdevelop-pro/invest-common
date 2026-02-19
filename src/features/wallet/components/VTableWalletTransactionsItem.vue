@@ -25,11 +25,13 @@ const { fullTxOrEntityId } = useVTableWalletTransactionsItem(props.data);
         </div>
       </div>
     </VTableCell>
+
     <VTableCell class="is--gt-tablet-show">
       <span class="v-table-wallet-transactions-item__type is--small-2">
         {{ data?.typeDisplay }}
       </span>
     </VTableCell>
+
     <VTableCell>
       <div class="v-table-wallet-transactions-item__type is--small-2 is--lt-tablet-show">
         {{ data?.typeDisplay }}

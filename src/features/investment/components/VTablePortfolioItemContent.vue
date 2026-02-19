@@ -196,6 +196,12 @@ const infoData = computed(() => [
     display: flex;
     justify-content: space-between;
     align-items: center;
+
+    @media screen and (width < $tablet){
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+    }
   }
 
   &__documents {
@@ -207,8 +213,10 @@ const infoData = computed(() => [
     width: 32%;
     padding-left: 52px;
 
-    @media screen and (max-width: $tablet){
+    @media screen and (width < $tablet){
       padding-left: 0;
+      width: 100%;
+      order: 2;
     }
   }
 
@@ -216,6 +224,11 @@ const infoData = computed(() => [
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 4px 40px;
+
+    @media screen and (width < $tablet){
+      grid-template-columns: repeat(1, minmax(0, 1fr));
+      order: 1;
+    }
   }
 
   &__actions {
@@ -226,8 +239,10 @@ const infoData = computed(() => [
     gap: 8px;
     width: 20%;
 
-    @media screen and (max-width: $tablet){
-      width: 30%;
+    @media screen and (width < $tablet){
+      width: 100%;
+      align-items: flex-start;
+      order: 3;
     }
   }
 

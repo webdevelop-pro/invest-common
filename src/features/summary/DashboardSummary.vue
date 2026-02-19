@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import DashboardTabsTopInfo from 'InvestCommon/features/dashboard/components/DashboardTabsTopInfo.vue';
 import CryptoPricesTicker from 'InvestCommon/features/summary/components/CryptoPricesTicker.vue';
 import CardDonutUnified from 'InvestCommon/features/summary/components/CardDonutUnified.vue';
@@ -38,6 +39,20 @@ const {
   holdingsTable,
   isWalletDataLoading,
 } = useDashboardWallet();
+
+const summaryHoldingsTable = computed(() => {
+  const table = holdingsTable?.value;
+
+  if (!table) return null;
+
+  return {
+    ...table,
+    data: (table.data ?? []).slice(0, 4),
+    infiniteScroll: false,
+    infiniteScrollDisabled: true,
+    onLoadMore: undefined,
+  };
+});
 
 const { isTablet } = useBreakpoints();
 const { sliderData: dashboardTopInfoData, isLoading: isDashboardTopInfoLoading } = useDashboardTopInfoRight();
@@ -162,7 +177,7 @@ const { sliderData: dashboardTopInfoData, isLoading: isDashboardTopInfoLoading }
           <section
             class="dashboard-summary__wallet-tabs"
           >
-            <DashboardWalletTablePanel :table="holdingsTable" />
+            <DashboardWalletTablePanel :table="summaryHoldingsTable" />
           </section>
         </div>
         <VCardOffer
