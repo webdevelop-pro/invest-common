@@ -76,7 +76,10 @@ const profileType = computed(() => selectedUserProfileData.value?.type || '');
           />
         </div>
         <div>
-          <div v-highlight="search" class="is--h3__title">
+          <div
+            v-highlight="search"
+            class="is--h3__title"
+          >
             {{ item.offer?.name }}
           </div>
         </div>

@@ -65,6 +65,11 @@ export const useRepositoryEsign = defineStore('repositoryEsign', () => {
     getDocumentState.value = { loading: false, error: null, data: undefined };
   };
 
+  /** Clear setDocument result only (e.g. after signature is done and entity_id is in investment). */
+  const clearSetDocumentData = () => {
+    setDocumentState.value = { loading: false, error: null, data: undefined };
+  };
+
   return {
     // States
     setDocumentState,
@@ -74,6 +79,7 @@ export const useRepositoryEsign = defineStore('repositoryEsign', () => {
     setDocument,
     getDocument,
     resetAll,
+    clearSetDocumentData,
   };
 });
 

@@ -2,7 +2,7 @@ import {
   describe, it, expect, vi, beforeEach, afterEach,
 } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
-import { ref } from 'vue';
+import { ref, nextTick } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
@@ -67,6 +67,7 @@ describe('useInvestSignature (logic)', () => {
   const mockEsignRepository = {
     setDocument: vi.fn().mockResolvedValue({ entity_id: 'new-entity-id' }),
     getDocument: vi.fn(),
+    clearSetDocumentData: vi.fn(),
     setDocumentState: ref({
       loading: false,
       data: undefined as { entity_id?: string } | undefined,
@@ -108,18 +109,17 @@ describe('useInvestSignature (logic)', () => {
     expect(composable.profileId.value).toBe('test-profile-id');
   });
 
-  it('computes signId from signature_data.entity_id or setDocumentState.data.entity_id', () => {
+  it('computes signId from signature_data.signature_id only (validate by signature_id, not entity_id)', () => {
     const composable = useInvestSignature();
 
-    expect(composable.signId.value).toBe('doc-entity-123');
+    expect(composable.signId.value).toBe('sig-1');
 
-    mockInvestmentRepository.getInvestUnconfirmedOne.value.signature_data!.entity_id = 'other-entity';
+    mockInvestmentRepository.getInvestUnconfirmedOne.value.signature_data!.signature_id = 'other-sig';
     mockInvestmentRepository.getInvestUnconfirmedOne.value = {
       ...mockInvestmentRepository.getInvestUnconfirmedOne.value,
     };
-    // composable uses refs from store, so need new composable to see updated store
     const composable2 = useInvestSignature();
-    expect(composable2.signId.value).toBe('other-entity');
+    expect(composable2.signId.value).toBe('other-sig');
   });
 
   it('computes signUrl as DOCUSEAL_URL (env has /s) + /{entity_id}?external_id={id}', () => {
@@ -163,7 +163,7 @@ describe('useInvestSignature (logic)', () => {
       email: 'test@example.com',
       invest_checkbox_1: true,
       invest_checkbox_2: true,
-      sign_id: 'doc-entity-123',
+      sign_id: 'sig-1',
     });
   });
 
@@ -213,7 +213,6 @@ describe('useInvestSignature (logic)', () => {
     expect(mockEsignRepository.setDocument).toHaveBeenCalledWith(
       'test-slug',
       'test-id',
-      'test-profile-id',
     );
     expect(mockWindowOpen).toHaveBeenCalledWith(
       'https://docuseal-web.webdevelop.biz/s/new-entity-id?external_id=test-id',
@@ -231,12 +230,41 @@ describe('useInvestSignature (logic)', () => {
     expect(mockWindowOpen).not.toHaveBeenCalled();
   });
 
-  it('syncs signId from setDocumentState.data.entity_id after setDocument', async () => {
-    mockInvestmentRepository.getInvestUnconfirmedOne.value.signature_data = { signature_id: '', entity_id: '' };
+  it('signId is from signature_data.signature_id only; setDocument entity_id does not set signId', () => {
+    mockInvestmentRepository.getInvestUnconfirmedOne.value.signature_data = { signature_id: '', entity_id: 'doc-entity-from-set' };
     mockEsignRepository.setDocumentState.value = { loading: false, data: { entity_id: 'from-set-document' } };
 
     const composable = useInvestSignature();
 
-    expect(composable.signId.value).toBe('from-set-document');
+    expect(composable.signId.value).toBe('');
+  });
+
+  it('calls clearSetDocumentData on init when unconfirmed one has entity_id (immediate watcher)', () => {
+    mockEsignRepository.clearSetDocumentData.mockClear();
+    mockInvestmentRepository.getInvestUnconfirmedOne.value = {
+      signature_data: { signature_id: '', entity_id: 'doc-entity-123' },
+    } as any;
+
+    useInvestSignature();
+
+    expect(mockEsignRepository.clearSetDocumentData).toHaveBeenCalled();
+  });
+
+  it('calls clearSetDocumentData when signId becomes set', async () => {
+    mockInvestmentRepository.getInvestUnconfirmedOne.value = {
+      signature_data: { signature_id: '', entity_id: 'doc-entity-123' },
+    } as any;
+
+    useInvestSignature();
+    mockEsignRepository.clearSetDocumentData.mockClear();
+
+    mockInvestmentRepository.getInvestUnconfirmedOne.value = {
+      ...mockInvestmentRepository.getInvestUnconfirmedOne.value,
+      signature_data: { signature_id: 'signed-123', entity_id: 'doc-entity-123' },
+    };
+
+    await nextTick();
+
+    expect(mockEsignRepository.clearSetDocumentData).toHaveBeenCalled();
   });
 });

@@ -21,9 +21,9 @@ describe('useInvestSignatureForm', () => {
     expect(composable.isBtnDisabled.value).toBe(true);
   });
 
-  it('computes canContinue only when both checkboxes checked and signId (entity_id) provided', () => {
+  it('computes canContinue only when both checkboxes checked and signId (signature_id) provided', () => {
     const props = reactive({
-      signId: 'doc-entity-123',
+      signId: 'sig-123',
       isLoading: false,
       signUrl: 'https://docuseal-web.webdevelop.biz/s/doc-entity-123',
     });

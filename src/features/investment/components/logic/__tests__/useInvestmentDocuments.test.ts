@@ -53,6 +53,7 @@ const mockInvestmentRepository = {
 const mockEsignRepository = {
   getDocument: vi.fn().mockResolvedValue(new Blob(['test'], { type: 'application/pdf' })),
   getDocumentState: ref({ loading: false, error: null, data: null as Blob | null }),
+  clearSetDocumentData: vi.fn(),
 };
 
 const mockFilerRepository = {

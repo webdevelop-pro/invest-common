@@ -30,6 +30,15 @@ export interface INotificationDataFields {
   investment_id?: number | null;
   network?: string;
   token?: INotificationToken;
+  /** From WS e.g. investment_investment: object_id + signature_data (signature_id, entity_id, provider, ...) */
+  signature_data?: {
+    signature_id?: number | string;
+    entity_id?: string;
+    provider?: string;
+    created_at?: string;
+    updated_at?: string;
+    [key: string]: unknown;
+  };
 }
 
 interface INotificationData {

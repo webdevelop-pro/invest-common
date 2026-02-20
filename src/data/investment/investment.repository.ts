@@ -334,21 +334,48 @@ export const useRepositoryInvestment = defineStore('repository-investment', () =
     getInvestUnconfirmedOne.value = new InvestmentFormatter().format();
   };
 
-  const updateNotificationData = (notification: INotification) => {
-    const { fields } = notification.data;
-    const objectId = fields?.object_id;
-    Object.assign(getInvestOneState.value.data, fields);  
-    getInvestOneState.value.data = new InvestmentFormatter(getInvestOneState.value.data).format();
-
-    if (!getInvestmentsState.value.data) {
-      getInvestmentsState.value.data = [];
+  /** Normalize WS payload: signature_id may come as number, app uses string */
+  const normalizeFields = (fields: INotification['data']['fields']) => {
+    const normalized = { ...fields } as Record<string, unknown>;
+    const sd = normalized.signature_data as Record<string, unknown> | undefined;
+    if (sd && typeof sd.signature_id !== 'undefined') {
+      normalized.signature_data = { ...sd, signature_id: String(sd.signature_id) };
     }
-    const index = getInvestmentsState.value.data?.findIndex((t) => t.id === objectId);
-    Object.assign(getInvestmentsState.value.data[index], fields);
-    Object.assign(
-      getInvestmentsState.value.data[index], 
-      new InvestmentFormatter(getInvestmentsState.value.data[index]).format()
-    );
+    return normalized;
+  };
+
+  const updateNotificationData = (notification: INotification) => {
+    const { fields } = notification.data ?? {};
+    if (!fields || typeof fields.object_id === 'undefined') return;
+
+    const objectId = Number(fields.object_id);
+    if (Number.isNaN(objectId)) return;
+
+    const normalizedFields = normalizeFields(fields);
+
+    if (getInvestOneState.value.data) {
+      Object.assign(getInvestOneState.value.data, normalizedFields);
+      getInvestOneState.value.data = new InvestmentFormatter(
+        getInvestOneState.value.data as unknown as IInvestment,
+      ).format();
+    }
+
+    const investmentsList = getInvestmentsState.value.data?.data;
+    if (investmentsList?.length) {
+      const index = investmentsList.findIndex((t: IInvestmentFormatted) => t.id === objectId);
+      if (index >= 0) {
+        Object.assign(investmentsList[index], normalizedFields);
+        investmentsList[index] = new InvestmentFormatter(
+          investmentsList[index] as unknown as IInvestment,
+        ).format();
+      }
+    }
+
+    // So signature step sees new signature_id and can close sign tab / enable continue
+    if (getInvestUnconfirmedOne.value?.id === objectId) {
+      const next = { ...getInvestUnconfirmedOne.value, ...normalizedFields } as unknown as IInvestment;
+      getInvestUnconfirmedOne.value = new InvestmentFormatter(next).format();
+    }
   };
 
   return {

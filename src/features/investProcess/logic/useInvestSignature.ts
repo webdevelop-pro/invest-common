@@ -32,6 +32,9 @@ export function useInvestSignature() {
   const id = ref((route.params.id as string) || '');
   const profileId = ref((route.params.profileId as string) || '');
 
+  // Window opened for signUrl — close it when signId is set (user signed)
+  const signWindowRef = ref<Window | null>(null);
+
   // Reference to the signature form instance (exposed from VFormInvestSignature)
   const formRef = ref<{
     canContinue: boolean;
@@ -44,7 +47,7 @@ export function useInvestSignature() {
 
   const signEntityId = computed(() => getInvestUnconfirmedOne.value?.signature_data?.entity_id
     || setDocumentState.value?.data?.entity_id);
-  const signId = computed(() => signEntityId.value);
+  const signId = computed(() => getInvestUnconfirmedOne.value?.signature_data?.signature_id ?? '');
   
   // Computed properties
   const docusealBase = (env.DOCUSEAL_URL || '').replace(/\/$/, '');
@@ -81,12 +84,12 @@ export function useInvestSignature() {
     try {
 
       if (!signEntityId.value) {
-        await esignRepository.setDocument(slug.value, id.value, profileId.value);
+        await esignRepository.setDocument(slug.value, id.value);
         
       }
 
       if (signUrl.value) {
-        window.open(signUrl.value, '_blank');
+        signWindowRef.value = window.open(signUrl.value, '_blank') ?? null;
       }
     } catch (error) {
       console.error('Failed to handle document:', error);
@@ -107,6 +110,29 @@ export function useInvestSignature() {
     [() => getInvestUnconfirmedOne.value?.step, () => formRef.value],
     markCheckboxesIfReview,
     { immediate: true }
+  );
+
+  const entityIdFromInvestment = computed(
+    () => getInvestUnconfirmedOne.value?.signature_data?.entity_id ?? '',
+  );
+
+  // When signId is set (user signed), close the sign tab and clear temporary setDocument data
+  watch(signId, (newSignId) => {
+    if (!newSignId) return;
+    if (signWindowRef.value && !signWindowRef.value.closed) {
+      signWindowRef.value.close();
+      signWindowRef.value = null;
+    }
+    esignRepository.clearSetDocumentData();
+  });
+
+  // Clear setDocument when unconfirmed one already has entity_id (e.g. from load or WS)
+  watch(
+    entityIdFromInvestment,
+    (entityId) => {
+      if (entityId) esignRepository.clearSetDocumentData();
+    },
+    { immediate: true },
   );
 
   return {

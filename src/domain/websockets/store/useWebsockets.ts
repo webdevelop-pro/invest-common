@@ -45,6 +45,7 @@ export const useDomainWebSocketStore = defineStore('domainWebsockets', () => {
         repositoryWallet.updateNotificationData(notification);
         break;
       case 'investment':
+      case 'investment_investment':
         repositoryInvestment.updateNotificationData(notification);
         break;
       case 'offer':
