@@ -149,6 +149,12 @@ const activeTab = ref('investments');
     width: fit-content;
     max-width: 100%;  
   }
+
+  @media screen and (width < $tablet){
+    .v-table-header {
+      display: none;
+    }
+  }
 }
 </style>
 

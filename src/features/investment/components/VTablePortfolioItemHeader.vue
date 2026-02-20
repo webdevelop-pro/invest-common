@@ -42,16 +42,7 @@ const profileType = computed(() => selectedUserProfileData.value?.type || '');
       </router-link>
     </VTableCell>
 
-    <VTableCell>
-      <router-link
-        v-highlight="search"
-        :to="{ name: ROUTE_INVESTMENT_DOCUMENTS, params: { profileId: selectedUserProfileId, id: item.id } }"
-        class="v-table-item-header__link is--link-1 is--lt-tablet-show"
-        @click.stop
-      >
-        {{ item.id }}
-      </router-link>
-
+    <VTableCell class="is--gt-tablet-show">
       <div class="v-table-item-header__table-offer is--body">
         <div class="v-table-item-header__table-image-wrap">
           <VImage
@@ -73,11 +64,38 @@ const profileType = computed(() => selectedUserProfileData.value?.type || '');
       </div>
     </VTableCell>
 
+    <VTableCell class="is--lt-tablet-show">
+      <div class="v-table-item-header__table-offer is--body">
+        <div class="v-table-item-header__table-image-wrap">
+          <VImage
+            :src="item?.offer?.imageMedium"
+            :alt="`${item.offer?.name} image`"
+            fit="cover"
+            class="v-table-item-header__table-image is--lt-tablet-show"
+            :class="{ 'is--default-image': item?.offer?.isDefaultImage }"
+          />
+        </div>
+        <div>
+          <div v-highlight="search" class="is--h3__title">
+            {{ item.offer?.name }}
+          </div>
+        </div>
+      </div>
+    </VTableCell>
+
     <VTableCell class="v-table-item-header__date is--gt-tablet-show">
       {{ item.submitedAtFormatted }}
     </VTableCell>
 
     <VTableCell class="v-table-item-header__amount">
+      <router-link
+        :to="{ name: ROUTE_INVESTMENT_DOCUMENTS, params: { profileId: selectedUserProfileId, id: item.id } }"
+        class="v-table-item-header__link is--link-1"
+        @click.stop
+      >
+        {{ item.id }}
+      </router-link>
+
       <router-link
         :to="{ name: ROUTE_INVESTMENT_DOCUMENTS, params: { profileId: selectedUserProfileId, id: item.id } }"
         class="v-table-item-header__link is--link-1 is--color-black is--h5__title"
@@ -86,12 +104,12 @@ const profileType = computed(() => selectedUserProfileData.value?.type || '');
         {{ item.amountFormattedZero }}
       </router-link>
 
-      <div class="is--lt-tablet-show">
-        {{ item.submitedAtFormatted }}
-      </div>
-
       <div class="v-table-item-header__ownership is--lt-tablet-show">
         {{ profileType.charAt(0).toUpperCase() + profileType.slice(1) }}
+      </div>
+
+      <div class="is--lt-tablet-show">
+        {{ item.submitedAtFormatted }}
       </div>
 
       <button
@@ -148,12 +166,38 @@ const profileType = computed(() => selectedUserProfileData.value?.type || '');
   color: $gray-80;
   cursor: pointer !important;
 
-  &__amount {   
-    @media screen and (width < $tablet){
-      gap: 12px;
+  @media screen and (width < $tablet){
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+  }
+
+  @media screen and (width < $tablet){
+    .v-table-cell {
+      width: 100%;
       display: flex;
-      flex-direction: column;
-      align-items: flex-end;
+      align-items: center;
+      padding: 0;
+    }
+  }
+
+  & &__amount {
+    @media screen and (width < $tablet){
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2px 4px;
+      align-items: baseline;
+      width: 100%;
+      padding: 8px 0 24px;
+
+      > *:nth-child(odd) {
+        text-align: left;
+      }
+
+      > *:nth-child(even) {
+        text-align: right;
+        justify-self: end;
+      }
     }
   }
 
@@ -185,6 +229,13 @@ const profileType = computed(() => selectedUserProfileData.value?.type || '');
     align-items: center;
     max-width: 205px;
     gap: 16px;
+
+    @media screen and (width < $tablet){
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      text-align: center;
+    }
   }
 
   &__table-image-wrap {
@@ -195,6 +246,12 @@ const profileType = computed(() => selectedUserProfileData.value?.type || '');
     justify-content: center;
     align-items: center;
     flex-shrink: 0;
+
+    @media screen and (width < $tablet){
+      width: 100%;
+      height: 150px;
+      margin-bottom: 8px;
+    }
   }
 
   &__table-funding-type {
@@ -225,10 +282,6 @@ const profileType = computed(() => selectedUserProfileData.value?.type || '');
     #{$root}__chevron {
       transform: rotate(180deg);
     }
-  }
-
-  .v-table-cell {
-    vertical-align: top;
   }
 }
 </style>
