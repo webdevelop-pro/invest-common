@@ -49,7 +49,9 @@ export function useInvestSignature() {
   // Computed properties
   const docusealBase = (env.DOCUSEAL_URL || '').replace(/\/$/, '');
   const signUrl = computed(() => {
-    return signEntityId.value && docusealBase ? `${docusealBase}/${signEntityId.value}` : '';
+    if (!signEntityId.value || !docusealBase) return '';
+    const base = `${docusealBase}/${signEntityId.value}`;
+    return id.value ? `${base}?external_id=${id.value}` : base;
   });
   const isLoading = computed(() => 
     setSignatureState.value.loading || 

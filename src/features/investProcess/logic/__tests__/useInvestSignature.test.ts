@@ -122,10 +122,10 @@ describe('useInvestSignature (logic)', () => {
     expect(composable2.signId.value).toBe('other-entity');
   });
 
-  it('computes signUrl as DOCUSEAL_URL (env has /s) + /{entity_id}', () => {
+  it('computes signUrl as DOCUSEAL_URL (env has /s) + /{entity_id}?external_id={id}', () => {
     const composable = useInvestSignature();
 
-    expect(composable.signUrl.value).toBe('https://docuseal-web.webdevelop.biz/s/doc-entity-123');
+    expect(composable.signUrl.value).toBe('https://docuseal-web.webdevelop.biz/s/doc-entity-123?external_id=test-id');
 
     mockInvestmentRepository.getInvestUnconfirmedOne.value.signature_data = { signature_id: '', entity_id: '' };
     mockInvestmentRepository.getInvestUnconfirmedOne.value = {
@@ -193,7 +193,7 @@ describe('useInvestSignature (logic)', () => {
 
     expect(mockEsignRepository.setDocument).not.toHaveBeenCalled();
     expect(mockWindowOpen).toHaveBeenCalledWith(
-      'https://docuseal-web.webdevelop.biz/s/doc-entity-123',
+      'https://docuseal-web.webdevelop.biz/s/doc-entity-123?external_id=test-id',
       '_blank',
     );
   });
@@ -216,7 +216,7 @@ describe('useInvestSignature (logic)', () => {
       'test-profile-id',
     );
     expect(mockWindowOpen).toHaveBeenCalledWith(
-      'https://docuseal-web.webdevelop.biz/s/new-entity-id',
+      'https://docuseal-web.webdevelop.biz/s/new-entity-id?external_id=test-id',
       '_blank',
     );
   });
