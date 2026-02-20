@@ -15,11 +15,15 @@ export const useRepositoryEsign = defineStore('repositoryEsign', () => {
   const setDocumentState = createActionState<IInvestDocumentSign>();
   const getDocumentState = createActionState<Blob>();
 
-  const setDocument = async (slug: string, investId: string, profileId: string) => {
+  const setDocument = async (slug: string, investId: string) => {
+    const payload = {
+      investment_id: Number(investId),
+    };
+
     try {
       setDocumentState.value.loading = true;
       setDocumentState.value.error = null;
-      const response = await esignApiClient.post(`/auth/create_document/${slug}/esign/${investId}/${profileId}`);
+      const response = await esignApiClient.post(`/auth/document`, payload);
       setDocumentState.value.data = response.data as IInvestDocumentSign;
       return response.data as IInvestDocumentSign;
     } catch (err) {

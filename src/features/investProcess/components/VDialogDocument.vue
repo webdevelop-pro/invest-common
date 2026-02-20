@@ -1,24 +1,11 @@
 <script setup lang="ts">
 import {
-  onBeforeUnmount, nextTick,
-  watch,
-} from 'vue';
-
-import {
   VDialogContent, VDialog,
 } from 'UiKit/components/Base/VDialog';
 
-const props = defineProps({
+defineProps({
   signUrl: {
     type: String,
-    required: true,
-  },
-  open: {
-    type: Function,
-    required: true,
-  },
-  close: {
-    type: Function,
     required: true,
   },
   modelValue: {
@@ -27,18 +14,6 @@ const props = defineProps({
   },
 });
 const openValue = defineModel<boolean>();
-
-watch(() => props.modelValue, () => {
-  if (props.modelValue) {
-    nextTick(() => {
-      props.open(props.signUrl, 'e-sign');
-    });
-  }
-});
-
-onBeforeUnmount(() => {
-  props.close();
-});
 </script>
 
 <template>
@@ -52,9 +27,12 @@ onBeforeUnmount(() => {
       full-screen
       class="v-dialog-document"
     >
-      <div
-        id="e-sign"
-        class="v-dialog-document__sign"
+      <iframe
+        v-if="signUrl"
+        :src="signUrl"
+        class="v-dialog-document__iframe"
+        frameborder="0"
+        title="Document"
       />
     </VDialogContent>
   </VDialog>
@@ -74,6 +52,11 @@ onBeforeUnmount(() => {
     @media screen and (max-width: $tablet){
       padding: 0;
     }
+  }
+
+  &__iframe {
+    width: 100%;
+    height: 100%;
   }
 }
 </style>

@@ -31,8 +31,6 @@ const props = defineProps({
 
 const emit = defineEmits<{
   (e: 'documentClick'): void;
-  (e: 'dialogOpen', signUrl: string, domEl: string): void;
-  (e: 'dialogClose'): void;
 }>();
 
 const {
@@ -48,14 +46,6 @@ const {
 
 const handleDocument = () => {
   emit('documentClick');
-};
-
-const handleDialogOpen = (signUrl: string, domEl: string) => {
-  emit('dialogOpen', signUrl, domEl);
-};
-
-const handleDialogClose = () => {
-  emit('dialogClose');
 };
 
 // Expose validation/interaction state to parent component
@@ -156,8 +146,6 @@ defineExpose({
     <VDialogDocument
       v-model="state.isDialogDocumentOpen"
       :sign-url="signUrl"
-      :close="handleDialogClose"
-      :open="handleDialogOpen"
     />
   </div>
 </template>

@@ -1,5 +1,6 @@
 import { FundingTypes } from 'InvestCommon/helpers/enums/general';
 import { IOffer } from './offers';
+import { IInvestmentFormatted } from 'InvestCommon/data/investment/investment.types';
 
 export enum InvestStepTypes {
   amount = 'amount',
@@ -233,6 +234,7 @@ export interface IInvest {
   signature_data: {
     created_at: string;
     signature_id: string;
+    entity_id: string;
     provider: string;
   };
   status: InvestmentStatuses;
@@ -268,10 +270,11 @@ export interface IInvestConfirm {
 }
 
 export interface IInvestDocumentSign {
-  sign_url: string;
-  expires_at: number;
-  signing_redirect_url: string;
-  test_mode: boolean;
+  sign_url?: string;
+  expires_at?: number;
+  signing_redirect_url?: string;
+  test_mode?: boolean;
+  entity_id?: string;
 }
 
 export interface IInvestFunding {

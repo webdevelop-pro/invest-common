@@ -38,6 +38,7 @@ const env = {
   HUBSPOT_FORM_ID_PLAN_INFO: import.meta.env.VITE_HUBSPOT_FORM_ID_PLAN_INFO,
   HUBSPOT_FORM_ID_ACCOUNT: import.meta.env.VITE_HUBSPOT_FORM_ID_ACCOUNT,
   CRYPTO_WALLET_SCAN_URL: import.meta.env.VITE_CRYPTO_WALLET_SCAN_URL,
+  DOCUSEAL_URL: import.meta.env.VITE_DOCUSEAL_URL,
 };
 
 export default env;

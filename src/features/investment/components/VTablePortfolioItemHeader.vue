@@ -153,7 +153,7 @@ const profileType = computed(() => selectedUserProfileData.value?.type || '');
       gap: 12px;
       display: flex;
       flex-direction: column;
-      align-items: flex-start;
+      align-items: flex-end;
     }
   }
 

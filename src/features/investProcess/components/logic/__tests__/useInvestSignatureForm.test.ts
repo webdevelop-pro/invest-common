@@ -21,11 +21,11 @@ describe('useInvestSignatureForm', () => {
     expect(composable.isBtnDisabled.value).toBe(true);
   });
 
-  it('computes canContinue only when both checkboxes checked and signId provided', () => {
+  it('computes canContinue only when both checkboxes checked and signId (entity_id) provided', () => {
     const props = reactive({
-      signId: '123',
+      signId: 'doc-entity-123',
       isLoading: false,
-      signUrl: '',
+      signUrl: 'https://docuseal-web.webdevelop.biz/s/doc-entity-123',
     });
 
     const composable = useInvestSignatureForm(props);
@@ -38,6 +38,28 @@ describe('useInvestSignatureForm', () => {
     expect(composable.canContinue.value).toBe(true);
     expect(composable.isValid.value).toBe(true);
     expect(composable.isBtnDisabled.value).toBe(false);
+  });
+
+  it('canContinue is false when signId is empty or null', () => {
+    const propsEmpty = reactive({
+      signId: '',
+      isLoading: false,
+      signUrl: 'https://example.com/sign',
+    });
+    const composableEmpty = useInvestSignatureForm(propsEmpty);
+    composableEmpty.state.value.checkbox1 = true;
+    composableEmpty.state.value.checkbox2 = true;
+    expect(composableEmpty.canContinue.value).toBe(false);
+
+    const propsNull = reactive({
+      signId: null,
+      isLoading: false,
+      signUrl: '',
+    });
+    const composableNull = useInvestSignatureForm(propsNull);
+    composableNull.state.value.checkbox1 = true;
+    composableNull.state.value.checkbox2 = true;
+    expect(composableNull.canContinue.value).toBe(false);
   });
 
   it('computes isSigned from signId', () => {

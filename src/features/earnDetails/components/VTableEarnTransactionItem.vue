@@ -110,7 +110,7 @@ const { formattedType, hasTransactionId } = useEarnTransactionItem(props);
     flex-direction: column;
     gap: 2px;
     text-align: initial;
-    word-break: break-word;
+    overflow-wrap: break-word
   }
 
   &__type {

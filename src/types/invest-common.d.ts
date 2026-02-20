@@ -41,6 +41,7 @@ declare module 'InvestCommon/domain/config/env' {
     HUBSPOT_FORM_ID_PLAN_INFO: MaybeString;
     HUBSPOT_FORM_ID_ACCOUNT: MaybeString;
     CRYPTO_WALLET_SCAN_URL: MaybeString;
+    DOCUSEAL_URL: MaybeString;
   };
 
   export default env;

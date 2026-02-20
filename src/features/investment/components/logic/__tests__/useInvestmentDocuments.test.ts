@@ -41,7 +41,12 @@ const mockInvestmentRepository = {
   getInvestOneState: ref({
     loading: false,
     error: null,
-    data: { id: '123', submited_at: '2024-01-10T10:00:00Z', offer: { id: 'offer-123' } },
+    data: {
+      id: '123',
+      submited_at: '2024-01-10T10:00:00Z',
+      offer: { id: 'offer-123' },
+      signature_data: { provider: 'hellosign', entity_id: '', signature_id: '' },
+    },
   }),
 };
 
@@ -67,6 +72,10 @@ vi.mock('InvestCommon/data/esign/esign.repository', () => ({
 
 vi.mock('InvestCommon/data/filer/filer.repository', () => ({
   useRepositoryFiler: vi.fn(() => mockFilerRepository),
+}));
+
+vi.mock('InvestCommon/domain/config/env', () => ({
+  default: { DOCUSEAL_URL: 'https://docuseal-web.webdevelop.biz/s' },
 }));
 
 const mockCreateObjectURL = vi.fn(() => 'blob:mock-url');
@@ -119,7 +128,12 @@ describe('useInvestmentDocuments', () => {
       composable = useInvestmentDocuments({ investmentId: 'test-123' });
     });
 
-    it('should handle subscription agreement click', async () => {
+    it('should open DocuSeal URL when provider is docuseal', async () => {
+      mockInvestmentRepository.getInvestOneState.value.data = {
+        ...mockInvestmentRepository.getInvestOneState.value.data,
+        signature_data: { provider: 'docuseal', entity_id: 'abc123', signature_id: '' },
+      };
+
       const subscriptionDoc: IFilerItemFormatted = {
         id: 0,
         name: 'Subscription Agreement',
@@ -140,7 +154,41 @@ describe('useInvestmentDocuments', () => {
         user_id: 0,
       };
 
-      mockEsignRepository.getDocumentState.value.data = new Blob(['test'], { type: 'application/pdf' });
+      const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+
+      await composable.onDocumentClick(subscriptionDoc);
+
+      expect(openSpy).toHaveBeenCalledWith('https://docuseal-web.webdevelop.biz/s/abc123', '_blank');
+      expect(mockEsignRepository.getDocument).not.toHaveBeenCalled();
+      expect(composable.loadingDocId.value).toBeUndefined();
+      openSpy.mockRestore();
+    });
+
+    it('should fetch and download document when provider is hellosign', async () => {
+      mockInvestmentRepository.getInvestOneState.value.data = {
+        ...mockInvestmentRepository.getInvestOneState.value.data,
+        signature_data: { provider: 'hellosign', entity_id: '', signature_id: '' },
+      };
+
+      const subscriptionDoc: IFilerItemFormatted = {
+        id: 0,
+        name: 'Subscription Agreement',
+        filename: 'subscription-agreement',
+        'object-type': 'investment-agreements',
+        'object-data': '',
+        'object-id': 0,
+        'object-name': '',
+        updated_at: '2024-01-10T10:00:00Z',
+        date: '01/10/2024',
+        typeFormatted: 'Investment Agreements',
+        isNew: false,
+        tagColor: 'green',
+        meta_data: { big: '', small: '', medium: '', size: 0 },
+        mime: '',
+        bucket_path: '',
+        url: '',
+        user_id: 0,
+      };
 
       await composable.onDocumentClick(subscriptionDoc);
 
@@ -148,6 +196,71 @@ describe('useInvestmentDocuments', () => {
       expect(mockCreateObjectURL).toHaveBeenCalled();
       expect(mockDownloadURI).toHaveBeenCalledWith('blob:mock-url', 'Subscription Agreement');
       expect(composable.loadingDocId.value).toBeUndefined();
+    });
+
+    it('should fetch and download when provider is docuseal but entity_id is missing', async () => {
+      mockInvestmentRepository.getInvestOneState.value.data = {
+        ...mockInvestmentRepository.getInvestOneState.value.data,
+        signature_data: { provider: 'docuseal', entity_id: '', signature_id: '' },
+      };
+
+      const subscriptionDoc: IFilerItemFormatted = {
+        id: 0,
+        name: 'Subscription Agreement',
+        filename: 'subscription-agreement',
+        'object-type': 'investment-agreements',
+        'object-data': '',
+        'object-id': 0,
+        'object-name': '',
+        updated_at: '2024-01-10T10:00:00Z',
+        date: '01/10/2024',
+        typeFormatted: 'Investment Agreements',
+        isNew: false,
+        tagColor: 'green',
+        meta_data: { big: '', small: '', medium: '', size: 0 },
+        mime: '',
+        bucket_path: '',
+        url: '',
+        user_id: 0,
+      };
+
+      await composable.onDocumentClick(subscriptionDoc);
+
+      expect(mockEsignRepository.getDocument).toHaveBeenCalledWith('test-123');
+      expect(mockCreateObjectURL).toHaveBeenCalled();
+      expect(mockDownloadURI).toHaveBeenCalledWith('blob:mock-url', 'Subscription Agreement');
+    });
+
+    it('should fetch and download when provider is missing (fallback to hellosign path)', async () => {
+      mockInvestmentRepository.getInvestOneState.value.data = {
+        ...mockInvestmentRepository.getInvestOneState.value.data,
+        signature_data: { provider: '', entity_id: '', signature_id: '' },
+      };
+
+      const subscriptionDoc: IFilerItemFormatted = {
+        id: 0,
+        name: 'Subscription Agreement',
+        filename: 'subscription-agreement',
+        'object-type': 'investment-agreements',
+        'object-data': '',
+        'object-id': 0,
+        'object-name': '',
+        updated_at: '2024-01-10T10:00:00Z',
+        date: '01/10/2024',
+        typeFormatted: 'Investment Agreements',
+        isNew: false,
+        tagColor: 'green',
+        meta_data: { big: '', small: '', medium: '', size: 0 },
+        mime: '',
+        bucket_path: '',
+        url: '',
+        user_id: 0,
+      };
+
+      await composable.onDocumentClick(subscriptionDoc);
+
+      expect(mockEsignRepository.getDocument).toHaveBeenCalledWith('test-123');
+      expect(mockDownloadURI).toHaveBeenCalledWith('blob:mock-url', 'Subscription Agreement');
     });
 
     it('should not handle non-subscription agreement clicks', async () => {
@@ -178,7 +291,11 @@ describe('useInvestmentDocuments', () => {
       expect(mockDownloadURI).not.toHaveBeenCalled();
     });
 
-    it('should handle document fetch error', async () => {
+    it('should handle document fetch error (hellosign path)', async () => {
+      mockInvestmentRepository.getInvestOneState.value.data = {
+        ...mockInvestmentRepository.getInvestOneState.value.data,
+        signature_data: { provider: 'hellosign', entity_id: '', signature_id: '' },
+      };
       mockEsignRepository.getDocument.mockRejectedValueOnce(new Error('Fetch failed'));
 
       const subscriptionDoc: IFilerItemFormatted = {
@@ -202,7 +319,7 @@ describe('useInvestmentDocuments', () => {
       };
 
       await expect(composable.onDocumentClick(subscriptionDoc)).rejects.toThrow('Fetch failed');
-      expect(composable.loadingDocId.value).toBe(0);
+      expect(composable.loadingDocId.value).toBeUndefined();
     });
   });
 

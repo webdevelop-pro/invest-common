@@ -7,6 +7,7 @@ import { IFilerItemFormatted } from 'InvestCommon/data/filer/filer.type';
 import { useRepositoryFiler } from 'InvestCommon/data/filer/filer.repository';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
 import { useRepositoryEsign } from 'InvestCommon/data/esign/esign.repository';
+import env from 'InvestCommon/domain/config/env';
 import { downloadURI } from 'UiKit/helpers/url';
 
 export interface UseInvestmentDocumentsOptions {
@@ -27,9 +28,7 @@ export const useInvestmentDocuments = (options: UseInvestmentDocumentsOptions): 
 
   const investmentRepository = useRepositoryInvestment();
   const { getInvestOneState } = storeToRefs(investmentRepository);
-  
   const esignRepository = useRepositoryEsign();
-  const { getDocumentState } = storeToRefs(esignRepository);
 
   const filerRepository = useRepositoryFiler();
   const { getFilesState, getPublicFilesState } = storeToRefs(filerRepository);
@@ -101,18 +100,32 @@ export const useInvestmentDocuments = (options: UseInvestmentDocumentsOptions): 
 
   const onDocumentClick = async (doc: IFilerItemFormatted) => {
     const isSubscriptionAgreement = doc?.name === 'Subscription Agreement';
-    if (isSubscriptionAgreement && investmentId) {
-      loadingDocId.value = doc.id;
-      await esignRepository.getDocument(investmentId);
+    if (!isSubscriptionAgreement || !investmentId) return;
 
-      // Create URL from Blob
-      if (getDocumentState.value.data) {
-        const blobUrl = URL.createObjectURL(getDocumentState.value.data);
-        downloadURI(blobUrl, 'Subscription Agreement');
-        // Clean up the URL after opening to prevent memory leaks
-        setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+    loadingDocId.value = doc.id;
+    try {
+      const provider = getInvestOneState.value.data?.signature_data?.provider?.toLowerCase();
+      const entityId = getInvestOneState.value.data?.signature_data?.entity_id
+        || getInvestOneState.value.data?.entity_id;
+      const baseUrl = (env.DOCUSEAL_URL || '').replace(/\/$/, '');
+
+      if (provider === 'docuseal' && entityId && baseUrl) {
+        const url = `${baseUrl}/${entityId}`;
+        window.open(url, '_blank');
+        return;
       }
 
+      // HelloSign or other: fetch document blob and trigger download
+      const blob = await esignRepository.getDocument(investmentId);
+      if (blob) {
+        const blobUrl = URL.createObjectURL(blob);
+        try {
+          downloadURI(blobUrl, 'Subscription Agreement');
+        } finally {
+          URL.revokeObjectURL(blobUrl);
+        }
+      }
+    } finally {
       loadingDocId.value = undefined;
     }
   };

@@ -16,8 +16,6 @@ const {
   profileId,
   handleDocument,
   handleContinue,
-  handleDialogOpen,
-  handleDialogClose,
 } = useInvestSignature();
 </script>
 
@@ -45,8 +43,6 @@ const {
         :is-loading="isLoading"
         :sign-url="signUrl"
         @document-click="handleDocument"
-        @dialog-open="handleDialogOpen"
-        @dialog-close="handleDialogClose"
       />
     </InvestStep>
   </div>

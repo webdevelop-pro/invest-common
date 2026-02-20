@@ -2,9 +2,8 @@ import {
   describe, it, expect, vi, beforeEach, afterEach,
 } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
-import { ref, nextTick } from 'vue';
+import { ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { useHelloSign } from 'InvestCommon/shared/composables/useHelloSign';
 import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
@@ -16,10 +15,6 @@ import { useInvestSignature } from '../useInvestSignature';
 vi.mock('vue-router', () => ({
   useRouter: vi.fn(),
   useRoute: vi.fn(),
-}));
-
-vi.mock('InvestCommon/shared/composables/useHelloSign', () => ({
-  useHelloSign: vi.fn(),
 }));
 
 vi.mock('UiKit/composables/useHubspotForm', () => ({
@@ -42,6 +37,10 @@ vi.mock('InvestCommon/data/esign/esign.repository', () => ({
   useRepositoryEsign: vi.fn(),
 }));
 
+vi.mock('InvestCommon/domain/config/env', () => ({
+  default: { DOCUSEAL_URL: 'https://docuseal-web.webdevelop.biz/s' },
+}));
+
 const mockWindowOpen = vi.fn();
 Object.defineProperty(window, 'open', {
   value: mockWindowOpen,
@@ -55,12 +54,6 @@ describe('useInvestSignature (logic)', () => {
   };
   const mockGlobalLoader = { hide: vi.fn() };
   const mockHubspotForm = { submitFormToHubspot: vi.fn() };
-  const mockHelloSign = {
-    onClose: vi.fn(),
-    onSign: vi.fn(),
-    openHelloSign: vi.fn(),
-    closeHelloSign: vi.fn(),
-  };
   const mockSessionStore = {
     userSessionTraits: ref({ email: 'test@example.com' }),
   };
@@ -68,19 +61,19 @@ describe('useInvestSignature (logic)', () => {
     setSignature: vi.fn(),
     setSignatureState: ref({ loading: false, data: { error: null } }),
     getInvestUnconfirmedOne: ref({
-      signature_data: { signature_id: 'existing-signature-id' },
+      signature_data: { signature_id: 'sig-1', entity_id: 'doc-entity-123' },
     }),
   };
   const mockEsignRepository = {
-    setDocument: vi.fn(),
+    setDocument: vi.fn().mockResolvedValue({ entity_id: 'new-entity-id' }),
     getDocument: vi.fn(),
     setDocumentState: ref({
       loading: false,
-      data: { sign_url: 'https://example.com/sign' },
+      data: undefined as { entity_id?: string } | undefined,
     }),
     getDocumentState: ref({
       loading: false,
-      data: new Blob(['pdf'], { type: 'application/pdf' }),
+      data: null as Blob | null,
     }),
   };
 
@@ -88,12 +81,15 @@ describe('useInvestSignature (logic)', () => {
     setActivePinia(createPinia());
     vi.clearAllMocks();
     mockWindowOpen.mockClear();
+    mockInvestmentRepository.getInvestUnconfirmedOne.value = {
+      signature_data: { signature_id: 'sig-1', entity_id: 'doc-entity-123' },
+    };
+    mockEsignRepository.setDocumentState.value = { loading: false, data: undefined };
 
     (useRouter as any).mockReturnValue(mockRouter);
     (useRoute as any).mockReturnValue(mockRoute);
     (useGlobalLoader as any).mockReturnValue(mockGlobalLoader);
     (useHubspotForm as any).mockReturnValue(mockHubspotForm);
-    (useHelloSign as any).mockReturnValue(mockHelloSign);
     (useSessionStore as any).mockReturnValue(mockSessionStore);
     (useRepositoryInvestment as any).mockReturnValue(mockInvestmentRepository);
     (useRepositoryEsign as any).mockReturnValue(mockEsignRepository);
@@ -107,36 +103,45 @@ describe('useInvestSignature (logic)', () => {
     const composable = useInvestSignature();
 
     expect(mockGlobalLoader.hide).toHaveBeenCalled();
-    expect(mockHelloSign.onSign).toHaveBeenCalled();
-    expect(mockHelloSign.onClose).toHaveBeenCalled();
     expect(composable.slug.value).toBe('test-slug');
     expect(composable.id.value).toBe('test-id');
     expect(composable.profileId.value).toBe('test-profile-id');
   });
 
-  it('computes signUrl and isLoading from repository state', () => {
+  it('computes signId from signature_data.entity_id or setDocumentState.data.entity_id', () => {
     const composable = useInvestSignature();
 
-    expect(composable.signUrl.value).toBe('https://example.com/sign');
-    expect(composable.isLoading.value).toBe(false);
+    expect(composable.signId.value).toBe('doc-entity-123');
 
-    mockInvestmentRepository.setSignatureState.value.loading = true;
-    expect(composable.isLoading.value).toBe(true);
+    mockInvestmentRepository.getInvestUnconfirmedOne.value.signature_data!.entity_id = 'other-entity';
+    mockInvestmentRepository.getInvestUnconfirmedOne.value = {
+      ...mockInvestmentRepository.getInvestUnconfirmedOne.value,
+    };
+    // composable uses refs from store, so need new composable to see updated store
+    const composable2 = useInvestSignature();
+    expect(composable2.signId.value).toBe('other-entity');
   });
 
-  it('handleSign sets signature and updates signId on success', async () => {
+  it('computes signUrl as DOCUSEAL_URL (env has /s) + /{entity_id}', () => {
     const composable = useInvestSignature();
-    const signatureData = { signatureId: 'new-signature-id' };
 
-    await composable.handleSign(signatureData as any);
+    expect(composable.signUrl.value).toBe('https://docuseal-web.webdevelop.biz/s/doc-entity-123');
 
-    expect(mockInvestmentRepository.setSignature).toHaveBeenCalledWith(
-      'test-slug',
-      'test-id',
-      'test-profile-id',
-      'new-signature-id',
-    );
-    expect(composable.signId.value).toBe('new-signature-id');
+    mockInvestmentRepository.getInvestUnconfirmedOne.value.signature_data = { signature_id: '', entity_id: '' };
+    mockInvestmentRepository.getInvestUnconfirmedOne.value = {
+      ...mockInvestmentRepository.getInvestUnconfirmedOne.value,
+    };
+    const composable2 = useInvestSignature();
+    expect(composable2.signUrl.value).toBe('');
+  });
+
+  it('computes isLoading from setSignatureState, setDocumentState, getDocumentState', () => {
+    const composable = useInvestSignature();
+
+    expect(composable.isLoading.value).toBe(false);
+
+    mockEsignRepository.setDocumentState.value.loading = true;
+    expect(composable.isLoading.value).toBe(true);
   });
 
   it('handleContinue navigates to review and submits Hubspot form when form canContinue', () => {
@@ -150,7 +155,6 @@ describe('useInvestSignature (logic)', () => {
         isDialogDocumentOpen: false,
       },
     } as any;
-    composable.signId.value = 'test-signature-id';
 
     composable.handleContinue();
 
@@ -159,7 +163,7 @@ describe('useInvestSignature (logic)', () => {
       email: 'test@example.com',
       invest_checkbox_1: true,
       invest_checkbox_2: true,
-      sign_id: 'test-signature-id',
+      sign_id: 'doc-entity-123',
     });
   });
 
@@ -168,7 +172,6 @@ describe('useInvestSignature (logic)', () => {
 
     composable.formRef.value = null;
     composable.handleContinue();
-
     expect(mockRouter.push).not.toHaveBeenCalled();
 
     composable.formRef.value = {
@@ -179,33 +182,31 @@ describe('useInvestSignature (logic)', () => {
         isDialogDocumentOpen: false,
       },
     } as any;
-
     composable.handleContinue();
     expect(mockRouter.push).not.toHaveBeenCalled();
   });
 
-  it('handleDocument opens existing document when signId exists', async () => {
+  it('handleDocument opens signUrl in new tab when signEntityId already exists', async () => {
     const composable = useInvestSignature();
-    composable.signId.value = 'existing-signature-id';
 
     await composable.handleDocument();
 
-    expect(mockEsignRepository.getDocument).toHaveBeenCalledWith('test-id');
-    expect(mockWindowOpen).toHaveBeenCalled();
+    expect(mockEsignRepository.setDocument).not.toHaveBeenCalled();
+    expect(mockWindowOpen).toHaveBeenCalledWith(
+      'https://docuseal-web.webdevelop.biz/s/doc-entity-123',
+      '_blank',
+    );
   });
 
-  it('handleDocument creates new document and opens dialog when no signId', async () => {
-    const composable = useInvestSignature();
-    composable.signId.value = null as any;
+  it('handleDocument calls setDocument then opens signUrl when no signEntityId', async () => {
+    mockInvestmentRepository.getInvestUnconfirmedOne.value.signature_data = { signature_id: '', entity_id: '' };
+    mockEsignRepository.setDocumentState.value = { loading: false, data: undefined };
+    mockEsignRepository.setDocument.mockImplementation(async () => {
+      mockEsignRepository.setDocumentState.value = { loading: false, data: { entity_id: 'new-entity-id' } };
+      return { entity_id: 'new-entity-id' };
+    });
 
-    composable.formRef.value = {
-      canContinue: false,
-      state: {
-        checkbox1: false,
-        checkbox2: false,
-        isDialogDocumentOpen: false,
-      },
-    } as any;
+    const composable = useInvestSignature();
 
     await composable.handleDocument();
 
@@ -214,30 +215,28 @@ describe('useInvestSignature (logic)', () => {
       'test-id',
       'test-profile-id',
     );
-    expect(composable.formRef.value?.state.isDialogDocumentOpen).toBe(true);
+    expect(mockWindowOpen).toHaveBeenCalledWith(
+      'https://docuseal-web.webdevelop.biz/s/new-entity-id',
+      '_blank',
+    );
   });
 
-  it('syncs signId from repository when signature_data changes', async () => {
+  it('handleDocument does nothing when slug, id or profileId is missing', async () => {
+    (useRoute as any).mockReturnValue({ params: { slug: '', id: 'test-id', profileId: 'test-profile-id' } });
     const composable = useInvestSignature();
 
-    mockInvestmentRepository.getInvestUnconfirmedOne.value.signature_data.signature_id = 'updated-id';
-    await nextTick();
+    await composable.handleDocument();
 
-    expect(composable.signId.value).toBe('updated-id');
+    expect(mockEsignRepository.setDocument).not.toHaveBeenCalled();
+    expect(mockWindowOpen).not.toHaveBeenCalled();
   });
 
-  it('handleDialogOpen delegates to HelloSign', () => {
-    const composable = useInvestSignature();
-    composable.handleDialogOpen('https://example.com/sign', '#target');
+  it('syncs signId from setDocumentState.data.entity_id after setDocument', async () => {
+    mockInvestmentRepository.getInvestUnconfirmedOne.value.signature_data = { signature_id: '', entity_id: '' };
+    mockEsignRepository.setDocumentState.value = { loading: false, data: { entity_id: 'from-set-document' } };
 
-    expect(mockHelloSign.openHelloSign).toHaveBeenCalledWith('https://example.com/sign', '#target');
-  });
-
-  it('handleDialogClose closes HelloSign when dialog is closed by user', () => {
     const composable = useInvestSignature();
 
-    composable.handleDialogClose();
-    expect(mockHelloSign.closeHelloSign).toHaveBeenCalled();
+    expect(composable.signId.value).toBe('from-set-document');
   });
 });
-

@@ -1,13 +1,13 @@
 import { computed, ref, watch, nextTick } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { useHelloSign } from 'InvestCommon/shared/composables/useHelloSign';
 import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
 import { ROUTE_INVEST_REVIEW } from 'InvestCommon/domain/config/enums/routes';
-import { ISignature, InvestStepTypes } from 'InvestCommon/types/api/invest';
+import { InvestStepTypes } from 'InvestCommon/types/api/invest';
 import { storeToRefs } from 'pinia';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
 import { useRepositoryEsign } from 'InvestCommon/data/esign/esign.repository';
+import env from 'InvestCommon/domain/config/env';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 
 export function useInvestSignature() {
@@ -18,7 +18,6 @@ export function useInvestSignature() {
   // Composables and stores
   const { submitFormToHubspot } = useHubspotForm('745431ff-2fed-4567-91d7-54e1c3385844');
   const { userSessionTraits } = storeToRefs(useSessionStore());
-  const { onClose, onSign, openHelloSign, closeHelloSign } = useHelloSign();
 
   // Repository stores
   const investmentRepository = useRepositoryInvestment();
@@ -43,11 +42,15 @@ export function useInvestSignature() {
     };
   } | null>(null);
 
-  // Local signId ref for managing signature state
-  const signId = ref(getInvestUnconfirmedOne.value?.signature_data?.signature_id);
+  const signEntityId = computed(() => getInvestUnconfirmedOne.value?.signature_data?.entity_id
+    || setDocumentState.value?.data?.entity_id);
+  const signId = computed(() => signEntityId.value);
   
   // Computed properties
-  const signUrl = computed(() => setDocumentState.value.data?.sign_url || '');
+  const docusealBase = (env.DOCUSEAL_URL || '').replace(/\/$/, '');
+  const signUrl = computed(() => {
+    return signEntityId.value && docusealBase ? `${docusealBase}/${signEntityId.value}` : '';
+  });
   const isLoading = computed(() => 
     setSignatureState.value.loading || 
     setDocumentState.value.loading ||
@@ -57,20 +60,6 @@ export function useInvestSignature() {
   const canContinue = computed(() => Boolean(formRef.value?.canContinue));
 
   // Methods
-  const handleSign = async (data: ISignature): Promise<void> => {
-    if (!data.signatureId || !slug.value || !id.value || !profileId.value) return;
-    
-    try {
-      await investmentRepository.setSignature(slug.value, id.value, profileId.value, data.signatureId);
-      
-      if (setSignatureState.value.data && !setSignatureState.value.data.error) {
-        signId.value = data.signatureId;
-      }
-    } catch (error) {
-      console.error('Failed to set signature:', error);
-    }
-  };
-
   const handleContinue = (): void => {
     if (!formRef.value || !formRef.value.canContinue) return;
     
@@ -88,36 +77,19 @@ export function useInvestSignature() {
     if (!slug.value || !id.value || !profileId.value) return;
     
     try {
-      if (signId.value) {
-        await esignRepository.getDocument(id.value);
 
-        if (getDocumentState.value.data) {
-          const blobUrl = URL.createObjectURL(getDocumentState.value.data);
-          window.open(blobUrl, '_blank');
-          // Clean up the URL after opening to prevent memory leaks
-          setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
-        }
-        return;
+      if (!signEntityId.value) {
+        await esignRepository.setDocument(slug.value, id.value, profileId.value);
+        
       }
 
-      await esignRepository.setDocument(slug.value, id.value, profileId.value);
-      
-      if (setDocumentState.value.data?.sign_url && formRef.value) {
-        formRef.value.state.isDialogDocumentOpen = true;
+      if (signUrl.value) {
+        window.open(signUrl.value, '_blank');
       }
     } catch (error) {
       console.error('Failed to handle document:', error);
     }
   };
-
-  // Watch for signature ID changes and sync with local ref
-  watch(
-    () => getInvestUnconfirmedOne.value?.signature_data?.signature_id,
-    (newSignatureId) => {
-      signId.value = newSignatureId;
-    },
-    { immediate: true }
-  );
 
   // Mark checkboxes as true if step is 'review' (user came back from review step)
   const markCheckboxesIfReview = async () => {
@@ -135,26 +107,6 @@ export function useInvestSignature() {
     { immediate: true }
   );
 
-  // Setup signature handler
-  onSign(handleSign);
-
-  onClose(() => {
-    if (formRef.value) {
-      formRef.value.state.isDialogDocumentOpen = false;
-    }
-  });
-
-  const handleDialogOpen = (url: string, domEl: string): void => {
-    openHelloSign(url, domEl);
-  };
-
-  const handleDialogClose = (): void => {
-    closeHelloSign();
-    if (formRef.value) {
-      formRef.value.state.isDialogDocumentOpen = false;
-    }
-  };
-
   return {
     formRef,
     signId,
@@ -164,13 +116,8 @@ export function useInvestSignature() {
     slug,
     id,
     profileId,
-    handleSign,
     handleContinue,
     handleDocument,
-    handleDialogOpen,
-    handleDialogClose,
-    openHelloSign,
-    closeHelloSign,
     setSignatureState,
     setDocumentState,
     getDocumentState,
