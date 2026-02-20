@@ -31,7 +31,6 @@ const profileType = computed(() => selectedUserProfileData.value?.type || '');
   >
     <VTableCell
       v-highlight="search"
-      class="is--gt-tablet-show"
     >
       <router-link
         :to="{ name: ROUTE_INVESTMENT_DOCUMENTS, params: { profileId: selectedUserProfileId, id: item.id } }"
@@ -42,7 +41,7 @@ const profileType = computed(() => selectedUserProfileData.value?.type || '');
       </router-link>
     </VTableCell>
 
-    <VTableCell class="is--gt-tablet-show">
+    <VTableCell>
       <div class="v-table-item-header__table-offer is--body">
         <div class="v-table-item-header__table-image-wrap">
           <VImage
@@ -64,41 +63,11 @@ const profileType = computed(() => selectedUserProfileData.value?.type || '');
       </div>
     </VTableCell>
 
-    <VTableCell class="is--lt-tablet-show">
-      <div class="v-table-item-header__table-offer is--body">
-        <div class="v-table-item-header__table-image-wrap">
-          <VImage
-            :src="item?.offer?.imageMedium"
-            :alt="`${item.offer?.name} image`"
-            fit="cover"
-            class="v-table-item-header__table-image is--lt-tablet-show"
-            :class="{ 'is--default-image': item?.offer?.isDefaultImage }"
-          />
-        </div>
-        <div>
-          <div
-            v-highlight="search"
-            class="is--h3__title"
-          >
-            {{ item.offer?.name }}
-          </div>
-        </div>
-      </div>
-    </VTableCell>
-
-    <VTableCell class="v-table-item-header__date is--gt-tablet-show">
+    <VTableCell class="v-table-item-header__date">
       {{ item.submitedAtFormatted }}
     </VTableCell>
 
     <VTableCell class="v-table-item-header__amount">
-      <router-link
-        :to="{ name: ROUTE_INVESTMENT_DOCUMENTS, params: { profileId: selectedUserProfileId, id: item.id } }"
-        class="v-table-item-header__link is--link-1"
-        @click.stop
-      >
-        {{ item.id }}
-      </router-link>
-
       <router-link
         :to="{ name: ROUTE_INVESTMENT_DOCUMENTS, params: { profileId: selectedUserProfileId, id: item.id } }"
         class="v-table-item-header__link is--link-1 is--color-black is--h5__title"
@@ -106,37 +75,13 @@ const profileType = computed(() => selectedUserProfileData.value?.type || '');
       >
         {{ item.amountFormattedZero }}
       </router-link>
-
-      <div class="v-table-item-header__ownership is--lt-tablet-show">
-        {{ profileType.charAt(0).toUpperCase() + profileType.slice(1) }}
-      </div>
-
-      <div class="is--lt-tablet-show">
-        {{ item.submitedAtFormatted }}
-      </div>
-
-      <button
-        class="v-table-item-header__table-funding-type is--lt-tablet-show"
-        :class="{ 'is--link-regular': item.isFundingClickable }"
-        @click.stop="emit('clickFundingType', item.id)"
-      >
-        {{ item.fundingTypeFormatted }}
-      </button>
-
-      <VBadge
-        :color="item.statusFormatted.color"
-        size="small"
-        class="is--lt-tablet-show"
-      >
-        {{ item.statusFormatted.text }}
-      </VBadge>
     </VTableCell>
 
-    <VTableCell class="v-table-item-header__ownership is--gt-tablet-show">
+    <VTableCell class="v-table-item-header__ownership">
       {{ profileType.charAt(0).toUpperCase() + profileType.slice(1) }}
     </VTableCell>
 
-    <VTableCell class="is--gt-tablet-show">
+    <VTableCell>
       <button
         class="v-table-item-header__table-funding-type"
         :class="{ 'is--link-regular': item.isFundingClickable }"
@@ -146,7 +91,7 @@ const profileType = computed(() => selectedUserProfileData.value?.type || '');
       </button>
     </VTableCell>
 
-    <VTableCell class="v-table-item-header__status is--gt-tablet-show">
+    <VTableCell class="v-table-item-header__status">
       <VBadge
         :color="item.statusFormatted.color"
       >
@@ -154,7 +99,7 @@ const profileType = computed(() => selectedUserProfileData.value?.type || '');
       </VBadge>
     </VTableCell>
 
-    <VTableCell class="is--gt-tablet-show">
+    <VTableCell>
       <chevronDownIcon class="v-table-item-header__chevron" />
     </VTableCell>
   </VTableRow>

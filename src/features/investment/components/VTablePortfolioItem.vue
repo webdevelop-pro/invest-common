@@ -3,6 +3,7 @@ import {
   PropType, defineAsyncComponent, watch,
 } from 'vue';
 import VTableItemHeader from './VTablePortfolioItemHeader.vue';
+import VTablePortfolioItemHeaderMobile from './VTablePortfolioItemHeaderMobile.vue';
 import VTableItemContent from './VTablePortfolioItemContent.vue';
 import { IInvestmentFormatted } from 'InvestCommon/data/investment/investment.types';
 import { useTablePortfolioItem } from './logic/useTablePortfolioItem';
@@ -69,6 +70,17 @@ watch(() => props.activeId, () => {
     :item="item"
     :search="search"
     :loading="loading"
+    class="is--gt-tablet-show"
+    :class="{ 'is--open': isOpen }"
+    @click="isOpen = !isOpen"
+    @click-funding-type="onFundingType"
+  />
+  <VTablePortfolioItemHeaderMobile
+    :id="scrollTarget"
+    :item="item"
+    :search="search"
+    :colspan="colspan"
+    class="is--lt-tablet-show"
     :class="{ 'is--open': isOpen }"
     @click="isOpen = !isOpen"
     @click-funding-type="onFundingType"
@@ -76,6 +88,7 @@ watch(() => props.activeId, () => {
   <!-- eslint-disable-next-line vue/no-multiple-template-root -->
   <VTableItemContent
     v-if="isOpen"
+    class="is--gt-tablet-show"
     :item="item"
     :loading="loading"
     :colspan="colspan"

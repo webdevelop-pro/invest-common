@@ -15,7 +15,6 @@ const {
   tableHeader,
   loadingDocId,
   loadingTable,
-  onDocumentClick,
 } = useInvestmentDocuments({
   investmentId: props.investmentId,
 });
@@ -34,7 +33,6 @@ const {
       :loading-table="loadingTable"
       with-download
       show-pagination
-      @row-click="onDocumentClick"
     />
   </div>
 </template>

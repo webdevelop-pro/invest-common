@@ -137,7 +137,7 @@ export class FilerFormatter {
   }
 
   /**
-   * Returns the fully formatted files array for investment documents, including the subscription agreement.
+   * Returns the fully formatted files array for investment documents.
    * @param getFilesData - The user files data (array of IFilerItem)
    * @param getFilesPublicData - The public files data (array of IFilerItem)
    * @returns Array of formatted document items for table display
