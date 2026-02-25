@@ -10,7 +10,7 @@ import { storeToRefs, acceptHMRUpdate, defineStore } from 'pinia';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { InvestmentFormatter } from 'InvestCommon/data/investment/investment.formatter';
 import { IInvestmentFormatted, IInvestment, IInvestmentsData } from 'InvestCommon/data/investment/investment.types';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { INotification } from 'InvestCommon/data/notifications/notifications.types';
 
 const { INVESTMENT_URL } = env;
@@ -18,11 +18,39 @@ const { INVESTMENT_URL } = env;
 export const useRepositoryInvestment = defineStore('repository-investment', () => {
   const apiClient = new ApiClient(INVESTMENT_URL);
 
+  const createEmptyInvestmentFormatted = (): IInvestmentFormatted => (
+    new InvestmentFormatter({} as IInvestment).format()
+  );
+
   // Create action states for each function
   const getInvestmentsState = createActionState<IInvestmentsData>();
-  const getInvestOneState = createActionState<IInvestmentFormatted>(new InvestmentFormatter().format());
+  const getInvestOneState = createActionState<IInvestmentFormatted>(createEmptyInvestmentFormatted());
   const getInvestUnconfirmedState = createActionState<IInvestUnconfirmed>();
-  const getInvestUnconfirmedOne = ref<IInvestmentFormatted>(new InvestmentFormatter().format());
+  const currentUnconfirmedSlug = ref<string | null>(null);
+  const currentUnconfirmedId = ref<number | null>(null);
+  const getInvestUnconfirmedOne = computed<IInvestmentFormatted>(() => {
+    const list = getInvestUnconfirmedState.value.data?.data as IInvestmentFormatted[] | undefined;
+
+    if (!list || !list.length) {
+      return createEmptyInvestmentFormatted();
+    }
+
+    if (currentUnconfirmedId.value !== null) {
+      const byId = list.find(
+        (investment: IInvestmentFormatted) => investment?.id === currentUnconfirmedId.value,
+      );
+      if (byId) return byId;
+    }
+
+    if (currentUnconfirmedSlug.value) {
+      const bySlug = list.find(
+        (investment: IInvestmentFormatted) => investment?.offer?.slug === currentUnconfirmedSlug.value,
+      );
+      if (bySlug) return bySlug;
+    }
+
+    return createEmptyInvestmentFormatted();
+  });
   const setInvestState = createActionState<IInvestment>();
   const setAmountState = createActionState<{number_of_shares: number}>();
   const setOwnershipState = createActionState<{step: string}>();
@@ -83,7 +111,11 @@ export const useRepositoryInvestment = defineStore('repository-investment', () =
   };
 
 
-  const getInvestUnconfirmed = async (slug: string, profileId: number | string) => {
+  const getInvestUnconfirmed = async (
+    slug: string,
+    profileId: number | string,
+    investmentId?: number | string,
+  ) => {
     try {
       getInvestUnconfirmedState.value.loading = true;
       getInvestUnconfirmedState.value.error = null;
@@ -98,11 +130,14 @@ export const useRepositoryInvestment = defineStore('repository-investment', () =
         }
         : rawData;
 
-      // Find the specific investment by slug
-      getInvestUnconfirmedOne.value = formattedData.data?.find(
-        (investment: any) => investment?.offer?.slug === slug
-      );
+      currentUnconfirmedSlug.value = slug;
 
+      if (typeof investmentId !== 'undefined' && investmentId !== null) {
+        const parsedId = Number(investmentId);
+        currentUnconfirmedId.value = Number.isNaN(parsedId) ? null : parsedId;
+      } else {
+        currentUnconfirmedId.value = null;
+      }
       getInvestUnconfirmedState.value.data = formattedData;
       return getInvestUnconfirmedState.value.data || null;
     } catch (err) {
@@ -331,7 +366,17 @@ export const useRepositoryInvestment = defineStore('repository-investment', () =
     setOwnershipOptionsState.value = { loading: false, error: null, data: undefined };
     setFundingOptionsState.value = { loading: false, error: null, data: undefined };
     setCancelOptionsState.value = { loading: false, error: null, data: undefined };
-    getInvestUnconfirmedOne.value = new InvestmentFormatter().format();
+    currentUnconfirmedSlug.value = null;
+    currentUnconfirmedId.value = null;
+  };
+
+  const setCurrentUnconfirmedFilter = (payload: { slug?: string | null; id?: number | null }) => {
+    if (Object.prototype.hasOwnProperty.call(payload, 'slug')) {
+      currentUnconfirmedSlug.value = payload.slug ?? null;
+    }
+    if (Object.prototype.hasOwnProperty.call(payload, 'id')) {
+      currentUnconfirmedId.value = payload.id ?? null;
+    }
   };
 
   /** Normalize WS payload: signature_id may come as number, app uses string */
@@ -370,11 +415,15 @@ export const useRepositoryInvestment = defineStore('repository-investment', () =
         ).format();
       }
     }
-
-    // So signature step sees new signature_id and can close sign tab / enable continue
-    if (getInvestUnconfirmedOne.value?.id === objectId) {
-      const next = { ...getInvestUnconfirmedOne.value, ...normalizedFields } as unknown as IInvestment;
-      getInvestUnconfirmedOne.value = new InvestmentFormatter(next).format();
+    const unconfirmedList = getInvestUnconfirmedState.value.data?.data as IInvestmentFormatted[] | undefined;
+    if (unconfirmedList?.length) {
+      const index = unconfirmedList.findIndex((t: IInvestmentFormatted) => t.id === objectId);
+      if (index >= 0) {
+        Object.assign(unconfirmedList[index], normalizedFields);
+        unconfirmedList[index] = new InvestmentFormatter(
+          unconfirmedList[index] as unknown as IInvestment,
+        ).format();
+      }
     }
   };
 
@@ -413,6 +462,7 @@ export const useRepositoryInvestment = defineStore('repository-investment', () =
     setCancelOptions,
     resetAll,
     updateNotificationData,
+    setCurrentUnconfirmedFilter,
   };
 });
 

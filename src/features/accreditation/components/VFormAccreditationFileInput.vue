@@ -14,6 +14,7 @@ defineProps({
 const accreditationUploadStore = useAccreditationUpload();
 const {
   allFiles,
+  filesUploadError,
 } = storeToRefs(accreditationUploadStore);
 
 const { onFilesChange, onFileRemove, model, isFieldRequired, getErrorText } = accreditationUploadStore;
@@ -27,7 +28,7 @@ const { onFilesChange, onFileRemove, model, isFieldRequired, getErrorText } = ac
       required
     >
       <VUploader
-        :is-error="VFormGroupProps.isFieldError"
+        :is-error="VFormGroupProps.isFieldError || !!filesUploadError"
         multiple
         :max-files="10"
         class="v-form-accreditation-file-input__field"
@@ -36,7 +37,17 @@ const { onFilesChange, onFileRemove, model, isFieldRequired, getErrorText } = ac
       />
     </VFormGroup>
 
-    <template v-if="allFiles && allFiles.length">
+    <p
+      v-if="filesUploadError"
+      class="v-form-accreditation-file-input__error is--small is--color-red-dark"
+    >
+      {{ filesUploadError }}
+    </p>
+
+    <div
+      v-if="allFiles && allFiles.length"
+      class="v-form-accreditation-file-input__descriptions"
+    >
       <VFormGroup
         v-for="(file, index) in allFiles"
         :key="file.name"
@@ -72,15 +83,15 @@ const { onFilesChange, onFileRemove, model, isFieldRequired, getErrorText } = ac
           @update:model-value="model.note = $event"
         />
       </VFormGroup>
-    </template>
+    </div>
   </div>
 </template>
 
 <style lang="scss">
 .v-form-accreditation-file-input {
 
-  &__field {
-    margin-bottom: 30px;
+  &__descriptions {
+    margin-top: 30px;
   }
 
   &__note {

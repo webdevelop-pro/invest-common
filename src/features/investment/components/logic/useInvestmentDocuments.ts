@@ -19,19 +19,31 @@ export interface UseInvestmentDocumentsReturn {
   loadingTable: ComputedRef<boolean>;
 }
 
-export const useInvestmentDocuments = (): UseInvestmentDocumentsReturn => {
+export const useInvestmentDocuments = (options?: UseInvestmentDocumentsOptions): UseInvestmentDocumentsReturn => {
   const investmentRepository = useRepositoryInvestment();
   const { getInvestOneState } = storeToRefs(investmentRepository);
 
   const filerRepository = useRepositoryFiler();
   const { getFilesState, getPublicFilesState } = storeToRefs(filerRepository);
 
+  // Local collections of all filer responses we care about on the investment page
+  const userFileSources = ref<any[]>([]);
+  const publicFileSources = ref<any[]>([]);
+
+  // Seed with any existing filer data so we don't lose responses
+  if (getFilesState.value.data) {
+    userFileSources.value.push(getFilesState.value.data);
+  }
+  if (getPublicFilesState.value.data) {
+    publicFileSources.value.push(getPublicFilesState.value.data);
+  }
+
   const folders = computed(() => (
-    FilerFormatter.getFolderedInvestmentDocuments(getFilesState.value.data, getPublicFilesState.value.data)
+    FilerFormatter.getFolderedInvestmentDocuments(userFileSources.value, publicFileSources.value)
   ));
 
   const filesFormatted = computed<IFilerItemFormatted[]>(() => (
-    FilerFormatter.getFormattedInvestmentDocuments(getFilesState.value.data, getPublicFilesState.value.data)
+    FilerFormatter.getFormattedInvestmentDocuments(userFileSources.value, publicFileSources.value)
   ));
 
   const filesWithSubscription = computed<IFilerItemFormatted[]>(() => filesFormatted.value);
@@ -55,22 +67,35 @@ export const useInvestmentDocuments = (): UseInvestmentDocumentsReturn => {
 
   const loadingDocId = ref<number | undefined>();
 
-  const getOfferDocuments = () => {
-    if (getInvestOneState.value.data?.offer?.id) {
-      if (getFilesState.value.data?.id !== getInvestOneState.value.data?.offer?.id) {
-        filerRepository.getFiles(`offer/${getInvestOneState.value.data?.offer?.id}`, 'user');
-      }
-      if (getPublicFilesState.value.data?.id !== getInvestOneState.value.data?.offer?.id) {
-        filerRepository.getPublicFiles(getInvestOneState.value.data?.offer?.id, 'offer');
-      }
-    }
+  const getOfferDocuments = async () => {
+    const offerId = getInvestOneState.value.data?.offer?.id;
+    if (!offerId) return;
+
+    const [userData, publicData] = await Promise.all([
+      filerRepository.getFiles(`offer/${offerId}`, 'user'),
+      filerRepository.getPublicFiles(offerId, 'offer'),
+    ]);
+
+    if (userData) userFileSources.value.push(userData);
+    if (publicData) publicFileSources.value.push(publicData);
   };
 
-  const loadingTable = computed(() => getFilesState.value.loading || getInvestOneState.value.loading);
+  const loadingTable = computed(
+    () => getFilesState.value.loading
+      || getPublicFilesState.value.loading
+      || getInvestOneState.value.loading,
+  );
 
   watch(() => getInvestOneState.value.data?.offer?.id, () => {
     getOfferDocuments();
   }, { immediate: true });
+
+  if (options?.investmentId) {
+    filerRepository.getFiles(options.investmentId, 'investment')
+      .then((data) => {
+        if (data) userFileSources.value.push(data);
+      });
+  }
 
   return {
     folders,

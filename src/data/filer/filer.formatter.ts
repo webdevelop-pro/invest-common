@@ -1,40 +1,79 @@
-import { IFilerItem, IFilerItemFormatted } from 'InvestCommon/types/api/filer.type';
+import { IFilerItem, IFilerItemFormatted } from 'InvestCommon/data/filer/filer.type';
 import merge from 'lodash/merge';
+
+/** Folder shape from filer API: name + map of item id → item */
+export interface IFilerFolder {
+  name?: string;
+  entities?: Record<string, IFilerItem>;
+}
+
+/** Filer API response: top-level key is folder name (e.g. investment_agreements, media) */
+export type FilerEntitiesMap = Record<string, IFilerFolder>;
+
+/** Response shape from getFiles / getPublicFiles */
+export interface FilerSourceResponse {
+  entities?: FilerEntitiesMap;
+}
+
+const FOLDER_MEDIA = 'media';
+const FOLDER_INVESTMENT_AGREEMENTS = 'investment-agreements';
+
+/**
+ * Normalize folder/type name: underscores → hyphens so investment_agreements === investment-agreements.
+ */
+function normalizeFolderName(name: string): string {
+  return typeof name === 'string' ? name.replace(/_/g, '-') : name;
+}
 
 /**
  * Utility class for formatting and merging filer items.
  */
 export class FilerFormatter {
-  private items: IFilerItem[];
-
-  constructor(items: IFilerItem[] = []) {
-    this.items = items;
-  }
-
   static capitalizeFirstLetter = (input: unknown): string => {
     if (typeof input !== 'string' || !input) return '';
     return input.charAt(0).toUpperCase() + input.slice(1);
   };
 
   /**
-   * Deeply merges two objects with properties (Record<string, IFilerItem>),
+   * Deeply merges two objects (e.g. Record<string, IFilerItem> or folder maps),
    * using lodash's merge for recursive merging.
    */
-  static deepMergeById(
-    obj1: Record<string, IFilerItem> = {},
-    obj2: Record<string, IFilerItem> = {},
-  ): Record<string, IFilerItem> {
-    return merge({}, obj1, obj2);
+  static deepMergeById<T extends Record<string, unknown>>(
+    obj1: T = {} as T,
+    obj2: T = {} as T,
+  ): T {
+    return merge({}, obj1, obj2) as T;
   }
 
   /**
-   * Merges two objects and returns the merged result as an array of IFilerItem.
+   * Merges one or more objects and returns the merged result as an array of values.
+   * Used for folder maps: merges by folder key, returns array of folder objects.
    */
   static deepMergeToArray(
-    obj1: Record<string, IFilerItem> = {},
-    obj2: Record<string, IFilerItem> = {},
+    ...objects: Array<Record<string, IFilerItem> | undefined | null>
   ): IFilerItem[] {
-    return Object.values(this.deepMergeById(obj1, obj2));
+    if (!objects.length) return [];
+    const merged = objects.reduce<Record<string, IFilerItem>>(
+      (acc, current) => (current ? this.deepMergeById(acc, current) : acc),
+      {},
+    );
+    return Object.values(merged);
+  }
+
+  /**
+   * Normalizes to array of responses and returns merged entities map (folder name → folder),
+   * with the "media" folder excluded.
+   */
+  static mergeAndFilterEntities(
+    ...sourceArrays: Array<FilerSourceResponse | FilerSourceResponse[] | undefined | null>
+  ): FilerEntitiesMap {
+    const flat = sourceArrays.flatMap((s) => (Array.isArray(s) ? s : s ? [s] : []));
+    const entities = flat.reduce<FilerEntitiesMap>(
+      (acc, src) => this.deepMergeById(acc, src?.entities ?? {}),
+      {},
+    );
+    const { [FOLDER_MEDIA]: _, ...withoutMedia } = entities;
+    return withoutMedia;
   }
 
   /**
@@ -45,10 +84,11 @@ export class FilerFormatter {
   }
 
   /**
-   * Returns an array of item.name values from the provided filer items.
+   * Returns an array of normalized item.name values from the provided filer items.
+   * Underscores and hyphens are treated the same (investment_agreements → investment-agreements).
    */
   static extractNames(items: IFilerItem[]): string[] {
-    return items.map((item) => this.capitalizeFirstLetter(item.name));
+    return items.map((item) => this.capitalizeFirstLetter(normalizeFolderName(String(item.name ?? ''))));
   }
 
   static formatToFullDate = (ISOString: string) => {
@@ -62,22 +102,27 @@ export class FilerFormatter {
   };
 
   /**
-   * Formats filer items into a one-dimensional array, grouped by folder (object-type) but flattened.
+   * Flattens a merged entities map (folder name → folder) into a single array of formatted items.
    */
-  static flattenGroupedEntities(mergedObj: Record<string, any>): IFilerItemFormatted[] {
-    if (!mergedObj || Object.keys(mergedObj).length === 0) return [];
-    return Object.entries(mergedObj).flatMap(([folderName, folderValue]) => {
-      const entities = folderValue?.entities || {};
-      const objectType = folderValue?.name || folderName;
-      return Object.values(entities).map((entity: any) => ({
-        ...entity,
-        'object-type': objectType,
-        name: entity.original_filename || entity.filename,
-        typeFormatted: this.capitalizeFirstLetter(objectType),
-        date: this.formatToFullDate(entity.updated_at),
-        isNew: this.isRecent(entity.updated_at),
-        tagColor: this.getTagColorByType(objectType),
-      }));
+  static flattenGroupedEntities(entitiesMap: FilerEntitiesMap): IFilerItemFormatted[] {
+    if (!entitiesMap || Object.keys(entitiesMap).length === 0) return [];
+    return Object.entries(entitiesMap).flatMap(([folderKey, folder]) => {
+      const entities = folder?.entities ?? {};
+      const objectType = normalizeFolderName(folder?.name ?? folderKey);
+
+      return Object.values(entities).map((entity: IFilerItem) => {
+        const raw = entity as unknown as Record<string, unknown>;
+        const displayName = raw.original_filename ?? entity.filename;
+        return {
+          ...entity,
+          'object-type': objectType,
+          name: typeof displayName === 'string' ? displayName : entity.filename,
+          typeFormatted: this.capitalizeFirstLetter(objectType),
+          date: this.formatToFullDate(entity.updated_at),
+          isNew: this.isRecent(entity.updated_at),
+          tagColor: this.getTagColorByType(objectType),
+        } as IFilerItemFormatted;
+      });
     });
   }
 
@@ -100,7 +145,7 @@ export class FilerFormatter {
     switch (objectType) {
       case 'other':
         return 'is--background-purple-light';
-      case 'investment-agreements':
+      case FOLDER_INVESTMENT_AGREEMENTS:
         return 'is--background-secondary-light';
       case 'company':
         return 'is--background-yellow-light';
@@ -112,72 +157,77 @@ export class FilerFormatter {
   }
 
   /**
-   * Sorts an array of IFilerItemFormatted or IFilerItem by typeFormatted, with a specified type first, then A-Z, then by date (newest first).
-   * @param items - Array of items to sort
-   * @param typeFirst - Optional typeFormatted value to appear first
-   * @returns Sorted array
+   * Sorts by typeFormatted (optional type first), then A–Z, then by date (newest first).
    */
-  static sortDocuments<T extends { typeFormatted?: string; date?: string }>(items: T[], typeFirst?: string): T[] {
-    return items.slice().sort((a, b) => {
-      // Place typeFirst at the top
-      if (typeFirst) {
-        if ((a.typeFormatted || '').toLowerCase() === typeFirst.toLowerCase() && (b.typeFormatted || '').toLowerCase() !== typeFirst.toLowerCase()) return -1;
-        if ((b.typeFormatted || '').toLowerCase() === typeFirst.toLowerCase() && (a.typeFormatted || '').toLowerCase() !== typeFirst.toLowerCase()) return 1;
+  static sortDocuments<T extends { typeFormatted?: string; date?: string }>(
+    items: T[],
+    typeFirst?: string,
+  ): T[] {
+    const type = (t: T) => (t.typeFormatted ?? '').toLowerCase();
+    const typeFirstLower = typeFirst?.toLowerCase();
+
+    return [...items].sort((a, b) => {
+      if (typeFirstLower) {
+        const aFirst = type(a) === typeFirstLower;
+        const bFirst = type(b) === typeFirstLower;
+        if (aFirst && !bFirst) return -1;
+        if (!aFirst && bFirst) return 1;
       }
-      // Sort by typeFormatted (A-Z)
-      const typeA = (a.typeFormatted || '').toLowerCase();
-      const typeB = (b.typeFormatted || '').toLowerCase();
-      if (typeA < typeB) return -1;
-      if (typeA > typeB) return 1;
-      // If typeFormatted is the same, sort by date (newest first)
-      if (!a.date) return 1;
-      if (!b.date) return -1;
-      return new Date(b.date).getTime() - new Date(a.date).getTime();
+      if (type(a) !== type(b)) return type(a).localeCompare(type(b));
+      const dateA = a.date ? new Date(a.date).getTime() : 0;
+      const dateB = b.date ? new Date(b.date).getTime() : 0;
+      return dateB - dateA;
     });
   }
 
   /**
-   * Returns the fully formatted files array for investment documents.
-   * @param getFilesData - The user files data (array of IFilerItem)
-   * @param getFilesPublicData - The public files data (array of IFilerItem)
-   * @returns Array of formatted document items for table display
+   * Normalizes a single value or array of filer responses for merging.
    */
-  static getFormattedInvestmentDocuments(
-    getFilesData: IFilerItem[] = [],
-    getFilesPublicData: IFilerItem[] = [],
-  ) {
-    // 1. Merge files
-    const filesMerged = FilerFormatter.deepMergeToArray(
-      (getFilesData as any)?.entities,
-      (getFilesPublicData as any)?.entities,
-    );
-    // 2. Filter out media
-    const filesFiltered = FilerFormatter.filterByPredicate(filesMerged, (item) => item.name !== 'media');
-    // 3. Flatten grouped entities (if needed)
-    const filesFormatted = FilerFormatter.flattenGroupedEntities(filesFiltered);
-    // 4. Sort by typeFormatted, with 'investment-agreements' first, then by date (newest first)
-    return FilerFormatter.sortDocuments(filesFormatted, 'investment-agreements');
+  private static toSourceArray(
+    data: FilerSourceResponse | FilerSourceResponse[] | undefined | null,
+  ): FilerSourceResponse[] {
+    if (data == null) return [];
+    return Array.isArray(data) ? data : [data];
   }
 
   /**
-   * Returns the investment documents grouped by folder (object-type), formatted for table display.
-   * @param getFilesData - The user files data (array of IFilerItem)
-   * @param getFilesPublicData - The public files data (array of IFilerItem)
-   * @returns Object where keys are folder/object-type names and values are arrays of formatted document items
+   * Merges all user and public filer responses (single or array), excludes media folder,
+   * and returns the merged entities map.
+   */
+  private static getMergedInvestmentEntities(
+    userData: FilerSourceResponse | FilerSourceResponse[] | undefined | null,
+    publicData: FilerSourceResponse | FilerSourceResponse[] | undefined | null,
+  ): FilerEntitiesMap {
+    return this.mergeAndFilterEntities(
+      ...this.toSourceArray(userData),
+      ...this.toSourceArray(publicData),
+    );
+  }
+
+  /**
+   * Returns formatted investment documents for table display.
+   * Merges all given user and public responses and sorts with investment-agreements first.
+   */
+  static getFormattedInvestmentDocuments(
+    userData: FilerSourceResponse | FilerSourceResponse[] | undefined | null = [],
+    publicData: FilerSourceResponse | FilerSourceResponse[] | undefined | null = [],
+  ): IFilerItemFormatted[] {
+    const merged = this.getMergedInvestmentEntities(userData, publicData);
+    const formatted = this.flattenGroupedEntities(merged);
+    return this.sortDocuments(formatted, FOLDER_INVESTMENT_AGREEMENTS);
+  }
+
+  /**
+   * Returns unique folder names for investment documents (normalized: investment_agreements === investment-agreements).
    */
   static getFolderedInvestmentDocuments(
-    getFilesData: IFilerItem[] = [],
-    getFilesPublicData: IFilerItem[] = [],
-  ) {
-    // 1. Merge files
-    const filesMerged = FilerFormatter.deepMergeToArray(
-      (getFilesData as any)?.entities,
-      (getFilesPublicData as any)?.entities,
+    userData: FilerSourceResponse | FilerSourceResponse[] | undefined | null = [],
+    publicData: FilerSourceResponse | FilerSourceResponse[] | undefined | null = [],
+  ): string[] {
+    const merged = this.getMergedInvestmentEntities(userData, publicData);
+    const names = Object.entries(merged).map(([key, folder]) =>
+      this.capitalizeFirstLetter(normalizeFolderName(folder?.name ?? key)),
     );
-    // 2. Filter out media
-    const filesFiltered = FilerFormatter.filterByPredicate(filesMerged, (item) => item.name !== 'media');
-
-    const result = FilerFormatter.extractNames(filesFiltered);
-    return result;
+    return [...new Set(names)];
   }
 }

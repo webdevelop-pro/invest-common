@@ -60,6 +60,7 @@ describe('useInvestSignature (logic)', () => {
   const mockInvestmentRepository = {
     setSignature: vi.fn(),
     setSignatureState: ref({ loading: false, data: { error: null } }),
+    setCurrentUnconfirmedFilter: vi.fn(),
     getInvestUnconfirmedOne: ref({
       signature_data: { signature_id: 'sig-1', entity_id: 'doc-entity-123' },
     }),
@@ -100,13 +101,17 @@ describe('useInvestSignature (logic)', () => {
     vi.restoreAllMocks();
   });
 
-  it('initializes correctly and hides global loader', () => {
+  it('initializes correctly, hides global loader and sets unconfirmed filter by slug and id', () => {
     const composable = useInvestSignature();
 
     expect(mockGlobalLoader.hide).toHaveBeenCalled();
     expect(composable.slug.value).toBe('test-slug');
     expect(composable.id.value).toBe('test-id');
     expect(composable.profileId.value).toBe('test-profile-id');
+    expect(mockInvestmentRepository.setCurrentUnconfirmedFilter).toHaveBeenCalledWith({
+      slug: 'test-slug',
+      id: NaN,
+    });
   });
 
   it('computes signId from signature_data.signature_id only (validate by signature_id, not entity_id)', () => {
@@ -150,7 +155,6 @@ describe('useInvestSignature (logic)', () => {
     composable.formRef.value = {
       canContinue: true,
       state: {
-        checkbox1: true,
         checkbox2: true,
         isDialogDocumentOpen: false,
       },
@@ -161,7 +165,6 @@ describe('useInvestSignature (logic)', () => {
     expect(mockRouter.push).toHaveBeenCalledWith({ name: ROUTE_INVEST_REVIEW });
     expect(mockHubspotForm.submitFormToHubspot).toHaveBeenCalledWith({
       email: 'test@example.com',
-      invest_checkbox_1: true,
       invest_checkbox_2: true,
       sign_id: 'sig-1',
     });
@@ -177,7 +180,6 @@ describe('useInvestSignature (logic)', () => {
     composable.formRef.value = {
       canContinue: false,
       state: {
-        checkbox1: false,
         checkbox2: false,
         isDialogDocumentOpen: false,
       },

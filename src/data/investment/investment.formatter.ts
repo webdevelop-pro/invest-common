@@ -43,8 +43,8 @@ const getTimeFormat = (fullDate: string) => {
 export class InvestmentFormatter {
   private investment: IInvestment | null;
 
-  constructor(investment: IInvestment) {
-    this.investment = investment;
+  constructor(investment?: IInvestment) {
+    this.investment = investment ?? this.createDefaultInvestment();
   }
 
   get amountFormatted() {

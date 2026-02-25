@@ -107,16 +107,6 @@ defineExpose({
     <!-- Checkboxes -->
     <div class="form-invest-signature__checkbox-wrap">
       <VFormCheckbox
-        v-model="state.checkbox1"
-        data-testid="V-checkbox"
-        class="form-invest-signature__checkbox"
-        has-asterisk
-      >
-        I have reviewed and agree to the terms of the offering document
-        and I agree to complete the investment process using HelloSign.
-      </VFormCheckbox>
-      
-      <VFormCheckbox
         v-model="state.checkbox2"
         data-testid="V-checkbox"
         class="form-invest-signature__checkbox"

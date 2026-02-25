@@ -4,7 +4,7 @@ import { reactive } from 'vue';
 import { useInvestSignatureForm } from '../useInvestSignatureForm';
 
 describe('useInvestSignatureForm', () => {
-  it('initializes dialog state and checkboxes as false', () => {
+  it('initializes dialog state and checkbox as false', () => {
     const props = reactive({
       signId: null,
       isLoading: false,
@@ -14,14 +14,13 @@ describe('useInvestSignatureForm', () => {
     const composable = useInvestSignatureForm(props);
 
     expect(composable.state.value.isDialogDocumentOpen).toBe(false);
-    expect(composable.state.value.checkbox1).toBe(false);
     expect(composable.state.value.checkbox2).toBe(false);
     expect(composable.canContinue.value).toBe(false);
     expect(composable.isValid.value).toBe(false);
     expect(composable.isBtnDisabled.value).toBe(true);
   });
 
-  it('computes canContinue only when both checkboxes checked and signId (signature_id) provided', () => {
+  it('computes canContinue only when checkbox checked and signId (signature_id) provided', () => {
     const props = reactive({
       signId: 'sig-123',
       isLoading: false,
@@ -32,7 +31,6 @@ describe('useInvestSignatureForm', () => {
 
     expect(composable.canContinue.value).toBe(false);
 
-    composable.state.value.checkbox1 = true;
     composable.state.value.checkbox2 = true;
 
     expect(composable.canContinue.value).toBe(true);
@@ -47,7 +45,6 @@ describe('useInvestSignatureForm', () => {
       signUrl: 'https://example.com/sign',
     });
     const composableEmpty = useInvestSignatureForm(propsEmpty);
-    composableEmpty.state.value.checkbox1 = true;
     composableEmpty.state.value.checkbox2 = true;
     expect(composableEmpty.canContinue.value).toBe(false);
 
@@ -57,7 +54,6 @@ describe('useInvestSignatureForm', () => {
       signUrl: '',
     });
     const composableNull = useInvestSignatureForm(propsNull);
-    composableNull.state.value.checkbox1 = true;
     composableNull.state.value.checkbox2 = true;
     expect(composableNull.canContinue.value).toBe(false);
   });

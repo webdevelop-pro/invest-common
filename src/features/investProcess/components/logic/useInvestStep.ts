@@ -96,6 +96,7 @@ export function useInvestStep(props: Props) {
         const res = await investmentRepository.getInvestUnconfirmed(
           routeParams.value.slug,
           routeParams.value.profileId,
+          routeParams.value.id,
         );
         if (!res) {
           router.push('/dashboard/error/404');

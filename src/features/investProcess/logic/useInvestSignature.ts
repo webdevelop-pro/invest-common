@@ -22,6 +22,7 @@ export function useInvestSignature() {
   // Repository stores
   const investmentRepository = useRepositoryInvestment();
   const { setSignatureState, getInvestUnconfirmedOne } = storeToRefs(investmentRepository);
+  const { setCurrentUnconfirmedFilter } = investmentRepository;
   const esignRepository = useRepositoryEsign();
   const { setDocumentState, getDocumentState } = storeToRefs(esignRepository);
 
@@ -32,6 +33,11 @@ export function useInvestSignature() {
   const id = ref((route.params.id as string) || '');
   const profileId = ref((route.params.profileId as string) || '');
 
+  setCurrentUnconfirmedFilter({
+    slug: slug.value || null,
+    id: id.value ? Number(id.value) : null,
+  });
+
   // Window opened for signUrl — close it when signId is set (user signed)
   const signWindowRef = ref<Window | null>(null);
 
@@ -40,7 +46,6 @@ export function useInvestSignature() {
     canContinue: boolean;
     state: {
       isDialogDocumentOpen: boolean;
-      checkbox1: boolean;
       checkbox2: boolean;
     };
   } | null>(null);
@@ -72,7 +77,6 @@ export function useInvestSignature() {
     
     submitFormToHubspot({
       email: userSessionTraits.value?.email,
-      invest_checkbox_1: formRef.value.state.checkbox1,
       invest_checkbox_2: formRef.value.state.checkbox2,
       sign_id: signId.value,
     });
@@ -100,7 +104,6 @@ export function useInvestSignature() {
   const markCheckboxesIfReview = async () => {
     if (getInvestUnconfirmedOne.value?.step === InvestStepTypes.review && formRef.value) {
       await nextTick();
-      formRef.value.state.checkbox1 = true;
       formRef.value.state.checkbox2 = true;
     }
   };

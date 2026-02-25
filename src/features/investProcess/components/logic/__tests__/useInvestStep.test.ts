@@ -3,6 +3,14 @@ import { ref, nextTick } from 'vue';
 
 const routerPushMock = vi.fn(() => Promise.resolve());
 
+vi.mock('vue', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('vue')>();
+  return {
+    ...actual,
+    onBeforeMount: (fn: () => unknown) => fn(),
+  };
+});
+
 vi.mock('vue-router', () => ({
   useRoute: () => ({
     params: {
@@ -22,9 +30,12 @@ vi.mock('InvestCommon/domain/session/store/useSession', () => ({
   }),
 }));
 
+const mockGetInvestUnconfirmed = vi.fn().mockResolvedValue({});
+
 vi.mock('InvestCommon/data/investment/investment.repository', () => ({
   useRepositoryInvestment: () => ({
-    getInvestUnconfirmed: vi.fn().mockResolvedValue({}),
+    getInvestUnconfirmed: mockGetInvestUnconfirmed,
+    getInvestUnconfirmedOne: ref({ step: undefined }),
   }),
 }));
 
@@ -46,6 +57,16 @@ describe('useInvestStep', () => {
     });
   });
 
+  it('calls getInvestUnconfirmed with slug, profileId and investment id', async () => {
+    await useInvestStep({ stepNumber: 1 });
+
+    expect(mockGetInvestUnconfirmed).toHaveBeenCalledWith(
+      'test-offer',
+      '456',
+      '123',
+    );
+  });
+
   it('navigates to correct route when currentTab changes', async () => {
     const composable = useInvestStep({ stepNumber: 1 });
 
@@ -53,9 +74,10 @@ describe('useInvestStep', () => {
     composable.currentTab.value = 3;
     await nextTick();
     expect(routerPushMock).toHaveBeenCalledTimes(1);
-    const call = routerPushMock.mock.calls[0][0];
-    expect(call.name).toBe(ROUTE_INVEST_REVIEW);
-    expect(call.params).toEqual(composable.routeParams.value);
+    const callArgs = routerPushMock.mock.calls[0] as unknown[];
+    const payload = callArgs[0] as { name: string; params: unknown };
+    expect(payload.name).toBe(ROUTE_INVEST_REVIEW);
+    expect(payload.params).toEqual(composable.routeParams.value);
   });
 });
 

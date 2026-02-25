@@ -154,6 +154,11 @@ export const useAccreditationUpload = defineStore('useAccreditationUpload', () =
   };
 
   const handleSave = () => {
+    if (!allFiles.value.length) {
+      filesUploadError.value = 'Please upload at least one accreditation document.';
+    } else {
+      filesUploadError.value = '';
+    }
     validateTrigger.value = true;
     nextTick(() => {
       if (!isFieldsValid.value) {
@@ -166,6 +171,9 @@ export const useAccreditationUpload = defineStore('useAccreditationUpload', () =
   const onFilesChange = (filesInner: File[]) => {
     allFiles.value = filesInner;
     accreditationFiles.value = filesInner;
+    if (filesInner.length) {
+      filesUploadError.value = '';
+    }
     validateTrigger.value = false;
     if (!isValid.value) {
       onValidate();
