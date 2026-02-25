@@ -179,8 +179,8 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
       deleteLinkedAccountState.value.loading = true;
       deleteLinkedAccountState.value.error = null;
       const response = await apiClient.delete(`/auth/linkaccount/${profileId}`, body);
-      deleteLinkedAccountState.value.data = response.data;
-      return response.data;
+      deleteLinkedAccountState.value.data = response;
+      return response;
     } catch (err) {
       deleteLinkedAccountState.value.error = err as Error;
       deleteLinkedAccountState.value.data = undefined;

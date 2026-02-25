@@ -67,7 +67,7 @@ export function useSettingsBankAccounts(options: UseSettingsBankAccountsOptions 
   async function onDeleteAccountClick(sourceId: string | number) {
     if (deleteLinkedAccountState.value.loading || profileId.value <= 0) return;
     await walletRepository.deleteLinkedAccount(profileId.value, {
-      funding_source_id: String(sourceId),
+      funding_source_id: Number(sourceId),
     });
     await updateData();
   }

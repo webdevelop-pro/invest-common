@@ -44,6 +44,7 @@ export class ApiClient {
       path: new URL(fullUrl).pathname,
       userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : '',
       referer: typeof document !== 'undefined' ? document.referrer : '',
+      remoteIp: '',
       protocol: typeof window !== 'undefined' ? window.location.protocol.replace(':', '') : '',
     };
 
@@ -61,10 +62,20 @@ export class ApiClient {
         throw error;
       }
 
+      // No-content responses (e.g., 204) should not be JSON-parsed
+      if (response.status === 204 || response.status === 205) {
+        return {
+          data: undefined as T,
+          status: response.status,
+          headers: response.headers,
+        };
+      }
+
       const contentType = response.headers.get('content-type');
       const defaultType = contentType?.includes('application/json') ? 'json' : 'text';
       const type = config.type || defaultType;
       let data: any;
+
 
       switch (type) {
         case 'json':
@@ -141,8 +152,13 @@ export class ApiClient {
     });
   }
 
-  delete<T>(url: string, config?: Omit<RequestConfig, 'method' | 'body'>): Promise<ApiResponse<T>> {
-    return this.request<T>(url, { ...config, method: 'DELETE' });
+  delete<T>(url: string, data?: any, config?: Omit<RequestConfig, 'method' | 'body'>): Promise<ApiResponse<T>> {
+    const isFormData = data instanceof FormData;
+    return this.request<T>(url, {
+      ...config,
+      method: 'DELETE',
+      body: isFormData ? data : JSON.stringify(data),
+    });
   }
 
   options<T>(url: string, config?: Omit<RequestConfig, 'method' | 'body'>): Promise<ApiResponse<T>> {
