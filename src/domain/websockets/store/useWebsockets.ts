@@ -1,4 +1,4 @@
-import { watch } from 'vue';
+import { ref, watch, type WatchStopHandle } from 'vue';
 import { INotification } from 'InvestCommon/data/notifications/notifications.types';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { useWebSocket } from '@vueuse/core';
@@ -34,6 +34,9 @@ export const useDomainWebSocketStore = defineStore('domainWebsockets', () => {
   const repositoryOffer = useRepositoryOffer();
   const repositoryFiler = useRepositoryFiler();
   const repositoryEvm = useRepositoryEvm();
+  const isInitialized = ref(false);
+  const stopHandlers = ref<WatchStopHandle[]>([]);
+  const closeActiveConnection = ref<null | (() => void)>(null);
 
   const handleInternalMessage = (notification: INotification) => {
     switch (notification.data.obj) {
@@ -81,6 +84,18 @@ export const useDomainWebSocketStore = defineStore('domainWebsockets', () => {
     if (!userLoggedIn.value) {
       return;
     }
+    if (isInitialized.value) {
+      return;
+    }
+    isInitialized.value = true;
+
+    const cleanup = () => {
+      stopHandlers.value.forEach((stop) => stop());
+      stopHandlers.value = [];
+      closeActiveConnection.value = null;
+      isInitialized.value = false;
+    };
+
     const url = `${NOTIFICATION_URL}/ws`;
     // Support both http and https
     const uri = url.replace(/^https:/, 'wss:').replace(/^http:/, 'ws:');
@@ -101,31 +116,47 @@ export const useDomainWebSocketStore = defineStore('domainWebsockets', () => {
         pongTimeout: 1000,
       },
     });
+    closeActiveConnection.value = close;
 
-    watch(userLoggedIn, () => {
+    const stopUserWatch = watch(userLoggedIn, () => {
       if (!userLoggedIn.value) {
         close();
+        cleanup();
         console.log(`connection to ${uri} is closed`);
       }
     });
 
-    watch(
+    const stopDataWatch = watch(
       () => data.value,
       (val) => {
         if (val) handleMessage(val);
       },
       { deep: true },
     );
-    watch(
+    const stopStatusWatch = watch(
       () => status.value,
       () => {
         console.log(`websocket status: ${status.value}`);
       },
     );
+
+    stopHandlers.value = [stopUserWatch, stopDataWatch, stopStatusWatch];
+  };
+
+  const disconnect = () => {
+    if (closeActiveConnection.value) {
+      closeActiveConnection.value();
+    }
+    stopHandlers.value.forEach((stop) => stop());
+    stopHandlers.value = [];
+    closeActiveConnection.value = null;
+    isInitialized.value = false;
   };
 
   return {
     webSocketHandler,
+    disconnect,
+    isInitialized,
   };
 });
 

@@ -34,10 +34,10 @@ export function useWalletAlert() {
   const hasRestrictedWallet = computed(() => hasRestrictedWalletBehavior(profile.value));
 
   const isFiatWalletError = computed(
-    () => getWalletState.value.data?.isWalletStatusAnyError ?? getWalletState.value.error,
+    () => Boolean(getWalletState.value.data?.isWalletStatusAnyError ?? getWalletState.value.error),
   );
   const isEvmWalletError = computed(
-    () => getEvmWalletState.value.data?.isStatusAnyError ?? getEvmWalletState.value.error,
+    () => Boolean(getEvmWalletState.value.data?.isStatusAnyError ?? getEvmWalletState.value.error),
   );
   const isWalletError = computed(
     () => isFiatWalletError.value || isEvmWalletError.value,

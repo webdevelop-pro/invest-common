@@ -27,6 +27,8 @@ import NotificationsSidebarButton from 'InvestCommon/features/notifications/VNot
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import VLogo from 'UiKit/components/VLogo.vue';
 import env from 'InvestCommon/domain/config/env';
+import { useLinkPrefetch } from 'InvestCommon/shared/composables/useLinkPrefetch';
+import { isPwaMobile } from 'InvestCommon/domain/pwa/pwaDetector';
 
 const VHeaderProfilePWA = defineAsyncComponent({
   loader: () => import('../VHeader/VHeaderProfilePWA.vue'),
@@ -198,6 +200,7 @@ const showPwaBackButton = computed(() => {
 
 const queryParams = computed(() => new URLSearchParams(window?.location?.search));
 const showMobileSidebar = computed(() => showNavigation.value);
+const { prefetchMany } = useLinkPrefetch();
 
 const signInHandler = () => {
   const paramsObj: Record<string, string> = {};
@@ -214,6 +217,15 @@ const signUpHandler = () => {
   });
   navigateWithQueryParams(urlSignup, paramsObj);
 };
+
+onMounted(() => {
+  if (!isPwaMobile()) return;
+  prefetchMany([
+    ...pwaRootPaths.value,
+    urlSignin,
+    urlSignup,
+  ], { includeExternal: true });
+});
 
 const backHandler = () => {
   if (typeof window === 'undefined') {

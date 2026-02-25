@@ -6,6 +6,7 @@ import GearIcon from 'UiKit/assets/images/menu_common/gear.svg';
 import HelpIcon from 'UiKit/assets/images/menu_common/help.svg';
 import FaqIcon from 'UiKit/assets/images/menu_common/faq.svg';
 import LogoutIcon from 'UiKit/assets/images/menu_common/logout.svg';
+import { useSmartLink } from 'InvestCommon/shared/composables/useSmartLink';
 
 defineProps<{
   email?: string;
@@ -21,6 +22,8 @@ defineEmits<{
   (e: 'close'): void;
   (e: 'logout'): void;
 }>();
+
+const { toRouterPathIfLocal, canUseRouterLink } = useSmartLink();
 </script>
 
 <template>
@@ -53,19 +56,23 @@ defineEmits<{
               <div class="v-header-profile-pwa__overlay-email is--h6__title">
                 {{ email }}
               </div>
-              <a
+              <component
                 v-if="accountDetailsHref"
-                :href="accountDetailsHref"
+                :is="canUseRouterLink(accountDetailsHref) ? 'router-link' : 'a'"
+                :to="canUseRouterLink(accountDetailsHref) ? toRouterPathIfLocal(accountDetailsHref) || undefined : undefined"
+                :href="!canUseRouterLink(accountDetailsHref) ? accountDetailsHref : undefined"
                 class="v-header-profile-pwa__overlay-link"
               >
                 Account Details
-              </a>
+              </component>
             </div>
 
             <div class="v-header-profile-pwa__overlay-list">
-              <a
+              <component
                 v-if="mfaHref"
-                :href="mfaHref"
+                :is="canUseRouterLink(mfaHref) ? 'router-link' : 'a'"
+                :to="canUseRouterLink(mfaHref) ? toRouterPathIfLocal(mfaHref) || undefined : undefined"
+                :href="!canUseRouterLink(mfaHref) ? mfaHref : undefined"
                 class="v-header-profile-pwa__overlay-item"
               >
                 <UserIcon
@@ -77,10 +84,12 @@ defineEmits<{
                   class="v-header-profile-pwa__overlay-chevron"
                   aria-hidden="true"
                 />
-              </a>
-              <a
+              </component>
+              <component
                 v-if="securityHref"
-                :href="securityHref"
+                :is="canUseRouterLink(securityHref) ? 'router-link' : 'a'"
+                :to="canUseRouterLink(securityHref) ? toRouterPathIfLocal(securityHref) || undefined : undefined"
+                :href="!canUseRouterLink(securityHref) ? securityHref : undefined"
                 class="v-header-profile-pwa__overlay-item"
               >
                 <GearIcon
@@ -92,10 +101,12 @@ defineEmits<{
                   class="v-header-profile-pwa__overlay-chevron"
                   aria-hidden="true"
                 />
-              </a>
-              <a
+              </component>
+              <component
                 v-if="helpHref"
-                :href="helpHref"
+                :is="canUseRouterLink(helpHref) ? 'router-link' : 'a'"
+                :to="canUseRouterLink(helpHref) ? toRouterPathIfLocal(helpHref) || undefined : undefined"
+                :href="!canUseRouterLink(helpHref) ? helpHref : undefined"
                 class="v-header-profile-pwa__overlay-item"
               >
                 <HelpIcon
@@ -107,10 +118,12 @@ defineEmits<{
                   class="v-header-profile-pwa__overlay-chevron"
                   aria-hidden="true"
                 />
-              </a>
-              <a
+              </component>
+              <component
                 v-if="contactHref"
-                :href="contactHref"
+                :is="canUseRouterLink(contactHref) ? 'router-link' : 'a'"
+                :to="canUseRouterLink(contactHref) ? toRouterPathIfLocal(contactHref) || undefined : undefined"
+                :href="!canUseRouterLink(contactHref) ? contactHref : undefined"
                 class="v-header-profile-pwa__overlay-item"
               >
                 <FaqIcon
@@ -122,7 +135,7 @@ defineEmits<{
                   class="v-header-profile-pwa__overlay-chevron"
                   aria-hidden="true"
                 />
-              </a>
+              </component>
               <button
                 type="button"
                 class="v-header-profile-pwa__overlay-item v-header-profile-pwa__overlay-item--logout"

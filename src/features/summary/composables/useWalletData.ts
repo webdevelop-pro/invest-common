@@ -18,7 +18,11 @@ export function useWalletData() {
 
   const updateWalletData = async () => {
     if (canLoadWalletData.value && !getWalletState.value.loading && !getWalletState.value.error) {
-      walletRepository.getWalletByProfile(selectedUserProfileId.value);
+      try {
+        await walletRepository.getWalletByProfile(selectedUserProfileId.value);
+      } catch {
+        // Wallet may be absent (404) for new profiles. State is already stored in repository.
+      }
     } else {
       walletRepository.resetAll();
     }
@@ -26,7 +30,11 @@ export function useWalletData() {
 
   const updateCryptoWalletData = async () => {
     if (canLoadEvmWalletData.value && !getEvmWalletState.value.loading && !getEvmWalletState.value.error) {
-      evmRepository.getEvmWalletByProfile(selectedUserProfileId.value);
+      try {
+        await evmRepository.getEvmWalletByProfile(selectedUserProfileId.value);
+      } catch {
+        // EVM wallet may be absent (404) for new profiles. State is already stored in repository.
+      }
     } else {
       evmRepository.resetAll();
     }
@@ -38,8 +46,8 @@ export function useWalletData() {
     // Only update if profile data exists to prevent errors when data is reset
     if (selectedUserProfileData.value?.id) {
       nextTick(() => {
-        updateWalletData();
-        updateCryptoWalletData();
+        void updateWalletData();
+        void updateCryptoWalletData();
       });
     }
   }, { immediate: true });

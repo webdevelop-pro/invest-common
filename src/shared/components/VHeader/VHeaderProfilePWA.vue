@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, onBeforeUnmount, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import VAvatar from 'UiKit/components/VAvatar.vue';
 import env from 'InvestCommon/domain/config/env';
@@ -75,13 +75,16 @@ const onFileChange = async () => {
   }
 
   isAvatarLoading.value = true;
-  await filerRepository.uploadHandler(file, userId, 'user', userId);
-  const uploadedId = postSignurlState.value.data?.meta?.id;
-  if (uploadedId) {
-    await useRepositoryProfilesStore.updateUserData(userId, { image_link_id: uploadedId });
-    await useRepositoryProfilesStore.getUser();
+  try {
+    await filerRepository.uploadHandler(file, userId, 'user', userId);
+    const uploadedId = postSignurlState.value.data?.meta?.id;
+    if (uploadedId) {
+      await useRepositoryProfilesStore.updateUserData(userId, { image_link_id: uploadedId });
+      await useRepositoryProfilesStore.getUser();
+    }
+  } finally {
+    isAvatarLoading.value = false;
   }
-  isAvatarLoading.value = false;
 };
 
 const openProfileOverlay = () => {
@@ -101,6 +104,12 @@ const closeProfileOverlay = () => {
 const onLogout = () => {
   isDialogLogoutOpen.value = true;
 };
+
+onBeforeUnmount(() => {
+  if (typeof document !== 'undefined') {
+    document.body?.classList.remove('pwa-profile-overlay-open');
+  }
+});
 </script>
 
 <template>

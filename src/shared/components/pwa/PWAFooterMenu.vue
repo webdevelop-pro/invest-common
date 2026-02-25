@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, onBeforeUnmount, onMounted } from 'vue';
 import type { Component } from 'vue';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { storeToRefs } from 'pinia';
@@ -24,6 +24,9 @@ import {
   urlProfileWallet, 
   urlProfilePortfolio
 } from 'InvestCommon/domain/config/links';
+import { useLinkPrefetch } from 'InvestCommon/shared/composables/useLinkPrefetch';
+import { useSmartLink } from 'InvestCommon/shared/composables/useSmartLink';
+import { isPwaMobile } from 'InvestCommon/domain/pwa/pwaDetector';
 
 
 defineOptions({ name: 'PWAFooterMenu' });
@@ -46,7 +49,7 @@ function defaultWithBase(to: string): string {
 }
 
 const withBaseUniversal = (to: string) => (props.withBase ? props.withBase(to) : defaultWithBase(to));
-
+const { toRouterPathIfLocal, canUseRouterLink } = useSmartLink();
 const layoutActiveFallbackMap: Record<string, string[]> = {
   'offer-single': [urlOffers],
 };
@@ -120,6 +123,30 @@ const shouldHideMenu = computed(() => (
   isSidebarOpen.value
   || props.currentLayout === 'offer-single'
 ));
+
+const { prefetchLink, prefetchMany, observeViewportLinks } = useLinkPrefetch();
+let stopViewportObserver: (() => void) | null = null;
+
+const prefetchItemLink = (to: string) => {
+  prefetchLink(withBaseUniversal(to), { includeExternal: true });
+};
+
+onMounted(() => {
+  if (!isPwaMobile()) return;
+  prefetchMany(menuItems.value.map((item) => withBaseUniversal(item.to)), { includeExternal: true });
+  stopViewportObserver = observeViewportLinks({
+    selector: 'a[href]',
+    rootMargin: '260px',
+    includeExternal: true,
+  });
+});
+
+onBeforeUnmount(() => {
+  if (stopViewportObserver) {
+    stopViewportObserver();
+    stopViewportObserver = null;
+  }
+});
 </script>
 
 <template>
@@ -137,9 +164,12 @@ const shouldHideMenu = computed(() => (
         :key="item.to"
         class="pwamenu__item"
       >
-        <VNavigationMenuLink 
-          :href="item.to"
+        <component
+          :is="canUseRouterLink(item.to) ? 'router-link' : VNavigationMenuLink"
+          :to="canUseRouterLink(item.to) ? toRouterPathIfLocal(item.to) || undefined : undefined"
+          :href="!canUseRouterLink(item.to) ? item.to : undefined"
           :class="['pwamenu__link', isActive(item.to) ? 'is-active' : '']"
+          @click="prefetchItemLink(item.to)"
         >
           <component
             :is="item.icon"
@@ -147,7 +177,7 @@ const shouldHideMenu = computed(() => (
             aria-hidden="true"
           />
           <span class="pwamenu__label">{{ item.text }}</span>
-        </VNavigationMenuLink>
+        </component>
       </li>
     </ul>
   </nav>

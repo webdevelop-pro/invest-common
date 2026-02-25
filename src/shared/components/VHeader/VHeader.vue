@@ -14,6 +14,7 @@ import VHeader from 'UiKit/components/VHeader/VHeader.vue';
 import { MenuItem } from 'InvestCommon/types/global'; // Use shared MenuItem type
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useBreakpoints } from 'UiKit/composables/useBreakpoints';
+import { useLinkPrefetch } from 'InvestCommon/shared/composables/useLinkPrefetch';
 
 const VHeaderProfile = defineAsyncComponent({
   loader: () => import('./VHeaderProfile.vue'),
@@ -88,6 +89,7 @@ const showAuthButtons = computed(() => (
 const queryParams = computed(() => new URLSearchParams(window?.location?.search));
 
 const showMobileSidebar = computed(() => showNavigation.value);
+const { prefetchLink } = useLinkPrefetch();
 
 
 const signInHandler = () => {
@@ -106,6 +108,19 @@ const signUpHandler = () => {
   });
   navigateWithQueryParams(urlSignup, paramsObj);
 };
+
+const prefetchSignIn = () => {
+  prefetchLink(urlSignin);
+};
+
+const prefetchSignUp = () => {
+  prefetchLink(urlSignup);
+};
+
+onMounted(() => {
+  prefetchSignIn();
+  prefetchSignUp();
+});
 
 </script>
 
@@ -154,6 +169,9 @@ const signUpHandler = () => {
           v-if="showHaveAccount"
           class="v-header-invest-btns__sign-in"
           :variant="!isSignUpPage ? 'link' : null"
+          @mouseenter="prefetchSignIn"
+          @focus="prefetchSignIn"
+          @touchstart.passive="prefetchSignIn"
           @click="signInHandler"
         >
           Log In
@@ -162,6 +180,9 @@ const signUpHandler = () => {
         <VButton
           v-if="showDontHaveAccount"
           class="v-header-invest-btns__sign-up"
+          @mouseenter="prefetchSignUp"
+          @focus="prefetchSignUp"
+          @touchstart.passive="prefetchSignUp"
           @click="signUpHandler"
         >
           Sign Up
@@ -189,6 +210,9 @@ const signUpHandler = () => {
           v-if="showHaveAccount"
           class="v-header-invest-btns__sign-in"
           :variant="!isSignUpPage ? 'link' : null"
+          @mouseenter="prefetchSignIn"
+          @focus="prefetchSignIn"
+          @touchstart.passive="prefetchSignIn"
           @click="signInHandler"
         >
           Log In
@@ -197,6 +221,9 @@ const signUpHandler = () => {
         <VButton
           v-if="showDontHaveAccount"
           class="v-header-invest-btns__sign-up"
+          @mouseenter="prefetchSignUp"
+          @focus="prefetchSignUp"
+          @touchstart.passive="prefetchSignUp"
           @click="signUpHandler"
         >
           Sign Up

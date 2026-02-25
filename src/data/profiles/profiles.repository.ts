@@ -24,6 +24,8 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
   // Track the latest request ID for each profile fetch
   let currentProfileRequestId = 0;
   let currentProfileOptionsRequestId = 0;
+  let currentUserRequestId = 0;
+  let inFlightUserRequests = 0;
 
   // Action states
   const setProfileByIdState = createActionState<IProfileIndividual>();
@@ -158,19 +160,27 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
   };
 
   const getUser = async () => {
+    const requestId = ++currentUserRequestId;
+    inFlightUserRequests += 1;
+
     try {
       getUserState.value.loading = true;
       getUserState.value.error = null;
       const response = await apiClient.get<IUser>('/auth/user');
-      getUserState.value.data = new UserFormatter(response.data).format();
+      if (requestId === currentUserRequestId) {
+        getUserState.value.data = new UserFormatter(response.data).format();
+      }
       return getUserState.value.data;
     } catch (err) {
-      getUserState.value.error = err as Error;
-      getUserState.value.data = undefined;
-      toasterErrorHandling(err, 'Failed to fetch user data');
+      if (requestId === currentUserRequestId) {
+        getUserState.value.error = err as Error;
+        getUserState.value.data = undefined;
+        toasterErrorHandling(err, 'Failed to fetch user data');
+      }
       throw err;
     } finally {
-      getUserState.value.loading = false;
+      inFlightUserRequests = Math.max(0, inFlightUserRequests - 1);
+      getUserState.value.loading = inFlightUserRequests > 0;
     }
   };
 
