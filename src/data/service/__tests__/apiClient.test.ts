@@ -157,6 +157,24 @@ describe('ApiClient', () => {
         expect.any(Object),
       );
     });
+
+    it('should handle 204 no content responses without parsing JSON', async () => {
+      const mockResponse = {
+        ok: true,
+        status: 204,
+        headers: new Headers({ 'content-type': 'application/json' }),
+        json: vi.fn(),
+        text: vi.fn(),
+      };
+      mockFetch.mockResolvedValueOnce(mockResponse);
+
+      const response = await apiClient.request('/test');
+
+      expect(response.status).toBe(204);
+      expect(response.data).toBeUndefined();
+      expect(mockResponse.json).not.toHaveBeenCalled();
+      expect(mockResponse.text).not.toHaveBeenCalled();
+    });
   });
 
   describe('HTTP methods', () => {
@@ -283,6 +301,19 @@ describe('ApiClient', () => {
         `${baseURL}/test`,
         expect.objectContaining({
           method: 'DELETE',
+        }),
+      );
+    });
+
+    it('should make DELETE request with data', async () => {
+      const data = { name: 'test' };
+      await apiClient.delete('/test', data);
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        `${baseURL}/test`,
+        expect.objectContaining({
+          method: 'DELETE',
+          body: JSON.stringify(data),
         }),
       );
     });
