@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import VTimeline from 'UiKit/components/Base/VTimeline/VTimeline.vue';
 import VTimelineItem from 'UiKit/components/Base/VTimeline/VTimelineItem.vue';
@@ -13,6 +14,21 @@ import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 const { frontmatter } = useData();
 
 const offers = filterPages(allPages as IFrontmatter[], 'layout', 'offers');
+
+const isMobile = ref(false);
+
+const handleResize = () => {
+  isMobile.value = window.innerWidth <= 768;
+};
+
+onMounted(() => {
+  handleResize();
+  window.addEventListener('resize', handleResize);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', handleResize);
+});
 
 useGlobalLoader().hide();
 </script>
@@ -68,7 +84,11 @@ useGlobalLoader().hide();
                     block
                     :to="{ name: item.buttonRoute }"
                   >
-                    {{ item.buttonText }}
+                    {{
+                      isMobile && item.buttonTextMobile
+                        ? item.buttonTextMobile
+                        : item.buttonText
+                    }}
                   </VButton>
                   <VButton
                     v-if="item.buttonHref"
@@ -77,7 +97,11 @@ useGlobalLoader().hide();
                     block
                     :href="item.buttonHref"
                   >
-                    {{ item.buttonText }}
+                    {{
+                      isMobile && item.buttonTextMobile
+                        ? item.buttonTextMobile
+                        : item.buttonText
+                    }}
                   </VButton>
                 </div>
               </div>
