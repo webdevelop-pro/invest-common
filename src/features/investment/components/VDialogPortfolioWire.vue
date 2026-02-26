@@ -207,6 +207,10 @@ const saveHandler = () => {
       width: 100%;
       max-width: 100%;
     }
+
+    @media screen and (max-width: $tablet-xs){
+      flex-direction: column;
+    }
   }
 
   &__text-title {
@@ -234,6 +238,7 @@ const saveHandler = () => {
     height: 1px;
     background-color: $gray-20;
     border: none;
+    margin: 20px 0;
   }
 
   &__text-value {

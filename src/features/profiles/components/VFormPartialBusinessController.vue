@@ -3,6 +3,7 @@ import { PropType, computed } from 'vue';
 import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
 import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
+import VFormDatePicker from 'UiKit/components/Base/VForm/VFormDatePicker.vue';
 import VFormCheckbox from 'UiKit/components/Base/VForm/VFormCheckbox.vue';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import VFormCombobox from 'UiKit/components/Base/VForm/VFormCombobox.vue';
@@ -146,14 +147,13 @@ defineExpose({
             label="Date of Birth"
             data-testid="dob-group"
           >
-            <VFormInput
+            <VFormDatePicker
               :model-value="model.business_controller.dob"
               :is-error="VFormGroupProps.isFieldError"
               placeholder="MM/DD/YYYY"
               name="date-of-birth"
               size="large"
               data-testid="date-of-birth"
-              type="date"
               :loading="loadingComputed"
               @update:model-value="model.business_controller.dob = $event"
             />

@@ -3,6 +3,7 @@ import { PropType, watch } from 'vue';
 import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
 import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
+import VFormDatePicker from 'UiKit/components/Base/VForm/VFormDatePicker.vue';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import VFormCheckbox from 'UiKit/components/Base/VForm/VFormCheckbox.vue';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
@@ -89,14 +90,12 @@ watch(() => model.value?.non_us, () => {
           label="Date of Birth"
           data-testid="dob-group"
         >
-          <VFormInput
+          <VFormDatePicker
             v-model="model.dob"
             :is-error="VFormGroupProps.isFieldError"
             placeholder="MM/DD/YYYY"
-            name="date-of-birth"
             size="large"
             data-testid="date-of-birth"
-            type="date"
             :loading="loading"
           />
         </VFormGroup>

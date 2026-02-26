@@ -5,6 +5,7 @@ import {
 import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
 import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
+import VFormDatePicker from 'UiKit/components/Base/VForm/VFormDatePicker.vue';
 import VFormSelect from 'UiKit/components/Base/VForm/VFormSelect.vue';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
@@ -207,14 +208,13 @@ watch(() => props.modelData, (newModelData) => {
           label="Date of Birth"
           data-testid="dob-group"
         >
-          <VFormInput
+          <VFormDatePicker
             :model-value="model.dob"
             :is-error="VFormGroupProps.isFieldError"
             placeholder="MM/DD/YYYY"
             name="date-of-birth"
             size="large"
             data-testid="date-of-birth"
-            type="date"
             :readonly="readOnly"
             :loading="loading"
             @update:model-value="model.dob = $event"

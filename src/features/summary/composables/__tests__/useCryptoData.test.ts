@@ -29,6 +29,15 @@ vi.mock('InvestCommon/data/3dParty/crypto.repository', () => ({
   }),
 }));
 
+// Mock offer repository to avoid real network calls from useSummaryData
+vi.mock('InvestCommon/data/offer/offer.repository', () => ({
+  useRepositoryOffer: () => ({
+    getOffersState: ref({ loading: false, error: null, data: [] }),
+    getOffers: vi.fn(),
+    getTopOpenOffer: vi.fn().mockReturnValue(null),
+  }),
+}));
+
 import DashboardSummary from '../../DashboardSummary.vue';
 
 describe('useCryptoData', () => {
@@ -40,26 +49,26 @@ describe('useCryptoData', () => {
   it('loads crypto prices and maps items in DashboardSummary', async () => {
     const pinia = createPinia();
     setActivePinia(pinia);
-    
-    const router = createRouter({ 
-      history: createWebHistory(), 
-      routes: [{ path: '/', component: { template: '<div />' } }] 
+
+    const router = createRouter({
+      history: createWebHistory(),
+      routes: [{ path: '/', component: { template: '<div />' } }],
     });
-    
+
     const wrapper = shallowMount(DashboardSummary, {
-      global: { 
+      global: {
         plugins: [pinia, router],
       },
     });
-    
+
     await wrapper.vm.$nextTick();
-    
+
     const cryptoTicker = wrapper.findComponent({ name: 'CryptoPricesTicker' });
     expect(cryptoTicker.exists()).toBe(true);
-    
+
     const items = cryptoTicker.props('items') as any[];
     expect(items.length).toBe(11);
-    
+
     const btc = items.find((c: any) => c.id === 'bitcoin');
     expect(btc?.name).toBe('Bitcoin');
     expect(btc?.priceUsd).toBe(50000);

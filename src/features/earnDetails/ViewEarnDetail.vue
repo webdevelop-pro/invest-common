@@ -11,6 +11,7 @@ import EarnOverview from './components/EarnOverview.vue';
 import EarnYourPosition from './components/EarnYourPosition.vue';
 import EarnRisk from './components/EarnRisk.vue';
 import { useEarnDetail } from './useEarnDetail';
+import { useWalletAlert } from 'InvestCommon/features/wallet/logic/useWalletAlert';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import VDialogWallet from 'InvestCommon/features/wallet/components/VDialogWallet.vue';
 import { urlOfferSingle } from 'InvestCommon/domain/config/links';
@@ -54,6 +55,9 @@ const {
   rwaOfferSlug,
 } = useEarnDetail();
 
+// Reuse wallet alert state to gate Earn detail interactions
+const { isAlertShow } = useWalletAlert({ hideFiatAlerts: true });
+
 const investUrl = computed(() =>
   isRwaPool.value && rwaOfferSlug.value
     ? urlOfferSingle(rwaOfferSlug.value)
@@ -77,6 +81,7 @@ const investUrl = computed(() =>
         :wallet-loading="walletLoading"
         :is-rwa="isRwaPool"
         :invest-url="investUrl"
+        :disabled="isAlertShow"
         @back-click="onBackClick"
         @exchange-click="onExchangeClick"
       />

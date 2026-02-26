@@ -17,6 +17,7 @@ interface Props {
   walletLoading?: boolean;
   isRwa?: boolean;
   investUrl?: string;
+  disabled?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -136,6 +137,7 @@ defineExpose({
           <a
             :href="investUrl"
             class="earn-deposit-card__exchange-button is--link-2"
+            :class="{ 'is--disabled': disabled }"
           >
             Invest
           </a>
@@ -145,6 +147,7 @@ defineExpose({
           <a
             href="#"
             class="earn-deposit-card__exchange-button is--link-2"
+            :class="{ 'is--disabled': disabled }"
             @click.prevent="onExchangeClick"
           >
             Exchange
@@ -155,7 +158,7 @@ defineExpose({
         v-if="!hasApproved"
         block
         size="large"
-        :disabled="loading || walletLoading || isApproving"
+        :disabled="loading || walletLoading || isApproving || disabled"
         :loading="isApproving"
         class="is--margin-top-8"
         @click="approveToken"
@@ -166,7 +169,7 @@ defineExpose({
         v-else
         block
         size="large"
-        :disabled="!isValid || loading || depositState.loading"
+        :disabled="!isValid || loading || depositState.loading || disabled"
         :loading="isSubmitting || depositState.loading"
         data-testid="deposit-button"
         class="is--margin-top-8"
@@ -190,6 +193,11 @@ defineExpose({
 
   @media screen and (max-width: $desktop){
     width: 100%;
+  }
+
+  .is--disabled {
+    opacity: 0.3;
+    pointer-events: none;
   }
 
   &__balance {

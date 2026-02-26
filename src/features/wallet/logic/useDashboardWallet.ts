@@ -15,6 +15,7 @@ import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 import { urlSettingsBankAccounts } from 'InvestCommon/domain/config/links';
 import externalLink from 'UiKit/assets/images/external-link.svg';
 import bank from 'UiKit/assets/images/bank.svg';
+import { useBreakpoints } from 'UiKit/composables/useBreakpoints';
 
 export const HOLDINGS_TAB = 'holdings';
 export const TRANSACTIONS_TAB = 'transactions';
@@ -46,6 +47,7 @@ function initialWalletTabFromRoute(query: Record<string, unknown>): string {
 export function useDashboardWallet() {
   const route = useRoute();
   const activeTab = ref(initialWalletTabFromRoute(route.query as Record<string, unknown>));
+  const { isTablet } = useBreakpoints();
 
   const isDialogTransactionOpen = ref(false);
   const transactionType = ref<EvmTransactionTypes>(EvmTransactionTypes.deposit);
@@ -113,6 +115,7 @@ export function useDashboardWallet() {
 
   const {
     table: walletTokensTable,
+    tokensOptions,
     filterItems: holdingsFilterItems,
     handleFilterApply: handleHoldingsFiltersApply,
   } = useWalletTokens();
@@ -126,6 +129,7 @@ export function useDashboardWallet() {
 
   const {
     table: walletTransactionsTable,
+    transactionsOptions,
     filterItems: walletFilterItems,
     handleFilterApply: handleWalletFiltersApply,
   } = useWalletTransactions();
@@ -135,6 +139,14 @@ export function useDashboardWallet() {
 
   const walletFilterItemsComputed = computed(() =>
     activeTab.value === HOLDINGS_TAB ? holdingsFilterItems.value : walletFilterItems.value,
+  );
+
+  const hasHoldingsSourceData = computed(
+    () => Array.isArray(tokensOptions.value) && tokensOptions.value.length > 0,
+  );
+
+  const hasTransactionsSourceData = computed(
+    () => Array.isArray(transactionsOptions.value) && transactionsOptions.value.length > 0,
   );
 
   const handleWalletFilterApply = (items: WalletFilterApplyPayload[]) => {
@@ -198,7 +210,7 @@ export function useDashboardWallet() {
       },
       {
         id: 'crypto',
-        title: 'Tradable Crypto Balance:',
+        title: isTablet.value ? 'Crypto Balance:' : 'Tradable Crypto Balance:',
         value: cryptoBalanceMainFormatted.value,
         unit: cryptoBalanceCoins.value,
         secondaryText: hasCrypto24hChange ? '24h Change' : undefined,
@@ -227,9 +239,18 @@ export function useDashboardWallet() {
     ];
   });
 
-  const filterDisabled = computed(
-    () => !holdingsTable.value && !transactionsTable.value,
-  );
+  const filterDisabled = computed(() => {
+    if (activeTab.value === HOLDINGS_TAB) {
+      // Disable filter only when there is no holdings data at all
+      // (initial empty state). Once any holdings exist, keep filter
+      // enabled even if the current filtered view has zero rows.
+      return !hasHoldingsSourceData.value;
+    }
+
+    // Same behavior for transactions tab: disable only when there are
+    // no transactions to filter.
+    return !hasTransactionsSourceData.value;
+  });
 
   return {
     activeTab,

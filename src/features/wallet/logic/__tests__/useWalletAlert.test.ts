@@ -255,16 +255,4 @@ describe('useWalletAlert', () => {
     api = useWalletAlert();
     expect(api.isDataLoading.value).toBe(false);
   });
-
-  it('does not treat missing data as loading when wallets cannot load (e.g. before KYC)', () => {
-    // Simulate case where wallets are not allowed to load yet
-    canLoadWalletDataRef.value = false;
-    canLoadEvmWalletDataRef.value = false;
-    getWalletStateRef.value = { data: undefined, loading: false, error: null };
-    getEvmWalletStateRef.value = { data: undefined, loading: false, error: null };
-
-    const api = useWalletAlert();
-
-    expect(api.isDataLoading.value).toBe(false);
-  });
 });

@@ -9,6 +9,7 @@ import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
 import { useRepositoryEsign } from 'InvestCommon/data/esign/esign.repository';
+import { useRepositoryFiler } from 'InvestCommon/data/filer/filer.repository';
 import { ROUTE_INVEST_REVIEW } from 'InvestCommon/domain/config/enums/routes';
 import { useInvestSignature } from '../useInvestSignature';
 
@@ -35,6 +36,22 @@ vi.mock('InvestCommon/data/investment/investment.repository', () => ({
 
 vi.mock('InvestCommon/data/esign/esign.repository', () => ({
   useRepositoryEsign: vi.fn(),
+}));
+
+vi.mock('InvestCommon/data/filer/filer.repository', () => ({
+  useRepositoryFiler: vi.fn(),
+}));
+
+vi.mock('InvestCommon/data/filer/filer.formatter', () => ({
+  FilerFormatter: {
+    // Always return a single formatted investment agreement document
+    getFormattedInvestmentDocuments: vi.fn(() => ([
+      {
+        url: 'https://files.example.com/investment-agreement.pdf',
+        typeFormatted: 'Investment-Agreements',
+      },
+    ])),
+  },
 }));
 
 vi.mock('InvestCommon/domain/config/env', () => ({
@@ -78,6 +95,20 @@ describe('useInvestSignature (logic)', () => {
       data: null as Blob | null,
     }),
   };
+  const mockFilerRepository = {
+    getFilesState: ref({
+      loading: false,
+      error: null,
+      data: undefined,
+    }),
+    getFiles: vi.fn().mockResolvedValue([
+      {
+        id: 1,
+        url: 'https://files.example.com/investment-agreement.pdf',
+        'object-type': 'investment-agreements',
+      },
+    ]),
+  };
 
   beforeEach(() => {
     setActivePinia(createPinia());
@@ -95,6 +126,7 @@ describe('useInvestSignature (logic)', () => {
     (useSessionStore as any).mockReturnValue(mockSessionStore);
     (useRepositoryInvestment as any).mockReturnValue(mockInvestmentRepository);
     (useRepositoryEsign as any).mockReturnValue(mockEsignRepository);
+    (useRepositoryFiler as any).mockReturnValue(mockFilerRepository);
   });
 
   afterEach(() => {
@@ -188,14 +220,15 @@ describe('useInvestSignature (logic)', () => {
     expect(mockRouter.push).not.toHaveBeenCalled();
   });
 
-  it('handleDocument opens signUrl in new tab when signEntityId already exists', async () => {
+  it('handleDocument opens finalized investment agreement from Filer when document is signed', async () => {
     const composable = useInvestSignature();
 
     await composable.handleDocument();
 
     expect(mockEsignRepository.setDocument).not.toHaveBeenCalled();
+    expect(mockFilerRepository.getFiles).toHaveBeenCalledWith('test-id', 'investment');
     expect(mockWindowOpen).toHaveBeenCalledWith(
-      'https://docuseal-web.webdevelop.biz/s/doc-entity-123?external_id=test-id',
+      'https://files.example.com/investment-agreement.pdf',
       '_blank',
     );
   });

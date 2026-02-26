@@ -16,6 +16,7 @@ interface Props {
   walletLoading?: boolean;
   isRwa?: boolean;
   investUrl?: string;
+  disabled?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -122,7 +123,8 @@ const {
         :is-rwa="isRwa"
         :invest-url="investUrl"
         :name="poolData?.name"
-        @exchange-click="emit('exchange-click')"
+        :disabled="disabled"
+        @exchange-click="() => { if (!disabled) emit('exchange-click'); }"
       />
     </div>
   </div>

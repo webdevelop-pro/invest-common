@@ -20,6 +20,15 @@ export interface UseSettingsBankAccountsOptions {
    * outside of the Settings page (e.g. wallet alert), to avoid extra fetches.
    */
   skipInitialUpdate?: boolean;
+  /**
+   * Optional callback that will be invoked after the Plaid link flow
+   * successfully completes and the wallet data (including funding sources)
+   * has been refreshed.
+   *
+   * This is primarily used by the Wallet tab to show a contextual toast
+   * notification after a new bank account has been added.
+   */
+  onBankAccountsUpdated?: () => void;
 }
 
 export function useSettingsBankAccounts(options: UseSettingsBankAccountsOptions = {}) {
@@ -90,6 +99,7 @@ export function useSettingsBankAccounts(options: UseSettingsBankAccountsOptions 
       await Promise.all(promises);
     }
     await updateData();
+    options.onBankAccountsUpdated?.();
   }
 
   async function onAddAccountClick() {

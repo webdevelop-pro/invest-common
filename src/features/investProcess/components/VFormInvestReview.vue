@@ -2,6 +2,7 @@
 import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
 import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
+import VFormDatePicker from 'UiKit/components/Base/VForm/VFormDatePicker.vue';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import { useInvestReviewForm } from './logic/useInvestReviewForm';
 
@@ -72,12 +73,11 @@ const {
       </FormCol>
       <FormCol col2>
         <VFormGroup label="Date of Birth">
-          <VFormInput
+          <VFormDatePicker
             :model-value="selectedUserProfileData?.data?.dob"
             name="date-of-birth"
             readonly
             size="large"
-            type="date"
             data-testid="date-of-birth"
           />
         </VFormGroup>

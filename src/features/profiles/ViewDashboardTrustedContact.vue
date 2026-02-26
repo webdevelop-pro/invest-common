@@ -5,6 +5,7 @@ import { useFormTrustedContact } from './store/useFormTrustedContact';
 import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
 import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
+import VFormDatePicker from 'UiKit/components/Base/VForm/VFormDatePicker.vue';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 
 const globalLoader = useGlobalLoader();
@@ -105,13 +106,12 @@ const {
               label="Date Of Birth"
               data-testid="dob-group"
             >
-              <VFormInput
+              <VFormDatePicker
                 :model-value="model.beneficiary?.dob"
                 :is-error="VFormGroupProps.isFieldError"
                 placeholder="Date Of Birth"
                 name="dob"
                 size="large"
-                type="date"
                 data-testid="dob"
                 :loading="isLoadingFields"
                 @update:model-value="model.beneficiary.dob = $event"

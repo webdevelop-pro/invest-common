@@ -48,11 +48,10 @@ export function useWalletAlert(options: UseWalletAlertOptions = {}) {
   const { getProfileByIdState } = storeToRefs(useRepositoryProfiles());
   const {
     getWalletState,
-    canLoadWalletData,
     createLinkExchangeState,
     createLinkProcessState,
   } = storeToRefs(useRepositoryWallet());
-  const { getEvmWalletState, canLoadEvmWalletData } = storeToRefs(useRepositoryEvm());
+  const { getEvmWalletState } = storeToRefs(useRepositoryEvm());
 
   const profile = computed(
     () => (selectedUserProfileData.value ?? null) as IProfileFormatted | null,
@@ -126,45 +125,41 @@ export function useWalletAlert(options: UseWalletAlertOptions = {}) {
     () => isBankAccountMissing.value && !hideBankAccountMissingInfo,
   );
 
-  const isDataLoading = computed(() => {
-    const profileLoading = getProfileByIdState.value.loading;
-    const walletLoading = getWalletState.value.loading;
-    const evmLoading = getEvmWalletState.value.loading;
-    const exchangeLoading = createLinkExchangeState.value.loading;
-    const processLoading = createLinkProcessState.value.loading;
+  // 1) Any repository signaling an explicit loading state
+  const isAnyRepoLoading = computed(
+    () => getProfileByIdState.value.loading
+      || getWalletState.value.loading
+      || getEvmWalletState.value.loading
+      || createLinkExchangeState.value.loading
+      || createLinkProcessState.value.loading,
+  );
 
-    // Any explicit loading flag → show alert skeleton
-    if (profileLoading || walletLoading || evmLoading || exchangeLoading || processLoading) {
-      return true;
-    }
+  // 2) Fiat wallet is "empty but clean": no data, no error, not loading
+  const isFiatWalletEmpty = computed(
+    () => getWalletState.value.data === undefined
+      && getWalletState.value.error === null
+      && !getWalletState.value.loading,
+  );
 
-    // Initial "no data yet" states, but only when those wallets are actually
-    // allowed to load (e.g. KYC passed, feature enabled). If canLoad* is false,
-    // we should not treat missing data as "loading".
-    const needsFiatInitialLoad =
-      getWalletState.value.data === undefined &&
-      canLoadWalletData.value &&
-      getWalletState.value.error === null;
+  // 3) EVM wallet is "empty but clean": no data, no error, not loading
+  const isEvmWalletEmpty = computed(
+    () => getEvmWalletState.value.data === undefined
+      && getEvmWalletState.value.error === null
+      && !getEvmWalletState.value.loading,
+  );
 
-    const needsEvmInitialLoad =
-      getEvmWalletState.value.data === undefined &&
-      canLoadEvmWalletData.value &&
-      getEvmWalletState.value.error === null;
+  // 4) Both wallets are in their initial "empty but clean" state
+  const areWalletsInitialLoading = computed(
+    () => isFiatWalletEmpty.value && isEvmWalletEmpty.value && !isAlertShow.value,
+  );
 
-    // Only show the alert skeleton while BOTH fiat and EVM are in their
-    // initial "can load but no data yet" state. As soon as we either
-    // (a) have data for one side, or (b) cannot load it (e.g. KYC required),
-    // we stop showing the loading skeleton.
-    if (needsFiatInitialLoad && needsEvmInitialLoad) {
-      return true;
-    }
-
-    return false;
-  });
+  // Final flag exposed to the UI
+  const isDataLoading = computed(
+    () => isAnyRepoLoading.value || areWalletsInitialLoading.value,
+  );
 
   const isAlertShow = computed(
     () =>
-      !isDataLoading.value &&
       (hasRestrictedWallet.value ||
         isKYCNeedToPass.value ||
         isKYCInProgress.value ||

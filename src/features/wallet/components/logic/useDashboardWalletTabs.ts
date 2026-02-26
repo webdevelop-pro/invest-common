@@ -31,24 +31,20 @@ export function useDashboardWalletTabs(
     () => activeTabModel.value === props.transactionsTab,
   );
 
-  const hasHoldingsData = computed(
-    () => !!props.holdingsTable && Array.isArray(props.holdingsTable.data) && props.holdingsTable.data.length > 0,
-  );
-
-  const hasTransactionsData = computed(() => 
-    !!props.transactionsTable && Array.isArray(props.transactionsTable.data)
-    && props.transactionsTable.data.length > 0,
-  );
-
   const filterDisabledComputed = computed(() => {
     if (props.filterDisabled) return true;
 
     if (isHoldingsActive.value) {
-      return !hasHoldingsData.value;
+      // Allow opening the filter even when the current holdings table
+      // has zero rows (e.g. after applying a filter that matches nothing).
+      // We only disable the filter completely when there is no table config.
+      return !props.holdingsTable;
     }
 
     if (isTransactionsActive.value) {
-      return !hasTransactionsData.value;
+      // Same behavior for the transactions tab: keep the filter enabled
+      // as long as the table exists, regardless of the current row count.
+      return !props.transactionsTable;
     }
 
     return false;

@@ -5,6 +5,7 @@ import DashboardTabsTopInfo from 'InvestCommon/features/dashboard/components/Das
 import VTableDefault from 'InvestCommon/shared/components/VTableDefault.vue';
 import VTableToolbar from 'InvestCommon/shared/components/VTableToolbar.vue';
 import VTableYieldItem from './components/VTableYieldItem.vue';
+import { useWallet } from 'InvestCommon/features/wallet/logic/useWallet';
 import { useEarnTable } from './composables/useEarnTable';
 import { useWalletAlert } from 'InvestCommon/features/wallet/logic/useWalletAlert';
 import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
@@ -61,6 +62,13 @@ const {
   isDataLoading,
 } = useWalletAlert({ hideFiatAlerts: true });
 
+// Ensure wallet data is fetched when landing directly on Earn (no prior wallet view)
+const {
+  getWalletState,
+  getEvmWalletState,
+  updateData: updateWalletData,
+} = useWallet();
+
 const dialogsStore = useDialogs();
 
 const handleContactUsClick = (event: Event) => {
@@ -76,6 +84,11 @@ const showEmptyMessage = computed(() => filterResults.value === 0 && search.valu
 
 onMounted(() => {
   globalLoader.hide();
+
+  // If neither fiat nor EVM wallet has data yet, trigger a wallet data fetch.
+  if (!getWalletState.value.data && !getEvmWalletState.value.data) {
+    void updateWalletData();
+  }
 });
 </script>
 

@@ -14,6 +14,7 @@ import { VTabsContent } from 'UiKit/components/Base/VTabs';
 import InvestmentDocuments from 'InvestCommon/features/investment/components/InvestmentDocuments.vue';
 import InvestmentTimeline from 'InvestCommon/features/investment/components/InvestmentTimeline.vue';
 import InvestmentTopInfo from 'InvestCommon/features/investment/components/InvestmentTopInfo.vue';
+import { useBreakpoints } from 'UiKit/composables/useBreakpoints';
 
 defineProps({
   tab: {
@@ -31,6 +32,7 @@ const { selectedUserProfileId, selectedUserProfileData } = storeToRefs(profilesS
 const router = useRouter();
 const route = useRoute();
 const investmentID = computed(() => router.currentRoute.value.params.id);
+const { isTablet } = useBreakpoints();
 
 const breadcrumbs = computed(() => ([
   {
@@ -49,7 +51,7 @@ const breadcrumbs = computed(() => ([
 const tabs = computed(() => ({
   [DashboardInvestmentTabTypes.documents]: {
     value: DashboardInvestmentTabTypes.documents,
-    label: 'Investment Documents',
+    label: isTablet.value ? 'Documents' : 'Investment Documents',
     to: {
       name: ROUTE_INVESTMENT_DOCUMENTS,
       params: {
@@ -60,7 +62,7 @@ const tabs = computed(() => ({
   },
   [DashboardInvestmentTabTypes.timeline]: {
     value: DashboardInvestmentTabTypes.timeline,
-    label: 'Investment Timeline',
+    label: isTablet.value ? 'Timeline' : 'Investment Timeline',
     to: {
       name: ROUTE_INVESTMENT_TIMELINE,
       params: {

@@ -54,7 +54,7 @@ const getComponentName = (item: MenuItem) => {
   >
     <VNavigationMenuList>
       <VNavigationMenuItem>
-        <div class="is--h6__title">
+        <div class="is--h6__title is--color-gray-60">
           <VAvatar
             size="small"
             src=""

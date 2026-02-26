@@ -7,6 +7,8 @@ import { storeToRefs } from 'pinia';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
 import { useRepositoryEsign } from 'InvestCommon/data/esign/esign.repository';
+import { useRepositoryFiler } from 'InvestCommon/data/filer/filer.repository';
+import { FilerFormatter } from 'InvestCommon/data/filer/filer.formatter';
 import env from 'InvestCommon/domain/config/env';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 
@@ -25,6 +27,8 @@ export function useInvestSignature() {
   const { setCurrentUnconfirmedFilter } = investmentRepository;
   const esignRepository = useRepositoryEsign();
   const { setDocumentState, getDocumentState } = storeToRefs(esignRepository);
+  const filerRepository = useRepositoryFiler();
+  const { getFilesState } = storeToRefs(filerRepository);
 
   // Router and route
   const router = useRouter();
@@ -64,7 +68,8 @@ export function useInvestSignature() {
   const isLoading = computed(() => 
     setSignatureState.value.loading || 
     setDocumentState.value.loading ||
-    getDocumentState.value.loading
+    getDocumentState.value.loading ||
+    getFilesState.value.loading
   );
   // Mirror form-level canContinue flag so the view can easily bind footer button state
   const canContinue = computed(() => Boolean(formRef.value?.canContinue));
@@ -86,6 +91,31 @@ export function useInvestSignature() {
     if (!slug.value || !id.value || !profileId.value) return;
     
     try {
+      // If the document is already signed, open the finalized agreement file from Filer
+      if (signId.value) {
+        // Try to reuse already-fetched files first; if not available,
+        // fetch from Filer and then locate the agreement using the same
+        // formatter logic as the Investment page.
+        let source = getFilesState.value.data;
+        if (!source) {
+          source = await filerRepository.getFiles(id.value, 'investment');
+        }
+        const formattedDocuments = FilerFormatter.getFormattedInvestmentDocuments(source as any);
+        const agreementDoc = formattedDocuments.find((doc: any) => {
+          const url = String(doc?.url ?? '').toLowerCase();
+          return url.includes('docuseal');
+        }) ?? formattedDocuments.find((doc: any) => {
+          const type = String(doc?.typeFormatted ?? '').toLowerCase();
+          return type.includes('investment-agreements');
+        }) ?? formattedDocuments[0];
+
+        const url = agreementDoc?.url;
+        if (url) {
+          window.open(url, '_blank');
+        }
+
+        return;
+      }
 
       if (!signEntityId.value) {
         await esignRepository.setDocument(slug.value, id.value);
@@ -119,21 +149,37 @@ export function useInvestSignature() {
     () => getInvestUnconfirmedOne.value?.signature_data?.entity_id ?? '',
   );
 
-  // When signId is set (user signed), close the sign tab and clear temporary setDocument data
-  watch(signId, (newSignId) => {
-    if (!newSignId) return;
-    if (signWindowRef.value && !signWindowRef.value.closed) {
-      signWindowRef.value.close();
-      signWindowRef.value = null;
-    }
-    esignRepository.clearSetDocumentData();
-  });
+  const getInvestmentFiles = async () => {
+    if (!id.value) return;
+    filerRepository.getFiles(id.value, 'investment').catch((error) => {
+      console.error('Failed to preload investment files:', error);
+    });
+  };
+
+  // When signId is set (user signed), close the sign tab, clear temporary setDocument data,
+  // and preload investment documents from Filer so the agreement is ready to open.
+  watch(
+    signId,
+    (newSignId) => {
+      if (!newSignId) return;
+      if (signWindowRef.value && !signWindowRef.value.closed) {
+        signWindowRef.value.close();
+        signWindowRef.value = null;
+      }
+      esignRepository.clearSetDocumentData();
+      getInvestmentFiles();
+    },
+    { immediate: true },
+  );
 
   // Clear setDocument when unconfirmed one already has entity_id (e.g. from load or WS)
   watch(
     entityIdFromInvestment,
     (entityId) => {
-      if (entityId) esignRepository.clearSetDocumentData();
+      if (entityId) {
+        esignRepository.clearSetDocumentData();
+        getInvestmentFiles();
+      }
     },
     { immediate: true },
   );
