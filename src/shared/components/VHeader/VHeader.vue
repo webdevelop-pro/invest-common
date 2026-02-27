@@ -116,6 +116,7 @@ const signUpHandler = () => {
     v-model="isMobileSidebarOpen"
     :show-navigation="showNavigation"
     :show-mobile-sidebar="showMobileSidebar"
+    :menu="menu"
     :is-mobile-p-w-a="false"
     :show-profile-link="showProfileLink"
     :url-profile="urlProfile"
