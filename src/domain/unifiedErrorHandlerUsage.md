@@ -116,3 +116,27 @@ errorHandler.setupVueHandler(vueApp);
 ## 🔍 Debugging
 
 Enable debug logging by checking the browser console. All errors are logged before being sent to analytics, so you can see what's being captured.
+
+## 🧪 Testing global alert (5xx banner)
+
+### Unit tests
+
+- **`generalErrorHandling` (UiKit):**  
+  Run from repo root:
+  ```bash
+  npm run test:unit:cov -- ui-kit/src/helpers/__tests__/generalErrorHandling.test.ts
+  ```
+  Or with watch:
+  ```bash
+  npm run test:watch -- ui-kit/src/helpers/__tests__/generalErrorHandling.test.ts
+  ```
+  These tests assert that for 5xx `Response` errors the global alert is shown (and toast is not), and for non-5xx the toast is shown (and global alert is not).
+
+### Manual testing in the browser
+
+1. **Trigger a 5xx from an API call (e.g. dashboard):**
+   - Open DevTools → Network.
+   - Find a request that uses `ApiClient` (e.g. wallet, profile, portfolio).
+   - Right-click the request → "Block request URL" or use a local proxy/mock server that returns 500 for that URL.
+   - Reload or perform the action that triggers the request.
+   - You should see the **red banner under the header** with message like `Request GET /path failed with status 500` (and optional server details). No toast.

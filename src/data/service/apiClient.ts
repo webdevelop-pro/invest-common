@@ -37,6 +37,11 @@ export class ApiClient {
 
     const headers = config.headers ? config.headers : defaultHeaders;
 
+    // Control how 5xx responses are treated by the global error handler.
+    // By default, server errors are NOT considered fatal to avoid
+    // redirecting the whole app for recoverable API issues.
+    const fatalOnServerError = config.fatalOnServerError ?? false;
+
     // Gather HTTP request data
     const httpRequest = {
       method: config.method || 'GET',
@@ -58,6 +63,9 @@ export class ApiClient {
 
       if (!response.ok) {
         const error = new APIError('Failed to fetch data', response, httpRequest);
+        // Classify API errors once, at the source. The global error handler
+        // will only redirect for errors explicitly marked as fatal.
+        (error as any).isFatal = fatalOnServerError && response.status >= 500;
         await error.initializeResponseJson();
         throw error;
       }

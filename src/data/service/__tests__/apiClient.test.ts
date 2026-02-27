@@ -86,6 +86,77 @@ describe('ApiClient', () => {
       });
     });
 
+    it('marks 5xx API errors as fatal only when fatalOnServerError is true', async () => {
+      const errorBody = { message: 'Server exploded' };
+      const mockResponse = new Response(
+        JSON.stringify(errorBody),
+        {
+          status: 500,
+          statusText: 'Server Error',
+          headers: new Headers({ 'content-type': 'application/json' }),
+        },
+      );
+      mockFetch.mockResolvedValueOnce(mockResponse);
+
+      const fatalPromise = apiClient.request('/fatal', { fatalOnServerError: true });
+      await expect(fatalPromise).rejects.toThrow(APIError);
+      await expect(fatalPromise).rejects.toMatchObject({
+        data: {
+          statusCode: 500,
+          responseJson: errorBody,
+        },
+        isFatal: true,
+      } as any);
+
+      // non-fatal by default
+      const nonFatalResponse = new Response(
+        JSON.stringify(errorBody),
+        {
+          status: 502,
+          statusText: 'Bad Gateway',
+          headers: new Headers({ 'content-type': 'application/json' }),
+        },
+      );
+      mockFetch.mockResolvedValueOnce(nonFatalResponse);
+
+      const nonFatalPromise = apiClient.request('/non-fatal');
+      await expect(nonFatalPromise).rejects.toThrow(APIError);
+      await expect(nonFatalPromise).rejects.toMatchObject({
+        data: {
+          statusCode: 502,
+          responseJson: errorBody,
+        },
+        isFatal: false,
+      } as any);
+    });
+
+    it('attaches httpRequest metadata to APIError', async () => {
+      const mockResponse = new Response(
+        JSON.stringify({ message: 'Oops' }),
+        {
+          status: 500,
+          statusText: 'Server Error',
+          headers: new Headers({ 'content-type': 'application/json' }),
+        },
+      );
+      mockFetch.mockResolvedValueOnce(mockResponse);
+
+      const promise = apiClient.request('/meta', {
+        method: 'POST',
+        params: { q: 'search' },
+      });
+
+      await expect(promise).rejects.toMatchObject({
+        data: {
+          httpRequest: expect.objectContaining({
+            method: 'POST',
+            url: `${baseURL}/meta?q=search`,
+            path: '/meta',
+          }),
+        },
+      } as any);
+    });
+
     it('should handle network errors', async () => {
       const networkError = new Error('Network error');
       mockFetch.mockRejectedValueOnce(networkError);

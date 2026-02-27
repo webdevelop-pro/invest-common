@@ -91,19 +91,34 @@ export const setupUnifiedErrorHandler = (config: ErrorHandlerConfig) => {
     }
   };
 
+  // Determine whether an error should be treated as "fatal" for the UI
+  const isFatalError = (error: Error): boolean => {
+    const maybeFatalFlag = (error as any).isFatal;
+    if (typeof maybeFatalFlag === 'boolean') return maybeFatalFlag;
+
+    // Fallback: treat uncaught API 5xx errors as fatal
+    if (error instanceof APIError && error.isServerError()) return true;
+
+    // Non-API runtime errors coming from global / Vue / VitePress handlers
+    // are considered fatal by default.
+    return true;
+  };
+
   // Handle errors
   const handleError = (error: Error, componentName: string, errorType: string) => {
-    sendErrorToAnalytics(error, componentName, errorType);
+    void sendErrorToAnalytics(error, componentName, errorType);
 
-    // Optional redirect to 500 page for API 5xx errors
+    // Only fatal errors should trigger a full-page 500 redirect
+    if (!isFatalError(error)) return;
+
+    // Optional redirect to 500 page for fatal errors
     try {
-      if (error instanceof APIError && error.isServerError()) {
-        if (typeof window !== 'undefined') {
-          if (window.location.pathname !== urlServerError) {
-            setTimeout(() => {
-              window.location.replace(urlServerError);
-            }, 500);
-          }
+      if (typeof window !== 'undefined') {
+        // Avoid redirect loop if we're already on the 500 page
+        if (!window.location.pathname.endsWith('/500')) {
+          setTimeout(() => {
+            window.location.replace(urlServerError);
+          }, 500);
         }
       }
     } catch (_) {
@@ -123,12 +138,12 @@ export const setupUnifiedErrorHandler = (config: ErrorHandlerConfig) => {
       handleError(error, 'Global Error', 'Unhandled Error Event');
     });
 
-    // Override console.error
+    // Override console.error to send errors to analytics only
     const originalConsoleError = console.error;
     console.error = (...args: any[]) => {
       originalConsoleError.apply(console, args);
       if (args.length > 0 && args[0] instanceof Error) {
-        handleError(args[0], 'Console Error', 'Console Error');
+        void sendErrorToAnalytics(args[0], 'Console Error', 'Console Error');
       }
     };
   };
