@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {
-  computed, onMounted, ref,
+  computed, onMounted, ref, watch,
 } from 'vue';
 import { useRoute } from 'vitepress';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
@@ -12,6 +12,8 @@ import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles
 import { useKycButton } from 'InvestCommon/features/kyc/store/useKycButton';
 import { useSendAnalyticsEvent } from 'InvestCommon/domain/analytics/useSendAnalyticsEvent';
 import { useEventListener } from '@vueuse/core';
+import { OfferTabTypes } from './logic/useOffersDetailsContent';
+import { useSyncWithUrl } from 'UiKit/composables/useSyncWithUrl';
 
 const props = defineProps({
   isSharesReached: {
@@ -37,6 +39,11 @@ const initialBottom = ref<number | null>(null);
 const footerEl = ref<HTMLElement | null>(null);
 const isClient = typeof window !== 'undefined';
 const isClientReady = ref(false);
+
+const activeTab = useSyncWithUrl<string>({
+  key: 'tab',
+  defaultValue: OfferTabTypes.description,
+});
 
 const showInvestBtn = computed(() => (
   selectedUserProfileData.value?.isKycApproved
@@ -80,6 +87,12 @@ const updateFloatingState = () => {
     return;
   }
 
+  // Only show floating button on the Description tab
+  if (activeTab.value && activeTab.value !== OfferTabTypes.description) {
+    isFloating.value = false;
+    return;
+  }
+
   // If we haven't measured the original button position yet, do nothing
   if (!initialBottom.value) return;
 
@@ -102,6 +115,20 @@ if (isClient) {
   useEventListener(window, 'scroll', updateFloatingState, { passive: true });
   useEventListener(window, 'resize', updateFloatingState);
 }
+
+watch(
+  () => activeTab.value,
+  () => {
+    if (!isClient) return;
+
+    if (activeTab.value !== OfferTabTypes.description) {
+      isFloating.value = false;
+      return;
+    }
+
+    updateFloatingState();
+  },
+);
 
 onMounted(() => {
   if (!isClient) return;
