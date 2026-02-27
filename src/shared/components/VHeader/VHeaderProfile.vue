@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, PropType } from 'vue';
+import { PropType } from 'vue';
 import VDropdown from 'UiKit/components/VDropdown.vue';
 import { storeToRefs } from 'pinia';
 import VAvatar from 'UiKit/components/VAvatar.vue';
@@ -7,12 +7,11 @@ import { VDropdownMenuItem } from 'UiKit/components/Base/VDropdownMenu';
 import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 import NotificationsSidebarButton from 'InvestCommon/features/notifications/VNotificationsSidebarButton.vue';
 import env from 'InvestCommon/domain/config/env';
-import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
-import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import LogOutIcon from 'UiKit/assets/images/menu_common/logout.svg';
 import type { MenuItem } from 'InvestCommon/types/global';
+import { useHeaderUser } from './useHeaderUser';
 
-const { IS_STATIC_SITE, FILER_URL } = env;
+const { IS_STATIC_SITE } = env;
 
 defineProps({
   menu: Array as PropType<MenuItem[]>,
@@ -30,20 +29,14 @@ defineProps({
   }
 });
 
-const userSessionStore = useSessionStore();
-const { userSessionTraits } = storeToRefs(userSessionStore);
+const { userEmail, avatarSrc } = useHeaderUser();
+
 const useDialogsStore = useDialogs();
 const { isDialogLogoutOpen } = storeToRefs(useDialogsStore);
-
-const useRepositoryProfilesStore = useRepositoryProfiles();
-const { getUserState } = storeToRefs(useRepositoryProfilesStore);
-
-const userEmail = computed(() => userSessionTraits.value?.email);
 
 const onLogout = () => {
   isDialogLogoutOpen.value = true;
 };
-const imageID = computed(() => getUserState.value.data?.image_link_id);
 </script>
 
 <template>
@@ -60,7 +53,7 @@ const imageID = computed(() => getUserState.value.data?.image_link_id);
     >
       <VAvatar
         size="small"
-        :src="imageID > 0 ? `${FILER_URL}/auth/files/${imageID}?size=small` : undefined"
+        :src="avatarSrc"
         alt="avatar image"
         class="v-header-profile__avatar"
       />

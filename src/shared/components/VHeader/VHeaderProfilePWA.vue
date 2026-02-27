@@ -2,8 +2,6 @@
 import { computed, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import VAvatar from 'UiKit/components/VAvatar.vue';
-import env from 'InvestCommon/domain/config/env';
-import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useRepositoryFiler } from 'InvestCommon/data/filer/filer.repository';
@@ -16,11 +14,7 @@ import {
   urlSettingsSecurity,
 } from 'InvestCommon/domain/config/links';
 import VHeaderProfileOverlayPWA from 'InvestCommon/shared/components/pwa/VHeaderProfileOverlayPWA.vue';
-
-const { FILER_URL } = env;
-
-const userSessionStore = useSessionStore();
-const { userSessionTraits } = storeToRefs(userSessionStore);
+import { useHeaderUser } from './useHeaderUser';
 
 const useRepositoryProfilesStore = useRepositoryProfiles();
 const { getUserState } = storeToRefs(useRepositoryProfilesStore);
@@ -31,11 +25,7 @@ const { postSignurlState } = storeToRefs(filerRepository);
 const dialogsStore = useDialogs();
 const { isDialogLogoutOpen } = storeToRefs(dialogsStore);
 
-const userEmail = computed(() => userSessionTraits.value?.email);
-const imageID = computed(() => getUserState.value.data?.image_link_id);
-const avatarSrc = computed(() => (
-  imageID.value > 0 ? `${FILER_URL}/auth/files/${imageID.value}?size=small` : undefined
-));
+const { userEmail, avatarSrc } = useHeaderUser();
 const getProfileId = computed(() => Number(selectedUserProfileId.value));
 
 const toPathname = (url: string) => {

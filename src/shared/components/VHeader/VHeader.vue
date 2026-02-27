@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {
-  computed, defineAsyncComponent, hydrateOnVisible, onMounted, PropType, ref,
+  computed, defineAsyncComponent, hydrateOnVisible, PropType,
 } from 'vue';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { storeToRefs } from 'pinia';
@@ -32,6 +32,7 @@ const props = defineProps({
   profileMenu: Array as PropType<MenuItem[]>,
   // Header navigation menu (e.g. Explore, How It Works, etc.)
   menu: Array as PropType<MenuItem[]>,
+  mobileMenu: Array as PropType<MenuItem[]>,
   path: {
     type: String,
     default: '',
@@ -50,63 +51,106 @@ const props = defineProps({
   },
 });
 
-const runtimePath = ref('');
-onMounted(() => {
-  runtimePath.value = window.location.pathname;
-});
-
-
-const { isDesktopMD } = storeToRefs(useBreakpoints());
+const { isDesktopMD } = useBreakpoints();
 
 const sessionStore = useSessionStore();
 const { userLoggedIn } = storeToRefs(sessionStore);
 const useRepositoryProfilesStore = useRepositoryProfiles();
 const { getUserState } = storeToRefs(useRepositoryProfilesStore);
-// Use props.path directly, no need for ref unless it is updated elsewhere
-const isMobileSidebarOpen = defineModel<boolean>();
 
-const resolvedPath = computed(() => props.path || runtimePath.value);
+const isMobileSidebarOpen = defineModel<boolean>({ default: false });
+
+const resolvedPath = computed(() => {
+  if (props.path) {
+    return props.path;
+  }
+
+  if (typeof window !== 'undefined') {
+    return window.location.pathname;
+  }
+
+  return '';
+});
+
+const isSignUpPage = computed(
+  () => props.layout === 'auth-signup' || resolvedPath.value?.includes('signup'),
+);
+const isSignInPage = computed(
+  () => props.layout === 'auth-login' || resolvedPath.value?.includes('signin'),
+);
+const isRecoveryPage = computed(
+  () => props.layout === 'auth-forgot' || resolvedPath.value?.includes('forgot'),
+);
+const isCheckEmailPage = computed(
+  () => props.layout === 'auth-check-email' || resolvedPath.value?.includes('check-email'),
+);
+const isAuthenticatorPage = computed(
+  () => props.layout === 'auth-authenticator' || resolvedPath.value?.includes('authenticator'),
+);
+const isKYCBoPage = computed(
+  () => props.layout?.includes('kyc-bo') || resolvedPath.value?.includes('kyc-bo'),
+);
+
+const isAuthFlowPage = computed(
+  () => isRecoveryPage.value || isCheckEmailPage.value,
+);
+
+const showNavigation = computed(
+  () => !isSignInPage.value
+    && !isSignUpPage.value
+    && !isRecoveryPage.value
+    && !isCheckEmailPage.value
+    && !isAuthenticatorPage.value
+    && !isKYCBoPage.value,
+);
 
 const isLoading = computed(() => getUserState.value.loading);
-const isSignUpPage = computed(() => props.layout === 'auth-signup' || resolvedPath.value?.includes('signup'));
-const isSignInPage = computed(() => props.layout === 'auth-login' || resolvedPath.value?.includes('signin'));
-const isRecoveryPage = computed(() => props.layout === 'auth-forgot' || resolvedPath.value?.includes('forgot'));
-const isCheckEmailPage = computed(() => props.layout === 'auth-check-email' || resolvedPath.value?.includes('check-email'));
-const isAuthenticatorPage = computed(() => props.layout === 'auth-authenticator' || resolvedPath.value?.includes('authenticator'));
-const isKYCBoPage = computed(() => props.layout?.includes('kyc-bo') || resolvedPath.value?.includes('kyc-bo'));
-const isAuthFlowPage = computed(() => (isRecoveryPage.value || isCheckEmailPage.value));
 
-const showNavigation = computed(() => (
-  !isSignInPage.value && !isSignUpPage.value && !isRecoveryPage.value
-  && !isCheckEmailPage.value && !isAuthenticatorPage.value && !isKYCBoPage.value));
+const desktopMenu = computed(() => (
+  isDesktopMD.value || !userLoggedIn.value ? props.menu : []
+));
 
-const showAccountText = computed(() => (
-  !userLoggedIn.value && !showNavigation.value && !isAuthenticatorPage.value && !isKYCBoPage.value))
-const showHaveAccount = computed(() => (!isSignInPage.value && !isAuthFlowPage.value));
-const showDontHaveAccount = computed(() => (!isSignUpPage.value));
-const showAuthButtons = computed(() => (
-  !userLoggedIn.value && !isAuthenticatorPage.value && !isKYCBoPage.value))
+const showAccountText = computed(
+  () => !userLoggedIn.value
+    && !showNavigation.value
+    && !isAuthenticatorPage.value
+    && !isKYCBoPage.value,
+);
 
-const queryParams = computed(() => new URLSearchParams(window?.location?.search));
+const showHaveAccount = computed(
+  () => !isSignInPage.value && !isAuthFlowPage.value,
+);
 
-const showMobileSidebar = computed(() => showNavigation.value);
+const showDontHaveAccount = computed(
+  () => !isSignUpPage.value,
+);
 
+const showAuthButtons = computed(
+  () => !userLoggedIn.value && !isAuthenticatorPage.value && !isKYCBoPage.value,
+);
 
-const signInHandler = () => {
-  // Convert URLSearchParams to Record<string, string>
+const buildQueryParamsObject = (): Record<string, string> => {
+  if (typeof window === 'undefined') {
+    return {};
+  }
+
+  const search = window.location.search ?? '';
+  const params = new URLSearchParams(search);
   const paramsObj: Record<string, string> = {};
-  queryParams.value.forEach((value, key) => {
+
+  params.forEach((value, key) => {
     paramsObj[key] = value;
   });
-  navigateWithQueryParams(urlSignin, paramsObj);
+
+  return paramsObj;
+};
+
+const signInHandler = () => {
+  navigateWithQueryParams(urlSignin, buildQueryParamsObject());
 };
 
 const signUpHandler = () => {
-  const paramsObj: Record<string, string> = {};
-  queryParams.value.forEach((value, key) => {
-    paramsObj[key] = value;
-  });
-  navigateWithQueryParams(urlSignup, paramsObj);
+  navigateWithQueryParams(urlSignup, buildQueryParamsObject());
 };
 
 </script>
@@ -115,8 +159,8 @@ const signUpHandler = () => {
   <VHeader
     v-model="isMobileSidebarOpen"
     :show-navigation="showNavigation"
-    :show-mobile-sidebar="showMobileSidebar"
-    :menu="menu"
+    :show-mobile-sidebar="showNavigation"
+    :menu="desktopMenu"
     :is-mobile-p-w-a="false"
     :show-profile-link="showProfileLink"
     :url-profile="urlProfile"
@@ -156,7 +200,7 @@ const signUpHandler = () => {
         <VButton
           v-if="showHaveAccount"
           class="v-header-invest-btns__sign-in"
-          :variant="!isSignUpPage ? 'link' : null"
+          :variant="!isSignUpPage ? 'link' : undefined"
           @click="signInHandler"
         >
           Log In
@@ -191,7 +235,7 @@ const signUpHandler = () => {
         <VButton
           v-if="showHaveAccount"
           class="v-header-invest-btns__sign-in"
-          :variant="!isSignUpPage ? 'link' : null"
+          :variant="!isSignUpPage ? 'link' : undefined"
           @click="signInHandler"
         >
           Log In
@@ -207,8 +251,7 @@ const signUpHandler = () => {
       </div>
       <VHeaderProfileMobile
         v-else-if="userLoggedIn"
-        :menu="profileMenu"
-        :menu-secondary="menu"
+        :menu="mobileMenu"
         :is-mobile-pwa="false"
         @click="isMobileSidebarOpen = false"
       />

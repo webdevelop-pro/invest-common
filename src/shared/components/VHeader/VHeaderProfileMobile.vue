@@ -8,16 +8,14 @@ import {
 import VAvatar from 'UiKit/components/VAvatar.vue';
 import NotificationsSidebarButton from 'InvestCommon/features/notifications/VNotificationsSidebarButton.vue';
 import env from 'InvestCommon/domain/config/env';
-import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import LogOutIcon from 'UiKit/assets/images/menu_common/logout.svg';
 import type { MenuItem } from 'InvestCommon/types/global';
+import { useHeaderUser } from './useHeaderUser';
 
 const { IS_STATIC_SITE } = env;
 
 const props = defineProps({
   menu: Array as PropType<MenuItem[]>,
-  // Header navigation menu (e.g. Explore, How It Works, etc.)
-  menuSecondary: Array as PropType<MenuItem[]>,
   isMobilePwa: {
     type: Boolean,
     default: false,
@@ -26,12 +24,10 @@ const props = defineProps({
 
 const emit = defineEmits(['click']);
 
-const userSessionStore = useSessionStore();
-const { userSessionTraits } = storeToRefs(userSessionStore);
 const useDialogsStore = useDialogs();
 const { isDialogLogoutOpen } = storeToRefs(useDialogsStore);
 
-const userEmail = computed(() => userSessionTraits.value?.email);
+const { userEmail, avatarSrc } = useHeaderUser();
 
 const onClick = () => {
   emit('click');
@@ -48,24 +44,7 @@ const getComponentName = (item: MenuItem) => {
   return 'div';
 };
 
-const combinedMenu = computed(() => {
-  const primary = props.menu ?? [];
-  const secondary = props.menuSecondary ?? [];
-
-  if (!primary.length && !secondary.length) return [];
-
-  const settingsIndex = primary.findIndex((item) => item.text === 'Settings');
-
-  if (settingsIndex === -1) {
-    return [...primary, ...secondary];
-  }
-
-  const beforeSettings = primary.slice(0, settingsIndex);
-  const settingsItem = primary[settingsIndex];
-  const afterSettings = primary.slice(settingsIndex + 1);
-
-  return [...beforeSettings, ...secondary, settingsItem, ...afterSettings];
-});
+const primaryProfileMenu = computed(() => props.menu || []);
 </script>
 
 <template>
@@ -78,7 +57,7 @@ const combinedMenu = computed(() => {
         <div class="is--h6__title is--color-gray-60">
           <VAvatar
             size="small"
-            src=""
+            :src="avatarSrc"
             alt="avatar image"
             class="v-header-profile-mobile__avatar"
           />
@@ -93,9 +72,9 @@ const combinedMenu = computed(() => {
         />
       </VNavigationMenuItem>
       <VNavigationMenuItem
-        v-for="(menuItem, index) in combinedMenu"
-        :id="index"
-        :key="JSON.stringify(menuItem)"
+        v-for="(menuItem, index) in primaryProfileMenu"
+        :id="`primary-${index}`"
+        :key="`primary-${menuItem.text}-${index}`"
         @click="onClick"
       >
         <VNavigationMenuLink as-child>
