@@ -30,6 +30,8 @@ const VButton = defineAsyncComponent({
 
 const props = defineProps({
   profileMenu: Array as PropType<MenuItem[]>,
+  // Header navigation menu (e.g. Explore, How It Works, etc.)
+  menu: Array as PropType<MenuItem[]>,
   path: {
     type: String,
     default: '',
@@ -205,6 +207,7 @@ const signUpHandler = () => {
       <VHeaderProfileMobile
         v-else-if="userLoggedIn"
         :menu="profileMenu"
+        :menu-secondary="menu"
         :is-mobile-pwa="false"
         @click="isMobileSidebarOpen = false"
       />

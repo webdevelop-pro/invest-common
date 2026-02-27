@@ -14,8 +14,10 @@ import type { MenuItem } from 'InvestCommon/types/global';
 
 const { IS_STATIC_SITE } = env;
 
-defineProps({
+const props = defineProps({
   menu: Array as PropType<MenuItem[]>,
+  // Header navigation menu (e.g. Explore, How It Works, etc.)
+  menuSecondary: Array as PropType<MenuItem[]>,
   isMobilePwa: {
     type: Boolean,
     default: false,
@@ -45,6 +47,25 @@ const getComponentName = (item: MenuItem) => {
   if (item.href) return 'a';
   return 'div';
 };
+
+const combinedMenu = computed(() => {
+  const primary = props.menu ?? [];
+  const secondary = props.menuSecondary ?? [];
+
+  if (!primary.length && !secondary.length) return [];
+
+  const settingsIndex = primary.findIndex((item) => item.text === 'Settings');
+
+  if (settingsIndex === -1) {
+    return [...primary, ...secondary];
+  }
+
+  const beforeSettings = primary.slice(0, settingsIndex);
+  const settingsItem = primary[settingsIndex];
+  const afterSettings = primary.slice(settingsIndex + 1);
+
+  return [...beforeSettings, ...secondary, settingsItem, ...afterSettings];
+});
 </script>
 
 <template>
@@ -72,7 +93,7 @@ const getComponentName = (item: MenuItem) => {
         />
       </VNavigationMenuItem>
       <VNavigationMenuItem
-        v-for="(menuItem, index) in menu"
+        v-for="(menuItem, index) in combinedMenu"
         :id="index"
         :key="JSON.stringify(menuItem)"
         @click="onClick"

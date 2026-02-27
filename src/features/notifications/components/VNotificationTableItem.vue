@@ -55,7 +55,7 @@ const onMessageClick = () => {
         <VBadge
           :key="data?.tagText"
           v-highlight="search"
-          :color="data?.tagBackground"
+          :color="(data?.tagBackground || 'default') as any"
         >
           <span class="v-table-notification-item__tag-text">
             {{ data?.tagText }}
@@ -132,6 +132,15 @@ const onMessageClick = () => {
         @keydown.enter="onMarkAsRead"
         @keydown.space="onMarkAsRead"
       />
+      <VButton
+        v-if="data?.isUnread"
+        size="small"
+        variant="link"
+        class="v-table-notification-item__mark-button"
+        @click.stop="onMarkAsRead"
+      >
+        Mark as read
+      </VButton>
     </VTableCell>
   </VTableRow>
 </template>
@@ -203,6 +212,7 @@ const onMessageClick = () => {
     @media screen and (max-width: $tablet){
       flex-direction: column;
       min-width: 300px;
+      align-items: flex-start;
     }
   }
 
@@ -216,6 +226,23 @@ const onMessageClick = () => {
     border-radius: 100%;
     z-index: 0;
     cursor: pointer;
+
+    @media screen and (width < $tablet){
+      display: none;
+    }
+  }
+
+  &__mark-button {
+    display: none;
+    position: absolute;
+    right: 8px;
+    top: 8px;
+
+    @media screen and (max-width: $tablet){
+      display: inline-flex;
+      align-self: flex-start;
+      margin-top: 8px;
+    }
   }
 
   &__button {

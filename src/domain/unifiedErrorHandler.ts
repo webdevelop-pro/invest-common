@@ -94,14 +94,12 @@ export const setupUnifiedErrorHandler = (config: ErrorHandlerConfig) => {
   // Determine whether an error should be treated as "fatal" for the UI
   const isFatalError = (error: Error): boolean => {
     const maybeFatalFlag = (error as any).isFatal;
+    // Only errors explicitly marked as fatal (e.g. API requests with
+    // `fatalOnServerError: true` for 5xx responses) should trigger a
+    // redirect to the 500 page. All other errors are non-fatal for
+    // navigation purposes and will only be sent to analytics.
     if (typeof maybeFatalFlag === 'boolean') return maybeFatalFlag;
-
-    // Fallback: treat uncaught API 5xx errors as fatal
-    if (error instanceof APIError && error.isServerError()) return true;
-
-    // Non-API runtime errors coming from global / Vue / VitePress handlers
-    // are considered fatal by default.
-    return true;
+    return false;
   };
 
   // Handle errors
