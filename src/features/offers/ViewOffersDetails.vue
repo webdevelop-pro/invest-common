@@ -78,6 +78,7 @@ const investHandler = async () => {
       const isCurrentApproved = (current as { isKycApproved?: boolean } | undefined)?.isKycApproved;
       if (!isCurrentApproved) {
         const approvedProfiles = profiles.filter((p: unknown) => p?.isKycApproved);
+        console.log('approvedProfiles', approvedProfiles);
         if (approvedProfiles.length > 0) {
           const randomApproved = approvedProfiles[Math.floor(Math.random() * approvedProfiles.length)];
           if (randomApproved?.id && randomApproved.id !== selectedUserProfileId.value) {
@@ -89,14 +90,14 @@ const investHandler = async () => {
     }
   } catch {}
 
-  if (!getInvestUnconfirmedOne.value) {
+  if (!getInvestUnconfirmedOne.value?.id) {
     await investmentRepository.setInvest(params.value?.slug as string, selectedUserProfileId.value, 0);
 
     if (setInvestState.value.data) {
       getInvestUnconfirmedOne.value = setInvestState.value.data;
       navigateWithQueryParams(`${env.FRONTEND_URL_DASHBOARD}/invest/${params.value?.slug}/amount/${setInvestState.value.data.id}/${selectedUserProfileId.value}`);
     }
-  } else if (getInvestUnconfirmedOne.value) {
+  } else if (getInvestUnconfirmedOne.value?.id) {
     const { step }: { step: InvestStepTypes } = getInvestUnconfirmedOne.value;
     const name = Object.keys(investSteps.value).includes(step) ? investSteps.value[step].to : 'amount';
     navigateWithQueryParams(`${env.FRONTEND_URL_DASHBOARD}/invest/${params.value?.slug}/${name}/${getInvestUnconfirmedOne.value.id}/${selectedUserProfileId.value}`);
