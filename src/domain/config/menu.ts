@@ -101,61 +101,82 @@ export const MENU_LEGAL = computed(() => (path: string) => [
 ]);
 
 export const MENU_HEADER_MOBILE = computed(
-  () => (profileId?: number | null) => {
+  () => (profileId?: number | null, path?: string) => {
     const items: MenuItem[] = [];
+    console.log('MENU_HEADER_MOBILE', profileId, path);
 
     const hasProfile = Number.isFinite(profileId as number);
     const id = hasProfile ? Number(profileId) : undefined;
 
     if (hasProfile && id !== undefined) {
+      const dashboardHref = urlProfilePortfolio(id);
+      console.log('dashboardHref', dashboardHref);
+      const profileHref = urlProfileAccount(id);
+      const walletHref = urlProfileWallet(id);
+
       items.push(
         {
-          href: urlProfilePortfolio(id),
+          href: dashboardHref,
           text: 'Dashboard',
           icon: DashboardMenuIcon,
+          active: dashboardHref === path,
         },
         {
-          href: urlProfileAccount(id),
+          href: profileHref,
           text: 'Profile',
           icon: ProfileMenuIcon,
+          active: profileHref === path,
         },
         {
-          href: urlProfileWallet(id),
+          href: walletHref,
           text: 'Wallet',
           icon: WalletMenuIcon,
+          active: walletHref === path,
         },
       );
     }
 
+    const exploreHref = urlOffers;
+    const howItWorksHref = urlHowItWorks;
+    const blogHref = urlBlog;
+    const faqHref = urlFaq;
+
     items.push(
       {
-        href: urlOffers,
+        href: exploreHref,
         text: 'Explore',
         icon: ExploreMenuIcon,
+        active: exploreHref === path,
       },
       {
-        href: urlHowItWorks,
+        href: howItWorksHref,
         text: 'How It Works',
         icon: HowItWorksMenuIcon,
+        active: howItWorksHref === path,
       },
       {
-        href: urlBlog,
+        href: blogHref,
         text: 'Resource center',
         icon: ResourceCenterMenuIcon,
+        active: blogHref === path,
       },
       {
-        href: urlFaq,
+        href: faqHref,
         text: 'FAQ',
         icon: FaqMenuIcon,
+        active: faqHref === path,
       },
     );
 
     if (hasProfile && id !== undefined) {
+      const settingsHref = urlSettings(id);
+
       items.push({
-        href: urlSettings(id),
+        href: settingsHref,
         text: 'Settings',
         class: 'is--border-top',
         icon: SettingsMenuIcon,
+        active: settingsHref === path,
       });
     }
 
