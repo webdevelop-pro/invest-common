@@ -61,6 +61,12 @@ describe('VHeaderProfileOverlayPWA', () => {
     expect(wrapper.emitted('logout')).toBeTruthy();
   });
 
+  it('emits avatar-click on avatar button click', async () => {
+    const wrapper = mountOverlay();
+    await wrapper.find('.v-header-profile-pwa__overlay-avatar-btn').trigger('click');
+    expect(wrapper.emitted('avatar-click')).toBeTruthy();
+  });
+
   it('hides optional links when hrefs are missing', () => {
     const wrapper = mountOverlay({
       accountDetailsHref: '',

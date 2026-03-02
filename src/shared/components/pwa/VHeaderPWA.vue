@@ -21,8 +21,8 @@ import {
 import VHeader from 'UiKit/components/VHeader/VHeader.vue';
 import { MenuItem } from 'InvestCommon/types/global';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
-import ArrowRight from 'UiKit/assets/images/arrow-right.svg';
 import ArrowLeft from 'UiKit/assets/images/arrow-left.svg';
+import PwaLoginArrow from 'InvestCommon/shared/assets/images/icons/pwa-login-arrow.svg';
 import NotificationsSidebarButton from 'InvestCommon/features/notifications/VNotificationsSidebarButton.vue';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import VLogo from 'UiKit/components/VLogo.vue';
@@ -62,6 +62,11 @@ const props = defineProps({
 });
 
 const isMobilePWA = true;
+const USER_MENU_QUERY_KEY = 'fromUserMenu';
+const USER_MENU_QUERY_VALUE = '1';
+const USER_MENU_FROM_QUERY_KEY = 'menuFrom';
+const USER_MENU_OPEN_QUERY_KEY = 'openUserMenu';
+const OPEN_PWA_PROFILE_OVERLAY_EVENT = 'invest:pwa-profile-overlay:open';
 const runtimePath = ref('');
 onMounted(() => {
   runtimePath.value = window.location.pathname;
@@ -173,9 +178,18 @@ const currentPath = computed(() => {
     || (typeof window !== 'undefined' ? window.location.pathname : '/');
   return normalizePath(rawPath);
 });
+const isFromUserMenu = computed(() => {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+  return window.location.search.includes(`${USER_MENU_QUERY_KEY}=${USER_MENU_QUERY_VALUE}`);
+});
 
 const showPwaBackButton = computed(() => {
   if (props.layout === 'auth-login' || props.layout === 'auth-signup') {
+    return false;
+  }
+  if (userLoggedIn.value && props.layout === 'home') {
     return false;
   }
 
@@ -219,6 +233,22 @@ const backHandler = () => {
   if (typeof window === 'undefined') {
     return;
   }
+  if (userLoggedIn.value && isFromUserMenu.value) {
+    const params = new URLSearchParams(window.location.search);
+    const sourcePath = params.get(USER_MENU_FROM_QUERY_KEY);
+    if (sourcePath) {
+      try {
+        const sourceUrl = new URL(sourcePath, window.location.origin);
+        sourceUrl.searchParams.set(USER_MENU_OPEN_QUERY_KEY, USER_MENU_QUERY_VALUE);
+        window.location.assign(`${sourceUrl.pathname}${sourceUrl.search}${sourceUrl.hash}`);
+        return;
+      } catch {
+        // fallback to local overlay open
+      }
+    }
+    window.dispatchEvent(new Event(OPEN_PWA_PROFILE_OVERLAY_EVENT));
+    return;
+  }
   if (window.history.length > 1) {
     window.history.back();
     return;
@@ -254,21 +284,26 @@ const backHandler = () => {
       </button>
     </template>
     <template #logo>
+      <span
+        v-if="showPwaBackButton || isOfferDetailsPage"
+        class="v-header-invest__pwa-logo-empty"
+        aria-hidden="true"
+      />
       <VHeaderProfilePWA
-        v-if="userLoggedIn && !isOfferDetailsPage"
+        v-else-if="userLoggedIn"
       />
       <VLogo
-        v-else-if="!isOfferDetailsPage"
+        v-else
         :href="urlHome"
         :show-desktop="false"
         class="v-header__logo v-header-invest__pwa-logo"
       />
-      <span
-        v-else
-        class="v-header-invest__pwa-logo-empty"
-        aria-hidden="true"
-      />
     </template>
+    <VHeaderProfilePWA
+      v-if="userLoggedIn && showPwaBackButton && isFromUserMenu && !isOfferDetailsPage"
+      class="v-header-invest__pwa-profile-listener"
+      aria-hidden="true"
+    />
     <div class="v-header-invest__wrap">
       <VSkeleton
         v-if="isLoading"
@@ -290,8 +325,9 @@ const backHandler = () => {
       >
         <span>Log in</span>
         <component
-          :is="ArrowRight"
+          :is="PwaLoginArrow"
           class="v-header-invest__pwa-login-icon"
+          aria-hidden="true"
         />
       </button>
       <div
@@ -485,6 +521,9 @@ const backHandler = () => {
     flex-shrink: 0;
   }
 
+  &__pwa-profile-listener {
+    display: none;
+  }
 }
 
   .v-header-mobile__list {

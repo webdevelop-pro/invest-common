@@ -20,6 +20,7 @@ defineProps<{
 defineEmits<{
   (e: 'close'): void;
   (e: 'logout'): void;
+  (e: 'avatar-click'): void;
 }>();
 </script>
 
@@ -44,12 +45,19 @@ defineEmits<{
         <div class="is--container">
           <div class="view-contact-us__wrap v-header-profile-pwa__overlay-content">
             <div class="v-header-profile-pwa__overlay-profile">
-              <VAvatar
-                size="large"
-                :src="avatarSrc"
-                alt="avatar image"
-                class="v-header-profile-pwa__overlay-avatar"
-              />
+              <button
+                type="button"
+                class="v-header-profile-pwa__overlay-avatar-btn"
+                aria-label="Upload avatar"
+                @click="$emit('avatar-click')"
+              >
+                <VAvatar
+                  size="large"
+                  :src="avatarSrc"
+                  alt="avatar image"
+                  class="v-header-profile-pwa__overlay-avatar"
+                />
+              </button>
               <div class="v-header-profile-pwa__overlay-email is--h6__title">
                 {{ email }}
               </div>
@@ -102,7 +110,7 @@ defineEmits<{
                   class="v-header-profile-pwa__overlay-icon"
                   aria-hidden="true"
                 />
-                <span>Help Center</span>
+                <span>How It Works</span>
                 <ArrowRight
                   class="v-header-profile-pwa__overlay-chevron"
                   aria-hidden="true"
@@ -204,6 +212,13 @@ defineEmits<{
 
   &__overlay-avatar {
     margin-bottom: 4px;
+  }
+
+  &__overlay-avatar-btn {
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
   }
 
   &__overlay-email {

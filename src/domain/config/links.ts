@@ -23,7 +23,7 @@ export const urlSettingsAccountDetails = (profileId: number) => (
 );
 export const urlSettingsMfa = (profileId: number) => `${env.FRONTEND_URL_DASHBOARD}/settings/${profileId}/mfa`;
 export const urlSettingsSecurity = (profileId: number) => (
-  `${env.FRONTEND_URL_DASHBOARD}/settings/${profileId}/account-security`
+  `${env.FRONTEND_URL_DASHBOARD}/settings/${profileId}/security`
 );
 export const urlSettingsBankAccounts = (profileId: number) => (
   `${env.FRONTEND_URL_DASHBOARD}/settings/${profileId}/bank-accounts`

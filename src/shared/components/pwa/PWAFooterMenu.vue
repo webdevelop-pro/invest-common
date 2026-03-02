@@ -154,6 +154,10 @@ const shouldHideMenu = computed(() => (
 </template>
 
 <style scoped lang="scss">
+:global(:root) {
+  --pwa-footer-safe-offset: 104px;
+}
+
 :host, .pwamenu {
   --pwamenu-gx: 12px;
   --pwamenu-gb: 12px;

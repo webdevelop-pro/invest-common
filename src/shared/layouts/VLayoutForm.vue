@@ -109,7 +109,7 @@ const saveHandler = () => {
   margin-bottom: 60px;
 
   &.is--pwa {
-    padding-top: 0;
+    padding-top: calc(#{$header-height} + env(safe-area-inset-top));
   }
 
   &.is--loading {

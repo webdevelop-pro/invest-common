@@ -106,6 +106,20 @@ describe('VHeaderPWA', () => {
     expect(wrapper.find('.v-header-invest__pwa-back').exists()).toBe(true);
   });
 
+  it('hides logo and profile block when back button is visible', () => {
+    userLoggedIn.value = true;
+    const wrapper = mountHeader('', '/some/other');
+    expect(wrapper.find('.v-header-invest__pwa-back').exists()).toBe(true);
+    expect(wrapper.find('.v-header__logo').exists()).toBe(false);
+    expect(wrapper.find('[data-testid="profile-menu"]').exists()).toBe(false);
+  });
+
+  it('hides back button on home layout when user is logged in', () => {
+    userLoggedIn.value = true;
+    const wrapper = mountHeader('home', '/home');
+    expect(wrapper.find('.v-header-invest__pwa-back').exists()).toBe(false);
+  });
+
   it('shows login link when logged out on non-auth page', () => {
     const wrapper = mountHeader('', '/offers');
     expect(wrapper.text()).toContain('Log in');
@@ -156,5 +170,20 @@ describe('VHeaderPWA', () => {
     expect(wrapper.find('.v-header-invest__pwa-login').exists()).toBe(false);
     expect(wrapper.find('.v-header-invest__pwa-auth').exists()).toBe(false);
     expect(wrapper.find('.v-header-invest__pwa-logout').exists()).toBe(false);
+  });
+
+  it('opens profile overlay event instead of browser back for pages opened from user menu', async () => {
+    userLoggedIn.value = true;
+    window.history.pushState({}, '', '/settings/10/mfa?fromUserMenu=1');
+    const dispatchSpy = vi.spyOn(window, 'dispatchEvent');
+    const backSpy = vi.spyOn(window.history, 'back');
+    const wrapper = mountHeader('', '/settings/10/mfa');
+
+    await wrapper.find('.v-header-invest__pwa-back').trigger('click');
+
+    expect(dispatchSpy).toHaveBeenCalledTimes(1);
+    expect(backSpy).not.toHaveBeenCalled();
+    dispatchSpy.mockRestore();
+    backSpy.mockRestore();
   });
 });

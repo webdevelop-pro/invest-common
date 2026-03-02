@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import {
+  computed, onMounted, onUnmounted, ref,
+} from 'vue';
 import { storeToRefs } from 'pinia';
 import VAvatar from 'UiKit/components/VAvatar.vue';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
@@ -8,8 +10,8 @@ import { useRepositoryFiler } from 'InvestCommon/data/filer/filer.repository';
 import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 import { reportError } from 'InvestCommon/domain/error/errorReporting';
 import {
-  urlContactUs,
   urlFaq,
+  urlHowItWorks,
   urlSettingsAccountDetails,
   urlSettingsMfa,
   urlSettingsSecurity,
@@ -28,6 +30,11 @@ const { isDialogLogoutOpen } = storeToRefs(dialogsStore);
 
 const { userEmail, avatarSrc } = useHeaderUser();
 const getProfileId = computed(() => Number(selectedUserProfileId.value));
+const USER_MENU_QUERY_KEY = 'fromUserMenu';
+const USER_MENU_QUERY_VALUE = '1';
+const USER_MENU_FROM_QUERY_KEY = 'menuFrom';
+const USER_MENU_OPEN_QUERY_KEY = 'openUserMenu';
+const OPEN_PWA_PROFILE_OVERLAY_EVENT = 'invest:pwa-profile-overlay:open';
 
 const toPathname = (url: string) => {
   try {
@@ -37,17 +44,81 @@ const toPathname = (url: string) => {
   }
 };
 
+const getAppBasePath = () => {
+  if (typeof window === 'undefined') {
+    return '';
+  }
+
+  try {
+    const baseHref = document.querySelector('base')?.getAttribute('href') || '/';
+    const basePath = new URL(baseHref, window.location.origin).pathname.replace(/\/$/, '');
+    return basePath === '/' ? '' : basePath;
+  } catch {
+    return '';
+  }
+};
+
+const normalizePathWithBase = (path: string) => {
+  if (!path.startsWith('/')) {
+    return path;
+  }
+
+  const basePath = getAppBasePath();
+  if (!basePath) {
+    return path;
+  }
+  if (path === basePath || path.startsWith(`${basePath}/`)) {
+    return path;
+  }
+  return `${basePath}${path}`;
+};
+
+const withUserMenuSource = (url: string) => {
+  if (!url) {
+    return '';
+  }
+
+  const getCurrentMenuSource = () => {
+    if (typeof window === 'undefined') {
+      return '/';
+    }
+    const current = new URL(window.location.href);
+    current.searchParams.delete(USER_MENU_QUERY_KEY);
+    current.searchParams.delete(USER_MENU_FROM_QUERY_KEY);
+    current.searchParams.delete(USER_MENU_OPEN_QUERY_KEY);
+    return `${current.pathname}${current.search}${current.hash}`;
+  };
+
+  if (typeof window === 'undefined') {
+    const hasQuery = url.includes('?');
+    const suffix = `${USER_MENU_QUERY_KEY}=${USER_MENU_QUERY_VALUE}`;
+    return `${url}${hasQuery ? '&' : '?'}${suffix}`;
+  }
+
+  try {
+    const parsed = new URL(url, window.location.origin);
+    parsed.searchParams.set(USER_MENU_QUERY_KEY, USER_MENU_QUERY_VALUE);
+    parsed.searchParams.set(USER_MENU_FROM_QUERY_KEY, getCurrentMenuSource());
+    const normalizedPath = normalizePathWithBase(parsed.pathname);
+    return `${normalizedPath}${parsed.search}${parsed.hash}`;
+  } catch {
+    const hasQuery = url.includes('?');
+    const suffix = `${USER_MENU_QUERY_KEY}=${USER_MENU_QUERY_VALUE}`;
+    return `${url}${hasQuery ? '&' : '?'}${suffix}`;
+  }
+};
+
 const accountDetailsPath = computed(() => (
-  Number.isFinite(getProfileId.value) ? urlSettingsAccountDetails(getProfileId.value) : ''
+  Number.isFinite(getProfileId.value) ? withUserMenuSource(urlSettingsAccountDetails(getProfileId.value)) : ''
 ));
 const mfaPath = computed(() => (
-  Number.isFinite(getProfileId.value) ? urlSettingsMfa(getProfileId.value) : ''
+  Number.isFinite(getProfileId.value) ? withUserMenuSource(urlSettingsMfa(getProfileId.value)) : ''
 ));
 const securityPath = computed(() => (
-  Number.isFinite(getProfileId.value) ? urlSettingsSecurity(getProfileId.value) : ''
+  Number.isFinite(getProfileId.value) ? withUserMenuSource(urlSettingsSecurity(getProfileId.value)) : ''
 ));
-const helpCenterPath = computed(() => toPathname(urlFaq));
-const contactUsPath = computed(() => toPathname(urlContactUs));
+const helpCenterPath = computed(() => withUserMenuSource(toPathname(urlHowItWorks)));
+const contactUsPath = computed(() => withUserMenuSource(toPathname(urlFaq)));
 
 const refFiles = ref<HTMLInputElement>();
 const isAvatarLoading = ref(false);
@@ -95,8 +166,29 @@ const closeProfileOverlay = () => {
 };
 
 const onLogout = () => {
+  closeProfileOverlay();
   isDialogLogoutOpen.value = true;
 };
+
+onMounted(() => {
+  if (typeof window !== 'undefined') {
+    const current = new URL(window.location.href);
+    const shouldOpenMenu = current.searchParams.get(USER_MENU_OPEN_QUERY_KEY) === USER_MENU_QUERY_VALUE;
+    if (shouldOpenMenu) {
+      openProfileOverlay();
+      current.searchParams.delete(USER_MENU_OPEN_QUERY_KEY);
+      window.history.replaceState({}, '', `${current.pathname}${current.search}${current.hash}`);
+    }
+    window.addEventListener(OPEN_PWA_PROFILE_OVERLAY_EVENT, openProfileOverlay);
+  }
+});
+
+onUnmounted(() => {
+  closeProfileOverlay();
+  if (typeof window !== 'undefined') {
+    window.removeEventListener(OPEN_PWA_PROFILE_OVERLAY_EVENT, openProfileOverlay);
+  }
+});
 </script>
 
 <template>
@@ -143,6 +235,7 @@ const onLogout = () => {
       :contact-href="contactUsPath"
       @close="closeProfileOverlay"
       @logout="onLogout"
+      @avatar-click="onAvatarClick"
     />
   </div>
 </template>

@@ -74,7 +74,7 @@ vi.mock('InvestCommon/domain/config/links', async () => {
     urlContactUs: '/contact-us',
     urlSettingsAccountDetails: (id: string | number) => `/settings/${id}/account-details`,
     urlSettingsMfa: (id: string | number) => `/settings/${id}/mfa`,
-    urlSettingsSecurity: (id: string | number) => `/settings/${id}/account-security`,
+    urlSettingsSecurity: (id: string | number) => `/settings/${id}/security`,
   };
 });
 
@@ -193,5 +193,38 @@ describe('VHeaderProfilePWA', () => {
     await wrapper.find('.v-header-profile-pwa__email').trigger('click');
     await wrapper.find('.v-header-profile-pwa__overlay-logout').trigger('click');
     expect(isDialogLogoutOpen.value).toBe(true);
+    expect(wrapper.find('.v-header-profile-pwa__overlay').exists()).toBe(false);
+  });
+
+  it('adds fromUserMenu marker to overlay navigation links', async () => {
+    const { default: VHeaderProfilePWA } = await import('../VHeaderProfilePWA.vue');
+    const wrapper = mount(VHeaderProfilePWA, {
+      global: {
+        stubs: {
+          VAvatar: true,
+          VHeaderProfileOverlayPWA: {
+            template: `
+              <div
+                class="v-header-profile-pwa__overlay"
+                :data-account="accountDetailsHref"
+                :data-mfa="mfaHref"
+                :data-security="securityHref"
+                :data-help="helpHref"
+                :data-contact="contactHref"
+              />
+            `,
+            props: ['accountDetailsHref', 'mfaHref', 'securityHref', 'helpHref', 'contactHref'],
+          },
+        },
+      },
+    });
+
+    await wrapper.find('.v-header-profile-pwa__email').trigger('click');
+    const overlay = wrapper.find('.v-header-profile-pwa__overlay');
+    expect(overlay.attributes('data-account')).toContain('fromUserMenu=1');
+    expect(overlay.attributes('data-mfa')).toContain('fromUserMenu=1');
+    expect(overlay.attributes('data-security')).toContain('fromUserMenu=1');
+    expect(overlay.attributes('data-help')).toContain('fromUserMenu=1');
+    expect(overlay.attributes('data-contact')).toContain('fromUserMenu=1');
   });
 });
