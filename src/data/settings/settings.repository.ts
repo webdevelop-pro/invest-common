@@ -1,5 +1,5 @@
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
-import env from 'InvestCommon/domain/config/env';
+import env from 'InvestCommon/config/env';
 import { ISession, IAuthFlow, ILogoutFlow } from './settings.types';
 import { SessionFormatter } from './session.formatter';
 import type { ISessionFormatted } from './settings.types';

@@ -132,7 +132,7 @@ Repos with extra state (e.g. notifications) call the factory’s `resetAll` then
 
 - **Repositories** — Return or throw; no toasts or navigation. Callers catch and use `oryErrorHandling` (auth/settings) or `reportError` (see **docs/ERROR_HANDLING.md**).
 - **Domain** — `oryErrorHandling`, `reportError` / `toasterErrorHandling`, `oryResponseHandling` live in **domain/error/**; data layer does not re-export them.
-- **Imports** — Repos may use `InvestCommon/domain/config/env` for base URLs; no dependency on **features** or **session/profile stores** for request params—accept params from the caller.
+- **Imports** — Repos may use `InvestCommon/config/env` for base URLs; no dependency on **features** or **session/profile stores** for request params—accept params from the caller.
 
 ## 10. What’s done well
 

@@ -4,7 +4,7 @@ import { DocusealForm } from '@docuseal/vue';
 import {
   VDialogContent, VDialog,
 } from 'UiKit/components/Base/VDialog';
-import env from 'InvestCommon/domain/config/env';
+import env from 'InvestCommon/config/env';
 
 const props = defineProps({
   slug: {

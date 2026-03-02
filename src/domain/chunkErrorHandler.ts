@@ -1,9 +1,31 @@
 // https://github.com/webdevelop-pro/dashboard.webdevelop.biz/issues/938
 export function setupChunkErrorHandler(): void {
   if (typeof window !== 'undefined') {
+    if ((window as any).__chunkErrorHandlerInstalled) {
+      return;
+    }
+    (window as any).__chunkErrorHandlerInstalled = true;
+
     const oldErr = console.error;
     const CHUNK_RELOAD_KEY = 'chunk-error-last-reload';
     const CHUNK_RELOAD_COOLDOWN = 30 * 1000; // 30 seconds
+
+    const isChunkAssetError = (msg: string) => {
+      return msg.includes('/assets/')
+        && (msg.includes('.js') || msg.includes('.css'));
+    };
+
+    const isDynamicImportError = (msg: string) => {
+      // Cover Chrome + Firefox phrasing
+      return msg.includes('Failed to fetch dynamically imported module:')
+        || msg.includes('error loading dynamically imported module:')
+        || msg.includes('Loading failed for the module with source');
+    };
+
+    const isServiceWorkerAssetError = (msg: string) => {
+      return msg.includes('A ServiceWorker intercepted the request')
+        && isChunkAssetError(msg);
+    };
 
     const tryReloadOnce = () => {
       try {
@@ -24,19 +46,20 @@ export function setupChunkErrorHandler(): void {
     };
 
     console.error = function (...args: any[]) {
-      // /assets/chunks/ViewErrors.B98_KOXD.js
       if (args.length > 0) {
-        const msg = args[0].toString();
-        if (
-          msg.indexOf('Failed to fetch dynamically imported module:') !== -1
-            && msg.indexOf('/assets/chunks/') !== -1
-            && msg.indexOf('.js') !== -1) {
+        const msg = String(args[0]);
+
+        // Examples we want to catch (Chrome + Firefox):
+        // - Failed to fetch dynamically imported module: https://.../assets/chunks/ViewHome...js
+        // - TypeError: error loading dynamically imported module: https://.../assets/chunks/ViewHome...js
+        // - Loading failed for the module with source "https://.../assets/chunks/ViewHome...js".
+        // - Failed to load 'https://.../assets/chunks/ViewHome...js'. A ServiceWorker intercepted the request...
+        if (isDynamicImportError(msg) && isChunkAssetError(msg)) {
           tryReloadOnce();
           return;
-        } else if (
-          msg.indexOf('A ServiceWorker intercepted the request') !== -1
-            && msg.indexOf('/assets/chunks/') !== -1
-            && msg.indexOf('.js') !== -1) {
+        }
+
+        if (isServiceWorkerAssetError(msg)) {
           tryReloadOnce();
           return;
         }

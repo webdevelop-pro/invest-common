@@ -7,7 +7,7 @@ import {
 } from 'UiKit/components/Base/VNavigationMenu';
 import VAvatar from 'UiKit/components/VAvatar.vue';
 import NotificationsSidebarButton from 'InvestCommon/features/notifications/VNotificationsSidebarButton.vue';
-import env from 'InvestCommon/domain/config/env';
+import env from 'InvestCommon/config/env';
 import LogOutIcon from 'UiKit/assets/images/menu_common/logout.svg';
 import type { MenuItem } from 'InvestCommon/types/global';
 import { useHeaderUser } from './useHeaderUser';

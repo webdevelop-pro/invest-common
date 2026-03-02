@@ -1,4 +1,4 @@
-import env from 'InvestCommon/domain/config/env';
+import env from 'InvestCommon/config/env';
 
 export const urlHome = `${env.FRONTEND_URL_STATIC}/`;
 export const urlSignin = `${env.FRONTEND_URL_STATIC}/signin`;

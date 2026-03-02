@@ -130,4 +130,21 @@ export interface IAnalyticsError {
   code: string;
   message: string;
   details: Record<string, unknown>;
-} 
+}
+
+/**
+ * Public analytics client interface used by domain layer.
+ * Allows different apps (Vue, Vitepress, etc.) to share implementation
+ * while providing their own service_name / app identity at call sites.
+ */
+export interface AnalyticsClient {
+  /**
+   * Log a structured analytics message (typically errors).
+   */
+  logMessage(message: IAnalyticsMessage): Promise<IAnalyticsResponse>;
+
+  /**
+   * Track a business/user event.
+   */
+  trackEvent(event: IAnalyticsEventRequest): Promise<IAnalyticsResponse>;
+}

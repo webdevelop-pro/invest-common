@@ -1,7 +1,7 @@
 import { ref, computed } from 'vue';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
-import env from 'InvestCommon/domain/config/env';
+import env from 'InvestCommon/config/env';
 import { createRepositoryStates, withActionState, type OptionsStateData } from 'InvestCommon/data/repository/repository';
 import {
   IProfileData, IUser, IProfileIndividual, ISchema,

@@ -1,6 +1,6 @@
 import { RouteLocationNormalized } from 'vue-router';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
-import env from 'InvestCommon/domain/config/env';
+import env from 'InvestCommon/config/env';
 
 // List of base paths that should redirect to static pages
 const redirectBasePaths: string[] = [

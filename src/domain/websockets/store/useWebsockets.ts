@@ -2,8 +2,7 @@ import { watch } from 'vue';
 import { INotification } from 'InvestCommon/data/notifications/notifications.types';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { useWebSocket } from '@vueuse/core';
-import env from 'InvestCommon/domain/config/env';
-import { useToast } from 'UiKit/components/Base/VToast/use-toast';
+import env from 'InvestCommon/config/env';
 import { useRepositoryNotifications } from 'InvestCommon/data/notifications/notifications.repository';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
@@ -15,11 +14,19 @@ import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
 
 const { NOTIFICATION_URL } = env;
 
-const { toast } = useToast();
-
 const TOAST_OPTIONS = {
   title: 'Failed to connect WebSocket after 3 retries',
   variant: 'error',
+};
+
+const isDebug =
+  typeof import.meta !== 'undefined' &&
+  typeof (import.meta as any).env !== 'undefined' &&
+  Boolean((import.meta as any).env.DEV);
+
+const debugLog = (...args: unknown[]) => {
+  if (!isDebug) return;
+  console.log(...args);
 };
 
 export const useDomainWebSocketStore = defineStore('domainWebsockets', () => {
@@ -66,7 +73,7 @@ export const useDomainWebSocketStore = defineStore('domainWebsockets', () => {
 
   const handleMessage = (data: string) => {
     if (!data) return;
-    console.log(`ws message: ${data}`);
+    debugLog(`ws message: ${data}`);
     if (data === 'pong') return;
     repositoryNotifications.updateNotificationsData(data);
     try {
@@ -78,7 +85,7 @@ export const useDomainWebSocketStore = defineStore('domainWebsockets', () => {
   };
 
   const webSocketHandler = async (): Promise<void> => {
-    console.log('webSocketHandler called');
+    debugLog('webSocketHandler called');
     if (!userLoggedIn.value) {
       return;
     }
@@ -86,7 +93,10 @@ export const useDomainWebSocketStore = defineStore('domainWebsockets', () => {
     // Support both http and https
     const uri = url.replace(/^https:/, 'wss:').replace(/^http:/, 'ws:');
 
-    console.log(`connection to ${uri}`);
+    debugLog(`connection to ${uri}`);
+
+    const { useToast } = await import('UiKit/components/Base/VToast/use-toast');
+    const { toast } = useToast();
     const { data, close, status } = useWebSocket(uri, {
       autoClose: true,
       autoReconnect: {
@@ -106,7 +116,7 @@ export const useDomainWebSocketStore = defineStore('domainWebsockets', () => {
     watch(userLoggedIn, () => {
       if (!userLoggedIn.value) {
         close();
-        console.log(`connection to ${uri} is closed`);
+        debugLog(`connection to ${uri} is closed`);
       }
     });
 
@@ -120,7 +130,7 @@ export const useDomainWebSocketStore = defineStore('domainWebsockets', () => {
     watch(
       () => status.value,
       () => {
-        console.log(`websocket status: ${status.value}`);
+        debugLog(`websocket status: ${status.value}`);
       },
     );
   };

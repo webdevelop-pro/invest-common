@@ -1,12 +1,18 @@
+import env from 'InvestCommon/config/env';
+
 type SameSiteOption = 'none' | 'lax' | 'strict';
 
-export const cookiesOptions = (expireDate: Date) => {
-  const sameSite: SameSiteOption = process.env.NODE_ENV === 'production' ? 'none' : 'lax';
+const isProd = import.meta.env.MODE === 'production';
+
+export const cookiesOptions = (expireDate?: Date) => {
+  const sameSite: SameSiteOption = isProd ? 'none' : 'lax';
+  const domain = env.COOKIE_DOMAIN || '.webdevelop.biz';
+
   return {
-    domain: '.webdevelop.biz',
+    domain,
     path: '/',
-    expires: expireDate,
+    ...(expireDate ? { expires: expireDate } : {}),
     sameSite,
-    secure: process.env.NODE_ENV === 'production',
+    secure: isProd,
   };
 };

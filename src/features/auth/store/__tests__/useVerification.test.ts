@@ -8,7 +8,7 @@ import { ref, reactive, watch } from 'vue';
 import { useVerificationStore } from '../useVerification';
 
 // Mock environment variables
-vi.mock('InvestCommon/domain/config/env', () => ({
+vi.mock('InvestCommon/config/env', () => ({
   default: {
     FRONTEND_URL_STATIC: 'http://localhost:3000',
   },

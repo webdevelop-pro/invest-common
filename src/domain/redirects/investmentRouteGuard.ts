@@ -2,6 +2,7 @@ import { RouteLocationNormalized } from 'vue-router';
 import { computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
+import type { IInvestmentFormatted } from 'InvestCommon/data/investment/investment.types';
 import { usePageSeo } from 'InvestCommon/shared/composables/usePageSeo';
 import { reportError } from 'InvestCommon/domain/error/errorReporting';
 
@@ -25,7 +26,7 @@ export const createInvestmentRouteGuard = (seoTitle: string, seoDescription: str
 
       const investmentID = computed(() => to?.params?.id);
       const investmentExists = getInvestmentsState.value.data?.data?.some(
-        (investment: any) => String(investment.id) === investmentID.value,
+        (investment: IInvestmentFormatted) => String(investment.id) === investmentID.value,
       );
 
       if (!investmentExists) {

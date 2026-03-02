@@ -9,7 +9,7 @@ vi.mock('pinia', async () => {
   };
 });
 
-vi.mock('InvestCommon/domain/config/env', () => ({
+vi.mock('InvestCommon/config/env', () => ({
   default: {
     FILER_URL: 'https://files.example.com',
   },

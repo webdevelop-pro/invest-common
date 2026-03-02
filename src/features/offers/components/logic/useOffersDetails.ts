@@ -1,6 +1,6 @@
 import { computed, type Ref } from 'vue';
 import { useData } from 'vitepress';
-import env from 'InvestCommon/domain/config/env';
+import env from 'InvestCommon/config/env';
 import { useRepositoryFiler } from 'InvestCommon/data/filer/filer.repository';
 import { storeToRefs } from 'pinia';
 import type { IOfferFormatted } from 'InvestCommon/data/offer/offer.types';

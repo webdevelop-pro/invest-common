@@ -4,7 +4,7 @@ import ContactUsForm from 'UiKit/components/VForms/VFormContactUs.vue';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { storeToRefs } from 'pinia';
-import env from 'InvestCommon/domain/config/env';
+import env from 'InvestCommon/config/env';
 
 const { frontmatter } = useData();
 

@@ -1,10 +1,18 @@
 import type { NormalizedError } from 'InvestCommon/domain/error/errorReporting';
 import { useRepositoryAnalytics } from 'InvestCommon/data/analytics/analytics.repository';
 import { AnalyticsLogLevel } from 'InvestCommon/data/analytics/analytics.type';
-import env from 'InvestCommon/domain/config/env';
+import env from 'InvestCommon/config/env';
 import { buildHttpRequest, getClientContext, normalizeGroupMessage } from 'InvestCommon/domain/analytics/useAnalyticsError';
 
 const isAnalyticsEnabled = env.ENABLE_ANALYTICS === '1';
+
+/**
+ * Allows each app (Vue, Vitepress, etc.) to provide its own analytics service name
+ * without duplicating the error reporting logic.
+ */
+export interface SendReportedErrorOptions {
+  serviceName: string;
+}
 
 const BOT_PATTERNS = [
   /bot/i,
@@ -28,6 +36,7 @@ function shouldReportToAnalytics(): boolean {
 export function sendReportedErrorToAnalytics(
   normalized: NormalizedError,
   fallbackMessage: string,
+  options: SendReportedErrorOptions = { serviceName: 'vue3-app' },
 ): void {
   if (!isAnalyticsEnabled || !shouldReportToAnalytics()) return;
 
@@ -35,7 +44,7 @@ export function sendReportedErrorToAnalytics(
     const analytics = useRepositoryAnalytics();
     const httpRequest = buildHttpRequest();
     const errorLabel = [fallbackMessage, normalized.message].filter(Boolean).join(': ');
-    void analytics.setMessage({
+    void analytics.logMessage({
       time: new Date().toISOString(),
       level: AnalyticsLogLevel.ERROR,
       message: normalizeGroupMessage(normalized.message),
@@ -46,7 +55,7 @@ export function sendReportedErrorToAnalytics(
         stack: [],
         serviceContext: {
           httpRequest,
-          service_name: 'vue3-app',
+          service_name: options.serviceName,
         },
         client: getClientContext(),
       },

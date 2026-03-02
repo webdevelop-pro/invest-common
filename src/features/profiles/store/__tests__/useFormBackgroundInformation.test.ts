@@ -136,7 +136,7 @@ vi.mock('UiKit/helpers/model', () => ({
   getOptions: vi.fn(() => []),
 }));
 
-vi.mock('InvestCommon/domain/config/env', () => ({
+vi.mock('InvestCommon/config/env', () => ({
   default: {
     HUBSPOT_FORM_ID_BACKGROUND_INFORMATION: 'test-hubspot-form-id',
   },

@@ -42,7 +42,7 @@ vi.mock('InvestCommon/data/service/apiClient', () => {
   }
 })
 
-vi.mock('InvestCommon/domain/config/env', () => ({
+vi.mock('InvestCommon/config/env', () => ({
   default: {
     KRATOS_URL: 'https://kratos.example.com',
   },

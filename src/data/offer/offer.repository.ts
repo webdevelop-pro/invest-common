@@ -2,7 +2,7 @@ import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import {
   IOffer, IOfferData, IOfferCommentsResponse, IOfferCommentPayload,
 } from 'InvestCommon/types/api/offers';
-import env from 'InvestCommon/domain/config/env';
+import env from 'InvestCommon/config/env';
 import { createRepositoryStates, withActionState, type OptionsStateData } from 'InvestCommon/data/repository/repository';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { OfferFormatter } from 'InvestCommon/data/offer/offer.formatter';

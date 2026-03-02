@@ -9,7 +9,7 @@ import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment
 import { useRepositoryEsign } from 'InvestCommon/data/esign/esign.repository';
 import { useRepositoryFiler } from 'InvestCommon/data/filer/filer.repository';
 import { FilerFormatter } from 'InvestCommon/data/filer/filer.formatter';
-import env from 'InvestCommon/domain/config/env';
+import env from 'InvestCommon/config/env';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import { reportError } from 'InvestCommon/domain/error/errorReporting';
 

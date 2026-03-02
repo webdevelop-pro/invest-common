@@ -54,6 +54,8 @@ export const useDialogs = defineStore('dialogs', () => {
   };
 });
 
-if (import.meta.hot) {
-  import.meta.hot.accept(acceptHMRUpdate(useDialogs, useDialogs));
+// Enable HMR in dev, but avoid wiring it up in tests where it can
+// interfere with Vitest's module runner shutdown lifecycle.
+if (import.meta.hot && import.meta.env.MODE !== 'test') {
+  import.meta.hot.accept(acceptHMRUpdate(useDialogs, import.meta.hot));
 }

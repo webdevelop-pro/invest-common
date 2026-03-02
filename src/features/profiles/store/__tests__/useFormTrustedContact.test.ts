@@ -78,7 +78,7 @@ vi.mock('UiKit/composables/useHubspotForm', () => ({
   useHubspotForm: vi.fn(() => ({ submitFormToHubspot: mockSubmitFormToHubspot })),
 }));
 
-vi.mock('InvestCommon/domain/config/env', () => ({
+vi.mock('InvestCommon/config/env', () => ({
   default: { HUBSPOT_FORM_ID_TRUSTED_CONTACT: 'test-hubspot-form-id' },
 }));
 

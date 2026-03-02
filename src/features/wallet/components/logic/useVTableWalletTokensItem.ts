@@ -1,5 +1,5 @@
 import { computed } from 'vue';
-import env from 'InvestCommon/domain/config/env';
+import env from 'InvestCommon/config/env';
 
 interface ITableEvmWalletTransaction {
   name?: string;

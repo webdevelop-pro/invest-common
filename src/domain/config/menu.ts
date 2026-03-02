@@ -103,14 +103,12 @@ export const MENU_LEGAL = computed(() => (path: string) => [
 export const MENU_HEADER_MOBILE = computed(
   () => (profileId?: number | null, path?: string) => {
     const items: MenuItem[] = [];
-    console.log('MENU_HEADER_MOBILE', profileId, path);
 
     const hasProfile = Number.isFinite(profileId as number);
     const id = hasProfile ? Number(profileId) : undefined;
 
     if (hasProfile && id !== undefined) {
       const dashboardHref = urlProfilePortfolio(id);
-      console.log('dashboardHref', dashboardHref);
       const profileHref = urlProfileAccount(id);
       const walletHref = urlProfileWallet(id);
 

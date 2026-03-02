@@ -8,7 +8,7 @@ import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles
 import { hasRestrictedWalletBehavior } from 'InvestCommon/data/profiles/profiles.helpers';
 import type { IProfileFormatted } from 'InvestCommon/data/profiles/profiles.types';
 import { currency } from 'InvestCommon/helpers/currency';
-import env from 'InvestCommon/domain/config/env';
+import env from 'InvestCommon/config/env';
 import { ROUTE_DASHBOARD_EARN, ROUTE_SETTINGS_BANK_ACCOUNTS } from 'InvestCommon/domain/config/enums/routes';
 import plus from 'UiKit/assets/images/plus.svg';
 

@@ -75,7 +75,7 @@ vi.mock('UiKit/helpers/validation/general', () => ({
   scrollToError: vi.fn(),
 }));
 
-vi.mock('InvestCommon/domain/config/env', () => ({
+vi.mock('InvestCommon/config/env', () => ({
   default: {
     HUBSPOT_FORM_ID_PERSONAL_INFORMATION: 'test-hubspot-form-id',
   },

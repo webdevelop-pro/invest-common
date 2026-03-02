@@ -1,3 +1,13 @@
+const isDebug =
+  typeof import.meta !== 'undefined' &&
+  typeof (import.meta as any).env !== 'undefined' &&
+  Boolean((import.meta as any).env.DEV);
+
+const debugLog = (...args: unknown[]) => {
+  if (!isDebug) return;
+  console.log(...args);
+};
+
 export interface HttpRequestLike {
   method: string;
   url: string;
@@ -100,11 +110,11 @@ export const formatErrorMessage = (message: string, componentName: string): stri
  */
 export const resolveComponentNameFromStack = (stack?: string): string | undefined => {
   if (!stack) {
-    console.log('[Stack Analysis] No stack provided');
+    debugLog('[Stack Analysis] No stack provided');
     return undefined;
   }
   
-  console.log('[Stack Analysis] Analyzing stack:', stack.substring(0, 200) + '...');
+  debugLog('[Stack Analysis] Analyzing stack:', stack.substring(0, 200) + '...');
   
   // Simplified pattern matching - just look for any PascalCase names
   const simplePatterns = [
@@ -124,17 +134,17 @@ export const resolveComponentNameFromStack = (stack?: string): string | undefine
     const match = stack.match(pattern);
     if (match?.[1]) {
       const candidate = match[1];
-      console.log(`[Stack Analysis] Pattern ${i + 1} matched: "${candidate}"`);
+      debugLog(`[Stack Analysis] Pattern ${i + 1} matched: "${candidate}"`);
       if (isValidComponentName(candidate, stack)) {
-        console.log(`[Stack Analysis] ✅ Valid component found: "${candidate}"`);
+        debugLog(`[Stack Analysis] ✅ Valid component found: "${candidate}"`);
         return candidate;
       } else {
-        console.log(`[Stack Analysis] ❌ Invalid component name: "${candidate}"`);
+        debugLog(`[Stack Analysis] ❌ Invalid component name: "${candidate}"`);
       }
     }
   }
   
-  console.log('[Stack Analysis] ❌ No component name found in stack');
+  debugLog('[Stack Analysis] ❌ No component name found in stack');
   return undefined;
 };
 
@@ -143,21 +153,21 @@ export const resolveComponentNameFromStack = (stack?: string): string | undefine
  */
 export const resolveComponentNameFromAPIError = (error: Error | undefined, apiClient?: any): string | undefined => {
   if (!error) {
-    console.log('[API Error Analysis] No error provided');
+    debugLog('[API Error Analysis] No error provided');
     return undefined;
   }
   
-  console.log('[API Error Analysis] Analyzing API error:', error.message);
+  debugLog('[API Error Analysis] Analyzing API error:', error.message);
   
   // First try to get from API client context if available
   if (apiClient && (apiClient as any).componentContext) {
-    console.log('[API Error Analysis] ✅ Found component context in API client:', (apiClient as any).componentContext);
+    debugLog('[API Error Analysis] ✅ Found component context in API client:', (apiClient as any).componentContext);
     return (apiClient as any).componentContext;
   }
   
   // Enhanced stack analysis for API errors
   const stack = error.stack || '';
-  console.log('[API Error Analysis] Analyzing stack for API patterns...');
+  debugLog('[API Error Analysis] Analyzing stack for API patterns...');
   
   // Simplified API pattern matching
   const simpleApiPatterns = [
@@ -184,7 +194,7 @@ export const resolveComponentNameFromAPIError = (error: Error | undefined, apiCl
   }
   
   // Fall back to general stack analysis
-  console.log('[API Error Analysis] Falling back to general stack analysis...');
+  debugLog('[API Error Analysis] Falling back to general stack analysis...');
   return resolveComponentNameFromStack(stack);
 };
 
@@ -192,33 +202,33 @@ export const resolveComponentNameFromAPIError = (error: Error | undefined, apiCl
  * Picks a safe component name from error stack or vm, filtering out utilities.
  */
 export const chooseSafeComponentName = (error: Error | undefined, vm: any, fallback: string = 'Unknown Component'): string => {
-  console.log('[Choose Safe Component] Starting component name selection...');
+  debugLog('[Choose Safe Component] Starting component name selection...');
   
   // Try API-specific analysis first
-  console.log('[Choose Safe Component] Trying API-specific analysis...');
+  debugLog('[Choose Safe Component] Trying API-specific analysis...');
   const fromAPI = resolveComponentNameFromAPIError(error);
   if (fromAPI && isValidComponentName(fromAPI, error?.stack)) {
-    console.log('[Choose Safe Component] ✅ Using API analysis result:', fromAPI);
+    debugLog('[Choose Safe Component] ✅ Using API analysis result:', fromAPI);
     return fromAPI;
   }
   
   // Try general stack analysis
-  console.log('[Choose Safe Component] Trying general stack analysis...');
+  debugLog('[Choose Safe Component] Trying general stack analysis...');
   const fromStack = resolveComponentNameFromStack(error?.stack);
   if (fromStack && isValidComponentName(fromStack, error?.stack)) {
-    console.log('[Choose Safe Component] ✅ Using stack analysis result:', fromStack);
+    debugLog('[Choose Safe Component] ✅ Using stack analysis result:', fromStack);
     return fromStack;
   }
   
   // Fall back to vm
-  console.log('[Choose Safe Component] Trying VM analysis...');
+  debugLog('[Choose Safe Component] Trying VM analysis...');
   const fromVm = resolveComponentName(vm, fallback);
   if (fromVm && isValidComponentName(fromVm)) {
-    console.log('[Choose Safe Component] ✅ Using VM analysis result:', fromVm);
+    debugLog('[Choose Safe Component] ✅ Using VM analysis result:', fromVm);
     return fromVm;
   }
   
-  console.log('[Choose Safe Component] ❌ Using fallback:', fallback);
+  debugLog('[Choose Safe Component] ❌ Using fallback:', fallback);
   return fallback;
 };
 
@@ -232,7 +242,7 @@ const isValidComponentName = (name?: string, stack?: string): boolean => {
   const trimmed = name.trim();
   if (!trimmed) return false;
   
-  console.log(`[Validation] Checking component name: "${name}"`);
+  debugLog(`[Validation] Checking component name: "${name}"`);
   
   // Basic validation - exclude obvious utility names
   const bannedNames = [
@@ -242,7 +252,7 @@ const isValidComponentName = (name?: string, stack?: string): boolean => {
   ];
   
   if (bannedNames.includes(trimmed.toLowerCase())) {
-    console.log(`[Validation] ❌ Name "${name}" is a banned utility name`);
+    debugLog(`[Validation] ❌ Name "${name}" is a banned utility name`);
     return false;
   }
   
@@ -272,19 +282,19 @@ const isValidComponentName = (name?: string, stack?: string): boolean => {
   ];
   
   if (utilityPatterns.some(pattern => pattern.test(trimmed))) {
-    console.log(`[Validation] ❌ Name "${name}" matches utility class pattern`);
+    debugLog(`[Validation] ❌ Name "${name}" matches utility class pattern`);
     return false;
   }
   
   // Must be PascalCase (starts with uppercase)
   if (!/^[A-Z]/.test(trimmed)) {
-    console.log(`[Validation] ❌ Name "${name}" doesn't start with uppercase`);
+    debugLog(`[Validation] ❌ Name "${name}" doesn't start with uppercase`);
     return false;
   }
   
   // Must be at least 3 characters
   if (trimmed.length < 3) {
-    console.log(`[Validation] ❌ Name "${name}" is too short`);
+    debugLog(`[Validation] ❌ Name "${name}" is too short`);
     return false;
   }
   
@@ -298,24 +308,24 @@ const isValidComponentName = (name?: string, stack?: string): boolean => {
       '/interceptors/', '/adapters/', '/handlers/'
     ];
     
-    console.log(`[Validation] Stack contains: ${lowerStack.substring(0, 100)}...`);
-    console.log(`[Validation] Looking for name "${lowerName}" in excluded paths...`);
+    debugLog(`[Validation] Stack contains: ${lowerStack.substring(0, 100)}...`);
+    debugLog(`[Validation] Looking for name "${lowerName}" in excluded paths...`);
     
     // Only exclude if the name is clearly from a utility file (not just mentioned in the stack)
     for (const path of excludePaths) {
       // Look for file paths that contain both the excluded path and the component name
       const filePathRegex = new RegExp(`[^\\s]*${path.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}[^\\s]*${lowerName}[^\\s]*\\.(ts|js|vue)`, 'i');
       if (filePathRegex.test(lowerStack)) {
-        console.log(`[Validation] ❌ Name "${name}" found in utility file path: ${path}`);
+        debugLog(`[Validation] ❌ Name "${name}" found in utility file path: ${path}`);
         return false;
       }
     }
     
-    console.log(`[Validation] ✅ Name "${name}" not found in any excluded paths`);
+    debugLog(`[Validation] ✅ Name "${name}" not found in any excluded paths`);
   }
   
   // Allow all other names that pass basic validation
-  console.log(`[Validation] ✅ Component name "${name}" is valid`);
+  debugLog(`[Validation] ✅ Component name "${name}" is valid`);
   return true;
 };
 
@@ -329,20 +339,20 @@ export const analyzeAPIErrorStack = (error: Error | undefined): {
   context?: string;
 } => {
   if (!error?.stack) {
-    console.log('[API Stack Analysis] No stack provided');
+    debugLog('[API Stack Analysis] No stack provided');
     return {};
   }
   
-  console.log('[API Stack Analysis] Analyzing API error stack...');
+  debugLog('[API Stack Analysis] Analyzing API error stack...');
   const stack = error.stack;
   const result: any = {};
   
   // Extract component name using general stack analysis
-  console.log('[API Stack Analysis] Using general stack analysis for component detection...');
+  debugLog('[API Stack Analysis] Using general stack analysis for component detection...');
   const componentName = resolveComponentNameFromStack(stack);
   if (componentName) {
     result.componentName = componentName;
-    console.log('[API Stack Analysis] ✅ Component found:', componentName);
+    debugLog('[API Stack Analysis] ✅ Component found:', componentName);
   }
   
   // Extract API method information
@@ -356,7 +366,7 @@ export const analyzeAPIErrorStack = (error: Error | undefined): {
     const match = stack.match(pattern);
     if (match?.[1]) {
       result.apiMethod = match[1];
-      console.log(`[API Stack Analysis] ✅ API method found with pattern ${i + 1}:`, match[1]);
+      debugLog(`[API Stack Analysis] ✅ API method found with pattern ${i + 1}:`, match[1]);
       break;
     }
   }
@@ -373,7 +383,7 @@ export const analyzeAPIErrorStack = (error: Error | undefined): {
     const match = stack.match(pattern);
     if (match?.[1]) {
       result.repositoryName = match[1];
-      console.log(`[API Stack Analysis] ✅ Repository found with pattern ${i + 1}:`, match[1]);
+      debugLog(`[API Stack Analysis] ✅ Repository found with pattern ${i + 1}:`, match[1]);
       break;
     }
   }
@@ -390,12 +400,12 @@ export const analyzeAPIErrorStack = (error: Error | undefined): {
     const match = stack.match(pattern);
     if (match?.[1]) {
       result.context = match[1];
-      console.log(`[API Stack Analysis] ✅ Context found with pattern ${i + 1}:`, match[1]);
+      debugLog(`[API Stack Analysis] ✅ Context found with pattern ${i + 1}:`, match[1]);
       break;
     }
   }
   
-  console.log('[API Stack Analysis] Final result:', result);
+  debugLog('[API Stack Analysis] Final result:', result);
   return result;
 };
 
@@ -422,7 +432,7 @@ export const resolveComponentNameForAPIError = (
   
   // Try API client context first (highest confidence)
   if (apiClient && (apiClient as any).componentContext) {
-    console.log('[Comprehensive Analysis] ✅ Using API client context:', (apiClient as any).componentContext);
+    debugLog('[Comprehensive Analysis] ✅ Using API client context:', (apiClient as any).componentContext);
     return {
       componentName: (apiClient as any).componentContext,
       confidence: 'high',
@@ -431,10 +441,10 @@ export const resolveComponentNameForAPIError = (
   }
   
   // Try API-specific stack analysis
-  console.log('[Comprehensive Analysis] Trying API-specific stack analysis...');
+  debugLog('[Comprehensive Analysis] Trying API-specific stack analysis...');
   const apiAnalysis = analyzeAPIErrorStack(error);
   if (apiAnalysis.componentName && isValidComponentName(apiAnalysis.componentName, error?.stack)) {
-    console.log('[Comprehensive Analysis] ✅ API analysis found component:', apiAnalysis.componentName);
+    debugLog('[Comprehensive Analysis] ✅ API analysis found component:', apiAnalysis.componentName);
     return {
       componentName: apiAnalysis.componentName,
       confidence: 'high',
@@ -448,10 +458,10 @@ export const resolveComponentNameForAPIError = (
   }
   
   // Try general API error analysis
-  console.log('[Comprehensive Analysis] Trying general API error analysis...');
+  debugLog('[Comprehensive Analysis] Trying general API error analysis...');
   const fromAPI = resolveComponentNameFromAPIError(error, apiClient);
   if (fromAPI && isValidComponentName(fromAPI, error?.stack)) {
-    console.log('[Comprehensive Analysis] ✅ General API analysis found component:', fromAPI);
+    debugLog('[Comprehensive Analysis] ✅ General API analysis found component:', fromAPI);
     return {
       componentName: fromAPI,
       confidence: 'medium',
@@ -460,10 +470,10 @@ export const resolveComponentNameForAPIError = (
   }
   
   // Try general stack analysis
-  console.log('[Comprehensive Analysis] Trying general stack analysis...');
+  debugLog('[Comprehensive Analysis] Trying general stack analysis...');
   const fromStack = resolveComponentNameFromStack(error?.stack);
   if (fromStack && isValidComponentName(fromStack, error?.stack)) {
-    console.log('[Comprehensive Analysis] ✅ General stack analysis found component:', fromStack);
+    debugLog('[Comprehensive Analysis] ✅ General stack analysis found component:', fromStack);
     return {
       componentName: fromStack,
       confidence: 'medium',
@@ -472,10 +482,10 @@ export const resolveComponentNameForAPIError = (
   }
   
   // Fall back to VM analysis
-  console.log('[Comprehensive Analysis] Trying VM analysis...');
+  debugLog('[Comprehensive Analysis] Trying VM analysis...');
   const fromVm = resolveComponentName(vm, fallback);
   if (fromVm && isValidComponentName(fromVm)) {
-    console.log('[Comprehensive Analysis] ✅ VM analysis found component:', fromVm);
+    debugLog('[Comprehensive Analysis] ✅ VM analysis found component:', fromVm);
     return {
       componentName: fromVm,
       confidence: 'low',
@@ -484,110 +494,12 @@ export const resolveComponentNameForAPIError = (
   }
   
   // Final fallback
-  console.log('[Comprehensive Analysis] ❌ Using fallback component name:', fallback);
+  debugLog('[Comprehensive Analysis] ❌ Using fallback component name:', fallback);
   return {
     componentName: fallback,
     confidence: 'low',
     source: 'fallback'
   };
-};
-
-/**
- * Test function to demonstrate enhanced stack trace analysis.
- * Call this function to see how the analysis works with sample data.
- */
-export const testStackTraceAnalysis = () => {
-  console.log('🧪 Testing Enhanced Stack Trace Analysis...\n');
-  
-  // Sample error stack traces for testing
-  const testStacks = [
-    // Vue component error
-    `Error: API request failed
-    at UserProfile.vue:45:12
-    at mounted (UserProfile.vue:23:8)
-    at callWithErrorHandling (vue.js:1234:56)`,
-    
-    // Repository method error
-    `Error: Failed to fetch data
-    at AuthRepository.getSession (auth.repository.ts:67:15)
-    at useAuthStore.login (auth.store.ts:45:23)
-    at LoginForm.handleSubmit (LoginForm.vue:89:12)`,
-    
-    // UseRepository pattern error
-    `Error: Repository error
-    at useRepositoryAuth.getSession (auth.repository.ts:45:12)
-    at UserDashboard.mounted (UserDashboard.vue:67:8)
-    at callWithErrorHandling (vue.js:1234:56)`,
-    
-    // Store pattern error
-    `Error: Store error
-    at useUserStore.setUser (user.store.ts:34:15)
-    at ProfileForm.handleSubmit (ProfileForm.vue:89:12)
-    at callWithErrorHandling (vue.js:1234:56)`,
-    
-    // Repository instantiation error
-    `Error: Repository instantiation failed
-    at new AuthRepository (auth.repository.ts:12:8)
-    at UserLogin.authenticate (UserLogin.vue:45:12)
-    at callWithErrorHandling (vue.js:1234:56)`,
-    
-    // Async/await error with repository
-    `Error: Network error
-    at async UserDashboard.loadData (UserDashboard.vue:123:15)
-    at async mounted (UserDashboard.vue:45:8)
-    at async AuthRepository.getSession (auth.repository.ts:67:15)`,
-    
-    // Component lifecycle error
-    `Error: Component error
-    at created in UserSettings (UserSettings.vue:34:12)
-    at callHook (vue.js:2345:67)`,
-    
-    // Data repository error
-    `Error: Repository error
-    at data/repository/auth.repository.ts:45:12
-    at UserProfile.mounted (UserProfile.vue:67:8)
-    at callWithErrorHandling (vue.js:1234:56)`,
-    
-    // Data service error
-    `Error: Service error
-    at data/service/apiClient.ts:67:15
-    at UserDashboard.loadData (UserDashboard.vue:89:12)
-    at callWithErrorHandling (vue.js:1234:56)`,
-    
-    // Data folder file with repository in name
-    `Error: Repository error
-    at data/repository/userRepository.ts:45:12
-    at UserProfile.mounted (UserProfile.vue:67:8)
-    at callWithErrorHandling (vue.js:1234:56)`,
-    
-    // Data folder file with repository in name (different pattern)
-    `Error: Repository error
-    at data/service/authRepository.ts:34:15
-    at LoginForm.handleSubmit (LoginForm.vue:89:12)
-    at callWithErrorHandling (vue.js:1234:56)`
-  ];
-  
-  testStacks.forEach((stack, index) => {
-    console.log(`\n📋 Test Case ${index + 1}:`);
-    console.log('Stack:', stack);
-    
-    // Test general stack analysis
-    const generalResult = resolveComponentNameFromStack(stack);
-    console.log('General Analysis Result:', generalResult);
-    
-    // Test API error analysis
-    const mockError = { stack, message: 'Test error' } as Error;
-    const apiResult = resolveComponentNameFromAPIError(mockError);
-    console.log('API Analysis Result:', apiResult);
-    
-    // Test comprehensive analysis
-    const comprehensiveResult = resolveComponentNameForAPIError(mockError, null);
-    console.log('Comprehensive Result:', comprehensiveResult);
-    
-    console.log('─'.repeat(50));
-  });
-  
-  console.log('\n✅ Stack trace analysis testing completed!');
 };
 
 export const getIsoTimestampFrom = (ts: unknown): string => {

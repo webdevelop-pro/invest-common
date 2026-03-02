@@ -26,7 +26,7 @@ import ArrowLeft from 'UiKit/assets/images/arrow-left.svg';
 import NotificationsSidebarButton from 'InvestCommon/features/notifications/VNotificationsSidebarButton.vue';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import VLogo from 'UiKit/components/VLogo.vue';
-import env from 'InvestCommon/domain/config/env';
+import env from 'InvestCommon/config/env';
 
 const VHeaderProfilePWA = defineAsyncComponent({
   loader: () => import('../VHeader/VHeaderProfilePWA.vue'),

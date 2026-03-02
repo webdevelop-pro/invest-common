@@ -3,7 +3,7 @@ import {
   IInvestUnconfirmed, IInvestConfirm,
   IInvestFunding,
 } from 'InvestCommon/types/api/invest';
-import env from 'InvestCommon/domain/config/env';
+import env from 'InvestCommon/config/env';
 import { createRepositoryStates, withActionState, type OptionsStateData } from 'InvestCommon/data/repository/repository';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { InvestmentFormatter } from 'InvestCommon/data/investment/investment.formatter';

@@ -7,7 +7,7 @@ import { ROUTE_DASHBOARD_ACCOUNT, ROUTE_ACCREDITATION_UPLOAD } from 'InvestCommo
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useRouter } from 'vue-router';
 import { FormChild } from 'InvestCommon/types/form';
-import env from 'InvestCommon/domain/config/env';
+import env from 'InvestCommon/config/env';
 import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';

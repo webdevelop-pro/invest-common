@@ -1,5 +1,5 @@
 import defaultImage from 'InvestCommon/shared/assets/images/default.svg?url';
-import env from 'InvestCommon/domain/config/env';
+import env from 'InvestCommon/config/env';
 import {
   IOfferFormatted, IOffer, OfferStatuses, PaymentScheduleTypes, VotingRightsTypes,
   DividendType, DividendFrequencyTypes,

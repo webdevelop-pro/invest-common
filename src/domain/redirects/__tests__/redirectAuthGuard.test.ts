@@ -64,7 +64,7 @@ const createMockSession = (active: boolean, id = 's1'): ISession => ({
   tikenized: '',
 } as unknown as ISession)
 
-vi.mock('InvestCommon/domain/config/env', () => ({
+vi.mock('InvestCommon/config/env', () => ({
   default: {
     FRONTEND_URL_STATIC: 'https://static.example.com',
     KRATOS_URL: 'https://kratos.example.com',

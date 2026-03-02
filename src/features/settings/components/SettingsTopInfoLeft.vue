@@ -3,7 +3,7 @@ import { computed, ref, watch } from 'vue';
 import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 import { storeToRefs } from 'pinia';
 import VAvatarUpload from 'InvestCommon/features/filer/VAvatarUpload.vue';
-import env from 'InvestCommon/domain/config/env';
+import env from 'InvestCommon/config/env';
 import pen from 'UiKit/assets/images/pen.svg?component';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { ROUTE_SETTINGS_ACCOUNT_DETAILS } from 'InvestCommon/domain/config/enums/routes';

@@ -1,5 +1,5 @@
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
-import env from 'InvestCommon/domain/config/env';
+import env from 'InvestCommon/config/env';
 import { createRepositoryStates, withActionState } from 'InvestCommon/data/repository/repository';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { IDistributions, IDistributionsMeta, IDistributionFormatted } from 'InvestCommon/data/distributions/distributions.types';

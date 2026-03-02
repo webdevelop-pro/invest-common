@@ -1,6 +1,6 @@
 import { computed } from 'vue';
 import { storeToRefs } from 'pinia';
-import env from 'InvestCommon/domain/config/env';
+import env from 'InvestCommon/config/env';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 

@@ -1,7 +1,7 @@
 import { ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRepositoryFiler } from 'InvestCommon/data/filer/filer.repository';
-import env from 'InvestCommon/domain/config/env';
+import env from 'InvestCommon/config/env';
 
 export function useAccountPhoto(props: any, emit: any) {
   const { FILER_URL } = env;

@@ -54,7 +54,7 @@ vi.mock('InvestCommon/data/filer/filer.formatter', () => ({
   },
 }));
 
-vi.mock('InvestCommon/domain/config/env', () => ({
+vi.mock('InvestCommon/config/env', () => ({
   default: { DOCUSEAL_URL: 'https://docuseal-web.webdevelop.biz/s' },
 }));
 

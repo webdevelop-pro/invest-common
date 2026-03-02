@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onBeforeMount } from 'vue';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
-import env from 'InvestCommon/domain/config/env';
+import env from 'InvestCommon/config/env';
 
 useGlobalLoader().show();
 

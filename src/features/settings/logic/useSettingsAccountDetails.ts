@@ -11,7 +11,7 @@ import { ROUTE_SETTINGS_MFA } from 'InvestCommon/domain/config/enums/routes';
 import { scrollToError } from 'UiKit/helpers/validation/general';
 import { FormChild } from 'InvestCommon/types/form';
 import { useRepositoryFiler } from 'InvestCommon/data/filer/filer.repository';
-import env from 'InvestCommon/domain/config/env';
+import env from 'InvestCommon/config/env';
 
 export function useSettingsAccountDetails() {
   const globalLoader = useGlobalLoader();

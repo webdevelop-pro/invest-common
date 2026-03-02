@@ -1,7 +1,7 @@
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import { APIError } from 'InvestCommon/data/service/handlers/apiError';
 import type { ApiResponse } from 'InvestCommon/data/service/types';
-import env from 'InvestCommon/domain/config/env';
+import env from 'InvestCommon/config/env';
 import { createActionState, withActionState } from 'InvestCommon/data/repository/repository';
 import { computed } from 'vue';
 import {

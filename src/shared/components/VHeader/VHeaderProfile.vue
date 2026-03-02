@@ -6,7 +6,7 @@ import VAvatar from 'UiKit/components/VAvatar.vue';
 import { VDropdownMenuItem } from 'UiKit/components/Base/VDropdownMenu';
 import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 import NotificationsSidebarButton from 'InvestCommon/features/notifications/VNotificationsSidebarButton.vue';
-import env from 'InvestCommon/domain/config/env';
+import env from 'InvestCommon/config/env';
 import LogOutIcon from 'UiKit/assets/images/menu_common/logout.svg';
 import type { MenuItem } from 'InvestCommon/types/global';
 import { useHeaderUser } from './useHeaderUser';

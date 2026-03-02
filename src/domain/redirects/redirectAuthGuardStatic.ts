@@ -13,6 +13,8 @@ import {
 //   urlSignin, urlSignup, urlAuthenticator, urlForgot, urlCheckEmail,
 // ];
 
+// TODO: add redirect for auth
+
 export const redirectAuthGuardStatic = async () => {
   // Skip during SSR (server-side rendering)
   if (typeof window === 'undefined') {

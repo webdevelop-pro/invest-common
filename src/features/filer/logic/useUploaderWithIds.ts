@@ -1,6 +1,6 @@
 import { ref, watch, type Ref } from 'vue';
 import { storeToRefs } from 'pinia';
-import env from 'InvestCommon/domain/config/env';
+import env from 'InvestCommon/config/env';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useRepositoryFiler } from 'InvestCommon/data/filer/filer.repository';
 import { reportError } from 'InvestCommon/domain/error/errorReporting';

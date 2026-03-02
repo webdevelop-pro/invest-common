@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { storeToRefs } from 'pinia';
-import env from 'InvestCommon/domain/config/env';
+import env from 'InvestCommon/config/env';
 import image from 'InvestCommon/shared/assets/images/icons/logout-modal.svg?url';
 import {
   VDialogContent, VDialogFooter, VDialogHeader, VDialogTitle, VDialog,

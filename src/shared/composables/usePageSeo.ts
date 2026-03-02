@@ -1,4 +1,4 @@
-import env from 'InvestCommon/domain/config/env';
+import env from 'InvestCommon/config/env';
 import { DEFAULT_DESCRIPTION, DEFAULT_PAGE_TITLE } from 'InvestCommon/domain/config/enums/routes';
 import { setHSPageView } from 'InvestCommon/helpers/hubspot';
 

@@ -6,7 +6,7 @@ import { storeToRefs } from 'pinia';
 import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/domain/config/enums/routes';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useRoute, useRouter } from 'vue-router';
-import env from 'InvestCommon/domain/config/env';
+import env from 'InvestCommon/config/env';
 import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
 import { scrollToError } from 'UiKit/helpers/validation/general';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';

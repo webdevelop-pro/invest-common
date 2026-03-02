@@ -8,7 +8,7 @@ import { useWalletActions } from 'InvestCommon/features/wallet/logic/useWalletAc
 import { useWalletTransactions } from 'InvestCommon/features/wallet/logic/useWalletTransactions';
 import { EvmTransactionTypes } from 'InvestCommon/data/evm/evm.types';
 import type { WalletFilterApplyPayload } from './walletLogic.types';
-import env from 'InvestCommon/domain/config/env';
+import env from 'InvestCommon/config/env';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';

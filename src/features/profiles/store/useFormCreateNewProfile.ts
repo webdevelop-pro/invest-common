@@ -8,7 +8,7 @@ import { useRouter } from 'vue-router';
 import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/domain/config/enums/routes';
 import { FormChild } from 'InvestCommon/types/form';
 import { PROFILE_TYPES as profileTypes } from 'InvestCommon/domain/config/enums/profileTypes';
-import env from 'InvestCommon/domain/config/env';
+import env from 'InvestCommon/config/env';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryAccreditation } from 'InvestCommon/data/accreditation/accreditation.repository';

@@ -1,6 +1,6 @@
 import HelloSign from 'hellosign-embedded';
 
-import env from 'InvestCommon/domain/config/env';
+import env from 'InvestCommon/config/env';
 
 import { ISignature } from 'InvestCommon/types/api/invest';
 

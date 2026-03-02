@@ -1,5 +1,5 @@
 import { currency } from 'InvestCommon/helpers/currency';
-import env from 'InvestCommon/domain/config/env';
+import env from 'InvestCommon/config/env';
 import {
   ITransactionDataResponse, ITransactionDataFormatted, WalletAddTransactionTypes, FundingStatuses,
   WalletTransactionStatusTypes,

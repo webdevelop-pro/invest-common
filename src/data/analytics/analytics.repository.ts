@@ -1,17 +1,21 @@
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import { createActionState, withActionState } from 'InvestCommon/data/repository/repository';
-import env from 'InvestCommon/domain/config/env';
-import { IAnalyticsEventRequest, IAnalyticsMessage, IAnalyticsResponse } from './analytics.type';
+import env from 'InvestCommon/config/env';
+import { type AnalyticsClient, type IAnalyticsEventRequest, type IAnalyticsMessage, type IAnalyticsResponse } from './analytics.type';
 
 const { ANALYTIC_URL } = env;
 
-export const useRepositoryAnalytics = () => {
+export const useRepositoryAnalytics = (): AnalyticsClient & {
+  setMessageState: ReturnType<typeof createActionState<IAnalyticsResponse>>;
+  setEventState: ReturnType<typeof createActionState<IAnalyticsResponse>>;
+  resetAll: () => void;
+} => {
   const apiClient = new ApiClient(ANALYTIC_URL);
 
   const setMessageState = createActionState<IAnalyticsResponse>();
   const setEventState = createActionState<IAnalyticsResponse>();
 
-  const setMessage = async (messageData: IAnalyticsMessage): Promise<IAnalyticsResponse> => {
+  const logMessage = async (messageData: IAnalyticsMessage): Promise<IAnalyticsResponse> => {
     try {
       return await withActionState(setMessageState, async () => {
         const payload = {
@@ -29,7 +33,7 @@ export const useRepositoryAnalytics = () => {
     }
   };
 
-  const sendEvent = async (eventData: IAnalyticsEventRequest): Promise<IAnalyticsResponse> =>
+  const trackEvent = async (eventData: IAnalyticsEventRequest): Promise<IAnalyticsResponse> =>
     withActionState(setEventState, async () => {
       const response = await apiClient.post<IAnalyticsResponse>('/public/event', eventData, {
         showGlobalAlertOnServerError: false,
@@ -43,13 +47,11 @@ export const useRepositoryAnalytics = () => {
   };
 
   return {
-    // States (expose refs so consumers stay reactive)
     setMessageState,
     setEventState,
 
-    // Actions
-    setMessage,
-    sendEvent,
+    logMessage,
+    trackEvent,
     resetAll,
   };
 };

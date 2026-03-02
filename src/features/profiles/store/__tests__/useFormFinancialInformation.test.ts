@@ -58,7 +58,7 @@ vi.mock('UiKit/helpers/validation/general', () => ({
   scrollToError: vi.fn(),
 }));
 
-vi.mock('InvestCommon/domain/config/env', () => ({
+vi.mock('InvestCommon/config/env', () => ({
   default: {
     HUBSPOT_FORM_ID_FINANCIAL_SITUATION: 'financial-situation-form-id',
     HUBSPOT_FORM_ID_RISKS: 'risks-form-id',
