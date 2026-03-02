@@ -2,8 +2,7 @@ import { ref, computed } from 'vue';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import env from 'InvestCommon/domain/config/env';
-import { toasterErrorHandling } from 'InvestCommon/data/repository/error/toasterErrorHandling';
-import { createActionState } from 'InvestCommon/data/repository/repository';
+import { createRepositoryStates, withActionState, type OptionsStateData } from 'InvestCommon/data/repository/repository';
 import {
   IProfileData, IUser, IProfileIndividual, ISchema,
   IProfileFormatted,
@@ -13,69 +12,67 @@ import { IUserFormatted } from './profiles.types';
 import { INotification } from '../notifications/notifications.types';
 import { ProfileFormatter } from './formatter/profiles.formatter';
 
+type ProfilesStates = {
+  setProfileByIdState: IProfileIndividual;
+  getProfileByIdState: IProfileFormatted;
+  getProfileByIdOptionsState: IProfileIndividual;
+  setProfileState: IProfileData;
+  getUserState: IUserFormatted;
+  setUserState: IProfileData;
+  setUserOptionsState: OptionsStateData;
+  updateUserDataState: OptionsStateData;
+  getProfileOptionsState: ISchema;
+};
+
 export const useRepositoryProfiles = defineStore('repository-profiles', () => {
-  // Dependencies
   const apiClient = new ApiClient(env.USER_URL);
 
-  // State
   const profileOptions = ref<ISchema>();
-  
-  // Request tracking to prevent stale data from being applied
-  // Track the latest request ID for each profile fetch
   let currentProfileRequestId = 0;
   let currentProfileOptionsRequestId = 0;
 
-  // Action states
-  const setProfileByIdState = createActionState<IProfileIndividual>();
-  const getProfileByIdState = createActionState<IProfileFormatted>();
-  const getProfileByIdOptionsState = createActionState<IProfileIndividual>();
-  const setProfileState = createActionState<IProfileData>();
-  const getUserState = createActionState<IUserFormatted>();
-  const setUserState = createActionState<IProfileData>();
-  const setUserOptionsState = createActionState<any>();
-  const updateUserDataState = createActionState<any>();
-  const getProfileOptionsState = createActionState<ISchema>();
+  const {
+    setProfileByIdState,
+    getProfileByIdState,
+    getProfileByIdOptionsState,
+    setProfileState,
+    getUserState,
+    setUserState,
+    setUserOptionsState,
+    updateUserDataState,
+    getProfileOptionsState,
+    resetAll,
+  } = createRepositoryStates<ProfilesStates>({
+    setProfileByIdState: undefined,
+    getProfileByIdState: undefined,
+    getProfileByIdOptionsState: undefined,
+    setProfileState: undefined,
+    getUserState: undefined,
+    setUserState: undefined,
+    setUserOptionsState: undefined,
+    updateUserDataState: undefined,
+    getProfileOptionsState: undefined,
+  });
 
   // Computed
   const formattedProfileData = computed(() => setProfileState.value.data);
 
   // Actions
-  const getProfileOptions = async (type: string) => {
-    try {
-      getProfileOptionsState.value.loading = true;
-      getProfileOptionsState.value.error = null;
+  const getProfileOptions = async (type: string) =>
+    withActionState(getProfileOptionsState, async () => {
       const response = await apiClient.options<ISchema>(`/auth/profile/${type}`);
-      getProfileOptionsState.value.data = response.data;
-      if (getProfileOptionsState.value.data?.definitions?.RegCF) {
-        delete getProfileOptionsState.value.data.definitions.RegCF?.required;
+      const data = response.data;
+      if (data?.definitions?.RegCF) {
+        delete data.definitions.RegCF?.required;
       }
-      return getProfileOptionsState.value.data;
-    } catch (err) {
-      getProfileOptionsState.value.error = err as Error;
-      getProfileOptionsState.value.data = undefined;
-      toasterErrorHandling(err, 'Failed to fetch profile options');
-      throw err;
-    } finally {
-      getProfileOptionsState.value.loading = false;
-    }
-  };
+      return data;
+    });
 
-  const setProfile = async (data: IProfileData, type: string) => {
-    try {
-      setProfileState.value.loading = true;
-      setProfileState.value.error = null;
+  const setProfile = async (data: IProfileData, type: string) =>
+    withActionState(setProfileState, async () => {
       const response = await apiClient.post<IProfileData>(`/auth/profile/${type}`, data);
-      setProfileState.value.data = response.data;
-      return setProfileState.value.data;
-    } catch (err) {
-      setProfileState.value.error = err as Error;
-      setProfileState.value.data = undefined;
-      toasterErrorHandling(err, 'Failed to set profile');
-      throw err;
-    } finally {
-      setProfileState.value.loading = false;
-    }
-  };
+      return response.data;
+    });
 
   const getProfileById = async (type: string, id: string | number) => {
     // Increment request ID to track this request
@@ -89,7 +86,7 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
       // Only apply the response if this is still the latest request
       // This prevents stale responses from overwriting current profile data
       if (requestId === currentProfileRequestId) {
-        getProfileByIdState.value.data = new ProfileFormatter(response.data).format();
+        getProfileByIdState.value.data = new ProfileFormatter(response.data as IProfileIndividual).format();
       }
       
       return getProfileByIdState.value.data;
@@ -98,7 +95,6 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
       if (requestId === currentProfileRequestId) {
         getProfileByIdState.value.error = err as Error;
         getProfileByIdState.value.data = undefined;
-        toasterErrorHandling(err, 'Failed to fetch profile by ID');
       }
       throw err;
     } finally {
@@ -129,7 +125,6 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
       if (requestId === currentProfileOptionsRequestId) {
         getProfileByIdOptionsState.value.error = err as Error;
         getProfileByIdOptionsState.value.data = undefined;
-        toasterErrorHandling(err, 'Failed to fetch profile by ID options');
       }
       throw err;
     } finally {
@@ -140,78 +135,32 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
     }
   };
 
-  const setProfileById = async (data: IProfileData, type: string, id: string | number) => {
-    try {
-      setProfileByIdState.value.loading = true;
-      setProfileByIdState.value.error = null;
+  const setProfileById = async (data: IProfileData, type: string, id: string | number) =>
+    withActionState(setProfileByIdState, async () => {
       const response = await apiClient.patch<IProfileIndividual>(`/auth/profile/${type}/${id}`, data);
-      setProfileByIdState.value.data = response.data;
-      return setProfileByIdState.value.data;
-    } catch (err) {
-      setProfileByIdState.value.error = err as Error;
-      setProfileByIdState.value.data = undefined;
-      toasterErrorHandling(err, 'Failed to update profile');
-      throw err;
-    } finally {
-      setProfileByIdState.value.loading = false;
-    }
-  };
+      return response.data;
+    });
 
-  const getUser = async () => {
-    try {
-      getUserState.value.loading = true;
-      getUserState.value.error = null;
+  const getUser = async () =>
+    withActionState(getUserState, async () => {
       const response = await apiClient.get<IUser>('/auth/user');
-      getUserState.value.data = new UserFormatter(response.data).format();
-      return getUserState.value.data;
-    } catch (err) {
-      getUserState.value.error = err as Error;
-      getUserState.value.data = undefined;
-      toasterErrorHandling(err, 'Failed to fetch user data');
-      throw err;
-    } finally {
-      getUserState.value.loading = false;
-    }
-  };
+      return new UserFormatter(response.data!).format();
+    });
 
-  const setUser = async (data: IProfileData) => {
-    try {
-      setUserState.value.loading = true;
-      setUserState.value.error = null;
+  const setUser = async (data: IProfileData) =>
+    withActionState(setUserState, async () => {
       const response = await apiClient.patch<IProfileData>('/auth/user', data);
-      setUserState.value.data = response.data;
-      return setUserState.value.data;
-    } catch (err) {
-      setUserState.value.error = err as Error;
-      setUserState.value.data = undefined;
-      toasterErrorHandling(err, 'Failed to update user data');
-      throw err;
-    } finally {
-      setUserState.value.loading = false;
-    }
-  };
+      return response.data;
+    });
 
-  const setUserOptions = async () => {
-    try {
-      setUserOptionsState.value.loading = true;
-      setUserOptionsState.value.error = null;
+  const setUserOptions = async () =>
+    withActionState(setUserOptionsState, async () => {
       const response = await apiClient.options('/auth/user');
-      setUserOptionsState.value.data = response.data;
-      return setUserOptionsState.value.data;
-    } catch (err) {
-      setUserOptionsState.value.error = err as Error;
-      setUserOptionsState.value.data = undefined;
-      toasterErrorHandling(err, 'Failed to fetch user options');
-      throw err;
-    } finally {
-      setUserOptionsState.value.loading = false;
-    }
-  };
+      return response.data;
+    });
 
-  const updateUserData = async (id: string | number, body: string) => {
-    try {
-      updateUserDataState.value.loading = true;
-      updateUserDataState.value.error = null;
+  const updateUserData = async (id: string | number, body: string) =>
+    withActionState(updateUserDataState, async () => {
       const response = await apiClient.patch('/auth/user', body, {
         headers: {
           'Content-Type': 'application/json',
@@ -219,49 +168,30 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
           'X-Requested-With': 'XMLHttpRequest',
         },
       });
-      updateUserDataState.value.data = response.data;
-      return updateUserDataState.value.data;
-    } catch (err) {
-      updateUserDataState.value.error = err as Error;
-      updateUserDataState.value.data = undefined;
-      toasterErrorHandling(err, 'Failed to update user data');
-      throw err;
-    } finally {
-      updateUserDataState.value.loading = false;
-    }
-  };
+      return response.data;
+    });
 
   const updateNotificationData = (notification: INotification) => {
+    if (!notification?.data?.fields) return;
     const objectId = notification.data.fields?.object_id;
+    const fields = notification.data.fields;
     // Update in user profiles list if present
-    const profiles = getUserState.value.data?.profiles;
-    if (profiles && objectId !== undefined) {
-      const profile = profiles.find((item: { id: number }) => item.id === objectId);
-      if (profile && notification.data.fields) {
-        Object.assign(profile, notification.data.fields);
-        const formatted = new ProfileFormatter(profile).format();
-        Object.assign(profile, formatted);
+    const userData = getUserState.value.data;
+    if (userData?.profiles && objectId !== undefined) {
+      const profileIndex = userData.profiles.findIndex((item: { id: number }) => item.id === objectId);
+      if (profileIndex >= 0 && fields) {
+        const updated = { ...userData.profiles[profileIndex], ...fields };
+        const formatted = new ProfileFormatter(updated as IProfileIndividual).format();
+        const newProfiles = userData.profiles.map((p, i) => (i === profileIndex ? formatted : p));
+        getUserState.value.data = { ...userData, profiles: newProfiles };
       }
     }
     // Update in currently loaded profile if it matches
-    if (getProfileByIdState.value?.data && getProfileByIdState.value.data.id === objectId && notification.data.fields) {
-      Object.assign(getProfileByIdState.value.data, notification.data.fields);
-      const formatted = new ProfileFormatter(getProfileByIdState.value.data as unknown as IProfileIndividual).format();
-      Object.assign(getProfileByIdState.value.data, formatted);
+    const currentProfile = getProfileByIdState.value?.data;
+    if (currentProfile && currentProfile.id === objectId && fields) {
+      const updated = { ...currentProfile, ...fields } as IProfileIndividual;
+      getProfileByIdState.value.data = new ProfileFormatter(updated).format();
     }
-  };
-
-  const resetAll = () => {
-    // Reset all action states
-    setProfileByIdState.value = { loading: false, error: null, data: undefined };
-    getProfileByIdState.value = { loading: false, error: null, data: undefined };
-    getProfileByIdOptionsState.value = { loading: false, error: null, data: undefined };
-    setProfileState.value = { loading: false, error: null, data: undefined };
-    getUserState.value = { loading: false, error: null, data: undefined };
-    setUserState.value = { loading: false, error: null, data: undefined };
-    setUserOptionsState.value = { loading: false, error: null, data: undefined };
-    updateUserDataState.value = { loading: false, error: null, data: undefined };
-    getProfileOptionsState.value = { loading: false, error: null, data: undefined };
   };
 
   /**

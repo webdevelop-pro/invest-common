@@ -1,9 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { reactive, ref } from 'vue';
 
-vi.mock('pinia', () => ({
-  storeToRefs: (store: any) => store,
-}));
+vi.mock('pinia', async () => {
+  const actual = await vi.importActual<typeof import('pinia')>('pinia');
+  return {
+    ...actual,
+    storeToRefs: (store: any) => store,
+  };
+});
 
 vi.mock('InvestCommon/domain/config/env', () => ({
   default: {

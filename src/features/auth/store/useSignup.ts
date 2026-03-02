@@ -12,7 +12,9 @@ import {
 } from 'UiKit/helpers/validation/rules';
 import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
-import { SELFSERVICE } from './type';
+import { SELFSERVICE } from 'InvestCommon/data/auth/auth.constants';
+import { oryErrorHandling } from 'InvestCommon/domain/error/oryErrorHandling';
+import { oryResponseHandling } from 'InvestCommon/domain/error/oryResponseHandling';
 
 const HUBSPOT_FORM_ID = '726ad71f-e168-467f-9847-25e9377f69cf';
 
@@ -149,7 +151,8 @@ export const useSignupStore = defineStore('signup', () => {
 
     isLoading.value = true;
     try {
-      await authRepository.getAuthFlow(SELFSERVICE.registration);
+      const flowData = await authRepository.getAuthFlow(SELFSERVICE.registration);
+      oryResponseHandling(flowData);
       console.log('getAuthFlowState.value.error', getAuthFlowState.value.error);
       if (getAuthFlowState.value.error) return;
 
@@ -171,7 +174,7 @@ export const useSignupStore = defineStore('signup', () => {
         handleSignupSuccess(setSignupState.value.data.session);
       }
     } catch (error) {
-      console.error('Signup failed:', error);
+      await oryErrorHandling(error as any, 'signup', () => authRepository.getAuthFlow(SELFSERVICE.registration), 'Failed to signup');
     } finally {
       isLoading.value = false;
     }
@@ -183,7 +186,8 @@ export const useSignupStore = defineStore('signup', () => {
     try {
       const currentFlowId = getQueryParam('flow');
       if (!currentFlowId) {
-        await authRepository.getAuthFlow(SELFSERVICE.registration);
+        const flowData = await authRepository.getAuthFlow(SELFSERVICE.registration);
+        oryResponseHandling(flowData);
         if (getAuthFlowState.value.error) return;
       }
 
@@ -193,7 +197,7 @@ export const useSignupStore = defineStore('signup', () => {
         method: 'oidc',
       });
     } catch (error) {
-      console.error('Social signup failed:', error);
+      await oryErrorHandling(error as any, 'signup', () => authRepository.getAuthFlow(SELFSERVICE.registration), 'Failed to signup');
     } finally {
       isLoading.value = false;
     }
@@ -234,14 +238,15 @@ export const useSignupStore = defineStore('signup', () => {
 
     try {
       if (!getSignupState.value.data) {
-        await authRepository.getSignup(queryFlow.value);
+        const data = await authRepository.getSignup(queryFlow.value);
+        oryResponseHandling(data);
       }
 
       if (getSignupState.value.data?.ui?.nodes) {
         mapFormFields(getSignupState.value.data.ui.nodes);
       }
     } catch (error) {
-      console.error('Failed to initialize form data:', error);
+      await oryErrorHandling(error as any, 'signup', () => authRepository.getAuthFlow(SELFSERVICE.registration), 'Failed to get signup data');
     }
   });
 

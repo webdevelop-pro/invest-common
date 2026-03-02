@@ -7,7 +7,7 @@ import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
 import { redirectAfterLogout } from 'InvestCommon/domain/redirects/redirectAfterLogout';
 import { resetAllData } from 'InvestCommon/domain/resetAllData';
 import { useLogoutStore } from '../useLogout';
-import { SELFSERVICE } from '../type';
+import { SELFSERVICE } from 'InvestCommon/data/auth/auth.constants';
 
 vi.mock('InvestCommon/data/auth/auth.repository', () => ({
   useRepositoryAuth: vi.fn(),

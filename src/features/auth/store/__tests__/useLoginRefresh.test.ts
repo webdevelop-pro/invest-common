@@ -4,7 +4,7 @@ import {
 import { setActivePinia, createPinia } from 'pinia';
 import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
 import { ref } from 'vue';
-import { SELFSERVICE } from '../type';
+import { SELFSERVICE } from 'InvestCommon/data/auth/auth.constants';
 import { useLoginRefreshStore } from '../useLoginRefresh';
 
 // Mock environment variables
@@ -19,7 +19,7 @@ export const mockUpdateSession = vi.fn();
 
 // Mock all required dependencies
 vi.mock('InvestCommon/data/auth/auth.repository', () => {
-  const mockGetAuthFlow = vi.fn().mockResolvedValue(undefined);
+  const mockGetAuthFlow = vi.fn().mockResolvedValue({ id: 'test-flow-id', ui: {} });
   const mockSetLogin = vi.fn().mockResolvedValue(undefined);
 
   return {
@@ -34,6 +34,9 @@ vi.mock('InvestCommon/data/auth/auth.repository', () => {
     })),
   };
 });
+
+vi.mock('InvestCommon/domain/error/oryResponseHandling', () => ({ oryResponseHandling: vi.fn() }));
+vi.mock('InvestCommon/domain/error/oryErrorHandling', () => ({ oryErrorHandling: vi.fn().mockResolvedValue(undefined) }));
 
 vi.mock('InvestCommon/domain/session/store/useSession', () => ({
   useSessionStore: vi.fn(() => ({

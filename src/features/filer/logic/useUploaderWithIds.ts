@@ -3,6 +3,7 @@ import { storeToRefs } from 'pinia';
 import env from 'InvestCommon/domain/config/env';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useRepositoryFiler } from 'InvestCommon/data/filer/filer.repository';
+import { reportError } from 'InvestCommon/domain/error/errorReporting';
 
 export interface UploaderWithIdsProps {
   modelValue?: number[] | null;
@@ -118,6 +119,7 @@ export function useUploaderWithIds(
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Upload failed. Please try again.';
       filesUploadError.value = errorMessage;
+      reportError(error, 'Failed to upload files');
       emit('upload-error', errorMessage);
     } finally {
       isUploading.value = false;

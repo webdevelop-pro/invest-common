@@ -18,7 +18,7 @@ vi.mock('vue-router', () => ({
 
 // Mock useProfilesStore
 const mockSelectedUserProfileId = ref(1);
-const mockSelectedUserProfileData = ref({ id: 1, name: 'Test Profile' });
+const mockSelectedUserProfileData = ref({ id: 1, name: 'Test Profile', isKycApproved: true });
 
 vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
   useProfilesStore: () => ({
@@ -50,7 +50,6 @@ const mockEarnRepo = {
 
 const mockEvmRepo = {
   getEvmWalletState: ref({ loading: false, error: null, data: undefined }),
-  canLoadEvmWalletData: ref(true),
   getEvmWalletByProfile: vi.fn().mockResolvedValue(undefined),
   resetAll: vi.fn(),
 };
@@ -106,7 +105,6 @@ describe('useEarnDetail', () => {
     mockEarnRepo.positionsPools.value = [];
     
     mockEvmRepo.getEvmWalletState.value = { loading: false, error: null, data: undefined };
-    mockEvmRepo.canLoadEvmWalletData.value = true;
   });
 
   afterEach(() => {

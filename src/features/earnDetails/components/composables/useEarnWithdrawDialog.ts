@@ -3,6 +3,7 @@ import type { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { useRepositoryEarn } from 'InvestCommon/data/earn/earn.repository';
+import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 
 interface UseEarnWithdrawDialogOptions {
@@ -81,6 +82,12 @@ export function useEarnWithdrawDialog(options: UseEarnWithdrawDialogOptions = {}
         symbol: symbol.value,
       });
 
+      if (symbol.value) {
+        useRepositoryEvm().applyEarnWithdrawToWallet(
+          Number(profileId.value),
+          unref(earnRepository.positionsPools) ?? [],
+        );
+      }
       await getPositions(poolId.value, profileId.value);
 
       toast({

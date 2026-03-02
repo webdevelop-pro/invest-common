@@ -138,7 +138,7 @@ export interface IPlaidLinkExchange {
 }
 
 export interface IPlaidLinkProcess {
-  additional: any;
+  additional: unknown;
   token: string;
 }
 

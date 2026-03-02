@@ -186,6 +186,23 @@ describe('ApiClient', () => {
       expect(response1).toEqual(response2);
     });
 
+    it('should not deduplicate requests with different params', async () => {
+      const mockResponse = {
+        ok: true,
+        status: 200,
+        headers: new Headers({ 'content-type': 'application/json' }),
+        json: () => Promise.resolve({ data: 'test' }),
+      };
+      mockFetch.mockResolvedValue(mockResponse);
+
+      await Promise.all([
+        apiClient.request('/items', { params: { page: 1 } }),
+        apiClient.request('/items', { params: { page: 2 } }),
+      ]);
+
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+    });
+
     it('should handle custom baseURL in request config', async () => {
       const customBaseURL = 'https://custom.example.com';
       const mockResponse = {

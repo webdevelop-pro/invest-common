@@ -36,7 +36,7 @@ export interface ChartItem {
 
 export interface OverviewSection {
   title: string;
-  data: any[];
+  data: unknown[];
   options?: ChartOptions;
   loading?: boolean;
 }

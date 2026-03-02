@@ -4,7 +4,9 @@ import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import { redirectAfterLogout } from 'InvestCommon/domain/redirects/redirectAfterLogout';
 import { resetAllData } from 'InvestCommon/domain/resetAllData';
-import { SELFSERVICE } from './type';
+import { SELFSERVICE } from 'InvestCommon/data/auth/auth.constants';
+import { oryErrorHandling } from 'InvestCommon/domain/error/oryErrorHandling';
+import { oryResponseHandling } from 'InvestCommon/domain/error/oryResponseHandling';
 
 export const useLogoutStore = defineStore('logout', () => {
   const authRepository = useRepositoryAuth();
@@ -24,7 +26,8 @@ export const useLogoutStore = defineStore('logout', () => {
     token.value = '';
     isLoading.value = true;
     try {
-      await authRepository.getAuthFlow(SELFSERVICE.logout);
+      const flowData = await authRepository.getAuthFlow(SELFSERVICE.logout);
+      oryResponseHandling(flowData);
       if (getAuthFlowState.value.error) {
         isLoading.value = false;
         return;
@@ -43,7 +46,7 @@ export const useLogoutStore = defineStore('logout', () => {
       }
       handleLogoutSuccess();
     } catch (error) {
-      console.error('Login failed:', error);
+      await oryErrorHandling(error as any, 'logout', () => authRepository.getAuthFlow(SELFSERVICE.logout), 'Failed to logout');
     } finally {
       isLoading.value = false;
     }

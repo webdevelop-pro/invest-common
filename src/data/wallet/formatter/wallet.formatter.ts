@@ -1,12 +1,12 @@
 import { currency } from 'InvestCommon/helpers/currency';
 import {
-  WalletTypes, IWalletDataFormatted,
+  WalletTypes, IWalletDataFormatted, IWalletDataResponse,
 } from '../wallet.types';
 
 export class WalletFormatter {
-  private wallet: IWalletDataFormatted;
+  private wallet: IWalletDataFormatted | IWalletDataResponse;
 
-  constructor(wallet: IWalletDataFormatted) {
+  constructor(wallet: IWalletDataFormatted | IWalletDataResponse) {
     this.wallet = wallet;
   }
 
@@ -93,6 +93,6 @@ export class WalletFormatter {
       isCurrentBalanceZero: this.isCurrentBalanceZero,
       isTotalBalanceZero: this.isTotalBalanceZero,
       isWalletStatusAnyError: this.isWalletStatusAnyError,
-    };
+    } as IWalletDataFormatted;
   }
 }

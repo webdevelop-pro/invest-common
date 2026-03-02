@@ -5,7 +5,7 @@ import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
 import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository';
 import { EvmTransactionTypes } from 'InvestCommon/data/evm/evm.types';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
-import { hasRestrictedWalletBehavior } from 'InvestCommon/features/wallet/helpers/walletProfileHelpers';
+import { hasRestrictedWalletBehavior } from 'InvestCommon/data/profiles/profiles.helpers';
 import type { IProfileFormatted } from 'InvestCommon/data/profiles/profiles.types';
 import { currency } from 'InvestCommon/helpers/currency';
 import env from 'InvestCommon/domain/config/env';

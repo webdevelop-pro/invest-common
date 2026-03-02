@@ -9,6 +9,7 @@ import {
   ROUTE_INVEST_AMOUNT, ROUTE_INVEST_REVIEW, ROUTE_INVEST_SIGNATURE,
 } from 'InvestCommon/domain/config/enums/routes';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
+import { reportError } from 'InvestCommon/domain/error/errorReporting';
 
 
 interface Props {
@@ -82,8 +83,8 @@ export function useInvestStep(props: Props) {
         void router.push({
           name: stepClick.to.name,
           params: routeParams.value,
-        }).catch((error) => {
-          console.error('Navigation failed:', error);
+        }).catch((e) => {
+          reportError(e, 'Navigation failed');
         });
       }
     },
@@ -102,7 +103,7 @@ export function useInvestStep(props: Props) {
           router.push('/dashboard/error/404');
         }
       } catch (error) {
-        console.error('Failed to fetch offer:', error);
+        reportError(error, 'Failed to fetch investment');
       }
     }
   });

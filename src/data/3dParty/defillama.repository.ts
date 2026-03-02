@@ -1,5 +1,5 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { createActionState } from 'InvestCommon/data/repository/repository';
+import { createRepositoryStates, withActionState } from 'InvestCommon/data/repository/repository';
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import { DefiLlamaYieldsFormatter, type DefiLlamaYieldPoolFormatted } from './formatter/yields.formatter';
 
@@ -73,129 +73,77 @@ interface DefiLlamaRiskResponse {
   data: DefiLlamaRiskData;
 }
 
+type DefiLlamaStates = {
+  getYieldsState: DefiLlamaYieldPoolFormatted[];
+  getPoolEnrichedState: DefiLlamaPoolEnriched;
+  getPoolChartState: DefiLlamaChartDataPoint[];
+  getProtocolConfigState: DefiLlamaConfigData;
+  getPoolRiskState: DefiLlamaRiskData;
+};
+
 export const useRepositoryDefiLlama = defineStore('repository-defillama', () => {
-  const getYieldsState = createActionState<DefiLlamaYieldPoolFormatted[]>();
-  const getPoolEnrichedState = createActionState<DefiLlamaPoolEnriched>();
-  const getPoolChartState = createActionState<DefiLlamaChartDataPoint[]>();
-  const getProtocolConfigState = createActionState<DefiLlamaConfigData>();
-  const getPoolRiskState = createActionState<DefiLlamaRiskData>();
+  const {
+    getYieldsState,
+    getPoolEnrichedState,
+    getPoolChartState,
+    getProtocolConfigState,
+    getPoolRiskState,
+    resetAll,
+  } = createRepositoryStates<DefiLlamaStates>({
+    getYieldsState: undefined,
+    getPoolEnrichedState: undefined,
+    getPoolChartState: undefined,
+    getProtocolConfigState: undefined,
+    getPoolRiskState: undefined,
+  });
   const api = new ApiClient('https://yields.llama.fi');
   const apiConfig = new ApiClient('https://api.llama.fi');
 
-  const getYields = async (protocol?: string) => {
-    try {
-      getYieldsState.value.loading = true;
-      getYieldsState.value.error = null;
-      
-      // DefiLlama uses /pools endpoint and filters client-side
+  const getYields = async (protocol?: string) =>
+    withActionState(getYieldsState, async () => {
       const { data } = await api.get<DefiLlamaResponse>('/pools', {
-        headers: {
-          accept: 'application/json',
-        },
+        headers: { accept: 'application/json' },
         credentials: 'omit',
+        simple: true,
       });
-
       let pools = data.data || [];
-      
-      // Filter by protocol if provided (matches DefiLlama's approach)
-      // They filter for projects that include the protocol name (case-insensitive)
       if (protocol) {
         const protocolLower = protocol.toLowerCase();
-        pools = pools.filter(
-          (pool) => pool.project?.toLowerCase().includes(protocolLower)
-        );
+        pools = pools.filter((pool) => pool.project?.toLowerCase().includes(protocolLower));
       }
-      
-      // Sort by TVL descending (same as DefiLlama)
       pools.sort((a, b) => b.tvlUsd - a.tvlUsd);
-      
-      // Format pools using formatter
-      const formattedPools = pools.map((pool) => 
-        new DefiLlamaYieldsFormatter(pool).format()
-      );
-      
-      getYieldsState.value.data = formattedPools;
+      const formattedPools = pools.map((pool) => new DefiLlamaYieldsFormatter(pool).format());
       return formattedPools;
-    } catch (err) {
-      getYieldsState.value.error = err as Error;
-      getYieldsState.value.data = undefined;
-      throw err;
-    } finally {
-      getYieldsState.value.loading = false;
-    }
-  };
+    });
 
-  const getPoolEnriched = async (poolId: string) => {
-    try {
-      getPoolEnrichedState.value.loading = true;
-      getPoolEnrichedState.value.error = null;
-      
+  const getPoolEnriched = async (poolId: string) =>
+    withActionState(getPoolEnrichedState, async () => {
       const { data } = await api.get<DefiLlamaEnrichedResponse>('/poolsEnriched', {
-        params: {
-          pool: poolId,
-        },
-        headers: {
-          accept: 'application/json',
-        },
+        params: { pool: poolId },
+        headers: { accept: 'application/json' },
         credentials: 'omit',
+        simple: true,
       });
-
-      getPoolEnrichedState.value.data = data.data;
       return data.data;
-    } catch (err) {
-      getPoolEnrichedState.value.error = err as Error;
-      getPoolEnrichedState.value.data = undefined;
-      throw err;
-    } finally {
-      getPoolEnrichedState.value.loading = false;
-    }
-  };
+    });
 
-  const getPoolChart = async (poolId: string) => {
-    try {
-      getPoolChartState.value.loading = true;
-      getPoolChartState.value.error = null;
-      
+  const getPoolChart = async (poolId: string) =>
+    withActionState(getPoolChartState, async () => {
       const { data } = await api.get<DefiLlamaChartResponse>(`/chart/${poolId}`, {
-        headers: {
-          accept: 'application/json',
-        },
+        headers: { accept: 'application/json' },
         credentials: 'omit',
       });
-
-      getPoolChartState.value.data = data.data || [];
       return data.data || [];
-    } catch (err) {
-      getPoolChartState.value.error = err as Error;
-      getPoolChartState.value.data = undefined;
-      throw err;
-    } finally {
-      getPoolChartState.value.loading = false;
-    }
-  };
+    });
 
-  const getProtocolConfig = async (protocol: string) => {
-    try {
-      getProtocolConfigState.value.loading = true;
-      getProtocolConfigState.value.error = null;
-      
+  const getProtocolConfig = async (protocol: string) =>
+    withActionState(getProtocolConfigState, async () => {
       const { data } = await apiConfig.get<DefiLlamaConfigData>(`/config/smol/${protocol}`, {
-        headers: {
-          accept: 'application/json',
-        },
+        headers: { accept: 'application/json' },
         credentials: 'omit',
       });
-
-      getProtocolConfigState.value.data = data;
       return data;
-    } catch (err) {
-      getProtocolConfigState.value.error = err as Error;
-      getProtocolConfigState.value.data = undefined;
-      throw err;
-    } finally {
-      getProtocolConfigState.value.loading = false;
-    }
-  };
+    });
 
   const getPoolRisk = async (params: {
     pool_old: string;
@@ -203,11 +151,8 @@ export const useRepositoryDefiLlama = defineStore('repository-defillama', () => 
     project: string;
     tvlUsd: number;
     underlyingTokens: string[];
-  }) => {
-    try {
-      getPoolRiskState.value.loading = true;
-      getPoolRiskState.value.error = null;
-      
+  }) =>
+    withActionState(getPoolRiskState, async () => {
       const queryParams = new URLSearchParams();
       queryParams.append('pool_old', params.pool_old);
       queryParams.append('chain', params.chain);
@@ -216,32 +161,12 @@ export const useRepositoryDefiLlama = defineStore('repository-defillama', () => 
       params.underlyingTokens.forEach((token) => {
         queryParams.append('underlyingTokens[]', token);
       });
-
       const { data } = await api.get<DefiLlamaRiskResponse>(`/risk?${queryParams.toString()}`, {
-        headers: {
-          accept: 'application/json',
-        },
+        headers: { accept: 'application/json' },
         credentials: 'omit',
       });
-
-      getPoolRiskState.value.data = data.data;
       return data.data;
-    } catch (err) {
-      getPoolRiskState.value.error = err as Error;
-      getPoolRiskState.value.data = undefined;
-      throw err;
-    } finally {
-      getPoolRiskState.value.loading = false;
-    }
-  };
-
-  const resetAll = () => {
-    getYieldsState.value = { loading: false, error: null, data: undefined };
-    getPoolEnrichedState.value = { loading: false, error: null, data: undefined };
-    getPoolChartState.value = { loading: false, error: null, data: undefined };
-    getProtocolConfigState.value = { loading: false, error: null, data: undefined };
-    getPoolRiskState.value = { loading: false, error: null, data: undefined };
-  };
+    });
 
   return {
     getYieldsState,

@@ -6,6 +6,7 @@ import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repos
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useRepositoryFiler } from 'InvestCommon/data/filer/filer.repository';
 import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
+import { reportError } from 'InvestCommon/domain/error/errorReporting';
 import {
   urlContactUs,
   urlFaq,
@@ -65,13 +66,18 @@ const onFileChange = async () => {
   }
 
   isAvatarLoading.value = true;
-  await filerRepository.uploadHandler(file, userId, 'user', userId);
-  const uploadedId = postSignurlState.value.data?.meta?.id;
-  if (uploadedId) {
-    await useRepositoryProfilesStore.updateUserData(userId, { image_link_id: uploadedId });
-    await useRepositoryProfilesStore.getUser();
-  }
+  try {
+    await filerRepository.uploadHandler(file, userId, 'user', userId);
+    const uploadedId = postSignurlState.value.data?.meta?.id;
+    if (uploadedId) {
+      await useRepositoryProfilesStore.updateUserData(userId, { image_link_id: uploadedId });
+      await useRepositoryProfilesStore.getUser();
+    }
+  } catch (e) {
+    reportError(e, 'Failed to update avatar');
+  } finally {
   isAvatarLoading.value = false;
+  }
 };
 
 const openProfileOverlay = () => {

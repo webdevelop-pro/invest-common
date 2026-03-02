@@ -15,6 +15,7 @@ import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment
 import { useRepositoryOffer } from 'InvestCommon/data/offer/offer.repository';
 import { useRepositoryFiler } from 'InvestCommon/data/filer/filer.repository';
 import { useSendAnalyticsEvent } from 'InvestCommon/domain/analytics/useSendAnalyticsEvent';
+import { reportError } from 'InvestCommon/domain/error/errorReporting';
 
 const defaultInvestSteps = {
   [InvestStepTypes.amount]: {
@@ -91,11 +92,15 @@ const investHandler = async () => {
   } catch {}
 
   if (!getInvestUnconfirmedOne.value?.id) {
-    await investmentRepository.setInvest(params.value?.slug as string, selectedUserProfileId.value, 0);
+    try {
+      await investmentRepository.setInvest(params.value?.slug as string, selectedUserProfileId.value, 0);
 
-    if (setInvestState.value.data) {
-      getInvestUnconfirmedOne.value = setInvestState.value.data;
-      navigateWithQueryParams(`${env.FRONTEND_URL_DASHBOARD}/invest/${params.value?.slug}/amount/${setInvestState.value.data.id}/${selectedUserProfileId.value}`);
+      if (setInvestState.value.data) {
+        getInvestUnconfirmedOne.value = setInvestState.value.data;
+        navigateWithQueryParams(`${env.FRONTEND_URL_DASHBOARD}/invest/${params.value?.slug}/amount/${setInvestState.value.data.id}/${selectedUserProfileId.value}`);
+      }
+    } catch (e) {
+      reportError(e, 'Failed to start investment');
     }
   } else if (getInvestUnconfirmedOne.value?.id) {
     const { step }: { step: InvestStepTypes } = getInvestUnconfirmedOne.value;
@@ -117,10 +122,12 @@ watch(
 
 onBeforeMount(() => {
   if (userLoggedIn.value && params.value?.slug) {
-    investmentRepository.getInvestUnconfirmed(String(params.value?.slug), selectedUserProfileId.value);
+    investmentRepository.getInvestUnconfirmed(String(params.value?.slug), selectedUserProfileId.value)
+      .catch((e) => reportError(e, 'Failed to load investment'));
   }
   if (params.value?.slug) {
-    offerRepository.getOfferOne(String(params.value?.slug));
+    offerRepository.getOfferOne(String(params.value?.slug))
+      .catch((e) => reportError(e, 'Failed to load offer'));
     void sendEvent({
       event_type: 'open',
       method: 'GET',
@@ -142,9 +149,14 @@ watch(() => getOfferOneState.value.data, (newValue) => {
 }, { immediate: true });
 watch(() => offer.value?.id, () => {
   if (offer.value?.id !== 0) {
-    offerRepository.getOfferComments(offer.value?.id);
-    filerRepository.getPublicFiles(offer.value?.id, 'offer');
-    if (userLoggedIn.value) filerRepository.getFiles(offer.value?.id, 'offer');
+    offerRepository.getOfferComments(offer.value?.id)
+      .catch((e) => reportError(e, 'Failed to load offer comments'));
+    filerRepository.getPublicFiles(offer.value?.id, 'offer')
+      .catch((e) => reportError(e, 'Failed to load offer files'));
+    if (userLoggedIn.value) {
+      filerRepository.getFiles(offer.value?.id, 'offer')
+        .catch((e) => reportError(e, 'Failed to load offer files'));
+    }
   }
 }, { immediate: true });
 </script>

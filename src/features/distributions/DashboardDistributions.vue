@@ -8,6 +8,7 @@ import DashboardTabsTopInfo from 'InvestCommon/features/dashboard/components/Das
 import { storeToRefs } from 'pinia';
 import DashboardDistributionsSummary from './components/DashboardDistributionsSummary.vue';
 import { useRepositoryDistributions } from 'InvestCommon/data/distributions/distributions.repository';
+import { reportError } from 'InvestCommon/domain/error/errorReporting';
 
 // todo: need to refactor
 
@@ -35,7 +36,8 @@ const {
 
 const updateData = () => {
   if (!getDistributionsState.value.loading && userLoggedIn.value && (selectedUserProfileId.value > 0)) {
-    distributionsRepository.getDistributions(selectedUserProfileId.value);
+    distributionsRepository.getDistributions(selectedUserProfileId.value)
+      .catch((e) => reportError(e, 'Failed to load distributions'));
   }
 };
 

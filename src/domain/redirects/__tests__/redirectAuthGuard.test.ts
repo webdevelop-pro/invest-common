@@ -33,6 +33,12 @@ vi.mock('InvestCommon/data/service/apiClient', () => {
   return { ApiClient: MockApiClient }
 })
 
+const reportErrorMock = vi.fn()
+vi.mock('InvestCommon/domain/error/errorReporting', () => ({
+  reportError: (...args: unknown[]) => reportErrorMock(...args),
+  toasterErrorHandling: vi.fn(),
+}))
+
 const createMockSession = (active: boolean, id = 's1'): ISession => ({
   id,
   active,
@@ -263,15 +269,12 @@ function redirectAuthGuardTests() {
     const sessionStore = useSessionStore()
     
     hoisted.getSessionMock.mockRejectedValue(new Error('Network error'))
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
 
     const to = createMockRoute('/dashboard', true)
     await redirectAuthGuard(to)
 
     expect(sessionStore.userSession).toBeUndefined()
-    expect(consoleSpy).toHaveBeenCalledWith('Auth guard error:', expect.any(Error))
-
-    consoleSpy.mockRestore()
+    expect(reportErrorMock).toHaveBeenCalledWith(expect.any(Error), 'Auth guard')
   })
 }
 

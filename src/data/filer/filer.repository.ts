@@ -1,9 +1,8 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import env from 'InvestCommon/domain/config/env';
-import { IFilerItem } from 'InvestCommon/data/filer/filer.type';
-import { toasterErrorHandling } from 'InvestCommon/data/repository/error/toasterErrorHandling';
-import { createActionState } from 'InvestCommon/data/repository/repository';
+import { IFilerItem, IPostSignurlResponse } from 'InvestCommon/data/filer/filer.type';
+import { createRepositoryStates, withActionState } from 'InvestCommon/data/repository/repository';
 import { INotification } from 'InvestCommon/data/notifications/notifications.types';
 
 const { FILER_URL } = env;
@@ -29,56 +28,50 @@ function uploadFileXHR(file: File, type: string, uploadData: { url: string; file
   });
 }
 
+type FilerStates = {
+  getFilesState: IFilerItem[];
+  getPublicFilesState: IFilerItem[];
+  postSignurlState: IPostSignurlResponse;
+  uploadFileState: string;
+  getFileByIdLinkState: IFilerItem[];
+  notificationFieldsState: INotification['data']['fields'];
+};
+
 export const useRepositoryFiler = defineStore('repository-filer', () => {
   const apiClient = new ApiClient(FILER_URL);
 
-  // States
-  const getFilesState = createActionState<IFilerItem[]>();
-  const getPublicFilesState = createActionState<IFilerItem[]>();
-  const postSignurlState = createActionState<any>();
-  const uploadFileState = createActionState<string>();
-  const getFileByIdLinkState = createActionState<IFilerItem[]>();
-  const notificationFieldsState = createActionState<INotification['data']['fields']>();
+  const {
+    getFilesState,
+    getPublicFilesState,
+    postSignurlState,
+    uploadFileState,
+    getFileByIdLinkState,
+    notificationFieldsState,
+    resetAll,
+  } = createRepositoryStates<FilerStates>({
+    getFilesState: undefined,
+    getPublicFilesState: undefined,
+    postSignurlState: undefined,
+    uploadFileState: undefined,
+    getFileByIdLinkState: undefined,
+    notificationFieldsState: undefined,
+  });
 
   // Actions
-  const getFiles = async (object_id: number | string, object_name: string) => {
-    try {
-      getFilesState.value.loading = true;
-      getFilesState.value.error = null;
+  const getFiles = async (object_id: number | string, object_name: string) =>
+    withActionState(getFilesState, async () => {
       const response = await apiClient.get<IFilerItem[]>(`/auth/objects/${object_name}/${object_id}`);
-      getFilesState.value.data = response.data;
       return response.data;
-    } catch (err) {
-      getFilesState.value.error = err as Error;
-      getFilesState.value.data = undefined;
-      toasterErrorHandling(err, 'Failed to fetch files');
-      throw err;
-    } finally {
-      getFilesState.value.loading = false;
-    }
-  };
+    });
 
-  const getPublicFiles = async (object_id: number | string, object_name: string) => {
-    try {
-      getPublicFilesState.value.loading = true;
-      getPublicFilesState.value.error = null;
+  const getPublicFiles = async (object_id: number | string, object_name: string) =>
+    withActionState(getPublicFilesState, async () => {
       const response = await apiClient.get<IFilerItem[]>(`/public/objects/${object_name}/${object_id}`);
-      getPublicFilesState.value.data = response.data;
       return response.data;
-    } catch (err) {
-      getPublicFilesState.value.error = err as Error;
-      getPublicFilesState.value.data = undefined;
-      toasterErrorHandling(err, 'Failed to fetch public files');
-      throw err;
-    } finally {
-      getPublicFilesState.value.loading = false;
-    }
-  };
+    });
 
-  const postSignurl = async (body: object) => {
-    try {
-      postSignurlState.value.loading = true;
-      postSignurlState.value.error = null;
+  const postSignurl = async (body: object) =>
+    withActionState(postSignurlState, async () => {
       const response = await apiClient.post<any>('/auth/files/signurl', body, {
         headers: {
           'Content-Type': 'application/json',
@@ -86,54 +79,21 @@ export const useRepositoryFiler = defineStore('repository-filer', () => {
           'X-Requested-With': 'XMLHttpRequest',
         },
       });
-      postSignurlState.value.data = response.data;
       return response.data;
-    } catch (err) {
-      postSignurlState.value.error = err as Error;
-      postSignurlState.value.data = undefined;
-      toasterErrorHandling(err, 'Failed to get signurl');
-      throw err;
-    } finally {
-      postSignurlState.value.loading = false;
-    }
-  };
+    });
 
-  const uploadFile = async (file: File, type: string, uploadData: { url: string; fileId: string }) => {
-    try {
-      uploadFileState.value.loading = true;
-      uploadFileState.value.error = null;
+  const uploadFile = async (file: File, type: string, uploadData: { url: string; fileId: string }) =>
+    withActionState(uploadFileState, async () => {
       const result = await uploadFileXHR(file, type, uploadData);
-      uploadFileState.value.data = result;
       return result;
-    } catch (err) {
-      uploadFileState.value.error = err as Error;
-      uploadFileState.value.data = undefined;
-      toasterErrorHandling(err, 'Failed to upload file');
-      throw err;
-    } finally {
-      uploadFileState.value.loading = false;
-    }
-  };
+    });
 
-  const getFileByIdLink = async (id: number | string, size?: string) => {
-    try {
-      getFileByIdLinkState.value.loading = true;
-      getFileByIdLinkState.value.error = null;
-      
-      // Only include size parameter if it's explicitly provided
+  const getFileByIdLink = async (id: number | string, size?: string) =>
+    withActionState(getFileByIdLinkState, async () => {
       const url = size ? `/auth/files/${id}?size=${size}` : `/auth/files/${id}`;
       const response = await apiClient.get<IFilerItem[]>(url);
-      getFileByIdLinkState.value.data = response;
       return response.data;
-    } catch (err) {
-      getFileByIdLinkState.value.error = err as Error;
-      getFileByIdLinkState.value.data = undefined;
-      toasterErrorHandling(err, 'Failed to fetch image by id');
-      throw err;
-    } finally {
-      getFileByIdLinkState.value.loading = false;
-    }
-  };
+    });
 
   const uploadHandler = async (file: File, objectId: string | number, objectName: string | number, userId: number) => {
     await postSignurl({
@@ -145,13 +105,13 @@ export const useRepositoryFiler = defineStore('repository-filer', () => {
     if (postSignurlState.value.error) {
       return false;
     }
-    if (postSignurlState.value.data?.url) {
+    if (postSignurlState.value.data?.url && postSignurlState.value.data?.meta?.id) {
       const uploadData = {
         objectName,
         objectId,
         userId,
-        url: postSignurlState.value.data?.url,
-        fileId: postSignurlState.value.data?.meta?.id,
+        url: postSignurlState.value.data.url,
+        fileId: postSignurlState.value.data.meta.id,
       };
       await uploadFile(file, file.type, uploadData);
     }
@@ -162,6 +122,7 @@ export const useRepositoryFiler = defineStore('repository-filer', () => {
   };
 
   const updateNotificationData = (notification: INotification) => {
+    if (!notification?.data) return;
     const { fields } = notification.data;
     const objectId = fields?.object_id;
     
@@ -182,15 +143,6 @@ export const useRepositoryFiler = defineStore('repository-filer', () => {
     updateStateArray(getFilesState.value.data);
     updateStateArray(getPublicFilesState.value.data);
     updateStateArray(getFileByIdLinkState.value.data);
-  };
-
-  const resetAll = () => {
-    getFilesState.value = { loading: false, error: null, data: undefined };
-    getPublicFilesState.value = { loading: false, error: null, data: undefined };
-    postSignurlState.value = { loading: false, error: null, data: undefined };
-    uploadFileState.value = { loading: false, error: null, data: undefined };
-    getFileByIdLinkState.value = { loading: false, error: null, data: undefined };
-    notificationFieldsState.value = { loading: false, error: null, data: undefined };
   };
 
   return {

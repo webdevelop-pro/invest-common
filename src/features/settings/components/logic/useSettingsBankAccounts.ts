@@ -3,6 +3,7 @@ import { storeToRefs } from 'pinia';
 import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository';
 import { loadPlaidScriptOnce, type PlaidHandler } from 'InvestCommon/data/plaid/loadPlaidScriptOnce';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
+import { reportError } from 'InvestCommon/domain/error/errorReporting';
 import type { IProfileFormatted } from 'InvestCommon/data/profiles/profiles.types';
 import type { IFundingSourceDataFormatted } from 'InvestCommon/data/wallet/wallet.types';
 import { useWallet } from 'InvestCommon/features/wallet/logic/useWallet';
@@ -143,7 +144,7 @@ export function useSettingsBankAccounts(options: UseSettingsBankAccountsOptions 
       });
       setTimeout(() => plaidHandler?.open(), PLAID_OPEN_DELAY_MS);
     } catch (e) {
-      console.error(e);
+      reportError(e, 'Failed to link bank account');
       isLinkBankAccountLoading.value = false;
     }
   }

@@ -11,6 +11,7 @@ import { useRepositoryFiler } from 'InvestCommon/data/filer/filer.repository';
 import { FilerFormatter } from 'InvestCommon/data/filer/filer.formatter';
 import env from 'InvestCommon/domain/config/env';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
+import { reportError } from 'InvestCommon/domain/error/errorReporting';
 
 export function useInvestSignature() {
   // Hide global loader immediately
@@ -126,7 +127,7 @@ export function useInvestSignature() {
         signWindowRef.value = window.open(signUrl.value, '_blank') ?? null;
       }
     } catch (error) {
-      console.error('Failed to handle document:', error);
+      reportError(error, 'Failed to handle document');
     }
   };
 
@@ -151,8 +152,8 @@ export function useInvestSignature() {
 
   const getInvestmentFiles = async () => {
     if (!id.value) return;
-    filerRepository.getFiles(id.value, 'investment').catch((error) => {
-      console.error('Failed to preload investment files:', error);
+    filerRepository.getFiles(id.value, 'investment').catch((e) => {
+      reportError(e, 'Failed to preload investment files');
     });
   };
 

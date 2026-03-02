@@ -2,105 +2,72 @@ import { ref, computed } from 'vue';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import env from 'InvestCommon/domain/config/env';
-import { INotification } from 'InvestCommon/types/api/notifications';
-import { toasterErrorHandling } from 'InvestCommon/data/repository/error/toasterErrorHandling';
-import { createActionState } from 'InvestCommon/data/repository/repository';
+import { INotification } from './notifications.types';
+import { createRepositoryStates, withActionState } from 'InvestCommon/data/repository/repository';
 import { NotificationFormatter } from './notifications.formatter';
 
+type NotificationStates = {
+  getAllState: INotification[];
+  markAllAsReadState: void;
+  markAsReadByIdState: void;
+};
+
 export const useRepositoryNotifications = defineStore('repository-notifications', () => {
-  // Dependencies
-  const apiClient = new ApiClient();
-  const baseUrl = env.NOTIFICATION_URL;
+  const apiClient = new ApiClient(env.NOTIFICATION_URL);
 
   // State
   const notifications = ref<INotification[]>([]);
   const formattedNotifications = computed(() => (
     notifications.value.map((notification: INotification) => new NotificationFormatter(notification).format()) || []));
 
-  // Action states
-  const getAllState = createActionState<INotification[]>();
-  const markAllAsReadState = createActionState<void>();
-  const markAsReadByIdState = createActionState<void>();
+  const states = createRepositoryStates<NotificationStates>({
+    getAllState: undefined,
+    markAllAsReadState: undefined,
+    markAsReadByIdState: undefined,
+  });
+  const { getAllState, markAllAsReadState, markAsReadByIdState, resetAll: resetActionStates } = states;
 
   // Actions
-  const getAll = async () => {
-    try {
-      getAllState.value.loading = true;
-      getAllState.value.error = null;
-      const response = await apiClient.get<INotification[]>(`${baseUrl}/notification`);
-      notifications.value = response.data;
-      getAllState.value.data = response.data;
-      return getAllState.value.data;
-    } catch (err) {
-      getAllState.value.error = err as Error;
-      getAllState.value.data = undefined;
-      toasterErrorHandling(err, 'Failed to fetch notifications');
-      throw err;
-    } finally {
-      getAllState.value.loading = false;
-    }
+  const getAll = async (): Promise<INotification[]> => {
+    const result = await withActionState(getAllState, async () => {
+      const response = await apiClient.get<INotification[]>(`/notification`, {
+        showGlobalAlertOnServerError: false,
+      });
+      const data = response.data ?? [];
+      notifications.value = data;
+      return data;
+    });
+    return result ?? [];
   };
 
-  const markAllAsRead = async () => {
-    try {
-      markAllAsReadState.value.loading = true;
-      markAllAsReadState.value.error = null;
-      await apiClient.put(`${baseUrl}/notification/all`);
+  const markAllAsRead = async () =>
+    withActionState(markAllAsReadState, async () => {
+      await apiClient.put(`/notification/all`, undefined, {
+        showGlobalAlertOnServerError: false,
+      });
       notifications.value = notifications.value.map((notification: INotification) => ({
         ...notification,
         status: 'read',
       }));
-      markAllAsReadState.value.data = undefined;
-    } catch (err) {
-      markAllAsReadState.value.error = err as Error;
-      markAllAsReadState.value.data = undefined;
-      toasterErrorHandling(err, 'Failed to mark all notifications as read');
-      throw err;
-    } finally {
-      markAllAsReadState.value.loading = false;
-    }
-  };
+    });
 
-  const markAsReadById = async (id: number) => {
-    try {
-      markAsReadByIdState.value.loading = true;
-      markAsReadByIdState.value.error = null;
-      await apiClient.put(`${baseUrl}/notification/${id}`);
+  const markAsReadById = async (id: number) =>
+    withActionState(markAsReadByIdState, async () => {
+      await apiClient.put(`/notification/${id}`, undefined, {
+        showGlobalAlertOnServerError: false,
+      });
       notifications.value = notifications.value.map((notification: INotification) => (notification.id === id
         ? { ...notification, status: 'read' }
         : notification));
-      markAsReadByIdState.value.data = undefined;
-    } catch (err) {
-      markAsReadByIdState.value.error = err as Error;
-      markAsReadByIdState.value.data = undefined;
-      toasterErrorHandling(err, 'Failed to mark notification as read');
-      throw err;
-    } finally {
-      markAsReadByIdState.value.loading = false;
-    }
-  };
+    });
 
   const resetAll = () => {
     notifications.value = [];
-    // Reset all action states explicitly
-    getAllState.value = { loading: false, error: null, data: null };
-    markAllAsReadState.value = { loading: false, error: null, data: null };
-    markAsReadByIdState.value = { loading: false, error: null, data: null };
+    resetActionStates();
   };
 
-  const reset = () => {
-    notifications.value = [];
-    // Reset all action states
-    Object.values({
-      getAllState,
-      markAllAsReadState,
-      markAsReadByIdState,
-    }).forEach((action) => {
-      action.value.data = undefined;
-      action.value.loading = false;
-      action.value.error = null;
-    });
-  };
+  /** Alias for resetAll; use resetAll for consistency. */
+  const reset = () => resetAll();
 
   const updateNotificationsData = (data: string) => {
     const notification = JSON.parse(data) as INotification;

@@ -1,46 +1,35 @@
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
-import { toasterErrorHandling } from 'InvestCommon/data/repository/error/toasterErrorHandling';
 import { IInvestDocumentSign } from 'InvestCommon/types/api/invest';
 import env from 'InvestCommon/domain/config/env';
 import { v4 as uuidv4 } from 'uuid';
-import { createActionState } from 'InvestCommon/data/repository/repository';
+import { createRepositoryStates, withActionState } from 'InvestCommon/data/repository/repository';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 
 const { ESIGN_URL } = env;
 
-export const useRepositoryEsign = defineStore('repositoryEsign', () => {
+type EsignStates = {
+  setDocumentState: IInvestDocumentSign;
+  getDocumentState: Blob;
+};
+
+export const useRepositoryEsign = defineStore('repository-esign', () => {
   const esignApiClient = new ApiClient(ESIGN_URL);
 
-  // Create action states for each function
-  const setDocumentState = createActionState<IInvestDocumentSign>();
-  const getDocumentState = createActionState<Blob>();
+  const { setDocumentState, getDocumentState, resetAll } = createRepositoryStates<EsignStates>({
+    setDocumentState: undefined,
+    getDocumentState: undefined,
+  });
 
-  const setDocument = async (slug: string, investId: string) => {
-    const payload = {
-      investment_id: Number(investId),
-    };
-
-    try {
-      setDocumentState.value.loading = true;
-      setDocumentState.value.error = null;
-      const response = await esignApiClient.post(`/auth/document`, payload);
-      setDocumentState.value.data = response.data as IInvestDocumentSign;
+  const setDocument = async (slug: string, investId: string) =>
+    withActionState(setDocumentState, async () => {
+      const payload = { investment_id: Number(investId) };
+      const response = await esignApiClient.post<IInvestDocumentSign>(`/auth/document`, payload);
       return response.data as IInvestDocumentSign;
-    } catch (err) {
-      setDocumentState.value.error = err as Error;
-      setDocumentState.value.data = undefined;
-      toasterErrorHandling(err, 'Failed to set document');
-      throw err;
-    } finally {
-      setDocumentState.value.loading = false;
-    }
-  };
+    });
 
-  const getDocument = async (investId: string) => {
-    try {
-      getDocumentState.value.loading = true;
-      getDocumentState.value.error = null;
-      const response = await esignApiClient.get(`/auth/get_document/${investId}`, {
+  const getDocument = async (investId: string) =>
+    withActionState(getDocumentState, async () => {
+      const response = await esignApiClient.get<Blob>(`/auth/get_document/${investId}`, {
         headers: {
           'Content-Type': 'application/pdf',
           accept: 'application/pdf',
@@ -48,22 +37,8 @@ export const useRepositoryEsign = defineStore('repositoryEsign', () => {
         },
         type: 'blob',
       });
-      getDocumentState.value.data = response.data as Blob;
       return response.data as Blob;
-    } catch (err) {
-      getDocumentState.value.error = err as Error;
-      getDocumentState.value.data = undefined;
-      toasterErrorHandling(err, 'Failed to get document');
-      throw err;
-    } finally {
-      getDocumentState.value.loading = false;
-    }
-  };
-
-  const resetAll = () => {
-    setDocumentState.value = { loading: false, error: null, data: undefined };
-    getDocumentState.value = { loading: false, error: null, data: undefined };
-  };
+    });
 
   /** Clear setDocument result only (e.g. after signature is done and entity_id is in investment). */
   const clearSetDocumentData = () => {

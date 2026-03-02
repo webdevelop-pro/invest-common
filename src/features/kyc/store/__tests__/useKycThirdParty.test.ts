@@ -8,7 +8,8 @@ vi.mock('InvestCommon/data/plaid/loadPlaidScriptOnce', () => ({
   loadPlaidScriptOnce: vi.fn().mockResolvedValue(undefined),
 }));
 
-vi.mock('InvestCommon/data/repository/error/toasterErrorHandling', () => ({
+vi.mock('InvestCommon/domain/error/errorReporting', () => ({
+  reportError: vi.fn(),
   toasterErrorHandling: vi.fn(),
 }));
 

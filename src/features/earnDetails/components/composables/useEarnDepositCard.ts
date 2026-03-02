@@ -3,6 +3,7 @@ import type { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { useRepositoryEarn } from 'InvestCommon/data/earn/earn.repository';
+import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
@@ -144,8 +145,13 @@ export function useEarnDepositCard(options: UseEarnDepositCardOptions = {}) {
           symbol: symbol.value,
           name: name.value,
         });
-        // After a successful deposit, refresh positions data for the position tab
-        // The deposit function already updated the positions array, so we just need to trigger a refresh
+        // Sync EVM wallet display with new Earn position (orchestration in feature layer)
+        if (symbol.value) {
+          useRepositoryEvm().applyEarnSupplyToWallet(
+            Number(profileId.value),
+            unref(earnRepository.positionsPools) ?? [],
+          );
+        }
         await earnRepository.getPositions(result.poolId, result.profileId);
       } else {
         // TODO: Implement actual deposit logic here

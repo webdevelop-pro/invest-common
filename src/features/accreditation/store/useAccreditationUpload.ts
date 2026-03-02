@@ -11,6 +11,7 @@ import { FormModelAccreditationFileInput } from 'InvestCommon/types/form';
 import { useRepositoryAccreditation } from 'InvestCommon/data/accreditation/accreditation.repository';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
+import { reportError } from 'InvestCommon/domain/error/errorReporting';
 import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 
 export const useAccreditationUpload = defineStore('useAccreditationUpload', () => {
@@ -147,7 +148,7 @@ export const useAccreditationUpload = defineStore('useAccreditationUpload', () =
         router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
       }
     } catch (err) {
-      console.error('Error uploading files:', err);
+      reportError(err, 'Failed to upload accreditation documents');
     } finally {
       isLoading.value = false;
     }

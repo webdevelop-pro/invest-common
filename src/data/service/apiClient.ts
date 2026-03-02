@@ -5,37 +5,45 @@ import {
 import { APIError } from './handlers/apiError';
 
 export class ApiClient {
-  private pendingRequests = new Map<string, Promise<any>>();
+  private pendingRequests = new Map<string, Promise<ApiResponse<unknown>>>();
 
   constructor(private baseURL: string = '') {
     this.baseURL = baseURL || (typeof window !== 'undefined' ? window.location.origin : '');
   }
 
-  private async executeRequest<T>(url: string, config: RequestConfig): Promise<ApiResponse<T>> {
+  private buildFullUrl(url: string, config: RequestConfig): string {
     const baseUrl = config.baseURL || this.baseURL;
     let fullUrl = url.startsWith('http') ? url : `${baseUrl}${url}`;
-
-    if (config.params) {
+    if (config.params && Object.keys(config.params).length > 0) {
       const urlWithParams = new URL(fullUrl);
-      Object.entries(config.params).forEach(([key, value]) => {
-        if (value != null) {
-          urlWithParams.searchParams.append(key, String(value));
-        }
-      });
+      for (const [key, value] of Object.entries(config.params)) {
+        if (value != null) urlWithParams.searchParams.set(key, String(value));
+      }
       fullUrl = urlWithParams.toString();
     }
+    return fullUrl;
+  }
 
+  private async executeRequest<T>(fullUrl: string, config: RequestConfig): Promise<ApiResponse<T>> {
     const isFormData = config.body instanceof FormData;
+    const isSimple = config.simple === true;
     const defaultHeaders: Record<string, string> = {
       accept: 'application/json',
       'X-Request-ID': uuidv4(),
     };
 
-    if (!isFormData) {
+    if (!isFormData && !isSimple) {
       defaultHeaders['Content-Type'] = 'application/json';
     }
 
-    const headers = config.headers ? config.headers : defaultHeaders;
+    const customHeaders = config.headers
+      ? (config.headers instanceof Headers
+          ? Object.fromEntries(config.headers.entries())
+          : Array.isArray(config.headers)
+            ? Object.fromEntries(config.headers as [string, string][])
+            : (config.headers as Record<string, string>))
+      : {};
+    const headers: Record<string, string> = isSimple ? customHeaders : { ...defaultHeaders, ...customHeaders };
 
     // Control how 5xx responses are treated by the global error handler.
     // By default, server errors are NOT considered fatal to avoid
@@ -53,73 +61,68 @@ export class ApiClient {
       protocol: typeof window !== 'undefined' ? window.location.protocol.replace(':', '') : '',
     };
 
-    try {
-      const response = await fetch(fullUrl, {
-        credentials: (config as any).credentials ?? 'include',
-        method: config.method,
-        body: config.body,
-        headers,
-      });
+    const response = await fetch(fullUrl, {
+      credentials: config.credentials ?? 'include',
+      method: config.method,
+      body: config.method === 'GET' ? undefined : config.body,
+      headers,
+      signal: config.signal,
+    });
 
-      if (!response.ok) {
-        const error = new APIError('Failed to fetch data', response, httpRequest);
-        // Classify API errors once, at the source. The global error handler
-        // will only redirect for errors explicitly marked as fatal.
-        (error as any).isFatal = fatalOnServerError && response.status >= 500;
-        await error.initializeResponseJson();
-        throw error;
-      }
+    if (!response.ok) {
+      const error = new APIError('Failed to fetch data', response, httpRequest);
+      error.isFatal = fatalOnServerError && response.status >= 500;
+      error.showGlobalAlertOnServerError = config.showGlobalAlertOnServerError ?? true;
+      await error.initializeResponseJson();
+      throw error;
+    }
 
-      // No-content responses (e.g., 204) should not be JSON-parsed
-      if (response.status === 204 || response.status === 205) {
-        return {
-          data: undefined as T,
-          status: response.status,
-          headers: response.headers,
-        };
-      }
-
-      const contentType = response.headers.get('content-type');
-      const defaultType = contentType?.includes('application/json') ? 'json' : 'text';
-      const type = config.type || defaultType;
-      let data: any;
-
-
-      switch (type) {
-        case 'json':
-          data = await response.json();
-          break;
-        case 'blob':
-          data = await response.blob();
-          break;
-        case 'text':
-        default:
-          data = await response.text();
-          break;
-      }
-
+    if (response.status === 204 || response.status === 205) {
       return {
-        data,
+        data: undefined as T,
         status: response.status,
         headers: response.headers,
       };
-    } catch (error) {
-      if (error instanceof Error && error.name !== 'AbortError') {
-        throw error;
-      }
-      // Re-throw AbortError or return undefined for other cases
-      throw error;
     }
+
+    const contentType = response.headers.get('content-type');
+    const defaultType = contentType?.includes('application/json') ? 'json' : 'text';
+    const type = config.type || defaultType;
+    let data: unknown;
+
+    switch (type) {
+      case 'json':
+        data = await response.json();
+        break;
+      case 'blob':
+        data = await response.blob();
+        break;
+      case 'arrayBuffer':
+        data = await response.arrayBuffer();
+        break;
+      case 'text':
+      default:
+        data = await response.text();
+        break;
+    }
+
+    return {
+      data: data as T,
+      status: response.status,
+      headers: response.headers,
+    };
   }
 
   async request<T>(url: string, config: RequestConfig = {}): Promise<ApiResponse<T>> {
-    const requestKey = `${config.method || 'GET'}-${url}`;
+    const fullUrl = this.buildFullUrl(url, config);
+    const method = config.method || 'GET';
+    const requestKey = `${method}-${fullUrl}`;
 
     if (this.pendingRequests.has(requestKey)) {
-      return this.pendingRequests.get(requestKey);
+      return this.pendingRequests.get(requestKey) as Promise<ApiResponse<T>>;
     }
 
-    const promise = this.executeRequest<T>(url, config);
+    const promise = this.executeRequest<T>(fullUrl, config);
     this.pendingRequests.set(requestKey, promise);
 
     try {
@@ -129,44 +132,29 @@ export class ApiClient {
     }
   }
 
+  private static toBody(data?: unknown): BodyInit | undefined {
+    if (data == null) return undefined;
+    return data instanceof FormData ? data : JSON.stringify(data);
+  }
+
   get<T>(url: string, config?: Omit<RequestConfig, 'method' | 'body'>): Promise<ApiResponse<T>> {
     return this.request<T>(url, { ...config, method: 'GET' });
   }
 
-  post<T>(url: string, data?: any, config?: Omit<RequestConfig, 'method' | 'body'>): Promise<ApiResponse<T>> {
-    const isFormData = data instanceof FormData;
-    return this.request<T>(url, {
-      ...config,
-      method: 'POST',
-      body: isFormData ? data : JSON.stringify(data),
-    });
+  post<T>(url: string, data?: unknown, config?: Omit<RequestConfig, 'method' | 'body'>): Promise<ApiResponse<T>> {
+    return this.request<T>(url, { ...config, method: 'POST', body: ApiClient.toBody(data) });
   }
 
-  put<T>(url: string, data?: any, config?: Omit<RequestConfig, 'method' | 'body'>): Promise<ApiResponse<T>> {
-    const isFormData = data instanceof FormData;
-    return this.request<T>(url, {
-      ...config,
-      method: 'PUT',
-      body: isFormData ? data : JSON.stringify(data),
-    });
+  put<T>(url: string, data?: unknown, config?: Omit<RequestConfig, 'method' | 'body'>): Promise<ApiResponse<T>> {
+    return this.request<T>(url, { ...config, method: 'PUT', body: ApiClient.toBody(data) });
   }
 
-  patch<T>(url: string, data?: any, config?: Omit<RequestConfig, 'method' | 'body'>): Promise<ApiResponse<T>> {
-    const isFormData = data instanceof FormData;
-    return this.request<T>(url, {
-      ...config,
-      method: 'PATCH',
-      body: isFormData ? data : JSON.stringify(data),
-    });
+  patch<T>(url: string, data?: unknown, config?: Omit<RequestConfig, 'method' | 'body'>): Promise<ApiResponse<T>> {
+    return this.request<T>(url, { ...config, method: 'PATCH', body: ApiClient.toBody(data) });
   }
 
-  delete<T>(url: string, data?: any, config?: Omit<RequestConfig, 'method' | 'body'>): Promise<ApiResponse<T>> {
-    const isFormData = data instanceof FormData;
-    return this.request<T>(url, {
-      ...config,
-      method: 'DELETE',
-      body: isFormData ? data : JSON.stringify(data),
-    });
+  delete<T>(url: string, data?: unknown, config?: Omit<RequestConfig, 'method' | 'body'>): Promise<ApiResponse<T>> {
+    return this.request<T>(url, { ...config, method: 'DELETE', body: ApiClient.toBody(data) });
   }
 
   options<T>(url: string, config?: Omit<RequestConfig, 'method' | 'body'>): Promise<ApiResponse<T>> {

@@ -1,9 +1,8 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { ref } from 'vue';
-import { createActionState } from 'InvestCommon/data/repository/repository';
+import { createRepositoryStates, withActionState } from 'InvestCommon/data/repository/repository';
 import { EarnPositionFormatter, type EarnPositionsResponseFormatted } from './earn.formatter';
 import { createEarnPositionsService } from './earn.positions';
-import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
 
 export interface EarnDepositRequest {
   poolId: string;
@@ -59,9 +58,28 @@ export interface EarnPositionsResponse {
   availableAmountUsd?: number;
 }
 
+type EarnStates = {
+  depositState: EarnDepositResponse;
+  withdrawState: EarnWithdrawResponse;
+  positionsState: EarnPositionsResponseFormatted;
+};
+
+/** Mock delay (ms) for deposit/withdraw simulation. */
+const MOCK_DEPOSIT_WITHDRAW_DELAY_MS = 800;
+/** Mock delay (ms) for getPositions simulation. */
+const MOCK_GET_POSITIONS_DELAY_MS = 2000;
+
 export const useRepositoryEarn = defineStore('repository-earn', () => {
-  const depositState = createActionState<EarnDepositResponse>();
-  const withdrawState = createActionState<EarnWithdrawResponse>();
+  const {
+    depositState,
+    withdrawState,
+    positionsState,
+    resetAll: resetActionStates,
+  } = createRepositoryStates<EarnStates>({
+    depositState: undefined,
+    withdrawState: undefined,
+    positionsState: undefined,
+  });
   /**
    * Holds the list of all positions across pools for the current session.
    * Used to preserve data when navigating between different pools.
@@ -71,8 +89,6 @@ export const useRepositoryEarn = defineStore('repository-earn', () => {
    * Holds the currently selected position (single pool/profile) with loading/error state.
    * Data is already formatted when retrieved from the repository.
    */
-  const positionsState = createActionState<EarnPositionsResponseFormatted>();
-
   /**
    * Tracks approved tokens per pool/profile/symbol so approval state survives
    * route changes (e.g. switching to "your-position" tab remounts the view).
@@ -100,13 +116,10 @@ export const useRepositoryEarn = defineStore('repository-earn', () => {
    * Updates the positions array with the new deposit data.
    * In the future this can be replaced with a real API call.
    */
-  const deposit = async (payload: EarnDepositRequest) => {
-    try {
-      depositState.value.loading = true;
-      depositState.value.error = null;
-
+  const deposit = async (payload: EarnDepositRequest) =>
+    withActionState(depositState, async () => {
       await new Promise((resolve) => {
-        setTimeout(resolve, 800);
+        setTimeout(resolve, MOCK_DEPOSIT_WITHDRAW_DELAY_MS);
       });
 
       const baseTimestamp = Date.now();
@@ -119,8 +132,6 @@ export const useRepositoryEarn = defineStore('repository-earn', () => {
         status: 'success',
         txId,
       };
-
-      depositState.value.data = mockResponse;
 
       const newTransaction: EarnPositionTransaction = createTimestampedTransaction(
         payload.amount,
@@ -135,32 +146,17 @@ export const useRepositoryEarn = defineStore('repository-earn', () => {
       );
       positionsPools.value = updatedList;
 
-      // Sync EVM wallet balances from positionsPools (single source of truth)
-      if (payload.symbol) {
-        useRepositoryEvm().applyEarnSupplyToWallet(Number(payload.profileId));
-      }
-
       return mockResponse;
-    } catch (err) {
-      depositState.value.error = err as Error;
-      depositState.value.data = undefined;
-      throw err;
-    } finally {
-      depositState.value.loading = false;
-    }
-  };
+    });
 
   /**
    * Mock withdraw request.
    * Decreases staked amount and increases available balance, and adds a withdraw transaction.
    */
-  const withdraw = async (payload: EarnWithdrawRequest) => {
-    try {
-      withdrawState.value.loading = true;
-      withdrawState.value.error = null;
-
+  const withdraw = async (payload: EarnWithdrawRequest) =>
+    withActionState(withdrawState, async () => {
       await new Promise((resolve) => {
-        setTimeout(resolve, 800);
+        setTimeout(resolve, MOCK_DEPOSIT_WITHDRAW_DELAY_MS);
       });
 
       const baseTimestamp = Date.now();
@@ -173,8 +169,6 @@ export const useRepositoryEarn = defineStore('repository-earn', () => {
         status: 'success',
         txId,
       };
-
-      withdrawState.value.data = mockResponse;
 
       const newTransaction: EarnPositionTransaction = createTimestampedTransaction(
         payload.amount,
@@ -189,58 +183,31 @@ export const useRepositoryEarn = defineStore('repository-earn', () => {
       );
       positionsPools.value = updatedList;
 
-      // Sync EVM wallet balances from positionsPools (single source of truth)
-      if (payload.symbol) {
-        useRepositoryEvm().applyEarnWithdrawToWallet(Number(payload.profileId));
-      }
-
       return mockResponse;
-    } catch (err) {
-      withdrawState.value.error = err as Error;
-      withdrawState.value.data = undefined;
-      throw err;
-    } finally {
-      withdrawState.value.loading = false;
-    }
-  };
+    });
 
   /**
    * Mock get positions request for the Earn \"Your Position\" tab.
    * Filters the positions array by poolId and profileId to return data for the current pool.
    * Returns undefined if no position exists for the specified pool/profile.
    */
-  const getPositions = async (poolId: string, profileId: string | number) => {
-    try {
-      positionsState.value.loading = true;
-      positionsState.value.error = null;
-
+  const getPositions = async (poolId: string, profileId: string | number) =>
+    withActionState(positionsState, async () => {
       await new Promise((resolve) => {
-        setTimeout(resolve, 2000);
+        setTimeout(resolve, MOCK_GET_POSITIONS_DELAY_MS);
       });
 
       const list = positionsPools.value;
 
-      // Filter by poolId and profileId to find the position for this pool
       const position = list.find(
         (p: EarnPositionsResponse) =>
           p.poolId === poolId && p.profileId === profileId,
       );
 
-      // Format the position data using the formatter
       const formatter = new EarnPositionFormatter(position);
       const formattedPosition = formatter.format();
-      positionsState.value.data = formattedPosition;
-
-      // Return the formatted position if found, otherwise undefined (empty state)
       return formattedPosition;
-    } catch (err) {
-      positionsState.value.error = err as Error;
-      positionsState.value.data = undefined;
-      throw err;
-    } finally {
-      positionsState.value.loading = false;
-    }
-  };
+    });
 
   /**
    * Helper to create a timestamped transaction with consistent date/time formatting.
@@ -313,21 +280,7 @@ export const useRepositoryEarn = defineStore('repository-earn', () => {
   };
 
   const resetAll = () => {
-    depositState.value = {
-      loading: false,
-      error: null,
-      data: undefined,
-    };
-    withdrawState.value = {
-      loading: false,
-      error: null,
-      data: undefined,
-    };
-    positionsState.value = {
-      loading: false,
-      error: null,
-      data: undefined,
-    };
+    resetActionStates();
     positionsPools.value = [];
     approvedTokens.value = new Set();
   };

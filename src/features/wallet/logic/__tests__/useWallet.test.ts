@@ -46,7 +46,6 @@ const getEvmWalletStateRef = ref({
 vi.mock('InvestCommon/data/wallet/wallet.repository', () => ({
   useRepositoryWallet: () => ({
     getWalletState: getWalletStateRef,
-    canLoadWalletData: ref(true),
     getWalletByProfile: vi.fn().mockResolvedValue(undefined),
     resetAll: vi.fn(),
   }),
@@ -55,7 +54,6 @@ vi.mock('InvestCommon/data/wallet/wallet.repository', () => ({
 vi.mock('InvestCommon/data/evm/evm.repository', () => ({
   useRepositoryEvm: () => ({
     getEvmWalletState: getEvmWalletStateRef,
-    canLoadEvmWalletData: ref(true),
     getEvmWalletByProfile: vi.fn().mockResolvedValue(undefined),
     resetAll: vi.fn(),
   }),
@@ -63,7 +61,7 @@ vi.mock('InvestCommon/data/evm/evm.repository', () => ({
 
 vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
   useProfilesStore: () => ({
-    selectedUserProfileData: ref({ id: 1, kyc_status: 'approved' }),
+    selectedUserProfileData: ref({ id: 1, isKycApproved: true }),
     selectedUserProfileId: ref(1),
   }),
 }));

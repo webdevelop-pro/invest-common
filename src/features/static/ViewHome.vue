@@ -8,6 +8,7 @@ import { filterPages } from 'UiKit/helpers/allData';
 import { IFrontmatter } from 'UiKit/types/types';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import { useRepositoryOffer } from 'InvestCommon/data/offer/offer.repository';
+import { reportError } from 'InvestCommon/domain/error/errorReporting';
 
 import { __pageData as topData } from 'Docs/home/top.md';
 import { __pageData as partnersData } from 'Docs/home/partners.md';
@@ -46,7 +47,10 @@ const explore = filterPages(allPages as IFrontmatter[], 'layout', 'offers');
 const offers = computed(() => getOffersState.value.data?.data?.slice(0, 6) || []);
 const latest3Items = computed(() => blogPosts?.slice(0, 3));
 
-if (!getOffersState.value.data) offerRepository.getOffers();
+if (!getOffersState.value.data) {
+  offerRepository.getOffers()
+    .catch((e) => reportError(e, 'Failed to load offers'));
+}
 useGlobalLoader().hide();
 
 const videoSrc = ref<string | undefined>(undefined);

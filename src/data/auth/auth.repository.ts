@@ -1,12 +1,9 @@
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
-import { oryErrorHandling } from 'InvestCommon/data/repository/error/oryErrorHandling';
-import { oryResponseHandling } from 'InvestCommon/data/repository/response/oryResponseHandling';
-import { toasterErrorHandling } from 'InvestCommon/data/repository/error/toasterErrorHandling';
+import { APIError } from 'InvestCommon/data/service/handlers/apiError';
+import type { ApiResponse } from 'InvestCommon/data/service/types';
 import env from 'InvestCommon/domain/config/env';
-import { SELFSERVICE } from 'InvestCommon/features/auth/store/type';
-import { createActionState } from 'InvestCommon/data/repository/repository';
+import { createActionState, withActionState } from 'InvestCommon/data/repository/repository';
 import { computed } from 'vue';
-import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import {
   ISession, IAuthFlow, ILogoutFlow, ISchema, ISuccessfullNativeAuth,
 } from './auth.type';
@@ -20,10 +17,10 @@ export const useRepositoryAuth = () => {
 
   // Create action states for each function
   const getSessionState = createActionState<ISession>();
-  const getAuthFlowState = createActionState<ILogoutFlow>();
+  const getAuthFlowState = createActionState<IAuthFlow | ILogoutFlow>();
   const getSchemaState = createActionState<ISchema>();
 
-  const getLogoutState = createActionState<undefined>();
+  const getLogoutState = createActionState<ApiResponse<unknown>>();
 
   const setRecoveryState = createActionState<IAuthFlow>();
 
@@ -33,172 +30,76 @@ export const useRepositoryAuth = () => {
   const getSignupState = createActionState<IAuthFlow>();
   const setSignupState = createActionState<ISuccessfullNativeAuth>();
 
-  const getSession = async () => {
+  const getSession = async (): Promise<ISession | null> => {
     try {
-      getSessionState.value.loading = true;
-      getSessionState.value.error = null;
-      const response = await apiClient.get('/sessions/whoami');
-      getSessionState.value.data = response.data;
-      return response.data;
+      const result = await withActionState(getSessionState, async () => {
+        const response = await apiClient.get<ISession>('/sessions/whoami');
+        return response.data;
+      });
+      return result ?? null;
     } catch (err) {
-      getSessionState.value.error = err as Error;
-      getSessionState.value.data = undefined;
-      if (err?.data?.statusCode === 401) {
-        // Session is invalid, clear it from store
-        useSessionStore().resetAll();
+      if (err instanceof APIError && err.data.statusCode === 401) {
+        getSessionState.value.data = undefined;
+        getSessionState.value.error = null;
         return null;
       }
-      oryErrorHandling(err, 'session', () => {}, 'Failed to get session');
       throw err;
-    } finally {
-      getSessionState.value.loading = false;
     }
   };
 
-  const getAuthFlow = async (url: string, query?: Record<string, string>) => {
-    try {
-      getAuthFlowState.value.loading = true;
-      getAuthFlowState.value.error = null;
+  const getAuthFlow = async (url: string, query?: Record<string, string>) =>
+    withActionState(getAuthFlowState, async () => {
       const response = await apiClient.get(url, { params: query });
-      getAuthFlowState.value.data = response.data;
-  
-      // Handle successful responses that may contain special UI states or messages
-      oryResponseHandling(response.data);
-      
       return response.data;
-    } catch (err) {
-      getAuthFlowState.value.error = err as Error;
-      getAuthFlowState.value.data = undefined;
-      oryErrorHandling(err, 'browser', () => {}, 'Failed to get auth flow');
-      throw err;
-    } finally {
-      getAuthFlowState.value.loading = false;
-    }
-  };
+    });
 
-  const setLogin = async (flowId: string, body: object) => {
-    try {
-      setLoginState.value.loading = true;
-      setLoginState.value.error = null;
+  const setLogin = async (flowId: string, body: object) =>
+    withActionState(setLoginState, async () => {
       const response = await apiClient.post(`/self-service/login?flow=${flowId}`, body);
-      setLoginState.value.data = response.data;
       return response.data;
-    } catch (err) {
-      setLoginState.value.error = err as Error;
-      setLoginState.value.data = undefined;
-      oryErrorHandling(err, 'login', () => getAuthFlow(SELFSERVICE.login), 'Failed to login');
-      throw err;
-    } finally {
-      setLoginState.value.loading = false;
-    }
-  };
+    });
 
-  const getLogin = async (flowId: string) => {
-    try {
-      getLoginState.value.loading = true;
-      getLoginState.value.error = null;
+  const getLogin = async (flowId: string) =>
+    withActionState(getLoginState, async () => {
       const response = await apiClient.get(`/self-service/login/flows?id=${flowId}`);
-      getLoginState.value.data = response.data;
       return response.data;
-    } catch (err) {
-      getLoginState.value.error = err as Error;
-      getLoginState.value.data = undefined;
-      oryErrorHandling(err, 'login', () => getAuthFlow(SELFSERVICE.login), 'Failed to get login data');
-      throw err;
-    } finally {
-      getLoginState.value.loading = false;
-    }
-  };
+    });
 
-  const getLogout = async (token: string) => {
-    try {
-      getLogoutState.value.loading = true;
-      getLogoutState.value.error = null;
+  const getLogout = async (token: string) =>
+    withActionState(getLogoutState, async () => {
       const response = await apiClient.get(`/self-service/logout?token=${token}`);
       return response;
-    } catch (err) {
-      getLogoutState.value.error = err as Error;
-      getLogoutState.value.data = undefined;
-      oryErrorHandling(err, 'logout', () => getAuthFlow(SELFSERVICE.logout), 'Failed to logout');
-      throw err;
-    } finally {
-      getLogoutState.value.loading = false;
-    }
-  };
+    });
 
-  const getSignup = async (flowId: string) => {
-    try {
-      getSignupState.value.loading = true;
-      getSignupState.value.error = null;
+  const getSignup = async (flowId: string) =>
+    withActionState(getSignupState, async () => {
       const response = await apiClient.get(`/self-service/registration/flows?id=${flowId}`);
-      getSignupState.value.data = response.data;
       return response.data;
-    } catch (err) {
-      getSignupState.value.error = err as Error;
-      getSignupState.value.data = undefined;
-      oryErrorHandling(err, 'signup', () => getAuthFlow(SELFSERVICE.registration), 'Failed to get signup data');
-      throw err;
-    } finally {
-      getSignupState.value.loading = false;
-    }
-  };
+    });
 
-  const setSignup = async (flowId: string, body: object) => {
-    try {
-      setSignupState.value.loading = true;
-      setSignupState.value.error = null;
+  const setSignup = async (flowId: string, body: object) =>
+    withActionState(setSignupState, async () => {
       const response = await apiClient.post(`/self-service/registration?flow=${flowId}`, body);
-      setSignupState.value.data = response.data;
       return response.data;
-    } catch (err) {
-      setSignupState.value.error = err as Error;
-      setSignupState.value.data = undefined;
-      oryErrorHandling(err, 'signup', () => getAuthFlow(SELFSERVICE.registration), 'Failed to signup');
-      throw err;
-    } finally {
-      setSignupState.value.loading = false;
-    }
-  };
+    });
 
-  const setRecovery = async (flowId: string, body: object) => {
-    try {
-      setRecoveryState.value.loading = true;
-      setRecoveryState.value.error = null;
+  const setRecovery = async (flowId: string, body: object) =>
+    withActionState(setRecoveryState, async () => {
       const response = await apiClient.post(`/self-service/recovery?flow=${flowId}`, body);
-      setRecoveryState.value.data = response.data;
       return response.data;
-    } catch (err) {
-      setRecoveryState.value.error = err as Error;
-      setRecoveryState.value.data = undefined;
-      oryErrorHandling(err, 'recovery', () => getAuthFlow(SELFSERVICE.recovery), 'Failed to set recovery');
-      throw err;
-    } finally {
-      setRecoveryState.value.loading = false;
-    }
-  };
+    });
 
-  const getSchema = async () => {
-    try {
-      getSchemaState.value.loading = true;
-      getSchemaState.value.error = null;
+  const getSchema = async () =>
+    withActionState(getSchemaState, async () => {
       const response = await apiClient.get('/schemas');
-      getSchemaState.value.data = response.data;
       return response.data;
-    } catch (err) {
-      getSchemaState.value.error = err as Error;
-      getSchemaState.value.data = undefined;
-      toasterErrorHandling(err, 'Failed to get schema');
-      throw err;
-    } finally {
-      getSchemaState.value.loading = false;
-    }
-  };
+    });
 
-  const flowId = computed(() => getAuthFlowState.value.data?.id || '');
+  const flowId = computed(() => (getAuthFlowState.value.data as IAuthFlow | undefined)?.id ?? '');
 
   const csrfToken = computed(() => {
-    // const res = getSignupData.value?.ui || getAuthFlowState.value.data.ui;
-    const res = getAuthFlowState.value.data.ui;
+    const data = getAuthFlowState.value.data as IAuthFlow | undefined;
+    const res = data?.ui;
     if (res) {
       const tokenItem = res.nodes.find((item: { attributes: { name: string; }; }) => (
         item.attributes.name === 'csrf_token'));
@@ -208,15 +109,15 @@ export const useRepositoryAuth = () => {
   });
 
   const resetAll = () => {
-    getSessionState.value = { loading: false, error: null, data: null };
-    getAuthFlowState.value = { loading: false, error: null, data: null };
-    setRecoveryState.value = { loading: false, error: null, data: null };
-    setLoginState.value = { loading: false, error: null, data: null };
-    setSignupState.value = { loading: false, error: null, data: null };
-    getSignupState.value = { loading: false, error: null, data: null };
-    getSchemaState.value = { loading: false, error: null, data: null };
-    getLoginState.value = { loading: false, error: null, data: null };
-    getLogoutState.value = { loading: false, error: null, data: null };
+    getSessionState.value = { loading: false, error: null, data: undefined };
+    getAuthFlowState.value = { loading: false, error: null, data: undefined };
+    setRecoveryState.value = { loading: false, error: null, data: undefined };
+    setLoginState.value = { loading: false, error: null, data: undefined };
+    setSignupState.value = { loading: false, error: null, data: undefined };
+    getSignupState.value = { loading: false, error: null, data: undefined };
+    getSchemaState.value = { loading: false, error: null, data: undefined };
+    getLoginState.value = { loading: false, error: null, data: undefined };
+    getLogoutState.value = { loading: false, error: null, data: undefined };
   };
 
   return {

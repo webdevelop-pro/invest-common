@@ -4,7 +4,8 @@ import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { useRepositorySettings } from 'InvestCommon/data/settings/settings.repository';
 import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
-import { SELFSERVICE } from 'InvestCommon/features/settings/utils';
+import { SELFSERVICE } from 'InvestCommon/data/auth/auth.constants';
+import { reportError } from 'InvestCommon/domain/error/errorReporting';
 
 type FormModelTOTP = {
   totp_code: number;
@@ -101,7 +102,7 @@ export function useVFormSettingsTOTP() {
         return true; // Indicate success
       }
     } catch (error) {
-      console.error('Recovery failed:', error);
+      reportError(error as any, 'Failed to save TOTP');
     } finally {
       isLoading.value = false;
     }
@@ -109,9 +110,13 @@ export function useVFormSettingsTOTP() {
   };
 
   const initializeTOTP = async () => {
-    await settingsRepository.getAuthFlow(SELFSERVICE.settings);
-    qrOnMounted.value = totpQR.value;
-    setSettingsState.value.error = null;
+    try {
+      await settingsRepository.getAuthFlow(SELFSERVICE.settings);
+      qrOnMounted.value = totpQR.value;
+      setSettingsState.value.error = null;
+    } catch (error) {
+      reportError(error as any, 'Failed to load TOTP settings');
+    }
   };
 
   // Auto-initialize on mount

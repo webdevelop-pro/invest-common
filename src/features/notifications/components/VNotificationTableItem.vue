@@ -7,6 +7,7 @@ import arrowRight from 'UiKit/assets/images/arrow-right.svg';
 import { VTableCell, VTableRow } from 'UiKit/components/Base/VTable';
 import { IFormattedNotification } from 'InvestCommon/data/notifications/notifications.types';
 import { useNotifications } from 'InvestCommon/features/notifications/store/useNotifications';
+import { reportError } from 'InvestCommon/domain/error/errorReporting';
 import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 
 const notificationsStore = useNotifications();
@@ -22,10 +23,15 @@ const props = defineProps({
 
 const onMarkAsRead = async () => {
   if (!props.data?.id) return;
-  
+
   isLoading.value = true;
-  await notificationsStore.markAsReadById(props.data.id);
-  isLoading.value = false;
+  try {
+    await notificationsStore.markAsReadById(props.data.id);
+  } catch (e) {
+    reportError(e, 'Failed to mark notification as read');
+  } finally {
+    isLoading.value = false;
+  }
 };
 
 const onButtonClick = async () => {

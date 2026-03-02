@@ -32,6 +32,14 @@ export type IEvmWalletBalancesMap = Record<string, {
   price_per_usd?: number;
 }>;
 
+/** Input for EvmWalletFormatter: balances can be map (API) or array (formatted). */
+export type IEvmWalletBalancesInput = IEvmWalletBalancesMap | IEvmWalletBalances[];
+
+/** Wallet-like shape accepted by EvmWalletFormatter (raw response or re-format from formatted). */
+export type IEvmWalletDataForFormatter = Omit<IEvmWalletDataResponse, 'balances'> & {
+  balances?: IEvmWalletBalancesInput;
+};
+
 export interface IEvmWalletBalances {
   id: number;
   address: string;
@@ -161,4 +169,17 @@ export interface IEvmExchangeResponse {
   exchange_rate: number;
   status: EvmTransactionStatusTypes;
   estimated_gas_fee?: number;
+}
+
+/**
+ * Minimal shape for Earn position overlay when merging Earn data into EVM wallet.
+ * Passed from the feature layer (e.g. useRepositoryEarn().positionsPools) so EVM repo
+ * does not depend on Earn repo.
+ */
+export interface IEvmEarnPositionOverlay {
+  profileId: string | number;
+  symbol?: string;
+  name?: string;
+  stakedAmountUsd?: number;
+  transactions?: Array<{ id: number; type: string; amountUsd: number; status: string; txId: string }>;
 }

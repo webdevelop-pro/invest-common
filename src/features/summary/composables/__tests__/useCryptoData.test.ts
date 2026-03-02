@@ -23,7 +23,7 @@ const mockCryptoData = {
 const mockGetPricesState = ref({ loading: false, error: null, data: mockCryptoData });
 
 vi.mock('InvestCommon/data/3dParty/crypto.repository', () => ({
-  useRepositoryCryptoo: () => ({
+  useRepositoryCrypto: () => ({
     getPricesState: mockGetPricesState,
     getSimplePrices: vi.fn().mockResolvedValue(mockCryptoData),
   }),

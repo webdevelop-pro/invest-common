@@ -11,7 +11,8 @@ import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import { urlSettings } from 'InvestCommon/domain/config/links';
 import { errorMessageRule, passwordRule } from 'UiKit/helpers/validation/rules';
-import { SELFSERVICE } from 'InvestCommon/features/settings/utils';
+import { SELFSERVICE } from 'InvestCommon/data/auth/auth.constants';
+import { reportError } from 'InvestCommon/domain/error/errorReporting';
 
 export function useResetPassword() {
   useGlobalLoader().hide();
@@ -92,13 +93,13 @@ export function useResetPassword() {
           description: 'Password reset success',
           variant: 'success',
         });
-        router.push({ 
-          name: ROUTE_SETTINGS_MFA, 
-          params: { profileId: selectedUserProfileId.value } 
+        router.push({
+          name: ROUTE_SETTINGS_MFA,
+          params: { profileId: selectedUserProfileId.value }
         });
       }
     } catch (error) {
-      console.error('Recovery failed:', error);
+      reportError(error as any, 'Failed to reset password');
     } finally {
       isLoading.value = false;
     }

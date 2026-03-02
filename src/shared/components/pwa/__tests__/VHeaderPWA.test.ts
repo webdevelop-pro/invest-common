@@ -5,6 +5,7 @@ import {
   urlHome,
   urlProfilePortfolio,
 } from 'InvestCommon/domain/config/links';
+import VHeaderPWA from '../VHeaderPWA.vue';
 
 const userLoggedIn = ref(false);
 const selectedUserProfileId = ref(0);
@@ -58,13 +59,11 @@ vi.mock('UiKit/components/VHeader/VHeader.vue', () => ({
   },
 }));
 
-const mountHeader = async (layout = '', path = '/some') => {
-  const { default: VHeaderPWA } = await import('../VHeaderPWA.vue');
-  return mount(VHeaderPWA, {
-    props: {
-      layout,
-      path,
-      showProfileLink: false,
+const mountHeader = (layout = '', path = '/some') => mount(VHeaderPWA, {
+  props: {
+    layout,
+    path,
+    showProfileLink: false,
   },
   global: {
     stubs: {
@@ -87,8 +86,7 @@ const mountHeader = async (layout = '', path = '/some') => {
       },
     },
   },
-  });
-};
+});
 
 describe('VHeaderPWA', () => {
   beforeEach(() => {
@@ -98,59 +96,59 @@ describe('VHeaderPWA', () => {
     window.history.pushState({}, '', '/');
   });
 
-  it('hides back button on root path', async () => {
-    const wrapper = await mountHeader('', urlHome);
+  it('hides back button on root path', () => {
+    const wrapper = mountHeader('', urlHome);
     expect(wrapper.find('.v-header-invest__pwa-back').exists()).toBe(false);
   });
 
-  it('shows back button on non-root path', async () => {
-    const wrapper = await mountHeader('', '/some/other');
+  it('shows back button on non-root path', () => {
+    const wrapper = mountHeader('', '/some/other');
     expect(wrapper.find('.v-header-invest__pwa-back').exists()).toBe(true);
   });
 
-  it('shows login link when logged out on non-auth page', async () => {
-    const wrapper = await mountHeader('', '/offers');
+  it('shows login link when logged out on non-auth page', () => {
+    const wrapper = mountHeader('', '/offers');
     expect(wrapper.text()).toContain('Log in');
   });
 
-  it('shows notifications icon when logged in', async () => {
+  it('shows notifications icon when logged in', () => {
     userLoggedIn.value = true;
-    const wrapper = await mountHeader('', '/offers');
+    const wrapper = mountHeader('', '/offers');
     expect(wrapper.find('.v-header-invest__pwa-notifications').exists()).toBe(true);
   });
 
-  it('shows notifications icon on auth pages for logged in users', async () => {
+  it('shows notifications icon on auth pages for logged in users', () => {
     userLoggedIn.value = true;
-    const wrapper = await mountHeader('auth-login', '/signin');
+    const wrapper = mountHeader('auth-login', '/signin');
     expect(wrapper.find('.v-header-invest__pwa-notifications').exists()).toBe(true);
   });
 
-  it('hides notifications icon on kyc-bo pages', async () => {
+  it('hides notifications icon on kyc-bo pages', () => {
     userLoggedIn.value = true;
-    const wrapper = await mountHeader('kyc-bo', '/kyc-bo');
+    const wrapper = mountHeader('kyc-bo', '/kyc-bo');
     expect(wrapper.find('.v-header-invest__pwa-notifications').exists()).toBe(false);
   });
 
-  it('shows Sign Up CTA on sign-in page', async () => {
-    const wrapper = await mountHeader('auth-login', '/signin');
+  it('shows Sign Up CTA on sign-in page', () => {
+    const wrapper = mountHeader('auth-login', '/signin');
     expect(wrapper.text()).toContain('Sign Up');
   });
 
-  it('shows Log In CTA on sign-up page', async () => {
-    const wrapper = await mountHeader('auth-signup', '/signup');
+  it('shows Log In CTA on sign-up page', () => {
+    const wrapper = mountHeader('auth-signup', '/signup');
     expect(wrapper.text()).toContain('Log In');
   });
 
-  it('shows profile menu when logged in', async () => {
+  it('shows profile menu when logged in', () => {
     userLoggedIn.value = true;
     selectedUserProfileId.value = 10;
-    const wrapper = await mountHeader('', urlProfilePortfolio(10));
+    const wrapper = mountHeader('', urlProfilePortfolio(10));
     expect(wrapper.find('[data-testid="profile-menu"]').exists()).toBe(true);
   });
 
-  it('shows only back button on offer details page', async () => {
+  it('shows only back button on offer details page', () => {
     userLoggedIn.value = true;
-    const wrapper = await mountHeader('offer-single', '/offers/some-offer');
+    const wrapper = mountHeader('offer-single', '/offers/some-offer');
     expect(wrapper.find('[data-testid="profile-menu"]').exists()).toBe(false);
     expect(wrapper.find('.v-header-invest__pwa-notifications').exists()).toBe(false);
     expect(wrapper.find('.v-header-invest__pwa-logo').exists()).toBe(false);

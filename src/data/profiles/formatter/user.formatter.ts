@@ -1,4 +1,4 @@
-import { IUser, IProfileFormatted, IUserFormatted } from '../profiles.types';
+import { IUser, IProfileFormatted, IUserFormatted, IProfileIndividual } from '../profiles.types';
 import { ProfileFormatter } from './profiles.formatter';
 
 export function formatDateToShortMonthDateYear(dateInput: Date | string): string {
@@ -49,7 +49,9 @@ export class UserFormatter {
   }
 
   private formatProfiles(): IProfileFormatted[] {
-    return (this.user?.profiles || []).map((profile: any) => new ProfileFormatter(profile).format());
+    return (this.user?.profiles || []).map((profile: IProfileIndividual) =>
+      new ProfileFormatter(profile).format(),
+    );
   }
 
   format(): IUserFormatted {

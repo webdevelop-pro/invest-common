@@ -5,7 +5,7 @@ import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository'
 import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
-import { hasRestrictedWalletBehavior } from '../helpers/walletProfileHelpers';
+import { hasRestrictedWalletBehavior } from 'InvestCommon/data/profiles/profiles.helpers';
 import type { IProfileFormatted } from 'InvestCommon/data/profiles/profiles.types';
 
 const CONTACT_US_LINK =

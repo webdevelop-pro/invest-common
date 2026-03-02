@@ -1,6 +1,7 @@
 // import { storeToRefs } from 'pinia';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
+import { reportError } from 'InvestCommon/domain/error/errorReporting';
 import {
   urlAuthenticator,
   // urlSignin, urlSignup, urlForgot, urlCheckEmail,
@@ -27,10 +28,12 @@ export const redirectAuthGuardStatic = async () => {
       return;
     }
 
-    // Check session
+    // Check session (repository returns null on 401 — we clear session here)
     const resp = await useRepositoryAuth().getSession();
     if (resp) {
       userSessionStore.updateSession(resp);
+    } else {
+      userSessionStore.resetAll();
     }
 
     // Only redirect if user is logged in and on a protected path
@@ -45,7 +48,6 @@ export const redirectAuthGuardStatic = async () => {
     //   }
     // }
   } catch (error) {
-    // If we get a 403 or other error, don't redirect
-    console.error('Auth guard error:', error);
+    reportError(error, 'Auth guard (static)');
   }
 };

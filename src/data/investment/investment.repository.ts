@@ -1,19 +1,35 @@
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
-import { toasterErrorHandling } from 'InvestCommon/data/repository/error/toasterErrorHandling';
 import {
   IInvestUnconfirmed, IInvestConfirm,
   IInvestFunding,
 } from 'InvestCommon/types/api/invest';
 import env from 'InvestCommon/domain/config/env';
-import { createActionState } from 'InvestCommon/data/repository/repository';
-import { storeToRefs, acceptHMRUpdate, defineStore } from 'pinia';
-import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
+import { createRepositoryStates, withActionState, type OptionsStateData } from 'InvestCommon/data/repository/repository';
+import { acceptHMRUpdate, defineStore } from 'pinia';
 import { InvestmentFormatter } from 'InvestCommon/data/investment/investment.formatter';
-import { IInvestmentFormatted, IInvestment, IInvestmentsData } from 'InvestCommon/data/investment/investment.types';
+import { IInvestmentFormatted, IInvestment, IInvestmentsData, IInvestmentsDataRaw } from 'InvestCommon/data/investment/investment.types';
 import { ref, computed } from 'vue';
 import { INotification } from 'InvestCommon/data/notifications/notifications.types';
 
 const { INVESTMENT_URL } = env;
+
+type InvestmentStates = {
+  getInvestmentsState: IInvestmentsData;
+  getInvestOneState: IInvestmentFormatted;
+  getInvestUnconfirmedState: IInvestUnconfirmed;
+  setInvestState: IInvestment;
+  setAmountState: { number_of_shares: number };
+  setOwnershipState: { step: string };
+  setSignatureState: OptionsStateData;
+  setFundingState: OptionsStateData;
+  setReviewState: IInvestConfirm;
+  cancelInvestState: OptionsStateData;
+  updateNotesState: { notes: string };
+  setAmountOptionsState: OptionsStateData;
+  setOwnershipOptionsState: OptionsStateData;
+  setFundingOptionsState: OptionsStateData;
+  setCancelOptionsState: OptionsStateData;
+};
 
 export const useRepositoryInvestment = defineStore('repository-investment', () => {
   const apiClient = new ApiClient(INVESTMENT_URL);
@@ -22,10 +38,41 @@ export const useRepositoryInvestment = defineStore('repository-investment', () =
     new InvestmentFormatter({} as IInvestment).format()
   );
 
-  // Create action states for each function
-  const getInvestmentsState = createActionState<IInvestmentsData>();
-  const getInvestOneState = createActionState<IInvestmentFormatted>(createEmptyInvestmentFormatted());
-  const getInvestUnconfirmedState = createActionState<IInvestUnconfirmed>();
+  const {
+    getInvestmentsState,
+    getInvestOneState,
+    getInvestUnconfirmedState,
+    setInvestState,
+    setAmountState,
+    setOwnershipState,
+    setSignatureState,
+    setFundingState,
+    setReviewState,
+    cancelInvestState,
+    updateNotesState,
+    setAmountOptionsState,
+    setOwnershipOptionsState,
+    setFundingOptionsState,
+    setCancelOptionsState,
+    resetAll: resetActionStates,
+  } = createRepositoryStates<InvestmentStates>({
+    getInvestOneState: createEmptyInvestmentFormatted(),
+    getInvestmentsState: undefined,
+    getInvestUnconfirmedState: undefined,
+    setInvestState: undefined,
+    setAmountState: undefined,
+    setOwnershipState: undefined,
+    setSignatureState: undefined,
+    setFundingState: undefined,
+    setReviewState: undefined,
+    cancelInvestState: undefined,
+    updateNotesState: undefined,
+    setAmountOptionsState: undefined,
+    setOwnershipOptionsState: undefined,
+    setFundingOptionsState: undefined,
+    setCancelOptionsState: undefined,
+  });
+
   const currentUnconfirmedSlug = ref<string | null>(null);
   const currentUnconfirmedId = ref<number | null>(null);
   const getInvestUnconfirmedOne = computed<IInvestmentFormatted>(() => {
@@ -51,321 +98,161 @@ export const useRepositoryInvestment = defineStore('repository-investment', () =
 
     return createEmptyInvestmentFormatted();
   });
-  const setInvestState = createActionState<IInvestment>();
-  const setAmountState = createActionState<{number_of_shares: number}>();
-  const setOwnershipState = createActionState<{step: string}>();
-  const setSignatureState = createActionState<any>();
-  const setFundingState = createActionState<any>();
-  const setReviewState = createActionState<IInvestConfirm>();
-  const cancelInvestState = createActionState<any>();
-  const setAmountOptionsState = createActionState<any>();
-  const setOwnershipOptionsState = createActionState<any>();
-  const setFundingOptionsState = createActionState<any>();
-  const setCancelOptionsState = createActionState<any>();
 
-  const getInvestments = async (id: string) => {
-    try {
-      getInvestmentsState.value.loading = true;
-      getInvestmentsState.value.error = null;
-      const response = await apiClient.get(`/auth/investment/${id}/confirmed`);
-      const rawData = response.data as any;
-
-      // Format investments if data array exists
-      const formattedData = rawData.data && Array.isArray(rawData.data)
-        ? {
-          ...rawData,
-          data: rawData.data.map((investment: any) => new InvestmentFormatter(investment as IInvestment).format()),
-        }
-        : rawData;
-
-      getInvestmentsState.value.data = formattedData;
+  const getInvestments = async (id: string) =>
+    withActionState(getInvestmentsState, async () => {
+      const response = await apiClient.get<IInvestmentsDataRaw>(`/auth/investment/${id}/confirmed`);
+      const rawData = response.data;
+      const emptyMeta: IInvestmentsData['meta'] = {
+        avarange_annual: 0,
+        total_distributions: 0,
+        total_investments_12_months: 0,
+        total_investments: 0,
+      };
+      if (!rawData || !Array.isArray(rawData.data)) {
+        return { meta: rawData?.meta ?? emptyMeta, count: rawData?.count ?? 0, data: [] };
+      }
+      const formattedData: IInvestmentsData = {
+        ...rawData,
+        data: rawData.data.map((investment) => new InvestmentFormatter(investment).format()),
+      };
       return formattedData;
-    } catch (err) {
-      getInvestmentsState.value.error = err as Error;
-      getInvestmentsState.value.data = undefined;
-      toasterErrorHandling(err, 'Failed to fetch investments');
-      throw err;
-    } finally {
-      getInvestmentsState.value.loading = false;
-    }
-  };
+    });
 
-  const getInvestOne = async (id: string) => {
-    try {
-      getInvestOneState.value.loading = true;
-      getInvestOneState.value.error = null;
+  const getInvestOne = async (id: string) =>
+    withActionState(getInvestOneState, async () => {
       const response = await apiClient.get(`/auth/investment/${id}`);
       const investmentData = response.data as IInvestment;
-      const formatter = new InvestmentFormatter(investmentData);
-      const formattedData = formatter.format();
-      getInvestOneState.value.data = formattedData;
-      return formattedData;
-    } catch (err) {
-      getInvestOneState.value.error = err as Error;
-      getInvestOneState.value.data = undefined;
-      toasterErrorHandling(err, 'Failed to fetch investment');
-      throw err;
-    } finally {
-      getInvestOneState.value.loading = false;
-    }
-  };
-
+      return new InvestmentFormatter(investmentData).format();
+    });
 
   const getInvestUnconfirmed = async (
     slug: string,
     profileId: number | string,
     investmentId?: number | string,
   ) => {
-    try {
-      getInvestUnconfirmedState.value.loading = true;
-      getInvestUnconfirmedState.value.error = null;
+    const result = await withActionState(getInvestUnconfirmedState, async () => {
       const response = await apiClient.get(`/auth/investment/${profileId}/unconfirmed`);
       const rawData = response.data as IInvestUnconfirmed;
-      
-      // Format investments if data array exists
+      // API type declares data as IInvestmentFormatted[] but backend returns raw; we format here.
       const formattedData = rawData.data && Array.isArray(rawData.data)
         ? {
-          ...rawData,
-          data: rawData.data.map((investment: any) => new InvestmentFormatter(investment as IInvestment).format()),
-        }
+            ...rawData,
+            data: (rawData.data as unknown as IInvestment[]).map((investment) =>
+              new InvestmentFormatter(investment).format(),
+            ),
+          }
         : rawData;
-
       currentUnconfirmedSlug.value = slug;
-
       if (typeof investmentId !== 'undefined' && investmentId !== null) {
         const parsedId = Number(investmentId);
         currentUnconfirmedId.value = Number.isNaN(parsedId) ? null : parsedId;
       } else {
         currentUnconfirmedId.value = null;
       }
-      getInvestUnconfirmedState.value.data = formattedData;
-      return getInvestUnconfirmedState.value.data || null;
-    } catch (err) {
-      getInvestUnconfirmedState.value.error = err as Error;
-      getInvestUnconfirmedState.value.data = undefined;
-      toasterErrorHandling(err, 'Failed to fetch unconfirmed investments');
-      throw err;
-    } finally {
-      getInvestUnconfirmedState.value.loading = false;
-    }
+      return formattedData;
+    });
+    return result || null;
   };
 
-  const setInvest = async (slug: string, profileId: string, sharesCount: number) => {
-    try {
-      setInvestState.value.loading = true;
-      setInvestState.value.error = null;
+  const setInvest = async (slug: string, profileId: string, sharesCount: number) =>
+    withActionState(setInvestState, async () => {
       const response = await apiClient.post(`/auth/invest/${slug}/${profileId}`, {
         number_of_shares: sharesCount,
       });
-      setInvestState.value.data = response.data as IInvestment;
       return response.data as IInvestment;
-    } catch (err) {
-      setInvestState.value.error = err as Error;
-      setInvestState.value.data = undefined;
-      toasterErrorHandling(err, 'Failed to set investment');
-      throw err;
-    } finally {
-      setInvestState.value.loading = false;
-    }
-  };
+    });
 
-  const setAmount = async (slug: string, id: string, profileId: string, data: object) => {
-    try {
-      setAmountState.value.loading = true;
-      setAmountState.value.error = null;
+  const setAmount = async (slug: string, id: string, profileId: string, data: object) =>
+    withActionState(setAmountState, async () => {
       const response = await apiClient.put(`/auth/invest/${slug}/amount/${id}/${profileId}`, data);
-      setAmountState.value.data = response.data as {number_of_shares: number};
       return response.data as {number_of_shares: number};
-    } catch (err) {
-      setAmountState.value.error = err as Error;
-      setAmountState.value.data = undefined;
-      toasterErrorHandling(err, 'Failed to set amount');
-      throw err;
-    } finally {
-      setAmountState.value.loading = false;
-    }
-  };
+    });
 
-  const setOwnership = async (slug: string, id: string, profileId: string) => {
-    try {
-      setOwnershipState.value.loading = true;
-      setOwnershipState.value.error = null;
+  const setOwnership = async (slug: string, id: string, profileId: string) =>
+    withActionState(setOwnershipState, async () => {
       const response = await apiClient.put(`/auth/invest/${slug}/ownership/${id}/${profileId}`, {});
-      setOwnershipState.value.data = response.data as {step: string};
       return response.data as {step: string};
-    } catch (err) {
-      setOwnershipState.value.error = err as Error;
-      setOwnershipState.value.data = undefined;
-      toasterErrorHandling(err, 'Failed to set ownership');
-      throw err;
-    } finally {
-      setOwnershipState.value.loading = false;
-    }
-  };
+    });
 
-  const setSignature = async (slug: string, id: string, profileId: string, signUrlId: string) => {
-    try {
-      setSignatureState.value.loading = true;
-      setSignatureState.value.error = null;
-
-      const userSessionStore = useSessionStore();
-      const { userSession } = storeToRefs(userSessionStore);
-
+  const setSignature = async (
+    slug: string,
+    id: string,
+    profileId: string,
+    signUrlId: string,
+    deviceInfo?: { userAgent?: string; ipAddress?: string },
+  ) =>
+    withActionState(setSignatureState, async () => {
+      const userAgent = deviceInfo?.userAgent ?? '';
+      const ipAddress = deviceInfo?.ipAddress ?? '';
       const response = await apiClient.put(`/auth/invest/${slug}/signature/${id}/${profileId}`, {
         signature_id: signUrlId,
-        user_browser: userSession.value?.devices[0].user_agent || '',
-        ip_address: userSession.value?.devices[0].ip_address || '',
+        user_browser: userAgent,
+        ip_address: ipAddress,
       });
-      setSignatureState.value.data = response.data;
       return response.data;
-    } catch (err) {
-      setSignatureState.value.error = err as Error;
-      setSignatureState.value.data = undefined;
-      toasterErrorHandling(err, 'Failed to set signature');
-      throw err;
-    } finally {
-      setSignatureState.value.loading = false;
-    }
-  };
+    });
 
-
-
-  const setFunding = async (slug: string, id: string, profileId: string, fundingData: IInvestFunding) => {
-    try {
-      setFundingState.value.loading = true;
-      setFundingState.value.error = null;
+  const setFunding = async (slug: string, id: string, profileId: string, fundingData: IInvestFunding) =>
+    withActionState(setFundingState, async () => {
       const response = await apiClient.put(`/auth/invest/${slug}/funding/${id}/${profileId}`, fundingData);
-      setFundingState.value.data = response.data;
       return response.data;
-    } catch (err) {
-      setFundingState.value.error = err as Error;
-      setFundingState.value.data = undefined;
-      toasterErrorHandling(err, 'Failed to set funding');
-      throw err;
-    } finally {
-      setFundingState.value.loading = false;
-    }
-  };
+    });
 
-  const setReview = async (slug: string, id: string, profileId: string) => {
-    try {
-      setReviewState.value.loading = true;
-      setReviewState.value.error = null;
+  const setReview = async (slug: string, id: string, profileId: string) =>
+    withActionState(setReviewState, async () => {
       const response = await apiClient.put(`/auth/invest/${slug}/review/${id}/${profileId}`, {});
-      setReviewState.value.data = response.data as IInvestConfirm;
       return response.data as IInvestConfirm;
-    } catch (err) {
-      setReviewState.value.error = err as Error;
-      setReviewState.value.data = undefined;
-      toasterErrorHandling(err, 'Failed to set review');
-      throw err;
-    } finally {
-      setReviewState.value.loading = false;
-    }
-  };
+    });
 
-  const cancelInvest = async (id: string, reason: string) => {
-    try {
-      cancelInvestState.value.loading = true;
-      cancelInvestState.value.error = null;
+  const cancelInvest = async (id: string, reason: string) =>
+    withActionState(cancelInvestState, async () => {
       const response = await apiClient.put(`/auth/investment/${id}/cancel`, {
         cancelation_reason: reason,
       });
-      cancelInvestState.value.data = response.data;
       return response.data;
-    } catch (err) {
-      cancelInvestState.value.error = err as Error;
-      cancelInvestState.value.data = undefined;
-      toasterErrorHandling(err, 'Failed to cancel investment');
-      throw err;
-    } finally {
-      cancelInvestState.value.loading = false;
-    }
-  };
+    });
 
-  const setAmountOptions = async (slug: string, id: string, profileId: string) => {
-    try {
-      setAmountOptionsState.value.loading = true;
-      setAmountOptionsState.value.error = null;
+  const updateInvestmentNotes = async (id: string, notes: string) =>
+    withActionState(updateNotesState, async () => {
+      const response = await apiClient.patch(`/auth/investment/${id}`, { notes });
+      const notesData = response.data as { notes: string };
+      const current = getInvestOneState.value.data;
+      if (current) {
+        getInvestOneState.value.data = new InvestmentFormatter({
+          ...(current as unknown as IInvestment),
+          notes,
+        }).format();
+      }
+      return notesData;
+    });
+
+  const setAmountOptions = async (slug: string, id: string, profileId: string) =>
+    withActionState(setAmountOptionsState, async () => {
       const response = await apiClient.options(`/auth/invest/${slug}/amount/${id}/${profileId}`);
-      setAmountOptionsState.value.data = response.data;
       return response.data;
-    } catch (err) {
-      setAmountOptionsState.value.error = err as Error;
-      setAmountOptionsState.value.data = undefined;
-      toasterErrorHandling(err, 'Failed to get amount options');
-      throw err;
-    } finally {
-      setAmountOptionsState.value.loading = false;
-    }
-  };
+    });
 
-  const setOwnershipOptions = async (slug: string, id: string, profileId: string) => {
-    try {
-      setOwnershipOptionsState.value.loading = true;
-      setOwnershipOptionsState.value.error = null;
+  const setOwnershipOptions = async (slug: string, id: string, profileId: string) =>
+    withActionState(setOwnershipOptionsState, async () => {
       const response = await apiClient.options(`/auth/invest/${slug}/ownership/${id}/${profileId}`);
-      setOwnershipOptionsState.value.data = response.data;
       return response.data;
-    } catch (err) {
-      setOwnershipOptionsState.value.error = err as Error;
-      setOwnershipOptionsState.value.data = undefined;
-      toasterErrorHandling(err, 'Failed to get ownership options');
-      throw err;
-    } finally {
-      setOwnershipOptionsState.value.loading = false;
-    }
-  };
+    });
 
-  const setFundingOptions = async (slug: string, id: string, profileId: string) => {
-    try {
-      setFundingOptionsState.value.loading = true;
-      setFundingOptionsState.value.error = null;
+  const setFundingOptions = async (slug: string, id: string, profileId: string) =>
+    withActionState(setFundingOptionsState, async () => {
       const response = await apiClient.options(`/auth/invest/${slug}/funding/${id}/${profileId}`);
-      setFundingOptionsState.value.data = response.data;
       return response.data;
-    } catch (err) {
-      setFundingOptionsState.value.error = err as Error;
-      setFundingOptionsState.value.data = undefined;
-      toasterErrorHandling(err, 'Failed to get funding options');
-      throw err;
-    } finally {
-      setFundingOptionsState.value.loading = false;
-    }
-  };
+    });
 
-  const setCancelOptions = async (id: string) => {
-    try {
-      setCancelOptionsState.value.loading = true;
-      setCancelOptionsState.value.error = null;
+  const setCancelOptions = async (id: string) =>
+    withActionState(setCancelOptionsState, async () => {
       const response = await apiClient.options(`/auth/investment/${id}/cancel`);
-      setCancelOptionsState.value.data = response.data;
       return response.data;
-    } catch (err) {
-      setCancelOptionsState.value.error = err as Error;
-      setCancelOptionsState.value.data = undefined;
-      toasterErrorHandling(err, 'Failed to get cancel options');
-      throw err;
-    } finally {
-      setCancelOptionsState.value.loading = false;
-    }
-  };
+    });
 
   const resetAll = () => {
-    getInvestmentsState.value = { loading: false, error: null, data: undefined };
-    getInvestOneState.value = { loading: false, error: null, data: undefined };
-    getInvestUnconfirmedState.value = { loading: false, error: null, data: undefined };
-    setInvestState.value = { loading: false, error: null, data: undefined };
-    setAmountState.value = { loading: false, error: null, data: undefined };
-    setOwnershipState.value = { loading: false, error: null, data: undefined };
-    setSignatureState.value = { loading: false, error: null, data: undefined };
-    setFundingState.value = { loading: false, error: null, data: undefined };
-    setReviewState.value = { loading: false, error: null, data: undefined };
-    cancelInvestState.value = { loading: false, error: null, data: undefined };
-    setAmountOptionsState.value = { loading: false, error: null, data: undefined };
-    setOwnershipOptionsState.value = { loading: false, error: null, data: undefined };
-    setFundingOptionsState.value = { loading: false, error: null, data: undefined };
-    setCancelOptionsState.value = { loading: false, error: null, data: undefined };
+    resetActionStates();
     currentUnconfirmedSlug.value = null;
     currentUnconfirmedId.value = null;
   };
@@ -398,31 +285,38 @@ export const useRepositoryInvestment = defineStore('repository-investment', () =
 
     const normalizedFields = normalizeFields(fields);
 
-    if (getInvestOneState.value.data) {
-      Object.assign(getInvestOneState.value.data, normalizedFields);
-      getInvestOneState.value.data = new InvestmentFormatter(
-        getInvestOneState.value.data as unknown as IInvestment,
-      ).format();
+    const one = getInvestOneState.value.data;
+    if (one) {
+      const updated = { ...one, ...normalizedFields } as unknown as IInvestment;
+      getInvestOneState.value.data = new InvestmentFormatter(updated).format();
     }
 
-    const investmentsList = getInvestmentsState.value.data?.data;
-    if (investmentsList?.length) {
-      const index = investmentsList.findIndex((t: IInvestmentFormatted) => t.id === objectId);
+    const investmentsData = getInvestmentsState.value.data;
+    if (investmentsData?.data?.length) {
+      const index = investmentsData.data.findIndex((t: IInvestmentFormatted) => t.id === objectId);
       if (index >= 0) {
-        Object.assign(investmentsList[index], normalizedFields);
-        investmentsList[index] = new InvestmentFormatter(
-          investmentsList[index] as unknown as IInvestment,
-        ).format();
+        const newData = investmentsData.data.map((item, i) =>
+          i === index
+            ? new InvestmentFormatter({ ...item, ...normalizedFields } as unknown as IInvestment).format()
+            : item,
+        );
+        getInvestmentsState.value.data = { ...investmentsData, data: newData };
       }
     }
-    const unconfirmedList = getInvestUnconfirmedState.value.data?.data as IInvestmentFormatted[] | undefined;
+    const unconfirmedData = getInvestUnconfirmedState.value.data;
+    const unconfirmedList = unconfirmedData?.data as IInvestmentFormatted[] | undefined;
     if (unconfirmedList?.length) {
       const index = unconfirmedList.findIndex((t: IInvestmentFormatted) => t.id === objectId);
       if (index >= 0) {
-        Object.assign(unconfirmedList[index], normalizedFields);
-        unconfirmedList[index] = new InvestmentFormatter(
-          unconfirmedList[index] as unknown as IInvestment,
-        ).format();
+        const newUnconfirmedList = unconfirmedList.map((item, i) =>
+          i === index
+            ? new InvestmentFormatter({ ...item, ...normalizedFields } as unknown as IInvestment).format()
+            : item,
+        );
+        getInvestUnconfirmedState.value.data = {
+          ...unconfirmedData,
+          data: newUnconfirmedList,
+        } as typeof unconfirmedData;
       }
     }
   };
@@ -439,6 +333,7 @@ export const useRepositoryInvestment = defineStore('repository-investment', () =
     setFundingState,
     setReviewState,
     cancelInvestState,
+    updateNotesState,
     setAmountOptionsState,
     setOwnershipOptionsState,
     setFundingOptionsState,
@@ -456,6 +351,7 @@ export const useRepositoryInvestment = defineStore('repository-investment', () =
     setFunding,
     setReview,
     cancelInvest,
+    updateInvestmentNotes,
     setAmountOptions,
     setOwnershipOptions,
     setFundingOptions,

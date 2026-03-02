@@ -1,10 +1,11 @@
 import { computed, ref, watch } from 'vue';
-import { SELFSERVICE } from 'InvestCommon/features/settings/utils';
+import { SELFSERVICE } from 'InvestCommon/data/auth/auth.constants';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import { urlResetPassword } from 'InvestCommon/domain/config/links';
 import { useRepositorySettings } from 'InvestCommon/data/settings/settings.repository';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 import { storeToRefs } from 'pinia';
+import { reportError } from 'InvestCommon/domain/error/errorReporting';
 
 export function useSettingsMfa() {
   const settingsRepository = useRepositorySettings();
@@ -37,26 +38,34 @@ export function useSettingsMfa() {
       isDialogMfaOpen.value = true;
     } else if (totpUnlink.value) {
       // unlink
-      await settingsRepository.setSettings(flowId.value, {
-        method: 'totp',
-        totp_unlink: true,
-        csrf_token: csrfToken.value,
-      }, onMfaClick);
-      await settingsRepository.getAuthFlow(SELFSERVICE.settings);
+      try {
+        await settingsRepository.setSettings(flowId.value, {
+          method: 'totp',
+          totp_unlink: true,
+          csrf_token: csrfToken.value,
+        }, onMfaClick);
+        await settingsRepository.getAuthFlow(SELFSERVICE.settings);
 
-      if (!setSettingsState.value.error) {
-        toast({
-          title: 'Submitted',
-          description: 'Unlinked',
-          variant: 'success',
-        });
+        if (!setSettingsState.value.error) {
+          toast({
+            title: 'Submitted',
+            description: 'Unlinked',
+            variant: 'success',
+          });
+        }
+      } catch (error) {
+        reportError(error as any, 'Failed to unlink MFA');
       }
     }
   };
 
   const initializeMfa = async () => {
     if (!getAuthFlowState.value.data) {
-      await settingsRepository.getAuthFlow(SELFSERVICE.settings);
+      try {
+        await settingsRepository.getAuthFlow(SELFSERVICE.settings);
+      } catch (error) {
+        reportError(error as any, 'Failed to load MFA settings');
+      }
     }
   };
 

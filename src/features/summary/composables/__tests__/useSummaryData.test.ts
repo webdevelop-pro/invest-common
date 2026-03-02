@@ -14,7 +14,7 @@ const mockPortfolioData = [
 
 // Mock repositories
 vi.mock('InvestCommon/data/3dParty/crypto.repository', () => ({
-  useRepositoryCryptoo: () => ({
+  useRepositoryCrypto: () => ({
     getPricesState: ref({ loading: false, error: null, data: mockCryptoData }),
     getSimplePrices: vi.fn(),
   }),

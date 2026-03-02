@@ -9,7 +9,9 @@ import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import { urlProfile } from 'InvestCommon/domain/config/links';
 import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
-import { SELFSERVICE } from './type';
+import { SELFSERVICE, AAL2_QUERY } from 'InvestCommon/data/auth/auth.constants';
+import { oryErrorHandling } from 'InvestCommon/domain/error/oryErrorHandling';
+import { oryResponseHandling } from 'InvestCommon/domain/error/oryResponseHandling';
 
 type FormModelTOTP = {
     totp_code: number;
@@ -106,14 +108,19 @@ export const useAuthenticatorStore = defineStore('authenticator', () => {
         handleSuccess(setLoginState.value.data.session);
       }
     } catch (error) {
-      console.error('TOTP verification failed:', error);
+      await oryErrorHandling(error as any, 'login', () => authRepository.getAuthFlow(SELFSERVICE.login, AAL2_QUERY), 'Failed to login');
     } finally {
       isLoading.value = false;
     }
   };
 
   const onMountedHandler = async () => {
-    authRepository.getAuthFlow(`${SELFSERVICE.login}?aal=aal2`);
+    try {
+      const flowData = await authRepository.getAuthFlow(SELFSERVICE.login, AAL2_QUERY);
+      oryResponseHandling(flowData);
+    } catch (error) {
+      await oryErrorHandling(error as any, 'browser', () => {}, 'Failed to get auth flow');
+    }
   };
 
   return {

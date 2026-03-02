@@ -12,6 +12,7 @@ import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import {
   ROUTE_DASHBOARD_PORTFOLIO,
 } from 'InvestCommon/domain/config/enums/routes';
+import { reportError } from 'InvestCommon/domain/error/errorReporting';
 
 type FormModel = {
   cancelation_reason: string;
@@ -61,7 +62,12 @@ export const usePortfolioCancelInvestment = (
     }
 
     if (investment?.id) {
-      await investmentRepository.cancelInvest(String(investment?.id), model.cancelation_reason);
+      try {
+        await investmentRepository.cancelInvest(String(investment?.id), model.cancelation_reason);
+      } catch (e) {
+        reportError(e, 'Failed to cancel investment');
+        return;
+      }
     }
 
     if (!cancelInvestState.value.error) {
@@ -85,7 +91,8 @@ export const usePortfolioCancelInvestment = (
 
   watch(() => open.value, () => {
     if (open.value && !schemaBackend.value) {
-      investmentRepository.setCancelOptions(String(investment?.id));
+      investmentRepository.setCancelOptions(String(investment?.id))
+        .catch((e) => reportError(e, 'Failed to load cancel options'));
     }
   }, { deep: true });
 

@@ -11,10 +11,12 @@ const hoisted = vi.hoisted(() => ({
 // ------------------- MOCKS -------------------
 
 const updateSessionMock = vi.fn()
+const resetAllMock = vi.fn()
 
 vi.mock('InvestCommon/domain/session/store/useSession', () => ({
   useSessionStore: () => ({
     updateSession: updateSessionMock,
+    resetAll: resetAllMock,
   }),
 }))
 
@@ -26,6 +28,12 @@ vi.mock('InvestCommon/data/auth/auth.repository', () => ({
 
 vi.mock('InvestCommon/domain/config/links', () => ({
   urlAuthenticator: '/authenticator',
+}))
+
+const reportErrorMock = vi.fn()
+vi.mock('InvestCommon/domain/error/errorReporting', () => ({
+  reportError: (...args: unknown[]) => reportErrorMock(...args),
+  toasterErrorHandling: vi.fn(),
 }))
 
 // ------------------- TESTS -------------------
@@ -71,6 +79,7 @@ function redirectAuthGuardStaticTests() {
 
     expect(hoisted.getSessionMock).toHaveBeenCalled()
     expect(updateSessionMock).not.toHaveBeenCalled()
+    expect(resetAllMock).toHaveBeenCalled()
   })
 
   it('skips session check on authenticator page', async () => {
@@ -106,16 +115,13 @@ function redirectAuthGuardStaticTests() {
 
   it('handles session fetch errors gracefully', async () => {
     hoisted.getSessionMock.mockRejectedValue(new Error('Network error'))
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
     window.location.pathname = '/signin'
 
     await redirectAuthGuardStatic()
 
     expect(hoisted.getSessionMock).toHaveBeenCalled()
-    expect(consoleSpy).toHaveBeenCalledWith('Auth guard error:', expect.any(Error))
+    expect(reportErrorMock).toHaveBeenCalledWith(expect.any(Error), 'Auth guard (static)')
     expect(updateSessionMock).not.toHaveBeenCalled()
-
-    consoleSpy.mockRestore()
   })
 }
 

@@ -25,7 +25,6 @@ const mockWalletData = {
 vi.mock('InvestCommon/data/evm/evm.repository', () => ({
   useRepositoryEvm: () => ({
     getEvmWalletState: ref({ loading: false, error: null, data: mockEvmWalletData }),
-    canLoadEvmWalletData: ref(true),
     getEvmWalletByProfile: vi.fn(),
     resetAll: vi.fn(),
   }),
@@ -34,7 +33,6 @@ vi.mock('InvestCommon/data/evm/evm.repository', () => ({
 vi.mock('InvestCommon/data/wallet/wallet.repository', () => ({
   useRepositoryWallet: () => ({
     getWalletState: ref({ loading: false, error: null, data: mockWalletData }),
-    canLoadWalletData: ref(true),
     getWalletByProfile: vi.fn(),
     resetAll: vi.fn(),
   }),

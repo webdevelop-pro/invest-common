@@ -6,7 +6,7 @@ import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
 import { ref } from 'vue';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 // import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
-import { SELFSERVICE } from '../type';
+import { SELFSERVICE } from 'InvestCommon/data/auth/auth.constants';
 import { useAuthenticatorStore } from '../useAuthenticator';
 
 // Mock environment variables
@@ -218,7 +218,7 @@ describe('useAuthenticator Store', () => {
     it('should initialize auth flow on mount', async () => {
       const store = useAuthenticatorStore();
       await store.onMountedHandler();
-      expect(mockAuthRepository.getAuthFlow).toHaveBeenCalledWith(`${SELFSERVICE.login}?aal=aal2`);
+      expect(mockAuthRepository.getAuthFlow).toHaveBeenCalledWith(SELFSERVICE.login, { aal: 'aal2' });
     });
   });
 });

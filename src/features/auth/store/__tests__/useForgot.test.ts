@@ -8,7 +8,7 @@ import { useForgotStore } from '../useForgot';
 
 // Mock all required dependencies
 vi.mock('InvestCommon/data/auth/auth.repository', () => {
-  const mockGetAuthFlow = vi.fn().mockResolvedValue(undefined);
+  const mockGetAuthFlow = vi.fn().mockResolvedValue({ id: 'test-flow-id', ui: {} });
   const mockSetRecovery = vi.fn().mockResolvedValue(undefined);
 
   return {
@@ -27,6 +27,9 @@ vi.mock('InvestCommon/data/auth/auth.repository', () => {
 vi.mock('UiKit/helpers/general', () => ({
   navigateWithQueryParams: vi.fn(),
 }));
+
+vi.mock('InvestCommon/domain/error/oryResponseHandling', () => ({ oryResponseHandling: vi.fn() }));
+vi.mock('InvestCommon/domain/error/oryErrorHandling', () => ({ oryErrorHandling: vi.fn().mockResolvedValue(undefined) }));
 
 describe('useForgot Store', () => {
   let store: ReturnType<typeof useForgotStore>;

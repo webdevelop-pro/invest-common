@@ -5,12 +5,13 @@ import VBadge from 'UiKit/components/Base/VBadge/VBadge.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import file from 'UiKit/assets/images/file.svg';
 import { urlTerms, urlPrivacy } from 'InvestCommon/domain/config/links';
+import { reportError } from 'InvestCommon/domain/error/errorReporting';
 import { useInvestSignatureForm } from './logic/useInvestSignatureForm';
 
 const VDialogDocument = defineAsyncComponent({
   loader: () => import('./VDialogDocument.vue'),
   onError: (error) => {
-    console.error('Failed to load VDialogDocument:', error);
+    reportError(error, 'Failed to load document dialog');
   },
 });
 

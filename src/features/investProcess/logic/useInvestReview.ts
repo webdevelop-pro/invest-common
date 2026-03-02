@@ -8,6 +8,7 @@ import { urlOfferSingle } from 'InvestCommon/domain/config/links';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
 import { useSendAnalyticsEvent } from 'InvestCommon/domain/analytics/useSendAnalyticsEvent';
+import { reportError } from 'InvestCommon/domain/error/errorReporting';
 
 export function useInvestReview() {
   const globalLoader = useGlobalLoader();
@@ -40,6 +41,7 @@ export function useInvestReview() {
         status_code: 200,
       });
     } catch (error) {
+      reportError(error, 'Failed to confirm investment');
       void sendEvent({
         event_type: 'send',
         method: 'POST',

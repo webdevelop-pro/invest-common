@@ -80,6 +80,7 @@ export interface IInvestment {
   escrow_type: string;
   entity_id: string;
   transaction_ref: string;
+  notes?: string;
 }
 
 export interface IInvestmentFormatted extends IInvestment {
@@ -121,4 +122,11 @@ export interface IInvestmentsData {
   };
   count: number;
   data: IInvestmentFormatted[];
+}
+
+/** Raw API response for confirmed investments list (before formatting). */
+export interface IInvestmentsDataRaw {
+  meta: IInvestmentsData['meta'];
+  count: number;
+  data: IInvestment[];
 }

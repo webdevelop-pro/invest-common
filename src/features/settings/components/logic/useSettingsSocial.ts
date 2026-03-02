@@ -3,7 +3,8 @@ import { storeToRefs } from 'pinia';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositorySettings } from 'InvestCommon/data/settings/settings.repository';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
-import { SELFSERVICE } from 'InvestCommon/features/settings/utils';
+import { SELFSERVICE } from 'InvestCommon/data/auth/auth.constants';
+import { reportError } from 'InvestCommon/domain/error/errorReporting';
 
 import GoogleIcon from 'InvestCommon/shared/assets/images/social-login/google1.svg?component';
 import FacebookIcon from 'InvestCommon/shared/assets/images/social-login/facebook1.svg?component';
@@ -106,7 +107,7 @@ export const useSettingsSocial = () => {
         return true; // Indicate success
       }
     } catch (error) {
-      console.error('Recovery failed:', error);
+      reportError(error as any, 'Failed to update social login');
     } finally {
       isLoading.value = false;
       loadingProvider.value = null;

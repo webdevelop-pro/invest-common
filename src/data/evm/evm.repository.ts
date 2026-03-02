@@ -1,37 +1,45 @@
-import { computed, ref, unref } from 'vue';
-import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
+import { computed, ref } from 'vue';
+import { acceptHMRUpdate, defineStore } from 'pinia';
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import env from 'InvestCommon/domain/config/env';
-import { toasterErrorHandling } from 'InvestCommon/data/repository/error/toasterErrorHandling';
-import { createActionState } from 'InvestCommon/data/repository/repository';
+import { createRepositoryStates, withActionState, type OptionsStateData } from 'InvestCommon/data/repository/repository';
 import { INotification } from 'InvestCommon/data/notifications/notifications.types';
 import { EvmWalletFormatter } from './formatter/wallet.formatter';
 import { EvmTransactionFormatter } from './formatter/transactions.formatter';
 import {
   IEvmWalletDataFormatted, IEvmWalletDataResponse, IEvmWithdrawRequestBody,
   IEvmExchangeRequestBody, IEvmExchangeResponse, EvmTransactionTypes, EvmTransactionStatusTypes,
-  IEvmTransactionDataResponse,
+  IEvmTransactionDataResponse, IEvmEarnPositionOverlay, IEvmWalletBalancesMap, IEvmWalletBalances,
 } from './evm.types';
-import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
-import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
-import { hasRestrictedWalletBehavior } from 'InvestCommon/features/wallet/helpers/walletProfileHelpers';
-import { IProfileFormatted } from '../profiles/profiles.types';
-import { useRepositoryEarn } from '../earn/earn.repository';
+
+/** Duration (ms) to show loading state after a notification-driven wallet/transaction update. */
+const NOTIFICATION_LOADING_DURATION_MS = 2000;
+
+type EvmStates = {
+  getEvmWalletState: IEvmWalletDataFormatted;
+  withdrawFundsState: IEvmWalletDataResponse;
+  withdrawFundsOptionsState: OptionsStateData;
+  exchangeTokensState: IEvmExchangeResponse;
+  exchangeTokensOptionsState: OptionsStateData;
+};
 
 export const useRepositoryEvm = defineStore('repository-evm', () => {
+  const apiClient = new ApiClient(env.EVM_URL);
 
-    const userProfileStore = useProfilesStore();
-    const { selectedUserProfileData, selectedUserProfileId } = storeToRefs(userProfileStore);
-    const userSessionStore = useSessionStore();
-    const { userLoggedIn } = storeToRefs(userSessionStore);
-
-  const apiClient = new ApiClient((env as any).EVM_URL);
-
-  const getEvmWalletState = createActionState<IEvmWalletDataFormatted>();
-  const withdrawFundsState = createActionState<IEvmWalletDataResponse>();
-  const withdrawFundsOptionsState = createActionState<any>();
-  const exchangeTokensState = createActionState<IEvmExchangeResponse>();
-  const exchangeTokensOptionsState = createActionState<any>();
+  const {
+    getEvmWalletState,
+    withdrawFundsState,
+    withdrawFundsOptionsState,
+    exchangeTokensState,
+    exchangeTokensOptionsState,
+    resetAll: resetActionStates,
+  } = createRepositoryStates<EvmStates>({
+    getEvmWalletState: undefined,
+    withdrawFundsState: undefined,
+    withdrawFundsOptionsState: undefined,
+    exchangeTokensState: undefined,
+    exchangeTokensOptionsState: undefined,
+  });
 
   // Stores the latest raw wallet response from backend so we can
   // deterministically recompute Earn overlays (transactions/balances)
@@ -45,13 +53,14 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
   const evmWalletId = computed(() => getEvmWalletState.value.data?.id || 0);
 
   /**
-   * Mock function that adds all earn transactions to crypto wallet transactions
+   * Mock function that adds all earn transactions to crypto wallet transactions.
+   * @param earnPositions - Pass from feature layer (e.g. useRepositoryEarn().positionsPools).
    */
   const addEarnTransactionsToWallet = (
     walletData: IEvmWalletDataResponse,
     profileId: number,
+    earnPositions: IEvmEarnPositionOverlay[],
   ): IEvmWalletDataResponse => {
-    const earnPositions = unref(useRepositoryEarn().positionsPools) || [];
     const existingTxIds = new Set((walletData.transactions || []).map(tx => tx.id));
     
     // Type and status mapping
@@ -133,21 +142,19 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
 
   /**
    * Updates crypto wallet balances based on earn positions.
-   * For each token, we take the original wallet balance from the backend response
-   * and subtract the amount staked into Earn. This keeps the wallet as the source
-   * of truth and treats Earn positions as a separate "locked" portion.
+   * @param earnPositions - Pass from feature layer (e.g. useRepositoryEarn().positionsPools).
    */
   const addEarnBalancesToWallet = (
     walletData: IEvmWalletDataResponse,
     profileId: number,
+    earnPositions: IEvmEarnPositionOverlay[],
   ): IEvmWalletDataResponse => {
-    const earnPositions = unref(useRepositoryEarn().positionsPools) || [];
-    const balances = { ...((walletData.balances as any) || {}) };
+    const balances: IEvmWalletBalancesMap = { ...(walletData.balances || {}) };
     
     earnPositions
       .filter(p => p.profileId === profileId && p.symbol)
       .forEach(position => {
-        const symbolKey = position.symbol.toLowerCase();
+        const symbolKey = (position.symbol ?? '').toLowerCase();
         const nameLower = (position.name ?? '').toLowerCase();
         const stakedAmount = position.stakedAmountUsd ?? 0;
 
@@ -195,141 +202,68 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
    * This is used by mock Earn flows to keep the crypto wallet in sync without
    * mutating the snapshot or relying on already-formatted wallet state.
    */
-  const recomputeWalletFromEarnOverlay = (profileId: number) => {
+  const recomputeWalletFromEarnOverlay = (profileId: number, earnPositions?: IEvmEarnPositionOverlay[]) => {
     if (!baseWalletSnapshot.value) return;
 
     const snapshot = baseWalletSnapshot.value;
+    const positions = earnPositions ?? [];
 
-    // Clone balances and transactions so we never mutate the snapshot directly
     const walletCopy: IEvmWalletDataResponse = {
-      ...(snapshot as IEvmWalletDataResponse),
-      balances: { ...((snapshot.balances as any) || {}) },
+      ...snapshot,
+      balances: { ...(snapshot.balances || {}) },
       transactions: [...(snapshot.transactions || [])],
     };
 
-    let walletWithEarn = addEarnTransactionsToWallet(walletCopy, profileId);
-    walletWithEarn = addEarnBalancesToWallet(walletWithEarn, profileId);
+    let walletWithEarn = addEarnTransactionsToWallet(walletCopy, profileId, positions);
+    walletWithEarn = addEarnBalancesToWallet(walletWithEarn, profileId, positions);
 
-    getEvmWalletState.value.data = new EvmWalletFormatter(walletWithEarn as any).format();
+    getEvmWalletState.value.data = new EvmWalletFormatter(walletWithEarn).format();
   };
 
-  /**
-   * Sync helper that applies Earn "supply" (deposit into Earn) to the
-   * in-memory EVM wallet balances for mock flows.
-   *
-   * For now this simply recomputes balances from Earn positions for the
-   * given profile and updates the formatted wallet state.
-   */
-  const applyEarnSupplyToWallet = (
-    profileId: number,
-  ): void => {
-    recomputeWalletFromEarnOverlay(profileId);
+  /** Call from feature layer after Earn deposit; pass useRepositoryEarn().positionsPools. */
+  const applyEarnSupplyToWallet = (profileId: number, earnPositions?: IEvmEarnPositionOverlay[]): void => {
+    recomputeWalletFromEarnOverlay(profileId, earnPositions);
   };
 
-  /**
-   * Sync helper that applies Earn "withdraw" (withdraw from Earn back to
-   * wallet) to the in-memory EVM wallet balances for mock flows.
-   *
-   * Implementation is symmetrical to applyEarnSupplyToWallet – we rely on
-   * positionsPools as the source of truth and simply recompute.
-   */
-  const applyEarnWithdrawToWallet = (
-    profileId: number,
-  ): void => {
-    recomputeWalletFromEarnOverlay(profileId);
+  /** Call from feature layer after Earn withdraw; pass useRepositoryEarn().positionsPools. */
+  const applyEarnWithdrawToWallet = (profileId: number, earnPositions?: IEvmEarnPositionOverlay[]): void => {
+    recomputeWalletFromEarnOverlay(profileId, earnPositions);
   };
 
-  const getEvmWalletByProfile = async (profileId: number) => {
-    try {
-      getEvmWalletState.value.loading = true;
-      getEvmWalletState.value.error = null;
+  const getEvmWalletByProfile = async (profileId: number, earnPositions?: IEvmEarnPositionOverlay[]) => {
+    const result = await withActionState(getEvmWalletState, async () => {
       const response = await apiClient.get<IEvmWalletDataResponse>(`/auth/wallet/${profileId}`);
-      baseWalletSnapshot.value = response.data as IEvmWalletDataResponse;
-
-      // Use snapshot + current Earn overlays to build the formatted wallet
-      recomputeWalletFromEarnOverlay(profileId);
-      return getEvmWalletState.value.data;
-    } catch (err) {
-      getEvmWalletState.value.error = err as Error;
-      getEvmWalletState.value.data = undefined;
-      if ((err as any)?.data?.statusCode !== 404) {
-        toasterErrorHandling(err, 'Failed to fetch EVM wallet');
-      }
-      throw err;
-    } finally {
-      getEvmWalletState.value.loading = false;
-    }
+      const data = response.data as IEvmWalletDataResponse;
+      baseWalletSnapshot.value = data;
+      recomputeWalletFromEarnOverlay(profileId, earnPositions);
+      return getEvmWalletState.value.data!;
+    });
+    return result;
   };
 
-  const withdrawFunds = async (body: IEvmWithdrawRequestBody) => {
-    try {
-      withdrawFundsState.value.loading = true;
-      withdrawFundsState.value.error = null;
+  const withdrawFunds = async (body: IEvmWithdrawRequestBody) =>
+    withActionState(withdrawFundsState, async () => {
       const response = await apiClient.post<IEvmWalletDataResponse>(`/auth/withdrawal`, body);
-      withdrawFundsState.value.data = response.data;
-      return withdrawFundsState.value.data;
-    } catch (err) {
-      withdrawFundsState.value.error = err as Error;
-      withdrawFundsState.value.data = undefined;
-      if ((err as any)?.data?.statusCode !== 404) {
-        toasterErrorHandling(err, 'Failed to withdraw funds');
-      }
-      throw err;
-    } finally {
-      withdrawFundsState.value.loading = false;
-    }
-  };
+      return response.data!;
+    });
 
-  const withdrawFundsOptions = async () => {
-    try {
-      withdrawFundsOptionsState.value.loading = true;
-      withdrawFundsOptionsState.value.error = null;
-      const response = await apiClient.options<any>(`/auth/withdrawal`);
-      withdrawFundsOptionsState.value.data = response.data;
-      return withdrawFundsOptionsState.value.data;
-    } catch (err) {
-      withdrawFundsOptionsState.value.error = err as Error;
-      withdrawFundsOptionsState.value.data = undefined;
-      toasterErrorHandling(err, 'Failed to fetch withdraw funds options');
-      throw err;
-    } finally {
-      withdrawFundsOptionsState.value.loading = false;
-    }
-  };
-
-  const exchangeTokens = async (body: IEvmExchangeRequestBody) => {
-    try {
-      exchangeTokensState.value.loading = true;
-      exchangeTokensState.value.error = null;
-      const response = await apiClient.post<IEvmExchangeResponse>(`/auth/exchange`, body);
-      exchangeTokensState.value.data = response.data;
+  const withdrawFundsOptions = async () =>
+    withActionState(withdrawFundsOptionsState, async () => {
+      const response = await apiClient.options<IEvmWalletDataResponse>(`/auth/withdrawal`);
       return response.data;
-    } catch (err) {
-      exchangeTokensState.value.error = err as Error;
-      exchangeTokensState.value.data = undefined;
-      toasterErrorHandling(err, 'Failed to exchange tokens');
-      throw err;
-    } finally {
-      exchangeTokensState.value.loading = false;
-    }
-  };
+    });
 
-  const exchangeTokensOptions = async () => {
-    try {
-      exchangeTokensOptionsState.value.loading = true;
-      exchangeTokensOptionsState.value.error = null;
-      const response = await apiClient.options<any>(`/auth/exchange`);
-      exchangeTokensOptionsState.value.data = response.data;
-      return exchangeTokensOptionsState.value.data;
-    } catch (err) {
-      exchangeTokensOptionsState.value.error = err as Error;
-      exchangeTokensOptionsState.value.data = undefined;
-      toasterErrorHandling(err, 'Failed to fetch exchange tokens options');
-      throw err;
-    } finally {
-      exchangeTokensOptionsState.value.loading = false;
-    }
-  };
+  const exchangeTokens = async (body: IEvmExchangeRequestBody) =>
+    withActionState(exchangeTokensState, async () => {
+      const response = await apiClient.post<IEvmExchangeResponse>(`/auth/exchange`, body);
+      return response.data!;
+    });
+
+  const exchangeTokensOptions = async () =>
+    withActionState(exchangeTokensOptionsState, async () => {
+      const response = await apiClient.options<IEvmExchangeResponse>(`/auth/exchange`);
+      return response.data;
+    });
 
 
   const updateNotificationData = (notification: INotification) => {
@@ -341,7 +275,7 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
 
     const setTempLoading = (flag: typeof isLoadingNotificationWallet | typeof isLoadingNotificationTransaction) => {
       flag.value = true;
-      setTimeout(() => { flag.value = false; }, 2000);
+      setTimeout(() => { flag.value = false; }, NOTIFICATION_LOADING_DURATION_MS);
     };
 
     const upsertTransaction = () => {
@@ -366,14 +300,13 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
         ...tokenFields,
       };
       
-      const index = wallet.transactions.findIndex((t: any) => t.id === objectId);
-      
+      const index = wallet.transactions.findIndex((t: IEvmTransactionDataResponse) => t.id === objectId);
+
       if (index !== -1) {
         Object.assign(wallet.transactions[index], mergedFields);
-        // Re-format the updated transaction
         Object.assign(
-          wallet.transactions[index], 
-          new EvmTransactionFormatter(wallet.transactions[index] as any).format()
+          wallet.transactions[index],
+          new EvmTransactionFormatter(wallet.transactions[index] as IEvmTransactionDataResponse).format()
         );
       } else {
         // Create a new transaction with required fields
@@ -407,35 +340,34 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
             : EvmTransactionStatusTypes.pending,
         };
         
-        Object.assign(newItem, new EvmTransactionFormatter(newItem as any).format());
+        Object.assign(newItem, new EvmTransactionFormatter(newItem as IEvmTransactionDataResponse).format());
         wallet.transactions.unshift(newItem);
       }
 
-      getEvmWalletState.value.data = new EvmWalletFormatter(wallet as any).format();
+      getEvmWalletState.value.data = new EvmWalletFormatter(wallet).format();
     };
 
     const upsertWallet = () => {
       setTempLoading(isLoadingNotificationWallet);
       Object.assign(wallet, fields);
 
-      getEvmWalletState.value.data = new EvmWalletFormatter(wallet as any).format();
+      getEvmWalletState.value.data = new EvmWalletFormatter(wallet).format();
     };
 
     const upsertBalance = () => {
       setTempLoading(isLoadingNotificationWallet);
       const addressFromFields = fields?.token?.address || '';
       if (objectId == null && !addressFromFields) return;
-      
-      const update: any = { ...fields };
+
+      const update: Record<string, unknown> = { ...fields };
       update.amount = Number(update.amount ?? 0);
       delete update.object_id;
 
-      // Convert balances array to map for easier manipulation
-      const balancesArray = wallet.balances as any[];
-      const balancesMap: Record<string, any> = {};
+      const balancesArray = (wallet.balances || []) as IEvmWalletBalances[];
+      const balancesMap: Record<string, IEvmWalletBalances> = {};
       
       // Convert array to map using address as key
-      balancesArray.forEach((balance: any) => {
+      balancesArray.forEach((balance: IEvmWalletBalances) => {
         if (balance.address) {
           balancesMap[balance.address] = { ...balance };
         }
@@ -466,7 +398,7 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
 
       // Convert map back to array
       wallet.balances = Object.values(balancesMap);
-      getEvmWalletState.value.data = new EvmWalletFormatter(wallet as any).format();
+      getEvmWalletState.value.data = new EvmWalletFormatter(wallet).format();
     };
 
     switch (obj) {
@@ -484,26 +416,8 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
     }
   };
 
-  const selectedIdAsDataIs = computed(() => selectedUserProfileData.value.id === selectedUserProfileId.value);
-  const canLoadEvmWalletData = computed(() => (
-    !hasRestrictedWalletBehavior(selectedUserProfileData.value)
-    && selectedIdAsDataIs.value && userLoggedIn.value
-    &&  selectedUserProfileData.value.isKycApproved && (selectedUserProfileId.value > 0)
-    && !getEvmWalletState.value.loading && (selectedUserProfileId.value > 0)));
-
-  const canLoadEvmWalletDataNotSelected = (profile: IProfileFormatted | undefined) => (
-    profile !== undefined
-    && !hasRestrictedWalletBehavior(profile)
-    && userLoggedIn.value
-    && profile.isKycApproved && (profile.id > 0)
-    && !getEvmWalletState.value.loading);
-
   const resetAll = () => {
-    getEvmWalletState.value = { loading: false, error: null, data: undefined };
-    withdrawFundsState.value = { loading: false, error: null, data: undefined };
-    withdrawFundsOptionsState.value = { loading: false, error: null, data: undefined };
-    exchangeTokensState.value = { loading: false, error: null, data: undefined };
-    exchangeTokensOptionsState.value = { loading: false, error: null, data: undefined };
+    resetActionStates();
     isLoadingNotificationTransaction.value = false;
     isLoadingNotificationWallet.value = false;
     baseWalletSnapshot.value = null;
@@ -516,8 +430,6 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
     withdrawFundsOptionsState,
     exchangeTokensState,
     exchangeTokensOptionsState,
-    canLoadEvmWalletData,
-    canLoadEvmWalletDataNotSelected,
     getEvmWalletByProfile,
     withdrawFunds,
     withdrawFundsOptions,

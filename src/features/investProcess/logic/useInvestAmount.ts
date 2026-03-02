@@ -1,5 +1,5 @@
 import {
-  computed, nextTick, onBeforeMount, ref, watch,
+  computed, nextTick, onBeforeMount, ref, watch, unref,
 } from 'vue';
 import { useRouter, useRoute, onBeforeRouteLeave } from 'vue-router';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
@@ -13,10 +13,16 @@ import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
 import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository';
 import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
+import { useRepositoryEarn } from 'InvestCommon/data/earn/earn.repository';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { FundingTypes } from 'InvestCommon/helpers/enums/general';
 import { storeToRefs } from 'pinia';
+import { reportError } from 'InvestCommon/domain/error/errorReporting';
+import {
+  canLoadWalletDataNotSelected,
+  canLoadEvmWalletDataNotSelected,
+} from 'InvestCommon/features/wallet/logic/walletLoadRules';
 
 
 export type formRef = {
@@ -51,6 +57,7 @@ export function useInvestAmount() {
   } = storeToRefs(walletRepository);
 
   const evmRepository = useRepositoryEvm();
+  const earnRepository = useRepositoryEarn();
   const {
     getEvmWalletState, evmWalletId,
   } = storeToRefs(evmRepository);
@@ -170,7 +177,7 @@ export function useInvestAmount() {
     return true;
   };
 
-  const updateData = (profileId?: number) => {
+  const updateData = async (profileId?: number) => {
     if (!userLoggedIn.value) return;
 
     const targetProfileId = profileId ?? selectedUserProfileId.value;
@@ -179,17 +186,36 @@ export function useInvestAmount() {
     );
     
     // Wallet data loading logic
-    const canLoadWallet = walletRepository.canLoadWalletDataNotSelected(targetProfile);
+    const canLoadWallet = canLoadWalletDataNotSelected(
+      targetProfile,
+      userLoggedIn.value,
+      getWalletState.value.loading,
+    );
     if (canLoadWallet) {
-      walletRepository.getWalletByProfile(targetProfileId);
+      try {
+        await walletRepository.getWalletByProfile(targetProfileId);
+      } catch (e) {
+        reportError(e, 'Failed to fetch wallet');
+      }
     } else if (getWalletState.value.data) {
       walletRepository.resetAll();
     }
-    
+
     // EVM wallet (crypto) data loading logic
-    const canLoadEvmWallet = evmRepository.canLoadEvmWalletDataNotSelected(targetProfile);
+    const canLoadEvmWallet = canLoadEvmWalletDataNotSelected(
+      targetProfile,
+      userLoggedIn.value,
+      getEvmWalletState.value.loading,
+    );
     if (canLoadEvmWallet) {
-      evmRepository.getEvmWalletByProfile(targetProfileId);
+      try {
+        await evmRepository.getEvmWalletByProfile(
+          targetProfileId,
+          unref(earnRepository.positionsPools) ?? [],
+        );
+      } catch (e) {
+        reportError(e, 'Failed to fetch EVM wallet');
+      }
     } else if (getEvmWalletState.value.data) {
       evmRepository.resetAll();
     }
@@ -263,13 +289,17 @@ export function useInvestAmount() {
 
     const { slug, id, profileId } = route.params;
     const dataToSend = buildAmountPayload();
-    await investmentRepository.setAmount(
-      slug as string,
-      id as string,
-      profileId as string,
-      dataToSend,
-    );
-
+    try {
+      await investmentRepository.setAmount(
+        slug as string,
+        id as string,
+        profileId as string,
+        dataToSend,
+      );
+    } catch (e) {
+      reportError(e, 'Failed to save investment step');
+      return;
+    }
 
     if (setAmountState.value.error) return;
 

@@ -37,13 +37,13 @@ vi.mock('InvestCommon/data/settings/settings.repository', () => ({
     setSettingsState: mockSetSettingsState,
     getAuthFlowState: mockGetAuthFlowState,
     getAuthFlow: mockGetAuthFlow,
-    setSettings: mockSetSettings
-  }))
+    setSettings: mockSetSettings,
+  })),
 }));
 
 const mockToast = vi.fn();
 vi.mock('UiKit/components/Base/VToast/use-toast', () => ({
-  useToast: vi.fn(() => ({ toast: mockToast }))
+  useToast: vi.fn(() => ({ toast: mockToast })),
 }));
 
 const mockModel = reactive({
@@ -62,12 +62,16 @@ vi.mock('UiKit/helpers/validation/useFormValidation', () => ({
     isValid: mockIsValid,
     onValidate: mockOnValidate,
     scrollToError: mockScrollToError,
-  }))
+  })),
 }));
 
 vi.mock('UiKit/helpers/validation/rules', () => ({
   passwordRule: { type: 'string', minLength: 8 },
-  errorMessageRule: { type: 'object' }
+  errorMessageRule: { type: 'object' },
+}));
+
+vi.mock('InvestCommon/domain/error/errorReporting', () => ({
+  reportError: vi.fn(),
 }));
 
 vi.mock('vue', async () => {
@@ -183,16 +187,13 @@ describe('useResetPassword', () => {
       expect(composable.isLoading.value).toBe(true);
       await resetPromise;
       expect(composable.isLoading.value).toBe(false);
-      
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+      const { reportError } = await import('InvestCommon/domain/error/errorReporting');
       mockGetAuthFlow.mockRejectedValueOnce(new Error('Network error'));
-      
       await composable.resetHandler();
-      
-      expect(consoleSpy).toHaveBeenCalledWith('Recovery failed:', expect.any(Error));
+
+      expect(reportError).toHaveBeenCalledWith(expect.any(Error), 'Failed to reset password');
       expect(composable.isLoading.value).toBe(false);
-      
-      consoleSpy.mockRestore();
     });
   });
 

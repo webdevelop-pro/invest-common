@@ -1,4 +1,4 @@
-import { computed, onMounted, ref, watch, nextTick } from 'vue';
+import { computed, onMounted, ref, watch, nextTick, unref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { EvmTransactionTypes } from 'InvestCommon/data/evm/evm.types';
@@ -10,6 +10,7 @@ import {
   ROUTE_EARN_RISK,
 } from 'InvestCommon/domain/config/enums/routes';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryDefiLlama, type DefiLlamaPoolEnriched, type DefiLlamaChartDataPoint, type DefiLlamaConfigData } from 'InvestCommon/data/3dParty/defillama.repository';
 import { useRepositoryEarn, type EarnPositionsResponse } from 'InvestCommon/data/earn/earn.repository';
 import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
@@ -22,6 +23,8 @@ import type { IEarnTransaction } from './components/composables/useEarnTransacti
 import { useRepositoryOffer } from 'InvestCommon/data/offer/offer.repository';
 import type { IOfferFormatted } from 'InvestCommon/data/offer/offer.types';
 import { mapOfferToRwaPool, type RwaEarnPoolFormatted } from 'InvestCommon/data/earn/rwaEarn.mapper';
+import { reportError } from 'InvestCommon/domain/error/errorReporting';
+import { canLoadEvmWalletData as canLoadEvmWalletDataRule } from 'InvestCommon/features/wallet/logic/walletLoadRules';
 
 const DEFAULT_STATS: StatItem[] = [
   {
@@ -56,7 +59,14 @@ export function useEarnDetail() {
     getProtocolConfigState,
   } = storeToRefs(defiLlamaRepo);
   const { positionsState, positionsPools } = storeToRefs(earnRepository);
-  const { getEvmWalletState, canLoadEvmWalletData } = storeToRefs(evmRepository);
+  const { getEvmWalletState } = storeToRefs(evmRepository);
+  const { userLoggedIn } = storeToRefs(useSessionStore());
+  const canLoadEvmWalletData = computed(() => canLoadEvmWalletDataRule(
+    selectedUserProfileData.value,
+    selectedUserProfileId.value,
+    userLoggedIn.value,
+    getEvmWalletState.value.loading,
+  ));
   const { getOffersState, getOfferOneState } = storeToRefs(offerRepository);
 
   // Pool data
@@ -259,7 +269,14 @@ export function useEarnDetail() {
   // Crypto wallet data management
   const updateCryptoWalletData = async () => {
     if (canLoadEvmWalletData.value && !getEvmWalletState.value.loading && !getEvmWalletState.value.error) {
-      await evmRepository.getEvmWalletByProfile(selectedUserProfileId.value);
+      try {
+        await evmRepository.getEvmWalletByProfile(
+          selectedUserProfileId.value,
+          unref(earnRepository.positionsPools) ?? [],
+        );
+      } catch (e) {
+        reportError(e, 'Failed to fetch EVM wallet');
+      }
     } else if (!canLoadEvmWalletData.value && getEvmWalletState.value.data) {
       evmRepository.resetAll();
     }
@@ -456,8 +473,8 @@ export function useEarnDetail() {
 
       if (rwaOfferSlug.value) {
         // Load single offer data for this RWA asset
-        await offerRepository.getOfferOne(String(rwaOfferSlug.value)).catch((err: Error) => {
-          console.warn('Failed to fetch RWA offer data:', err);
+        await offerRepository.getOfferOne(String(rwaOfferSlug.value)).catch((e) => {
+          reportError(e, 'Failed to load RWA offer');
         });
       }
     } else {
@@ -478,27 +495,31 @@ export function useEarnDetail() {
       // Fetch all data in parallel to show as we get it
       if (poolId.value) {
         // Fetch enriched pool data
-        defiLlamaRepo.getPoolEnriched(poolId.value).catch((err: Error) => {
-          console.warn('Failed to fetch enriched pool data:', err);
+        defiLlamaRepo.getPoolEnriched(poolId.value).catch((e) => {
+          reportError(e, 'Failed to load pool data');
         });
 
         // Fetch chart data
-        defiLlamaRepo.getPoolChart(poolId.value).catch((err: Error) => {
-          console.warn('Failed to fetch chart data:', err);
+        defiLlamaRepo.getPoolChart(poolId.value).catch((e) => {
+          reportError(e, 'Failed to load pool chart');
         });
 
         // Fetch protocol config if pool data is available
         if (poolData.value?.project) {
           const protocol = poolData.value.project.toLowerCase().replace(/\s+/g, '-');
-          defiLlamaRepo.getProtocolConfig(protocol).catch((err: Error) => {
-            console.warn('Failed to fetch protocol config:', err);
+          defiLlamaRepo.getProtocolConfig(protocol).catch((e) => {
+            reportError(e, 'Failed to load protocol config');
           });
         }
       }
     }
 
     // Load positions for "Your Position" tab (wallet already triggered at start of onMounted)
-    await earnRepository.getPositions(poolId.value, selectedUserProfileId.value);
+    try {
+      await earnRepository.getPositions(poolId.value, selectedUserProfileId.value);
+    } catch (e) {
+      reportError(e, 'Failed to load earn positions');
+    }
   });
 
   return {

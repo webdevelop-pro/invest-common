@@ -4,6 +4,7 @@ import QRCode from 'qrcode';
 import { useClipboard } from '@vueuse/core';
 import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
 import type { IEvmWalletDataFormatted } from 'InvestCommon/data/evm/evm.types';
+import { reportError } from 'InvestCommon/domain/error/errorReporting';
 
 export function useVFormAddFundsCrypto() {
   const evmRepository = useRepositoryEvm();
@@ -34,7 +35,7 @@ export function useVFormAddFundsCrypto() {
         },
       });
     } catch (error) {
-      console.error('Error generating QR code:', error);
+      reportError(error, 'Failed to generate QR code');
     } finally {
       isGeneratingQR.value = false;
     }

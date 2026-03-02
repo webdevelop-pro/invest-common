@@ -1,18 +1,25 @@
-import { ref, computed, watch } from 'vue';
-import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
+import { ref, computed } from 'vue';
+import { acceptHMRUpdate, defineStore } from 'pinia';
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import env from 'InvestCommon/domain/config/env';
-import { toasterErrorHandling } from 'InvestCommon/data/repository/error/toasterErrorHandling';
-import { createActionState } from 'InvestCommon/data/repository/repository';
-import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
+import { createRepositoryStates, withActionState } from 'InvestCommon/data/repository/repository';
 import { IKycTokenResponse } from './kyc.types';
 import { loadPlaidScriptOnce, PlaidHandler } from 'InvestCommon/data/plaid/loadPlaidScriptOnce';
 
-// Add Plaid window type
+// Plaid SDK types (narrow when reading; SDK does not ship types in this project)
+interface IPlaidCreateConfig {
+  token?: string;
+  onSuccess?: (publicToken: string, metadata: unknown) => void;
+  onLoad?: () => void;
+  onExit?: (err: unknown, metadata: unknown) => void;
+  onEvent?: (eventName: string, metadata: unknown) => void;
+  receivedRedirectUri?: string | null;
+}
+
 declare global {
   interface Window {
     Plaid: {
-      create: (config: any) => { open: () => void };
+      create: (config: IPlaidCreateConfig) => { open: () => void };
     };
   }
 }
@@ -21,16 +28,21 @@ declare global {
 let plaidHandler: PlaidHandler | null = null;
 let expectedLinkSessionId: string | null = null;
 
-export const useRepositoryKyc = defineStore('repository-kyc', () => {
-  // Dependencies
-  const apiClient = new ApiClient();
-  const { PLAID_URL } = env;
-  const profilesStore = useProfilesStore();
-  const { selectedUserProfileData } = storeToRefs(profilesStore);
+/** Delay (ms) before opening the Plaid Link UI after create. */
+const PLAID_OPEN_DELAY_MS = 1000;
 
-  // State
+type KycStates = {
+  tokenState: IKycTokenResponse;
+};
+
+export const useRepositoryKyc = defineStore('repository-kyc', () => {
+  const { PLAID_URL } = env;
+  const apiClient = new ApiClient(PLAID_URL);
+
+  const { tokenState, resetAll: resetActionStates } = createRepositoryStates<KycStates>({
+    tokenState: undefined,
+  });
   const kycToken = ref<IKycTokenResponse | null>(null);
-  const tokenState = createActionState<IKycTokenResponse>();
   const isPlaidLoading = ref(false);
   const isPlaidDone = ref(false);
 
@@ -41,75 +53,63 @@ export const useRepositoryKyc = defineStore('repository-kyc', () => {
   });
 
   // Generalized token creation
-  const createToken = async (profileId: number) => {
-    tokenState.value.loading = true;
-    tokenState.value.error = null;
-    try {
-      const response = await apiClient.post<IKycTokenResponse>(`${PLAID_URL}/auth/kyc/${profileId}`, {});
-      kycToken.value = response.data;
-      tokenState.value.data = response.data;
+  const createToken = async (profileId: number) =>
+    withActionState(tokenState, async () => {
+      const response = await apiClient.post<IKycTokenResponse>(`/auth/kyc/${profileId}`, {});
+      kycToken.value = response.data ?? null;
       return response.data;
-    } catch (err) {
-      tokenState.value.error = err as Error;
-      tokenState.value.data = undefined;
-      toasterErrorHandling(err, 'Failed to create KYC token');
-      throw err;
-    } finally {
-      tokenState.value.loading = false;
-    }
-  };
+    });
 
-  // Generalized Plaid KYC handler
-  const handlePlaidKyc = async (id: number) => {
-    if (!selectedUserProfileData.value?.id) return;
-
+  // Generalized Plaid KYC handler — caller must pass profileId (no store fallback).
+  const handlePlaidKyc = async (profileId: number) => {
     isPlaidLoading.value = true;
     isPlaidDone.value = false;
     try {
-      await createToken(id || selectedUserProfileData.value.id);
+      await createToken(profileId);
       if (kycToken.value && kycToken.value.link_token) {
         await loadPlaidScriptOnce();
         expectedLinkSessionId = null;
         plaidHandler = window?.Plaid.create({
           token: kycToken.value?.link_token,
-          onSuccess: (publicToken: string, metadata: any) => {
-            if (expectedLinkSessionId && metadata?.link_session_id !== expectedLinkSessionId) return;
+          onSuccess: (publicToken: string, metadata: unknown) => {
+            const linkSessionId = metadata && typeof metadata === 'object' && 'link_session_id' in metadata
+              ? (metadata as { link_session_id?: string }).link_session_id
+              : undefined;
+            if (expectedLinkSessionId && linkSessionId !== expectedLinkSessionId) return;
             isPlaidLoading.value = false;
             isPlaidDone.value = true;
           },
           onLoad: () => {
-            console.log('plaid own onload event');
+            if (import.meta.env.DEV) console.debug('[KYC Plaid] onLoad');
           },
-          onExit: (err: unknown, metadata: any) => {
-            console.log('plaid on exit event', err, metadata);
-            console.log('update account with failed kyc status');
+          onExit: (err: unknown, metadata: unknown) => {
+            if (import.meta.env.DEV) console.debug('[KYC Plaid] onExit', err, metadata);
             isPlaidLoading.value = false;
           },
-          onEvent: (eventName: string, metadata: any) => {
-            if (!expectedLinkSessionId && metadata?.link_session_id) {
-              expectedLinkSessionId = metadata.link_session_id;
+          onEvent: (eventName: string, metadata: unknown) => {
+            const linkSessionId = metadata && typeof metadata === 'object' && 'link_session_id' in metadata
+              ? (metadata as { link_session_id: string }).link_session_id
+              : undefined;
+            if (!expectedLinkSessionId && linkSessionId) {
+              expectedLinkSessionId = linkSessionId;
             }
-            console.log('plaid on event', eventName, metadata);
+            if (import.meta.env.DEV) console.debug('[KYC Plaid] onEvent', eventName, metadata);
           },
           receivedRedirectUri: null,
         });
-        setTimeout(() => { if (plaidHandler) plaidHandler.open(); }, 1000);
+        setTimeout(() => { if (plaidHandler) plaidHandler.open(); }, PLAID_OPEN_DELAY_MS);
       }
     } catch (err) {
       isPlaidLoading.value = false;
-      toasterErrorHandling(err, 'Failed to handle Plaid KYC');
+      throw err;
     }
   };
 
   // Reset all state
   const resetAll = () => {
     kycToken.value = null;
-    tokenState.value = { loading: false, error: null, data: undefined };
+    resetActionStates();
   };
-
-  watch(() => selectedUserProfileData.value.kyc_status, () => {
-    isPlaidDone.value = false;
-  });
 
   return {
     kycToken,

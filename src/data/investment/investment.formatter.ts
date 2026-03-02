@@ -5,6 +5,7 @@ import {
   IInvestmentFormatted,
   InvestStepTypes,
 } from './investment.types';
+import { FundingTypes } from 'InvestCommon/helpers/enums/general';
 import { OfferFormatter } from 'InvestCommon/data/offer/offer.formatter';
 import { IOffer } from 'InvestCommon/types/api/offers';
 
@@ -138,7 +139,7 @@ export class InvestmentFormatter {
   }
 
   get isFundingTypeWire() {
-    return this.investment?.funding_type === 'wire';
+    return this.investment?.funding_type === FundingTypes.wire;
   }
 
   get statusFormatted() {
@@ -206,7 +207,7 @@ export class InvestmentFormatter {
       status: InvestmentStatuses.confirmed,
       created_at: new Date(),
       submited_at: new Date(),
-      funding_type: 'wire' as any,
+      funding_type: FundingTypes.wire,
       funding_status: InvestFundingStatuses.none,
       signature_data: {
         created_at: '',
@@ -234,6 +235,7 @@ export class InvestmentFormatter {
       escrow_type: '',
       entity_id: '',
       transaction_ref: '',
+      notes: undefined,
     };
   }
 

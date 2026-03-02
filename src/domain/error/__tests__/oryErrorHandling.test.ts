@@ -4,7 +4,7 @@ import {
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
-import { oryErrorHandling } from './oryErrorHandling';
+import { oryErrorHandling } from '../oryErrorHandling';
 
 // Mock the dependencies
 vi.mock('UiKit/components/Base/VToast/use-toast', () => ({
@@ -63,7 +63,13 @@ describe('oryErrorHandling', () => {
     } as any;
 
     oryErrorHandling(error, 'login', mockResetFlow, 'test');
-    expect(error.message).toBe('Invalid email or password.');
+    expect(mockToast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'test',
+        description: 'Invalid email or password.',
+        variant: 'error',
+      }),
+    );
   });
 
   it('should handle session_already_available error', () => {
@@ -213,7 +219,7 @@ describe('oryErrorHandling', () => {
     expect(navigateWithQueryParams).toHaveBeenCalledWith('urlSignin');
   });
 
-  it('should handle unknown error with toasterErrorHandling', () => {
+  it('should handle unknown error with reportError', () => {
     const error = {
       data: {
         responseJson: {
@@ -223,9 +229,12 @@ describe('oryErrorHandling', () => {
     };
 
     oryErrorHandling(error as any, 'login', mockResetFlow, 'test');
-    // Note: We can't directly test toasterErrorHandling since it's imported
-    // but we can verify that other handlers weren't called
-    expect(mockToast).not.toHaveBeenCalled();
+    expect(mockToast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'test',
+        variant: 'error',
+      }),
+    );
     expect(mockResetFlow).not.toHaveBeenCalled();
     expect(navigateWithQueryParams).not.toHaveBeenCalled();
   });
@@ -238,9 +247,12 @@ describe('oryErrorHandling', () => {
     };
 
     oryErrorHandling(error as any, 'login', mockResetFlow, 'test');
-    // Note: We can't directly test toasterErrorHandling since it's imported
-    // but we can verify that other handlers weren't called
-    expect(mockToast).not.toHaveBeenCalled();
+    expect(mockToast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'test',
+        variant: 'error',
+      }),
+    );
     expect(mockResetFlow).not.toHaveBeenCalled();
     expect(navigateWithQueryParams).not.toHaveBeenCalled();
   });

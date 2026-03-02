@@ -3,25 +3,29 @@ import { setActivePinia, createPinia } from 'pinia';
 import { ref, nextTick } from 'vue';
 
 vi.mock('InvestCommon/data/settings/settings.repository', () => ({
-  useRepositorySettings: vi.fn()
+  useRepositorySettings: vi.fn(),
 }));
 
 vi.mock('UiKit/components/Base/VToast/use-toast', () => ({
-  useToast: vi.fn()
+  useToast: vi.fn(),
 }));
 
 vi.mock('UiKit/helpers/general', () => ({
-  navigateWithQueryParams: vi.fn()
+  navigateWithQueryParams: vi.fn(),
 }));
 
 vi.mock('InvestCommon/domain/config/links.ts', () => ({
-  urlResetPassword: '/reset-password'
+  urlResetPassword: '/reset-password',
 }));
 
 vi.mock('InvestCommon/features/settings/utils', () => ({
   SELFSERVICE: {
-    settings: '/self-service/settings/browser'
-  }
+    settings: '/self-service/settings/browser',
+  },
+}));
+
+vi.mock('InvestCommon/domain/error/errorReporting', () => ({
+  reportError: vi.fn(),
 }));
 
 import { useSettingsMfa } from '../useSettingsMfa';
@@ -161,7 +165,11 @@ describe('useSettingsMfa', () => {
       const error = new Error('API Error');
       mockSettingsRepository.setSettings.mockRejectedValueOnce(error);
 
-      await expect(composable.onMfaClick()).rejects.toThrow('API Error');
+      const { reportError } = await import('InvestCommon/domain/error/errorReporting');
+
+      await composable.onMfaClick();
+
+      expect(reportError).toHaveBeenCalledWith(error, 'Failed to unlink MFA');
     });
 
     it('should not show toast when unlinking fails', async () => {

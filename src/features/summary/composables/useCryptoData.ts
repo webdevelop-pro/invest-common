@@ -1,8 +1,8 @@
 import { computed, onMounted, ref } from 'vue';
 import { storeToRefs } from 'pinia';
-import { useRepositoryCryptoo, type CryptooId } from 'InvestCommon/data/3dParty/crypto.repository';
+import { useRepositoryCrypto, type CryptoId } from 'InvestCommon/data/3dParty/crypto.repository';
 
-export type SupportedCoinId = CryptooId;
+export type SupportedCoinId = CryptoId;
 
 const COIN_IDS: SupportedCoinId[] = [
   'bitcoin',
@@ -34,7 +34,7 @@ const COIN_NAMES: Record<SupportedCoinId, string> = {
 
 export function useCryptoData() {
   const durationSec = ref(80);
-  const cryptoRepo = useRepositoryCryptoo();
+  const cryptoRepo = useRepositoryCrypto();
   const { getPricesState } = storeToRefs(cryptoRepo);
 
   const cryptoItems = computed(() => {

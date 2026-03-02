@@ -1,43 +1,34 @@
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
-import { toasterErrorHandling } from 'InvestCommon/data/repository/error/toasterErrorHandling';
 import env from 'InvestCommon/domain/config/env';
-import { createActionState } from 'InvestCommon/data/repository/repository';
+import { createRepositoryStates, withActionState } from 'InvestCommon/data/repository/repository';
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { IDistributions, IDistributionsMeta } from 'InvestCommon/data/distributions/distributions.types';
+import { IDistributions, IDistributionsMeta, IDistributionFormatted } from 'InvestCommon/data/distributions/distributions.types';
 import { ref, computed } from 'vue';
 
 const { DISTRIBUTIONS_URL } = env;
 
+type DistributionsStates = {
+  getDistributionsState: IDistributionFormatted[];
+};
+
 export const useRepositoryDistributions = defineStore('repository-distributions', () => {
   const apiClient = new ApiClient(DISTRIBUTIONS_URL);
 
-  // Create action states for each function
-  const getDistributionsState = createActionState<IDistributions>();
+  const { getDistributionsState, resetAll: resetActionStates } = createRepositoryStates<DistributionsStates>({
+    getDistributionsState: undefined,
+  });
   const getDistributionsMetaState = ref<IDistributionsMeta>();
 
-  const getDistributions = async (profileId?: string) => {
-    try {
-      getDistributionsState.value.loading = true;
-      getDistributionsState.value.error = null;
-      
-      const response = await apiClient.get(`/auth/${profileId}/distribution`);
-
-      getDistributionsState.value.data = response.data.data || [];
-      getDistributionsMetaState.value = response.data.meta;
-      return getDistributionsState.value.data;
-    } catch (err) {
-      getDistributionsState.value.error = err as Error;
-      getDistributionsState.value.data = undefined;
-      toasterErrorHandling(err, 'Failed to fetch distributions');
-      throw err;
-    } finally {
-      getDistributionsState.value.loading = false;
-    }
-  };
-
+  const getDistributions = async (profileId?: string) =>
+    withActionState(getDistributionsState, async () => {
+      const response = await apiClient.get<IDistributions>(`/auth/${profileId}/distribution`);
+      const list = response.data?.data || [];
+      getDistributionsMetaState.value = response.data?.meta;
+      return list;
+    });
 
   const resetAll = () => {
-    getDistributionsState.value = { loading: false, error: null, data: undefined };
+    resetActionStates();
     getDistributionsMetaState.value = undefined;
   };
 

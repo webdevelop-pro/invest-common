@@ -8,7 +8,9 @@ import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { emailRule, errorMessageRule, passwordRule } from 'UiKit/helpers/validation/rules';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
-import { SELFSERVICE } from './type';
+import { SELFSERVICE } from 'InvestCommon/data/auth/auth.constants';
+import { oryErrorHandling } from 'InvestCommon/domain/error/oryErrorHandling';
+import { oryResponseHandling } from 'InvestCommon/domain/error/oryResponseHandling';
 
 type FormModelSignIn = {
   email: string;
@@ -83,7 +85,8 @@ export const useLoginRefreshStore = defineStore('loginRefresh', () => {
 
     isLoading.value = true;
     try {
-      await authRepository.getAuthFlow(SELFSERVICE.login, { refresh: true });
+      const flowData = await authRepository.getAuthFlow(SELFSERVICE.login, { refresh: true });
+      oryResponseHandling(flowData);
       if (getAuthFlowState.value.error) {
         isLoading.value = false;
         return;
@@ -106,7 +109,7 @@ export const useLoginRefreshStore = defineStore('loginRefresh', () => {
         completeSessionRefresh(true); // Success - complete the session refresh
       }
     } catch (error) {
-      console.error('Login failed:', error);
+      await oryErrorHandling(error as any, 'login', () => authRepository.getAuthFlow(SELFSERVICE.login, { refresh: true }), 'Failed to login');
       completeSessionRefresh(false); // Failure - complete with false
     } finally {
       isLoading.value = false;
@@ -119,7 +122,8 @@ export const useLoginRefreshStore = defineStore('loginRefresh', () => {
     try {
       const flowId = getQueryParam('flow');
       if (!flowId) {
-        await authRepository.getAuthFlow(SELFSERVICE.login, { refresh: true });
+        const flowData = await authRepository.getAuthFlow(SELFSERVICE.login, { refresh: true });
+        oryResponseHandling(flowData);
         if (getAuthFlowState.value.error) return;
       }
 
@@ -135,7 +139,7 @@ export const useLoginRefreshStore = defineStore('loginRefresh', () => {
         completeSessionRefresh(true); // Success
       }
     } catch (error) {
-      console.error('Social login failed:', error);
+      await oryErrorHandling(error as any, 'login', () => authRepository.getAuthFlow(SELFSERVICE.login, { refresh: true }), 'Failed to login');
       completeSessionRefresh(false); // Failure
     } finally {
       isLoading.value = false;

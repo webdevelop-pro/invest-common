@@ -14,6 +14,7 @@ import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { FormChild } from 'InvestCommon/types/form';
 import { useRepositoryAccreditation } from 'InvestCommon/data/accreditation/accreditation.repository';
 import { useRepositoryKyc } from 'InvestCommon/data/kyc/kyc.repository';
+import { reportError } from 'InvestCommon/domain/error/errorReporting';
 
 export const useFormFinancialInformationAndKyc = () => {
   const router = useRouter();
@@ -105,7 +106,7 @@ export const useFormFinancialInformationAndKyc = () => {
         selectedUserProfileType.value,
         selectedUserProfileId.value,
       );
-      if (!setProfileByIdState.value.error) await useRepositoryKycStore.handlePlaidKyc();
+      if (!setProfileByIdState.value.error) await useRepositoryKycStore.handlePlaidKyc(selectedUserProfileId.value);
 
       useRepositoryProfilesStore.setUser({ phone: fields?.phone });
       useRepositoryProfilesStore.getUser();
@@ -133,6 +134,8 @@ export const useFormFinancialInformationAndKyc = () => {
           params: { profileId: selectedUserProfileId.value },
         });
       }
+    } catch (error) {
+      reportError(error, 'Failed to save KYC and financial information');
     } finally {
       isLoading.value = false;
     }

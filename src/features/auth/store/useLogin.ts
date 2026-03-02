@@ -10,7 +10,9 @@ import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { emailRule, errorMessageRule, passwordRule } from 'UiKit/helpers/validation/rules';
 import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
-import { SELFSERVICE } from './type';
+import { SELFSERVICE } from 'InvestCommon/data/auth/auth.constants';
+import { oryErrorHandling } from 'InvestCommon/domain/error/oryErrorHandling';
+import { oryResponseHandling } from 'InvestCommon/domain/error/oryResponseHandling';
 
 type FormModelSignIn = {
   email: string;
@@ -100,7 +102,8 @@ export const useLoginStore = defineStore('login', () => {
 
     isLoading.value = true;
     try {
-      await authRepository.getAuthFlow(SELFSERVICE.login);
+      const flowData = await authRepository.getAuthFlow(SELFSERVICE.login);
+      oryResponseHandling(flowData);
       if (getAuthFlowState.value.error) {
         isLoading.value = false;
         return;
@@ -122,7 +125,7 @@ export const useLoginStore = defineStore('login', () => {
         handleLoginSuccess(setLoginState.value.data.session);
       }
     } catch (error) {
-      console.error('Login failed:', error);
+      await oryErrorHandling(error as any, 'login', () => authRepository.getAuthFlow(SELFSERVICE.login), 'Failed to login');
     } finally {
       isLoading.value = false;
     }
@@ -134,7 +137,8 @@ export const useLoginStore = defineStore('login', () => {
     try {
       const flowId = getQueryParam('flow');
       console.log('Using query flow ID:', flowId);
-      await authRepository.getAuthFlow(SELFSERVICE.login);
+      const flowData = await authRepository.getAuthFlow(SELFSERVICE.login);
+      oryResponseHandling(flowData);
       if (getAuthFlowState.value.error) return;
 
       await authRepository.setLogin(flowId || authRepository.flowId.value, {
@@ -143,7 +147,7 @@ export const useLoginStore = defineStore('login', () => {
         method: 'oidc',
       });
     } catch (error) {
-      console.error('Social login failed:', error);
+      await oryErrorHandling(error as any, 'login', () => authRepository.getAuthFlow(SELFSERVICE.login), 'Failed to login');
     } finally {
       isLoading.value = false;
     }
@@ -151,9 +155,14 @@ export const useLoginStore = defineStore('login', () => {
 
   const onMountedHandler = async () => {
     if (getQueryParam('flow')) {
-      await authRepository.getLogin(getQueryParam('flow')!);
-      if (getLoginState.value.data.requested_aal === 'aal2') {
-        navigateWithQueryParams(urlAuthenticator);
+      try {
+        const data = await authRepository.getLogin(getQueryParam('flow')!);
+        oryResponseHandling(data);
+        if (getLoginState.value.data?.requested_aal === 'aal2') {
+          navigateWithQueryParams(urlAuthenticator);
+        }
+      } catch (error) {
+        await oryErrorHandling(error as any, 'login', () => authRepository.getAuthFlow(SELFSERVICE.login), 'Failed to get login data');
       }
     }
   };

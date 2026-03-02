@@ -1,9 +1,16 @@
-import { computed, nextTick, onBeforeMount, watch } from 'vue';
+import { computed, nextTick, onBeforeMount, watch, unref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
+import { useRepositoryEarn } from 'InvestCommon/data/earn/earn.repository';
+import { reportError } from 'InvestCommon/domain/error/errorReporting';
 import { currency } from 'InvestCommon/helpers/currency';
+import {
+  canLoadWalletData as canLoadWalletDataRule,
+  canLoadEvmWalletData as canLoadEvmWalletDataRule,
+} from './walletLoadRules';
 
 let walletWatchersInitialized = false;
 
@@ -21,10 +28,25 @@ function formatBalanceParts(value: number): { main: number; mainFormatted: strin
 export function useWallet() {
   const profilesStore = useProfilesStore();
   const { selectedUserProfileData, selectedUserProfileId } = storeToRefs(profilesStore);
+  const { userLoggedIn } = storeToRefs(useSessionStore());
   const walletRepository = useRepositoryWallet();
-  const { getWalletState, canLoadWalletData } = storeToRefs(walletRepository);
+  const { getWalletState } = storeToRefs(walletRepository);
   const evmRepository = useRepositoryEvm();
-  const { getEvmWalletState, canLoadEvmWalletData } = storeToRefs(evmRepository);
+  const earnRepository = useRepositoryEarn();
+  const { getEvmWalletState } = storeToRefs(evmRepository);
+
+  const canLoadWalletData = computed(() => canLoadWalletDataRule(
+    selectedUserProfileData.value,
+    selectedUserProfileId.value,
+    userLoggedIn.value,
+    getWalletState.value.loading,
+  ));
+  const canLoadEvmWalletData = computed(() => canLoadEvmWalletDataRule(
+    selectedUserProfileData.value,
+    selectedUserProfileId.value,
+    userLoggedIn.value,
+    getEvmWalletState.value.loading,
+  ));
 
   const fiatBalance = computed(() => getWalletState.value.data?.currentBalance ?? 0);
   const fiatParts = computed(() => formatBalanceParts(fiatBalance.value));
@@ -95,7 +117,11 @@ export function useWallet() {
 
   const updateWalletData = async () => {
     if (canLoadWalletData.value && !getWalletState.value.loading && !getWalletState.value.error) {
-      await walletRepository.getWalletByProfile(selectedUserProfileId.value);
+      try {
+        await walletRepository.getWalletByProfile(selectedUserProfileId.value);
+      } catch (e) {
+        reportError(e, 'Failed to fetch wallet');
+      }
     } else if (!canLoadWalletData.value && getWalletState.value.data) {
       walletRepository.resetAll();
     }
@@ -103,7 +129,14 @@ export function useWallet() {
 
   const updateCryptoWalletData = async () => {
     if (canLoadEvmWalletData.value && !getEvmWalletState.value.loading && !getEvmWalletState.value.error) {
-      await evmRepository.getEvmWalletByProfile(selectedUserProfileId.value);
+      try {
+        await evmRepository.getEvmWalletByProfile(
+          selectedUserProfileId.value,
+          unref(earnRepository.positionsPools) ?? [],
+        );
+      } catch (e) {
+        reportError(e, 'Failed to fetch EVM wallet');
+      }
     } else if (!canLoadEvmWalletData.value && getEvmWalletState.value.data) {
       evmRepository.resetAll();
     }

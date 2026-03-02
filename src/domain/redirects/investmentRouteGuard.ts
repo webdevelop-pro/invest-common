@@ -3,6 +3,7 @@ import { computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
 import { usePageSeo } from 'InvestCommon/shared/composables/usePageSeo';
+import { reportError } from 'InvestCommon/domain/error/errorReporting';
 
 const { setMetaData } = usePageSeo();
 
@@ -13,26 +14,30 @@ export const createInvestmentRouteGuard = (seoTitle: string, seoDescription: str
       seo_description: seoDescription,
       canonical: to.fullPath,
     });
-    
+
     const investmentRepository = useRepositoryInvestment();
     const { getInvestOneState, getInvestmentsState } = storeToRefs(investmentRepository);
-    
-    if (!getInvestmentsState.value.data?.data?.length) {
-      await investmentRepository.getInvestments(to?.params?.profileId as string);
-    }
 
-    // Check if investment ID exists in the investments array
-    const investmentID = computed(() => to?.params?.id);
-    const investmentExists = getInvestmentsState.value.data?.data?.some(
-      (investment: any) => String(investment.id) === investmentID.value,
-    );
+    try {
+      if (!getInvestmentsState.value.data?.data?.length) {
+        await investmentRepository.getInvestments(to?.params?.profileId as string);
+      }
 
-    if (!investmentExists) {
+      const investmentID = computed(() => to?.params?.id);
+      const investmentExists = getInvestmentsState.value.data?.data?.some(
+        (investment: any) => String(investment.id) === investmentID.value,
+      );
+
+      if (!investmentExists) {
+        return '/error/404';
+      }
+
+      if (investmentID.value && (String(getInvestOneState.value.data?.id) !== investmentID.value)) {
+        await investmentRepository.getInvestOne(String(investmentID.value));
+      }
+    } catch (error) {
+      reportError(error, 'Failed to load investment');
       return '/error/404';
-    }
-
-    if (investmentID.value && (String(getInvestOneState.value.data?.id) !== investmentID.value)) {
-      investmentRepository.getInvestOne(String(investmentID.value));
     }
   };
 }; 

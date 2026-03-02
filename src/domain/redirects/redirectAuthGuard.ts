@@ -6,8 +6,19 @@ import { urlSignin } from 'InvestCommon/domain/config/links';
 import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
 import { resetAllData } from 'InvestCommon/domain/resetAllData';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
+import { reportError } from 'InvestCommon/domain/error/errorReporting';
 // import { useDomainWebSocketStore } from 'InvestCommon/domain/websockets/store/useWebsockets';
 import { ISession } from 'InvestCommon/types/api/auth';
+
+/**
+ * Shared 401 / unauthorized redirect: reset state and go to sign-in with optional return URL.
+ * Used by the auth guard and by the global error handler (onUnauthorized).
+ */
+export function redirectToSigninForUnauthorized(redirectPath?: string): void {
+  resetAllData();
+  const redirect = redirectPath ?? window.location.href;
+  navigateWithQueryParams(urlSignin, { redirect });
+}
 
 /**
  * Handles authentication and session management for route navigation
@@ -36,9 +47,7 @@ export const redirectAuthGuard = async (
       if (to.path.includes('/signin') || to.path.includes('/signup')) {
         return;
       }
-      resetAllData();
-      const redirectUrl = `${window.location.origin}${to.fullPath}`;
-      navigateWithQueryParams(urlSignin, { redirect: redirectUrl });
+      redirectToSigninForUnauthorized(`${window.location.origin}${to.fullPath}`);
     };
 
     // Not logged in: try to get session from server
@@ -49,6 +58,11 @@ export const redirectAuthGuard = async (
         await userSessionStore.updateSession(session);
         profilesStore.init();
         return;
+      }
+
+      // Session invalid or 401 — clear any stale session/cookies (repository no longer mutates session)
+      if (session === null) {
+        resetAllData();
       }
 
       if (to.meta.requiresAuth) {
@@ -87,7 +101,7 @@ export const redirectAuthGuard = async (
     // Authenticated and session present: allow navigation
     return;
   } catch (error) {
-    console.error('Auth guard error:', error);
+    reportError(error, 'Auth guard');
     resetAllData();
     return;
   }

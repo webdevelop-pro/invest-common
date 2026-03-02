@@ -7,7 +7,9 @@ import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { codeRule, errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
-import { SELFSERVICE } from './type';
+import { SELFSERVICE } from 'InvestCommon/data/auth/auth.constants';
+import { oryErrorHandling } from 'InvestCommon/domain/error/oryErrorHandling';
+import { oryResponseHandling } from 'InvestCommon/domain/error/oryResponseHandling';
 
 type FormModelVerification = {
   code: string;
@@ -86,7 +88,8 @@ export const useVerificationStore = defineStore('verification', () => {
 
     isLoading.value = true;
     try {
-      await authRepository.getAuthFlow(SELFSERVICE.recovery);
+      const flowData = await authRepository.getAuthFlow(SELFSERVICE.recovery);
+      oryResponseHandling(flowData);
       if (getAuthFlowState.value.error) {
         isLoading.value = false;
         return;
@@ -113,7 +116,7 @@ export const useVerificationStore = defineStore('verification', () => {
         });
       }
     } catch (error) {
-      console.error('Recovery failed:', error);
+      await oryErrorHandling(error as any, 'recovery', () => authRepository.getAuthFlow(SELFSERVICE.recovery), 'Failed to set recovery');
     } finally {
       isLoading.value = false;
     }

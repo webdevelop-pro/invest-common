@@ -9,6 +9,7 @@ import { storeToRefs } from 'pinia';
 import VSectionCardOfferGrid from 'UiKit/components/VCard/VSectionCardOfferGrid.vue';
 import { useRoute } from 'vitepress';
 import { useRepositoryOffer } from 'InvestCommon/data/offer/offer.repository';
+import { reportError } from 'InvestCommon/domain/error/errorReporting';
 
 const VSliderSectionCardOffer = defineAsyncComponent({
   loader: () => import('UiKit/components/VSlider/VSliderSectionCardOffer.vue'),
@@ -24,7 +25,10 @@ const showClosed = computed(() => ((offersClosed.value?.length || 0) > 0));
 
 useGlobalLoader().hide();
 
-if (!getOffersState.value.data) offerRepository.getOffers();
+if (!getOffersState.value.data) {
+  offerRepository.getOffers()
+    .catch((e) => reportError(e, 'Failed to load offers'));
+}
 const route = useRoute();
 
 watch(

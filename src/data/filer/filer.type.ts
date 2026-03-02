@@ -27,3 +27,9 @@ export interface IFilerItemFormatted extends IFilerItem {
     tagColor?: string;
     typeFormatted: string;
 }
+
+/** Response shape from the sign URL (post signurl) endpoint. */
+export interface IPostSignurlResponse {
+  url?: string;
+  meta?: { id?: string };
+}

@@ -13,7 +13,6 @@ const getWalletStateRef = ref({
   loading: false,
   error: null as Error | null,
 });
-const canLoadWalletDataRef = ref(true);
 
 const getEvmWalletStateRef = ref({
   data: {
@@ -24,15 +23,14 @@ const getEvmWalletStateRef = ref({
   loading: false,
   error: null as Error | null,
 });
-const canLoadEvmWalletDataRef = ref(true);
 const selectedUserProfileDataRef = ref({
   id: 1,
+  isKycApproved: true,
   isKycNone: false,
   isKycNew: false,
   isKycPending: false,
   isKycInProgress: false,
   isKycDeclined: false,
-  isKycApproved: false,
   isTypeSdira: false,
   isTypeSolo401k: false,
   isTypeTrust: false,
@@ -44,8 +42,6 @@ const getProfileByIdStateRef = ref({ loading: false });
 vi.mock('InvestCommon/data/wallet/wallet.repository', () => ({
   useRepositoryWallet: () => ({
     getWalletState: getWalletStateRef,
-    canLoadWalletData: canLoadWalletDataRef,
-    // Minimal mocks for Plaid link states used in useWalletAlert
     createLinkExchangeState: ref({ loading: false, error: null, data: null }),
     createLinkProcessState: ref({ loading: false, error: null, data: null }),
   }),
@@ -53,7 +49,6 @@ vi.mock('InvestCommon/data/wallet/wallet.repository', () => ({
 vi.mock('InvestCommon/data/evm/evm.repository', () => ({
   useRepositoryEvm: () => ({
     getEvmWalletState: getEvmWalletStateRef,
-    canLoadEvmWalletData: canLoadEvmWalletDataRef,
   }),
 }));
 vi.mock('InvestCommon/data/profiles/profiles.repository', () => ({
@@ -115,8 +110,6 @@ describe('useWalletAlert', () => {
     };
     selectedUserProfileIdRef.value = 1;
     getProfileByIdStateRef.value = { loading: false };
-    canLoadWalletDataRef.value = true;
-    canLoadEvmWalletDataRef.value = true;
     mockPush.mockClear();
   });
 

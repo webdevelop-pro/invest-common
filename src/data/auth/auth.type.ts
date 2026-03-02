@@ -130,7 +130,7 @@ export interface IAuthFlow {
   requestred_aal?: string;
   return_to: string;
   session_token_exchange_code?: string;
-  state: any;
+  state: unknown;
   transient_payload: object;
 }
 

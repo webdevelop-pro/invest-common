@@ -82,7 +82,9 @@ vi.mock('InvestCommon/data/earn/earn.repository', () => ({
 }));
 
 vi.mock('InvestCommon/data/evm/evm.repository', () => ({
-  useRepositoryEvm: vi.fn(() => ({})),
+  useRepositoryEvm: vi.fn(() => ({
+    applyEarnSupplyToWallet: vi.fn(),
+  })),
 }));
 
 describe('useEarnDepositCard', () => {

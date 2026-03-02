@@ -83,6 +83,10 @@ vi.mock('InvestCommon/domain/config/env', () => ({
   },
 }));
 
+vi.mock('InvestCommon/domain/error/errorReporting', () => ({
+  reportError: vi.fn(),
+}));
+
 const mockPersonalFormRef = {
   value: {
     isValid: true,
@@ -231,8 +235,15 @@ describe('useFormFinancialInformationAndKyc', () => {
 
     it('should handle setProfileById error gracefully', async () => {
       mockRepositoryProfiles.setProfileById.mockRejectedValue(new Error('fail'));
-      await expect(composable.handleSave()).rejects.toThrow('fail');
+      const { reportError } = await import('InvestCommon/domain/error/errorReporting');
+
+      await composable.handleSave();
+
       expect(mockRepositoryProfiles.setProfileById).toHaveBeenCalled();
+      expect(reportError).toHaveBeenCalledWith(
+        expect.any(Error),
+        'Failed to save KYC and financial information',
+      );
       expect(composable.isLoading.value).toBe(false);
     });
 

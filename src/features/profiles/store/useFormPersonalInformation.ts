@@ -12,6 +12,7 @@ import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryAccreditation } from 'InvestCommon/data/accreditation/accreditation.repository';
+import { reportError } from 'InvestCommon/domain/error/errorReporting';
 
 export const useFormPersonalInformation = () => {
   const router = useRouter();
@@ -87,7 +88,7 @@ export const useFormPersonalInformation = () => {
             selectedUserProfileData.value?.id,
           );
         } catch (error) {
-          console.error('Error creating escrow:', error);
+          reportError(error, 'Failed to create escrow');
         }
       }
       if (!setProfileByIdState.value.error) {

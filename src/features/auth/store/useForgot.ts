@@ -8,7 +8,9 @@ import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
 import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { emailRule, errorMessageRule } from 'UiKit/helpers/validation/rules';
-import { SELFSERVICE } from './type';
+import { SELFSERVICE } from 'InvestCommon/data/auth/auth.constants';
+import { oryErrorHandling } from 'InvestCommon/domain/error/oryErrorHandling';
+import { oryResponseHandling } from 'InvestCommon/domain/error/oryResponseHandling';
 
 type FormModelForgot = {
   email: string;
@@ -70,7 +72,8 @@ export const useForgotStore = defineStore('forgot', () => {
 
     isLoading.value = true;
     try {
-      await authRepository.getAuthFlow(SELFSERVICE.recovery);
+      const flowData = await authRepository.getAuthFlow(SELFSERVICE.recovery);
+      oryResponseHandling(flowData);
       if (getAuthFlowState.value.error) {
         isLoading.value = false;
         return;
@@ -91,7 +94,7 @@ export const useForgotStore = defineStore('forgot', () => {
         navigateWithQueryParams(urlCheckEmail, { email: model.email, flowId: authRepository.flowId.value });
       }
     } catch (error) {
-      console.error('Recovery failed:', error);
+      await oryErrorHandling(error as any, 'recovery', () => authRepository.getAuthFlow(SELFSERVICE.recovery), 'Failed to set recovery');
     } finally {
       isLoading.value = false;
     }
