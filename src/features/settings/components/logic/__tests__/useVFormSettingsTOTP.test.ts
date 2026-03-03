@@ -34,6 +34,12 @@ vi.mock('InvestCommon/data/settings/settings.repository', () => ({
   useRepositorySettings: vi.fn(() => mockSettingsRepository),
 }));
 
+vi.mock('InvestCommon/domain/analytics/useSendAnalyticsEvent', () => ({
+  useSendAnalyticsEvent: () => ({
+    sendEvent: vi.fn().mockResolvedValue(undefined),
+  }),
+}));
+
 vi.mock('vue', async () => {
   const actual = await vi.importActual('vue');
   return { ...actual, onMounted: vi.fn() };

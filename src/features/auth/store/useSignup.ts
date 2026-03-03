@@ -15,6 +15,7 @@ import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { SELFSERVICE } from 'InvestCommon/data/auth/auth.constants';
 import { oryErrorHandling } from 'InvestCommon/domain/error/oryErrorHandling';
 import { oryResponseHandling } from 'InvestCommon/domain/error/oryResponseHandling';
+import { useSendAnalyticsEvent } from 'InvestCommon/domain/analytics/useSendAnalyticsEvent';
 
 const HUBSPOT_FORM_ID = '726ad71f-e168-467f-9847-25e9377f69cf';
 
@@ -45,6 +46,21 @@ export const useSignupStore = defineStore('signup', () => {
   } = storeToRefs(authRepository);
 
   const userSessionStore = useSessionStore();
+  const { sendEvent } = useSendAnalyticsEvent();
+
+  const trackSignupEvent = (statusCode: number) => {
+    const uiPath = typeof window !== 'undefined' ? window.location.pathname : '';
+    void sendEvent({
+      event_type: 'send',
+      method: 'POST',
+      httpRequestMethod: 'POST',
+      service_name: 'vue3-app',
+      request_id: authRepository.flowId.value,
+      request_path: uiPath,
+      httpRequestUrl: SELFSERVICE.registration,
+      status_code: statusCode,
+    });
+  };
 
   // Query parameters handling
   const queryParams = computed(() => {
@@ -168,12 +184,17 @@ export const useSignupStore = defineStore('signup', () => {
         csrf_token: authRepository.csrfToken.value,
       });
 
-      if (setSignupState.value.error) return;
+      if (setSignupState.value.error) {
+        trackSignupEvent(400);
+        return;
+      }
 
       if (setSignupState.value.data?.session) {
+        trackSignupEvent(200);
         handleSignupSuccess(setSignupState.value.data.session);
       }
     } catch (error) {
+      trackSignupEvent(400);
       await oryErrorHandling(error as any, 'signup', () => authRepository.getAuthFlow(SELFSERVICE.registration), 'Failed to signup');
     } finally {
       isLoading.value = false;
@@ -197,6 +218,7 @@ export const useSignupStore = defineStore('signup', () => {
         method: 'oidc',
       });
     } catch (error) {
+      trackSignupEvent(400);
       await oryErrorHandling(error as any, 'signup', () => authRepository.getAuthFlow(SELFSERVICE.registration), 'Failed to signup');
     } finally {
       isLoading.value = false;

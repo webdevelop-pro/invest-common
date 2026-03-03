@@ -134,6 +134,7 @@ onBeforeMount(() => {
       httpRequestMethod: 'GET',
       service_name: 'vitepress-app',
       request_path: route.path,
+      httpRequestUrl: `/public/offer/${params.value?.slug}`,
     });
   }
 });

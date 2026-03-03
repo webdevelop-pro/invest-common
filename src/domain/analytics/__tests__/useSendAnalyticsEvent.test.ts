@@ -52,6 +52,7 @@ describe('useSendAnalyticsEvent', () => {
       // Cast as any to avoid depending on concrete enum values
       event_type: 'test_event' as any,
       request_path: '/test-path',
+      httpRequestUrl: 'https://api.test.local/v1/example',
     });
 
     expect(trackEventMock).toHaveBeenCalledTimes(1);
@@ -64,7 +65,7 @@ describe('useSendAnalyticsEvent', () => {
     expect(payload.request_path).toBe('/test-path');
 
     expect(payload.service_context.httpRequest.method).toBe('POST');
-    expect(payload.service_context.httpRequest.url).toBe('/test-path');
+    expect(payload.service_context.httpRequest.url).toBe('https://api.test.local/v1/example');
 
     expect(payload.service_context.user).toBe('user@example.com');
     expect(payload.service_context.request_id).toBeTruthy();

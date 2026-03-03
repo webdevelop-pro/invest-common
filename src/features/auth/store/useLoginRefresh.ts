@@ -11,6 +11,7 @@ import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 import { SELFSERVICE } from 'InvestCommon/data/auth/auth.constants';
 import { oryErrorHandling } from 'InvestCommon/domain/error/oryErrorHandling';
 import { oryResponseHandling } from 'InvestCommon/domain/error/oryResponseHandling';
+import { useSendAnalyticsEvent } from 'InvestCommon/domain/analytics/useSendAnalyticsEvent';
 
 type FormModelSignIn = {
   email: string;
@@ -25,6 +26,21 @@ export const useLoginRefreshStore = defineStore('loginRefresh', () => {
   const userSessionStore = useSessionStore();
   const useDialogsStore = useDialogs();
   const { completeSessionRefresh } = useDialogsStore; // Direct access, not storeToRefs
+  const { sendEvent } = useSendAnalyticsEvent();
+
+  const trackLoginRefreshEvent = (statusCode: number) => {
+    const uiPath = typeof window !== 'undefined' ? window.location.pathname : '';
+    void sendEvent({
+      event_type: 'send',
+      method: 'POST',
+      httpRequestMethod: 'POST',
+      service_name: 'vue3-app',
+      request_id: authRepository.flowId.value,
+      request_path: uiPath,
+      httpRequestUrl: `${SELFSERVICE.login}?refresh=true`,
+      status_code: statusCode,
+    });
+  };
 
   // Query parameters handling
   const queryParams = computed(() => {
@@ -101,16 +117,19 @@ export const useLoginRefreshStore = defineStore('loginRefresh', () => {
 
       if (setLoginState.value.error) {
         isLoading.value = false;
+        trackLoginRefreshEvent(400);
         return;
       }
 
       if (setLoginState.value.data?.session) {
         userSessionStore.updateSession(setLoginState.value.data.session);
         completeSessionRefresh(true); // Success - complete the session refresh
+        trackLoginRefreshEvent(200);
       }
     } catch (error) {
       await oryErrorHandling(error as any, 'login', () => authRepository.getAuthFlow(SELFSERVICE.login, { refresh: true }), 'Failed to login');
       completeSessionRefresh(false); // Failure - complete with false
+      trackLoginRefreshEvent(400);
     } finally {
       isLoading.value = false;
     }

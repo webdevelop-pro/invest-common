@@ -13,6 +13,7 @@ import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { SELFSERVICE } from 'InvestCommon/data/auth/auth.constants';
 import { oryErrorHandling } from 'InvestCommon/domain/error/oryErrorHandling';
 import { oryResponseHandling } from 'InvestCommon/domain/error/oryResponseHandling';
+import { useSendAnalyticsEvent } from 'InvestCommon/domain/analytics/useSendAnalyticsEvent';
 
 type FormModelSignIn = {
   email: string;
@@ -27,6 +28,21 @@ export const useLoginStore = defineStore('login', () => {
     getSchemaState, setLoginState, getAuthFlowState, getLoginState,
   } = storeToRefs(authRepository);
   const userSessionStore = useSessionStore();
+  const { sendEvent } = useSendAnalyticsEvent();
+
+  const trackLoginEvent = (statusCode: number) => {
+    const uiPath = typeof window !== 'undefined' ? window.location.pathname : '';
+    void sendEvent({
+      event_type: 'send',
+      method: 'POST',
+      httpRequestMethod: 'POST',
+      service_name: 'vue3-app',
+      request_id: authRepository.flowId.value,
+      request_path: uiPath,
+      httpRequestUrl: SELFSERVICE.login,
+      status_code: statusCode,
+    });
+  };
 
   // Query parameters handling
   const queryParams = computed(() => {
@@ -117,14 +133,17 @@ export const useLoginStore = defineStore('login', () => {
       });
 
       if (setLoginState.value.error) {
+        trackLoginEvent(400);
         isLoading.value = false;
         return;
       }
 
       if (setLoginState.value.data?.session) {
+        trackLoginEvent(200);
         handleLoginSuccess(setLoginState.value.data.session);
       }
     } catch (error) {
+      trackLoginEvent(400);
       await oryErrorHandling(error as any, 'login', () => authRepository.getAuthFlow(SELFSERVICE.login), 'Failed to login');
     } finally {
       isLoading.value = false;
@@ -147,6 +166,7 @@ export const useLoginStore = defineStore('login', () => {
         method: 'oidc',
       });
     } catch (error) {
+      trackLoginEvent(400);
       await oryErrorHandling(error as any, 'login', () => authRepository.getAuthFlow(SELFSERVICE.login), 'Failed to login');
     } finally {
       isLoading.value = false;

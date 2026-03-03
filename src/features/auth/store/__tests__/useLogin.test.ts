@@ -56,6 +56,12 @@ vi.mock('InvestCommon/config/env', () => ({
   },
 }));
 
+vi.mock('InvestCommon/domain/analytics/useSendAnalyticsEvent', () => ({
+  useSendAnalyticsEvent: () => ({
+    sendEvent: vi.fn().mockResolvedValue(undefined),
+  }),
+}));
+
 describe('useLogin Store', () => {
   let store: ReturnType<typeof useLoginStore>;
 

@@ -6,11 +6,27 @@ import { useRepositorySettings } from 'InvestCommon/data/settings/settings.repos
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 import { storeToRefs } from 'pinia';
 import { reportError } from 'InvestCommon/domain/error/errorReporting';
+import { useSendAnalyticsEvent } from 'InvestCommon/domain/analytics/useSendAnalyticsEvent';
 
 export function useSettingsMfa() {
   const settingsRepository = useRepositorySettings();
   const { flowId, csrfToken, setSettingsState, getAuthFlowState } = storeToRefs(settingsRepository);
   const { toast } = useToast();
+  const { sendEvent } = useSendAnalyticsEvent();
+
+  const trackMfaEvent = (statusCode: number) => {
+    const uiPath = typeof window !== 'undefined' ? window.location.pathname : '';
+    void sendEvent({
+      event_type: 'send',
+      method: 'POST',
+      httpRequestMethod: 'POST',
+      service_name: 'vue3-app',
+      request_id: flowId.value,
+      request_path: uiPath,
+      httpRequestUrl: SELFSERVICE.settings,
+      status_code: statusCode,
+    });
+  };
 
   const isDialogMfaOpen = ref(false);
   const isMfaEnabled = ref(false);
@@ -52,8 +68,10 @@ export function useSettingsMfa() {
             description: 'Unlinked',
             variant: 'success',
           });
+          trackMfaEvent(200);
         }
       } catch (error) {
+        trackMfaEvent(400);
         reportError(error as any, 'Failed to unlink MFA');
       }
     }

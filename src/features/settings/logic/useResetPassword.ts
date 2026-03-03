@@ -13,6 +13,7 @@ import { urlSettings } from 'InvestCommon/domain/config/links';
 import { errorMessageRule, passwordRule } from 'UiKit/helpers/validation/rules';
 import { SELFSERVICE } from 'InvestCommon/data/auth/auth.constants';
 import { reportError } from 'InvestCommon/domain/error/errorReporting';
+import { useSendAnalyticsEvent } from 'InvestCommon/domain/analytics/useSendAnalyticsEvent';
 
 export function useResetPassword() {
   useGlobalLoader().hide();
@@ -24,6 +25,21 @@ export function useResetPassword() {
 
   const { toast } = useToast();
   const router = useRouter();
+  const { sendEvent } = useSendAnalyticsEvent();
+
+  const trackPasswordResetEvent = (statusCode: number) => {
+    const uiPath = typeof window !== 'undefined' ? window.location.pathname : '';
+    void sendEvent({
+      event_type: 'send',
+      method: 'POST',
+      httpRequestMethod: 'POST',
+      service_name: 'vue3-app',
+      request_id: flowId.value,
+      request_path: uiPath,
+      httpRequestUrl: SELFSERVICE.settings,
+      status_code: statusCode,
+    });
+  };
 
   const errorData = computed(() => (setSettingsState.value.error as any)?.data?.responseJson);
 
@@ -93,12 +109,14 @@ export function useResetPassword() {
           description: 'Password reset success',
           variant: 'success',
         });
+        trackPasswordResetEvent(200);
         router.push({
           name: ROUTE_SETTINGS_MFA,
           params: { profileId: selectedUserProfileId.value }
         });
       }
     } catch (error) {
+      trackPasswordResetEvent(400);
       reportError(error as any, 'Failed to reset password');
     } finally {
       isLoading.value = false;

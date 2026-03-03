@@ -120,14 +120,15 @@ describe('useInvestReview (logic)', () => {
       'test-profile-id',
     );
 
-    expect(mockSendEvent).toHaveBeenCalledWith({
+    expect(mockSendEvent).toHaveBeenCalledWith(expect.objectContaining({
       event_type: 'send',
       method: 'POST',
       httpRequestMethod: 'POST',
       service_name: 'vue3-app',
       request_path: mockRoute.path,
+      httpRequestUrl: '/auth/invest/test-slug/review/test-id/test-profile-id',
       status_code: 200,
-    });
+    }));
   });
 
   it('confirmInvest sends analytics error event when repository.setReview throws', async () => {
@@ -143,14 +144,15 @@ describe('useInvestReview (logic)', () => {
       'test-profile-id',
     );
 
-    expect(mockSendEvent).toHaveBeenCalledWith({
+    expect(mockSendEvent).toHaveBeenCalledWith(expect.objectContaining({
       event_type: 'send',
       method: 'POST',
       httpRequestMethod: 'POST',
       service_name: 'vue3-app',
       request_path: mockRoute.path,
+      httpRequestUrl: '/auth/invest/test-slug/review/test-id/test-profile-id',
       status_code: 400,
-    });
+    }));
   });
 
   it('handles successful setReview action and navigates to thank you', async () => {

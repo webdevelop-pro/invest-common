@@ -48,6 +48,12 @@ vi.mock('UiKit/composables/useHubspotForm', () => ({
   })),
 }));
 
+vi.mock('InvestCommon/domain/analytics/useSendAnalyticsEvent', () => ({
+  useSendAnalyticsEvent: () => ({
+    sendEvent: vi.fn().mockResolvedValue(undefined),
+  }),
+}));
+
 describe('useSignup Store', () => {
   beforeEach(() => {
     setActivePinia(createPinia());

@@ -5,6 +5,7 @@ import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryAnalytics } from 'InvestCommon/data/analytics/analytics.repository';
 import type { AnalyticsEventType, AnalyticsHttpMethod, IAnalyticsEventRequest } from 'InvestCommon/data/analytics/analytics.type';
 import env from 'InvestCommon/config/env';
+import { buildHttpRequest } from 'InvestCommon/domain/analytics/useAnalyticsError';
 
 export interface UseSendAnalyticsEventOptions {
   /**
@@ -19,7 +20,23 @@ export interface SendEventOptions {
   method?: AnalyticsHttpMethod;
   httpRequestMethod?: AnalyticsHttpMethod;
   status_code?: number;
+  /**
+   * Where the user is in the app (UI route or logical location).
+   * Example: '/onboarding/kyc'
+   */
   request_path?: string;
+  /**
+   * What API endpoint was called.
+   * Example: 'https://api.x.com/v1/kyc/submit'
+   */
+  httpRequestUrl?: string;
+  /**
+   * Optional correlation id; defaults to a UUID when omitted.
+   */
+  request_id?: string;
+  /**
+   * Override service name; normally rely on resolvedServiceName instead.
+   */
   service_name?: string;
   version?: string;
 }
@@ -45,11 +62,14 @@ export const useSendAnalyticsEvent = (options?: UseSendAnalyticsEventOptions) =>
 
     const identityId = (userSession?.value?.identity?.id || '');
     const userEmail = userSessionTraits?.value?.email || '';
-    const requestId = uuidv4();
+    const requestId = eventOptions.request_id || uuidv4();
     const requestPath = eventOptions.request_path || '';
-    const protocol = typeof window !== 'undefined' ? window.location.protocol.replace(':', '') : '';
-    const userAgent = typeof navigator !== 'undefined' ? navigator.userAgent : '';
-    const referer = typeof document !== 'undefined' ? document.referrer || '' : '';
+
+    const httpLike = buildHttpRequest({
+      method: eventOptions.httpRequestMethod || 'POST',
+      // Prefer explicit API URL if provided; otherwise fall back to browser URL
+      url: eventOptions.httpRequestUrl || undefined,
+    });
 
     const eventData: IAnalyticsEventRequest = {
       event_type: eventOptions.event_type,
@@ -59,12 +79,12 @@ export const useSendAnalyticsEvent = (options?: UseSendAnalyticsEventOptions) =>
       request_path: requestPath,
       service_context: {
         httpRequest: {
-          method: eventOptions.httpRequestMethod || 'POST',
-          url: requestPath,
-          userAgent,
-          referer,
-          remoteIp: '-',
-          protocol,
+          method: (httpLike.method as AnalyticsHttpMethod) || (eventOptions.httpRequestMethod || 'POST'),
+          url: httpLike.url,
+          userAgent: httpLike.userAgent,
+          referer: httpLike.referer,
+          remoteIp: httpLike.remoteIp,
+          protocol: httpLike.protocol,
         },
         user: userEmail,
         request_id: requestId,

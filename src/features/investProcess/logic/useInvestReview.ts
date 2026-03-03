@@ -38,6 +38,7 @@ export function useInvestReview() {
         httpRequestMethod: 'POST',
         service_name: 'vue3-app',
         request_path: route.path,
+        httpRequestUrl: `/auth/invest/${slug}/review/${id}/${profileId}`,
         status_code: 200,
       });
     } catch (error) {
@@ -48,6 +49,7 @@ export function useInvestReview() {
         httpRequestMethod: 'POST',
         service_name: 'vue3-app',
         request_path: route.path,
+        httpRequestUrl: `/auth/invest/${slug}/review/${id}/${profileId}`,
         status_code: 400,
       });
     }

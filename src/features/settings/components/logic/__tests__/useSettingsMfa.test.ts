@@ -28,6 +28,12 @@ vi.mock('InvestCommon/domain/error/errorReporting', () => ({
   reportError: vi.fn(),
 }));
 
+vi.mock('InvestCommon/domain/analytics/useSendAnalyticsEvent', () => ({
+  useSendAnalyticsEvent: () => ({
+    sendEvent: vi.fn().mockResolvedValue(undefined),
+  }),
+}));
+
 import { useSettingsMfa } from '../useSettingsMfa';
 
 describe('useSettingsMfa', () => {

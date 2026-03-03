@@ -6,6 +6,7 @@ import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 import { SELFSERVICE } from 'InvestCommon/data/auth/auth.constants';
 import { reportError } from 'InvestCommon/domain/error/errorReporting';
+import { useSendAnalyticsEvent } from 'InvestCommon/domain/analytics/useSendAnalyticsEvent';
 
 type FormModelTOTP = {
   totp_code: number;
@@ -16,6 +17,21 @@ export function useVFormSettingsTOTP() {
   const { flowId, csrfToken, setSettingsState, getAuthFlowState } = storeToRefs(settingsRepository);
 
   const { toast } = useToast();
+  const { sendEvent } = useSendAnalyticsEvent();
+
+  const trackTotpEvent = (statusCode: number) => {
+    const uiPath = typeof window !== 'undefined' ? window.location.pathname : '';
+    void sendEvent({
+      event_type: 'send',
+      method: 'POST',
+      httpRequestMethod: 'POST',
+      service_name: 'vue3-app',
+      request_id: flowId.value,
+      request_path: uiPath,
+      httpRequestUrl: SELFSERVICE.settings,
+      status_code: statusCode,
+    });
+  };
 
   const qrOnMounted = ref(false);
   const isLoading = ref(false);
@@ -99,9 +115,11 @@ export function useVFormSettingsTOTP() {
           description: 'Setup confirmed',
           variant: 'success',
         });
+        trackTotpEvent(200);
         return true; // Indicate success
       }
     } catch (error) {
+      trackTotpEvent(400);
       reportError(error as any, 'Failed to save TOTP');
     } finally {
       isLoading.value = false;
