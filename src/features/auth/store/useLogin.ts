@@ -30,9 +30,9 @@ export const useLoginStore = defineStore('login', () => {
   const userSessionStore = useSessionStore();
   const { sendEvent } = useSendAnalyticsEvent();
 
-  const trackLoginEvent = (statusCode: number) => {
+  const trackLoginEvent = async (statusCode: number) => {
     const uiPath = typeof window !== 'undefined' ? window.location.pathname : '';
-    void sendEvent({
+    await sendEvent({
       event_type: 'send',
       method: 'POST',
       httpRequestMethod: 'POST',
@@ -106,9 +106,9 @@ export const useLoginStore = defineStore('login', () => {
   };
 
   // Login handlers
-  const handleLoginSuccess = (session: any) => {
+  const handleLoginSuccess = async (session: any) => {
     const { submitFormToHubspot } = useHubspotForm(HUBSPOT_FORM_ID);
-    if (model.email) submitFormToHubspot({ email: model.email });
+    if (model.email) await submitFormToHubspot({ email: model.email });
     userSessionStore.updateSession(session);
     navigateWithQueryParams(getQueryParam('redirect') || urlProfile());
   };
@@ -133,17 +133,17 @@ export const useLoginStore = defineStore('login', () => {
       });
 
       if (setLoginState.value.error) {
-        trackLoginEvent(400);
+        void trackLoginEvent(400);
         isLoading.value = false;
         return;
       }
 
       if (setLoginState.value.data?.session) {
-        trackLoginEvent(200);
-        handleLoginSuccess(setLoginState.value.data.session);
+        await trackLoginEvent(200);
+        await handleLoginSuccess(setLoginState.value.data.session);
       }
     } catch (error) {
-      trackLoginEvent(400);
+      void trackLoginEvent(400);
       await oryErrorHandling(error as any, 'login', () => authRepository.getAuthFlow(SELFSERVICE.login), 'Failed to login');
     } finally {
       isLoading.value = false;
@@ -151,7 +151,6 @@ export const useLoginStore = defineStore('login', () => {
   };
 
   const loginSocialHandler = async (provider: string) => {
-    console.log('Social login initiated for provider:', provider);
     isLoading.value = true;
     try {
       const flowId = getQueryParam('flow');

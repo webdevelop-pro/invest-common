@@ -28,9 +28,9 @@ export const useLoginRefreshStore = defineStore('loginRefresh', () => {
   const { completeSessionRefresh } = useDialogsStore; // Direct access, not storeToRefs
   const { sendEvent } = useSendAnalyticsEvent();
 
-  const trackLoginRefreshEvent = (statusCode: number) => {
+  const trackLoginRefreshEvent = async (statusCode: number) => {
     const uiPath = typeof window !== 'undefined' ? window.location.pathname : '';
-    void sendEvent({
+    await sendEvent({
       event_type: 'send',
       method: 'POST',
       httpRequestMethod: 'POST',
@@ -117,19 +117,19 @@ export const useLoginRefreshStore = defineStore('loginRefresh', () => {
 
       if (setLoginState.value.error) {
         isLoading.value = false;
-        trackLoginRefreshEvent(400);
+        void trackLoginRefreshEvent(400);
         return;
       }
 
       if (setLoginState.value.data?.session) {
+        await trackLoginRefreshEvent(200);
         userSessionStore.updateSession(setLoginState.value.data.session);
         completeSessionRefresh(true); // Success - complete the session refresh
-        trackLoginRefreshEvent(200);
       }
     } catch (error) {
       await oryErrorHandling(error as any, 'login', () => authRepository.getAuthFlow(SELFSERVICE.login, { refresh: true }), 'Failed to login');
       completeSessionRefresh(false); // Failure - complete with false
-      trackLoginRefreshEvent(400);
+      void trackLoginRefreshEvent(400);
     } finally {
       isLoading.value = false;
     }

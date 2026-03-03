@@ -3,6 +3,7 @@ import { useRepositoryAnalytics } from 'InvestCommon/data/analytics/analytics.re
 import { AnalyticsLogLevel } from 'InvestCommon/data/analytics/analytics.type';
 import env from 'InvestCommon/config/env';
 import { buildHttpRequest, getClientContext, normalizeGroupMessage } from 'InvestCommon/domain/analytics/useAnalyticsError';
+import { isIgnorableErrorMessage } from 'InvestCommon/domain/error/ignorableErrors';
 
 const isAnalyticsEnabled = env.ENABLE_ANALYTICS === '1';
 
@@ -39,6 +40,9 @@ export function sendReportedErrorToAnalytics(
   options: SendReportedErrorOptions = { serviceName: 'vue3-app' },
 ): void {
   if (!isAnalyticsEnabled || !shouldReportToAnalytics()) return;
+
+  const combinedMessage = `${fallbackMessage ?? ''} ${normalized.message ?? ''}`;
+  if (isIgnorableErrorMessage(combinedMessage)) return;
 
   try {
     const analytics = useRepositoryAnalytics();

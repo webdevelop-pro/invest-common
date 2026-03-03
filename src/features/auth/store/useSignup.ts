@@ -48,9 +48,9 @@ export const useSignupStore = defineStore('signup', () => {
   const userSessionStore = useSessionStore();
   const { sendEvent } = useSendAnalyticsEvent();
 
-  const trackSignupEvent = (statusCode: number) => {
+  const trackSignupEvent = async (statusCode: number) => {
     const uiPath = typeof window !== 'undefined' ? window.location.pathname : '';
-    void sendEvent({
+    await sendEvent({
       event_type: 'send',
       method: 'POST',
       httpRequestMethod: 'POST',
@@ -148,10 +148,10 @@ export const useSignupStore = defineStore('signup', () => {
   };
 
   // Signup handlers
-  const handleSignupSuccess = (session: any) => {
+  const handleSignupSuccess = async (session: any) => {
     const { submitFormToHubspot } = useHubspotForm(HUBSPOT_FORM_ID);
     if (model.email) {
-      submitFormToHubspot({
+      await submitFormToHubspot({
         email: model.email,
         firstname: model.first_name,
         lastname: model.last_name,
@@ -185,16 +185,16 @@ export const useSignupStore = defineStore('signup', () => {
       });
 
       if (setSignupState.value.error) {
-        trackSignupEvent(400);
+        void trackSignupEvent(400);
         return;
       }
 
       if (setSignupState.value.data?.session) {
-        trackSignupEvent(200);
-        handleSignupSuccess(setSignupState.value.data.session);
+        await trackSignupEvent(200);
+        await handleSignupSuccess(setSignupState.value.data.session);
       }
     } catch (error) {
-      trackSignupEvent(400);
+      void trackSignupEvent(400);
       await oryErrorHandling(error as any, 'signup', () => authRepository.getAuthFlow(SELFSERVICE.registration), 'Failed to signup');
     } finally {
       isLoading.value = false;

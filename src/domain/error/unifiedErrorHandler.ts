@@ -2,6 +2,7 @@ import { setErrorHandlers, setErrorLogger, reportError } from 'InvestCommon/doma
 import { redirectToSigninForUnauthorized } from 'InvestCommon/domain/redirects/redirectAuthGuard';
 import { urlServerError } from 'InvestCommon/domain/config/links';
 import { sendReportedErrorToAnalytics } from 'InvestCommon/domain/analytics/sendReportedErrorToAnalytics';
+import { isIgnorableError } from 'InvestCommon/domain/error/ignorableErrors';
 
 declare global {
   interface Window {
@@ -17,17 +18,6 @@ type VueApp = { config?: { errorHandler?: (err: Error, vm: unknown, info: string
 
 export interface ErrorHandlerConfig {
   appType: 'vue' | 'vitepress';
-}
-
-const IGNORABLE_PATTERNS = [
-  /resizeobserver.*(loop|limit exceeded)/i,
-  /aborterror|aborted|canceled/i,
-  /loading chunk|failed to fetch dynamically imported module|importing dynamically imported module/i,
-];
-
-function isIgnorableError(error: Error): boolean {
-  const s = `${error?.name ?? ''} ${error?.message ?? ''}`.toLowerCase();
-  return IGNORABLE_PATTERNS.some((p) => p.test(s));
 }
 
 /** Coerce unknown (e.g. unhandledrejection.reason) to Error for global handlers. */
@@ -113,12 +103,12 @@ export const setupUnifiedErrorHandler = () => {
 
 export const setupVueErrorHandler = (app?: unknown) => {
   if ((import.meta as { env?: { VITE_ENV?: string } }).env?.VITE_ENV === 'local') return;
-  setupUnifiedErrorHandler({ appType: 'vue' })?.initialize(app as VueApp);
+  setupUnifiedErrorHandler()?.initialize(app as VueApp);
 };
 
 export const setupVitePressErrorHandler = () => {
   if ((import.meta as { env?: { VITE_ENV?: string } }).env?.VITE_ENV === 'local') return;
-  setupUnifiedErrorHandler({ appType: 'vitepress' })?.initialize();
+  setupUnifiedErrorHandler()?.initialize();
 };
 
 // ---------------------------------------------------------------------------
@@ -161,5 +151,5 @@ export function setupErrorHandling(options: SetupErrorHandlingOptions): void {
   const { app, type, onUnauthorized } = options;
   setErrorHandlers(onUnauthorized ? { onUnauthorized } : type === 'vue' ? { onUnauthorized: redirectToSigninForUnauthorized } : {});
   setErrorLogger(sendReportedErrorToAnalytics);
-  setupUnifiedErrorHandler({ appType: type })?.initialize(app as VueApp);
+  setupUnifiedErrorHandler()?.initialize(app as VueApp);
 }

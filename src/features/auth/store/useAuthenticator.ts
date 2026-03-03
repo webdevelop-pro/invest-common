@@ -81,9 +81,11 @@ export const useAuthenticatorStore = defineStore('authenticator', () => {
     return navigateWithQueryParams(redirectUrl);
   };
 
-  const handleSuccess = (session: any) => {
+  const handleSuccess = async (session: any) => {
     const { submitFormToHubspot } = useHubspotForm(HUBSPOT_FORM_ID);
-    if (model.email) submitFormToHubspot({ email: model.email });
+    if ((model as any).email) {
+      await submitFormToHubspot({ email: (model as any).email });
+    }
     userSessionStore.updateSession(session);
     navigateToProfile();
   };
@@ -105,7 +107,7 @@ export const useAuthenticatorStore = defineStore('authenticator', () => {
       }
 
       if (setLoginState.value.data?.session) {
-        handleSuccess(setLoginState.value.data.session);
+        await handleSuccess(setLoginState.value.data.session);
       }
     } catch (error) {
       await oryErrorHandling(error as any, 'login', () => authRepository.getAuthFlow(SELFSERVICE.login, AAL2_QUERY), 'Failed to login');
