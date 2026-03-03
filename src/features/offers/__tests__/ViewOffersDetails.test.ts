@@ -61,15 +61,15 @@ vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
 vi.mock('InvestCommon/data/offer/offer.repository', () => ({
   useRepositoryOffer: () => ({
     getOfferOneState: ref({ loading: false, data: null as unknown }),
-    getOfferOne: vi.fn(),
-    getOfferComments: vi.fn(),
+    getOfferOne: vi.fn().mockResolvedValue(undefined),
+    getOfferComments: vi.fn().mockResolvedValue(undefined),
   }),
 }));
 
 vi.mock('InvestCommon/data/filer/filer.repository', () => ({
   useRepositoryFiler: () => ({
-    getPublicFiles: vi.fn(),
-    getFiles: vi.fn(),
+    getPublicFiles: vi.fn().mockResolvedValue(undefined),
+    getFiles: vi.fn().mockResolvedValue(undefined),
   }),
 }));
 
