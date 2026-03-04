@@ -1,4 +1,4 @@
-import { currency } from 'InvestCommon/helpers/currency';
+import { currency } from 'UiKit/helpers/currency';
 import {
   WalletTypes, IWalletDataFormatted, IWalletDataResponse,
 } from '../wallet.types';

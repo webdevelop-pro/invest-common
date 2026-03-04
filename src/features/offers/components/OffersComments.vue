@@ -3,7 +3,7 @@ import VFormComments from './VFormComments.vue';
 import VCommentItems from 'UiKit/components/VComment/VCommentItems.vue';
 import { storeToRefs } from 'pinia';
 import { computed, onBeforeMount } from 'vue';
-import type { IOfferComment } from 'InvestCommon/types/api/offers';
+import type { IOfferComment } from 'InvestCommon/data/offer/offer.types';
 import { useRepositoryOffer } from 'InvestCommon/data/offer/offer.repository';
 
 const props = defineProps({

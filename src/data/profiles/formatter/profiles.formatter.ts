@@ -3,7 +3,8 @@ import {
   IProfileFormatted,
   IFormPartialBeneficialOwnershipItemFormatted,
 } from '../profiles.types';
-import { InvestKycTypes, AccreditationTypes } from 'InvestCommon/types/api/invest';
+import { InvestKycTypes } from 'InvestCommon/data/kyc/kyc.types';
+import { AccreditationTypes } from 'InvestCommon/data/accreditation/accreditation.types';
 import { PROFILE_TYPES } from 'InvestCommon/domain/config/enums/profileTypes';
 import { BeneficialsFormatter } from './beneficials.formatter';
 

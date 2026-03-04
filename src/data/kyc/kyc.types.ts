@@ -1,4 +1,11 @@
-import { InvestKycTypes } from 'InvestCommon/types/api/invest';
+export enum InvestKycTypes {
+  none = 'none',
+  new = 'new',
+  pending = 'pending',
+  approved = 'approved',
+  declined = 'declined',
+  in_progress = 'in_progress',
+}
 
 export interface IKycTokenResponse {
   expiration: string;
@@ -16,13 +23,13 @@ export interface IKycIdentity {
 export interface IKycData {
   completed_at: string;
   created_at: string;
-  status: string;
+  status: InvestKycTypes;
 }
 
 export interface IKycProfile {
   id: number;
   user_id: number;
-  kyc_status: string;
+  kyc_status: InvestKycTypes;
   kyc_data: IKycData[];
   created_at: string;
   updated_at: string;

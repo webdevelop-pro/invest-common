@@ -1,3 +1,101 @@
+# Error Handling & Reporting (Invest App)
+
+This document describes **how errors flow through the app**, how to use the
+unified error handler, and where UI helpers live after the latest refactors.
+
+## 1. High‑level design
+
+- **Single entry point:** All non-trivial errors should go through
+  `reportError` from `InvestCommon/domain/error/errorReporting`.
+- **Unified bootstrap:** Use `setupErrorHandling` from
+  `InvestCommon/domain/error/unifiedErrorHandler` once at app entry
+  (Vue app or VitePress).
+- **UI vs data boundaries:**
+  - Data layer (`invest-common/src/data/**`) **never** shows toasts or navigates.
+    It sets `state.error` and rethrows.
+  - Domain and feature layers decide whether to call `oryErrorHandling`,
+    `oryResponseHandling`, or `reportError`.
+- **Analytics aware:** When `VITE_ENABLE_ANALYTICS=1`, the error reporter sends
+  normalized errors to the analytics service; otherwise it is a no‑op logger.
+
+## 2. Key building blocks
+
+- `InvestCommon/domain/error/unifiedErrorHandler.ts`
+  - `setupErrorHandling({ app, type })` — wire global handlers for:
+    - Vue app errors (`app.config.errorHandler`)
+    - Global `error` + `unhandledrejection`
+    - Optional VitePress integration
+- `InvestCommon/domain/error/errorReporting.ts`
+  - `reportError(error, comment?)` — main entry; use in `catch` blocks.
+  - `setErrorLogger(fn)` / `setErrorReporter(fn)` — allow tests and analytics
+    to hook into the pipeline.
+  - `toasterErrorHandling(normalizedError)` — converts an error into a toast;
+    used internally by `reportError`, rarely directly.
+- `InvestCommon/domain/error/oryErrorHandling.ts`
+  - Handles Ory Kratos flows (login, registration, settings, recovery).
+  - Uses toasts, dialogs, and redirects instead of raw `reportError` because
+    Ory often returns UI messages in responses.
+- `InvestCommon/domain/error/oryResponseHandling.ts`
+  - Handles *successful* Ory responses that still contain human‑readable UI
+    messages; used for friendly banners instead of error toasts.
+
+## 3. Where UI helpers live now
+
+- **Toasts / generic HTTP errors**
+  - Use `UiKit/helpers/generalErrorHandling` for low‑level `Response` handling
+    in UiKit / shared utilities.
+  - For app flows, prefer `reportError` which will **log + toast** via the
+    unified pipeline.
+
+- **Highlight directive**
+  - Vue directive is defined in `UiKit/helpers/v-highlight`.
+  - Registered in:
+    - `.vitepress/theme/index.ts` for docs.
+    - App entry for the main SPA (via `app.directive('highlight', highlight)`).
+
+- **Shared formatting helpers**
+  - Currency and number helpers now live in `UiKit/helpers/currency` and
+    `UiKit/helpers/numberFormatter`.
+  - Date helpers for UI live in `UiKit/helpers/formatters/formatToDate`.
+  - Investment/distribution‑specific mappings are in:
+    - `InvestCommon/data/investment/investment.formatter.ts`
+    - `InvestCommon/data/distributions/distributions.formatter.ts`
+
+## 4. How to use in features
+
+### 4.1 Typical catch block
+
+```ts
+import { reportError } from 'InvestCommon/domain/error/errorReporting';
+
+try {
+  await repository.someAction();
+} catch (error) {
+  reportError(error, 'Optional human‑readable context');
+}
+```
+
+### 4.2 Ory authentication / settings flows
+
+```ts
+import { oryErrorHandling } from 'InvestCommon/domain/error/oryErrorHandling';
+
+try {
+  await authRepository.login(credentials);
+} catch (error) {
+  await oryErrorHandling(error, 'login', resetFlow, 'Login failed');
+}
+```
+
+## 5. Testing notes
+
+- Unit tests for Ory and unified handler live under
+  `invest-common/src/domain/error/__tests__`.
+- For tests that should not hit analytics:
+  - Use `setErrorReporter(vi.fn())` or mock `reportError` directly.
+- UiKit‑level toast behavior is covered by
+  `ui-kit/src/helpers/__tests__/generalErrorHandling.test.ts`.
+
 # Error handling
 
 **Related:** Data layer and repos — **docs/DATA_LAYER.md**. Usage guide and quick start — **invest-common/src/domain/error/README.md**.

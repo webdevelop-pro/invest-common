@@ -5,7 +5,7 @@ import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import { useEarnDepositCard } from './composables/useEarnDepositCard';
-import { numberFormatter } from 'InvestCommon/helpers/numberFormatter';
+import { numberFormatter } from 'UiKit/helpers/numberFormatter';
 
 interface Props {
   loading?: boolean;

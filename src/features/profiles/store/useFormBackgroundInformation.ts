@@ -16,7 +16,7 @@ import {
   address1Rule, address2Rule, cityRule, emailRule, errorMessageRule, zipRule,
 } from 'UiKit/helpers/validation/rules';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
-import { checkObjectAndDeleteNotRequiredFields } from 'InvestCommon/helpers/general';
+import { checkObjectAndDeleteNotRequiredFields } from 'UiKit/helpers/general';
 
 export const useFormBackgroundInformation = () => {
   const router = useRouter();

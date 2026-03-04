@@ -2,8 +2,8 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
-import { redirectAuthGuard } from '../redirectAuthGuard'
-import type { ISession } from 'InvestCommon/types/api/auth'
+import { redirectAuthGuard, __resetRedirectAuthGuardForTests } from '../redirectAuthGuard'
+import type { ISession } from 'InvestCommon/data/auth/auth.type'
 
 // ------------------- HOIST-SAFE HELPERS -------------------
 const hoisted = vi.hoisted(() => ({
@@ -94,6 +94,7 @@ function redirectAuthGuardTests() {
   beforeEach(() => {
     setActivePinia(createPinia())
     vi.clearAllMocks()
+    __resetRedirectAuthGuardForTests()
     hoisted.getSessionMock.mockResolvedValue(null)
     mockCookies.get.mockReturnValue(undefined)
     mockCookies.getAll.mockReturnValue({})

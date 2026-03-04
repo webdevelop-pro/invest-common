@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { reactive, ref, nextTick } from 'vue';
-import { FundingTypes } from 'InvestCommon/helpers/enums/general';
+import { FundingTypes } from 'InvestCommon/data/investment/investment.types';
 
 import { useInvestFundingForm } from '../useInvestFundingForm';
 

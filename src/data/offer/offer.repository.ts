@@ -1,7 +1,10 @@
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import {
-  IOffer, IOfferData, IOfferCommentsResponse, IOfferCommentPayload,
-} from 'InvestCommon/types/api/offers';
+  IOffer,
+  IOfferData,
+  IOfferCommentsResponse,
+  IOfferCommentPayload,
+} from 'InvestCommon/data/offer/offer.types';
 import env from 'InvestCommon/config/env';
 import { createRepositoryStates, withActionState, type OptionsStateData } from 'InvestCommon/data/repository/repository';
 import { acceptHMRUpdate, defineStore } from 'pinia';

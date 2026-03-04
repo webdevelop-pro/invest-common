@@ -1,4 +1,4 @@
-import { IErrorGeneric } from 'InvestCommon/types/api/auth';
+import { IErrorGeneric } from 'InvestCommon/data/auth/auth.type';
 import { urlAuthenticator, urlProfile, urlSignin } from 'InvestCommon/domain/config/links';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
@@ -41,10 +41,11 @@ export const oryErrorHandling = async (
   const isCredentialsError = uiError?.id === CREDENTIALS_ERROR_ID;
 
   if (isCredentialsError) {
-    reportError(
-      { ...error, message: 'Invalid email or password.' },
-      comment,
-    );
+    toast({
+      ...TOAST_OPTIONS,
+      title: comment || TOAST_OPTIONS.title,
+      description: 'Invalid email or password.',
+    });
     return;
   }
 

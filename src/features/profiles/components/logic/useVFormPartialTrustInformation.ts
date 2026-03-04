@@ -11,7 +11,7 @@ const yesNoOptions = [
 ];
 
 export interface FormModelTrustInformation {
-  is_use_ein: string | undefined;
+  is_use_ein: 'Yes' | 'No' | undefined;
   ein?: string;
   type: string | undefined;
   owner_title: string | undefined;

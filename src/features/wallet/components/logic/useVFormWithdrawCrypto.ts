@@ -2,7 +2,7 @@ import {
   computed, reactive, watch, nextTick, onMounted,
 } from 'vue';
 import { storeToRefs } from 'pinia';
-import { numberFormatter } from 'InvestCommon/helpers/numberFormatter';
+import { numberFormatter } from 'UiKit/helpers/numberFormatter';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';

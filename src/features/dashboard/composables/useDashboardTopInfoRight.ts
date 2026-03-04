@@ -1,6 +1,6 @@
 import { computed } from 'vue';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
-import { currency } from 'InvestCommon/helpers/currency';
+import { currency } from 'UiKit/helpers/currency';
 import { storeToRefs } from 'pinia';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 

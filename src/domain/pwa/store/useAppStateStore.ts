@@ -9,6 +9,10 @@ export const useAppStateStore = defineStore('appState', {
   }),
   actions: {
     initializeAppState() {
+      if (typeof window === 'undefined' || typeof document === 'undefined') {
+        return;
+      }
+
       this.isMobile = isPwaMobile();
       if (this.isMobile) {
         this.isPwa = true;

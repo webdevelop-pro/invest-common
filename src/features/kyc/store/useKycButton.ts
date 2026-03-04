@@ -3,8 +3,7 @@ import {
   watch,
 } from 'vue';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
-import { InvestKycTypes } from 'InvestCommon/types/api/invest';
-import { KycTextStatuses } from 'InvestCommon/data/kyc/kyc.types';
+import { InvestKycTypes, KycTextStatuses } from 'InvestCommon/data/kyc/kyc.types';
 import { ROUTE_SUBMIT_KYC } from 'InvestCommon/domain/config/enums/routes';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { urlContactUs, urlProfileKYC } from 'InvestCommon/domain/config/links';

@@ -1,8 +1,7 @@
 import HelloSign from 'hellosign-embedded';
 
 import env from 'InvestCommon/config/env';
-
-import { ISignature } from 'InvestCommon/types/api/invest';
+import { ISignature } from 'InvestCommon/data/esign/esign.types';
 
 interface IHelloSign {
   open: (signUrl: string, props: object) => void;

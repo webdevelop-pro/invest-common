@@ -1,16 +1,15 @@
 <script setup lang="ts">
-import { currency } from 'InvestCommon/helpers/currency';
-import { formatToFullDate } from 'InvestCommon/helpers/formatters/formatToDate';
+import { currency } from 'UiKit/helpers/currency';
+import { formatToFullDate } from 'UiKit/helpers/formatters/formatToDate';
 import VBadge from 'UiKit/components/Base/VBadge/VBadge.vue';
 import { PropType, computed } from 'vue';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { storeToRefs } from 'pinia';
-import {
-  getInvestmentOfferImage, getDistributionTagBackground,
-} from 'InvestCommon/helpers/investment';
+import { getInvestmentOfferImage } from 'InvestCommon/data/investment/investment.formatter';
+import { getDistributionTagBackground } from 'InvestCommon/data/distributions/distributions.formatter';
 import { ROUTE_INVESTMENT_DOCUMENTS } from 'InvestCommon/domain/config/enums/routes';
 import expand from 'UiKit/assets/images/expand.svg';
-import { IDistributionsData } from 'InvestCommon/types/api/distributions';
+import { IDistributionsData } from 'InvestCommon/data/distributions/distributions.types';
 import { VTableCell, VTableRow } from 'UiKit/components/Base/VTable';
 import chevronDownIcon from 'UiKit/assets/images/chevron-down.svg';
 import VImage from 'UiKit/components/Base/VImage/VImage.vue';

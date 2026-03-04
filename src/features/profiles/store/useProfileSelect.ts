@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router';
 import { capitalizeFirstLetter } from 'UiKit/helpers/text';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { ROUTE_CREATE_PROFILE } from 'InvestCommon/domain/config/enums/routes';
-import { InvestKycTypes } from 'InvestCommon/types/api/invest';
+import { InvestKycTypes } from 'InvestCommon/data/kyc/kyc.types';
 
 interface ISelectedProfile {
   text: string;

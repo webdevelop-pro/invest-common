@@ -4,7 +4,7 @@ import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
 import { useInvestAmountForm } from './logic/useInvestAmountForm';
-import { numberFormatter } from 'InvestCommon/helpers/numberFormatter';
+import { numberFormatter } from 'UiKit/helpers/numberFormatter';
 
 const props = defineProps({
   modelValue: {

@@ -1,6 +1,5 @@
-import {
-  AccreditationTypes, InvestKycTypes, IKycData, IAccreditationData, IOwnership,
-} from '../../types/api/invest';
+import { AccreditationTypes, IAccreditationData } from 'InvestCommon/data/accreditation/accreditation.types';
+import { InvestKycTypes, IKycData } from 'InvestCommon/data/kyc/kyc.types';
 
 export interface IEmployment {
   type: string;
@@ -52,6 +51,24 @@ export interface IRegCF {
   annual_income: number;
   net_worth: number;
   invested_external: number;
+}
+
+export interface IOwnership {
+  first_name: string;
+  last_name: string;
+  middle_name: string;
+  dob: string;
+  phone: string;
+  ssn: string;
+  address1: string;
+  address2: string;
+  city: string;
+  state: string;
+  zip_code: string;
+  country: string;
+  citizenship: string;
+  nc_account_nickname?: string;
+  nc_account_bank_name?: string;
 }
 
 export interface IBusinessController {

@@ -1,6 +1,5 @@
 import env from 'InvestCommon/config/env';
 import { DEFAULT_DESCRIPTION, DEFAULT_PAGE_TITLE } from 'InvestCommon/domain/config/enums/routes';
-import { setHSPageView } from 'InvestCommon/helpers/hubspot';
 
 export interface IPageData {
   seo_description?: string;
@@ -13,17 +12,36 @@ interface ITagItem {
   name?: string;
   property?: string;
 }
+
+export function setHSPageView(path: string) {
+  if (typeof window === 'undefined') return;
+
+  const w = window as any;
+  const _hsq = (w._hsq = w._hsq || []);
+  _hsq.push(['setPath', path]);
+  _hsq.push(['trackPageView']);
+}
+
 export const usePageSeo = () => {
+  const isClient = typeof window !== 'undefined' && typeof document !== 'undefined';
+
   function setMetaContent(key: string, meta: ITagItem) {
-    const element: HTMLElement | null = document.head.querySelector(`meta[${key}="${meta.name || meta.property}"]`);
-    if (element instanceof HTMLMetaElement) {
+    if (!isClient) return;
+
+    const selectorKey = meta.name ?? meta.property;
+    if (!selectorKey) return;
+
+    const element = document.head.querySelector<HTMLMetaElement>(`meta[${key}="${selectorKey}"]`);
+    if (element) {
       element.content = meta.content;
     }
   }
 
   function setTitle(pageData: IPageData) {
-    const newTitle = pageData?.seo_title || `${DEFAULT_PAGE_TITLE}`;
-    document.title = `${newTitle}`;
+    if (!isClient) return;
+
+    const newTitle = pageData?.seo_title || DEFAULT_PAGE_TITLE;
+    document.title = newTitle;
     const ogTitle = { property: 'og:title', content: document.title };
 
     setMetaContent('property', ogTitle);
@@ -32,15 +50,18 @@ export const usePageSeo = () => {
   }
 
   function setRobotsAll() {
-    const element: HTMLElement | null = document.head.querySelector('meta[robots]');
-    if (element instanceof HTMLMetaElement) {
+    if (!isClient) return;
+
+    const element = document.head.querySelector<HTMLMetaElement>('meta[name="robots"]');
+    if (element) {
       element.content = 'noindex, nofollow';
-    } else {
-      const meta = document.createElement('meta');
-      meta.name = 'robots';
-      meta.content = 'noindex, nofollow';
-      document.head.appendChild(meta);
+      return;
     }
+
+    const meta = document.createElement('meta');
+    meta.name = 'robots';
+    meta.content = 'noindex, nofollow';
+    document.head.appendChild(meta);
   }
 
   // function setOgImage(pageData: IPageData) {
@@ -52,38 +73,43 @@ export const usePageSeo = () => {
   // }
 
   function setUrl(pageData: IPageData) {
+    if (!isClient) return;
+
     let canonical = pageData?.canonical;
-    if (!pageData?.canonical?.includes('http')) canonical = `${env.FRONTEND_URL}${pageData?.canonical}`;
+    if (canonical && !canonical.includes('http')) {
+      canonical = `${env.FRONTEND_URL}${canonical}`;
+    }
     const path = canonical || `${env.FRONTEND_URL}${window.location.pathname}`;
     const ogUrl = { property: 'og:url', content: path };
+
     // set canonical url
-    let link: HTMLLinkElement | null = document.head.querySelector('link[rel="canonical"]');
+    let link = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
     if (!link) {
       link = document.createElement('link');
-      if (link instanceof HTMLLinkElement) {
-        link = document.createElement('link');
-        link.rel = 'canonical';
-        document.head.appendChild(link);
-      }
+      link.rel = 'canonical';
+      document.head.appendChild(link);
     }
     link.href = path;
+
     // set og:url
     setMetaContent('property', ogUrl);
   }
 
   function setMetaTags(pageData: IPageData) {
-    const seoTags = [
+    const description = pageData?.seo_description || DEFAULT_DESCRIPTION;
+    const seoTags: ITagItem[] = [
       {
         name: 'description',
-        content: pageData?.seo_description || DEFAULT_DESCRIPTION,
+        content: description,
       },
       {
         property: 'og:description',
-        content: pageData?.seo_description || DEFAULT_DESCRIPTION,
+        content: description,
       },
     ];
-    seoTags.forEach((singleTag: ITagItem) => {
-      Object.keys(singleTag).forEach((key: string) => {
+
+    seoTags.forEach((singleTag) => {
+      Object.keys(singleTag).forEach((key) => {
         setMetaContent(key, singleTag);
       });
     });

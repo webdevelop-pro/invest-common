@@ -3,10 +3,10 @@ import {
 } from 'vue';
 import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { useForm } from 'UiKit/composables/useForm';
-import { FundingTypes } from 'InvestCommon/helpers/enums/general';
+import { FundingTypes } from 'InvestCommon/data/investment/investment.types';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
-import { currency } from 'InvestCommon/helpers/currency';
+import { currency } from 'UiKit/helpers/currency';
 import InvestFormFundingAch from 'InvestCommon/features/investProcess/components/VFormInvestFundingAch.vue';
 import InvestFormFundingWire from 'InvestCommon/features/investProcess/components/VFormInvestFundingWire.vue';
 

@@ -4,14 +4,14 @@ import {
 } from 'vue';
 import VTableItemHeader from './VTableDistributionsItemHeader.vue';
 import VTableItemContent from './VTableDistributionsItemContent.vue';
-import { IInvest } from 'InvestCommon/types/api/invest';
+import { IInvestmentFormatted } from 'InvestCommon/data/investment/investment.types';
 import { useRoute } from 'vue-router';
 
 const route = useRoute();
 const queryId = computed(() => Number(route.query?.id));
 const props = defineProps({
   item: {
-    type: Object as PropType<IInvest>,
+    type: Object as PropType<IInvestmentFormatted>,
     required: true,
   },
   search: String,

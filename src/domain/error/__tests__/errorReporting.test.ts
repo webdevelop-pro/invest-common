@@ -100,17 +100,20 @@ describe('reportError', () => {
   it('calls custom reporter when set', () => {
     setErrorReporter(mockReporter);
     reportError(new Error('test'), 'Fallback');
-    expect(mockReporter).toHaveBeenCalledWith(expect.any(Error), 'Fallback');
+    expect(mockReporter).toHaveBeenCalledTimes(1);
+    const [errorArg, fallback] = mockReporter.mock.calls[0];
+    expect(errorArg).toEqual(expect.any(Error));
+    expect(fallback).toBe('Fallback');
   });
 
   it('uses default reporter when setErrorReporter(null)', () => {
     setErrorReporter(null);
     setErrorLogger(mockLogger);
     reportError(new Error('err'), 'Fallback');
-    expect(mockLogger).toHaveBeenCalledWith(
-      expect.objectContaining({ message: 'err' }),
-      'Fallback',
-    );
+    expect(mockLogger).toHaveBeenCalledTimes(1);
+    const [normalized, fallback] = mockLogger.mock.calls[0];
+    expect(normalized).toEqual(expect.objectContaining({ message: 'err' }));
+    expect(fallback).toBe('Fallback');
   });
 
   it('calls onUnauthorized for 401 and does not toast', () => {
@@ -207,5 +210,22 @@ describe('setErrorLogger / setErrorHandlers', () => {
     expect(args.message).toContain('status 502');
     expect(args.message).toContain('Upstream error');
     expect(mockToast).not.toHaveBeenCalled();
+  });
+
+  it('forwards stack context to logger when available', () => {
+    const logger = vi.fn();
+    setErrorLogger(logger);
+    const error = new Error('boom');
+
+    reportError(error, 'Fallback');
+
+    expect(logger).toHaveBeenCalledTimes(1);
+    const [, , context] = logger.mock.calls[0];
+    if (!context || typeof context !== 'object') {
+      throw new Error('Expected context object to be passed to logger');
+    }
+    const stack = (context as { stack?: unknown }).stack;
+    expect(Array.isArray(stack)).toBe(true);
+    expect((stack as unknown[]).length).toBeGreaterThan(0);
   });
 });

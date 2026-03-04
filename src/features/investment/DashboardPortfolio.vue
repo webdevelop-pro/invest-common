@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 import { urlBlogSingle } from 'InvestCommon/domain/config/links';
 import DashboardTabsTopInfo from 'InvestCommon/features/dashboard/components/DashboardTabsTopInfo.vue';;
-import { PostLinkTypes } from 'InvestCommon/types/api/blog';
+import { PostLinkTypes } from 'InvestCommon/data/blog/blog.types';
 import { VTabs, VTabsList, VTabsTrigger, VTabsContent } from 'UiKit/components/Base/VTabs';
 import DashboardDistributions from 'InvestCommon/features/distributions/DashboardDistributions.vue';
 import PortfolioInvestmentsTable from './components/PortfolioInvestmentsTable.vue';

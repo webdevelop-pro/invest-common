@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { IVFilter } from 'UiKit/components/VFilter/VFilter.vue';
-import { IDistributionsData } from 'InvestCommon/types/api/distributions';
+import { IDistributionsData } from 'InvestCommon/data/distributions/distributions.types';
 import VTableDefault from 'InvestCommon/shared/components/VTableDefault.vue';
 import { urlProfilePortfolio } from 'InvestCommon/domain/config/links';
 import VTableToolbar from 'InvestCommon/shared/components/VTableToolbar.vue';

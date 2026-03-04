@@ -6,10 +6,10 @@ const isProd = import.meta.env.MODE === 'production';
 
 export const cookiesOptions = (expireDate?: Date) => {
   const sameSite: SameSiteOption = isProd ? 'none' : 'lax';
-  const domain = env.COOKIE_DOMAIN || '.webdevelop.biz';
+  const domain = env.COOKIE_DOMAIN || undefined;
 
   return {
-    domain,
+    ...(domain ? { domain } : {}),
     path: '/',
     ...(expireDate ? { expires: expireDate } : {}),
     sameSite,

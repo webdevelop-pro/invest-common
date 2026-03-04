@@ -1,5 +1,5 @@
 import { computed } from 'vue';
-import { FundingTypes } from 'InvestCommon/helpers/enums/general';
+import { FundingTypes } from 'InvestCommon/data/investment/investment.types';
 
 export interface UseInvestReviewFormProps {
   data?: any;

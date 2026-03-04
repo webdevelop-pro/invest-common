@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
-import { InvestStepTypes } from 'InvestCommon/types/api/invest';
+import { InvestStepTypes } from 'InvestCommon/data/investment/investment.types';
 import OffersDetails from './components/OffersDetails.vue';
 import { storeToRefs } from 'pinia';
 import {

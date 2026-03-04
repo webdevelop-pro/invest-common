@@ -8,7 +8,10 @@ import { resetAllData } from 'InvestCommon/domain/resetAllData';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { reportError } from 'InvestCommon/domain/error/errorReporting';
 // import { useDomainWebSocketStore } from 'InvestCommon/domain/websockets/store/useWebsockets';
-import { ISession } from 'InvestCommon/types/api/auth';
+import { ISession } from 'InvestCommon/data/auth/auth.type';
+
+const SESSION_CHECK_TTL_MS = 2 * 60 * 1000; // 2 minutes
+let lastSessionCheckAt: number | null = null;
 
 /**
  * Shared 401 / unauthorized redirect: reset state and go to sign-in with optional return URL.
@@ -71,24 +74,31 @@ export const redirectAuthGuard = async (
       return;
     }
 
-    // User appears logged in - verify session is still valid
+    // User appears logged in - verify session is still valid (with basic throttling)
     // This handles the case where cookies exist but session was invalidated elsewhere
     if (userLoggedIn.value && userSession.value) {
-      const session = (await useRepositoryAuth().getSession()) as ISession | null;
-      
-      if (!session?.active) {
-        // Session is invalid, clear everything and redirect
-        resetAllData();
-        if (to.meta.requiresAuth) {
-          redirectToSignin();
-        }
-        return;
-      }
+      const now = Date.now();
+      const shouldCheck =
+        !lastSessionCheckAt || now - lastSessionCheckAt > SESSION_CHECK_TTL_MS;
 
-      // Session is valid, update store if needed
-      if (session && session.id !== userSession.value?.id) {
-        await userSessionStore.updateSession(session);
-        profilesStore.init();
+      if (shouldCheck) {
+        const session = (await useRepositoryAuth().getSession()) as ISession | null;
+        lastSessionCheckAt = now;
+
+        if (!session?.active) {
+          // Session is invalid, clear everything and redirect if route requires auth
+          resetAllData();
+          if (to.meta.requiresAuth) {
+            redirectToSignin();
+          }
+          return;
+        }
+
+        // Session is valid, update store if needed
+        if (session && session.id !== userSession.value?.id) {
+          await userSessionStore.updateSession(session);
+          profilesStore.init();
+        }
       }
     }
 
@@ -105,4 +115,9 @@ export const redirectAuthGuard = async (
     resetAllData();
     return;
   }
+};
+
+// Test-only helper to reset internal throttling state
+export const __resetRedirectAuthGuardForTests = () => {
+  lastSessionCheckAt = null;
 };

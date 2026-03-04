@@ -4,7 +4,7 @@ import {
 } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
-import { InvestStepTypes } from 'InvestCommon/types/api/invest';
+import { InvestStepTypes } from 'InvestCommon/data/investment/investment.types';
 import {
   ROUTE_INVEST_AMOUNT, ROUTE_INVEST_REVIEW, ROUTE_INVEST_SIGNATURE,
 } from 'InvestCommon/domain/config/enums/routes';

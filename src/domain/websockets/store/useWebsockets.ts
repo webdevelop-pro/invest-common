@@ -1,4 +1,4 @@
-import { watch } from 'vue';
+import { ref, watch, type WatchStopHandle } from 'vue';
 import { INotification } from 'InvestCommon/data/notifications/notifications.types';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { useWebSocket } from '@vueuse/core';
@@ -11,22 +11,13 @@ import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment
 import { useRepositoryOffer } from 'InvestCommon/data/offer/offer.repository';
 import { useRepositoryFiler } from 'InvestCommon/data/filer/filer.repository';
 import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
+import { debugLog } from 'InvestCommon/domain/debug';
 
 const { NOTIFICATION_URL } = env;
 
 const TOAST_OPTIONS = {
   title: 'Failed to connect WebSocket after 3 retries',
-  variant: 'error',
-};
-
-const isDebug =
-  typeof import.meta !== 'undefined' &&
-  typeof (import.meta as any).env !== 'undefined' &&
-  Boolean((import.meta as any).env.DEV);
-
-const debugLog = (...args: unknown[]) => {
-  if (!isDebug) return;
-  console.log(...args);
+  variant: 'error' as const,
 };
 
 export const useDomainWebSocketStore = defineStore('domainWebsockets', () => {
@@ -41,6 +32,28 @@ export const useDomainWebSocketStore = defineStore('domainWebsockets', () => {
   const repositoryOffer = useRepositoryOffer();
   const repositoryFiler = useRepositoryFiler();
   const repositoryEvm = useRepositoryEvm();
+
+  const isConnectingOrOpen = ref(false);
+  let stopUserLoggedInWatch: WatchStopHandle | null = null;
+  let stopDataWatch: WatchStopHandle | null = null;
+  let stopStatusWatch: WatchStopHandle | null = null;
+
+  const cleanupConnection = () => {
+    isConnectingOrOpen.value = false;
+
+    if (stopUserLoggedInWatch) {
+      stopUserLoggedInWatch();
+      stopUserLoggedInWatch = null;
+    }
+    if (stopDataWatch) {
+      stopDataWatch();
+      stopDataWatch = null;
+    }
+    if (stopStatusWatch) {
+      stopStatusWatch();
+      stopStatusWatch = null;
+    }
+  };
 
   const handleInternalMessage = (notification: INotification) => {
     switch (notification.data.obj) {
@@ -89,11 +102,19 @@ export const useDomainWebSocketStore = defineStore('domainWebsockets', () => {
     if (!userLoggedIn.value) {
       return;
     }
+
+    if (isConnectingOrOpen.value) {
+      debugLog('webSocketHandler skipped: connection already active');
+      return;
+    }
+
     const url = `${NOTIFICATION_URL}/ws`;
     // Support both http and https
     const uri = url.replace(/^https:/, 'wss:').replace(/^http:/, 'ws:');
 
     debugLog(`connection to ${uri}`);
+
+    isConnectingOrOpen.value = true;
 
     const { useToast } = await import('UiKit/components/Base/VToast/use-toast');
     const { toast } = useToast();
@@ -103,6 +124,7 @@ export const useDomainWebSocketStore = defineStore('domainWebsockets', () => {
         retries: 3,
         delay: 1000,
         onFailed() {
+          cleanupConnection();
           toast(TOAST_OPTIONS);
         },
       },
@@ -113,24 +135,28 @@ export const useDomainWebSocketStore = defineStore('domainWebsockets', () => {
       },
     });
 
-    watch(userLoggedIn, () => {
+    stopUserLoggedInWatch = watch(userLoggedIn, () => {
       if (!userLoggedIn.value) {
         close();
         debugLog(`connection to ${uri} is closed`);
+        cleanupConnection();
       }
     });
 
-    watch(
+    stopDataWatch = watch(
       () => data.value,
       (val) => {
         if (val) handleMessage(val);
       },
       { deep: true },
     );
-    watch(
+    stopStatusWatch = watch(
       () => status.value,
       () => {
         debugLog(`websocket status: ${status.value}`);
+        if (status.value === 'CLOSED') {
+          cleanupConnection();
+        }
       },
     );
   };

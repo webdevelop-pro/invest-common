@@ -2,8 +2,8 @@ import { computed, watch } from 'vue';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { useForm } from 'UiKit/composables/useForm';
-import { numberFormatter } from 'InvestCommon/helpers/numberFormatter';
-import { currency } from 'InvestCommon/helpers/currency';
+import { numberFormatter } from 'UiKit/helpers/numberFormatter';
+import { currency } from 'UiKit/helpers/currency';
 
 export type FormModelInvestAmount = {
   number_of_shares: number;

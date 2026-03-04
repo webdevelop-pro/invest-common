@@ -4,8 +4,7 @@ import { nextTick, ref } from 'vue';
 import { useDashboardPortfolioStore } from '../useDashboardPortfolio';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
-import { IInvestmentFormatted, InvestmentStatuses, InvestStepTypes, InvestFundingStatuses } from 'InvestCommon/data/investment/investment.types';
-import { FundingTypes } from 'InvestCommon/helpers/enums/general';
+import { IInvestmentFormatted, InvestmentStatuses, InvestStepTypes, InvestFundingStatuses, FundingTypes } from 'InvestCommon/data/investment/investment.types';
 
 vi.mock('InvestCommon/data/investment/investment.repository');
 vi.mock('InvestCommon/domain/profiles/store/useProfiles');

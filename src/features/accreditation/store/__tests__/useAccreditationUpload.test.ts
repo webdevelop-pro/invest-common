@@ -5,7 +5,7 @@ import { setActivePinia, createPinia } from 'pinia';
 import { ref } from 'vue';
 import { useRepositoryAccreditation } from 'InvestCommon/data/accreditation/accreditation.repository';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
-import { AccreditationTypes } from 'InvestCommon/types/api/invest';
+import { AccreditationTypes } from 'InvestCommon/data/accreditation/accreditation.types';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { useAccreditationUpload } from '../useAccreditationUpload';

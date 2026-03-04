@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { formatToDate } from 'InvestCommon/helpers/formatters/formatToDate';
+import { formatToDate } from 'UiKit/helpers/formatters/formatToDate';
 import { PropType, ref } from 'vue';
 import VBadge from 'UiKit/components/Base/VBadge/VBadge.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';

@@ -142,7 +142,7 @@ vi.mock('InvestCommon/config/env', () => ({
   },
 }));
 
-vi.mock('InvestCommon/helpers/general', () => ({
+vi.mock('UiKit/helpers/general', () => ({
   checkObjectAndDeleteNotRequiredFields: vi.fn((keep, required, obj) => obj),
 }));
 

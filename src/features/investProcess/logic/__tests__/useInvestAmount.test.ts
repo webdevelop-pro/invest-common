@@ -12,7 +12,7 @@ import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository'
 import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
-import { FundingTypes } from 'InvestCommon/helpers/enums/general';
+import { FundingTypes } from 'InvestCommon/data/investment/investment.types';
 import { ROUTE_INVEST_SIGNATURE } from 'InvestCommon/domain/config/enums/routes';
 import { useInvestAmount } from '../useInvestAmount';
 

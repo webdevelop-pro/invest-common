@@ -28,7 +28,10 @@ export const useProfilesStore = defineStore('profiles', () => {
   } = storeToRefs(useRepositoryProfilesStore);
 
   const userProfiles = computed(() => getUserState.value?.data?.profiles || []);
-  const selectedUserProfileId = ref(cookies.get('selectedUserProfileId'));
+  const rawSelectedUserProfileId = cookies.get('selectedUserProfileId');
+  const selectedUserProfileId = ref<number>(
+    rawSelectedUserProfileId != null ? Number(rawSelectedUserProfileId) || 0 : 0,
+  );
   const profileByIdInProfilesList = computed(() => (
     userProfiles.value.find((item) => item.id === selectedUserProfileId.value)));
   const selectedUserProfileData = computed(() => (

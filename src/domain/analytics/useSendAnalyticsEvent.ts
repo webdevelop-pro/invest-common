@@ -41,11 +41,8 @@ export interface SendEventOptions {
   version?: string;
 }
 
-/**
- * Composable for sending analytics events
- * Handles common event payload construction and error handling
- */
 export const useSendAnalyticsEvent = (options?: UseSendAnalyticsEventOptions) => {
+  const isAnalyticsEnabled = env.ENABLE_ANALYTICS === '1';
   const userSessionStore = useSessionStore();
   const { userSession, userSessionTraits } = storeToRefs(userSessionStore);
   const analytics = useRepositoryAnalytics();
@@ -53,12 +50,10 @@ export const useSendAnalyticsEvent = (options?: UseSendAnalyticsEventOptions) =>
   const resolvedServiceName =
     options?.serviceName ?? (env.IS_STATIC_SITE === '1' ? 'vitepress-app' : 'vue3-app');
 
-  /**
-   * Sends an analytics event with automatically populated common fields
-   * @param options - Event options (event_type is required, others are optional)
-   * @returns Promise that resolves when the event is sent
-   */
   const sendEvent = async (eventOptions: SendEventOptions): Promise<void> => {
+    if (!isAnalyticsEnabled) {
+      return;
+    }
 
     const identityId = (userSession?.value?.identity?.id || '');
     const userEmail = userSessionTraits?.value?.email || '';

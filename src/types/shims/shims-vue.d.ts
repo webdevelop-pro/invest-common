@@ -22,8 +22,8 @@ declare module 'vue-svg-inline-plugin' {
   export default plugin;
 }
 
-declare module 'hellosign-embedded';
 
-declare module "*.md";
+declare module '*.md';
 
 declare module 'marked';
+

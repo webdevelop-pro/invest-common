@@ -1,8 +1,9 @@
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import {
-  IInvestUnconfirmed, IInvestConfirm,
+  IInvestUnconfirmed,
+  IInvestConfirm,
   IInvestFunding,
-} from 'InvestCommon/types/api/invest';
+} from 'InvestCommon/data/investment/investment.types';
 import env from 'InvestCommon/config/env';
 import { createRepositoryStates, withActionState, type OptionsStateData } from 'InvestCommon/data/repository/repository';
 import { acceptHMRUpdate, defineStore } from 'pinia';

@@ -1,5 +1,5 @@
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
-import { IInvestDocumentSign } from 'InvestCommon/types/api/invest';
+import { IInvestDocumentSign } from 'InvestCommon/data/esign/esign.types';
 import env from 'InvestCommon/config/env';
 import { v4 as uuidv4 } from 'uuid';
 import { createRepositoryStates, withActionState } from 'InvestCommon/data/repository/repository';

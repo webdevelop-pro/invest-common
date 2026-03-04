@@ -3,6 +3,8 @@ export const IGNORABLE_ERROR_PATTERNS = [
   /aborterror|aborted|canceled/i,
   // Ignore common dynamic-import/chunk-load failures (noise, usually auto-recovered)
   /loading chunk|failed to fetch dynamically imported module|importing dynamically imported module|error loading dynamically imported module/i,
+  // Expected auth failures (e.g. wrong credentials) — user behavior, not system error
+  /invalid email or password/i,
 ];
 
 export function isIgnorableError(error: Error): boolean {

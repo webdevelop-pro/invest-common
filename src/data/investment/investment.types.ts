@@ -1,6 +1,11 @@
-import { FundingTypes } from 'InvestCommon/helpers/enums/general';
-import { IOffer } from 'InvestCommon/types/api/offers';
-import { IOfferFormatted } from 'InvestCommon/data/offer/offer.types';
+import { IOffer, IOfferFormatted } from 'InvestCommon/data/offer/offer.types';
+
+export enum FundingTypes {
+  ach = 'ach',
+  wire = 'wire',
+  wallet = 'wallet',
+  cryptoWallet = 'crypto_wallet',
+}
 
 export enum InvestStepTypes {
   amount = 'amount',
@@ -129,4 +134,61 @@ export interface IInvestmentsDataRaw {
   meta: IInvestmentsData['meta'];
   count: number;
   data: IInvestment[];
+}
+
+/**
+ * Unconfirmed investments list (before or after formatting).
+ * API schema historically declared `data` as IInvestmentFormatted[],
+ * but the backend may return raw IInvestment[] which we normalize in the repository.
+ */
+export interface IInvestUnconfirmed {
+  count: number;
+  // Can hold either raw or formatted investments; repository normalizes as needed.
+  data: (IInvestment | IInvestmentFormatted)[];
+}
+
+/**
+ * Payload returned after confirming an investment.
+ */
+export interface IInvestConfirm {
+  investment: {
+    id: number;
+    status: string;
+  };
+}
+
+/**
+ * Payload used to update funding information for an investment.
+ */
+export interface IInvestFunding {
+  funding_type: FundingTypes;
+  payment_data?: {
+    account_number: string;
+    routing_number: string;
+    account_holder_name: string;
+    account_type: string;
+  };
+}
+
+export enum InvestmentDocumentsTypes {
+  agreement = 'agreement',
+  tax_document = 'tax document',
+  offer_document = 'offer document',
+}
+
+export interface IInvestmentDocuments {
+  id: number;
+  url: string;
+  name: string;
+  filename: string;
+  mime: string;
+  bucket_path: string;
+  updated_at: string;
+  meta_data: {
+    big: string;
+    small: string;
+    medium: string;
+    size: number;
+  };
+  type: InvestmentDocumentsTypes;
 }

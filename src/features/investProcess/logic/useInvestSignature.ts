@@ -2,7 +2,7 @@ import { computed, ref, watch, nextTick } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
 import { ROUTE_INVEST_REVIEW } from 'InvestCommon/domain/config/enums/routes';
-import { InvestStepTypes } from 'InvestCommon/types/api/invest';
+import { InvestStepTypes } from 'InvestCommon/data/investment/investment.types';
 import { storeToRefs } from 'pinia';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';

@@ -3,11 +3,10 @@ import { storeToRefs } from 'pinia';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
 import { useRepositoryKyc } from 'InvestCommon/data/kyc/kyc.repository';
-import {
-  IAccreditationData, IKycData, InvestKycTypes,
-} from 'InvestCommon/types/api/invest';
+import { IAccreditationData } from 'InvestCommon/data/accreditation/accreditation.types';
+import { IKycData, InvestKycTypes } from 'InvestCommon/data/kyc/kyc.types';
 import { ACCREDITATION_HISTORY, INVEST_KYC_HISTORY, ITimelineItemsHistory } from '../../utils';
-import { PostLinkTypes } from 'InvestCommon/types/api/blog';
+import { PostLinkTypes } from 'InvestCommon/data/blog/blog.types';
 import { urlBlogSingle } from 'InvestCommon/domain/config/links';
 import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 

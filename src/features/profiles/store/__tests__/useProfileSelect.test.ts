@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useRouter } from 'vue-router';
 import { ref } from 'vue';
-import { InvestKycTypes } from 'InvestCommon/types/api/invest';
+import { InvestKycTypes } from 'InvestCommon/data/kyc/kyc.types';
 import { useProfileSelectStore } from '../useProfileSelect';
 
 const mockPush = vi.fn();

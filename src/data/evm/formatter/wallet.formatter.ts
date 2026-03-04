@@ -8,7 +8,7 @@ import {
 import { EvmTransactionFormatter } from './transactions.formatter';
 import defaultImage from 'InvestCommon/shared/assets/images/default.svg?url';
 import env from 'InvestCommon/config/env';
-import { currency } from 'InvestCommon/helpers/currency';
+import { currency } from 'UiKit/helpers/currency';
 
 export class EvmWalletFormatter {
   private data: IEvmWalletDataForFormatter;

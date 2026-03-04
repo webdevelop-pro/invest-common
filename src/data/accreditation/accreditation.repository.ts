@@ -1,5 +1,5 @@
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
-import { IAccreditationData } from 'InvestCommon/types/api/invest';
+import { IAccreditationData } from 'InvestCommon/data/accreditation/accreditation.types';
 import env from 'InvestCommon/config/env';
 import { v4 as uuidv4 } from 'uuid';
 import { createRepositoryStates, withActionState, type OptionsStateData } from 'InvestCommon/data/repository/repository';

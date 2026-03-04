@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 
-export interface ImportMetaEnv {
+interface ImportMetaEnv {
   VITE_KRATOS_URL: string;
   VITE_PLAID_URL: string;
   VITE_FRONTEND: string;
@@ -30,3 +30,8 @@ export interface ImportMetaEnv {
   VITE_HUBSPOT_FORM_ID_BENEFICIAL_OWNERS: string;
   readonly VITE_GIT_HASH?: string;
 }
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
+}
+

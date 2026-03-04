@@ -26,3 +26,4 @@ export interface IAuthor {
   favoriteTags?: string[];
   slug?: string;
 }
+

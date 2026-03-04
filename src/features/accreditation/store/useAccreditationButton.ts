@@ -3,8 +3,7 @@ import {
   watch,
 } from 'vue';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
-import { AccreditationTypes } from 'InvestCommon/types/api/invest';
-import { AccreditationTextStatuses } from 'InvestCommon/data/accreditation/accreditation.types';
+import { AccreditationTypes, AccreditationTextStatuses } from 'InvestCommon/data/accreditation/accreditation.types';
 import { useRouter } from 'vue-router';
 import { ROUTE_ACCREDITATION_UPLOAD, ROUTE_DASHBOARD_PERSONAL_DETAILS } from 'InvestCommon/domain/config/enums/routes';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';

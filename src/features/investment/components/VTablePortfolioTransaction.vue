@@ -3,7 +3,6 @@ import {
   VTable, VTableBody, VTableCell, VTableRow,
 } from 'UiKit/components/Base/VTable';
 import { computed, PropType } from 'vue';
-import { InvestTransactionStatuses } from 'InvestCommon/helpers/enums/invest';
 import VBadge from 'UiKit/components/Base/VBadge/VBadge.vue';
 import VTooltip from 'UiKit/components/VTooltip.vue';
 import { IInvestmentFormatted } from 'InvestCommon/data/investment/investment.types';
@@ -74,7 +73,7 @@ const time = computed(() => (
         </VTableCell>
 
         <VTableCell class="is--gt-tablet-show">
-          {{ InvestTransactionStatuses[investment.funding_status]?.text }}
+          {{ investment.fundingStatusFormatted }}
         </VTableCell>
   
         <VTableCell class="v-table-portfolio-transaction__amount-cell">
@@ -83,7 +82,7 @@ const time = computed(() => (
           </div>
 
           <div class="is--lt-tablet-show">
-            {{ InvestTransactionStatuses[investment.funding_status]?.text }}
+            {{ investment.fundingStatusFormatted }}
           </div>
         </VTableCell>
       </VTableRow>

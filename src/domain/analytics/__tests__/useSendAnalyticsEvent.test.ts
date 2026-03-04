@@ -35,6 +35,7 @@ vi.mock('InvestCommon/config/env', () => ({
   default: {
     IS_STATIC_SITE: '0',
     APP_VERSION: 'test-hash',
+    ENABLE_ANALYTICS: '1',
   },
 }));
 

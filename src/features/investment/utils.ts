@@ -1,7 +1,8 @@
 import {
   ROUTE_ACCREDITATION_UPLOAD,
 } from 'InvestCommon/domain/config/enums/routes';
-import { AccreditationTypes, InvestKycTypes } from 'InvestCommon/types/api/invest';
+import { AccreditationTypes } from 'InvestCommon/data/accreditation/accreditation.types';
+import { InvestKycTypes } from 'InvestCommon/data/kyc/kyc.types';
 
 export enum DashboardInvestmentTabTypes {
   documents = 'documents',

@@ -10,7 +10,7 @@ import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { FormModelInvestmentObjectives } from 'InvestCommon/types/form';
-import { numberFormatter } from 'InvestCommon/helpers/numberFormatter';
+import { numberFormatter } from 'UiKit/helpers/numberFormatter';
 import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 
 const props = defineProps({

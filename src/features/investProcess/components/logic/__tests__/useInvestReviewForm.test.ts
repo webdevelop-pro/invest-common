@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { reactive } from 'vue';
 
 import { useInvestReviewForm } from '../useInvestReviewForm';
-import { FundingTypes } from 'InvestCommon/helpers/enums/general';
+import { FundingTypes } from 'InvestCommon/data/investment/investment.types';
 
 describe('useInvestReviewForm', () => {
   it('builds investorName from selectedUserProfileData', () => {

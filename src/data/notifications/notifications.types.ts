@@ -1,5 +1,5 @@
-import { InvestKycTypes } from 'InvestCommon/types/api/invest';
-import { IProfileIndividual } from 'InvestCommon/types/api/user';
+import { InvestKycTypes } from 'InvestCommon/data/kyc/kyc.types';
+import { IProfileIndividual } from 'InvestCommon/data/profiles/profiles.types';
 import { AccreditationTypes } from 'InvestCommon/data/accreditation/accreditation.types';
 
 export interface INotificationToken {

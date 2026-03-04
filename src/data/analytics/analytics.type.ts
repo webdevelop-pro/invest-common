@@ -10,7 +10,13 @@ export const AnalyticsLogLevel = {
 
 export type AnalyticsLogLevel = typeof AnalyticsLogLevel[keyof typeof AnalyticsLogLevel];
 
-export type AnalyticsEventType = 'open' | 'click' | 'send' | 'close';
+export type AnalyticsEventType =
+  | 'open'
+  | 'click'
+  | 'send'
+  | 'close'
+  // Allow additional, descriptive event names (e.g. 'kyc_started')
+  | (string & {});
 
 export type AnalyticsHttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD' | 'OPTIONS' | 'PATCH';
 

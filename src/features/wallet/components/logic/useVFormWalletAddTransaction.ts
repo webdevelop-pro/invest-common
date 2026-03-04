@@ -3,8 +3,8 @@ import {
 } from 'vue';
 import { storeToRefs } from 'pinia';
 import { WalletAddTransactionTypes } from 'InvestCommon/data/wallet/wallet.types';
-import { numberFormatter } from 'InvestCommon/helpers/numberFormatter';
-import { currency } from 'InvestCommon/helpers/currency';
+import { numberFormatter } from 'UiKit/helpers/numberFormatter';
+import { currency } from 'UiKit/helpers/currency';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { FormModelAddTransaction } from 'InvestCommon/types/form';

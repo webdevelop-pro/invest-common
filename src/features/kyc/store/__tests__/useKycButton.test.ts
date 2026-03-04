@@ -4,8 +4,7 @@ import {
 } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { nextTick, ref } from 'vue';
-import { InvestKycTypes } from 'InvestCommon/types/api/invest';
-import { KycTextStatuses } from 'InvestCommon/data/kyc/kyc.types';
+import { InvestKycTypes, KycTextStatuses } from 'InvestCommon/data/kyc/kyc.types';
 import { ROUTE_SUBMIT_KYC } from 'InvestCommon/domain/config/enums/routes';
 import { urlContactUs, urlProfileKYC } from 'InvestCommon/domain/config/links';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';

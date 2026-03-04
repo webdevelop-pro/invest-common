@@ -5,7 +5,7 @@ import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository'
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useWallet } from 'InvestCommon/features/wallet/logic/useWallet';
 import VTableWalletTokensItem from 'InvestCommon/features/wallet/components/VTableWalletTokensItem.vue';
-import { currency } from 'InvestCommon/helpers/currency';
+import { currency } from 'UiKit/helpers/currency';
 import { ROUTE_DASHBOARD_EVMWALLET, ROUTE_DASHBOARD_WALLET } from 'InvestCommon/domain/config/enums/routes';
 
 export function useWalletData() {

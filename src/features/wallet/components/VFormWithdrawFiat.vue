@@ -4,7 +4,7 @@ import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
 import VFormSelect from 'UiKit/components/Base/VForm/VFormSelect.vue';
 import FormRow from 'UiKit/components/Base/VForm/VFormRow.vue';
 import FormCol from 'UiKit/components/Base/VForm/VFormCol.vue';
-import { numberFormatter } from 'InvestCommon/helpers/numberFormatter';
+import { numberFormatter } from 'UiKit/helpers/numberFormatter';
 import VLayoutDialogForm from 'InvestCommon/shared/layouts/VLayoutDialogForm.vue';
 
 defineProps<{

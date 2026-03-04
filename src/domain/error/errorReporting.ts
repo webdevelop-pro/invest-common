@@ -79,7 +79,7 @@ export const toasterErrorHandling = (error: unknown, fallbackMessage: string) =>
 };
 
 /** Logger called for every reported error (log then show). Set to record errors (e.g. analytics). */
-let errorLogger: ((normalized: NormalizedError, fallbackMessage: string) => void) | null = null;
+let errorLogger: ((normalized: NormalizedError, fallbackMessage: string, context?: unknown) => void) | null = null;
 
 /** Optional handlers for specific status codes (401, 429, etc.). Set at app bootstrap. */
 let errorHandlers: ErrorHandlers = {};
@@ -87,8 +87,11 @@ let errorHandlers: ErrorHandlers = {};
 /**
  * Set a logger for every reported error. Called before the toast (log then show).
  * Use to send errors to analytics or central logging. Reset with setErrorLogger(null).
+ * The optional third argument can carry structured context (e.g. AnalyticsErrorContext).
  */
-export function setErrorLogger(fn: ((normalized: NormalizedError, fallbackMessage: string) => void) | null) {
+export function setErrorLogger(
+  fn: ((normalized: NormalizedError, fallbackMessage: string, context?: unknown) => void) | null,
+) {
   errorLogger = fn;
 }
 
@@ -103,11 +106,39 @@ export function setErrorHandlers(handlers: ErrorHandlers) {
 /**
  * Default reporter: normalize → log (or console) → branch on statusCode → else toast.
  * Keeps all "log then show" and error-code branching in one place.
+ * Optional context is forwarded to errorLogger (e.g. analytics) but not used for UI.
  */
-function defaultErrorReporter(error: unknown, fallbackMessage: string) {
+function defaultErrorReporter(error: unknown, fallbackMessage: string, context?: unknown) {
   const normalized = normalizeError(error, fallbackMessage);
 
-  if (errorLogger) errorLogger(normalized, fallbackMessage);
+  const baseContext = (context as Record<string, unknown> | undefined) ?? {};
+
+  // Enrich context with HTTP request details when available (e.g. APIError.data.httpRequest)
+  const httpRequest =
+    (error as { data?: { httpRequest?: unknown } })?.data?.httpRequest ?? undefined;
+
+  // Prefer existing stack/httpRequest on context; fall back to values from the error.
+  const stackString =
+    (error as { data?: { stack?: string } })?.data?.stack
+    ?? (error as { stack?: string }).stack
+    ?? '';
+
+  const enrichedContext: Record<string, unknown> = { ...baseContext };
+
+  if (httpRequest != null && enrichedContext.httpRequest == null) {
+    enrichedContext.httpRequest = httpRequest;
+  }
+
+  if (stackString && enrichedContext.stack == null) {
+    enrichedContext.stack = stackString.split('\n').slice(0, 15);
+  }
+
+  const hasContext = Object.keys(enrichedContext).length > 0;
+
+  if (errorLogger) {
+    // Only pass context when we actually have something structured to forward.
+    errorLogger(normalized, fallbackMessage, hasContext ? enrichedContext : undefined);
+  }
   else if (typeof console?.error === 'function') console.error('[reportError]', fallbackMessage, normalized);
 
   if (normalized.statusCode === 401 && errorHandlers.onUnauthorized) {
@@ -151,24 +182,26 @@ function defaultErrorReporter(error: unknown, fallbackMessage: string) {
 }
 
 /** Reporter used by reportError. Null = use defaultErrorReporter (log then show + branching). */
-let errorReporter: ((error: unknown, fallbackMessage: string) => void) | null = null;
+let errorReporter: ((error: unknown, fallbackMessage: string, context?: unknown) => void) | null = null;
 
 /**
  * Replace the error reporter (e.g. in tests or for log-then-show).
  * Call with no args or null to reset to default (defaultErrorReporter).
+ * The optional third argument can carry structured context (e.g. AnalyticsErrorContext).
  */
-export function setErrorReporter(fn?: ((error: unknown, fallbackMessage: string) => void) | null) {
+export function setErrorReporter(fn?: ((error: unknown, fallbackMessage: string, context?: unknown) => void) | null) {
   errorReporter = fn ?? null;
 }
 
 /**
  * Report an error (toast by default). Use this in catch blocks so tests can mock one interface.
  * Uses the reporter set by setErrorReporter, or defaultErrorReporter (log then show + 401/429 branching).
+ * Optional context is forwarded to errorLogger (e.g. analytics) but ignored by UI logic.
  * Never throws: if the reporter throws, logs to console and swallows.
  */
-export const reportError = (error: unknown, fallbackMessage: string) => {
+export const reportError = (error: unknown, fallbackMessage: string, context?: unknown) => {
   try {
-    (errorReporter ?? defaultErrorReporter)(error, fallbackMessage);
+    (errorReporter ?? defaultErrorReporter)(error, fallbackMessage, context);
   } catch (e) {
     if (typeof console?.error === 'function') {
       console.error('[reportError] reporter threw', fallbackMessage, e);

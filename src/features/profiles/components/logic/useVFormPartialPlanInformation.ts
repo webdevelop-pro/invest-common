@@ -12,7 +12,7 @@ const yesNoOptions = [
 
 export interface FormModelPlanInformation {
   name: string | undefined;
-  is_use_ein: string | undefined;
+  is_use_ein: 'Yes' | 'No' | undefined;
   ein?: string | undefined;
   plan_document_id?: number | string | undefined;
 }

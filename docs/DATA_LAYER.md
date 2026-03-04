@@ -126,7 +126,7 @@ Repos with extra state (e.g. notifications) call the factory’s `resetAll` then
 4. Formatter for API → app mapping; no “when to load” or UI in data.
 5. `resetAll()` clearing all action states and local refs.
 6. Pinia: `acceptHMRUpdate(useRepositoryX, import.meta.hot)` for HMR.
-7. Types from `InvestCommon/types/api/*` or local `*.types.ts`; avoid `as any` where known.
+7. Types from `InvestCommon/data/*/*.types.ts` or local `*.types.ts`; avoid `as any` where known.
 
 ## 9. Error handling and boundaries
 

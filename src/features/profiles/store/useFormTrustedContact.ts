@@ -45,7 +45,7 @@ export const useFormTrustedContact = () => {
   const schemaBackend = computed(() => (
     getProfileByIdOptionsState.value.data ? structuredClone(toRaw(getProfileByIdOptionsState.value.data)) : null));
 
-  interface FormModeTrustedContact {
+  interface FormModelTrustedContact {
     beneficiary: {
       first_name: string;
       last_name: string;
@@ -81,7 +81,7 @@ export const useFormTrustedContact = () => {
       },
     },
     $ref: '#/definitions/Individual',
-  } as unknown as JSONSchemaType<FormModeTrustedContact>));
+  } as unknown as JSONSchemaType<FormModelTrustedContact>));
 
 
   const fieldsPaths = ['beneficiary.first_name', 'beneficiary.last_name', 'beneficiary.relationship_type', 'beneficiary.phone', 'beneficiary.email', 'beneficiary.dob'];
@@ -90,10 +90,10 @@ export const useFormTrustedContact = () => {
     model, validation, onValidate,
     formErrors, isFieldRequired, getErrorText,
     scrollToError, isValid
-  } = useFormValidation<FormModeTrustedContact>(
+  } = useFormValidation<FormModelTrustedContact>(
     schemaFrontend,
     schemaBackend,
-    { beneficiary: {} } as FormModeTrustedContact,
+    { beneficiary: {} } as FormModelTrustedContact,
     fieldsPaths,
   );
 

@@ -4,10 +4,11 @@ import {
   InvestFundingStatuses,
   IInvestmentFormatted,
   InvestStepTypes,
+  FundingTypes,
 } from './investment.types';
-import { FundingTypes } from 'InvestCommon/helpers/enums/general';
 import { OfferFormatter } from 'InvestCommon/data/offer/offer.formatter';
-import { IOffer } from 'InvestCommon/types/api/offers';
+import { IOffer } from 'InvestCommon/data/offer/offer.types';
+import defaultImage from 'InvestCommon/shared/assets/images/default.svg?url';
 
 // Currency formatter function
 const defaultInstance = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 });
@@ -276,4 +277,31 @@ export class InvestmentFormatter {
 
     return formattedInvestment;
   }
+}
+
+export function getInvestmentOfferImage(
+  investment: IInvestment | IInvestmentFormatted | null,
+  metaSize: 'big' | 'small' | 'medium' = 'small',
+): string {
+  // The investment's embedded offer may contain additional image metadata
+  // that isn't represented in the shared IOffer type, so we treat it as `any`.
+  const offer: any = (investment as any)?.offer;
+
+  // Prefer explicit meta_data / url from the API when present
+  if (offer?.image?.meta_data && offer.image.meta_data[metaSize]) {
+    return offer.image.meta_data[metaSize];
+  }
+
+  if (offer?.image?.url) {
+    return offer.image.url;
+  }
+
+  // Fallback to OfferFormatter logic (uses FILER_URL + image_link_id)
+  if (offer) {
+    const formatter = new OfferFormatter(offer);
+    return formatter.getOfferImage(metaSize);
+  }
+
+  // Final safety fallback
+  return defaultImage;
 }

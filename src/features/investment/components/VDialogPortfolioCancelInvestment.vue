@@ -3,7 +3,7 @@ import {
   PropType, type Ref,
 } from 'vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
-import { PostLinkTypes } from 'InvestCommon/types/api/blog';
+import { PostLinkTypes } from 'InvestCommon/data/blog/blog.types';
 import VFormTextarea from 'UiKit/components/Base/VForm/VFormTextarea.vue';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
 import arrowLeft from 'UiKit/assets/images/arrow-left.svg';

@@ -146,7 +146,6 @@ export interface SetupErrorHandlingOptions {
  */
 export function setupErrorHandling(options: SetupErrorHandlingOptions): void {
   if (typeof window === 'undefined') return;
-  if ((import.meta as { env?: { VITE_ENV?: string } }).env?.VITE_ENV === 'local') return;
 
   const { app, type, onUnauthorized } = options;
   setErrorHandlers(onUnauthorized ? { onUnauthorized } : type === 'vue' ? { onUnauthorized: redirectToSigninForUnauthorized } : {});

@@ -6,7 +6,7 @@ import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
 import { useRepositoryEarn } from 'InvestCommon/data/earn/earn.repository';
 import { reportError } from 'InvestCommon/domain/error/errorReporting';
-import { currency } from 'InvestCommon/helpers/currency';
+import { currency } from 'UiKit/helpers/currency';
 import {
   canLoadWalletData as canLoadWalletDataRule,
   canLoadEvmWalletData as canLoadEvmWalletDataRule,

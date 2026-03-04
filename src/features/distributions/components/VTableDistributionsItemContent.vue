@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { currency } from 'InvestCommon/helpers/currency';
-import { formatToFullDate } from 'InvestCommon/helpers/formatters/formatToDate';
+import { currency } from 'UiKit/helpers/currency';
+import { formatToFullDate } from 'UiKit/helpers/formatters/formatToDate';
 import { PropType } from 'vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 import file from 'UiKit/assets/images/file.svg';
-import { IDistributionsData } from 'InvestCommon/types/api/distributions';
+import { IDistributionsData } from 'InvestCommon/data/distributions/distributions.types';
 import { VTableCell, VTableRow } from 'UiKit/components/Base/VTable';
 
 defineProps({

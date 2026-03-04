@@ -16,7 +16,7 @@ import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
 import { useRepositoryEarn } from 'InvestCommon/data/earn/earn.repository';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
-import { FundingTypes } from 'InvestCommon/helpers/enums/general';
+import { FundingTypes } from 'InvestCommon/data/investment/investment.types';
 import { storeToRefs } from 'pinia';
 import { reportError } from 'InvestCommon/domain/error/errorReporting';
 import {

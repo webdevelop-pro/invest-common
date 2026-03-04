@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { formatToFullDate } from 'InvestCommon/helpers/formatters/formatToDate';
+import { formatToFullDate } from 'UiKit/helpers/formatters/formatToDate';
 import {
   PropType, defineAsyncComponent, ref,
 } from 'vue';
-import { IInvestmentDocuments } from 'InvestCommon/types/api/invest';
+import { IInvestmentDocuments } from 'InvestCommon/data/investment/investment.types';
 import file from 'UiKit/assets/images/file.svg';
 import { VTableCell, VTableRow } from 'UiKit/components/Base/VTable';
 
