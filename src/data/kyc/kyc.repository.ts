@@ -60,31 +60,51 @@ export const useRepositoryKyc = defineStore('repository-kyc', () => {
       return response.data;
     });
 
-  // Generalized Plaid KYC handler — caller must pass profileId (no store fallback).
-  const handlePlaidKyc = async (profileId: number) => {
+  /**
+   * Generalized Plaid KYC handler — caller must pass profileId (no store fallback).
+   * Returns a promise that resolves when the Plaid Link flow is closed.
+   * `success` indicates whether Plaid reported a successful link session.
+   */
+  const handlePlaidKyc = async (
+    profileId: number,
+  ): Promise<{ success: boolean } | null> => {
     isPlaidLoading.value = true;
     isPlaidDone.value = false;
     try {
       await createToken(profileId);
-      if (kycToken.value && kycToken.value.link_token) {
-        await loadPlaidScriptOnce();
-        expectedLinkSessionId = null;
+      if (!kycToken.value?.link_token) {
+        isPlaidLoading.value = false;
+        return null;
+      }
+
+      await loadPlaidScriptOnce();
+      expectedLinkSessionId = null;
+
+      const result = await new Promise<{ success: boolean }>((resolve) => {
+        let settled = false;
+
         plaidHandler = window?.Plaid.create({
-          token: kycToken.value?.link_token,
+          token: kycToken.value!.link_token,
           onSuccess: (publicToken: string, metadata: unknown) => {
             const linkSessionId = metadata && typeof metadata === 'object' && 'link_session_id' in metadata
               ? (metadata as { link_session_id?: string }).link_session_id
               : undefined;
             if (expectedLinkSessionId && linkSessionId !== expectedLinkSessionId) return;
+            if (settled) return;
+            settled = true;
             isPlaidLoading.value = false;
             isPlaidDone.value = true;
+            resolve({ success: true });
           },
           onLoad: () => {
             if (import.meta.env.DEV) console.debug('[KYC Plaid] onLoad');
           },
           onExit: (err: unknown, metadata: unknown) => {
             if (import.meta.env.DEV) console.debug('[KYC Plaid] onExit', err, metadata);
+            if (settled) return;
+            settled = true;
             isPlaidLoading.value = false;
+            resolve({ success: false });
           },
           onEvent: (eventName: string, metadata: unknown) => {
             const linkSessionId = metadata && typeof metadata === 'object' && 'link_session_id' in metadata
@@ -97,8 +117,11 @@ export const useRepositoryKyc = defineStore('repository-kyc', () => {
           },
           receivedRedirectUri: null,
         });
+
         setTimeout(() => { if (plaidHandler) plaidHandler.open(); }, PLAID_OPEN_DELAY_MS);
-      }
+      });
+
+      return result;
     } catch (err) {
       isPlaidLoading.value = false;
       throw err;

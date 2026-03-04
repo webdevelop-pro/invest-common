@@ -108,8 +108,8 @@ export const useFormFinancialInformationAndKyc = () => {
       );
       if (!setProfileByIdState.value.error) await useRepositoryKycStore.handlePlaidKyc(selectedUserProfileId.value);
 
-      useRepositoryProfilesStore.setUser({ phone: fields?.phone });
-      useRepositoryProfilesStore.getUser();
+      await useRepositoryProfilesStore.setUser({ phone: fields?.phone });
+      await useRepositoryProfilesStore.getUser();
       if (!tokenState.value.error && !setProfileByIdState.value.error
     && selectedUserProfileData.value?.user_id && selectedUserProfileData.value?.id
     && !selectedUserProfileData.value?.escrow_id) {
@@ -117,6 +117,7 @@ export const useFormFinancialInformationAndKyc = () => {
           selectedUserProfileData.value?.user_id,
           selectedUserProfileData.value?.id
         );
+
       }
       if (!setProfileByIdState.value.error) hubspotHandle();
       useRepositoryProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
