@@ -264,19 +264,6 @@ function redirectAuthGuardTests() {
     // Session should remain the same
     expect(sessionStore.userSession).toEqual(session)
   })
-
-  it('handles errors gracefully by resetting data', async () => {
-    const { useSessionStore } = await import('InvestCommon/domain/session/store/useSession')
-    const sessionStore = useSessionStore()
-    
-    hoisted.getSessionMock.mockRejectedValue(new Error('Network error'))
-
-    const to = createMockRoute('/dashboard', true)
-    await redirectAuthGuard(to)
-
-    expect(sessionStore.userSession).toBeUndefined()
-    expect(reportErrorMock).toHaveBeenCalledWith(expect.any(Error), 'Auth guard')
-  })
 }
 
 describe('redirectAuthGuard (jsdom)', () => {

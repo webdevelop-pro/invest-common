@@ -1,7 +1,6 @@
 // import { storeToRefs } from 'pinia';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
-import { reportError } from 'InvestCommon/domain/error/errorReporting';
 import {
   urlAuthenticator,
   // urlSignin, urlSignup, urlForgot, urlCheckEmail,
@@ -50,6 +49,6 @@ export const redirectAuthGuardStatic = async () => {
     //   }
     // }
   } catch (error) {
-    reportError(error, 'Auth guard (static)');
+    // reportError(error, 'Auth guard (static)');
   }
 };

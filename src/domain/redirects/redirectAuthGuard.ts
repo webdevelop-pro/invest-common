@@ -6,7 +6,6 @@ import { urlSignin } from 'InvestCommon/domain/config/links';
 import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
 import { resetAllData } from 'InvestCommon/domain/resetAllData';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
-import { reportError } from 'InvestCommon/domain/error/errorReporting';
 // import { useDomainWebSocketStore } from 'InvestCommon/domain/websockets/store/useWebsockets';
 import { ISession } from 'InvestCommon/data/auth/auth.type';
 
@@ -63,11 +62,6 @@ export const redirectAuthGuard = async (
         return;
       }
 
-      // Session invalid or 401 — clear any stale session/cookies (repository no longer mutates session)
-      if (session === null) {
-        resetAllData();
-      }
-
       if (to.meta.requiresAuth) {
         redirectToSignin();
       }
@@ -111,7 +105,7 @@ export const redirectAuthGuard = async (
     // Authenticated and session present: allow navigation
     return;
   } catch (error) {
-    reportError(error, 'Auth guard');
+    // reportError(error, 'Auth guard');
     resetAllData();
     return;
   }

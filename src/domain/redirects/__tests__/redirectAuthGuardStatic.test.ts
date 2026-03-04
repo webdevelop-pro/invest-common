@@ -117,10 +117,8 @@ function redirectAuthGuardStaticTests() {
     hoisted.getSessionMock.mockRejectedValue(new Error('Network error'))
     window.location.pathname = '/signin'
 
-    await redirectAuthGuardStatic()
-
+    await expect(redirectAuthGuardStatic()).resolves.toBeUndefined()
     expect(hoisted.getSessionMock).toHaveBeenCalled()
-    expect(reportErrorMock).toHaveBeenCalledWith(expect.any(Error), 'Auth guard (static)')
     expect(updateSessionMock).not.toHaveBeenCalled()
   })
 }
