@@ -79,7 +79,7 @@ export const toasterErrorHandling = (error: unknown, fallbackMessage: string) =>
 };
 
 /** Logger called for every reported error (log then show). Set to record errors (e.g. analytics). */
-let errorLogger: ((normalized: NormalizedError, fallbackMessage: string, context?: unknown) => void) | null = null;
+let errorLogger: ((normalized: NormalizedError, fallbackMessage: string, context?: any) => void) | null = null;
 
 /** Optional handlers for specific status codes (401, 429, etc.). Set at app bootstrap. */
 let errorHandlers: ErrorHandlers = {};
@@ -90,7 +90,7 @@ let errorHandlers: ErrorHandlers = {};
  * The optional third argument can carry structured context (e.g. AnalyticsErrorContext).
  */
 export function setErrorLogger(
-  fn: ((normalized: NormalizedError, fallbackMessage: string, context?: unknown) => void) | null,
+  fn: ((normalized: NormalizedError, fallbackMessage: string, context?: any) => void) | null,
 ) {
   errorLogger = fn;
 }

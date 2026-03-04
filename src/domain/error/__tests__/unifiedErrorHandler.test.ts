@@ -109,7 +109,11 @@ describe('setupUnifiedErrorHandler', () => {
     const rejection = listeners.find((l) => l.type === 'unhandledrejection');
     expect(rejection).toBeDefined();
     rejection!.handler({ reason: new Error('Real error') } as PromiseRejectionEvent);
-    expect(mockReportError).toHaveBeenCalledWith(expect.any(Error), 'Something went wrong');
+    expect(mockReportError).toHaveBeenCalledWith(
+      expect.any(Error),
+      'Something went wrong',
+      expect.objectContaining({ source: 'global', silent: true }),
+    );
   });
 
   it('does not call reportError for ignorable ResizeObserver error', () => {
@@ -138,6 +142,10 @@ describe('setupUnifiedErrorHandler', () => {
     const testError = new Error('Vue error');
     expect(app.config.errorHandler).toBeDefined();
     app.config.errorHandler!(testError, null, '');
-    expect(mockReportError).toHaveBeenCalledWith(testError, 'Something went wrong');
+    expect(mockReportError).toHaveBeenCalledWith(
+      testError,
+      'Something went wrong',
+      expect.objectContaining({ source: 'global', silent: true }),
+    );
   });
 });
