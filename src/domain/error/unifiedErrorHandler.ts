@@ -42,8 +42,14 @@ export const setupUnifiedErrorHandler = () => {
   const setupGlobalHandlers = () => {
     window.addEventListener('unhandledrejection', (e) =>
       handleError(toError(e.reason, 'Unhandled Promise Rejection')));
-    window.addEventListener('error', (e) =>
-      handleError(toError(e.error ?? e.message, 'Unknown error')));
+    window.addEventListener('error', (e) => {
+      const target = (e as Event).target as unknown;
+      if (target && typeof window !== 'undefined' && target instanceof window.HTMLImageElement) {
+        return;
+      }
+      const errorEvent = e as ErrorEvent;
+      handleError(toError(errorEvent.error ?? errorEvent.message, 'Unknown error'));
+    });
   };
 
   const setupVueHandler = (app?: VueApp) => {

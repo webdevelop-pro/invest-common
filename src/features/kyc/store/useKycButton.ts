@@ -25,8 +25,9 @@ export const useKycButton = defineStore('useKycButton', () => {
   /* * Loading State * */
   const isLoading = ref(true);
 
-  // const showSkeleton = computed(() => isLoading.value || (isPlaidDone.value && selectedUserProfileData.value?.isTypeIndividual));
-  const showSkeleton = computed(() => isLoading.value || (isPlaidDone.value));
+  // Show skeleton only while profile data is being fetched (or while Plaid is actively loading),
+  // not indefinitely after Plaid completes.
+  const showSkeleton = computed(() => isLoading.value || isPlaidLoading.value);
 
   // Watch for notification changes to update loading state
   watch([selectedUserProfileData, isSelectedProfileLoading], () => {

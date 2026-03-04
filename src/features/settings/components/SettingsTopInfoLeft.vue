@@ -19,45 +19,45 @@ const userSessionStore = useSessionStore();
 const { userSessionTraits } = storeToRefs(userSessionStore);
 const useRepositoryProfilesStore = useRepositoryProfiles();
 const { getUserState } = storeToRefs(useRepositoryProfilesStore);
-const { isTablet } = storeToRefs(useBreakpoints());
+const { isTablet } = useBreakpoints();
 const profilesStore = useProfilesStore();
 const { selectedUserProfileId } = storeToRefs(profilesStore);
 const filerRepository = useRepositoryFiler();
 const { notificationFieldsState } = storeToRefs(filerRepository);
 
 const isLoading = computed(() => getUserState.value.loading);
-const imageID = computed(() => getUserState.value.data?.image_link_id);
+const imageID = computed(() => Number(getUserState.value.data?.image_link_id || 0));
 const isAvatarLoading = ref(false);
-const bodyId = ref(0);
 const avatarLoadingState = computed(() => isLoading.value || isAvatarLoading.value);
 
-// Add debounced watch to check notification fields state and call getUser if id matches
-// This ensures the callback is not called more than once every 3 seconds
-let debounceTimeout: NodeJS.Timeout | null = null;
-watch(notificationFieldsState, () => {
-  if (!getUserState.value.loading) {
-    // Clear any existing timeout
+// Debounced notification-based refresh of user data
+let debounceTimeout: ReturnType<typeof setTimeout> | null = null;
+watch(
+  notificationFieldsState,
+  () => {
     if (debounceTimeout) {
       clearTimeout(debounceTimeout);
     }
-    
-    // Set new timeout with 3 second delay
+
     debounceTimeout = setTimeout(async () => {
       await useRepositoryProfilesStore.getUser();
-      isAvatarLoading.value = false;
-      debounceTimeout = null; // Reset timeout reference
+      debounceTimeout = null;
     }, 3000);
-  }
-}, { deep: true });
+  },
+  { deep: true },
+);
 
 const onUploadId = async (id: string) => {
   isAvatarLoading.value = true;
-  bodyId.value = Number(id);
+
   const body = {
     image_link_id: id,
   };
-  await useRepositoryProfilesStore.updateUserData(Number(getUserState.value.data?.id), body);
-  useRepositoryProfilesStore.getUser();
+
+  await useRepositoryProfilesStore.updateUserData(Number(getUserState.value.data?.id), body as any);
+  // Fallback: explicitly refresh user data even if no notification arrives
+  await useRepositoryProfilesStore.getUser();
+  isAvatarLoading.value = false;
 };
 </script>
 
