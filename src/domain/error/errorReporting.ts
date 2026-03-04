@@ -112,6 +112,7 @@ function defaultErrorReporter(error: unknown, fallbackMessage: string, context?:
   const normalized = normalizeError(error, fallbackMessage);
 
   const baseContext = (context as Record<string, unknown> | undefined) ?? {};
+  const isSilent = baseContext.silent === true;
 
   // Enrich context with HTTP request details when available (e.g. APIError.data.httpRequest)
   const httpRequest =
@@ -140,6 +141,11 @@ function defaultErrorReporter(error: unknown, fallbackMessage: string, context?:
     errorLogger(normalized, fallbackMessage, hasContext ? enrichedContext : undefined);
   }
   else if (typeof console?.error === 'function') console.error('[reportError]', fallbackMessage, normalized);
+
+  // For "silent" errors (e.g. global window error handlers), log but do not show any UI.
+  if (isSilent) {
+    return;
+  }
 
   if (normalized.statusCode === 401 && errorHandlers.onUnauthorized) {
     errorHandlers.onUnauthorized();

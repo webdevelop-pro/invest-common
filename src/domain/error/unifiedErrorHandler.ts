@@ -33,7 +33,8 @@ export const setupUnifiedErrorHandler = () => {
 
   const handleError = (error: Error) => {
     if (isIgnorableError(error)) return;
-    reportError(error, 'Something went wrong');
+    // Global/unhandled errors: log to analytics but do not show a user-facing toast.
+    reportError(error, 'Something went wrong', { source: 'global', silent: true });
     if (isFatal(error) && !window.location.pathname.endsWith('/500')) {
       setTimeout(() => window.location.replace(urlServerError), 500);
     }
@@ -45,6 +46,10 @@ export const setupUnifiedErrorHandler = () => {
     window.addEventListener('error', (e) => {
       const target = (e as Event).target as unknown;
       if (target && typeof window !== 'undefined' && target instanceof window.HTMLImageElement) {
+        // Swallow image load errors completely: they are noisy and not actionable.
+        if (typeof (e as Event).preventDefault === 'function') {
+          (e as Event).preventDefault();
+        }
         return;
       }
       const errorEvent = e as ErrorEvent;
@@ -108,12 +113,10 @@ export const setupUnifiedErrorHandler = () => {
 };
 
 export const setupVueErrorHandler = (app?: unknown) => {
-  if ((import.meta as { env?: { VITE_ENV?: string } }).env?.VITE_ENV === 'local') return;
   setupUnifiedErrorHandler()?.initialize(app as VueApp);
 };
 
 export const setupVitePressErrorHandler = () => {
-  if ((import.meta as { env?: { VITE_ENV?: string } }).env?.VITE_ENV === 'local') return;
   setupUnifiedErrorHandler()?.initialize();
 };
 
