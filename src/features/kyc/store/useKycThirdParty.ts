@@ -27,18 +27,18 @@ export function useKycThirdParty() {
             plaidSuccess.value = true;
           },
           onLoad: () => {
-            console.log('plaid own onload event');
+            // console.log('plaid own onload event');
           },
           onExit: (err: unknown, metadata: any) => {
-            console.log('plaid on exit event', err, metadata);
-            console.log('update account with failed kyc status');
+            // console.log('plaid on exit event', err, metadata);
+            // console.log('update account with failed kyc status');
             isPlaidLoading.value = false;
           },
           onEvent: (eventName: string, metadata: any) => {
             if (!expectedLinkSessionId && metadata?.link_session_id) {
               expectedLinkSessionId = metadata.link_session_id;
             }
-            console.log('plaid on event', eventName, metadata);
+            // console.log('plaid on event', eventName, metadata);
           },
           receivedRedirectUri: null,
         });

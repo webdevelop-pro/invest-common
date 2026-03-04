@@ -29,7 +29,6 @@ export const useProfileSelectStore = (options?: IUseProfileSelectOptions) => {
   const defaultValue = computed(() => String(selectedUserProfileId.value));
 
   watch(() => selectedUserProfileId.value, () => {
-    console.log('selectedUserProfileId changed', selectedUserProfileId.value);
     if (selectedUserProfileId.value > 0) {
       isLoading.value = false;
     }

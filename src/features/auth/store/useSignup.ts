@@ -169,7 +169,6 @@ export const useSignupStore = defineStore('signup', () => {
     try {
       const flowData = await authRepository.getAuthFlow(SELFSERVICE.registration);
       oryResponseHandling(flowData);
-      console.log('getAuthFlowState.value.error', getAuthFlowState.value.error);
       if (getAuthFlowState.value.error) return;
 
       await authRepository.setSignup(authRepository.flowId.value, {
@@ -202,7 +201,6 @@ export const useSignupStore = defineStore('signup', () => {
   };
 
   const signupSocialHandler = async (provider: string) => {
-    console.log('Social signup initiated for provider:', provider);
     isLoading.value = true;
     try {
       const currentFlowId = getQueryParam('flow');

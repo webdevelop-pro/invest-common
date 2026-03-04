@@ -57,20 +57,20 @@ export const useFormFinancialInformationAndKyc = () => {
   const schemaBackend = computed(() => (
     getProfileByIdOptionsState.value.data ? structuredClone(toRaw(getProfileByIdOptionsState.value.data)) : {}));
 
-  const hubspotHandle = () => {
-    useHubspotForm(env.HUBSPOT_FORM_ID_FINANCIAL_SITUATION).submitFormToHubspot({
+  const hubspotHandle = async () => {
+    await useHubspotForm(env.HUBSPOT_FORM_ID_FINANCIAL_SITUATION).submitFormToHubspot({
       email: userSessionTraits.value?.email,
       is_accredited: financialInfoFormRef.value?.model?.accredited_investor?.is_accredited,
     });
-    useHubspotForm(env.HUBSPOT_FORM_ID_RISKS).submitFormToHubspot({
+    await useHubspotForm(env.HUBSPOT_FORM_ID_RISKS).submitFormToHubspot({
       email: userSessionTraits.value?.email,
       ...understandingRisksFormRef.value?.model,
     });
-    useHubspotForm(env.HUBSPOT_FORM_ID_INVESTMENT_OBJECTIVES).submitFormToHubspot({
+    await useHubspotForm(env.HUBSPOT_FORM_ID_INVESTMENT_OBJECTIVES).submitFormToHubspot({
       email: userSessionTraits.value?.email,
       ...investmentObjectivesFormRef.value?.model,
     });
-    useHubspotForm(env.HUBSPOT_FORM_ID_PERSONAL_INFORMATION).submitFormToHubspot({
+    await useHubspotForm(env.HUBSPOT_FORM_ID_PERSONAL_INFORMATION).submitFormToHubspot({
       email: userSessionTraits.value?.email,
       ...personalFormRef.value?.model,
       date_of_birth: personalFormRef.value?.model?.dob,
@@ -119,16 +119,13 @@ export const useFormFinancialInformationAndKyc = () => {
         );
 
       }
-      if (!setProfileByIdState.value.error) hubspotHandle();
+      if (!setProfileByIdState.value.error) await hubspotHandle();
       useRepositoryProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
       const redirectParam = route.query.redirect;
+      console.log('redirectParam', redirectParam);
 
-      if (typeof redirectParam === 'string' && redirectParam) {
-        if (/^https?:\/\//.test(redirectParam)) {
-          window.location.href = redirectParam;
-        } else {
-          await router.push(redirectParam);
-        }
+      if (redirectParam) {
+        await router.push(redirectParam);
       } else {
         await router.push({
           name: ROUTE_DASHBOARD_ACCOUNT,

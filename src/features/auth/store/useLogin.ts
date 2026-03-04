@@ -154,7 +154,6 @@ export const useLoginStore = defineStore('login', () => {
     isLoading.value = true;
     try {
       const flowId = getQueryParam('flow');
-      console.log('Using query flow ID:', flowId);
       const flowData = await authRepository.getAuthFlow(SELFSERVICE.login);
       oryResponseHandling(flowData);
       if (getAuthFlowState.value.error) return;

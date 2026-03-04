@@ -2,16 +2,19 @@ import {
   ref, computed,
   watch,
 } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { InvestKycTypes, KycTextStatuses } from 'InvestCommon/data/kyc/kyc.types';
 import { ROUTE_SUBMIT_KYC } from 'InvestCommon/domain/config/enums/routes';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
-import { urlContactUs, urlProfileKYC } from 'InvestCommon/domain/config/links';
+import { urlContactUs } from 'InvestCommon/domain/config/links';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useRepositoryKyc } from 'InvestCommon/data/kyc/kyc.repository';
 import { PROFILE_TYPES } from 'InvestCommon/domain/config/enums/profileTypes';
 
 export const useKycButton = defineStore('useKycButton', () => {
+  const route = useRoute();
+  const router = useRouter();
   const userProfilesStore = useProfilesStore();
   const {
     selectedUserProfileData, selectedUserProfileId, isSelectedProfileLoading, selectedUserProfileShowKycInitForm,
@@ -24,10 +27,11 @@ export const useKycButton = defineStore('useKycButton', () => {
 
   /* * Loading State * */
   const isLoading = ref(true);
+  const isPlaidLoadingAfter = computed(() => isPlaidLoading.value || (isPlaidDone.value && selectedUserProfileData.value.isKycPending));
 
   // Show skeleton only while profile data is being fetched (or while Plaid is actively loading),
   // not indefinitely after Plaid completes.
-  const showSkeleton = computed(() => isLoading.value || isPlaidLoading.value);
+  const showSkeleton = computed(() => isLoading.value || isPlaidLoadingAfter.value);
 
   // Watch for notification changes to update loading state
   watch([selectedUserProfileData, isSelectedProfileLoading], () => {
@@ -81,21 +85,24 @@ export const useKycButton = defineStore('useKycButton', () => {
 
   const handleKycClick = async () => {
     if (selectedUserProfileShowKycInitForm.value) {
-      const baseUrl = urlProfileKYC(kycProfileId.value);
+      const redirect = route.fullPath;
       try {
-        if (typeof window !== 'undefined') {
-          const redirectParam = `redirect=${encodeURIComponent(window.location.href)}`;
-          const url = baseUrl.includes('?')
-            ? `${baseUrl}&${redirectParam}`
-            : `${baseUrl}?${redirectParam}`;
-          window.location.href = url;
-          return;
-        }
+        await router.push({
+          name: ROUTE_SUBMIT_KYC,
+          params: { profileId: kycProfileId.value },
+          query: {
+            ...route.query,
+            redirect,
+          },
+        });
+        return;
       } catch {
-        // If URL construction fails (e.g. invalid base or no window), fall back to base URL
-      }
-      if (typeof window !== 'undefined') {
-        window.location.href = baseUrl;
+        // Fallback to basic KYC route without redirect if navigation fails
+        await router.push({
+          name: ROUTE_SUBMIT_KYC,
+          params: { profileId: kycProfileId.value },
+        });
+        return;
       }
     } else {
       await useRepositoryKycStore.handlePlaidKyc(kycProfileId.value);

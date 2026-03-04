@@ -136,7 +136,6 @@ export const useLoginRefreshStore = defineStore('loginRefresh', () => {
   };
 
   const loginSocialHandler = async (provider: string) => {
-    console.log('Social login initiated for provider:', provider);
     isLoading.value = true;
     try {
       const flowId = getQueryParam('flow');

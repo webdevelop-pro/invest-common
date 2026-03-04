@@ -79,7 +79,6 @@ const investHandler = async () => {
       const isCurrentApproved = (current as { isKycApproved?: boolean } | undefined)?.isKycApproved;
       if (!isCurrentApproved) {
         const approvedProfiles = profiles.filter((p: unknown) => p?.isKycApproved);
-        console.log('approvedProfiles', approvedProfiles);
         if (approvedProfiles.length > 0) {
           const randomApproved = approvedProfiles[Math.floor(Math.random() * approvedProfiles.length)];
           if (randomApproved?.id && randomApproved.id !== selectedUserProfileId.value) {
