@@ -4,7 +4,8 @@ import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositorySettings } from 'InvestCommon/data/settings/settings.repository';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 import { SELFSERVICE } from 'InvestCommon/data/auth/auth.constants';
-import { reportError } from 'InvestCommon/domain/error/errorReporting';
+import { oryErrorHandling } from 'InvestCommon/domain/error/oryErrorHandling';
+import { oryResponseHandling } from 'InvestCommon/domain/error/oryResponseHandling';
 
 import GoogleIcon from 'InvestCommon/shared/assets/images/social-login/google1.svg?component';
 import FacebookIcon from 'InvestCommon/shared/assets/images/social-login/facebook1.svg?component';
@@ -52,6 +53,12 @@ export const useSettingsSocial = () => {
   const isLoading = ref(false);
   const { toast } = useToast();
 
+  const resetSettingsFlow = () => {
+    void settingsRepository
+      .getAuthFlow(SELFSERVICE.settings)
+      .then((flow) => oryResponseHandling(flow as any));
+  };
+
   const oidcSocials = computed(() => 
     getAuthFlowState.value.data?.ui?.nodes?.filter((item) => item.group === 'oidc')
   );
@@ -84,7 +91,8 @@ export const useSettingsSocial = () => {
     isLoading.value = true;
     
     try {
-      await settingsRepository.getAuthFlow(SELFSERVICE.settings);
+      const flowData = await settingsRepository.getAuthFlow(SELFSERVICE.settings);
+      oryResponseHandling(flowData as any);
       
       if (getAuthFlowState.value.error) {
         isLoading.value = false;
@@ -95,7 +103,7 @@ export const useSettingsSocial = () => {
       await settingsRepository.setSettings(flowId.value, {
         csrf_token: csrfToken.value,
         ...dataToSend,
-      }, () => onSocialLoginHandler(provider, toLink)); // Pass resetHandler as callback for retry after session refresh
+      });
 
       if (!setSettingsState.value.error) {
         settingsRepository.getAuthFlow(SELFSERVICE.settings);
@@ -107,7 +115,13 @@ export const useSettingsSocial = () => {
         return true; // Indicate success
       }
     } catch (error) {
-      reportError(error as any, 'Failed to update social login');
+      await oryErrorHandling(
+        error as any,
+        'settings',
+        resetSettingsFlow,
+        'Failed to update social login',
+        () => onSocialLoginHandler(provider, toLink),
+      );
     } finally {
       isLoading.value = false;
       loadingProvider.value = null;

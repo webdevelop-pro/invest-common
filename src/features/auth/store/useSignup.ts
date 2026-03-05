@@ -48,6 +48,12 @@ export const useSignupStore = defineStore('signup', () => {
   const userSessionStore = useSessionStore();
   const { sendEvent } = useSendAnalyticsEvent();
 
+  const resetSignupFlow = () => {
+    void authRepository
+      .getAuthFlow(SELFSERVICE.registration)
+      .then((flow) => oryResponseHandling(flow as any));
+  };
+
   const trackSignupEvent = async (statusCode: number) => {
     const uiPath = typeof window !== 'undefined' ? window.location.pathname : '';
     await sendEvent({
@@ -194,7 +200,12 @@ export const useSignupStore = defineStore('signup', () => {
       }
     } catch (error) {
       void trackSignupEvent(400);
-      await oryErrorHandling(error as any, 'signup', () => authRepository.getAuthFlow(SELFSERVICE.registration), 'Failed to signup');
+      await oryErrorHandling(
+        error as any,
+        'signup',
+        resetSignupFlow,
+        'Failed to signup',
+      );
     } finally {
       isLoading.value = false;
     }
@@ -217,7 +228,12 @@ export const useSignupStore = defineStore('signup', () => {
       });
     } catch (error) {
       trackSignupEvent(400);
-      await oryErrorHandling(error as any, 'signup', () => authRepository.getAuthFlow(SELFSERVICE.registration), 'Failed to signup');
+      await oryErrorHandling(
+        error as any,
+        'signup',
+        resetSignupFlow,
+        'Failed to signup',
+      );
     } finally {
       isLoading.value = false;
     }
@@ -266,7 +282,12 @@ export const useSignupStore = defineStore('signup', () => {
         mapFormFields(getSignupState.value.data.ui.nodes);
       }
     } catch (error) {
-      await oryErrorHandling(error as any, 'signup', () => authRepository.getAuthFlow(SELFSERVICE.registration), 'Failed to get signup data');
+      await oryErrorHandling(
+        error as any,
+        'signup',
+        resetSignupFlow,
+        'Failed to get signup data',
+      );
     }
   });
 

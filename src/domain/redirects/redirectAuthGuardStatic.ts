@@ -6,6 +6,7 @@ import {
   // urlSignin, urlSignup, urlForgot, urlCheckEmail,
   // urlProfile,
 } from 'InvestCommon/domain/config/links';
+import { oryErrorHandling } from 'InvestCommon/domain/error/oryErrorHandling';
 // import { navigateWithQueryParams } from 'UiKit/helpers/general';
 
 // const pagesToRedirectIfLoggedIn = [
@@ -49,6 +50,7 @@ export const redirectAuthGuardStatic = async () => {
     //   }
     // }
   } catch (error) {
-    // reportError(error, 'Auth guard (static)');
+    // Handle Ory-specific session errors (e.g. session_aal2_required) and generic failures.
+    await oryErrorHandling(error as any, 'browser', () => {}, 'Auth guard (static)');
   }
 };

@@ -26,6 +26,12 @@ export const useVerificationStore = defineStore('verification', () => {
   const authRepository = useRepositoryAuth();
   const { getSchemaState, setRecoveryState, getAuthFlowState } = storeToRefs(authRepository);
 
+  const resetRecoveryFlow = () => {
+    void authRepository
+      .getAuthFlow(SELFSERVICE.recovery)
+      .then((flow) => oryResponseHandling(flow as any));
+  };
+
   // Query parameters handling
   const queryParams = computed(() => {
     if (import.meta.env.SSR) return new Map<string, string>();
@@ -116,7 +122,12 @@ export const useVerificationStore = defineStore('verification', () => {
         });
       }
     } catch (error) {
-      await oryErrorHandling(error as any, 'recovery', () => authRepository.getAuthFlow(SELFSERVICE.recovery), 'Failed to set recovery');
+      await oryErrorHandling(
+        error as any,
+        'recovery',
+        resetRecoveryFlow,
+        'Failed to set recovery',
+      );
     } finally {
       isLoading.value = false;
     }

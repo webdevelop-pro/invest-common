@@ -6,11 +6,9 @@ import { urlSignin } from 'InvestCommon/domain/config/links';
 import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
 import { resetAllData } from 'InvestCommon/domain/resetAllData';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
+import { oryErrorHandling } from 'InvestCommon/domain/error/oryErrorHandling';
 // import { useDomainWebSocketStore } from 'InvestCommon/domain/websockets/store/useWebsockets';
 import { ISession } from 'InvestCommon/data/auth/auth.type';
-
-const SESSION_CHECK_TTL_MS = 2 * 60 * 1000; // 2 minutes
-let lastSessionCheckAt: number | null = null;
 
 /**
  * Shared 401 / unauthorized redirect: reset state and go to sign-in with optional return URL.
@@ -71,13 +69,7 @@ export const redirectAuthGuard = async (
     // User appears logged in - verify session is still valid (with basic throttling)
     // This handles the case where cookies exist but session was invalidated elsewhere
     if (userLoggedIn.value && userSession.value) {
-      const now = Date.now();
-      const shouldCheck =
-        !lastSessionCheckAt || now - lastSessionCheckAt > SESSION_CHECK_TTL_MS;
-
-      if (shouldCheck) {
         const session = (await useRepositoryAuth().getSession()) as ISession | null;
-        lastSessionCheckAt = now;
 
         if (!session?.active) {
           // Session is invalid, clear everything and redirect if route requires auth
@@ -93,7 +85,6 @@ export const redirectAuthGuard = async (
           await userSessionStore.updateSession(session);
           profilesStore.init();
         }
-      }
     }
 
     // Logged in but session missing: reset all data
@@ -105,13 +96,9 @@ export const redirectAuthGuard = async (
     // Authenticated and session present: allow navigation
     return;
   } catch (error) {
-    // reportError(error, 'Auth guard');
+    // Handle Ory-specific session errors (e.g. session_aal2_required) and generic failures.
+    await oryErrorHandling(error as any, 'browser', () => {}, 'Auth guard');
     resetAllData();
     return;
   }
-};
-
-// Test-only helper to reset internal throttling state
-export const __resetRedirectAuthGuardForTests = () => {
-  lastSessionCheckAt = null;
 };

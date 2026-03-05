@@ -12,6 +12,12 @@ export const useLogoutStore = defineStore('logout', () => {
   const authRepository = useRepositoryAuth();
   const { getAuthFlowState, getLogoutState } = storeToRefs(authRepository);
 
+  const resetLogoutFlow = () => {
+    void authRepository
+      .getAuthFlow(SELFSERVICE.logout)
+      .then((flow) => oryResponseHandling(flow as any));
+  };
+
   const isLoading = ref(false);
   const token = ref('');
 
@@ -46,7 +52,12 @@ export const useLogoutStore = defineStore('logout', () => {
       }
       handleLogoutSuccess();
     } catch (error) {
-      await oryErrorHandling(error as any, 'logout', () => authRepository.getAuthFlow(SELFSERVICE.logout), 'Failed to logout');
+      await oryErrorHandling(
+        error as any,
+        'logout',
+        resetLogoutFlow,
+        'Failed to logout',
+      );
     } finally {
       isLoading.value = false;
     }

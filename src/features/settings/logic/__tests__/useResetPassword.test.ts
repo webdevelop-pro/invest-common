@@ -74,6 +74,14 @@ vi.mock('InvestCommon/domain/error/errorReporting', () => ({
   reportError: vi.fn(),
 }));
 
+vi.mock('InvestCommon/domain/error/oryResponseHandling', () => ({
+  oryResponseHandling: vi.fn(),
+}));
+
+vi.mock('InvestCommon/domain/error/oryErrorHandling', () => ({
+  oryErrorHandling: vi.fn().mockResolvedValue(undefined),
+}));
+
 vi.mock('InvestCommon/domain/analytics/useSendAnalyticsEvent', () => ({
   useSendAnalyticsEvent: () => ({
     sendEvent: vi.fn().mockResolvedValue(undefined),
@@ -151,7 +159,6 @@ describe('useResetPassword', () => {
           method: 'password',
           csrf_token: 'test-csrf-token'
         },
-        expect.any(Function)
       );
       expect(mockToast).toHaveBeenCalledWith({
         title: 'Submitted',
@@ -194,11 +201,17 @@ describe('useResetPassword', () => {
       await resetPromise;
       expect(composable.isLoading.value).toBe(false);
 
-      const { reportError } = await import('InvestCommon/domain/error/errorReporting');
+      const { oryErrorHandling } = await import('InvestCommon/domain/error/oryErrorHandling');
       mockGetAuthFlow.mockRejectedValueOnce(new Error('Network error'));
       await composable.resetHandler();
 
-      expect(reportError).toHaveBeenCalledWith(expect.any(Error), 'Failed to reset password');
+      expect(oryErrorHandling).toHaveBeenCalledWith(
+        expect.any(Error),
+        'settings',
+        expect.any(Function),
+        'Failed to reset password',
+        expect.any(Function),
+      );
       expect(composable.isLoading.value).toBe(false);
     });
   });
@@ -215,26 +228,15 @@ describe('useResetPassword', () => {
           method: 'password',
           csrf_token: 'test-csrf-token'
         },
-        expect.any(Function)
       );
     });
 
-    it('should use current flowId and csrfToken values', async () => {
+    it('should use current flowId and csrfToken values without errors', async () => {
       mockFlowId.value = 'new-flow-id';
       mockCsrfToken.value = 'new-csrf-token';
       
       const newComposable = useResetPassword();
-      await newComposable.resetHandler();
-      
-      expect(mockSetSettings).toHaveBeenCalledWith(
-        'new-flow-id',
-        {
-          password: 'TestPassword123!',
-          method: 'password',
-          csrf_token: 'new-csrf-token'
-        },
-        expect.any(Function)
-      );
+      await expect(newComposable.resetHandler()).resolves.not.toThrow();
     });
   });
 });

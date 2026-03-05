@@ -12,8 +12,9 @@ import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import { urlSettings } from 'InvestCommon/domain/config/links';
 import { errorMessageRule, passwordRule } from 'UiKit/helpers/validation/rules';
 import { SELFSERVICE } from 'InvestCommon/data/auth/auth.constants';
-import { reportError } from 'InvestCommon/domain/error/errorReporting';
 import { useSendAnalyticsEvent } from 'InvestCommon/domain/analytics/useSendAnalyticsEvent';
+import { oryErrorHandling } from 'InvestCommon/domain/error/oryErrorHandling';
+import { oryResponseHandling } from 'InvestCommon/domain/error/oryResponseHandling';
 
 export function useResetPassword() {
   useGlobalLoader().hide();
@@ -26,6 +27,12 @@ export function useResetPassword() {
   const { toast } = useToast();
   const router = useRouter();
   const { sendEvent } = useSendAnalyticsEvent();
+
+  const resetSettingsFlow = () => {
+    void settingsRepository
+      .getAuthFlow(SELFSERVICE.settings)
+      .then((flow) => oryResponseHandling(flow as any));
+  };
 
   const trackPasswordResetEvent = (statusCode: number) => {
     const uiPath = typeof window !== 'undefined' ? window.location.pathname : '';
@@ -90,7 +97,8 @@ export function useResetPassword() {
 
     isLoading.value = true;
     try {
-      await settingsRepository.getAuthFlow(SELFSERVICE.settings);
+      const flowData = await settingsRepository.getAuthFlow(SELFSERVICE.settings);
+      oryResponseHandling(flowData as any);
       
       if (getAuthFlowState.value.error) {
         isLoading.value = false;
@@ -101,7 +109,7 @@ export function useResetPassword() {
         password: model.create_password,
         method: 'password',
         csrf_token: csrfToken.value,
-      }, resetHandler); // Pass resetHandler as callback for retry after session refresh
+      });
 
       if (!setSettingsState.value.error) {
         toast({
@@ -117,7 +125,13 @@ export function useResetPassword() {
       }
     } catch (error) {
       trackPasswordResetEvent(400);
-      reportError(error as any, 'Failed to reset password');
+      await oryErrorHandling(
+        error as any,
+        'settings',
+        resetSettingsFlow,
+        'Failed to reset password',
+        resetHandler,
+      );
     } finally {
       isLoading.value = false;
     }

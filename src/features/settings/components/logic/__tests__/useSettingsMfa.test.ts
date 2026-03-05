@@ -28,6 +28,10 @@ vi.mock('InvestCommon/domain/error/errorReporting', () => ({
   reportError: vi.fn(),
 }));
 
+vi.mock('InvestCommon/domain/error/oryErrorHandling', () => ({
+  oryErrorHandling: vi.fn().mockResolvedValue(undefined),
+}));
+
 vi.mock('InvestCommon/domain/analytics/useSendAnalyticsEvent', () => ({
   useSendAnalyticsEvent: () => ({
     sendEvent: vi.fn().mockResolvedValue(undefined),
@@ -127,7 +131,6 @@ describe('useSettingsMfa', () => {
           totp_unlink: true,
           csrf_token: 'csrf-token-123'
         },
-        expect.any(Function)
       );
       expect(mockSettingsRepository.getAuthFlow).toHaveBeenCalledWith('/self-service/settings/browser');
     });
@@ -171,11 +174,17 @@ describe('useSettingsMfa', () => {
       const error = new Error('API Error');
       mockSettingsRepository.setSettings.mockRejectedValueOnce(error);
 
-      const { reportError } = await import('InvestCommon/domain/error/errorReporting');
+      const { oryErrorHandling } = await import('InvestCommon/domain/error/oryErrorHandling');
 
       await composable.onMfaClick();
 
-      expect(reportError).toHaveBeenCalledWith(error, 'Failed to unlink MFA');
+      expect(oryErrorHandling).toHaveBeenCalledWith(
+        error,
+        'settings',
+        expect.any(Function),
+        'Failed to unlink MFA',
+        expect.any(Function),
+      );
     });
 
     it('should not show toast when unlinking fails', async () => {

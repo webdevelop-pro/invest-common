@@ -87,7 +87,7 @@ describe('useVFormSettingsTOTP', () => {
 
   describe('Initialization', () => {
     it('should initialize with correct default values', () => {
-      expect(composable.qrOnMounted.value).toBe('data:image/png;base64,test-qr-code');
+      expect(composable.totpQR.value).toBe('data:image/png;base64,test-qr-code');
       expect(composable.isLoading.value).toBe(false);
       expect(composable.model.totp_code).toBeUndefined();
       expect(composable.isValid).toBeDefined();
@@ -173,7 +173,6 @@ describe('useVFormSettingsTOTP', () => {
             totp_code: '123456',
             csrf_token: 'test-csrf-token',
           },
-          expect.any(Function)
         );
         expect(result).toBe(true);
       });
@@ -242,7 +241,7 @@ describe('useVFormSettingsTOTP', () => {
       await composable.initializeTOTP();
       
       expect(mockSettingsRepositoryInstance.getAuthFlow).toHaveBeenCalledWith('/self-service/settings/browser');
-      expect(composable.qrOnMounted.value).toBe('data:image/png;base64,test-qr-code');
+      expect(composable.totpQR.value).toBe('data:image/png;base64,test-qr-code');
     });
 
     it('should update QR code on mounted after initialization', async () => {
@@ -253,7 +252,7 @@ describe('useVFormSettingsTOTP', () => {
       
       await composable.initializeTOTP();
       
-      expect(composable.qrOnMounted.value).toBe(newQRCode);
+      expect(composable.totpQR.value).toBe(newQRCode);
     });
   });
 
@@ -300,7 +299,6 @@ describe('useVFormSettingsTOTP', () => {
           totp_code: testData.totpCode.toString(),
           csrf_token: testData.csrfToken,
         },
-        expect.any(Function)
       );
     });
   });

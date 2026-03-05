@@ -28,6 +28,12 @@ export const useLoginRefreshStore = defineStore('loginRefresh', () => {
   const { completeSessionRefresh } = useDialogsStore; // Direct access, not storeToRefs
   const { sendEvent } = useSendAnalyticsEvent();
 
+  const resetLoginRefreshFlow = () => {
+    void authRepository
+      .getAuthFlow(SELFSERVICE.login, { refresh: true } as any)
+      .then((flow) => oryResponseHandling(flow as any));
+  };
+
   const trackLoginRefreshEvent = async (statusCode: number) => {
     const uiPath = typeof window !== 'undefined' ? window.location.pathname : '';
     await sendEvent({
@@ -127,7 +133,12 @@ export const useLoginRefreshStore = defineStore('loginRefresh', () => {
         completeSessionRefresh(true); // Success - complete the session refresh
       }
     } catch (error) {
-      await oryErrorHandling(error as any, 'login', () => authRepository.getAuthFlow(SELFSERVICE.login, { refresh: true }), 'Failed to login');
+      await oryErrorHandling(
+        error as any,
+        'login',
+        resetLoginRefreshFlow,
+        'Failed to login',
+      );
       completeSessionRefresh(false); // Failure - complete with false
       void trackLoginRefreshEvent(400);
     } finally {
@@ -157,7 +168,12 @@ export const useLoginRefreshStore = defineStore('loginRefresh', () => {
         completeSessionRefresh(true); // Success
       }
     } catch (error) {
-      await oryErrorHandling(error as any, 'login', () => authRepository.getAuthFlow(SELFSERVICE.login, { refresh: true }), 'Failed to login');
+      await oryErrorHandling(
+        error as any,
+        'login',
+        resetLoginRefreshFlow,
+        'Failed to login',
+      );
       completeSessionRefresh(false); // Failure
     } finally {
       isLoading.value = false;

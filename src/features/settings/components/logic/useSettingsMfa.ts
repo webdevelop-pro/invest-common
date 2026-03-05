@@ -5,14 +5,21 @@ import { urlResetPassword } from 'InvestCommon/domain/config/links';
 import { useRepositorySettings } from 'InvestCommon/data/settings/settings.repository';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 import { storeToRefs } from 'pinia';
-import { reportError } from 'InvestCommon/domain/error/errorReporting';
 import { useSendAnalyticsEvent } from 'InvestCommon/domain/analytics/useSendAnalyticsEvent';
+import { oryErrorHandling } from 'InvestCommon/domain/error/oryErrorHandling';
+import { oryResponseHandling } from 'InvestCommon/domain/error/oryResponseHandling';
 
 export function useSettingsMfa() {
   const settingsRepository = useRepositorySettings();
   const { flowId, csrfToken, setSettingsState, getAuthFlowState } = storeToRefs(settingsRepository);
   const { toast } = useToast();
   const { sendEvent } = useSendAnalyticsEvent();
+
+  const resetSettingsFlow = () => {
+    void settingsRepository
+      .getAuthFlow(SELFSERVICE.settings)
+      .then((flow) => oryResponseHandling(flow as any));
+  };
 
   const trackMfaEvent = (statusCode: number) => {
     const uiPath = typeof window !== 'undefined' ? window.location.pathname : '';
@@ -59,8 +66,9 @@ export function useSettingsMfa() {
           method: 'totp',
           totp_unlink: true,
           csrf_token: csrfToken.value,
-        }, onMfaClick);
-        await settingsRepository.getAuthFlow(SELFSERVICE.settings);
+        });
+        const flowData = await settingsRepository.getAuthFlow(SELFSERVICE.settings);
+        oryResponseHandling(flowData as any);
 
         if (!setSettingsState.value.error) {
           toast({
@@ -72,7 +80,13 @@ export function useSettingsMfa() {
         }
       } catch (error) {
         trackMfaEvent(400);
-        reportError(error as any, 'Failed to unlink MFA');
+        await oryErrorHandling(
+          error as any,
+          'settings',
+          resetSettingsFlow,
+          'Failed to unlink MFA',
+          onMfaClick,
+        );
       }
     }
   };
@@ -80,9 +94,15 @@ export function useSettingsMfa() {
   const initializeMfa = async () => {
     if (!getAuthFlowState.value.data) {
       try {
-        await settingsRepository.getAuthFlow(SELFSERVICE.settings);
+        const flowData = await settingsRepository.getAuthFlow(SELFSERVICE.settings);
+        oryResponseHandling(flowData as any);
       } catch (error) {
-        reportError(error as any, 'Failed to load MFA settings');
+        await oryErrorHandling(
+          error as any,
+          'settings',
+          resetSettingsFlow,
+          'Failed to load MFA settings',
+        );
       }
     }
   };

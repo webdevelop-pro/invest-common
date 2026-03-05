@@ -2,7 +2,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
-import { redirectAuthGuard, __resetRedirectAuthGuardForTests } from '../redirectAuthGuard'
+import { redirectAuthGuard } from '../redirectAuthGuard'
 import type { ISession } from 'InvestCommon/data/auth/auth.type'
 
 // ------------------- HOIST-SAFE HELPERS -------------------
@@ -37,6 +37,11 @@ const reportErrorMock = vi.fn()
 vi.mock('InvestCommon/domain/error/errorReporting', () => ({
   reportError: (...args: unknown[]) => reportErrorMock(...args),
   toasterErrorHandling: vi.fn(),
+}))
+
+const oryErrorHandlingMock = vi.fn().mockResolvedValue(undefined)
+vi.mock('InvestCommon/domain/error/oryErrorHandling', () => ({
+  oryErrorHandling: (...args: unknown[]) => oryErrorHandlingMock(...args),
 }))
 
 const createMockSession = (active: boolean, id = 's1'): ISession => ({
@@ -94,7 +99,6 @@ function redirectAuthGuardTests() {
   beforeEach(() => {
     setActivePinia(createPinia())
     vi.clearAllMocks()
-    __resetRedirectAuthGuardForTests()
     hoisted.getSessionMock.mockResolvedValue(null)
     mockCookies.get.mockReturnValue(undefined)
     mockCookies.getAll.mockReturnValue({})

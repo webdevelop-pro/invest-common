@@ -30,6 +30,12 @@ export const useLoginStore = defineStore('login', () => {
   const userSessionStore = useSessionStore();
   const { sendEvent } = useSendAnalyticsEvent();
 
+  const resetLoginFlow = () => {
+    void authRepository
+      .getAuthFlow(SELFSERVICE.login)
+      .then((flow) => oryResponseHandling(flow as any));
+  };
+
   const trackLoginEvent = async (statusCode: number) => {
     const uiPath = typeof window !== 'undefined' ? window.location.pathname : '';
     await sendEvent({
@@ -144,7 +150,12 @@ export const useLoginStore = defineStore('login', () => {
       }
     } catch (error) {
       void trackLoginEvent(400);
-      await oryErrorHandling(error as any, 'login', () => authRepository.getAuthFlow(SELFSERVICE.login), 'Failed to login');
+      await oryErrorHandling(
+        error as any,
+        'login',
+        resetLoginFlow,
+        'Failed to login',
+      );
     } finally {
       isLoading.value = false;
     }
@@ -165,7 +176,12 @@ export const useLoginStore = defineStore('login', () => {
       });
     } catch (error) {
       trackLoginEvent(400);
-      await oryErrorHandling(error as any, 'login', () => authRepository.getAuthFlow(SELFSERVICE.login), 'Failed to login');
+      await oryErrorHandling(
+        error as any,
+        'login',
+        resetLoginFlow,
+        'Failed to login',
+      );
     } finally {
       isLoading.value = false;
     }
@@ -180,7 +196,12 @@ export const useLoginStore = defineStore('login', () => {
           navigateWithQueryParams(urlAuthenticator);
         }
       } catch (error) {
-        await oryErrorHandling(error as any, 'login', () => authRepository.getAuthFlow(SELFSERVICE.login), 'Failed to get login data');
+        await oryErrorHandling(
+          error as any,
+          'login',
+          resetLoginFlow,
+          'Failed to get login data',
+        );
       }
     }
   };

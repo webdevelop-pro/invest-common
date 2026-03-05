@@ -5,7 +5,8 @@ import { useRepositorySettings } from 'InvestCommon/data/settings/settings.repos
 import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 import { SELFSERVICE } from 'InvestCommon/data/auth/auth.constants';
-import { reportError } from 'InvestCommon/domain/error/errorReporting';
+import { oryErrorHandling } from 'InvestCommon/domain/error/oryErrorHandling';
+import { oryResponseHandling } from 'InvestCommon/domain/error/oryResponseHandling';
 
 type FormModelTOTP = {
   totp_code: number;
@@ -17,23 +18,32 @@ export function useSettingsTOTP() {
 
   const { toast } = useToast();
 
-  const qrOnMounted = ref(false);
+  const qrOnMounted = ref('');
   const isLoading = ref(false);
 
+  const resetSettingsFlow = () => {
+    void settingsRepository
+      .getAuthFlow(SELFSERVICE.settings)
+      .then((flow) => oryResponseHandling(flow as any));
+  };
+
   const totpQR = computed(() => {
-    const tokenItem = getAuthFlowState.value.data?.ui?.nodes?.find((item) => item.attributes.id === 'totp_qr');
+    const ui = (getAuthFlowState.value.data as any)?.ui;
+    const tokenItem = ui?.nodes?.find((item: any) => item.attributes?.id === 'totp_qr');
     return tokenItem?.attributes?.src ?? '';
   });
 
   const totpSecret = computed(() => {
-    const tokenItem = getAuthFlowState.value.data?.ui?.nodes?.find((item) => item.attributes.id === 'totp_secret_key');
+    const ui = (getAuthFlowState.value.data as any)?.ui;
+    const tokenItem = ui?.nodes?.find((item: any) => item.attributes?.id === 'totp_secret_key');
     return tokenItem?.attributes?.text?.text ?? '';
   });
 
   const errorData = computed(() => (setSettingsState.value.error as any)?.data?.responseJson);
 
   const totpCodeError = computed(() => {
-    const tokenItem = errorData.value?.ui?.nodes?.find((item) => item.attributes.name === 'totp_code');
+    const ui = errorData.value?.ui;
+    const tokenItem = ui?.nodes?.find((item: any) => item.attributes?.name === 'totp_code');
     return tokenItem?.messages?.[0]?.text;
   });
 
@@ -76,7 +86,10 @@ export function useSettingsTOTP() {
 
     isLoading.value = true;
     try {
-      if (!flowId.value) await settingsRepository.getAuthFlow(SELFSERVICE.settings);
+      if (!flowId.value) {
+        const flowData = await settingsRepository.getAuthFlow(SELFSERVICE.settings);
+        oryResponseHandling(flowData as any);
+      }
       
       if (getAuthFlowState.value.error) {
         isLoading.value = false;
@@ -87,7 +100,7 @@ export function useSettingsTOTP() {
         method: 'totp',
         totp_code: model.totp_code?.toString() || '',
         csrf_token: csrfToken.value,
-      }, onSave); // Pass resetHandler as callback for retry after session refresh
+      });
 
       if (!setSettingsState.value.error) {
         settingsRepository.getAuthFlow(SELFSERVICE.settings);
@@ -99,7 +112,13 @@ export function useSettingsTOTP() {
         return true; // Indicate success
       }
     } catch (error) {
-      reportError(error as any, 'Failed to save TOTP');
+      await oryErrorHandling(
+        error as any,
+        'settings',
+        resetSettingsFlow,
+        'Failed to save TOTP',
+        onSave,
+      );
     } finally {
       isLoading.value = false;
     }
@@ -108,11 +127,17 @@ export function useSettingsTOTP() {
 
   const initializeTOTP = async () => {
     try {
-      await settingsRepository.getAuthFlow(SELFSERVICE.settings);
+      const flowData = await settingsRepository.getAuthFlow(SELFSERVICE.settings);
+      oryResponseHandling(flowData as any);
       qrOnMounted.value = totpQR.value;
       setSettingsState.value.error = null;
     } catch (error) {
-      reportError(error as any, 'Failed to load TOTP settings');
+      await oryErrorHandling(
+        error as any,
+        'settings',
+        resetSettingsFlow,
+        'Failed to load TOTP settings',
+      );
     }
   };
 

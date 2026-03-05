@@ -5,7 +5,8 @@ import { useRepositorySettings } from 'InvestCommon/data/settings/settings.repos
 import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 import { SELFSERVICE } from 'InvestCommon/data/auth/auth.constants';
-import { reportError } from 'InvestCommon/domain/error/errorReporting';
+import { oryErrorHandling } from 'InvestCommon/domain/error/oryErrorHandling';
+import { oryResponseHandling } from 'InvestCommon/domain/error/oryResponseHandling';
 import { useSendAnalyticsEvent } from 'InvestCommon/domain/analytics/useSendAnalyticsEvent';
 
 type FormModelTOTP = {
@@ -33,8 +34,14 @@ export function useVFormSettingsTOTP() {
     });
   };
 
-  const qrOnMounted = ref(false);
+  const qrOnMounted = ref('');
   const isLoading = ref(false);
+
+  const resetSettingsFlow = () => {
+    void settingsRepository
+      .getAuthFlow(SELFSERVICE.settings)
+      .then((flow) => oryResponseHandling(flow as any));
+  };
 
   const totpQR = computed(() => {
     const tokenItem = getAuthFlowState.value.data?.ui?.nodes?.find((item) => item.attributes.id === 'totp_qr');
@@ -95,7 +102,10 @@ export function useVFormSettingsTOTP() {
 
     isLoading.value = true;
     try {
-      if (!flowId.value) await settingsRepository.getAuthFlow(SELFSERVICE.settings);
+      if (!flowId.value) {
+        const flowData = await settingsRepository.getAuthFlow(SELFSERVICE.settings);
+        oryResponseHandling(flowData as any);
+      }
       
       if (getAuthFlowState.value.error) {
         isLoading.value = false;
@@ -106,7 +116,7 @@ export function useVFormSettingsTOTP() {
         method: 'totp',
         totp_code: model.totp_code?.toString() || '',
         csrf_token: csrfToken.value,
-      }, onSave); // Pass resetHandler as callback for retry after session refresh
+      });
 
       if (!setSettingsState.value.error) {
         settingsRepository.getAuthFlow(SELFSERVICE.settings);
@@ -120,7 +130,13 @@ export function useVFormSettingsTOTP() {
       }
     } catch (error) {
       trackTotpEvent(400);
-      reportError(error as any, 'Failed to save TOTP');
+      await oryErrorHandling(
+        error as any,
+        'settings',
+        resetSettingsFlow,
+        'Failed to save TOTP',
+        onSave,
+      );
     } finally {
       isLoading.value = false;
     }
@@ -129,11 +145,17 @@ export function useVFormSettingsTOTP() {
 
   const initializeTOTP = async () => {
     try {
-      await settingsRepository.getAuthFlow(SELFSERVICE.settings);
+      const flowData = await settingsRepository.getAuthFlow(SELFSERVICE.settings);
+      oryResponseHandling(flowData as any);
       qrOnMounted.value = totpQR.value;
       setSettingsState.value.error = null;
     } catch (error) {
-      reportError(error as any, 'Failed to load TOTP settings');
+      await oryErrorHandling(
+        error as any,
+        'settings',
+        resetSettingsFlow,
+        'Failed to load TOTP settings',
+      );
     }
   };
 

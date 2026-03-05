@@ -22,6 +22,12 @@ export const useForgotStore = defineStore('forgot', () => {
   const authRepository = useRepositoryAuth();
   const { getSchemaState, setRecoveryState, getAuthFlowState } = storeToRefs(authRepository);
 
+  const resetRecoveryFlow = () => {
+    void authRepository
+      .getAuthFlow(SELFSERVICE.recovery)
+      .then((flow) => oryResponseHandling(flow as any));
+  };
+
   // Form schema and validation
   const schemaFrontend = computed(() => ({
     $schema: 'http://json-schema.org/draft-07/schema#',
@@ -94,7 +100,12 @@ export const useForgotStore = defineStore('forgot', () => {
         navigateWithQueryParams(urlCheckEmail, { email: model.email, flowId: authRepository.flowId.value });
       }
     } catch (error) {
-      await oryErrorHandling(error as any, 'recovery', () => authRepository.getAuthFlow(SELFSERVICE.recovery), 'Failed to set recovery');
+      await oryErrorHandling(
+        error as any,
+        'recovery',
+        resetRecoveryFlow,
+        'Failed to set recovery',
+      );
     } finally {
       isLoading.value = false;
     }
