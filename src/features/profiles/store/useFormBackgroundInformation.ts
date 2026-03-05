@@ -17,6 +17,7 @@ import {
 } from 'UiKit/helpers/validation/rules';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { checkObjectAndDeleteNotRequiredFields } from 'UiKit/helpers/general';
+import { reportError } from 'InvestCommon/domain/error/errorReporting';
 
 export const useFormBackgroundInformation = () => {
   const router = useRouter();
@@ -262,6 +263,8 @@ export const useFormBackgroundInformation = () => {
       useRepositoryProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
       isLoading.value = false;
       router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
+    } catch (error) {
+      reportError(error, 'Failed to save background information');
     } finally {
       isLoading.value = false;
     }

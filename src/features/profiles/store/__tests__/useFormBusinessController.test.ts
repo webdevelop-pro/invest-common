@@ -279,12 +279,13 @@ describe('useFormBusinessController', () => {
       mockFormRef.value = mockForm;
 
       const newComposable = useFormBusinessController();
-      await expect(newComposable.handleSave()).rejects.toThrow('API Error');
+      await newComposable.handleSave();
 
       expect(repositoryProfilesMockInstance.setProfileById).toHaveBeenCalled();
       expect(hubspotFormMockInstance.submitFormToHubspot).not.toHaveBeenCalled();
       expect(repositoryProfilesMockInstance.getProfileById).not.toHaveBeenCalled();
       expect(mockRouter.push).not.toHaveBeenCalled();
+      expect(newComposable.isLoading.value).toBe(false);
     });
 
     it('should not proceed when setProfileByIdState has error', async () => {
@@ -390,7 +391,7 @@ describe('useFormBusinessController', () => {
 
       const newComposable = useFormBusinessController();
 
-      await expect(newComposable.handleSave()).rejects.toThrow('API Error');
+      await newComposable.handleSave();
 
       expect(newComposable.isLoading.value).toBe(false);
     });
@@ -421,7 +422,7 @@ describe('useFormBusinessController', () => {
 
       const newComposable = useFormBusinessController();
 
-      await expect(newComposable.handleSave()).rejects.toThrow('Network Error');
+      await newComposable.handleSave();
       expect(newComposable.isLoading.value).toBe(false);
     });
   });

@@ -11,6 +11,7 @@ import env from 'InvestCommon/config/env';
 import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
+import { reportError } from 'InvestCommon/domain/error/errorReporting';
 
 export const useFormPlanInformation = () => {
   const router = useRouter();
@@ -78,6 +79,8 @@ export const useFormPlanInformation = () => {
       });
       useRepositoryProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
       router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
+    } catch (error) {
+      reportError(error, 'Failed to save plan information');
     } finally {
       isLoading.value = false;
     }

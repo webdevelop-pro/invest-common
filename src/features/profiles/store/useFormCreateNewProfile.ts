@@ -13,6 +13,7 @@ import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repos
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryAccreditation } from 'InvestCommon/data/accreditation/accreditation.repository';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
+import { reportError } from 'InvestCommon/domain/error/errorReporting';
 
 export const useFormCreateNewProfile = () => {
   const router = useRouter();
@@ -150,6 +151,9 @@ export const useFormCreateNewProfile = () => {
     || (selectedType.value.toLowerCase() === profileTypes.SOLO401K)
     || isTrustRevocable.value)); // same logic as in domain profiles
 
+
+    console.log('selectedUserIndividualProfile', selectedUserIndividualProfile);
+
   const handleHubspot = () => {
     const model = { ...childFormModel.value };
     useHubspotForm(env.HUBSPOT_FORM_ID_PERSONAL_INFORMATION).submitFormToHubspot({
@@ -258,7 +262,7 @@ export const useFormCreateNewProfile = () => {
         selectedUserIndividualProfile.value?.id,
       );
     }
-    if (!accreditationRepository.createEscrowState.value.error) {
+    if (!accreditationRepository.createEscrowState.error) {
       await useRepositoryProfilesStore.setProfile(
         model,
         selectedType.value,
@@ -308,14 +312,16 @@ export const useFormCreateNewProfile = () => {
         return;
       }
 
-      useRepositoryProfilesStore.setUser({ phone: personalFormModel.value?.phone });
-      useRepositoryProfilesStore.getUser();
+      await useRepositoryProfilesStore.setUser({ phone: personalFormModel.value?.phone });
+      await useRepositoryProfilesStore.getUser();
 
       if (isProfileAktAsIndividual.value) {
         await handlerCheckIndividualEscrow();
       } else {
         await handlerCreateEscrow();
       }
+    } catch (error) {
+      reportError(error, 'Failed to create new account');
     } finally {
       isLoading.value = false;
     }

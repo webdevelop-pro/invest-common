@@ -66,6 +66,8 @@ vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
 const mockPush = vi.fn();
 const mockRoute = {
   params: { profileId: '123' },
+  fullPath: '/dashboard',
+  query: {},
 };
 vi.mock('vue-router', () => ({
   useRouter: () => ({
@@ -340,13 +342,16 @@ describe('useKycButton', () => {
       mockProfilesStore.selectedUserProfileType.value = PROFILE_TYPES.SDIRA;
       mockProfilesStore.selectedUserIndividualProfile.value = { id: 555 } as any;
       const store = useKycButton();
-      const hrefSpy = vi.spyOn(window.location, 'href', 'set');
-      
+
       await store.onClick();
-      
-      const expectedBaseUrl = urlProfileKYC(555);
-      expect(hrefSpy).toHaveBeenCalledWith(expect.stringContaining(expectedBaseUrl));
-      expect(hrefSpy.mock.calls[0][0]).toContain('redirect=');
+
+      expect(mockPush).toHaveBeenCalledWith({
+        name: ROUTE_SUBMIT_KYC,
+        params: { profileId: 555 },
+        query: expect.objectContaining({
+          redirect: '/dashboard',
+        }),
+      });
       expect(mockKycRepository.handlePlaidKyc).not.toHaveBeenCalled();
     });
     it('should call handlePlaidKyc when selectedUserProfileShowKycInitForm is false', async () => {

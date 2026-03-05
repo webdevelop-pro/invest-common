@@ -209,7 +209,7 @@ describe('useFormPlanInformation', () => {
       mockFormRef.value.isValid = true;
       mockRepositoryProfiles.setProfileById = vi.fn().mockRejectedValue(new Error('API Error'));
 
-      await expect(composable.handleSave()).rejects.toThrow('API Error');
+      await composable.handleSave();
       expect(composable.isLoading.value).toBe(false);
     });
   });
@@ -245,7 +245,7 @@ describe('useFormPlanInformation', () => {
       const apiError = new Error('API Error');
       mockRepositoryProfiles.setProfileById = vi.fn().mockRejectedValue(apiError);
 
-      await expect(composable.handleSave()).rejects.toThrow('API Error');
+      await composable.handleSave();
 
       expect(mockFormRef.value.onValidate).toHaveBeenCalled();
       expect(mockRepositoryProfiles.setProfileById).toHaveBeenCalled();
@@ -258,7 +258,7 @@ describe('useFormPlanInformation', () => {
       mockFormRef.value.isValid = true;
       mockRepositoryProfiles.setProfileById = vi.fn().mockRejectedValue(new Error('API Error'));
 
-      await expect(composable.handleSave()).rejects.toThrow('API Error');
+      await composable.handleSave();
 
       expect(mockHubspotForm.submitFormToHubspot).not.toHaveBeenCalled();
     });
@@ -267,7 +267,7 @@ describe('useFormPlanInformation', () => {
       mockFormRef.value.isValid = true;
       mockRepositoryProfiles.setProfileById = vi.fn().mockRejectedValue(new Error('API Error'));
 
-      await expect(composable.handleSave()).rejects.toThrow('API Error');
+      await composable.handleSave();
 
       expect(mockRouter.push).not.toHaveBeenCalled();
     });

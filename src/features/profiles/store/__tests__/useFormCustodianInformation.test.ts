@@ -288,7 +288,6 @@ describe('useFormCustodianInformation', () => {
       expect(mockRepositoryProfiles.setProfileById).toHaveBeenCalledWith(
         {
           full_account_name: 'John Doe IRA',
-          type: 'self-directed',
           account_number: '123456789',
         },
         'individual',

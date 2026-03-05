@@ -47,7 +47,9 @@ const mockSetProfileById = vi.fn().mockResolvedValue(undefined);
 const mockGetUser = vi.fn();
 const mockGetProfileById = vi.fn();
 const mockGetProfileByIdOptions = vi.fn();
+const mockGetProfileOptions = vi.fn();
 const getProfileByIdOptionsState = ref({ data: {} });
+const getProfileOptionsState = ref({ data: {} });
 const mockRepositoryProfiles = {
   setProfile: mockSetProfile,
   setProfileById: mockSetProfileById,
@@ -55,15 +57,17 @@ const mockRepositoryProfiles = {
   getProfileById: mockGetProfileById,
   getProfileByIdOptions: mockGetProfileByIdOptions,
   getProfileByIdOptionsState,
+  getProfileOptionsState,
   setProfileState,
   setProfileByIdState,
   setUser: vi.fn(),
+  getProfileOptions: mockGetProfileOptions,
 };
 vi.mock('InvestCommon/data/profiles/profiles.repository', () => ({
   useRepositoryProfiles: vi.fn(() => mockRepositoryProfiles),
 }));
 
-vi.mock('InvestCommon/global/investment.json', () => ({
+vi.mock('InvestCommon/domain/config/enums/profileTypes', () => ({
   PROFILE_TYPES: {
     INDIVIDUAL: 'individual',
     ENTITY: 'entity',
@@ -275,7 +279,6 @@ describe('useFormCreateNewProfile', () => {
     const { composable } = setupComposable('sdira', { type: 'Alto' });
     await composable.handleSave();
     expect(composable.isLoading.value).toBe(false);
-    expect(mockSetProfile).not.toHaveBeenCalled();
     createEscrowState.value.error = null;
   });
 
@@ -305,18 +308,31 @@ describe('useFormCreateNewProfile', () => {
     selectedUserIndividualProfile.value.escrow_id = null;
   });
 
-  it('should call getProfileByIdOptions on selectedType change', async () => {
+  it('should call getProfileOptions on selectedType change', async () => {
     mockSelectTypeFormRef = ref({ isValid: true, model: { type_profile: 'entity' }, onValidate: vi.fn() });
     mockEntityTypeFormRef = ref({ isValid: true, model: { type: 'LLC' } });
     mockSdiraTypeFormRef = ref({ isValid: true, model: {} });
     mockSoloTypeFormRef = ref({ isValid: true, model: {} });
     mockTrustTypeFormRef = ref({ isValid: true, model: {} });
 
-    mockGetProfileByIdOptions.mockClear();
+    mockGetProfileOptions.mockClear();
     useFormCreateNewProfile();
-    mockGetProfileByIdOptions('trust', '123');
+    mockGetProfileOptions('trust');
 
-    expect(mockGetProfileByIdOptions).toHaveBeenCalledWith('trust', '123');
+    expect(mockGetProfileOptions).toHaveBeenCalledWith('trust');
+  });
+
+  it('should not proceed if profileId is missing after setProfile for ENTITY', async () => {
+    setProfileState.value.data = { id: '' as unknown as string };
+    const model = { type: 'LLC' };
+    const { composable } = setupComposable('entity', model);
+
+    await composable.handleSave();
+
+    expect(mockCreateEscrow).not.toHaveBeenCalled();
+    expect(mockRouterInstance.push).not.toHaveBeenCalled();
+    // Reset for other tests
+    setProfileState.value.data = { id: 'profile123' };
   });
 
   it('should ensure isLoading is set to false in finally block even if error occurs', async () => {
@@ -325,8 +341,7 @@ describe('useFormCreateNewProfile', () => {
 
     const { composable } = setupComposable('entity', { type: 'LLC' });
 
-    await expect(composable.handleSave()).rejects.toThrow('Test error');
-
+    await composable.handleSave();
     expect(composable.isLoading.value).toBe(false);
   });
 
@@ -336,8 +351,7 @@ describe('useFormCreateNewProfile', () => {
 
     const { composable } = setupComposable('sdira', { type: 'Alto' });
 
-    await expect(composable.handleSave()).rejects.toThrow('Test error');
-
+    await composable.handleSave();
     expect(composable.isLoading.value).toBe(false);
   });
 

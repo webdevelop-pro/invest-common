@@ -28,10 +28,7 @@ export const useProfilesStore = defineStore('profiles', () => {
   } = storeToRefs(useRepositoryProfilesStore);
 
   const userProfiles = computed(() => getUserState.value?.data?.profiles || []);
-  const rawSelectedUserProfileId = cookies.get('selectedUserProfileId');
-  const selectedUserProfileId = ref<number>(
-    rawSelectedUserProfileId != null ? Number(rawSelectedUserProfileId) || 0 : 0,
-  );
+  const selectedUserProfileId = ref(cookies.get('selectedUserProfileId'));
   const profileByIdInProfilesList = computed(() => (
     userProfiles.value.find((item) => item.id === selectedUserProfileId.value)));
   const selectedUserProfileData = computed(() => (
@@ -46,8 +43,7 @@ export const useProfilesStore = defineStore('profiles', () => {
 
   const urlProfileId = computed(() => {
     if (!isStaticSite) return route?.params?.profileId;
-    if (typeof window === 'undefined') return undefined;
-    return window.location.pathname.split('/')[3]; // TODO change if url changes
+    return (window && window?.location?.pathname.split('/')[3]); // TODO change if url changes
   });
 
   const isUrlProfileSameAsSelected = computed(() => Number(urlProfileId.value) === selectedUserProfileId.value);
@@ -61,17 +57,18 @@ export const useProfilesStore = defineStore('profiles', () => {
   });
 
   const selectedUserProfileAccreditationDataOK = computed(() => {
-    const { accredited_investor } = selectedUserProfileData.value?.data ?? {};
-    return Boolean(accredited_investor);
+    const profileData = selectedUserProfileData.value?.data;
+    if (!profileData?.accredited_investor) return false;
+    return Boolean(profileData?.accredited_investor);
   });
 
-  const selectedUserProfileKYCStatusNotStarted = computed(() => (
+  const selectedUserProfielKYCStatusNotStarted = computed(() => (
     getProfileByIdState.value.data?.kyc_status === 'new'
   ));
 
   const selectedUserProfileShowKycInitFormIndividual = computed(() => ((
     !getProfileByIdState.value.data?.data.citizenship || !selectedUserProfileRiskAcknowledged.value
-    || !selectedUserProfileAccreditationDataOK.value || selectedUserProfileKYCStatusNotStarted.value
+    || !selectedUserProfileAccreditationDataOK.value || selectedUserProfielKYCStatusNotStarted.value
   ) && (selectedUserProfileType.value === PROFILE_TYPES.INDIVIDUAL)));
 
   const selectedUserProfileShowKycInitForm = computed(() => (
@@ -102,38 +99,17 @@ export const useProfilesStore = defineStore('profiles', () => {
       useRepositoryProfilesStore.getUser();
     }
   };
-  const handleUserLoggedInChange = () => {
-    void init();
-  };
+  // if user is logged in and profile is not loaded, load it - step 1
+  watch(() => userLoggedIn.value, async () => {
+    init();
+  }, { immediate: true });
 
-  const handleProfilesError = () => {
+  // if there is error in getUser (profiles) call logout - could happen if session expired
+  watch(() => getUserState.value.error, async () => {
     if (getUserState.value.error) {
       logoutStore.logoutHandler();
     }
-  };
-
-  const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
-
-  const setSelectedProfileInState = (id: number) => {
-    selectedUserProfileId.value = Number(id);
-  };
-
-  const persistSelectedProfileIdToCookie = (id: number) => {
-    if (id === 0) return;
-
-    // Save to cookies - use session expires_at when valid, otherwise fallback to 1 year
-    const expiresAt = userSession.value?.expires_at;
-    const expireDate = expiresAt ? new Date(expiresAt) : null;
-    const validExpireDate = (expireDate && !Number.isNaN(expireDate.getTime()))
-      ? expireDate
-      : new Date(Date.now() + ONE_YEAR_MS); // 1 year from now
-
-    cookies.set(
-      'selectedUserProfileId',
-      id,
-      cookiesOptions(validExpireDate),
-    );
-  };
+  }, { immediate: true });
 
   const setSelectedUserProfileById = (id: number) => {
     
@@ -146,8 +122,23 @@ export const useProfilesStore = defineStore('profiles', () => {
       resetAllProfileData();
     }
     
-    setSelectedProfileInState(newProfileId);
-    persistSelectedProfileIdToCookie(newProfileId);
+    // Update the selected profile ID
+    selectedUserProfileId.value = newProfileId;
+    
+    if (id === 0) return;
+    
+    // Save to cookies - use session expires_at when valid, otherwise fallback to 1 year
+    const expiresAt = userSession.value?.expires_at;
+    const expireDate = expiresAt ? new Date(expiresAt) : null;
+    const validExpireDate = (expireDate && !Number.isNaN(expireDate.getTime()))
+      ? expireDate
+      : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000); // 1 year from now
+
+    cookies.set(
+      'selectedUserProfileId',
+      id,
+      cookiesOptions(validExpireDate),
+    );
   };
 
   const updateSelectedAccount = () => {
@@ -158,7 +149,7 @@ export const useProfilesStore = defineStore('profiles', () => {
 
   const updateDataInProfile = (nameOfProperty: string, data: unknown) => {
     if (getProfileByIdState.value?.data) {
-      (getProfileByIdState.value.data as unknown as Record<string, unknown>)[nameOfProperty] = data;
+      (getProfileByIdState.value.data as Record<string, unknown>)[nameOfProperty] = data;
     }
   };
 
@@ -173,55 +164,30 @@ export const useProfilesStore = defineStore('profiles', () => {
 
     const profileData = getProfileByIdState.value?.data;
     if (profileData?.id === notification.data.fields?.object_id) {
-      Object.assign(profileData as unknown as Record<string, unknown>, notification.data.fields);
+      Object.assign(profileData as Record<string, unknown>, notification.data.fields);
     }
   };
-
-  const ensureSelectedProfileId = () => {
-    const firstProfileId = userProfiles.value[0]?.id;
-    if ((!selectedUserProfileId.value || selectedUserProfileId.value === 0) && (firstProfileId > 0)) {
-      setSelectedUserProfileById(firstProfileId);
-    }
-  };
-
-  const shouldFetchSelectedProfile = () => (
-    userLoggedIn.value
-    && isUrlProfileSameAsSelected.value
-    && Boolean(selectedUserProfileType.value)
-    && selectedUserProfileId.value > 0
-  );
-
-  const fetchSelectedProfileData = () => {
-    if (!shouldFetchSelectedProfile()) return;
-
-    // Clear profile data before fetching to prevent brief flash of old data
-    // This ensures the UI shows loading state instead of stale data
-    useRepositoryProfilesStore.resetProfileData();
-
-    // Fetch new profile data
-    useRepositoryProfilesStore.getProfileById(selectedUserProfileType.value as string, selectedUserProfileId.value);
-    useRepositoryProfilesStore.getProfileByIdOptions(
-      selectedUserProfileType.value as string,
-      selectedUserProfileId.value,
-    );
-  };
-
-  // if user is logged in and profile is not loaded, load it - step 1
-  watch(() => userLoggedIn.value, handleUserLoggedInChange, { immediate: true });
-
-  // if there is error in getUser (profiles) call logout - could happen if session expired
-  watch(() => getUserState.value.error, handleProfilesError, { immediate: true });
 
   // on init user load if there is no selectedUserProfileId or it is === 0
   // and user profiles loaded and first id is not 0, set selectedUserProfileId - step 2
-  watch(() => userProfiles.value[0]?.id, ensureSelectedProfileId, { immediate: true });
+  watch(() => userProfiles.value[0]?.id, () => {
+    if ((!selectedUserProfileId.value || selectedUserProfileId.value === 0) && (userProfiles.value[0]?.id > 0)) {
+      setSelectedUserProfileById(userProfiles.value[0]?.id);
+    }
+  }, { immediate: true });
 
-  // whenever selection or URL changes, fetch fresh profile data when appropriate
-  watch(
-    () => [selectedUserProfileId.value, selectedUserProfileType.value, isUrlProfileSameAsSelected.value],
-    fetchSelectedProfileData,
-    { immediate: true },
-  );
+  watch(() => [selectedUserProfileId.value, selectedUserProfileType.value, isUrlProfileSameAsSelected.value], () => {
+    if (userLoggedIn.value && isUrlProfileSameAsSelected.value
+      && selectedUserProfileType.value && (selectedUserProfileId.value > 0)) {
+      // Clear profile data before fetching to prevent brief flash of old data
+      // This ensures the UI shows loading state instead of stale data
+      useRepositoryProfilesStore.resetProfileData();
+      
+      // Fetch new profile data
+      useRepositoryProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
+      useRepositoryProfilesStore.getProfileByIdOptions(selectedUserProfileType.value, selectedUserProfileId.value);
+    }
+  }, { immediate: true });
 
   return {
     // State

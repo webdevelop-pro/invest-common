@@ -65,9 +65,10 @@ export const useFormCustodianInformation = () => {
     }
 
     isLoading.value = true;
+    const { type, ...data} = custodianRef.value?.model;
     try {
       await useRepositoryProfilesStore.setProfileById(
-        custodianRef.value?.model,
+        data,
         selectedUserProfileType.value,
         selectedUserProfileId.value,
       );

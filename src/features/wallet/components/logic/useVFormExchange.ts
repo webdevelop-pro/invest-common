@@ -10,6 +10,7 @@ import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
 import { useRepositoryEarn } from 'InvestCommon/data/earn/earn.repository';
 import { IEvmExchangeRequestBody, IEvmWalletBalances } from 'InvestCommon/data/evm/evm.types';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
+import { reportError } from 'InvestCommon/domain/error/errorReporting';
 
 export function useVFormExchange(
   emitClose?: () => void,
@@ -135,11 +136,16 @@ export function useVFormExchange(
       amount: fromAmount,
       wallet_id: Number(model.wallet_id),
     };
-    await evmRepository.exchangeTokens(data);
-    if (!getEvmWalletState.value.error) {
-      // Refresh wallet and Earn positions for this pool/profile to reflect backend state
-      await evmRepository.getEvmWalletByProfile(Number(profileId));
-      await earnRepository.getPositions(poolId, profileId);
+    try {
+      await evmRepository.exchangeTokens(data);
+      if (!getEvmWalletState.value.error) {
+        // Refresh wallet and Earn positions for this pool/profile to reflect backend state
+        await evmRepository.getEvmWalletByProfile(Number(profileId));
+        await earnRepository.getPositions(poolId, profileId);
+      }
+    } catch (error) {
+      reportError(error, 'Failed to exchange tokens');
+      throw error;
     }
   };
 
@@ -151,23 +157,27 @@ export function useVFormExchange(
     }
     const fromAmount = Number(model.amount);
     const isEarnContext = defaultBuySymbol && poolId != null && profileId != null;
-    if (isEarnContext) {
-      await handleEarnExchange(fromAmount);
+    try {
+      if (isEarnContext) {
+        await handleEarnExchange(fromAmount);
+        if (emitClose) emitClose();
+        return;
+      }
+      const data: IEvmExchangeRequestBody = {
+        from: String(model.from),
+        to: String(model.to),
+        amount: fromAmount,
+        wallet_id: Number(model.wallet_id),
+      };
+      await evmRepository.exchangeTokens(data);
+      if (!getEvmWalletState.value.error && selectedUserProfileId.value) {
+        // Global wallet context: refresh wallet data after successful exchange.
+        await evmRepository.getEvmWalletByProfile(Number(selectedUserProfileId.value));
+      }
       if (emitClose) emitClose();
-      return;
+    } catch (error) {
+      reportError(error, 'Failed to exchange tokens');
     }
-    const data: IEvmExchangeRequestBody = {
-      from: String(model.from),
-      to: String(model.to),
-      amount: fromAmount,
-      wallet_id: Number(model.wallet_id),
-    };
-    await evmRepository.exchangeTokens(data);
-    if (!getEvmWalletState.value.error && selectedUserProfileId.value) {
-      // Global wallet context: refresh wallet data after successful exchange.
-      await evmRepository.getEvmWalletByProfile(Number(selectedUserProfileId.value));
-    }
-    if (emitClose) emitClose();
   };
 
   const cancelHandler = () => {

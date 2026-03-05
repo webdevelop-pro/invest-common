@@ -29,7 +29,7 @@ export function useKycThirdParty() {
           onLoad: () => {
             // console.log('plaid own onload event');
           },
-          onExit: (err: unknown, metadata: any) => {
+          onExit: () => {
             // console.log('plaid on exit event', err, metadata);
             // console.log('update account with failed kyc status');
             isPlaidLoading.value = false;

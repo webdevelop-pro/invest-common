@@ -10,6 +10,7 @@ import env from 'InvestCommon/config/env';
 import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
+import { reportError } from 'InvestCommon/domain/error/errorReporting';
 import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import {
   relationshipTypeRule, phoneRule, emailRule, dobRule, errorMessageRule,
@@ -143,6 +144,8 @@ export const useFormTrustedContact = () => {
       useRepositoryProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
       isLoading.value = false;
       router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
+    } catch (error) {
+      reportError(error, 'Failed to save trusted contact');
     } finally {
       isLoading.value = false;
     }
