@@ -1,8 +1,12 @@
 <script setup lang="ts">
-import VShadcnChartDonut from 'UiKit/components/VCharts/VShadcnChartDonut/VShadcnChartDonut.vue';
+import { defineAsyncComponent } from 'vue';
 import { VCard, VCardContent } from 'UiKit/components/Base/VCard';
 import CardChartSideInfo from './CardChartSideInfo.vue';
 import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
+
+const VShadcnChartDonut = defineAsyncComponent(
+  () => import('UiKit/components/VCharts/VShadcnChartDonut/VShadcnChartDonut.vue'),
+);
 
 export interface DonutDatum { name: string; percent: number }
 export interface SideItem { label: string; amount?: number; percent?: number; color?: string }
@@ -96,20 +100,29 @@ const valueFormatter = (tick: number) => (props.valueFormatter ? props.valueForm
   }
 
   &__grid {
-    display: grid;
-    grid-template-columns: 1.2fr 0.8fr;
+    display: flex;
+    flex-wrap: wrap;
     gap: 16px;
     align-items: stretch;
     flex: 1 1 auto;
 
     @media screen and (max-width: $desktop) {
-      grid-template-columns: 1fr;
+      flex-direction: column;
     }
 
     &.is--single {
       display: block;
-      grid-template-columns: none;
     }
+  }
+
+  &__grid > *:first-child {
+    flex: 1.2 1 0;
+    min-width: 0;
+  }
+
+  &__grid > *:last-child:not(:first-child) {
+    flex: 0.8 1 0;
+    min-width: 0;
   }
 
   &__chart {

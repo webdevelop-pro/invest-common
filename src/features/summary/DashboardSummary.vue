@@ -1,20 +1,26 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, defineAsyncComponent } from 'vue';
 import DashboardTabsTopInfo from 'InvestCommon/features/dashboard/components/DashboardTabsTopInfo.vue';
 import CryptoPricesTicker from 'InvestCommon/features/summary/components/CryptoPricesTicker.vue';
-import CardDonutUnified from 'InvestCommon/features/summary/components/CardDonutUnified.vue';
 import { useSummaryData } from 'InvestCommon/features/summary/composables/useSummaryData';
 import VCardOffer from 'UiKit/components/VCard/VCardOffer.vue';
 import { urlOfferSingle, urlOffers } from 'InvestCommon/domain/config/links';
 import VCardGoal from 'InvestCommon/shared/components/VCardGoal.vue';
 import VCardOfferFunded from 'InvestCommon/shared/components/VCardOfferFunded.vue';
-import VSliderCards from 'UiKit/components/VSlider/VSliderCards.vue';
 import { VCardInfo } from 'UiKit/components/Base/VCard';
 import { useDashboardTopInfoRight } from 'InvestCommon/features/dashboard/composables/useDashboardTopInfoRight';
 import { useBreakpoints } from 'UiKit/composables/useBreakpoints';
 import { useDashboardWallet } from 'InvestCommon/features/wallet/logic/useDashboardWallet';
 import DashboardWalletBalanceCards from 'InvestCommon/features/wallet/components/DashboardWalletBalanceCards.vue';
 import DashboardWalletTablePanel from 'InvestCommon/features/wallet/components/DashboardWalletTablePanel.vue';
+
+const CardDonutUnified = defineAsyncComponent(
+  () => import('InvestCommon/features/summary/components/CardDonutUnified.vue'),
+);
+
+const VSliderCards = defineAsyncComponent(
+  () => import('UiKit/components/VSlider/VSliderCards.vue'),
+);
 
 const {
   cryptoItems,
@@ -203,26 +209,40 @@ const { sliderData: dashboardTopInfoData, isLoading: isDashboardTopInfoLoading }
     }
 
     &__grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        display: flex;
+        flex-wrap: wrap;
         gap: 24px;
         margin-top: 40px;
 
       @media screen and (width < $tablet){
-        grid-template-columns: 1fr;
         margin-top: 20px;
       }
     }
 
+    &__grid > * {
+      flex: 1 1 300px;
+      min-width: 0;
+    }
+
     &__grid-offer {
-        display: grid;
-        grid-template-columns:  2fr 0.8fr;
+        display: flex;
+        flex-wrap: wrap;
         gap: 24px;
         margin-top: 40px;
 
       @media screen and (width < $tablet){
-        grid-template-columns: 1fr;
+        flex-direction: column;
       }
+    }
+
+    &__grid-offer > .dashboard-summary__wallet {
+      flex: 2 1 300px;
+      min-width: 0;
+    }
+
+    &__grid-offer > *:not(.dashboard-summary__wallet) {
+      flex: 0.8 1 260px;
+      min-width: 0;
     }
 
     &__wallet {

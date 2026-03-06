@@ -1,6 +1,5 @@
 import { ref, computed, watch } from 'vue';
 import { storeToRefs } from 'pinia';
-import QRCode from 'qrcode';
 import { useClipboard } from '@vueuse/core';
 import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
 import type { IEvmWalletDataFormatted } from 'InvestCommon/data/evm/evm.types';
@@ -9,10 +8,10 @@ import { reportError } from 'InvestCommon/domain/error/errorReporting';
 export function useVFormAddFundsCrypto() {
   const evmRepository = useRepositoryEvm();
   const { getEvmWalletState } = storeToRefs(evmRepository);
-  
+
   const evmData = computed(() => getEvmWalletState.value.data as IEvmWalletDataFormatted | undefined);
   const addressRef = computed(() => evmData.value?.address);
-  
+
   const qrCodeDataURL = ref<string>('');
   const isGeneratingQR = ref<boolean>(true);
   const { copy, copied } = useClipboard({ legacy: true });
@@ -24,6 +23,7 @@ export function useVFormAddFundsCrypto() {
         qrCodeDataURL.value = '';
         return;
       }
+      const { default: QRCode } = await import('qrcode');
       qrCodeDataURL.value = await QRCode.toDataURL(addressRef.value, {
         errorCorrectionLevel: 'H',
         type: 'image/png',

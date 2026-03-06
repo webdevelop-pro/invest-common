@@ -16,6 +16,8 @@ const STATUS_MAPPING = {
 
 export const useDashboardPortfolioStore = defineStore('dashboard-portfolio', () => {
   const search = ref('');
+  const debouncedSearch = ref('');
+  let searchDebounceTimeout: ReturnType<typeof setTimeout> | undefined;
 
   const query = useReactiveQuery();
   const queryId = computed(() => Number(query.value?.get('id')));
@@ -54,7 +56,9 @@ export const useDashboardPortfolioStore = defineStore('dashboard-portfolio', () 
   const totalResults = computed(() => portfolioData.value.length);
 
   const isFiltering = computed(() => (
-    filterFundingType.value.length > 0 || filterStatus.value.length > 0 || search.value?.length > 0));
+    filterFundingType.value.length > 0
+    || filterStatus.value.length > 0
+    || debouncedSearch.value?.length > 0));
 
   const filteredData = computed(() => {
     let filtered = portfolioData.value;
@@ -71,9 +75,9 @@ export const useDashboardPortfolioStore = defineStore('dashboard-portfolio', () 
         filterStatus.value.includes(item.status));
     }
 
-    // Apply search filter
-    if (search.value) {
-      const searchTerm = search.value.toLowerCase();
+    // Apply search filter with debounce
+    if (debouncedSearch.value) {
+      const searchTerm = debouncedSearch.value.toLowerCase();
       filtered = filtered.filter((item: IInvestmentFormatted) => String(item.id).toLowerCase().includes(searchTerm)
         || item.offer.name.toLowerCase().includes(searchTerm));
     }
@@ -87,6 +91,16 @@ export const useDashboardPortfolioStore = defineStore('dashboard-portfolio', () 
   const setSearch = (value: string) => {
     search.value = value;
   };
+
+  watch(search, (value) => {
+    if (searchDebounceTimeout) {
+      clearTimeout(searchDebounceTimeout);
+    }
+
+    searchDebounceTimeout = setTimeout(() => {
+      debouncedSearch.value = value;
+    }, 200);
+  });
 
   const onApplyFilter = (items: IVFilter[]) => {
     filterPortfolio.value = items;

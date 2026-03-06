@@ -7,7 +7,7 @@ import {
 } from 'vue';
 import { storeToRefs } from 'pinia';
 import VSectionCardOfferGrid from 'UiKit/components/VCard/VSectionCardOfferGrid.vue';
-import { useRoute } from 'vitepress';
+import { useRoute } from 'vue-router';
 import { useRepositoryOffer } from 'InvestCommon/data/offer/offer.repository';
 import { reportError } from 'InvestCommon/domain/error/errorReporting';
 
