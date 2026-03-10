@@ -38,6 +38,8 @@ const {
   isFilesLoading,
   parsedDescription,
   parsedHighlights,
+  parsedRiskDisclosures,
+  OfferTabTypes,
   tabOptions,
 } = useOffersDetailsContent(offerRef);
 
@@ -77,7 +79,7 @@ const signInHandler = () => {
     </VTabsList>
 
     <VTabsContent
-      :value="tabOptions[0].value"
+      :value="OfferTabTypes.description"
       class="offer-details tab offer-details-content__description"
     >
       <div class="offer-details-content__title is--h2__title">
@@ -92,7 +94,7 @@ const signInHandler = () => {
     </VTabsContent>
 
     <VTabsContent
-      :value="tabOptions[1].value"
+      :value="OfferTabTypes.highlights"
       class="offer-highlights tab offer-details-content__highlights"
     >
       <div class="offer-details-content__title is--h2__title">
@@ -106,7 +108,21 @@ const signInHandler = () => {
     </VTabsContent>
 
     <VTabsContent
-      :value="tabOptions[2].value"
+      v-if="offer.risk_disclosures"
+      :value="OfferTabTypes.risk_disclosures"
+      class="offer-risk tab offer-details-content__risk"
+    >
+      <div class="offer-details-content__title is--h2__title">
+        Risk
+      </div>
+      <p
+        v-dompurify-html="parsedRiskDisclosures"
+        class="offer-details-content__content-text is--body"
+      />
+    </VTabsContent>
+
+    <VTabsContent
+      :value="OfferTabTypes.documents"
       class="offer-documents tab offer-details-content__documents"
     >
       <div class="offer-details-content__title is--h2__title">
@@ -135,7 +151,7 @@ const signInHandler = () => {
       </div>
     </VTabsContent>
     <VTabsContent
-      :value="tabOptions[3].value"
+      :value="OfferTabTypes.comments"
     >
       <OffersComments
         :offer-id="offer.id"

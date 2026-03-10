@@ -110,6 +110,7 @@ export interface IOffer {
   seo_description: string;
   description?: string;
   highlights?: string;
+  risk_disclosures?: string;
   additional_details: string;
   data?: IOfferInfoData;
   linkedin?: string;

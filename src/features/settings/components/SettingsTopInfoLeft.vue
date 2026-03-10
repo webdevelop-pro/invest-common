@@ -54,7 +54,7 @@ const onUploadId = async (id: string) => {
     image_link_id: id,
   };
 
-  await useRepositoryProfilesStore.updateUserData(Number(getUserState.value.data?.id), body as any);
+  await useRepositoryProfilesStore.updateUserData(Number(getUserState.value.data?.id), body as unknown);
   // Fallback: explicitly refresh user data even if no notification arrives
   await useRepositoryProfilesStore.getUser();
   isAvatarLoading.value = false;

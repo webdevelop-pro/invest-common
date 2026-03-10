@@ -12,6 +12,7 @@ import { useBreakpoints } from 'UiKit/composables/useBreakpoints';
 export enum OfferTabTypes {
   description = 'description',
   highlights = 'highlights',
+  risk_disclosures = 'risk_disclosures',
   documents = 'documents',
   comments = 'comments',
 }
@@ -60,26 +61,43 @@ export function useOffersDetailsContent(offerRef: Ref<IOfferFormatted | undefine
 
   const parsedDescription = computed(() => parseAndClean(offerRef.value?.description));
   const parsedHighlights = computed(() => parseAndClean(offerRef.value?.highlights));
+  const parsedRiskDisclosures = computed(
+    () => parseAndClean(offerRef.value?.risk_disclosures),
+  );
 
-  const tabOptions = computed(() => ([
-    {
-      value: OfferTabTypes.description,
-      label: 'Description',
-    },
-    {
-      value: OfferTabTypes.highlights,
-      label: 'Highlights',
-    },
-    {
-      value: OfferTabTypes.documents,
-      label: isTablet.value ? 'Docs' : 'Financial Documents',
-    },
-    {
-      value: OfferTabTypes.comments,
-      label: isTablet.value ? 'Question' : 'Ask a Question',
-      subTitle: commentsLength.value,
-    },
-  ]));
+  const tabOptions = computed(() => {
+    const tabs = [
+      {
+        value: OfferTabTypes.description,
+        label: 'Description',
+      },
+      {
+        value: OfferTabTypes.highlights,
+        label: 'Highlights',
+      },
+    ];
+
+    if (offerRef.value?.risk_disclosures) {
+      tabs.push({
+        value: OfferTabTypes.risk_disclosures,
+        label: 'Risk',
+      });
+    }
+
+    tabs.push(
+      {
+        value: OfferTabTypes.documents,
+        label: isTablet.value ? 'Docs' : 'Financial Documents',
+      },
+      {
+        value: OfferTabTypes.comments,
+        label: isTablet.value ? 'Question' : 'Ask a Question',
+        subTitle: commentsLength.value,
+      },
+    );
+
+    return tabs;
+  });
 
   return {
     OfferTabTypes,
@@ -90,6 +108,7 @@ export function useOffersDetailsContent(offerRef: Ref<IOfferFormatted | undefine
     isFilesLoading,
     parsedDescription,
     parsedHighlights,
+    parsedRiskDisclosures,
     tabOptions,
   };
 }
