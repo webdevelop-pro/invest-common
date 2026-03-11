@@ -1,5 +1,6 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { createRepositoryStates, withActionState } from 'InvestCommon/data/repository/repository';
+import { createFormatterCache } from 'InvestCommon/data/repository/formatterCache';
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import { DefiLlamaYieldsFormatter, type DefiLlamaYieldPoolFormatted } from './formatter/yields.formatter';
 
@@ -82,13 +83,27 @@ type DefiLlamaStates = {
 };
 
 export const useRepositoryDefiLlama = defineStore('repository-defillama', () => {
+  const yieldsCache = createFormatterCache<DefiLlamaYieldPool, DefiLlamaYieldPoolFormatted, string>({
+    getKey: (pool) => pool.pool,
+    getSignature: (pool) => [
+      pool.apy,
+      pool.apyBase,
+      pool.apyReward,
+      pool.apyMean30d,
+      pool.tvlUsd,
+      pool.symbol,
+      pool.project,
+    ].join('|'),
+    format: (pool) => new DefiLlamaYieldsFormatter(pool).format(),
+  });
+
   const {
     getYieldsState,
     getPoolEnrichedState,
     getPoolChartState,
     getProtocolConfigState,
     getPoolRiskState,
-    resetAll,
+    resetAll: resetActionStates,
   } = createRepositoryStates<DefiLlamaStates>({
     getYieldsState: undefined,
     getPoolEnrichedState: undefined,
@@ -112,7 +127,8 @@ export const useRepositoryDefiLlama = defineStore('repository-defillama', () => 
         pools = pools.filter((pool) => pool.project?.toLowerCase().includes(protocolLower));
       }
       pools.sort((a, b) => b.tvlUsd - a.tvlUsd);
-      const formattedPools = pools.map((pool) => new DefiLlamaYieldsFormatter(pool).format());
+      yieldsCache.prune(pools);
+      const formattedPools = yieldsCache.formatMany(pools);
       return formattedPools;
     });
 
@@ -167,6 +183,11 @@ export const useRepositoryDefiLlama = defineStore('repository-defillama', () => 
       });
       return data.data;
     });
+
+  const resetAll = () => {
+    yieldsCache.clear();
+    resetActionStates();
+  };
 
   return {
     getYieldsState,

@@ -1,4 +1,6 @@
-import { computed, nextTick, onBeforeMount, watch, unref } from 'vue';
+import {
+  computed, effectScope, nextTick, watch, unref, type EffectScope,
+} from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
@@ -12,17 +14,7 @@ import {
   canLoadEvmWalletData as canLoadEvmWalletDataRule,
 } from './walletLoadRules';
 
-let walletWatchersInitialized = false;
-
-function formatBalanceParts(value: number): { main: number; mainFormatted: string; coins: string } {
-  const main = Math.floor(value);
-  const coins = (value - main).toFixed(2).toString().substring(1);
-  return {
-    main,
-    mainFormatted: currency(main, 0),
-    coins,
-  };
-}
+let walletEffectsScope: EffectScope | null = null;
 
 /** Single composable for the combined Wallet page (fiat + crypto). One call runs both. */
 export function useWallet() {
@@ -49,9 +41,9 @@ export function useWallet() {
   ));
 
   const fiatBalance = computed(() => getWalletState.value.data?.currentBalance ?? 0);
-  const fiatParts = computed(() => formatBalanceParts(fiatBalance.value));
-  const fiatBalanceMainFormatted = computed(() => fiatParts.value.mainFormatted);
-  const fiatBalanceCoins = computed(() => fiatParts.value.coins);
+  const fiatBalanceMain = computed(() => Math.floor(fiatBalance.value));
+  const fiatBalanceMainFormatted = computed(() => currency(fiatBalanceMain.value, 0));
+  const fiatBalanceCoins = computed(() => (fiatBalance.value - fiatBalanceMain.value).toFixed(2).substring(1));
   const fiatPendingDeposit = computed(
     () => getWalletState.value.data?.pendingIncomingBalanceFormatted,
   );
@@ -60,18 +52,18 @@ export function useWallet() {
   );
 
   const cryptoBalance = computed(() => getEvmWalletState.value.data?.fundingBalance ?? 0);
-  const cryptoParts = computed(() => formatBalanceParts(cryptoBalance.value));
-  const cryptoBalanceMainFormatted = computed(() => cryptoParts.value.mainFormatted);
-  const cryptoBalanceCoins = computed(() => cryptoParts.value.coins);
+  const cryptoBalanceMain = computed(() => Math.floor(cryptoBalance.value));
+  const cryptoBalanceMainFormatted = computed(() => currency(cryptoBalanceMain.value, 0));
+  const cryptoBalanceCoins = computed(() => (cryptoBalance.value - cryptoBalanceMain.value).toFixed(2).substring(1));
   // Formatted 24h change for crypto; undefined when backend doesn't provide it
   const crypto24hChange = computed(
     () => getEvmWalletState.value.data?.cryptoChangeFormatted,
   );
 
   const rwaValue = computed(() => getEvmWalletState.value.data?.rwaValue ?? 0);
-  const rwaParts = computed(() => formatBalanceParts(rwaValue.value));
-  const rwaValueMainFormatted = computed(() => rwaParts.value.mainFormatted);
-  const rwaValueCoins = computed(() => rwaParts.value.coins);
+  const rwaValueMain = computed(() => Math.floor(rwaValue.value));
+  const rwaValueMainFormatted = computed(() => currency(rwaValueMain.value, 0));
+  const rwaValueCoins = computed(() => (rwaValue.value - rwaValueMain.value).toFixed(2).substring(1));
   // Formatted value change for RWA; undefined when backend doesn't provide it
   const rwa24hChange = computed(
     () => getEvmWalletState.value.data?.rwaChangeFormatted,
@@ -80,9 +72,9 @@ export function useWallet() {
   const totalBalance = computed(
     () => fiatBalance.value + cryptoBalance.value + rwaValue.value,
   );
-  const totalParts = computed(() => formatBalanceParts(totalBalance.value));
-  const totalBalanceMainFormatted = computed(() => totalParts.value.mainFormatted);
-  const totalBalanceCoins = computed(() => totalParts.value.coins);
+  const totalBalanceMain = computed(() => Math.floor(totalBalance.value));
+  const totalBalanceMainFormatted = computed(() => currency(totalBalanceMain.value, 0));
+  const totalBalanceCoins = computed(() => (totalBalance.value - totalBalanceMain.value).toFixed(2).substring(1));
 
   const hasFiatWalletData = computed(() => !!getWalletState.value.data);
   const hasEvmWalletData = computed(() => !!getEvmWalletState.value.data);
@@ -147,15 +139,19 @@ export function useWallet() {
     updateCryptoWalletData();
   };
 
-  // Ensure we only attach watchers & initial fetch once across the app,
-  // even if `useWallet` is called from multiple composables/pages.
-  if (!walletWatchersInitialized) {
-    walletWatchersInitialized = true;
-    watch(
-      () => [selectedUserProfileData.value?.id, selectedUserProfileData.value?.kyc_status],
-      () => nextTick(updateData),
-    );
-    onBeforeMount(() => updateData());
+  // Keep the profile-driven wallet refresh alive for the lifetime of the app.
+  // A detached effect scope avoids tying the watcher to the first component that used this composable.
+  if (!walletEffectsScope) {
+    walletEffectsScope = effectScope(true);
+    walletEffectsScope.run(() => {
+      watch(
+        () => [selectedUserProfileData.value?.id, selectedUserProfileData.value?.kyc_status],
+        () => {
+          void nextTick(() => updateData());
+        },
+        { immediate: true },
+      );
+    });
   }
 
   return {
@@ -165,23 +161,23 @@ export function useWallet() {
 
     // Derived balances
     fiatBalance,
-    fiatBalanceMain: computed(() => fiatParts.value.main),
+    fiatBalanceMain,
     fiatBalanceCoins,
     fiatBalanceMainFormatted,
     fiatPendingDeposit,
     fiatPendingWithdraw,
     cryptoBalance,
-    cryptoBalanceMain: computed(() => cryptoParts.value.main),
+    cryptoBalanceMain,
     cryptoBalanceCoins,
     cryptoBalanceMainFormatted,
     crypto24hChange,
     rwaValue,
-    rwaValueMain: computed(() => rwaParts.value.main),
+    rwaValueMain,
     rwaValueCoins,
     rwaValueMainFormatted,
     rwa24hChange,
     totalBalance,
-    totalBalanceMain: computed(() => totalParts.value.main),
+    totalBalanceMain,
     totalBalanceCoins,
     totalBalanceMainFormatted,
 

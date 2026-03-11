@@ -3,6 +3,12 @@ import { useCryptoData } from './useCryptoData';
 import { usePortfolioData } from './usePortfolioData';
 import { useRepositoryOffer } from 'InvestCommon/data/offer/offer.repository';
 
+const _AMOUNT_FORMATTER = new Intl.NumberFormat(undefined, {
+  style: 'currency',
+  currency: 'USD',
+  maximumFractionDigits: 0,
+});
+
 // Re-export types for convenience
 export type { SupportedCoinId } from './useCryptoData';
 export type { DonutDatum, SideInfoItem } from './usePortfolioData';
@@ -30,12 +36,7 @@ export function useSummaryData() {
 
   // Formatters shared across charts
   const percentValueFormatter = (tick: number) => `${Math.round(Number(tick || 0))}%`;
-  const defaultAmountFormatter = (v: number) => 
-    new Intl.NumberFormat(undefined, { 
-      style: 'currency', 
-      currency: 'USD', 
-      maximumFractionDigits: 0 
-    }).format(Number(v || 0));
+  const defaultAmountFormatter = (v: number) => _AMOUNT_FORMATTER.format(Number(v || 0));
   const defaultPercentFormatter = (v: number) => `${Math.round(Number(v || 0))}%`;
 
   // Side items for donut charts

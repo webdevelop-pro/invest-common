@@ -26,14 +26,14 @@ const progressPercentage = computed(() => {
   return (monthsElapsed.value * 100) / props.totalMonths;
 });
 
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: props.currency,
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
-};
+const currencyFormatter = computed(() => new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: props.currency,
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 0,
+}));
+
+const formatCurrency = (amount: number) => currencyFormatter.value.format(amount);
 </script>
 
 <template>

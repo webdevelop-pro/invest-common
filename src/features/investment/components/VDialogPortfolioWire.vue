@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { PropType, ref } from 'vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
-import { jsPDF } from 'jspdf';
 import download from 'UiKit/assets/images/download.svg';
 import {
   VDialogContent, VDialogFooter, VDialogHeader, VDialogTitle, VDialog,
@@ -19,7 +18,8 @@ const open = defineModel<boolean>('open');
 
 const DownloadComp = ref<HTMLElement | null>(null);
 
-const saveHandler = () => {
+const saveHandler = async () => {
+  const { jsPDF } = await import('jspdf');
   const pdf = new jsPDF();
 
   pdf.html(DownloadComp.value, {

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {
-  defineAsyncComponent, hydrateOnVisible, onBeforeMount,
+  defineAsyncComponent, hydrateOnVisible, nextTick, ref,
 } from 'vue';
 import { useNotifications } from 'InvestCommon/features/notifications/store/useNotifications';
 import VNotificationBadge from 'InvestCommon/shared/components/VNotificationBadge.vue';
@@ -19,9 +19,13 @@ defineProps({
   },
 });
 
-const notificationsStore = useNotifications();
+const shouldRenderSidebar = ref(false);
 
-const onSidebarOpen = () => {
+const onSidebarOpen = async () => {
+  shouldRenderSidebar.value = true;
+  await nextTick();
+  const notificationsStore = useNotifications();
+  notificationsStore.loadData();
   notificationsStore.onSidebarToggle(true);
 };
 
@@ -31,10 +35,6 @@ const handleKeyDown = (event: KeyboardEvent) => {
     onSidebarOpen();
   }
 };
-
-onBeforeMount(() => {
-  notificationsStore.loadData();
-});
 </script>
 
 <template>
@@ -58,7 +58,10 @@ onBeforeMount(() => {
       :position="showIcon ? 'absolute' : 'inline'"
       custom-class="notifications-sidebar-button__badge"
     />
-    <VNotificationSidebar :is-static-site="isStaticSite" />
+    <VNotificationSidebar
+      v-if="shouldRenderSidebar"
+      :is-static-site="isStaticSite"
+    />
   </div>
 </template>
 

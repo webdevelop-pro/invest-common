@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { PropType } from 'vue';
+import { type RouteLocationRaw } from 'vue-router';
 import {
   VTabs, VTabsList, VTabsTrigger,
 } from 'UiKit/components/Base/VTabs';
@@ -7,12 +8,7 @@ import {
 interface ITab {
   value: string;
   label: string;
-  to: {
-    name: string;
-    params: {
-      profileId: string;
-    };
-  };
+  to?: RouteLocationRaw;
   subTitle?: string;
 }
 defineProps({

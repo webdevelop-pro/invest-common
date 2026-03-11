@@ -1,5 +1,12 @@
 import type { DefiLlamaYieldPool } from '../defillama.repository';
 
+const CURRENCY_FORMATTER = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 0,
+});
+
 export interface DefiLlamaYieldPoolFormatted extends DefiLlamaYieldPool {
   apyFormatted: string;
   tvlFormatted: string;
@@ -23,12 +30,7 @@ export class DefiLlamaYieldsFormatter {
   }
 
   private formatCurrency(value: number): string {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value);
+    return CURRENCY_FORMATTER.format(value);
   }
 
   format(): DefiLlamaYieldPoolFormatted {

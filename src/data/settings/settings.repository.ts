@@ -4,6 +4,7 @@ import { ISession, IAuthFlow, ILogoutFlow } from './settings.types';
 import { SessionFormatter } from './session.formatter';
 import type { ISessionFormatted } from './settings.types';
 import { createRepositoryStates, withActionState } from 'InvestCommon/data/repository/repository';
+import { createFormatterCache } from 'InvestCommon/data/repository/formatterCache';
 import { computed } from 'vue';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 
@@ -20,6 +21,17 @@ type SettingsStates = {
 
 export const useRepositorySettings = defineStore('repository-settings', () => {
   const apiClient = new ApiClient(KRATOS_URL);
+  const sessionCache = createFormatterCache<ISession, ISessionFormatted, string>({
+    getKey: (session) => session.id,
+    getSignature: (session) => [
+      session.authenticated_at,
+      session.expires_at,
+      session.active,
+      session.devices?.length ?? 0,
+      (session.devices ?? []).map((device) => `${device.id}:${device.ip_address}:${device.user_agent ?? ''}`).join(';'),
+    ].join('|'),
+    format: (session) => new SessionFormatter(session).format(),
+  });
 
   const {
     getAuthFlowState,
@@ -28,7 +40,7 @@ export const useRepositorySettings = defineStore('repository-settings', () => {
     getAllSessionState,
     deleteAllSessionState,
     deleteOneSessionState,
-    resetAll,
+    resetAll: resetActionStates,
   } = createRepositoryStates<SettingsStates>({
     getAuthFlowState: undefined,
     getSettingsState: undefined,
@@ -41,7 +53,9 @@ export const useRepositorySettings = defineStore('repository-settings', () => {
   const getAllSession = async () =>
     withActionState(getAllSessionState, async () => {
       const response = await apiClient.get('/sessions');
-      const formatted = (response.data as ISession[]).map((s) => new SessionFormatter(s).format());
+      const sessions = response.data as ISession[];
+      sessionCache.prune(sessions);
+      const formatted = sessionCache.formatMany(sessions);
       return formatted;
     });
 
@@ -90,6 +104,11 @@ export const useRepositorySettings = defineStore('repository-settings', () => {
     return '';
   });
 
+  const resetAll = () => {
+    sessionCache.clear();
+    resetActionStates();
+  };
+
   return {
     // States
     getAuthFlowState,
@@ -116,4 +135,3 @@ export const useRepositorySettings = defineStore('repository-settings', () => {
 if (import.meta.hot) {
   import.meta.hot.accept(acceptHMRUpdate(useRepositorySettings, import.meta.hot));
 }
-

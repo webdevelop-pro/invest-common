@@ -11,6 +11,7 @@ import { acceptHMRUpdate, defineStore } from 'pinia';
 import { OfferFormatter } from 'InvestCommon/data/offer/offer.formatter';
 import { IOfferFormatted, IOffer as IOfferApp } from 'InvestCommon/data/offer/offer.types';
 import { INotification } from 'InvestCommon/data/notifications/notifications.types';
+import { createFormatterCache } from 'InvestCommon/data/repository/formatterCache';
 
 const { OFFER_URL } = env;
 
@@ -24,6 +25,50 @@ type OfferStates = {
 
 export const useRepositoryOffer = defineStore('repository-offer', () => {
   const apiClient = new ApiClient(OFFER_URL);
+  const getOfferSignature = (offer: IOfferApp) => {
+    const securityInfo = offer.security_info ?? {};
+
+    return [
+      offer.updated_at ?? '',
+      offer.status ?? '',
+      offer.id ?? '',
+      offer.name ?? '',
+      offer.slug ?? '',
+      offer.amount_raised ?? '',
+      offer.target_raise ?? '',
+      offer.total_shares ?? '',
+      offer.subscribed_shares ?? '',
+      offer.min_investment ?? '',
+      offer.price_per_share ?? '',
+      offer.image_link_id ?? '',
+      offer.approved_at ?? '',
+      offer.close_at ?? '',
+      offer.security_type ?? '',
+      offer.valuation ?? '',
+      offer.reg_type ?? '',
+      securityInfo.pre_money_valuation ?? '',
+      securityInfo.voting_rights ?? '',
+      securityInfo.liquidation_preference ?? '',
+      securityInfo.dividend_type ?? '',
+      securityInfo.dividend_rate ?? '',
+      securityInfo.dividend_payment_frequency ?? '',
+      securityInfo.cn_valuation_cap ?? '',
+      securityInfo.cn_discount_rate ?? '',
+      securityInfo.cn_interest_rate ?? '',
+      securityInfo.cn_maturity_date ?? '',
+      securityInfo.interest_rate_apy ?? '',
+      securityInfo.debt_payment_schedule ?? '',
+      securityInfo.debt_maturity_date ?? '',
+      securityInfo.debt_interest_rate ?? '',
+      securityInfo.debt_term_length ?? '',
+      securityInfo.debt_term_unit ?? '',
+    ].join('|');
+  };
+  const offerCache = createFormatterCache<IOfferApp, IOfferFormatted>({
+    getKey: (offer) => Number(offer.id) || 0,
+    getSignature: getOfferSignature,
+    format: (offer) => new OfferFormatter(offer).format(),
+  });
 
   const {
     getOffersState,
@@ -31,10 +76,10 @@ export const useRepositoryOffer = defineStore('repository-offer', () => {
     getOfferCommentsState,
     setOfferCommentState,
     setOfferCommentOptionsState,
-    resetAll,
+    resetAll: resetActionStates,
   } = createRepositoryStates<OfferStates>({
     getOffersState: undefined,
-    getOfferOneState: new OfferFormatter().format(),
+    getOfferOneState: offerCache.format({} as IOfferApp),
     getOfferCommentsState: undefined,
     setOfferCommentState: undefined,
     setOfferCommentOptionsState: undefined,
@@ -44,11 +89,14 @@ export const useRepositoryOffer = defineStore('repository-offer', () => {
     withActionState(getOffersState, async () => {
       const response = await apiClient.get('/public/offer');
       const rawData = response.data as IOfferData;
+      if (rawData.data && Array.isArray(rawData.data)) {
+        offerCache.prune(rawData.data as unknown as IOfferApp[]);
+      }
       const formattedData = rawData.data && Array.isArray(rawData.data)
         ? {
             ...rawData,
-            data: rawData.data
-              .map((offer: IOffer) => new OfferFormatter(offer as unknown as IOfferApp).format())
+            data: offerCache
+              .formatMany(rawData.data as unknown as IOfferApp[])
               .sort((a: IOfferFormatted, b: IOfferFormatted) => {
                 if (a.isClosingSoon && !b.isClosingSoon) return 1;
                 if (!a.isClosingSoon && b.isClosingSoon) return -1;
@@ -63,7 +111,7 @@ export const useRepositoryOffer = defineStore('repository-offer', () => {
     withActionState(getOfferOneState, async () => {
       const response = await apiClient.get(`/public/offer/${slug}`);
       const offerData = response.data as IOffer;
-      return new OfferFormatter(offerData as unknown as IOfferApp).format();
+      return offerCache.format(offerData as unknown as IOfferApp);
     });
 
   const getOfferComments = async (id: number) =>
@@ -86,7 +134,7 @@ export const useRepositoryOffer = defineStore('repository-offer', () => {
 
   // Helper: delegate to formatter for single source of truth (accepts API or app shape)
   const getOfferFundedPercent = (offer: IOffer | IOfferApp) =>
-    offer ? new OfferFormatter(offer as unknown as IOfferApp).offerFundedPercent : 0;
+    offer ? offerCache.format(offer as unknown as IOfferApp).offerFundedPercent : 0;
 
   const updateNotificationData = (notification: INotification) => {
     const { fields } = notification.data;
@@ -96,7 +144,7 @@ export const useRepositoryOffer = defineStore('repository-offer', () => {
     const one = getOfferOneState.value.data;
     if (one) {
       const updated = { ...one, ...fields } as IOfferApp;
-      getOfferOneState.value.data = new OfferFormatter(updated).format();
+      getOfferOneState.value.data = offerCache.format(updated);
     }
 
     const list = getOffersState.value.data;
@@ -107,10 +155,15 @@ export const useRepositoryOffer = defineStore('repository-offer', () => {
     if (index === -1) return;
     const newItems = items.map((item, i) =>
       i === index
-        ? new OfferFormatter({ ...item, ...fields } as unknown as IOfferApp).format()
+        ? offerCache.format({ ...item, ...fields } as unknown as IOfferApp)
         : item,
     );
     getOffersState.value.data = { ...list, data: newItems } as unknown as IOfferData;
+  };
+
+  const resetAll = () => {
+    offerCache.clear();
+    resetActionStates();
   };
 
   // Returns the not-closed offer with the highest funded percent

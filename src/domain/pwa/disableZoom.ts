@@ -18,16 +18,20 @@ export function installPwaNoZoomGuards() {
     }
   };
 
-  // Touchmove (Android/Chrome)
+  // Touchmove (Android/Chrome): do not run any work for single-finger scroll.
   const onTouchMove = (e: TouchEvent) => {
+    if (!e.touches || e.touches.length < 2) {
+      return;
+    }
     if (!insideAllowZone(e.target)) {
-      if (e.touches && e.touches.length > 1) e.preventDefault();
+      e.preventDefault();
     }
   };
 
   // Double-tap zoom (iOS)
   let lastTouchEnd = 0;
   const onTouchEnd = (e: TouchEvent) => {
+    if (e.touches && e.touches.length > 0) return;
     if (insideAllowZone(e.target)) return;
     const now = Date.now();
     if (now - lastTouchEnd <= 300) {
@@ -89,5 +93,6 @@ export function installPwaNoZoomGuards() {
     document.removeEventListener("touchmove", onTouchMove as EventListener);
     document.removeEventListener("touchend", onTouchEnd as EventListener);
     window.removeEventListener("wheel", onWheel as EventListener);
+    window.removeEventListener("keydown", onKeyDown as EventListener);
   };
 }

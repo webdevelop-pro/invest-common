@@ -11,6 +11,7 @@ import { UserFormatter } from './formatter/user.formatter';
 import { IUserFormatted } from './profiles.types';
 import { INotification } from '../notifications/notifications.types';
 import { ProfileFormatter } from './formatter/profiles.formatter';
+import { createFormatterCache } from 'InvestCommon/data/repository/formatterCache';
 
 type ProfilesStates = {
   setProfileByIdState: IProfileIndividual;
@@ -26,6 +27,39 @@ type ProfilesStates = {
 
 export const useRepositoryProfiles = defineStore('repository-profiles', () => {
   const apiClient = new ApiClient(env.USER_URL);
+  const profileCache = createFormatterCache<IProfileIndividual, IProfileFormatted>({
+    getKey: (profile) => Number(profile.id) || 0,
+    getSignature: (profile) => [
+      profile.updated_at ?? '',
+      profile.type ?? '',
+      profile.name ?? '',
+      profile.kyc_id ?? '',
+      profile.accreditation_id ?? '',
+      profile.kyc_status ?? '',
+      profile.accreditation_status ?? '',
+      profile.kyc_at ?? '',
+      profile.accreditation_at ?? '',
+      profile.created_at ?? '',
+      profile.updated_by ?? '',
+      profile.wallet?.id ?? '',
+      profile.wallet?.status ?? '',
+      JSON.stringify(profile.data ?? {}),
+    ].join('|'),
+    format: (profile) => new ProfileFormatter(profile).format(),
+  });
+  const userCache = createFormatterCache<IUser, IUserFormatted>({
+    getKey: (user) => Number(user.id) || 0,
+    getSignature: (user) => [
+      user.first_name ?? '',
+      user.last_name ?? '',
+      user.phone ?? '',
+      user.created_at ?? '',
+      user.updated_at ?? '',
+      user.profiles?.length ?? 0,
+      (user.profiles ?? []).map((profile) => `${profile.id}:${profile.updated_at ?? ''}`).join(';'),
+    ].join('|'),
+    format: (user) => new UserFormatter(user, (profile) => profileCache.format(profile)).format(),
+  });
 
   const profileOptions = ref<ISchema>();
   let currentProfileRequestId = 0;
@@ -41,7 +75,7 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
     setUserOptionsState,
     updateUserDataState,
     getProfileOptionsState,
-    resetAll,
+    resetAll: resetActionStates,
   } = createRepositoryStates<ProfilesStates>({
     setProfileByIdState: undefined,
     getProfileByIdState: undefined,
@@ -86,7 +120,7 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
       // Only apply the response if this is still the latest request
       // This prevents stale responses from overwriting current profile data
       if (requestId === currentProfileRequestId) {
-        getProfileByIdState.value.data = new ProfileFormatter(response.data as IProfileIndividual).format();
+        getProfileByIdState.value.data = profileCache.format(response.data as IProfileIndividual);
       }
       
       return getProfileByIdState.value.data;
@@ -144,7 +178,9 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
   const getUser = async () =>
     withActionState(getUserState, async () => {
       const response = await apiClient.get<IUser>('/auth/user');
-      return new UserFormatter(response.data!).format();
+      const user = response.data as IUser;
+      profileCache.prune(user.profiles ?? []);
+      return userCache.format(user);
     });
 
   const setUser = async (data: IProfileData) =>
@@ -181,7 +217,7 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
       const profileIndex = userData.profiles.findIndex((item: { id: number }) => item.id === objectId);
       if (profileIndex >= 0 && fields) {
         const updated = { ...userData.profiles[profileIndex], ...fields };
-        const formatted = new ProfileFormatter(updated as IProfileIndividual).format();
+        const formatted = profileCache.format(updated as IProfileIndividual);
         const newProfiles = userData.profiles.map((p, i) => (i === profileIndex ? formatted : p));
         getUserState.value.data = { ...userData, profiles: newProfiles };
       }
@@ -190,7 +226,7 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
     const currentProfile = getProfileByIdState.value?.data;
     if (currentProfile && currentProfile.id === objectId && fields) {
       const updated = { ...currentProfile, ...fields } as IProfileIndividual;
-      getProfileByIdState.value.data = new ProfileFormatter(updated).format();
+      getProfileByIdState.value.data = profileCache.format(updated);
     }
   };
 
@@ -211,6 +247,12 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
     getProfileByIdOptionsState.value = { loading: false, error: null, data: undefined };
     setProfileState.value = { loading: false, error: null, data: undefined };
     // Note: getUserState is NOT reset as it contains the profiles list which is shared across profiles
+  };
+
+  const resetAll = () => {
+    profileCache.clear();
+    userCache.clear();
+    resetActionStates();
   };
 
   return {

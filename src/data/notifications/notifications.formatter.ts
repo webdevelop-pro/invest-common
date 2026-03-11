@@ -7,204 +7,133 @@ import {
   ROUTE_ACCREDITATION_UPLOAD, ROUTE_DASHBOARD_ACCOUNT,
   ROUTE_DASHBOARD_WALLET, ROUTE_INVESTMENT_TIMELINE, ROUTE_NOTIFICATIONS,
 } from 'InvestCommon/domain/config/enums/routes';
-import { INotification, IFormattedNotification } from './notifications.types';
+import { INotification, IFormattedNotification, INotificationDataFields } from './notifications.types';
 
 export class NotificationFormatter {
-  private notification: INotification;
+  private readonly notification: INotification;
+
+  private readonly typeLower: string;
+
+  private readonly fields: INotificationDataFields;
 
   constructor(notification: INotification) {
     this.notification = notification;
-  }
-
-  get isNotificationInvestment(): boolean {
-    return this.notification?.type.toLowerCase().includes('investment');
-  }
-
-  get isNotificationDocument(): boolean {
-    return this.notification?.type.toLowerCase().includes('document');
-  }
-
-  get isNotificationSystem(): boolean {
-    return this.notification?.type.toLowerCase().includes('system');
-  }
-
-  get isNotificationWallet(): boolean {
-    return this.notification?.type.toLowerCase().includes('wallet');
-  }
-
-  get isNotificationProfile(): boolean {
-    return this.notification?.type.toLowerCase().includes('profile');
-  }
-
-  get isNotificationUser(): boolean {
-    return this.notification?.type.toLowerCase().includes('user');
-  }
-
-  get objectId(): number {
-    return this.notification?.data?.fields?.object_id || 0;
-  }
-
-  get profileId(): number {
-    return this.notification?.data?.fields?.profile?.ID || this.objectId;
-  }
-
-  get kycDeclined(): boolean {
-    return this.notification?.data?.fields?.kyc_status === 'declined';
-  }
-
-  get accreditationDeclined(): boolean {
-    return this.notification?.data?.fields?.accreditation_status === 'declined';
-  }
-
-  get accreditationExpired(): boolean {
-    return this.notification?.data?.fields?.accreditation_status === 'expired';
-  }
-
-  get isStart(): boolean {
-    return this.notification?.data?.fields?.profile?.kyc_status === 'new';
-  }
-
-  get isFundsFailed(): boolean {
-    return this.notification?.data?.fields?.funding_status === 'failed';
-  }
-
-  get tagBackground(): string {
-    if (this.isNotificationInvestment) {
-      return 'secondary-light';
-    }
-    if (this.isNotificationDocument) {
-      return 'yellow-light';
-    }
-    if (this.isNotificationSystem || this.isNotificationUser) {
-      return 'default';
-    }
-    if (this.isNotificationWallet) {
-      return 'red-light';
-    }
-    return 'purple-light';
-  }
-
-  get buttonText(): string {
-    if (this.kycDeclined || this.isFundsFailed) {
-      return 'Contact Us';
-    }
-    if (this.accreditationDeclined || this.accreditationExpired) {
-      return 'Provide info';
-    }
-    if (this.isStart) {
-      return 'Start Investing';
-    }
-    if (this.isNotificationInvestment || this.isNotificationProfile || this.isNotificationWallet) {
-      return 'See More Details';
-    }
-    if (this.isNotificationDocument) {
-      return 'Review Document';
-    }
-    return 'More Info';
-  }
-
-  get tagText(): string {
-    if (this.isNotificationProfile) {
-      return 'Investment Profile';
-    }
-    if (this.isNotificationUser) {
-      return 'System';
-    }
-    return capitalizeFirstLetter(this.notification?.type || '');
-  }
-
-  get isUnread(): boolean {
-    return this.notification?.status.toLowerCase() === 'unread';
-  }
-
-  get buttonTo(): string | { name: string; params?: { profileId: number; id?: number } } {
-    if (this.kycDeclined || this.isFundsFailed) {
-      return urlContactUs;
-    }
-    if (this.accreditationDeclined || this.accreditationExpired) {
-      return {
-        name: ROUTE_ACCREDITATION_UPLOAD,
-        params: { profileId: this.profileId },
-      };
-    }
-    if (this.isNotificationInvestment) {
-      return {
-        name: ROUTE_INVESTMENT_TIMELINE,
-        params: { profileId: this.profileId, id: this.objectId },
-      };
-    }
-    if (this.isNotificationDocument) {
-      return {
-        name: ROUTE_NOTIFICATIONS,
-      };
-    }
-    if (this.isNotificationWallet) {
-      return {
-        name: ROUTE_DASHBOARD_WALLET,
-        params: { profileId: this.profileId },
-      };
-    }
-    if (this.isNotificationProfile) {
-      return {
-        name: ROUTE_DASHBOARD_ACCOUNT,
-        params: { profileId: this.profileId },
-      };
-    }
-    if (this.isStart) {
-      return urlOffers;
-    }
-    return {
-      name: ROUTE_NOTIFICATIONS,
-    };
-  }
-
-  get buttonHref() {
-    if (this.kycDeclined || this.isFundsFailed) {
-      return urlContactUs;
-    }
-    if (this.accreditationDeclined || this.accreditationExpired) {
-      return urlProfileAccreditation(this.profileId);
-    }
-    if (this.isNotificationInvestment) {
-      return urlInvestmentTimeline(this.profileId, this.objectId);
-    }
-    if (this.isNotificationDocument) {
-      return urlNotifications;
-    }
-    if (this.isNotificationWallet) {
-      return urlProfileWallet(this.profileId);
-    }
-    if (this.isNotificationProfile) {
-      return urlProfileAccount(this.profileId);
-    }
-    if (this.isStart) {
-      return urlOffers;
-    }
-    return urlNotifications;
+    this.typeLower = (notification?.type || '').toLowerCase();
+    this.fields = notification?.data?.fields ?? {};
   }
 
   format(): IFormattedNotification {
+    const isNotificationInvestment = this.typeLower.includes('investment');
+    const isNotificationDocument = this.typeLower.includes('document');
+    const isNotificationSystem = this.typeLower.includes('system');
+    const isNotificationWallet = this.typeLower.includes('wallet');
+    const isNotificationProfile = this.typeLower.includes('profile');
+    const isNotificationUser = this.typeLower.includes('user');
+
+    const objectId = this.fields.object_id || 0;
+    const profileId = (this.fields.profile as { ID?: number; id?: number } | undefined)?.ID
+      || this.fields.profile?.id
+      || objectId;
+    const kycDeclined = this.fields.kyc_status === 'declined';
+    const accreditationDeclined = this.fields.accreditation_status === 'declined';
+    const accreditationExpired = this.fields.accreditation_status === 'expired';
+    const isStart = this.fields.profile?.kyc_status === 'new';
+    const isFundsFailed = this.fields.funding_status === 'failed';
+
+    let tagBackground = 'purple-light';
+    if (isNotificationInvestment) {
+      tagBackground = 'secondary-light';
+    } else if (isNotificationDocument) {
+      tagBackground = 'yellow-light';
+    } else if (isNotificationSystem || isNotificationUser) {
+      tagBackground = 'default';
+    } else if (isNotificationWallet) {
+      tagBackground = 'red-light';
+    }
+
+    let buttonText = 'More Info';
+    if (kycDeclined || isFundsFailed) {
+      buttonText = 'Contact Us';
+    } else if (accreditationDeclined || accreditationExpired) {
+      buttonText = 'Provide info';
+    } else if (isStart) {
+      buttonText = 'Start Investing';
+    } else if (isNotificationInvestment || isNotificationProfile || isNotificationWallet) {
+      buttonText = 'See More Details';
+    } else if (isNotificationDocument) {
+      buttonText = 'Review Document';
+    }
+
+    const tagText = isNotificationProfile
+      ? 'Investment Profile'
+      : isNotificationUser
+        ? 'System'
+        : capitalizeFirstLetter(this.notification?.type || '');
+    const isUnread = this.notification?.status.toLowerCase() === 'unread';
+
+    let buttonTo: string | { name: string; params?: { profileId: number; id?: number } } = {
+      name: ROUTE_NOTIFICATIONS,
+    };
+    let buttonHref = urlNotifications;
+
+    if (kycDeclined || isFundsFailed) {
+      buttonTo = urlContactUs;
+      buttonHref = urlContactUs;
+    } else if (accreditationDeclined || accreditationExpired) {
+      buttonTo = {
+        name: ROUTE_ACCREDITATION_UPLOAD,
+        params: { profileId },
+      };
+      buttonHref = urlProfileAccreditation(profileId);
+    } else if (isNotificationInvestment) {
+      buttonTo = {
+        name: ROUTE_INVESTMENT_TIMELINE,
+        params: { profileId, id: objectId },
+      };
+      buttonHref = urlInvestmentTimeline(profileId, String(objectId));
+    } else if (isNotificationDocument) {
+      buttonTo = {
+        name: ROUTE_NOTIFICATIONS,
+      };
+      buttonHref = urlNotifications;
+    } else if (isNotificationWallet) {
+      buttonTo = {
+        name: ROUTE_DASHBOARD_WALLET,
+        params: { profileId },
+      };
+      buttonHref = urlProfileWallet(profileId);
+    } else if (isNotificationProfile) {
+      buttonTo = {
+        name: ROUTE_DASHBOARD_ACCOUNT,
+        params: { profileId },
+      };
+      buttonHref = urlProfileAccount(profileId);
+    } else if (isStart) {
+      buttonTo = urlOffers;
+      buttonHref = urlOffers;
+    }
+
     return {
       ...this.notification,
-      isNotificationInvestment: this.isNotificationInvestment,
-      isNotificationDocument: this.isNotificationDocument,
-      isNotificationSystem: this.isNotificationSystem,
-      isNotificationWallet: this.isNotificationWallet,
-      isNotificationProfile: this.isNotificationProfile,
-      isNotificationUser: this.isNotificationUser,
-      objectId: this.objectId,
-      profileId: this.profileId,
-      kycDeclined: this.kycDeclined,
-      accreditationDeclined: this.accreditationDeclined,
-      accreditationExpired: this.accreditationExpired,
-      isStart: this.isStart,
-      isFundsFailed: this.isFundsFailed,
-      tagBackground: this.tagBackground,
-      buttonText: this.buttonText,
-      tagText: this.tagText,
-      isUnread: this.isUnread,
-      buttonTo: this.buttonTo,
-      buttonHref: this.buttonHref,
+      isNotificationInvestment,
+      isNotificationDocument,
+      isNotificationSystem,
+      isNotificationWallet,
+      isNotificationProfile,
+      isNotificationUser,
+      objectId,
+      profileId,
+      kycDeclined,
+      accreditationDeclined,
+      accreditationExpired,
+      isStart,
+      isFundsFailed,
+      tagBackground,
+      buttonText,
+      tagText,
+      isUnread,
+      buttonTo: buttonTo as unknown as string,
+      buttonHref,
     };
   }
 }

@@ -1,21 +1,27 @@
 import { ISession } from '../auth/auth.type';
 import { IActivityRow, ISessionFormatted } from './settings.types';
 
-const BASE_OPTIONS = {
+const DATE_FORMATTER = new Intl.DateTimeFormat('en-US', {
   year: 'numeric',
   month: 'numeric',
   day: 'numeric',
-} as const;
+});
 
-const HOURS_OPTIONS = {
-  ...BASE_OPTIONS,
+const DATETIME_FORMATTER = new Intl.DateTimeFormat('en-US', {
+  year: 'numeric',
+  month: 'numeric',
+  day: 'numeric',
   hour: 'numeric',
   minute: 'numeric',
-} as const;
+});
+
+const TIME_FORMATTER = new Intl.DateTimeFormat('en-US', {
+  hour: 'numeric',
+  minute: 'numeric',
+});
 
 export const formatToDate = (ISOString: string, withHours = false) => (
-  new Intl.DateTimeFormat('en-US', withHours ? HOURS_OPTIONS : BASE_OPTIONS)
-    .format(new Date(ISOString))
+  (withHours ? DATETIME_FORMATTER : DATE_FORMATTER).format(new Date(ISOString))
 );
 
 export class SessionFormatter {
@@ -25,39 +31,24 @@ export class SessionFormatter {
     this.session = session;
   }
 
-  get authenticatedAtDate(): string {
-    return this.session?.authenticated_at ? formatToDate(this.session.authenticated_at) : '';
-  }
-
-  get authenticatedAtTime(): string {
-    return this.session?.authenticated_at ? this.getTimeFormat(this.session.authenticated_at) : '';
-  }
-
-  private formatDevices(): IActivityRow[] {
-    return (this.session?.devices || []).map((device) => ({
-      date: this.authenticatedAtDate,
-      time: this.authenticatedAtTime,
-      ip: device?.ip_address,
-      browser: device?.user_agent,
-      id: this.session?.id,
-    }));
-  }
-
-  private getTimeFormat(fullDate: string): string {
-    try {
-      return new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: 'numeric' })
-        .format(new Date(fullDate));
-    } catch (e) {
-      return '';
-    }
-  }
-
   format(): ISessionFormatted {
+    const authenticatedAt = this.session?.authenticated_at;
+    const dateObj = authenticatedAt ? new Date(authenticatedAt) : null;
+    const hasValidDate = dateObj !== null && !Number.isNaN(dateObj.getTime());
+    const authenticatedAtDate = hasValidDate ? DATE_FORMATTER.format(dateObj) : '';
+    const authenticatedAtTime = hasValidDate ? TIME_FORMATTER.format(dateObj) : '';
+
     return {
       ...this.session,
-      authenticatedAtDate: this.authenticatedAtDate,
-      authenticatedAtTime: this.authenticatedAtTime,
-      devicesFormatted: this.formatDevices(),
+      authenticatedAtDate,
+      authenticatedAtTime,
+      devicesFormatted: (this.session?.devices || []).map((device) => ({
+        date: authenticatedAtDate,
+        time: authenticatedAtTime,
+        ip: device?.ip_address,
+        browser: device?.user_agent,
+        id: this.session?.id,
+      })),
     };
   }
 }
@@ -65,5 +56,4 @@ export class SessionFormatter {
 // Backward-compatible helper (optional)
 export const formatSessionDevices = (session: ISession): IActivityRow[] => (
   new SessionFormatter(session).format().devicesFormatted);
-
 

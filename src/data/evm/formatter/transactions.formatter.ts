@@ -13,10 +13,14 @@ const BASE_OPTIONS = {
   day: 'numeric',
 } as const;
 
-const formatToFullDate = (ISOString: string) => (
-  new Intl.DateTimeFormat('en-US', BASE_OPTIONS)
-    .format(new Date(ISOString))
-);
+const DATE_FORMATTER = new Intl.DateTimeFormat('en-US', BASE_OPTIONS);
+
+const formatToFullDate = (value?: string): string => {
+  if (!value) return '-';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '-';
+  return DATE_FORMATTER.format(date);
+};
 
 const getTimeFormat = (fullDate: string) => {
   const date = new Date(fullDate);
@@ -142,6 +146,11 @@ export class EvmTransactionFormatter {
   }
 
   format(): IEvmTransactionDataFormatted {
+    const submittedDate = formatToFullDate(this.data.created_at);
+    const submittedTime = this.data.created_at ? getTimeFormat(this.data.created_at) : '-';
+    const updatedDate = formatToFullDate(this.data.updated_at);
+    const updatedTime = this.data.updated_at ? getTimeFormat(this.data.updated_at) : '-';
+
     return {
       ...this.data,
       icon: this.data.image_link_id ? this.getImage(this.data.image_link_id) : undefined,
@@ -151,10 +160,10 @@ export class EvmTransactionFormatter {
       isStatusCancelled: this.data.status === EvmTransactionStatusTypes.cancelled,
       isStatusWait: this.data.status === EvmTransactionStatusTypes.wait,
 
-      submitted_at_date: this.data.created_at ? formatToFullDate(new Date(this.data.created_at).toISOString()) : '-',
-      submitted_at_time: this.data.created_at ? getTimeFormat(this.data.created_at) : '-',
-      updated_at_date: this.data.updated_at ? formatToFullDate(new Date(this.data.updated_at).toISOString()) : '-',
-      updated_at_time: this.data.updated_at ? getTimeFormat(this.data.updated_at) : '-',
+      submitted_at_date: submittedDate,
+      submitted_at_time: submittedTime,
+      updated_at_date: updatedDate,
+      updated_at_time: updatedTime,
       
       statusColor: EvmTransactionFormatter.getStatusColor(this.data.status),
       statusText: EvmTransactionFormatter.getStatusText(this.data.status),

@@ -16,6 +16,8 @@ const STATUS_MAPPING = {
 
 export const useDashboardPortfolioStore = defineStore('dashboard-portfolio', () => {
   const search = ref('');
+  const debouncedSearch = ref('');
+  let searchDebounceTimeout: ReturnType<typeof setTimeout> | undefined;
 
   const query = useReactiveQuery();
   const queryId = computed(() => Number(query.value?.get('id')));
@@ -54,31 +56,30 @@ export const useDashboardPortfolioStore = defineStore('dashboard-portfolio', () 
   const totalResults = computed(() => portfolioData.value.length);
 
   const isFiltering = computed(() => (
-    filterFundingType.value.length > 0 || filterStatus.value.length > 0 || search.value?.length > 0));
+    filterFundingType.value.length > 0
+    || filterStatus.value.length > 0
+    || debouncedSearch.value?.length > 0));
 
   const filteredData = computed(() => {
-    let filtered = portfolioData.value;
+    const fundingTypeSet = filterFundingType.value.length
+      ? new Set(filterFundingType.value)
+      : null;
+    const statusSet = filterStatus.value.length
+      ? new Set(filterStatus.value)
+      : null;
+    const searchTerm = debouncedSearch.value?.toLowerCase() || '';
 
-    // Apply funding type filter using intermediate ref
-    if (filterFundingType.value?.length) {
-      filtered = filtered.filter((item: IInvestmentFormatted) => (
-        filterFundingType.value.includes(item.funding_type?.toLowerCase())));
+    if (!fundingTypeSet && !statusSet && !searchTerm) {
+      return portfolioData.value;
     }
 
-    // Apply status filter using intermediate ref
-    if (filterStatus.value?.length) {
-      filtered = filtered.filter((item: IInvestmentFormatted) => 
-        filterStatus.value.includes(item.status));
-    }
-
-    // Apply search filter
-    if (search.value) {
-      const searchTerm = search.value.toLowerCase();
-      filtered = filtered.filter((item: IInvestmentFormatted) => String(item.id).toLowerCase().includes(searchTerm)
-        || item.offer.name.toLowerCase().includes(searchTerm));
-    }
-
-    return filtered;
+    return portfolioData.value.filter((item: IInvestmentFormatted) => {
+      if (fundingTypeSet && !fundingTypeSet.has(item.funding_type?.toLowerCase())) return false;
+      if (statusSet && !statusSet.has(item.status)) return false;
+      if (searchTerm && !String(item.id).toLowerCase().includes(searchTerm)
+        && !item.offer.name.toLowerCase().includes(searchTerm)) return false;
+      return true;
+    });
   });
 
   const filterResults = computed(() => filteredData.value.length);
@@ -87,6 +88,16 @@ export const useDashboardPortfolioStore = defineStore('dashboard-portfolio', () 
   const setSearch = (value: string) => {
     search.value = value;
   };
+
+  watch(search, (value) => {
+    if (searchDebounceTimeout) {
+      clearTimeout(searchDebounceTimeout);
+    }
+
+    searchDebounceTimeout = setTimeout(() => {
+      debouncedSearch.value = value;
+    }, 200);
+  });
 
   const onApplyFilter = (items: IVFilter[]) => {
     filterPortfolio.value = items;

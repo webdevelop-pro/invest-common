@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-import { useNotifications } from 'InvestCommon/features/notifications/store/useNotifications';
+import { computed, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
+import { useRepositoryNotifications } from 'InvestCommon/data/notifications/notifications.repository';
 
 defineOptions({ name: 'VNotificationBadge' });
 
@@ -22,10 +23,27 @@ const props = withDefaults(defineProps<{
   position: 'inline',
 });
 
-const notificationsStore = useNotifications();
-const { notificationUnreadLength } = storeToRefs(notificationsStore);
+const sessionStore = useSessionStore();
+const { userLoggedIn } = storeToRefs(sessionStore);
 
-const displayCount = computed(() => props.count ?? notificationUnreadLength.value);
+const notificationsRepository = useRepositoryNotifications();
+const { formattedNotifications, unreadNotificationsCount, getAllState } = storeToRefs(notificationsRepository);
+
+onMounted(() => {
+  if (!userLoggedIn.value) {
+    return;
+  }
+
+  const hasNotifications = Array.isArray(formattedNotifications.value) && formattedNotifications.value.length > 0;
+  const isLoading = Boolean(getAllState.value?.loading);
+  const hasError = Boolean(getAllState.value?.error);
+
+  if (!hasNotifications && !isLoading && !hasError) {
+    notificationsRepository.getAll();
+  }
+});
+
+const displayCount = computed(() => props.count ?? unreadNotificationsCount.value);
 const shouldShow = computed(() => displayCount.value > 0);
 
 const badgeClasses = computed(() => [
@@ -89,4 +107,3 @@ const badgeClasses = computed(() => [
   }
 }
 </style>
-

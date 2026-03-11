@@ -1,6 +1,7 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { ref } from 'vue';
 import { createRepositoryStates, withActionState } from 'InvestCommon/data/repository/repository';
+import { createFormatterCache } from 'InvestCommon/data/repository/formatterCache';
 import { EarnPositionFormatter, type EarnPositionsResponseFormatted } from './earn.formatter';
 import { createEarnPositionsService } from './earn.positions';
 
@@ -70,6 +71,38 @@ const MOCK_DEPOSIT_WITHDRAW_DELAY_MS = 800;
 const MOCK_GET_POSITIONS_DELAY_MS = 2000;
 
 export const useRepositoryEarn = defineStore('repository-earn', () => {
+  const earnPositionCache = createFormatterCache<
+    EarnPositionsResponse | undefined,
+    EarnPositionsResponseFormatted | undefined,
+    string
+  >({
+    getKey: (position) => (position ? `${position.poolId}-${position.profileId}` : 'empty'),
+    getSignature: (position) => {
+      if (!position) {
+        return 'empty';
+      }
+      const transactionsSignature = (position.transactions ?? [])
+        .map((transaction) => `${transaction.id}:${transaction.type}:${transaction.status}:${transaction.amountUsd}:${transaction.txId}:${transaction.date}:${transaction.time}`)
+        .join(';');
+
+      return [
+        position.poolId,
+        position.profileId,
+        position.symbol,
+        position.stakedAmountUsd,
+        position.earnedAmountUsd,
+        position.transactions?.length ?? 0,
+        transactionsSignature,
+      ].join('|');
+    },
+    format: (position) => {
+      if (!position) {
+        return undefined;
+      }
+      return new EarnPositionFormatter(position).format();
+    },
+  });
+
   const {
     depositState,
     withdrawState,
@@ -204,8 +237,7 @@ export const useRepositoryEarn = defineStore('repository-earn', () => {
           p.poolId === poolId && p.profileId === profileId,
       );
 
-      const formatter = new EarnPositionFormatter(position);
-      const formattedPosition = formatter.format();
+      const formattedPosition = earnPositionCache.format(position);
       return formattedPosition;
     });
 
@@ -281,6 +313,7 @@ export const useRepositoryEarn = defineStore('repository-earn', () => {
 
   const resetAll = () => {
     resetActionStates();
+    earnPositionCache.clear();
     positionsPools.value = [];
     approvedTokens.value = new Set();
   };
@@ -302,5 +335,4 @@ export const useRepositoryEarn = defineStore('repository-earn', () => {
 if (import.meta.hot) {
   import.meta.hot.accept(acceptHMRUpdate(useRepositoryEarn, import.meta.hot));
 }
-
 

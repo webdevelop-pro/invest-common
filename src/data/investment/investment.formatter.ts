@@ -26,10 +26,13 @@ const BASE_OPTIONS = {
   day: 'numeric',
 } as const;
 
-const formatToFullDate = (ISOString: string): string => {
-  if (!ISOString) return '-';
-  return new Intl.DateTimeFormat('en-US', BASE_OPTIONS)
-    .format(new Date(ISOString));
+const DATE_FORMATTER = new Intl.DateTimeFormat('en-US', BASE_OPTIONS);
+
+const formatToFullDate = (value: string | Date): string => {
+  if (!value) return '-';
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return '-';
+  return DATE_FORMATTER.format(date);
 };
 
 // Simple capitalize function since we can't import from UiKit
@@ -71,7 +74,7 @@ export class InvestmentFormatter {
 
   get createdAtFormatted(): string {
     return this.investment?.created_at
-      ? formatToFullDate(new Date(this.investment.created_at).toISOString())
+      ? formatToFullDate(this.investment.created_at)
       : '-';
   }
 
@@ -83,7 +86,7 @@ export class InvestmentFormatter {
 
   get submitedAtFormatted(): string {
     return this.investment?.submited_at
-      ? formatToFullDate(new Date(this.investment.submited_at).toISOString())
+      ? formatToFullDate(this.investment.submited_at)
       : '-';
   }
 
@@ -95,7 +98,7 @@ export class InvestmentFormatter {
 
   get paymentDataCreatedAtFormatted(): string {
     return this.investment?.payment_data?.created_at
-      ? formatToFullDate(new Date(this.investment.payment_data.created_at).toISOString())
+      ? formatToFullDate(this.investment.payment_data.created_at)
       : '-';
   }
 
@@ -107,7 +110,7 @@ export class InvestmentFormatter {
 
   get paymentDataUpdatedAtFormatted(): string {
     return this.investment?.payment_data?.updated_at
-      ? formatToFullDate(new Date(this.investment.payment_data.updated_at).toISOString())
+      ? formatToFullDate(this.investment.payment_data.updated_at)
       : '-';
   }
 
@@ -156,14 +159,6 @@ export class InvestmentFormatter {
       color: statusMap[this.investment?.status as InvestmentStatuses]?.color || 'gray',
     };
   }
-
-
-
-  get offerFormatted() {
-    const offerFormatter = new OfferFormatter(this.investment?.offer);
-    return offerFormatter.format();
-  }
-
   get isActive() {
     return this.investment?.status === InvestmentStatuses.confirmed
            || this.investment?.status === InvestmentStatuses.legally_confirmed;
@@ -241,9 +236,11 @@ export class InvestmentFormatter {
   }
 
   format(): IInvestmentFormatted {
-    // Create a proxy object that maintains reactivity for the offer property
-    const formattedInvestment = {
+    const offerFormatted = new OfferFormatter(this.investment?.offer).format();
+
+    return {
       ...this.investment!,
+      offer: offerFormatted,
       amountFormatted: this.amountFormatted,
       amountFormattedZero: this.amountFormattedZero,
       amountWithSign: this.amountWithSign,
@@ -267,15 +264,6 @@ export class InvestmentFormatter {
       isPending: this.isPending,
       isFundingClickable: this.isFundingClickable,
     } as IInvestmentFormatted;
-
-    // Use a getter for the offer property to maintain reactivity
-    Object.defineProperty(formattedInvestment, 'offer', {
-      get: () => this.offerFormatted,
-      enumerable: true,
-      configurable: true,
-    });
-
-    return formattedInvestment;
   }
 }
 

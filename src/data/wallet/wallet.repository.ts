@@ -6,6 +6,7 @@ import { createRepositoryStates, withActionState, type OptionsStateData } from '
 import { INotification } from 'InvestCommon/data/notifications/notifications.types';
 import { TransactionFormatter } from './formatter/transactions.formatter';
 import { WalletFormatter } from './formatter/wallet.formatter';
+import { createFormatterCache } from 'InvestCommon/data/repository/formatterCache';
 import {
   ITransactionDataResponse, ITransactionDataFormatted, IWalletDataFormatted, IWalletDataResponse,
 } from './wallet.types';
@@ -24,6 +25,46 @@ type WalletStates = {
 
 export const useRepositoryWallet = defineStore('repository-wallet', () => {
   const apiClient = new ApiClient(env.WALLET_URL);
+  const transactionCache = createFormatterCache<
+    ITransactionDataResponse | ITransactionDataFormatted,
+    ITransactionDataFormatted
+  >({
+    getKey: (transaction) => transaction.id,
+    getSignature: (transaction) => [
+      transaction.updated_at,
+      transaction.created_at,
+      transaction.status,
+      transaction.type,
+      transaction.amount,
+      transaction.entity_id,
+      transaction.description,
+      transaction.scan_tx_url,
+      transaction.transaction_tx,
+      transaction.type_display,
+    ].join('|'),
+    format: (transaction) => new TransactionFormatter(transaction as ITransactionDataResponse).format(),
+  });
+
+  const walletCache = createFormatterCache<IWalletDataResponse | IWalletDataFormatted, IWalletDataFormatted>({
+    getKey: (wallet) => wallet.id,
+    getSignature: (wallet) => {
+      const fundingSource = wallet.funding_source ?? [];
+      const fundingSignature = fundingSource
+        .map((item) => `${item.id}|${item.status}|${item.type}|${item.name}|${item.bank_name}`)
+        .join(';');
+
+      return [
+        wallet.id,
+        wallet.status,
+        wallet.balance,
+        wallet.pending_incoming_balance,
+        wallet.pending_outcoming_balance,
+        fundingSource.length,
+        fundingSignature,
+      ].join('|');
+    },
+    format: (wallet) => new WalletFormatter(wallet).format(),
+  });
 
   const {
     getWalletState,
@@ -55,14 +96,15 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
       const response = await apiClient.get<IWalletDataResponse>(`/auth/wallet/${profileId}`);
       const data = response.data;
       if (data === undefined) throw new Error('Wallet response missing data');
-      return new WalletFormatter(data).format();
+      return walletCache.format(data);
     });
 
   const getTransactions = async (walletIdProp: number) =>
     withActionState(getTransactionsState, async () => {
       const response = await apiClient.get<{ items: ITransactionDataResponse[] }>(`/auth/wallet/${walletIdProp}/transactions`);
-      const formatted = (response.data?.items ?? []).map((transaction: ITransactionDataResponse) =>
-        new TransactionFormatter(transaction).format());
+      const items = response.data?.items ?? [];
+      transactionCache.prune(items);
+      const formatted = items.map((transaction: ITransactionDataResponse) => transactionCache.format(transaction));
       return formatted;
     });
 
@@ -120,19 +162,19 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
 
       if (index !== -1) {
         const updated = { ...currentList[index], ...fields } as ITransactionDataResponse;
-        const formatted = new TransactionFormatter(updated).format();
+        const formatted = transactionCache.format(updated);
         const newList = currentList.map((t, i) => (i === index ? formatted : t));
         getTransactionsState.value.data = newList;
       } else {
         const newItem = { ...fields, id: fields.object_id } as unknown as ITransactionDataResponse;
-        const formatted = new TransactionFormatter(newItem).format();
+        const formatted = transactionCache.format(newItem);
         getTransactionsState.value.data = [formatted, ...currentList];
       }
     } else if (obj === 'wallet') {
       const wallet = getWalletState.value.data;
       if (!wallet) return;
       const updated = { ...wallet, ...fields };
-      getWalletState.value.data = new WalletFormatter(updated).format();
+      getWalletState.value.data = walletCache.format(updated);
     }
   };
 

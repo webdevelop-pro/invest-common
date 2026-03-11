@@ -21,10 +21,15 @@ const BASE_OPTIONS = {
   day: 'numeric',
 } as const;
 
-const formatToFullDate = (ISOString: string): string => {
-  if (!ISOString) return '-';
-  return new Intl.DateTimeFormat('en-US', BASE_OPTIONS)
-    .format(new Date(ISOString));
+const DATE_FORMATTER = new Intl.DateTimeFormat('en-US', BASE_OPTIONS);
+
+const formatToFullDate = (value?: string | Date): string => {
+  if (!value) return '-';
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return '-';
+  }
+  return DATE_FORMATTER.format(date);
 };
 
 // Simple capitalize function since we can't import from UiKit
@@ -98,21 +103,23 @@ export class OfferFormatter {
     return this.offer.valuation ? currency(this.offer.valuation) : '-';
   }
 
-  get preMoneyValuationFormatted() {
-    return this.offer.security_info?.pre_money_valuation
-      ? currency(this.offer.security_info?.pre_money_valuation)
-      : this.offer.security_info?.pre_money_valuation;
+  get preMoneyValuationFormatted(): string {
+    const value = this.offer.security_info?.pre_money_valuation;
+    if (value === undefined || value === null) {
+      return '-';
+    }
+    return currency(value);
   }
 
   get approvedAtFormatted(): string {
     return this.offer.approved_at
-      ? formatToFullDate(new Date(this.offer.approved_at).toISOString())
+      ? formatToFullDate(this.offer.approved_at)
       : '-';
   }
 
   get closeAtFormatted(): string {
     return this.offer.close_at
-      ? formatToFullDate(new Date(this.offer.close_at).toISOString())
+      ? formatToFullDate(this.offer.close_at)
       : 'not closed';
   }
 
@@ -337,11 +344,11 @@ export class OfferFormatter {
     const debtMaturityDate = this.offer.security_info?.debt_maturity_date;
     
     if (cnMaturityDate) {
-      return formatToFullDate(new Date(cnMaturityDate).toISOString());
+      return formatToFullDate(cnMaturityDate);
     }
     
     if (debtMaturityDate) {
-      return formatToFullDate(new Date(debtMaturityDate).toISOString());
+      return formatToFullDate(debtMaturityDate);
     }
     
     return undefined;

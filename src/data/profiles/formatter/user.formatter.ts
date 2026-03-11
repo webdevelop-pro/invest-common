@@ -29,9 +29,14 @@ export function formatPhoneNumber(input: string | number): string | undefined {
 
 export class UserFormatter {
   private user: IUser;
+  private formatProfile: (profile: IProfileIndividual) => IProfileFormatted;
 
-  constructor(user: IUser) {
+  constructor(
+    user: IUser,
+    formatProfile: (profile: IProfileIndividual) => IProfileFormatted = (profile) => new ProfileFormatter(profile).format(),
+  ) {
     this.user = user;
+    this.formatProfile = formatProfile;
   }
 
   get fullName(): string {
@@ -50,27 +55,18 @@ export class UserFormatter {
 
   private formatProfiles(): IProfileFormatted[] {
     return (this.user?.profiles || []).map((profile: IProfileIndividual) =>
-      new ProfileFormatter(profile).format(),
+      this.formatProfile(profile),
     );
   }
 
   format(): IUserFormatted {
-    const formattedUser = {
+    return {
       ...this.user,
       fullName: this.fullName,
       createdAtFormattedShortMonth: this.createdAtFormattedShortMonth,
       phoneFormatted: this.phoneFormatted,
+      profiles: this.formatProfiles(),
     } as IUserFormatted;
-
-    // Use a getter for the profiles property to maintain reactivity
-    Object.defineProperty(formattedUser, 'profiles', {
-      get: () => this.formatProfiles(),
-      enumerable: true,
-      configurable: true,
-    });
-
-    return formattedUser;
   }
 }
-
 

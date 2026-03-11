@@ -29,43 +29,60 @@ export function usePortfolioData() {
   const portfolioStore = useDashboardPortfolioStore();
   const { portfolioData, getInvestmentsState } = storeToRefs(portfolioStore);
 
-  const totalAmount = computed(() => 
-    portfolioData.value.reduce((sum, inv) => sum + (inv.amount || 0), 0)
-  );
-
   const isLoading = computed(() => getInvestmentsState.value?.loading);
+  const portfolioSummary = computed(() => {
+    let totalAmount = 0;
+    const offerAmounts = new Map<string, number>();
+    const categoryAmounts = new Map<string, number>();
+    const topOffers = new Map<number, Record<string, unknown> & { investedAmount: number }>();
 
-  // Generic function to create slices by any field
-  const createSlices = (getKey: (inv: any) => string) => {
-    const map = new Map<string, number>();
-    
-    for (const inv of portfolioData.value) {
-      const key = getKey(inv) || 'Unknown';
-      const current = map.get(key) || 0;
-      map.set(key, current + (inv.amount || 0));
+    for (const investment of portfolioData.value) {
+      const amount = investment.amount || 0;
+      totalAmount += amount;
+
+      const offerName = investment.offer?.name || 'Unknown';
+      offerAmounts.set(offerName, (offerAmounts.get(offerName) || 0) + amount);
+
+      const securityType = investment.offer?.security_type || 'Unknown';
+      categoryAmounts.set(securityType, (categoryAmounts.get(securityType) || 0) + amount);
+
+      if (investment.offer && amount && investment.offer.status === 'published') {
+        const offerId = investment.offer.id;
+        const current = topOffers.get(offerId);
+        if (current) {
+          current.investedAmount += amount;
+        } else {
+          topOffers.set(offerId, {
+            ...investment.offer,
+            investedAmount: amount,
+          });
+        }
+      }
     }
-    
-    const arr = Array.from(map.entries()).map(([key, amount]) => ({ 
-      key, 
-      label: key, 
-      amount 
-    }));
-    
-    const total = totalAmount.value || 1;
-    return arr
-      .map((s) => ({ ...s, percent: (s.amount / total) * 100 }))
+
+    const denominator = totalAmount || 1;
+    const toSlices = (source: Map<string, number>) => Array.from(source.entries())
+      .map(([label, amount]) => ({
+        key: label,
+        label,
+        amount,
+        percent: (amount / denominator) * 100,
+      }))
       .sort((a, b) => b.percent - a.percent);
-  };
 
-  // Assets diversification (by offer name)
-  const offerSlices = computed(() => 
-    createSlices((inv) => inv.offer?.name)
-  );
+    return {
+      totalAmount,
+      offerSlices: toSlices(offerAmounts),
+      categorySlices: toSlices(categoryAmounts),
+      topInvestedOffers: Array.from(topOffers.values())
+        .sort((a, b) => (b.investedAmount || 0) - (a.investedAmount || 0))
+        .slice(0, 2),
+    };
+  });
 
-  // Investment categories (by security type)
-  const categorySlices = computed(() => 
-    createSlices((inv) => inv.offer?.security_type)
-  );
+  const totalAmount = computed(() => portfolioSummary.value.totalAmount);
+  const offerSlices = computed(() => portfolioSummary.value.offerSlices);
+  const categorySlices = computed(() => portfolioSummary.value.categorySlices);
 
   const offerDonutData = computed<DonutDatum[]>(() => 
     offerSlices.value.map((s) => ({ name: s.label, percent: s.percent }))
@@ -83,33 +100,7 @@ export function usePortfolioData() {
     DEFAULT_CHART_COLORS.slice(0, categoryDonutData.value.length)
   );
 
-  // Top invested offers (unique by offer ID) - only include published offers
-  const topInvestedOffers = computed(() => {
-    const offerMap = new Map();
-    
-    portfolioData.value
-      .filter(
-        (inv: any) =>
-          inv.offer &&
-          inv.amount &&
-          inv.offer.status === 'published',
-      )
-      .forEach((inv: any) => {
-        const offerId = inv.offer.id;
-        if (offerMap.has(offerId)) {
-          offerMap.get(offerId).investedAmount += inv.amount || 0;
-        } else {
-          offerMap.set(offerId, {
-            ...inv.offer,
-            investedAmount: inv.amount || 0
-          });
-        }
-      });
-    
-    return Array.from(offerMap.values())
-      .sort((a: any, b: any) => (b.investedAmount || 0) - (a.investedAmount || 0))
-      .slice(0, 2);
-  });
+  const topInvestedOffers = computed(() => portfolioSummary.value.topInvestedOffers);
 
 
   return {

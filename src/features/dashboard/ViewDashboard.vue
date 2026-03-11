@@ -2,16 +2,18 @@
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import { DashboardTabTypes } from './utils';
 import DashboardTopInfo from './components/DashboardTopInfo.vue';
+import DashboardTabSkeleton from './components/DashboardTabSkeleton.vue';
 import VPageTopInfoAndTabs from 'InvestCommon/shared/components/VPageTopInfoAndTabs.vue';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { storeToRefs } from 'pinia';
 import {
   computed,
   PropType,
+  ref,
   watch,
   onMounted,
-  nextTick,
   type Component,
+  defineAsyncComponent,
 } from 'vue';
 import {
   ROUTE_DASHBOARD_PORTFOLIO,
@@ -22,15 +24,9 @@ import {
   ROUTE_DASHBOARD_EARN,
 } from 'InvestCommon/domain/config/enums/routes';
 import { VTabsContent } from 'UiKit/components/Base/VTabs';
-import DashboardPortfolio from 'InvestCommon/features/investment/DashboardPortfolio.vue';
-import DashboardAccountDetails from 'InvestCommon/features/profiles/DashboardAccountDetails.vue';
-import DashboardDistributions from 'InvestCommon/features/distributions/DashboardDistributions.vue';
-import DashboardSummary from 'InvestCommon/features/summary/DashboardSummary.vue';
-import DashboardEarn from 'InvestCommon/features/earn/DashboardEarn.vue';
-import DashboardWallet from 'InvestCommon/features/wallet/DashboardWallet.vue';
-import { useRoute } from 'vue-router';
 import { useBreakpoints } from 'UiKit/composables/useBreakpoints';
 import { isPwaMobile } from 'InvestCommon/domain/pwa/pwaDetector';
+import { useSyncWithUrl } from 'UiKit/composables/useSyncWithUrl';
 
 const props = defineProps({
   tab: {
@@ -44,8 +40,6 @@ const globalLoader = useGlobalLoader();
 onMounted(() => {
   globalLoader.hide();
 });
-
-const route = useRoute();
 
 const profilesStore = useProfilesStore();
 const { selectedUserProfileId } = storeToRefs(profilesStore);
@@ -103,30 +97,74 @@ const filteredTabs = computed(() => {
   return allTabs;
 });
 
-const tabsList = computed(() => {
-  const allTabs = Object.values(filteredTabs.value);
-  return allTabs;
-});
+const tabsList = computed(() => Object.values(filteredTabs.value));
+
+const tabLoaders: Record<DashboardTabTypes, () => Promise<Component>> = {
+  [DashboardTabTypes.portfolio]: () =>
+    import('InvestCommon/features/investment/DashboardPortfolio.vue'),
+  [DashboardTabTypes.summary]: () =>
+    import('InvestCommon/features/summary/DashboardSummary.vue'),
+  [DashboardTabTypes.acount]: () =>
+    import('InvestCommon/features/profiles/DashboardAccountDetails.vue'),
+  // Wallet and Crypto Wallet are combined into a single tab
+  [DashboardTabTypes.wallet]: () =>
+    import('InvestCommon/features/wallet/DashboardWallet.vue'),
+  [DashboardTabTypes.evmwallet]: () =>
+    import('InvestCommon/features/wallet/DashboardWallet.vue'),
+  [DashboardTabTypes.distributions]: () =>
+    import('InvestCommon/features/distributions/DashboardDistributions.vue'),
+  [DashboardTabTypes.earn]: () =>
+    import('InvestCommon/features/earn/DashboardEarn.vue'),
+};
+
+const createTabComponent = (loader: () => Promise<Component>) =>
+  defineAsyncComponent({
+    loader,
+    loadingComponent: DashboardTabSkeleton,
+    delay: 0,
+  });
 
 const tabComponents: Record<DashboardTabTypes, Component> = {
-  [DashboardTabTypes.portfolio]: DashboardPortfolio,
-  [DashboardTabTypes.acount]: DashboardAccountDetails,
-  // Wallet and Crypto Wallet are combined into a single tab
-  [DashboardTabTypes.wallet]: DashboardWallet,
-  [DashboardTabTypes.evmwallet]: DashboardWallet,
-  [DashboardTabTypes.distributions]: DashboardDistributions,
-  [DashboardTabTypes.summary]: DashboardSummary,
-  [DashboardTabTypes.earn]: DashboardEarn,
+  [DashboardTabTypes.portfolio]: createTabComponent(tabLoaders[DashboardTabTypes.portfolio]),
+  [DashboardTabTypes.summary]: createTabComponent(tabLoaders[DashboardTabTypes.summary]),
+  [DashboardTabTypes.acount]: createTabComponent(tabLoaders[DashboardTabTypes.acount]),
+  [DashboardTabTypes.wallet]: createTabComponent(tabLoaders[DashboardTabTypes.wallet]),
+  [DashboardTabTypes.evmwallet]: createTabComponent(tabLoaders[DashboardTabTypes.evmwallet]),
+  [DashboardTabTypes.distributions]: createTabComponent(tabLoaders[DashboardTabTypes.distributions]),
+  [DashboardTabTypes.earn]: createTabComponent(tabLoaders[DashboardTabTypes.earn]),
 };
-const currentPwaComponent = computed(() => tabComponents[props.tab] ?? tabComponents[DashboardTabTypes.portfolio]);
+
+// VTabs controls the active tab via URL query param `tab`.
+// Keep this view synced so we can lazy-create only the active tab's component.
+const selectedTab = useSyncWithUrl<string>({
+  key: 'tab',
+  defaultValue: props.tab,
+  syncToUrl: true,
+});
+
+const activeTab = computed<DashboardTabTypes>(() => {
+  const maybeTab = selectedTab.value as DashboardTabTypes;
+  if (maybeTab in tabLoaders) return maybeTab;
+  if (props.tab in tabLoaders) return props.tab;
+  return DashboardTabTypes.portfolio;
+});
+
+const loadedTabs = ref<DashboardTabTypes[]>([]);
 
 watch(
-  () => route.path,
-  async () => {
-    await nextTick();
-    globalLoader.hide();
+  () => activeTab.value,
+  (tab) => {
+    if (!loadedTabs.value.includes(tab)) {
+      loadedTabs.value = [...loadedTabs.value, tab];
+    }
+    // Warm the active tab chunk; component mount will also load if needed.
+    void tabLoaders[tab]?.();
   },
+  { immediate: true },
 );
+
+const currentPwaComponent = computed(() => (
+  tabComponents[activeTab.value] ?? tabComponents[DashboardTabTypes.portfolio]));
 
 </script>
 
@@ -144,7 +182,7 @@ watch(
       <component
         :is="currentPwaComponent"
         v-if="isPwaMobileDashboard"
-        :key="props.tab"
+        :key="activeTab"
       />
       <template v-else>
         <VTabsContent
@@ -152,7 +190,11 @@ watch(
           :key="item.value"
           :value="item.value"
         >
-          <component :is="tabComponents[item.value]" />
+          <component
+            :is="tabComponents[item.value]"
+            v-if="loadedTabs.includes(item.value)"
+            v-show="item.value === activeTab"
+          />
         </VTabsContent>
       </template>
     </template>

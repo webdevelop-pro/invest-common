@@ -19,10 +19,14 @@ const BASE_OPTIONS = {
   day: 'numeric',
 } as const;
 
-const formatToFullDate = (ISOString: string) => (
-  new Intl.DateTimeFormat('en-US', BASE_OPTIONS)
-    .format(new Date(ISOString))
-);
+const DATE_FORMATTER = new Intl.DateTimeFormat('en-US', BASE_OPTIONS);
+
+const formatToFullDate = (value?: string): string => {
+  if (!value) return '-';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '-';
+  return DATE_FORMATTER.format(date);
+};
 
 const getTimeFormat = (fullDate: string) => {
   const date = new Date(fullDate);
@@ -122,12 +126,17 @@ export class TransactionFormatter {
   }
 
   format(): ITransactionDataFormatted {
+    const submittedDate = formatToFullDate(this.transaction.created_at);
+    const submittedTime = this.transaction.created_at ? getTimeFormat(this.transaction.created_at) : '-';
+    const updatedDate = formatToFullDate(this.transaction.updated_at);
+    const updatedTime = this.transaction.updated_at ? getTimeFormat(this.transaction.updated_at) : '-';
+
     return {
       ...this.transaction,
-      submited_at_date: this.transaction.created_at ? formatToFullDate(new Date(this.transaction.created_at).toISOString()) : '-',
-      submited_at_time: this.transaction.created_at ? getTimeFormat(this.transaction.created_at) : '-',
-      updated_at_date: this.transaction.updated_at ? formatToFullDate(new Date(this.transaction.updated_at).toISOString()) : '-',
-      updated_at_time: this.transaction.updated_at ? getTimeFormat(this.transaction.updated_at) : '-',
+      submited_at_date: submittedDate,
+      submited_at_time: submittedTime,
+      updated_at_date: updatedDate,
+      updated_at_time: updatedTime,
       isTypeDeposit: this.isTypeDeposit,
       isTypeInvestment: this.isTypeInvestment,
       typeFormatted: this.typeFormatted,
@@ -141,8 +150,8 @@ export class TransactionFormatter {
       typeDisplay: this.typeDisplay,
       description: this.description,
       scanTxUrl: this.scanTxUrl,
-      submitted_at_date: this.transaction.created_at ? formatToFullDate(new Date(this.transaction.created_at).toISOString()) : '-',
-      submitted_at_time: this.transaction.created_at ? getTimeFormat(this.transaction.created_at) : '-',
+      submitted_at_date: submittedDate,
+      submitted_at_time: submittedTime,
       statusText: FundingStatuses[this.transaction.status]?.text ?? '',
       statusColor: this.transaction.status ? WALLET_STATUS_COLOR[this.transaction.status] ?? 'default' : 'default',
     };

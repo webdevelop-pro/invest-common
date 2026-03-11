@@ -45,6 +45,10 @@ export const useFormFinancialInformation = () => {
   const investmentObjectivesFormRef = useTemplateRef<FormChild>('investmentObjectivesFormChild');
   const understandingRisksFormRef = useTemplateRef<FormChild>('understandingRisksFormChild');
 
+  const { submitFormToHubspot: submitFinancialSituation } = useHubspotForm(env.HUBSPOT_FORM_ID_FINANCIAL_SITUATION);
+  const { submitFormToHubspot: submitRisks } = useHubspotForm(env.HUBSPOT_FORM_ID_RISKS);
+  const { submitFormToHubspot: submitInvestmentObjectives } = useHubspotForm(env.HUBSPOT_FORM_ID_INVESTMENT_OBJECTIVES);
+
   const isValid = computed(() => (financialInfoFormRef.value?.isValid
     && investmentObjectivesFormRef.value?.isValid && understandingRisksFormRef.value?.isValid));
   const isDisabledButton = computed(() => !isValid.value);
@@ -91,15 +95,15 @@ export const useFormFinancialInformation = () => {
     }
 
     if (!setProfileByIdState.value.error) {
-      useHubspotForm(env.HUBSPOT_FORM_ID_FINANCIAL_SITUATION).submitFormToHubspot({
+      submitFinancialSituation({
         email: userSessionTraits.value?.email,
         is_accredited: financialInfoFormRef.value?.model.accredited_investor.is_accredited,
       });
-      useHubspotForm(env.HUBSPOT_FORM_ID_RISKS).submitFormToHubspot({
+      submitRisks({
         email: userSessionTraits.value?.email,
         ...understandingRisksFormRef.value?.model,
       });
-      useHubspotForm(env.HUBSPOT_FORM_ID_INVESTMENT_OBJECTIVES).submitFormToHubspot({
+      submitInvestmentObjectives({
         email: userSessionTraits.value?.email,
         ...investmentObjectivesFormRef.value?.model,
       });

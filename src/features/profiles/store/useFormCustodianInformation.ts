@@ -1,5 +1,5 @@
 import {
-  ref, computed, nextTick,
+  ref, computed, watch, nextTick,
   toRaw, useTemplateRef,
 } from 'vue';
 import { storeToRefs } from 'pinia';
@@ -45,8 +45,14 @@ export const useFormCustodianInformation = () => {
   const { submitFormToHubspot } = useHubspotForm(env.HUBSPOT_FORM_ID_CUSTODIAN);
 
   const errorData = computed(() => setProfileByIdState.value.error?.data?.responseJson);
-  const schemaBackend = computed(() => (
-    getProfileByIdOptionsState.value.data ? structuredClone(toRaw(getProfileByIdOptionsState.value.data)) : null));
+  const schemaBackend = ref<ReturnType<typeof toRaw<typeof getProfileByIdOptionsState.value.data>> | null>(null);
+  watch(
+    () => getProfileByIdOptionsState.value.data,
+    (data) => {
+      schemaBackend.value = data ? structuredClone(toRaw(data)) : null;
+    },
+    { immediate: true },
+  );
 
   const isValid = computed(() => custodianRef.value?.isValid);
   const isDisabledButton = computed(() => !isValid.value);

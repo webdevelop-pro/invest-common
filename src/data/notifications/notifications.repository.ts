@@ -1,10 +1,11 @@
-import { ref, computed } from 'vue';
+import { computed, ref } from 'vue';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import env from 'InvestCommon/config/env';
-import { INotification } from './notifications.types';
+import { IFormattedNotification, INotification } from './notifications.types';
 import { createRepositoryStates, withActionState } from 'InvestCommon/data/repository/repository';
 import { NotificationFormatter } from './notifications.formatter';
+import { createFormatterCache } from 'InvestCommon/data/repository/formatterCache';
 
 type NotificationStates = {
   getAllState: INotification[];
@@ -16,9 +17,33 @@ export const useRepositoryNotifications = defineStore('repository-notifications'
   const apiClient = new ApiClient(env.NOTIFICATION_URL);
 
   // State
-  const notifications = ref<INotification[]>([]);
-  const formattedNotifications = computed(() => (
-    notifications.value.map((notification: INotification) => new NotificationFormatter(notification).format()) || []));
+  const formattedNotifications = ref<IFormattedNotification[]>([]);
+  const unreadNotificationsCount = computed(() => {
+    const source = formattedNotifications.value;
+    let count = 0;
+    for (let i = 0; i < source.length; i++) {
+      const item = source[i];
+      if (item.status === 'unread' && item.type !== 'internal') {
+        count++;
+      }
+    }
+    return count;
+  });
+  const notificationCache = createFormatterCache<INotification, IFormattedNotification>({
+    getKey: (notification) => notification.id,
+    getSignature: (notification) => [
+      notification.updated_at,
+      notification.status,
+      notification.type,
+      notification.content,
+      JSON.stringify(notification.data?.fields ?? {}),
+    ].join('|'),
+    format: (notification) => new NotificationFormatter(notification).format(),
+  });
+
+  const setFormattedNotifications = (items: INotification[]) => {
+    formattedNotifications.value = notificationCache.formatMany(items);
+  };
 
   const states = createRepositoryStates<NotificationStates>({
     getAllState: undefined,
@@ -34,7 +59,8 @@ export const useRepositoryNotifications = defineStore('repository-notifications'
         showGlobalAlertOnServerError: false,
       });
       const data = response.data ?? [];
-      notifications.value = data;
+      notificationCache.prune(data);
+      setFormattedNotifications(data);
       return data;
     });
     return result ?? [];
@@ -45,9 +71,10 @@ export const useRepositoryNotifications = defineStore('repository-notifications'
       await apiClient.put(`/notification/all`, undefined, {
         showGlobalAlertOnServerError: false,
       });
-      notifications.value = notifications.value.map((notification: INotification) => ({
+      formattedNotifications.value = formattedNotifications.value.map((notification) => ({
         ...notification,
         status: 'read',
+        isUnread: false,
       }));
     });
 
@@ -56,13 +83,14 @@ export const useRepositoryNotifications = defineStore('repository-notifications'
       await apiClient.put(`/notification/${id}`, undefined, {
         showGlobalAlertOnServerError: false,
       });
-      notifications.value = notifications.value.map((notification: INotification) => (notification.id === id
-        ? { ...notification, status: 'read' }
+      formattedNotifications.value = formattedNotifications.value.map((notification) => (notification.id === id
+        ? { ...notification, status: 'read', isUnread: false }
         : notification));
     });
 
   const resetAll = () => {
-    notifications.value = [];
+    formattedNotifications.value = [];
+    notificationCache.clear();
     resetActionStates();
   };
 
@@ -71,13 +99,13 @@ export const useRepositoryNotifications = defineStore('repository-notifications'
 
   const updateNotificationsData = (data: string) => {
     const notification = JSON.parse(data) as INotification;
-    notifications.value.unshift(notification);
+    formattedNotifications.value.unshift(notificationCache.format(notification));
   };
 
   return {
     // State
-    notifications,
     formattedNotifications,
+    unreadNotificationsCount,
     // Action states
     getAllState,
     markAllAsReadState,

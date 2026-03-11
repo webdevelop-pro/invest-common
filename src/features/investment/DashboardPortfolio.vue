@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, defineAsyncComponent } from 'vue';
 import { urlBlogSingle } from 'InvestCommon/domain/config/links';
 import DashboardTabsTopInfo from 'InvestCommon/features/dashboard/components/DashboardTabsTopInfo.vue';;
 import { PostLinkTypes } from 'InvestCommon/data/blog/blog.types';
 import { VTabs, VTabsList, VTabsTrigger, VTabsContent } from 'UiKit/components/Base/VTabs';
-import DashboardDistributions from 'InvestCommon/features/distributions/DashboardDistributions.vue';
 import PortfolioInvestmentsTable from './components/PortfolioInvestmentsTable.vue';
 
 const PORTFOLIO_TAB_INFO = {
@@ -20,6 +19,10 @@ const PORTFOLIO_TAB_INFO = {
 };
 
 const activeTab = ref('investments');
+
+const DashboardDistributions = defineAsyncComponent(
+  () => import('InvestCommon/features/distributions/DashboardDistributions.vue'),
+);
 </script>
 
 <template>
@@ -59,7 +62,7 @@ const activeTab = ref('investments');
           <PortfolioInvestmentsTable />
         </VTabsContent>
         <VTabsContent value="distributions">
-          <DashboardDistributions />
+          <DashboardDistributions v-if="activeTab === 'distributions'" />
         </VTabsContent>
       </VTabs>
       <div class="dashboard-portfolio__desktop-content">

@@ -12,6 +12,9 @@ const props = defineProps<{
   error?: string;
   durationSec?: number;
 }>();
+
+const PRICE_FORMATTER = new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 });
+const formatPrice = (price: number) => PRICE_FORMATTER.format(price);
 </script>
 
 <template>
@@ -48,7 +51,7 @@ const props = defineProps<{
             :class="{ 'is--up': item.change24h >= 0, 'is--down': item.change24h < 0 }"
           >
             <div class="crypto-prices-ticker__price is--small">
-              ${{ item.priceUsd.toLocaleString(undefined, { maximumFractionDigits: 2 }) }}
+              ${{ formatPrice(item.priceUsd) }}
             </div>
             <div class="crypto-prices-ticker__value">
               <span class="crypto-prices-ticker__name">
@@ -88,7 +91,6 @@ const props = defineProps<{
     width: max-content;
     user-select: none;
     white-space: nowrap;
-    will-change: transform;
     animation: ticker var(--duration) linear infinite;
   }
 

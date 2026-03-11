@@ -1,5 +1,13 @@
 <script setup lang="ts">
-import { computed, defineAsyncComponent, hydrateOnIdle, hydrateOnVisible, ref, onMounted } from 'vue';
+import {
+  computed,
+  defineAsyncComponent,
+  hydrateOnIdle,
+  hydrateOnVisible,
+  ref,
+  onMounted,
+  onBeforeUnmount,
+} from 'vue';
 import { useData } from 'vitepress';
 import VSectionTopVideo from 'UiKit/components/VSectionTop/VSectionTopVideo.vue';
 import { storeToRefs } from 'pinia';
@@ -46,23 +54,68 @@ const explore = filterPages(allPages as IFrontmatter[], 'layout', 'offers');
 
 const offers = computed(() => getOffersState.value.data?.data?.slice(0, 6) || []);
 const latest3Items = computed(() => blogPosts?.slice(0, 3));
-
-if (!getOffersState.value.data) {
-  offerRepository.getOffers()
-    .catch((e) => reportError(e, 'Failed to load offers'));
-}
 useGlobalLoader().hide();
 
 const videoSrc = ref<string | undefined>(undefined);
+const heroRoot = ref<HTMLElement | null>(null);
+let heroObserver: IntersectionObserver | null = null;
+let offersFetchTimeout: ReturnType<typeof setTimeout> | undefined;
 
-onMounted(async () => {
+const loadHeroVideo = async () => {
+  if (videoSrc.value) return;
   const videoModule = await import('InvestCommon/shared/assets/video/video-bg.mp4');
   videoSrc.value = videoModule.default as string;
+};
+
+const loadOffers = () => {
+  if (getOffersState.value.data || getOffersState.value.loading) {
+    return;
+  }
+
+  offerRepository.getOffers()
+    .catch((e) => reportError(e, 'Failed to load offers'));
+};
+
+onMounted(() => {
+  if (typeof window === 'undefined') return;
+
+  const connection = navigator.connection as { saveData?: boolean } | undefined;
+  if (!connection?.saveData && 'IntersectionObserver' in window && heroRoot.value) {
+    heroObserver = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) {
+        void loadHeroVideo();
+        heroObserver?.disconnect();
+        heroObserver = null;
+      }
+    }, { rootMargin: '300px 0px' });
+
+    heroObserver.observe(heroRoot.value);
+  } else if (!connection?.saveData) {
+    void loadHeroVideo();
+  }
+
+  if ('requestIdleCallback' in window) {
+    const idleCallback = window.requestIdleCallback as (callback: IdleRequestCallback) => number;
+    idleCallback(() => loadOffers());
+    return;
+  }
+
+  offersFetchTimeout = setTimeout(loadOffers, 0);
+});
+
+onBeforeUnmount(() => {
+  heroObserver?.disconnect();
+  heroObserver = null;
+  if (offersFetchTimeout) {
+    clearTimeout(offersFetchTimeout);
+    offersFetchTimeout = undefined;
+  }
 });
 </script>
 
 <template>
   <div
+    ref="heroRoot"
     class="ViewHome view-home"
   >
     <div class="view-home__top-wrap">

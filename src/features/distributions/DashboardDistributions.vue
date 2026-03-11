@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {
-  defineAsyncComponent, onMounted, watch,
+  computed, defineAsyncComponent, onMounted, watch,
 } from 'vue';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
@@ -16,12 +16,12 @@ const DISTRIBUTIONS_TAB_INFO = {
   title: 'Your Total Assets',
 };
 
-const VApexChartArea = defineAsyncComponent({
-  loader: () => import('UiKit/components/VCharts/VApexChartArea.vue'),
+const VShadcnChartArea = defineAsyncComponent({
+  loader: () => import('UiKit/components/VCharts/VShadcnChartArea/VShadcnChartArea.vue'),
 });
 
-const VApexChartDonut = defineAsyncComponent({
-  loader: () => import('UiKit/components/VCharts/VApexChartDonut.vue'),
+const VShadcnChartDonut = defineAsyncComponent({
+  loader: () => import('UiKit/components/VCharts/VShadcnChartDonut/VShadcnChartDonut.vue'),
 });
 
 const profilesStore = useProfilesStore();
@@ -40,6 +40,16 @@ const updateData = () => {
       .catch((e) => reportError(e, 'Failed to load distributions'));
   }
 };
+
+const geographicChartData = computed(() => distributionGeograficData.value.map((value, index) => ({
+  name: String(distributionGeograficLabels.value[index] ?? index + 1),
+  value,
+})));
+
+const performanceChartData = computed(() => distributionPerformanceData.value.map((value, index) => ({
+  label: String(distributionPerformanceLabels.value[index] ?? index + 1),
+  value,
+})));
 
 watch(() => selectedUserProfileId.value, (value) => {
   if (value && value > 0) {
@@ -62,19 +72,22 @@ onMounted(() => {
       v-if="(distributionGeograficData.length > 0) || (distributionPerformanceData.length > 0)"
       class="dashboard-distributions__charts"
     >
-      <VApexChartDonut
+      <VShadcnChartDonut
         v-if="distributionGeograficData.length > 0"
         title="Geographic Diversification"
-        :data="distributionGeograficData"
-        :labels="distributionGeograficLabels"
+        :data="geographicChartData"
+        index="name"
+        category="value"
+        :show-center="false"
         class="dashboard-distributions__chart-pie"
       />
-      <VApexChartArea
+      <VShadcnChartArea
         v-if="distributionPerformanceData.length > 0"
-        name="Distributions"
         title="Portfolio Performance"
-        :data="distributionPerformanceData"
-        :labels="distributionPerformanceLabels"
+        :data="performanceChartData"
+        :categories="['value']"
+        index="label"
+        :show-legend="false"
         class="dashboard-distributions__chart-area"
       />
     </div>

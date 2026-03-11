@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {
-  computed, onMounted, ref, watch,
+  computed, onMounted, onUnmounted, ref, watch,
 } from 'vue';
 import { useRoute } from 'vitepress';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
@@ -37,8 +37,11 @@ const rootEl = ref<HTMLElement | null>(null);
 const isFloating = ref(false);
 const initialBottom = ref<number | null>(null);
 const footerEl = ref<HTMLElement | null>(null);
+const isFooterVisible = ref(false);
 const isClient = typeof window !== 'undefined';
 const isClientReady = ref(false);
+let footerObserver: IntersectionObserver | null = null;
+let frameId = 0;
 
 const activeTab = useSyncWithUrl<string>({
   key: 'tab',
@@ -99,21 +102,30 @@ const updateFloatingState = () => {
   // Start floating once the original button has completely scrolled above the viewport
   const scrolledPastButton = window.scrollY >= initialBottom.value;
 
-  let footerVisible = false;
+  isFloating.value = scrolledPastButton && !isFooterVisible.value;
+};
 
-  if (footerEl.value) {
-    const footerRect = footerEl.value.getBoundingClientRect();
-    // Add a small margin so we hide the floating button slightly before the footer overlaps it
-    const margin = 24;
-    footerVisible = footerRect.top < window.innerHeight - margin;
-  }
+const scheduleFloatingStateUpdate = () => {
+  if (!isClient) return;
+  if (frameId) return;
+  frameId = window.requestAnimationFrame(() => {
+    frameId = 0;
+    updateFloatingState();
+  });
+};
 
-  isFloating.value = scrolledPastButton && !footerVisible;
+const updateInitialBottom = () => {
+  if (!isClient || !rootEl.value) return;
+  const rect = rootEl.value.getBoundingClientRect();
+  initialBottom.value = rect.bottom + window.scrollY;
 };
 
 if (isClient) {
-  useEventListener(window, 'scroll', updateFloatingState, { passive: true });
-  useEventListener(window, 'resize', updateFloatingState);
+  useEventListener(window, 'scroll', scheduleFloatingStateUpdate, { passive: true });
+  useEventListener(window, 'resize', () => {
+    updateInitialBottom();
+    scheduleFloatingStateUpdate();
+  });
 }
 
 watch(
@@ -126,7 +138,7 @@ watch(
       return;
     }
 
-    updateFloatingState();
+    scheduleFloatingStateUpdate();
   },
 );
 
@@ -134,15 +146,41 @@ onMounted(() => {
   if (!isClient) return;
 
   footerEl.value = document.querySelector('.app-layout-default__footer') as HTMLElement | null;
-
-  if (rootEl.value) {
-    const rect = rootEl.value.getBoundingClientRect();
-    // Bottom of the button relative to the document
-    initialBottom.value = rect.bottom + window.scrollY;
+  if (footerEl.value && typeof IntersectionObserver !== 'undefined') {
+    footerObserver = new IntersectionObserver(
+      ([entry]) => {
+        isFooterVisible.value = entry.isIntersecting;
+        scheduleFloatingStateUpdate();
+      },
+      {
+        root: null,
+        threshold: 0,
+        rootMargin: '0px 0px -24px 0px',
+      },
+    );
+    footerObserver.observe(footerEl.value);
   }
 
-  updateFloatingState();
+  updateInitialBottom();
+
+  scheduleFloatingStateUpdate();
   isClientReady.value = true;
+});
+
+watch(() => rootEl.value, () => {
+  updateInitialBottom();
+  scheduleFloatingStateUpdate();
+});
+
+onUnmounted(() => {
+  if (frameId) {
+    window.cancelAnimationFrame(frameId);
+    frameId = 0;
+  }
+  if (footerObserver) {
+    footerObserver.disconnect();
+    footerObserver = null;
+  }
 });
 </script>
 

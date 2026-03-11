@@ -49,6 +49,13 @@ function isFiatRow(row: WalletTransactionRow): boolean {
   return 'source_wallet_id' in row;
 }
 
+function getCreatedAtTimestamp(row: WalletTransactionRow): number {
+  const rawDate = row.created_at;
+  if (!rawDate) return 0;
+  const timestamp = Date.parse(rawDate);
+  return Number.isFinite(timestamp) ? timestamp : 0;
+}
+
 export type WalletTransactionsFilterItem = WalletFilterItem;
 
 export function useWalletTransactions() {
@@ -61,11 +68,23 @@ export function useWalletTransactions() {
     isLoadingNotificationTransaction,
   } = storeToRefs(evmRepository);
 
+  const lastFetchedWalletId = ref(0);
+
   watch(
-    [walletId, () => getWalletState.value.data],
-    ([id, wallet]) => {
+    walletId,
+    (id) => {
       const wId = Number(id ?? 0);
-      if (wId > 0 && wallet) walletRepository.getTransactions(wId);
+      if (wId <= 0) {
+        lastFetchedWalletId.value = 0;
+        return;
+      }
+
+      if (wId === lastFetchedWalletId.value && Array.isArray(getTransactionsState.value.data)) {
+        return;
+      }
+
+      lastFetchedWalletId.value = wId;
+      walletRepository.getTransactions(wId);
     },
     { immediate: true },
   );
@@ -82,12 +101,12 @@ export function useWalletTransactions() {
   const transactionsOptions = computed((): WalletTransactionRow[] => {
     const evm = getEvmWalletState.value.data?.formattedTransactions ?? [];
     const fiat = getTransactionsState.value.data ?? [];
-    const combined: WalletTransactionRow[] = [...evm, ...fiat];
-    return combined.sort((a, b) => {
-      const tA = a.created_at ? new Date(a.created_at).getTime() : 0;
-      const tB = b.created_at ? new Date(b.created_at).getTime() : 0;
-      return tB - tA;
-    });
+    const combined: Array<{ row: WalletTransactionRow; ts: number }> = [...evm, ...fiat].map((row) => ({
+      row,
+      ts: getCreatedAtTimestamp(row),
+    }));
+    combined.sort((a, b) => b.ts - a.ts);
+    return combined.map((item) => item.row);
   });
 
   const filters = ref<WalletTransactionsFilterState>({
@@ -119,14 +138,16 @@ export function useWalletTransactions() {
 
   const filteredTransactions = computed<WalletTransactionRow[]>(() => {
     const { balanceTypes, transactionTypes } = filters.value;
+    const balanceFilter = balanceTypes.length ? new Set(balanceTypes) : null;
+    const transactionFilter = transactionTypes.length ? new Set(transactionTypes) : null;
     return transactionsOptions.value.filter((row) => {
-      if (balanceTypes.length) {
+      if (balanceFilter) {
         const label = isFiatRow(row) ? 'Fiat' : 'Crypto';
-        if (!balanceTypes.includes(label)) return false;
+        if (!balanceFilter.has(label)) return false;
       }
-      if (transactionTypes.length) {
+      if (transactionFilter) {
         const labels = getTransactionFilterLabels(row);
-        if (!labels.some((l) => transactionTypes.includes(l))) return false;
+        if (!labels.some((l) => transactionFilter.has(l))) return false;
       }
       return true;
     });

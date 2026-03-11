@@ -56,7 +56,7 @@ export function useWalletTokens() {
   });
 
   const visibleCount = ref(INITIAL_VISIBLE);
-  watch(holdingTypesFilter, () => { visibleCount.value = INITIAL_VISIBLE; }, { deep: true });
+  watch(holdingTypesFilter, () => { visibleCount.value = INITIAL_VISIBLE; });
 
   const visibleTokens = computed(() =>
     filteredTokensOptions.value.slice(0, visibleCount.value),

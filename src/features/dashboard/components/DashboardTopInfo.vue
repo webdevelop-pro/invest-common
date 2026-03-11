@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, defineAsyncComponent } from 'vue';
 import VAccreditationButton from 'InvestCommon/features/accreditation/VAccreditationButton.vue';
 import VKycButton from 'InvestCommon/features/kyc/VKycButton.vue';
 import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 import { storeToRefs } from 'pinia';
 import VProfileSelectList from 'InvestCommon/features/profiles/VProfileSelectList.vue';
-import DashboardTopInfoRight from './DashboardTopInfoRight.vue';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
@@ -13,6 +12,10 @@ import { useBreakpoints } from 'UiKit/composables/useBreakpoints';
 import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/domain/config/enums/routes';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { isPwaMobile } from 'InvestCommon/domain/pwa/pwaDetector';
+
+const DashboardTopInfoRight = defineAsyncComponent(
+  () => import('./DashboardTopInfoRight.vue'),
+);
 
 const userSessionStore = useSessionStore();
 const { userSessionTraits } = storeToRefs(userSessionStore);
@@ -89,6 +92,7 @@ const profileDetailsLink = computed(() => ({
       </div>
     </div>
     <DashboardTopInfoRight
+      v-if="!isTablet"
       class="is--gt-tablet-show"
     />
   </div>

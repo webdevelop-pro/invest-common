@@ -8,6 +8,10 @@ export interface SideInfoItem {
   color?: string;
 }
 
+const _AMOUNT_FORMATTER = new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+const defaultAmountFormatter = (v: number) => _AMOUNT_FORMATTER.format(Number(v || 0));
+const defaultPercentFormatter = (v: number) => `${Math.round(Number(v || 0))}%`;
+
 const props = defineProps<{
   items: SideInfoItem[];
   showAmount?: boolean;
@@ -15,9 +19,6 @@ const props = defineProps<{
   amountFormatter?: (v: number) => string;
   percentFormatter?: (v: number) => string;
 }>();
-
-const defaultAmountFormatter = (v: number) => new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Number(v || 0));
-const defaultPercentFormatter = (v: number) => `${Math.round(Number(v || 0))}%`;
 
 const formatAmount = (v?: number) => (props.amountFormatter || defaultAmountFormatter)(Number(v || 0));
 const formatPercent = (v?: number) => (props.percentFormatter || defaultPercentFormatter)(Number(v || 0));

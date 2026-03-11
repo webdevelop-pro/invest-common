@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { PropType, ref, computed, nextTick, onMounted } from 'vue';
+import { PropType, ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import VBadge from 'UiKit/components/Base/VBadge/VBadge.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import file from 'UiKit/assets/images/file.svg';
@@ -32,12 +32,19 @@ const shouldShowTooltip = computed(() =>
   props.data?.name && isTextOverflowing.value
 );
 
-onMounted(async () => {
-  await nextTick();
-  // Add a small delay to ensure layout is stable
-  setTimeout(() => {
+let resizeObserver: ResizeObserver | null = null;
+
+onMounted(() => {
+  if (!nameElementRef.value) return;
+  resizeObserver = new ResizeObserver(() => {
     isTextOverflowing.value = checkTextOverflow();
-  }, 50);
+  });
+  resizeObserver.observe(nameElementRef.value);
+});
+
+onBeforeUnmount(() => {
+  resizeObserver?.disconnect();
+  resizeObserver = null;
 });
 
 const onDocumentClick = async () => {

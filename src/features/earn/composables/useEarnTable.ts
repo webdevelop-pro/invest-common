@@ -132,16 +132,6 @@ export function useEarnTable() {
   // Reset visible count and scroll to top when search changes
   watch(search, () => {
     visibleCount.value = INITIAL_VISIBLE_COUNT;
-
-    // Guard for non-browser environments
-    if (typeof window === 'undefined' || typeof requestAnimationFrame === 'undefined') {
-      return;
-    }
-
-    // Use requestAnimationFrame for smoother scroll
-    requestAnimationFrame(() => {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
   });
 
   // Load yields and offers on mount
@@ -186,4 +176,3 @@ export function useEarnTable() {
     refetch,
   };
 }
-

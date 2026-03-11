@@ -48,6 +48,7 @@ const profileType = computed(() => selectedUserProfileData.value?.type || '');
             :src="item?.offer?.imageSmall"
             :alt="`${item.offer?.name} image`"
             fit="cover"
+            loading="lazy"
             class="v-table-item-header__table-image"
             :class="{ 'is--default-image': item?.offer?.isDefaultImage }"
           />

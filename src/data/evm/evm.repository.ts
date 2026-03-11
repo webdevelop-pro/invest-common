@@ -3,6 +3,7 @@ import { acceptHMRUpdate, defineStore } from 'pinia';
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import env from 'InvestCommon/config/env';
 import { createRepositoryStates, withActionState, type OptionsStateData } from 'InvestCommon/data/repository/repository';
+import { createFormatterCache } from 'InvestCommon/data/repository/formatterCache';
 import { INotification } from 'InvestCommon/data/notifications/notifications.types';
 import { EvmWalletFormatter } from './formatter/wallet.formatter';
 import { EvmTransactionFormatter } from './formatter/transactions.formatter';
@@ -25,6 +26,48 @@ type EvmStates = {
 
 export const useRepositoryEvm = defineStore('repository-evm', () => {
   const apiClient = new ApiClient(env.EVM_URL);
+  const evmTransactionCache = createFormatterCache<IEvmTransactionDataResponse, IEvmTransactionDataResponse>({
+    getKey: (transaction) => transaction.id,
+    getSignature: (transaction) => [
+      transaction.updated_at,
+      transaction.created_at,
+      transaction.status,
+      transaction.type,
+      transaction.amount,
+      transaction.transaction_tx,
+      transaction.type_display,
+      transaction.description,
+      transaction.scan_tx_url,
+    ].join('|'),
+    format: (transaction) => new EvmTransactionFormatter(transaction).format(),
+  });
+  const evmWalletCache = createFormatterCache<IEvmWalletDataResponse, IEvmWalletDataFormatted>({
+    getKey: (wallet) => wallet.id,
+    getSignature: (wallet) => {
+      const balances = Array.isArray(wallet.balances)
+        ? wallet.balances
+        : Object.values(wallet.balances || {});
+      const balancesSignature = balances
+        .map((balance) => `${balance.id}|${balance.address}|${balance.amount}|${balance.symbol}|${balance.name ?? ''}|${balance.icon ?? ''}|${balance.price_per_usd ?? ''}`)
+        .join(';');
+      const transactionsSignature = (wallet.transactions || [])
+        .map((transaction) => `${transaction.id}|${transaction.updated_at}|${transaction.created_at}|${transaction.status}|${transaction.type}|${transaction.amount}|${transaction.transaction_tx ?? ''}`)
+        .join(';');
+
+      return [
+        wallet.updated_at,
+        wallet.status,
+        wallet.balance,
+        wallet.inc_balance,
+        wallet.out_balance,
+        balances.length,
+        balancesSignature,
+        wallet.transactions?.length ?? 0,
+        transactionsSignature,
+      ].join('|');
+    },
+    format: (wallet) => new EvmWalletFormatter(wallet).format(),
+  });
 
   const {
     getEvmWalletState,
@@ -217,7 +260,8 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
     let walletWithEarn = addEarnTransactionsToWallet(walletCopy, profileId, positions);
     walletWithEarn = addEarnBalancesToWallet(walletWithEarn, profileId, positions);
 
-    getEvmWalletState.value.data = new EvmWalletFormatter(walletWithEarn).format();
+    evmTransactionCache.prune(walletWithEarn.transactions || []);
+    getEvmWalletState.value.data = evmWalletCache.format(walletWithEarn);
   };
 
   /** Call from feature layer after Earn deposit; pass useRepositoryEarn().positionsPools. */
@@ -306,7 +350,7 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
         Object.assign(wallet.transactions[index], mergedFields);
         Object.assign(
           wallet.transactions[index],
-          new EvmTransactionFormatter(wallet.transactions[index] as IEvmTransactionDataResponse).format()
+          evmTransactionCache.format(wallet.transactions[index] as IEvmTransactionDataResponse)
         );
       } else {
         // Create a new transaction with required fields
@@ -340,18 +384,20 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
             : EvmTransactionStatusTypes.pending,
         };
         
-        Object.assign(newItem, new EvmTransactionFormatter(newItem as IEvmTransactionDataResponse).format());
+        Object.assign(newItem, evmTransactionCache.format(newItem as IEvmTransactionDataResponse));
         wallet.transactions.unshift(newItem);
       }
 
-      getEvmWalletState.value.data = new EvmWalletFormatter(wallet).format();
+      evmTransactionCache.prune(wallet.transactions || []);
+      getEvmWalletState.value.data = evmWalletCache.format(wallet as IEvmWalletDataResponse);
     };
 
     const upsertWallet = () => {
       setTempLoading(isLoadingNotificationWallet);
       Object.assign(wallet, fields);
 
-      getEvmWalletState.value.data = new EvmWalletFormatter(wallet).format();
+      evmTransactionCache.prune(wallet.transactions || []);
+      getEvmWalletState.value.data = evmWalletCache.format(wallet as IEvmWalletDataResponse);
     };
 
     const upsertBalance = () => {
@@ -398,7 +444,8 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
 
       // Convert map back to array
       wallet.balances = Object.values(balancesMap);
-      getEvmWalletState.value.data = new EvmWalletFormatter(wallet).format();
+      evmTransactionCache.prune(wallet.transactions || []);
+      getEvmWalletState.value.data = evmWalletCache.format(wallet as IEvmWalletDataResponse);
     };
 
     switch (obj) {
@@ -418,6 +465,8 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
 
   const resetAll = () => {
     resetActionStates();
+    evmTransactionCache.clear();
+    evmWalletCache.clear();
     isLoadingNotificationTransaction.value = false;
     isLoadingNotificationWallet.value = false;
     baseWalletSnapshot.value = null;

@@ -18,6 +18,14 @@ export interface FilerSourceResponse {
 const FOLDER_MEDIA = 'media';
 const FOLDER_INVESTMENT_AGREEMENTS = 'investment-agreements';
 
+const DATE_FORMATTER = new Intl.DateTimeFormat('en-US', {
+  year: 'numeric',
+  month: 'numeric',
+  day: 'numeric',
+});
+
+const TWO_DAYS_MS = 2 * 24 * 3600 * 1000;
+
 /**
  * Normalize folder/type name: underscores → hyphens so investment_agreements === investment-agreements.
  */
@@ -93,12 +101,7 @@ export class FilerFormatter {
 
   static formatToFullDate = (ISOString: string) => {
     if (!ISOString) return '';
-    return new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: 'numeric',
-      day: 'numeric',
-    })
-      .format(new Date(ISOString))
+    return DATE_FORMATTER.format(new Date(ISOString));
   };
 
   /**
@@ -131,11 +134,7 @@ export class FilerFormatter {
    */
   static isRecent(dateString?: string): boolean {
     if (!dateString) return false;
-    const tagDate = new Date(dateString);
-    const currentDate = new Date();
-    const differenceInMs = currentDate.getTime() - tagDate.getTime();
-    const differenceInDays = differenceInMs / (1000 * 3600 * 24);
-    return differenceInDays < 2;
+    return (Date.now() - new Date(dateString).getTime()) < TWO_DAYS_MS;
   }
 
   /**
@@ -158,26 +157,35 @@ export class FilerFormatter {
 
   /**
    * Sorts by typeFormatted (optional type first), then A–Z, then by date (newest first).
+   * Uses Schwartzian transform to pre-compute sort keys once per item.
    */
   static sortDocuments<T extends { typeFormatted?: string; date?: string }>(
     items: T[],
     typeFirst?: string,
   ): T[] {
-    const type = (t: T) => (t.typeFormatted ?? '').toLowerCase();
     const typeFirstLower = typeFirst?.toLowerCase();
 
-    return [...items].sort((a, b) => {
-      if (typeFirstLower) {
-        const aFirst = type(a) === typeFirstLower;
-        const bFirst = type(b) === typeFirstLower;
-        if (aFirst && !bFirst) return -1;
-        if (!aFirst && bFirst) return 1;
-      }
-      if (type(a) !== type(b)) return type(a).localeCompare(type(b));
-      const dateA = a.date ? new Date(a.date).getTime() : 0;
-      const dateB = b.date ? new Date(b.date).getTime() : 0;
-      return dateB - dateA;
+    type Tagged = { item: T; typeLower: string; isFirst: boolean; dateMs: number };
+    const tagged: Tagged[] = items.map((item) => {
+      const typeLower = (item.typeFormatted ?? '').toLowerCase();
+      return {
+        item,
+        typeLower,
+        isFirst: typeFirstLower !== undefined && typeLower === typeFirstLower,
+        dateMs: item.date ? new Date(item.date).getTime() : 0,
+      };
     });
+
+    tagged.sort((a, b) => {
+      if (typeFirstLower) {
+        if (a.isFirst && !b.isFirst) return -1;
+        if (!a.isFirst && b.isFirst) return 1;
+      }
+      if (a.typeLower !== b.typeLower) return a.typeLower.localeCompare(b.typeLower);
+      return b.dateMs - a.dateMs;
+    });
+
+    return tagged.map((t) => t.item);
   }
 
   /**

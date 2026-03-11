@@ -1,8 +1,12 @@
 <script setup lang="ts">
+import { defineAsyncComponent } from 'vue';
 import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
-import VShadcnChartArea from 'UiKit/components/VCharts/VShadcnChartArea/VShadcnChartArea.vue';
 import type { InfoDataItem } from 'InvestCommon/data/3dParty/formatter/earnDetail.formatter';
 import { useEarnOverview, type OverviewSection } from './composables/useEarnOverview';
+
+const VShadcnChartArea = defineAsyncComponent(
+  () => import('UiKit/components/VCharts/VShadcnChartArea/VShadcnChartArea.vue'),
+);
 
 interface Props {
   sections?: OverviewSection[];

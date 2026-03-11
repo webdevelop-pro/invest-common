@@ -42,6 +42,7 @@ export const useFormPlanInformation = () => {
   const isLoading = ref(false);
 
   const planInformationFormRef = useTemplateRef<FormChild>('planInformationFormChild');
+  const { submitFormToHubspot: submitPlanInfo } = useHubspotForm(env.HUBSPOT_FORM_ID_PLAN_INFO);
 
   const isValid = computed(() => planInformationFormRef.value?.isValid);
   const isDisabledButton = computed(() => !isValid.value);
@@ -80,7 +81,7 @@ export const useFormPlanInformation = () => {
     }
 
     if (!setProfileByIdState.value.error) {
-      useHubspotForm(env.HUBSPOT_FORM_ID_PLAN_INFO).submitFormToHubspot({
+      submitPlanInfo({
         email: userSessionTraits.value?.email,
         ...planInformationFormRef.value?.model,
       });

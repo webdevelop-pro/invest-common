@@ -21,30 +21,57 @@ export const useNotifications = defineStore('notifications', () => {
 
   /* * Loading State * */
   const isLoading = ref(true);
+  let loadingStateTimeout: ReturnType<typeof setTimeout> | undefined;
 
-  // Watch for notification changes to update loading state
-  watch(() => [
-    formattedNotifications.value, getAllState.value.error, getAllState.value.loading,
-    markAllAsReadState.value.error, markAllAsReadState.value.loading,
-  ], () => {
-    // Set loading state based on repository loading state
-    if (getAllState.value.loading || markAllAsReadState.value.loading) {
+  // Watch lightweight state fields only; avoid reacting to full-array identity changes.
+  watch(() => ({
+    getAllLoading: getAllState.value.loading,
+    markAllLoading: markAllAsReadState.value.loading,
+    getAllError: getAllState.value.error,
+    markAllError: markAllAsReadState.value.error,
+    count: formattedNotifications.value.length,
+  }), (state) => {
+    if (loadingStateTimeout) {
+      clearTimeout(loadingStateTimeout);
+      loadingStateTimeout = undefined;
+    }
+
+    if (state.getAllLoading || state.markAllLoading) {
       isLoading.value = true;
-    // Stop loading if we have data, empty array, or an error
-    } else if (Array.isArray(formattedNotifications.value) || getAllState.value.error
-      || markAllAsReadState.value.error) {
-      setTimeout(() => {
+      return;
+    }
+
+    if (state.getAllError || state.markAllError || state.count >= 0) {
+      loadingStateTimeout = setTimeout(() => {
         isLoading.value = false;
       }, 500);
     }
-  });
+  }, { immediate: true });
 
   /* * Data * */
-  const notificationUserData = computed(() => (
-    formattedNotifications.value?.filter((item: INotification) => item.type !== 'internal') || []));
+  const notificationUserData = computed(() => {
+    const source = formattedNotifications.value || [];
+    const result: INotification[] = [];
+    for (let i = 0; i < source.length; i++) {
+      const item = source[i];
+      if (item.type !== 'internal') {
+        result.push(item);
+      }
+    }
+    return result;
+  });
   const notificationUserLength = computed(() => notificationUserData.value.length);
-  const notificationUnreadData = computed(() => (
-    notificationUserData.value.filter((item: INotification) => item.status === 'unread')));
+  const notificationUnreadData = computed(() => {
+    const source = notificationUserData.value;
+    const result: INotification[] = [];
+    for (let i = 0; i < source.length; i++) {
+      const item = source[i];
+      if (item.status === 'unread') {
+        result.push(item);
+      }
+    }
+    return result;
+  });
   const notificationUnreadLength = computed(() => notificationUnreadData.value.length);
 
   /* * Loading All Data * */
@@ -118,41 +145,46 @@ export const useNotifications = defineStore('notifications', () => {
   const filterStatus = ref<string[]>([]);
   const filterType = ref<string[]>([]);
 
-  const notificationsFilterTypeAll = computed(() => notificationUserData.value);
-  const notificationsFilterTypeInvestments = computed(() => (
-    notificationUserData.value?.filter((item) => (item.type?.toLowerCase().includes('investment')))));
-  const notificationsFilterTypeAccounts = computed(() => (
-    notificationUserData.value?.filter((item) => (item.type?.toLowerCase().includes('profile')))));
-  const notificationsFilterTypeDocuments = computed(() => (
-    notificationUserData.value?.filter((item) => (item.type?.toLowerCase().includes('document')))));
-
   const tabsData = computed(() => {
-    if (currentTab.value === 'investments') {
-      return notificationsFilterTypeInvestments.value;
+    const source = notificationUserData.value;
+    if (currentTab.value === 'all') {
+      return source;
     }
-    if (currentTab.value === 'accounts') {
-      return notificationsFilterTypeAccounts.value;
+    const result: INotification[] = [];
+    for (let i = 0; i < source.length; i++) {
+      const item = source[i];
+      const type = (item.type || '').toLowerCase();
+      if (currentTab.value === 'investments' && type.includes('investment')) {
+        result.push(item);
+      } else if (currentTab.value === 'accounts' && type.includes('profile')) {
+        result.push(item);
+      } else if (currentTab.value === 'document' && type.includes('document')) {
+        result.push(item);
+      }
     }
-    if (currentTab.value === 'document') {
-      return notificationsFilterTypeDocuments.value;
-    }
-    return notificationsFilterTypeAll.value;
+    return result;
   });
 
-  const tabsDataFilterStatus = computed(() => (
-    tabsData.value?.filter((item) => (filterStatus.value?.includes(item.status?.toLowerCase())))));
-  const tabsDataFilterType = computed(() => (
-    tabsData.value?.filter((item) => (filterType.value?.includes(item.type?.toLowerCase())))));
-
   const filterData = computed(() => {
-    let filtered = tabsData.value;
-    if (filterStatus.value && (filterStatus.value?.length > 0)) {
-      filtered = tabsDataFilterStatus.value;
+    const source = tabsData.value;
+    const hasStatusFilter = Boolean(filterStatus.value?.length);
+    const hasTypeFilter = Boolean(filterType.value?.length);
+    if (!hasStatusFilter && !hasTypeFilter) {
+      return source;
     }
-    if (filterType.value && (filterType.value?.length > 0)) {
-      filtered = tabsDataFilterType.value;
+
+    const result: INotification[] = [];
+    for (let i = 0; i < source.length; i++) {
+      const item = source[i];
+      const itemStatus = (item.status || '').toLowerCase();
+      const itemType = (item.type || '').toLowerCase();
+
+      if (hasTypeFilter && !filterType.value.includes(itemType)) continue;
+      if (hasStatusFilter && !filterStatus.value.includes(itemStatus)) continue;
+      result.push(item);
     }
-    return filtered;
+
+    return result;
   });
 
   const tableData = computed(() => {
@@ -182,8 +214,8 @@ export const useNotifications = defineStore('notifications', () => {
   });
 
   const filterResults = computed(() => tableData.value?.length);
-  const showSearch = computed(() => notificationsFilterTypeAll.value.length > 0);
-  const showFilter = computed(() => notificationsFilterTypeAll.value.length > 0);
+  const showSearch = computed(() => notificationUserData.value.length > 0);
+  const showFilter = computed(() => notificationUserData.value.length > 0);
   const showFilterPagination = computed(() => (
     Boolean(notificationUserLength.value && (notificationUserLength.value > 0) && (filterResults.value > 0))));
   const showMarkAll = computed(() => (filterResults.value > 0 && (notificationUnreadLength.value > 0)));

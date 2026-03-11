@@ -11,6 +11,7 @@ import { InvestmentFormatter } from 'InvestCommon/data/investment/investment.for
 import { IInvestmentFormatted, IInvestment, IInvestmentsData, IInvestmentsDataRaw } from 'InvestCommon/data/investment/investment.types';
 import { ref, computed } from 'vue';
 import { INotification } from 'InvestCommon/data/notifications/notifications.types';
+import { createFormatterCache } from 'InvestCommon/data/repository/formatterCache';
 
 const { INVESTMENT_URL } = env;
 
@@ -34,9 +35,77 @@ type InvestmentStates = {
 
 export const useRepositoryInvestment = defineStore('repository-investment', () => {
   const apiClient = new ApiClient(INVESTMENT_URL);
+  const getOfferSignature = (offer?: IInvestment['offer']) => {
+    if (!offer) {
+      return '';
+    }
+
+    const offerAny = offer as IInvestment['offer'] & { updated_at?: string };
+    const securityInfo = offer.security_info ?? {};
+
+    return [
+      offer.id ?? '',
+      offerAny.updated_at ?? '',
+      offer.status ?? '',
+      offer.security_type ?? '',
+      offer.amount_raised ?? '',
+      offer.target_raise ?? '',
+      offer.total_shares ?? '',
+      offer.subscribed_shares ?? '',
+      offer.min_investment ?? '',
+      offer.price_per_share ?? '',
+      offer.image_link_id ?? '',
+      offer.approved_at ?? '',
+      offer.close_at ?? '',
+      offer.valuation ?? '',
+      offer.reg_type ?? '',
+      securityInfo.pre_money_valuation ?? '',
+      securityInfo.voting_rights ?? '',
+      securityInfo.liquidation_preference ?? '',
+      securityInfo.dividend_type ?? '',
+      securityInfo.dividend_rate ?? '',
+      securityInfo.dividend_payment_frequency ?? '',
+      securityInfo.cn_valuation_cap ?? '',
+      securityInfo.cn_discount_rate ?? '',
+      securityInfo.cn_interest_rate ?? '',
+      securityInfo.cn_maturity_date ?? '',
+      securityInfo.interest_rate_apy ?? '',
+      securityInfo.debt_payment_schedule ?? '',
+      securityInfo.debt_maturity_date ?? '',
+      securityInfo.debt_interest_rate ?? '',
+      securityInfo.debt_term_length ?? '',
+      securityInfo.debt_term_unit ?? '',
+    ].join('|');
+  };
+  const investmentCache = createFormatterCache<IInvestment, IInvestmentFormatted>({
+    getKey: (investment) => Number(investment.id) || 0,
+    getSignature: (investment) => {
+      const investAny = investment as IInvestment & { updated_at?: string };
+
+      return [
+        investment.id,
+        investAny.updated_at ?? '',
+        investment.status,
+        investment.step,
+        investment.funding_status,
+        investment.number_of_shares,
+        investment.amount,
+        investment.notes ?? '',
+        investment.created_at ?? '',
+        investment.submited_at ?? '',
+        investment.payment_data?.created_at ?? '',
+        investment.payment_data?.updated_at ?? '',
+        investment.payment_data?.funding_type ?? '',
+        getOfferSignature(investment.offer),
+        investment.signature_data?.signature_id ?? '',
+        investment.signature_data?.created_at ?? '',
+      ].join('|');
+    },
+    format: (investment) => new InvestmentFormatter(investment).format(),
+  });
 
   const createEmptyInvestmentFormatted = (): IInvestmentFormatted => (
-    new InvestmentFormatter({} as IInvestment).format()
+    investmentCache.format({} as IInvestment)
   );
 
   const {
@@ -113,9 +182,10 @@ export const useRepositoryInvestment = defineStore('repository-investment', () =
       if (!rawData || !Array.isArray(rawData.data)) {
         return { meta: rawData?.meta ?? emptyMeta, count: rawData?.count ?? 0, data: [] };
       }
+      investmentCache.prune(rawData.data);
       const formattedData: IInvestmentsData = {
         ...rawData,
-        data: rawData.data.map((investment) => new InvestmentFormatter(investment).format()),
+        data: rawData.data.map((investment) => investmentCache.format(investment)),
       };
       return formattedData;
     });
@@ -124,7 +194,7 @@ export const useRepositoryInvestment = defineStore('repository-investment', () =
     withActionState(getInvestOneState, async () => {
       const response = await apiClient.get(`/auth/investment/${id}`);
       const investmentData = response.data as IInvestment;
-      return new InvestmentFormatter(investmentData).format();
+      return investmentCache.format(investmentData);
     });
 
   const getInvestUnconfirmed = async (
@@ -140,7 +210,7 @@ export const useRepositoryInvestment = defineStore('repository-investment', () =
         ? {
             ...rawData,
             data: (rawData.data as unknown as IInvestment[]).map((investment) =>
-              new InvestmentFormatter(investment).format(),
+              investmentCache.format(investment),
             ),
           }
         : rawData;
@@ -220,10 +290,10 @@ export const useRepositoryInvestment = defineStore('repository-investment', () =
       const notesData = response.data as { notes: string };
       const current = getInvestOneState.value.data;
       if (current) {
-        getInvestOneState.value.data = new InvestmentFormatter({
+        getInvestOneState.value.data = investmentCache.format({
           ...(current as unknown as IInvestment),
           notes,
-        }).format();
+        });
       }
       return notesData;
     });
@@ -254,6 +324,7 @@ export const useRepositoryInvestment = defineStore('repository-investment', () =
 
   const resetAll = () => {
     resetActionStates();
+    investmentCache.clear();
     currentUnconfirmedSlug.value = null;
     currentUnconfirmedId.value = null;
   };
@@ -289,7 +360,7 @@ export const useRepositoryInvestment = defineStore('repository-investment', () =
     const one = getInvestOneState.value.data;
     if (one) {
       const updated = { ...one, ...normalizedFields } as unknown as IInvestment;
-      getInvestOneState.value.data = new InvestmentFormatter(updated).format();
+      getInvestOneState.value.data = investmentCache.format(updated);
     }
 
     const investmentsData = getInvestmentsState.value.data;
@@ -298,7 +369,7 @@ export const useRepositoryInvestment = defineStore('repository-investment', () =
       if (index >= 0) {
         const newData = investmentsData.data.map((item, i) =>
           i === index
-            ? new InvestmentFormatter({ ...item, ...normalizedFields } as unknown as IInvestment).format()
+            ? investmentCache.format({ ...item, ...normalizedFields } as unknown as IInvestment)
             : item,
         );
         getInvestmentsState.value.data = { ...investmentsData, data: newData };
@@ -311,7 +382,7 @@ export const useRepositoryInvestment = defineStore('repository-investment', () =
       if (index >= 0) {
         const newUnconfirmedList = unconfirmedList.map((item, i) =>
           i === index
-            ? new InvestmentFormatter({ ...item, ...normalizedFields } as unknown as IInvestment).format()
+            ? investmentCache.format({ ...item, ...normalizedFields } as unknown as IInvestment)
             : item,
         );
         getInvestUnconfirmedState.value.data = {

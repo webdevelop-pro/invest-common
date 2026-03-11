@@ -37,6 +37,7 @@ const { tokenScanUrl } = useVTableWalletTokensItem(props.data);
             :src="data.icon"
             :alt="`${data?.name || data?.symbol} token icon`"
             fit="cover"
+            loading="lazy"
             class="v-table-wallet-tokens-item__token-icon"
           />
         </div>
