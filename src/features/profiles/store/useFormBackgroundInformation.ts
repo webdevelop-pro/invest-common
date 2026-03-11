@@ -246,28 +246,30 @@ export const useFormBackgroundInformation = () => {
         selectedUserProfileId.value,
       );
 
-      submitFormToHubspot({
-        email: userSessionTraits.value?.email,
-        employment_type: model.employment?.type,
-        employer_name: model.employment?.employer_name,
-        title: model.employment?.title,
-        employer_address_1: model.employment?.address1,
-        employer_address_2: model.employment?.address2,
-        city: model.employment?.city,
-        zip: model.employment?.zip_code,
-        ...model.finra_affiliated,
-        ...model.ten_percent_shareholder,
-        irs_backup_withholding: model.irs_backup_withholding,
-        compliance_contractemail: model.finra_affiliated?.compliance_contant_email,
-      });
       useRepositoryProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
       isLoading.value = false;
-      router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
     } catch (error) {
       reportError(error, 'Failed to save background information');
     } finally {
       isLoading.value = false;
     }
+
+    await submitFormToHubspot({
+      email: userSessionTraits.value?.email,
+      employment_type: model.employment?.type,
+      employer_name: model.employment?.employer_name,
+      title: model.employment?.title,
+      employer_address_1: model.employment?.address1,
+      employer_address_2: model.employment?.address2,
+      city: model.employment?.city,
+      zip: model.employment?.zip_code,
+      ...model.finra_affiliated,
+      ...model.ten_percent_shareholder,
+      irs_backup_withholding: model.irs_backup_withholding,
+      compliance_contractemail: model.finra_affiliated?.compliance_contant_email,
+    });
+    router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
+    
   };
 
   watch(() => selectedUserProfileData.value?.data.employment, () => {

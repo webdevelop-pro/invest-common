@@ -193,11 +193,6 @@ export const useSignupStore = defineStore('signup', () => {
         void trackSignupEvent(400);
         return;
       }
-
-      if (setSignupState.value.data?.session) {
-        await trackSignupEvent(200);
-        await handleSignupSuccess(setSignupState.value.data.session);
-      }
     } catch (error) {
       void trackSignupEvent(400);
       await oryErrorHandling(
@@ -208,6 +203,11 @@ export const useSignupStore = defineStore('signup', () => {
       );
     } finally {
       isLoading.value = false;
+    }
+
+    if (setSignupState.value.data?.session) {
+      await trackSignupEvent(200);
+      await handleSignupSuccess(setSignupState.value.data.session);
     }
   };
 

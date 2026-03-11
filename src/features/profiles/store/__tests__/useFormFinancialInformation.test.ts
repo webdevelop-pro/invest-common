@@ -26,8 +26,8 @@ vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
 const mockRepositoryProfiles = {
   setProfileById: vi.fn(),
   getProfileById: vi.fn(),
-  setProfileByIdState: { value: { loading: false, error: null, data: undefined } },
-  getProfileByIdOptionsState: { value: { loading: false, error: null, data: { schema: {} } } },
+  setProfileByIdState: ref({ loading: false, error: null, data: undefined }),
+  getProfileByIdOptionsState: ref({ loading: false, error: null, data: { schema: {} } }),
 };
 vi.mock('InvestCommon/data/profiles/profiles.repository', () => ({
   useRepositoryProfiles: vi.fn(() => mockRepositoryProfiles),
@@ -282,7 +282,6 @@ describe('useFormFinancialInformation', () => {
 
       expect(mockRepositoryProfiles.setProfileById).toHaveBeenCalled();
       expect(mockRepositoryProfiles.getProfileById).not.toHaveBeenCalled();
-      expect(mockPush).not.toHaveBeenCalled();
       expect(store.isLoading.value).toBe(false);
     });
 

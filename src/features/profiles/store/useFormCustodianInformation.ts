@@ -72,16 +72,17 @@ export const useFormCustodianInformation = () => {
         selectedUserProfileType.value,
         selectedUserProfileId.value,
       );
-      if (!setProfileByIdState.value.error) {
-        submitFormToHubspot({
-          email: userSessionTraits.value?.email,
-          ...custodianRef.value?.model,
-        });
-      }
       useRepositoryProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
-      router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
-    } finally {
+      } finally {
       isLoading.value = false;
+    }
+
+    if (!setProfileByIdState.value.error) {
+      submitFormToHubspot({
+        email: userSessionTraits.value?.email,
+        ...custodianRef.value?.model,
+      });
+      router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
     }
   };
 

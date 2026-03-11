@@ -255,7 +255,10 @@ describe('useFormBusinessController', () => {
 
   describe('handleSave - Error scenarios', () => {
     it('should not proceed with hubspot submission and navigation when setProfileById fails', async () => {
-      repositoryProfilesMockInstance.setProfileById.mockRejectedValue(new Error('API Error'));
+      repositoryProfilesMockInstance.setProfileById.mockImplementation(async () => {
+        repositoryProfilesMockInstance.setProfileByIdState.value.error = new Error('API Error');
+        throw new Error('API Error');
+      });
 
       const mockForm = {
         onValidate: vi.fn(),

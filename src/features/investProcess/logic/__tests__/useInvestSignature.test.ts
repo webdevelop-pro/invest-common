@@ -10,7 +10,7 @@ import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
 import { useRepositoryEsign } from 'InvestCommon/data/esign/esign.repository';
 import { useRepositoryFiler } from 'InvestCommon/data/filer/filer.repository';
-import { ROUTE_INVEST_REVIEW } from 'InvestCommon/domain/config/enums/routes';
+import { ROUTE_INVEST_REVIEW, ROUTE_ACCREDITATION_UPLOAD } from 'InvestCommon/domain/config/enums/routes';
 import { useInvestSignature } from '../useInvestSignature';
 
 vi.mock('vue-router', () => ({
@@ -28,6 +28,17 @@ vi.mock('UiKit/store/useGlobalLoader', () => ({
 
 vi.mock('InvestCommon/domain/session/store/useSession', () => ({
   useSessionStore: vi.fn(),
+}));
+
+// Shared profile refs so tests can manipulate accreditation state
+const mockSelectedUserProfileData = ref<any>(null);
+const mockSelectedUserProfileId = ref<number | null>(null);
+
+vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
+  useProfilesStore: vi.fn(() => ({
+    selectedUserProfileData: mockSelectedUserProfileData,
+    selectedUserProfileId: mockSelectedUserProfileId,
+  })),
 }));
 
 vi.mock('InvestCommon/data/investment/investment.repository', () => ({
@@ -65,7 +76,10 @@ Object.defineProperty(window, 'open', {
 });
 
 describe('useInvestSignature (logic)', () => {
-  const mockRouter = { push: vi.fn() };
+  const mockRouter = {
+    push: vi.fn(),
+    currentRoute: { value: { fullPath: '/current/path' } },
+  };
   const mockRoute = {
     params: { slug: 'test-slug', id: 'test-id', profileId: 'test-profile-id' },
   };
@@ -79,6 +93,7 @@ describe('useInvestSignature (logic)', () => {
     setSignatureState: ref({ loading: false, data: { error: null } }),
     setCurrentUnconfirmedFilter: vi.fn(),
     getInvestUnconfirmedOne: ref({
+      id: 1,
       signature_data: { signature_id: 'sig-1', entity_id: 'doc-entity-123' },
     }),
   };
@@ -114,7 +129,10 @@ describe('useInvestSignature (logic)', () => {
     setActivePinia(createPinia());
     vi.clearAllMocks();
     mockWindowOpen.mockClear();
+    mockSelectedUserProfileData.value = null;
+    mockSelectedUserProfileId.value = null;
     mockInvestmentRepository.getInvestUnconfirmedOne.value = {
+      id: 1,
       signature_data: { signature_id: 'sig-1', entity_id: 'doc-entity-123' },
     };
     mockEsignRepository.setDocumentState.value = { loading: false, data: undefined };
@@ -181,6 +199,39 @@ describe('useInvestSignature (logic)', () => {
     expect(composable.isLoading.value).toBe(true);
   });
 
+  it('computes accreditation gating flags and alert text correctly', () => {
+    // 506(c) offer with new accreditation → button shown, signature enabled
+    mockInvestmentRepository.getInvestUnconfirmedOne.value.offer = {
+      isRegD506cOffer: true,
+    } as any;
+    mockSelectedUserProfileData.value = {
+      isAccreditationNew: true,
+      isAccreditationExpired: false,
+      isAccreditationInfoRequired: false,
+      isAccreditationPending: false,
+    };
+
+    const composable = useInvestSignature();
+
+    expect(composable.showAccreditationButton.value).toBe(true);
+    expect(composable.isSignatureDisabled.value).toBe(false);
+    expect(composable.accreditationAlertText.value)
+      .toBe('This is a 506(c) offering. SEC regulations require APPROVED accreditation verification before signing documents.');
+
+    // Pending accreditation → button hidden, signature disabled, same alert
+    mockSelectedUserProfileData.value = {
+      isAccreditationNew: false,
+      isAccreditationExpired: false,
+      isAccreditationInfoRequired: false,
+      isAccreditationPending: true,
+    };
+
+    expect(composable.showAccreditationButton.value).toBe(false);
+    expect(composable.isSignatureDisabled.value).toBe(true);
+    expect(composable.accreditationAlertText.value)
+      .toBe('This is a 506(c) offering. SEC regulations require APPROVED accreditation verification before signing documents.');
+  });
+
   it('handleContinue navigates to review and submits Hubspot form when form canContinue', () => {
     const composable = useInvestSignature();
 
@@ -199,6 +250,25 @@ describe('useInvestSignature (logic)', () => {
       email: 'test@example.com',
       invest_checkbox_2: true,
       sign_id: 'sig-1',
+    });
+  });
+
+  it('handleAccreditationClick navigates to accreditation upload with redirect to current route', () => {
+    (useRoute as any).mockReturnValue({
+      params: { slug: 'test-slug', id: 'test-id', profileId: '123' },
+    });
+    mockSelectedUserProfileId.value = 999;
+
+    const composable = useInvestSignature();
+
+    composable.handleAccreditationClick();
+
+    expect(mockRouter.push).toHaveBeenCalledWith({
+      name: ROUTE_ACCREDITATION_UPLOAD,
+      params: { profileId: 123 },
+      query: {
+        redirect: '/current/path',
+      },
     });
   });
 
@@ -261,6 +331,26 @@ describe('useInvestSignature (logic)', () => {
 
     await composable.handleDocument();
 
+    expect(mockEsignRepository.setDocument).not.toHaveBeenCalled();
+    expect(mockWindowOpen).not.toHaveBeenCalled();
+  });
+
+  it('handleDocument does nothing when signature is disabled by accreditation', async () => {
+    mockInvestmentRepository.getInvestUnconfirmedOne.value.offer = {
+      isRegD506cOffer: true,
+    } as any;
+    mockSelectedUserProfileData.value = {
+      isAccreditationNew: false,
+      isAccreditationExpired: false,
+      isAccreditationInfoRequired: false,
+      isAccreditationPending: true,
+    };
+
+    const composable = useInvestSignature();
+
+    await composable.handleDocument();
+
+    expect(composable.isSignatureDisabled.value).toBe(true);
     expect(mockEsignRepository.setDocument).not.toHaveBeenCalled();
     expect(mockWindowOpen).not.toHaveBeenCalled();
   });

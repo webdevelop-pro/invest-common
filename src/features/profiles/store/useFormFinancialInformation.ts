@@ -83,7 +83,14 @@ export const useFormFinancialInformation = () => {
         selectedUserProfileType.value,
         selectedUserProfileId.value,
       );
+      useRepositoryProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
+    } catch (error) {
+      reportError(error, 'Failed to save financial information');
+    } finally {
       isLoading.value = false;
+    }
+
+    if (!setProfileByIdState.value.error) {
       useHubspotForm(env.HUBSPOT_FORM_ID_FINANCIAL_SITUATION).submitFormToHubspot({
         email: userSessionTraits.value?.email,
         is_accredited: financialInfoFormRef.value?.model.accredited_investor.is_accredited,
@@ -96,12 +103,7 @@ export const useFormFinancialInformation = () => {
         email: userSessionTraits.value?.email,
         ...investmentObjectivesFormRef.value?.model,
       });
-      useRepositoryProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
       router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
-    } catch (error) {
-      reportError(error, 'Failed to save financial information');
-    } finally {
-      isLoading.value = false;
     }
   };
 

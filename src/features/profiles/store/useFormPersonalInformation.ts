@@ -92,20 +92,23 @@ export const useFormPersonalInformation = () => {
         }
       }
       if (!setProfileByIdState.value.error) {
-        submitFormToHubspot({
-          email: userSessionTraits.value?.email,
-          ...personalFormRef.value?.model,
-          date_of_birth: model?.dob,
-        });
         useRepositoryProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
-        if (isAccreditation.value) {
-          router.push({ name: ROUTE_ACCREDITATION_UPLOAD, params: { profileId: selectedUserProfileId.value } });
-        } else {
-          router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
-        }
       }
     } finally {
       isLoading.value = false;
+    }
+
+    if (!setProfileByIdState.value.error) {
+      submitFormToHubspot({
+        email: userSessionTraits.value?.email,
+        ...personalFormRef.value?.model,
+        date_of_birth: model?.dob,
+      });
+      if (isAccreditation.value) {
+        router.push({ name: ROUTE_ACCREDITATION_UPLOAD, params: { profileId: selectedUserProfileId.value } });
+      } else {
+        router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
+      }
     }
   };
 

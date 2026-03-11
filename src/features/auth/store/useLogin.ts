@@ -143,11 +143,6 @@ export const useLoginStore = defineStore('login', () => {
         isLoading.value = false;
         return;
       }
-
-      if (setLoginState.value.data?.session) {
-        await trackLoginEvent(200);
-        await handleLoginSuccess(setLoginState.value.data.session);
-      }
     } catch (error) {
       void trackLoginEvent(400);
       await oryErrorHandling(
@@ -158,6 +153,11 @@ export const useLoginStore = defineStore('login', () => {
       );
     } finally {
       isLoading.value = false;
+    }
+
+    if (setLoginState.value.data?.session) {
+      await trackLoginEvent(200);
+      await handleLoginSuccess(setLoginState.value.data.session);
     }
   };
 

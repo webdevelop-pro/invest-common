@@ -11,10 +11,14 @@ const {
   signUrl,
   isLoading,
   canContinue,
+  showAccreditationButton,
+  isSignatureDisabled,
+  accreditationAlertText,
   slug,
   id,
   profileId,
   handleDocument,
+  handleAccreditationClick,
   handleContinue,
 } = useInvestSignature();
 </script>
@@ -42,7 +46,11 @@ const {
         :sign-id="signId"
         :is-loading="isLoading"
         :sign-url="signUrl"
+        :is-signature-disabled="isSignatureDisabled"
+        :show-accreditation-button="showAccreditationButton"
+        :accreditation-alert-text="accreditationAlertText"
         @document-click="handleDocument"
+        @accreditation-click="handleAccreditationClick"
       />
     </InvestStep>
   </div>

@@ -105,14 +105,14 @@ export const useAuthenticatorStore = defineStore('authenticator', () => {
         isLoading.value = false;
         return;
       }
-
-      if (setLoginState.value.data?.session) {
-        await handleSuccess(setLoginState.value.data.session);
-      }
     } catch (error) {
       await oryErrorHandling(error as any, 'login', () => authRepository.getAuthFlow(SELFSERVICE.login, AAL2_QUERY), 'Failed to login');
     } finally {
       isLoading.value = false;
+    }
+
+    if (setLoginState.value.data?.session) {
+      await handleSuccess(setLoginState.value.data.session);
     }
   };
 

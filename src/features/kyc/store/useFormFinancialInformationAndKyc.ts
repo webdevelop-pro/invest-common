@@ -119,23 +119,23 @@ export const useFormFinancialInformationAndKyc = () => {
         );
 
       }
-      if (!setProfileByIdState.value.error) await hubspotHandle();
       useRepositoryProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
-      const redirectParam = route.query.redirect;
-      console.log('redirectParam', redirectParam);
-
-      if (redirectParam) {
-        await router.push(redirectParam);
-      } else {
-        await router.push({
-          name: ROUTE_DASHBOARD_ACCOUNT,
-          params: { profileId: selectedUserProfileId.value },
-        });
-      }
+      
     } catch (error) {
       reportError(error, 'Failed to save KYC and financial information');
     } finally {
       isLoading.value = false;
+    }
+    if (!setProfileByIdState.value.error) await hubspotHandle();
+
+    const redirectParam = route.query.redirect;
+    if (redirectParam) {
+      await router.push(redirectParam);
+    } else {
+      await router.push({
+        name: ROUTE_DASHBOARD_ACCOUNT,
+        params: { profileId: selectedUserProfileId.value },
+      });
     }
   };
 

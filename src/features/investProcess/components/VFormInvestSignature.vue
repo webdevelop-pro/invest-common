@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { defineAsyncComponent } from 'vue';
+import { computed, defineAsyncComponent } from 'vue';
+import VAlert from 'UiKit/components/VAlert.vue';
 import VFormCheckbox from 'UiKit/components/Base/VForm/VFormCheckbox.vue';
 import VBadge from 'UiKit/components/Base/VBadge/VBadge.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
+import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 import file from 'UiKit/assets/images/file.svg';
 import { urlTerms, urlPrivacy } from 'InvestCommon/domain/config/links';
 import { reportError } from 'InvestCommon/domain/error/errorReporting';
@@ -28,10 +30,25 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  isSignatureDisabled: {
+    type: Boolean,
+    default: false,
+  },
+  showAccreditationButton: {
+    type: Boolean,
+    default: false,
+  },
+  accreditationAlertText: {
+    type: String,
+    default: '',
+  },
 });
+
+const isSkeleton = computed(() => props.isLoading && !props.signUrl && !props.signId);
 
 const emit = defineEmits<{
   (e: 'documentClick'): void;
+  (e: 'accreditationClick'): void;
 }>();
 
 const {
@@ -66,13 +83,31 @@ defineExpose({
 <template>
   <div class="FormInvestSignature form-invest-signature">
     <!-- Header -->
-    <div class="form-invest-signature__label is--h6__title">
+    <VSkeleton
+      v-if="isSkeleton"
+      class="form-invest-signature__label"
+      height="21px"
+      width="260px"
+    />
+    <div
+      v-else-if="!showAccreditationButton"
+      class="form-invest-signature__label is--h6__title"
+    >
       Review and sign the agreement:
     </div>
 
+    <VSkeleton
+      v-if="isSkeleton"
+      class="form-invest-signature__document"
+      height="82px"
+      width="100%"
+    />
+
     <!-- Document Section -->
     <div
+      v-else-if="!showAccreditationButton"
       class="form-invest-signature__document"
+      :class="{ 'is--disabled': isSignatureDisabled }"
       role="button"
       tabindex="0"
       @click="handleDocument"
@@ -84,7 +119,7 @@ defineExpose({
         variant="link"
         color="secondary"
         :loading="isLoading"
-        :disabled="isLoading"
+        :disabled="isLoading || isSignatureDisabled"
         class="form-invest-signature__document-button"
       >
         <file
@@ -104,6 +139,27 @@ defineExpose({
         {{ isSigned ? 'Signed' : 'Signature Needed' }}
       </VBadge>
     </div>
+
+    <VButton
+      v-if="showAccreditationButton && !isSkeleton"
+      size="large"
+      :loading="isLoading"
+      :disabled="isLoading"
+      class="form-invest-signature__accreditation-button"
+      @click="emit('accreditationClick')"
+    >
+      Verify Accreditation
+    </VButton>
+
+    <VAlert
+      v-if="accreditationAlertText && !isSkeleton"
+      class="form-invest-signature__alert"
+      variant="info"
+    >
+      <template #description>
+        {{ accreditationAlertText }}
+      </template>
+    </VAlert>
 
     <!-- Checkboxes -->
     <div class="form-invest-signature__checkbox-wrap">
@@ -167,11 +223,25 @@ defineExpose({
       background-color: $gray-10;
     }
 
+    &.is--disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
     @media screen and (max-width: $tablet) {
       flex-direction: column;
       padding: 16px 0;
       gap: 10px;
     }
+  }
+
+  &__accreditation-button {
+    margin-bottom: 20px;
+  }
+
+  &__alert {
+    margin-bottom: 40px;
   }
 
   &__checkbox {

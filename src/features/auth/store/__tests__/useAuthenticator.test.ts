@@ -2,7 +2,6 @@ import {
   describe, it, expect, vi, beforeEach,
 } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
-import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
 import { ref } from 'vue';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 // import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
@@ -16,27 +15,30 @@ vi.mock('InvestCommon/config/env', () => ({
   },
 }));
 
-// Add at the top of your file, before vi.mock:
+// Shared mocks
 export const mockUpdateSession = vi.fn();
 
-// Mock all required dependencies
-vi.mock('InvestCommon/data/auth/auth.repository', () => {
-  const mockGetAuthFlow = vi.fn().mockResolvedValue(undefined);
-  const mockSetLogin = vi.fn().mockResolvedValue(undefined);
+const mockGetAuthFlow = vi.fn().mockResolvedValue(undefined);
+const mockSetLogin = vi.fn().mockResolvedValue(undefined);
+const mockGetSchemaState = ref({ data: undefined, loading: false, error: null });
+const mockSetLoginState = ref({ data: null, error: null });
+const mockGetAuthFlowState = ref({ error: null });
 
-  return {
-    useRepositoryAuth: vi.fn(() => ({
-      flowId: { value: 'test-flow-id' },
-      csrfToken: { value: 'test-csrf-token' },
-      getAuthFlow: mockGetAuthFlow,
-      setLogin: mockSetLogin,
-      getSchemaState: ref({ data: undefined, loading: false, error: null }),
-      setLoginState: ref({ data: null, error: null }),
-      getAuthFlowState: ref({ error: null }),
-      onLogout: vi.fn(),
-    })),
-  };
-});
+export const mockAuthRepository = {
+  flowId: { value: 'test-flow-id' },
+  csrfToken: { value: 'test-csrf-token' },
+  getAuthFlow: mockGetAuthFlow,
+  setLogin: mockSetLogin,
+  getSchemaState: mockGetSchemaState,
+  setLoginState: mockSetLoginState,
+  getAuthFlowState: mockGetAuthFlowState,
+  onLogout: vi.fn(),
+};
+
+// Mock all required dependencies
+vi.mock('InvestCommon/data/auth/auth.repository', () => ({
+  useRepositoryAuth: vi.fn(() => mockAuthRepository),
+}));
 
 vi.mock('InvestCommon/domain/session/store/useSession', () => ({
   useSessionStore: vi.fn(() => ({
@@ -91,14 +93,12 @@ vi.mock('UiKit/helpers/general', () => ({
 describe('useAuthenticator Store', () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let store: ReturnType<typeof useAuthenticatorStore>;
-  let mockAuthRepository: ReturnType<typeof useRepositoryAuth>;
 
   beforeEach(() => {
     setActivePinia(createPinia());
     vi.clearAllMocks();
 
     store = useAuthenticatorStore();
-    mockAuthRepository = useRepositoryAuth();
   });
 
   describe('Form Validation', () => {
@@ -130,7 +130,7 @@ describe('useAuthenticator Store', () => {
         required: ['totp_code'],
       };
 
-      useRepositoryAuth().getSchemaState.value = { data: backendSchema };
+      mockAuthRepository.getSchemaState.value = { data: backendSchema };
 
       // Test with invalid data
       store.model.totp_code = '12345';
@@ -154,17 +154,12 @@ describe('useAuthenticator Store', () => {
 
       const mockSession = { id: 'test-session' };
 
-      // Mock useRepositoryAuth with successful response
-      vi.mocked(useRepositoryAuth).mockReturnValue({
-        ...useRepositoryAuth(),
-        setLoginState: { value: { error: null, data: { session: mockSession } } },
-        flowId: { value: 'test-flow-id' },
-        csrfToken: { value: 'test-csrf-token' },
-        setLogin: vi.fn().mockResolvedValue(undefined),
-      });
+      mockAuthRepository.setLogin.mockResolvedValue(undefined);
+      mockAuthRepository.setLoginState.value = { error: null, data: { session: mockSession } };
 
       await store.totpHandler();
       expect(store.isLoading).toBe(false);
+      expect(mockUpdateSession).toHaveBeenCalledWith(mockSession);
     });
 
     it('should handle TOTP verification errors', async () => {
@@ -173,10 +168,8 @@ describe('useAuthenticator Store', () => {
         totp_code: '123456',
       };
 
-      vi.mocked(useRepositoryAuth).mockReturnValueOnce({
-        ...useRepositoryAuth(),
-        setLoginState: { value: { error: 'Invalid TOTP code', data: null } },
-      });
+      mockAuthRepository.setLogin.mockResolvedValue(undefined);
+      mockAuthRepository.setLoginState.value = { error: 'Invalid TOTP code', data: null };
 
       await store.totpHandler();
       expect(store.isLoading).toBe(false);

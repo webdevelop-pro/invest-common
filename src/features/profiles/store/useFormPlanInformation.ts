@@ -72,17 +72,19 @@ export const useFormPlanInformation = () => {
         selectedUserProfileType.value,
         selectedUserProfileId.value,
       );
-      isLoading.value = false;
-      useHubspotForm(env.HUBSPOT_FORM_ID_PLAN_INFO).submitFormToHubspot({
-        email: userSessionTraits.value?.email,
-        ...planInformationFormRef.value?.model,
-      });
       useRepositoryProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
-      router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
     } catch (error) {
       reportError(error, 'Failed to save plan information');
     } finally {
       isLoading.value = false;
+    }
+
+    if (!setProfileByIdState.value.error) {
+      useHubspotForm(env.HUBSPOT_FORM_ID_PLAN_INFO).submitFormToHubspot({
+        email: userSessionTraits.value?.email,
+        ...planInformationFormRef.value?.model,
+      });
+      router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
     }
   };
 

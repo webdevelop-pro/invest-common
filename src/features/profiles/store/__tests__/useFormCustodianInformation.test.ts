@@ -381,7 +381,7 @@ describe('useFormCustodianInformation', () => {
       expect(mockRepositoryProfiles.setProfileById).toHaveBeenCalled();
       expect(mockSubmitFormToHubspot).not.toHaveBeenCalled();
       expect(mockRepositoryProfiles.getProfileById).toHaveBeenCalled();
-      expect(mockRouter.push).toHaveBeenCalled();
+      expect(mockRouter.push).not.toHaveBeenCalled();
     });
 
     it('should handle setProfileById rejection', async () => {

@@ -132,23 +132,25 @@ export const useFormTrustedContact = () => {
         selectedUserProfileType.value,
         selectedUserProfileId.value,
       );
-      submitFormToHubspot({
-        email: userSessionTraits.value?.email,
-        firstname: model.beneficiary.first_name,
-        lastname: model.beneficiary.last_name,
-        relationship_type: model.beneficiary.relationship_type,
-        phone: model.beneficiary.phone,
-        trusted_email: model.beneficiary.email,
-        date_of_birth: model.beneficiary.dob,
-      });
       useRepositoryProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
       isLoading.value = false;
-      router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
     } catch (error) {
       reportError(error, 'Failed to save trusted contact');
     } finally {
       isLoading.value = false;
     }
+
+    await submitFormToHubspot({
+      email: userSessionTraits.value?.email,
+      firstname: model.beneficiary.first_name,
+      lastname: model.beneficiary.last_name,
+      relationship_type: model.beneficiary.relationship_type,
+      phone: model.beneficiary.phone,
+      trusted_email: model.beneficiary.email,
+      date_of_birth: model.beneficiary.dob,
+    });
+
+    router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
   };
 
   return {

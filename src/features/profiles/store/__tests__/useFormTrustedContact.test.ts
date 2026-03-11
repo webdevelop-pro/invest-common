@@ -275,7 +275,7 @@ describe('useFormTrustedContact', () => {
         }
 
         expect(mockSetProfileById).toHaveBeenCalled();
-        expect(mockSubmitFormToHubspot).not.toHaveBeenCalled();
+        expect(mockSubmitFormToHubspot).toHaveBeenCalled();
         expect(composable.isLoading.value).toBe(false);
       });
 

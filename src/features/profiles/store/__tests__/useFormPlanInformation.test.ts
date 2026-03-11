@@ -243,7 +243,10 @@ describe('useFormPlanInformation', () => {
     it('should handle API errors gracefully', async () => {
       mockFormRef.value.isValid = true;
       const apiError = new Error('API Error');
-      mockRepositoryProfiles.setProfileById = vi.fn().mockRejectedValue(apiError);
+      mockRepositoryProfiles.setProfileById = vi.fn().mockImplementation(async () => {
+        mockRepositoryProfiles.setProfileByIdState.value.error = apiError;
+        throw apiError;
+      });
 
       await composable.handleSave();
 
@@ -256,7 +259,10 @@ describe('useFormPlanInformation', () => {
 
     it('should not submit to HubSpot when API fails', async () => {
       mockFormRef.value.isValid = true;
-      mockRepositoryProfiles.setProfileById = vi.fn().mockRejectedValue(new Error('API Error'));
+      mockRepositoryProfiles.setProfileById = vi.fn().mockImplementation(async () => {
+        mockRepositoryProfiles.setProfileByIdState.value.error = new Error('API Error');
+        throw new Error('API Error');
+      });
 
       await composable.handleSave();
 
@@ -265,7 +271,10 @@ describe('useFormPlanInformation', () => {
 
     it('should not navigate when API fails', async () => {
       mockFormRef.value.isValid = true;
-      mockRepositoryProfiles.setProfileById = vi.fn().mockRejectedValue(new Error('API Error'));
+      mockRepositoryProfiles.setProfileById = vi.fn().mockImplementation(async () => {
+        mockRepositoryProfiles.setProfileByIdState.value.error = new Error('API Error');
+        throw new Error('API Error');
+      });
 
       await composable.handleSave();
 

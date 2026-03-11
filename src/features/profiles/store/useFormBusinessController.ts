@@ -73,17 +73,20 @@ export const useFormBusinessController = () => {
       );
 
       if (!setProfileByIdState.value.error) {
-        submitFormToHubspot({
-          email: userSessionTraits.value?.email,
-          business_controller: businessControllerFormRef.value?.model,
-        });
         useRepositoryProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
-        router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
       }
     } catch (error) {
       reportError(error, 'Failed to save business controller');
     } finally {
       isLoading.value = false;
+    }
+
+    if (!setProfileByIdState.value.error) {
+      submitFormToHubspot({
+        email: userSessionTraits.value?.email,
+        business_controller: businessControllerFormRef.value?.model,
+      });
+      router.push({ name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } });
     }
   };
 

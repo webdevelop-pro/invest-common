@@ -80,6 +80,13 @@ export class OfferFormatter {
     return this.offer.security_type === 'preferred-equity';
   }
 
+  get isRegD506cOffer(): boolean {
+    const regType = this.offer.reg_type;
+    if (!regType) return false;
+    const normalized = regType.toLowerCase();
+    return normalized.includes('506(c)') && normalized.includes('reg d');
+  }
+
   get valuationLabel(): string {
     if (this.isSecurityTypeDebt || this.isSecurityTypeConvertibleNote) {
       return 'Funding Goal:';
@@ -431,6 +438,7 @@ export class OfferFormatter {
       instagram: '',
       telegram: '',
       mastodon: '',
+      reg_type: '',
     };
   }
 
@@ -488,6 +496,7 @@ export class OfferFormatter {
       isSecurityTypeEquity: this.isSecurityTypeEquity,
       isSecurityTypePreferredEquity: this.isSecurityTypePreferredEquity,
       valuationLabel: this.valuationLabel,
+      isRegD506cOffer: this.isRegD506cOffer,
     };
   }
 }

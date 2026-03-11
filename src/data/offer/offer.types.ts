@@ -120,6 +120,7 @@ export interface IOffer {
   instagram?: string;
   telegram?: string;
   mastodon?: string;
+  reg_type?: string;
   amount_raised: number;
   target_raise: number;
 }
@@ -160,7 +161,7 @@ export interface IOfferFormatted extends IOffer {
   targetRaiseFormatted: string;
   pricePerShareFormatted: string;
   valuationFormatted: string;
-  preMoneyValuationFormatted: string;
+  preMoneyValuationFormatted: string | number | undefined;
   securityTypeFormatted: string;
   securityTypeTooltip: string | undefined;
   statusFormatted: {
@@ -210,4 +211,5 @@ export interface IOfferFormatted extends IOffer {
   isSecurityTypeEquity: boolean;
   isSecurityTypePreferredEquity: boolean;
   valuationLabel: string;
+  isRegD506cOffer: boolean;
 } 
