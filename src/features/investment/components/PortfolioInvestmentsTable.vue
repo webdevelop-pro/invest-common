@@ -3,6 +3,7 @@ import { storeToRefs } from 'pinia';
 import { urlOffers } from 'InvestCommon/domain/config/links';
 import VTableDefault from 'InvestCommon/shared/components/VTableDefault.vue';
 import VTableToolbar from 'InvestCommon/shared/components/VTableToolbar.vue';
+import VTableResponsiveLoadingRow from 'InvestCommon/shared/components/VTableResponsiveLoadingRow.vue';
 import { useDashboardPortfolioStore } from '../store/useDashboardPortfolio';
 import VTablePortfolioItem from './VTablePortfolioItem.vue';
 
@@ -50,6 +51,12 @@ const { onApplyFilter } = portfolioStore;
       :data="filteredData"
       :colspan="9"
     >
+      <template #loading>
+        <VTableResponsiveLoadingRow
+          :columns="portfolioTableHeader.length - 1"
+          variant="portfolio"
+        />
+      </template>
       <VTablePortfolioItem
         v-for="item in filteredData"
         :key="item.id"
@@ -75,4 +82,3 @@ const { onApplyFilter } = portfolioStore;
     </VTableDefault>
   </div>
 </template>
-

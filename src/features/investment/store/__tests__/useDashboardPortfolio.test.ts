@@ -14,6 +14,13 @@ vi.mock('UiKit/composables/useReactiveQuery', () => ({
 
 const mockUseRepositoryInvestment = vi.mocked(useRepositoryInvestment);
 const mockUseProfilesStore = vi.mocked(useProfilesStore);
+const SEARCH_DEBOUNCE_MS = 200;
+
+const flushSearchDebounce = async () => {
+  await nextTick();
+  vi.advanceTimersByTime(SEARCH_DEBOUNCE_MS);
+  await nextTick();
+};
 
 const mockInvestmentData: IInvestmentFormatted[] = [
   {
@@ -180,6 +187,7 @@ describe('useDashboardPortfolioStore', () => {
   let mockProfilesStore: any;
 
   beforeEach(() => {
+    vi.useFakeTimers();
     setActivePinia(createPinia());
 
     mockInvestmentRepository = {
@@ -202,6 +210,8 @@ describe('useDashboardPortfolioStore', () => {
   });
 
   afterEach(() => {
+    vi.runOnlyPendingTimers();
+    vi.useRealTimers();
     vi.clearAllMocks();
   });
 
@@ -211,8 +221,9 @@ describe('useDashboardPortfolioStore', () => {
         expect(store.isFiltering).toBe(false);
       });
 
-      it('should return true when search is applied', () => {
+      it('should return true when search is applied', async () => {
         store.setSearch('test');
+        await flushSearchDebounce();
         expect(store.isFiltering).toBe(true);
       });
 
@@ -230,8 +241,9 @@ describe('useDashboardPortfolioStore', () => {
         expect(store.isFiltering).toBe(true);
       });
 
-      it('should return true when multiple filters are applied', () => {
+      it('should return true when multiple filters are applied', async () => {
         store.setSearch('test');
+        await flushSearchDebounce();
         const updatedFilters = [...store.filterPortfolio];
         updatedFilters[0].model = ['Wire'];
         store.onApplyFilter(updatedFilters);
@@ -285,28 +297,32 @@ describe('useDashboardPortfolioStore', () => {
           [InvestmentStatuses.confirmed, InvestmentStatuses.legally_confirmed].includes(item.status)))).toBe(true);
       });
 
-      it('should filter by search term (investment ID)', () => {
+      it('should filter by search term (investment ID)', async () => {
         store.setSearch('1');
+        await flushSearchDebounce();
         const filtered = store.filteredData;
         expect(filtered).toHaveLength(1);
         expect(filtered[0].id).toBe(1);
       });
 
-      it('should filter by search term (offer name)', () => {
+      it('should filter by search term (offer name)', async () => {
         store.setSearch('Test Offer 1');
+        await flushSearchDebounce();
         const filtered = store.filteredData;
         expect(filtered).toHaveLength(1);
         expect(filtered[0].offer.name).toBe('Test Offer 1');
       });
 
-      it('should filter by search term (case insensitive)', () => {
+      it('should filter by search term (case insensitive)', async () => {
         store.setSearch('test offer');
+        await flushSearchDebounce();
         const filtered = store.filteredData;
         expect(filtered).toHaveLength(3);
       });
 
-      it('should combine multiple filters', () => {
+      it('should combine multiple filters', async () => {
         store.setSearch('Test');
+        await flushSearchDebounce();
         const updatedFilters = [...store.filterPortfolio];
         updatedFilters[0].model = ['Wire'];
         store.onApplyFilter(updatedFilters);
@@ -317,13 +333,15 @@ describe('useDashboardPortfolioStore', () => {
         expect(filtered[0].offer.name).toContain('Test');
       });
 
-      it('should handle empty search term', () => {
+      it('should handle empty search term', async () => {
         store.setSearch('');
+        await flushSearchDebounce();
         expect(store.filteredData).toEqual(mockInvestmentData);
       });
 
-      it('should handle undefined search value', () => {
+      it('should handle undefined search value', async () => {
         store.setSearch(undefined as any);
+        await flushSearchDebounce();
         expect(store.filteredData).toEqual(mockInvestmentData);
       });
     });

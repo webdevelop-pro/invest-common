@@ -10,6 +10,7 @@ import { useEarnTable } from './composables/useEarnTable';
 import { useWalletAlert } from 'InvestCommon/features/wallet/logic/useWalletAlert';
 import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
+import VTableResponsiveLoadingRow from 'InvestCommon/shared/components/VTableResponsiveLoadingRow.vue';
 
 const VAlert = defineAsyncComponent({
   loader: () => import('UiKit/components/VAlert.vue'),
@@ -159,6 +160,12 @@ onMounted(() => {
         :data="visibleData"
         :colspan="TABLE_HEADERS.length"
       >
+        <template #loading>
+          <VTableResponsiveLoadingRow
+            :columns="TABLE_HEADERS.length"
+            variant="yield"
+          />
+        </template>
         <VTableYieldItem
           v-for="pool in visibleData"
           :key="pool.pool"
@@ -226,4 +233,3 @@ onMounted(() => {
   }
 }
 </style>
-

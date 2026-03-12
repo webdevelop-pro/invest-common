@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import VTableDefault from 'InvestCommon/shared/components/VTableDefault.vue';
+import VTableResponsiveLoadingRow from 'InvestCommon/shared/components/VTableResponsiveLoadingRow.vue';
 import VTableActivityItem from './VTableActivityItem.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import circleExclamation from 'UiKit/assets/images/circle-exclamation.svg';
@@ -67,6 +68,12 @@ const {
       :data="activityBody"
       :colspan="4"
     >
+      <template #loading>
+        <VTableResponsiveLoadingRow
+          :columns="activityHeader.length"
+          variant="activity"
+        />
+      </template>
       <VTableActivityItem
         v-for="(item, index) in activityBody"
         :key="index"

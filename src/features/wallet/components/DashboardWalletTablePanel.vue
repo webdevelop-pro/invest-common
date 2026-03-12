@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import VTableDefault from 'InvestCommon/shared/components/VTableDefault.vue';
+import VTableResponsiveLoadingRow from 'InvestCommon/shared/components/VTableResponsiveLoadingRow.vue';
 import type { DashboardWalletTableConfig } from 'InvestCommon/features/wallet/logic/walletLogic.types';
 
 const props = defineProps<{
@@ -30,6 +31,12 @@ const isTransactionsTable = computed(
     :infinite-scroll-disabled="table.infiniteScrollDisabled"
     @load-more="table.onLoadMore?.()"
   >
+    <template #loading>
+      <VTableResponsiveLoadingRow
+        :columns="table.colspan ?? table.header.length"
+        :variant="isHoldingsTable ? 'wallet-token' : isTransactionsTable ? 'wallet-transaction' : 'default'"
+      />
+    </template>
     <template #empty>
       <p v-if="isHoldingsTable">
         You don’t have any tokens yet.

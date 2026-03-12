@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import {
-  VTable, VTableBody, VTableCell, VTableRow,
+  VTable, VTableBody, VTableRow,
   VTableEmpty, VTableHead, VTableHeader,
 } from 'UiKit/components/Base/VTable';
 import { computed, ref } from 'vue';
 import { useIntersectionObserver } from '@vueuse/core';
-import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
+import VTableResponsiveLoadingRow from 'InvestCommon/shared/components/VTableResponsiveLoadingRow.vue';
 
 defineOptions({
   inheritAttrs: false,
@@ -92,17 +92,7 @@ useIntersectionObserver(
         :key="`loading-${index}`"
       >
         <slot name="loading">
-          <VTableRow>
-            <VTableCell
-              v-for="skeletonItem in headerLength"
-              :key="`loading-cell-${skeletonItem}`"
-            >
-              <VSkeleton
-                height="26px"
-                width="100%"
-              />
-            </VTableCell>
-          </VTableRow>
+          <VTableResponsiveLoadingRow :columns="headerLength" />
         </slot>
       </template>
     </VTableBody>

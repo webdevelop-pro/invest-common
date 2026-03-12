@@ -7,6 +7,7 @@ import { computed } from 'vue';
 import DashboardAccountDetailsReadonlyForm from './components/DashboardAccountDetailsReadonlyForm.vue';
 import VTableBeneficialItem from './components/VTableBeneficialItem.vue';
 import VTableDefault from 'InvestCommon/shared/components/VTableDefault.vue';
+import VTableResponsiveLoadingRow from 'InvestCommon/shared/components/VTableResponsiveLoadingRow.vue';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 import { 
@@ -283,6 +284,12 @@ const ACCOUNT_TAB_INFO = {
           { text: 'Email' }
         ]"
       >
+        <template #loading>
+          <VTableResponsiveLoadingRow
+            :columns="5"
+            variant="beneficial"
+          />
+        </template>
         <VTableBeneficialItem
           v-for="item in profileData?.beneficials"
           :key="`${item.first_name}-${item.last_name}-${item.dob}`"

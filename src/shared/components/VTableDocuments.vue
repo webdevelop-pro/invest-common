@@ -4,6 +4,7 @@ import {
   computed, ref, watch, PropType,
 } from 'vue';
 import VTableDefault from 'InvestCommon/shared/components/VTableDefault.vue';
+import VTableResponsiveLoadingRow from 'InvestCommon/shared/components/VTableResponsiveLoadingRow.vue';
 import FilterPagination from 'InvestCommon/shared/components/VFilterPagination.vue';
 import { VTabs, VTabsList, VTabsTrigger } from 'UiKit/components/Base/VTabs';
 import { IFilerItemFormatted } from 'InvestCommon/data/filer/filer.type';
@@ -134,6 +135,12 @@ watch(() => currentTab.value, () => {
       :header="tableHeader"
       :loading="loadingTable"
     >
+      <template #loading>
+        <VTableResponsiveLoadingRow
+          :columns="tableHeader.length"
+          variant="document"
+        />
+      </template>
       <VTableDocumentItem
         v-for="item in searchData"
         :key="item.name"

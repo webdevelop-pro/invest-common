@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import VTableDefault from 'InvestCommon/shared/components/VTableDefault.vue';
+import VTableResponsiveLoadingRow from 'InvestCommon/shared/components/VTableResponsiveLoadingRow.vue';
 import VTooltip from 'UiKit/components/VTooltip.vue';
 import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 
@@ -180,6 +181,12 @@ const emit = defineEmits<{
           :loading-row-length="table.rowLength ?? 5"
           :colspan="table.colspan ?? table.header.length"
         >
+          <template #loading>
+            <VTableResponsiveLoadingRow
+              :columns="table.colspan ?? table.header.length"
+              :variant="table.header?.[0]?.text === 'Token' ? 'wallet-token' : table.header?.[0]?.text === 'Date' ? 'wallet-transaction' : 'default'"
+            />
+          </template>
           <template #empty>
             <p>
               {{ table.emptyText || 'No data available.' }}
@@ -325,4 +332,3 @@ const emit = defineEmits<{
   }
 }
 </style>
-
