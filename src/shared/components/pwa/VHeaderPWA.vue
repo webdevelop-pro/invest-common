@@ -11,9 +11,12 @@ import {
   urlHome,
   urlHowItWorks,
   urlNotifications,
+  urlProfileAccount,
+  urlProfileEarn,
   urlOffers,
   urlProfileCryptoWallet,
   urlProfilePortfolio,
+  urlProfileSummary,
   urlProfileWallet,
   urlSignin,
   urlSignup,
@@ -160,9 +163,12 @@ const pwaRootPaths = computed(() => {
   const profileId = Number(selectedUserProfileId.value);
   const profilePaths = Number.isFinite(profileId)
     ? [
+        urlProfileSummary(profileId),
         urlProfilePortfolio(profileId),
+        urlProfileAccount(profileId),
         urlProfileWallet(profileId),
         urlProfileCryptoWallet(profileId),
+        urlProfileEarn(profileId),
       ]
     : [];
 

@@ -94,6 +94,10 @@ defineProps({
   &__tabs-content {
     background: $white;
     padding-bottom: 40px;
+
+    @media screen and (width < $tablet) {
+      padding-top: 24px;
+    }
   }
 
   .v-tabs-content {

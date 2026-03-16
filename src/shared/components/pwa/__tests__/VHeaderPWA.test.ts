@@ -3,7 +3,10 @@ import { mount } from '@vue/test-utils';
 import { ref } from 'vue';
 import {
   urlHome,
+  urlProfileAccount,
+  urlProfileEarn,
   urlProfilePortfolio,
+  urlProfileSummary,
 } from 'InvestCommon/domain/config/links';
 import VHeaderPWA from '../VHeaderPWA.vue';
 
@@ -59,11 +62,15 @@ vi.mock('UiKit/components/VHeader/VHeader.vue', () => ({
   },
 }));
 
-const mountHeader = (layout = '', path = '/some') => mount(VHeaderPWA, {
+const mountHeader = (
+  layout = '',
+  path = '/some',
+  showProfileLink = false,
+) => mount(VHeaderPWA, {
   props: {
     layout,
     path,
-    showProfileLink: false,
+    showProfileLink,
   },
   global: {
     stubs: {
@@ -82,7 +89,8 @@ const mountHeader = (layout = '', path = '/some') => mount(VHeaderPWA, {
         template: '<div class="notifications-sidebar-button" />',
       },
       VHeader: {
-        template: '<div><slot name="leading" /><slot name="logo" /><slot /><slot name="pwa" /><slot name="mobile" /></div>',
+        props: ['showProfileLink'],
+        template: '<div :data-show-profile-link="String(showProfileLink)"><slot name="leading" /><slot name="logo" /><slot /><slot name="pwa" /><slot name="mobile" /></div>',
       },
     },
   },
@@ -158,6 +166,27 @@ describe('VHeaderPWA', () => {
     selectedUserProfileId.value = 10;
     const wrapper = mountHeader('', urlProfilePortfolio(10));
     expect(wrapper.find('[data-testid="profile-menu"]').exists()).toBe(true);
+  });
+
+  it('hides back button on logged-in account root path', () => {
+    userLoggedIn.value = true;
+    selectedUserProfileId.value = 10;
+    const wrapper = mountHeader('', urlProfileAccount(10));
+    expect(wrapper.find('.v-header-invest__pwa-back').exists()).toBe(false);
+  });
+
+  it('hides back button on logged-in summary root path', () => {
+    userLoggedIn.value = true;
+    selectedUserProfileId.value = 10;
+    const wrapper = mountHeader('', urlProfileSummary(10));
+    expect(wrapper.find('.v-header-invest__pwa-back').exists()).toBe(false);
+  });
+
+  it('hides back button on logged-in earn root path', () => {
+    userLoggedIn.value = true;
+    selectedUserProfileId.value = 10;
+    const wrapper = mountHeader('', urlProfileEarn(10));
+    expect(wrapper.find('.v-header-invest__pwa-back').exists()).toBe(false);
   });
 
   it('shows only back button on offer details page', () => {
