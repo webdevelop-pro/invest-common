@@ -1,4 +1,4 @@
-import { ref, computed, useTemplateRef, nextTick, watch } from 'vue';
+import { ref, computed, useTemplateRef, nextTick, watch, onScopeDispose } from 'vue';
 import { useRouter } from 'vue-router';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
@@ -12,6 +12,7 @@ import { scrollToError } from 'UiKit/helpers/validation/general';
 import { FormChild } from 'InvestCommon/types/form';
 import { useRepositoryFiler } from 'InvestCommon/data/filer/filer.repository';
 import env from 'InvestCommon/config/env';
+import { reportError } from 'InvestCommon/domain/error/errorReporting';
 
 export function useSettingsAccountDetails() {
   const globalLoader = useGlobalLoader();
@@ -61,8 +62,14 @@ export function useSettingsAccountDetails() {
     const body = {
       image_link_id: id,
     };
-    await useRepositoryProfilesStore.updateUserData(Number(getUserState.value.data?.id), body);
-    useRepositoryProfilesStore.getUser();
+    try {
+      await useRepositoryProfilesStore.updateUserData(body as Record<string, unknown>);
+      await useRepositoryProfilesStore.getUser();
+    } catch (error) {
+      reportError(error, 'Failed to update avatar');
+    } finally {
+      isLoading.value = false;
+    }
   };
 
   const handleSave = async () => {
@@ -73,17 +80,22 @@ export function useSettingsAccountDetails() {
     }
 
     isLoading.value = true;
-    const { email, ...body } = (personalFormRef.value?.model || {}) as Record<string, unknown>;
-    await useRepositoryProfilesStore.setUser(body as any);
-    if (setUserState.value.error) {
+    try {
+      const { email, ...body } = (personalFormRef.value?.model || {}) as Record<string, unknown>;
+      await useRepositoryProfilesStore.setUser(body as any);
+      if (setUserState.value.error) {
+        return;
+      }
+      await useRepositoryProfilesStore.getUser();
+      } catch (error) {
+      reportError(error, 'Failed to update account details');
+    } finally {
       isLoading.value = false;
-      return;
     }
-    await useRepositoryProfilesStore.getUser();
-    isLoading.value = false;
     submitFormToHubspot({ ...(personalFormRef.value?.model as Record<string, unknown>) });
     toast(TOAST_OPTIONS);
     router.push({ name: ROUTE_SETTINGS_MFA, params: { profileId: selectedUserProfileId.value } });
+    
   };
 
   let debounceTimeout: NodeJS.Timeout | null = null;
@@ -96,12 +108,23 @@ export function useSettingsAccountDetails() {
       
       // Set new timeout with 3 second delay
       debounceTimeout = setTimeout(async () => {
-        await useRepositoryProfilesStore.getUser();
-        isLoading.value = false;
-        debounceTimeout = null; // Reset timeout reference
+        try {
+          await useRepositoryProfilesStore.getUser();
+        } catch (error) {
+          reportError(error, 'Failed to refresh user data');
+        } finally {
+          debounceTimeout = null;
+        }
       }, 3000);
     }
   }, { deep: true });
+
+  onScopeDispose(() => {
+    if (debounceTimeout) {
+      clearTimeout(debounceTimeout);
+      debounceTimeout = null;
+    }
+  });
 
   return {
     // State

@@ -115,20 +115,25 @@ export class ApiClient {
 
   async request<T>(url: string, config: RequestConfig = {}): Promise<ApiResponse<T>> {
     const fullUrl = this.buildFullUrl(url, config);
-    const method = config.method || 'GET';
+    const method = (config.method || 'GET').toUpperCase();
     const requestKey = `${method}-${fullUrl}`;
+    const shouldDeduplicate = method === 'GET' || method === 'OPTIONS';
 
-    if (this.pendingRequests.has(requestKey)) {
+    if (shouldDeduplicate && this.pendingRequests.has(requestKey)) {
       return this.pendingRequests.get(requestKey) as Promise<ApiResponse<T>>;
     }
 
     const promise = this.executeRequest<T>(fullUrl, config);
-    this.pendingRequests.set(requestKey, promise);
+    if (shouldDeduplicate) {
+      this.pendingRequests.set(requestKey, promise);
+    }
 
     try {
       return await promise;
     } finally {
-      this.pendingRequests.delete(requestKey);
+      if (shouldDeduplicate) {
+        this.pendingRequests.delete(requestKey);
+      }
     }
   }
 

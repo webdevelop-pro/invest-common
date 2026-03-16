@@ -3,9 +3,9 @@ import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { useRouter, type RouteLocationRaw } from 'vue-router';
 import VBreadcrumbs from 'UiKit/components/VBreadcrumb/VBreadcrumbsList.vue';
 import type { IBreadcrumb } from 'UiKit/components/VBreadcrumb/VBreadcrumbsList.vue';
-import { PropType, onMounted, ref } from 'vue';
+import { PropType } from 'vue';
 import arrowLeft from 'UiKit/assets/images/arrow-left.svg';
-import { isPwaMobile } from 'InvestCommon/domain/pwa/pwaDetector';
+import { useMobileAppShell } from 'InvestCommon/domain/mobile/useMobileAppShell';
 
 const props = defineProps({
   buttonText: String,
@@ -27,12 +27,7 @@ const props = defineProps({
 const emit = defineEmits(['save']);
 
 const router = useRouter();
-
-const isPwa = ref(false);
-
-onMounted(() => {
-  isPwa.value = isPwaMobile();
-});
+const { usesMobileAppShell } = useMobileAppShell();
 
 const onBackClick = () => {
   if (props.buttonRoute) {
@@ -50,12 +45,12 @@ const saveHandler = () => {
 <template>
   <div
     class="VLayoutForm layout-back-button"
-    :class="{ 'is--loading': isLoading, 'is--pwa': isPwa }"
+    :class="{ 'is--loading': isLoading, 'is--pwa': usesMobileAppShell }"
   >
     <div class="is--container layout-back-button__container">
       <div class="layout-back-button__left">
         <VButton
-          v-if="!isPwa"
+          v-if="!usesMobileAppShell"
           variant="link"
           size="large"
           icon-placement="left"

@@ -25,7 +25,7 @@ import {
 } from 'InvestCommon/domain/config/enums/routes';
 import { VTabsContent } from 'UiKit/components/Base/VTabs';
 import { useBreakpoints } from 'UiKit/composables/useBreakpoints';
-import { isPwaMobile } from 'InvestCommon/domain/pwa/pwaDetector';
+import { useMobileAppShell } from 'InvestCommon/domain/mobile/useMobileAppShell';
 import { useSyncWithUrl } from 'UiKit/composables/useSyncWithUrl';
 
 const props = defineProps({
@@ -45,7 +45,8 @@ const profilesStore = useProfilesStore();
 const { selectedUserProfileId } = storeToRefs(profilesStore);
 
 const { isTablet } = useBreakpoints();
-const isPwaMobileDashboard = computed(() => isTablet.value && isPwaMobile());
+const { usesMobileAppShell } = useMobileAppShell();
+const isMobileAppShellDashboard = computed(() => isTablet.value && usesMobileAppShell.value);
 
 const tabs = computed(() => ({
   [DashboardTabTypes.summary]: {
@@ -83,7 +84,7 @@ const tabs = computed(() => ({
 
 const filteredTabs = computed(() => {
   const allTabs = { ...tabs.value };
-  if (isPwaMobileDashboard.value) {
+  if (isMobileAppShellDashboard.value) {
     return {
       [DashboardTabTypes.portfolio]: allTabs[DashboardTabTypes.portfolio],
     };
@@ -172,7 +173,7 @@ const currentPwaComponent = computed(() => (
   <VPageTopInfoAndTabs
     :tab="props.tab"
     :tabs="filteredTabs"
-    :hide-tabs="isPwaMobileDashboard"
+    :hide-tabs="isMobileAppShellDashboard"
     class="ViewDashboard view-dashboard is--no-margin"
   >
     <template #top-info>
@@ -181,7 +182,7 @@ const currentPwaComponent = computed(() => (
     <template #tabs-content>
       <component
         :is="currentPwaComponent"
-        v-if="isPwaMobileDashboard"
+        v-if="isMobileAppShellDashboard"
         :key="activeTab"
       />
       <template v-else>

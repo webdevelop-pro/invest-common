@@ -141,7 +141,7 @@ describe('VHeaderProfilePWA', () => {
     await input.trigger('change');
 
     expect(uploadHandler).toHaveBeenCalledWith(file, 123, 'user', 123);
-    expect(updateUserData).toHaveBeenCalledWith(123, { image_link_id: 999 });
+    expect(updateUserData).toHaveBeenCalledWith({ image_link_id: 999 });
     expect(getUser).toHaveBeenCalled();
   });
 

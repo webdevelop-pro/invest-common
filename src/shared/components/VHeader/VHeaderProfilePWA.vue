@@ -141,7 +141,7 @@ const onFileChange = async () => {
     await filerRepository.uploadHandler(file, userId, 'user', userId);
     const uploadedId = postSignurlState.value.data?.meta?.id;
     if (uploadedId) {
-      await useRepositoryProfilesStore.updateUserData(userId, { image_link_id: uploadedId });
+      await useRepositoryProfilesStore.updateUserData({ image_link_id: uploadedId });
       await useRepositoryProfilesStore.getUser();
     }
   } catch (e) {

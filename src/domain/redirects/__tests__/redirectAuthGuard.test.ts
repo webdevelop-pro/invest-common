@@ -268,6 +268,7 @@ function redirectAuthGuardTests() {
     // Session should remain the same
     expect(sessionStore.userSession).toEqual(session)
   })
+
 }
 
 describe('redirectAuthGuard (jsdom)', () => {

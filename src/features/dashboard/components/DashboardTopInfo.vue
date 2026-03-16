@@ -11,7 +11,7 @@ import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repos
 import { useBreakpoints } from 'UiKit/composables/useBreakpoints';
 import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/domain/config/enums/routes';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
-import { isPwaMobile } from 'InvestCommon/domain/pwa/pwaDetector';
+import { useMobileAppShell } from 'InvestCommon/domain/mobile/useMobileAppShell';
 
 const DashboardTopInfoRight = defineAsyncComponent(
   () => import('./DashboardTopInfoRight.vue'),
@@ -27,9 +27,10 @@ const profilesStore = useProfilesStore();
 const { selectedUserProfileId } = storeToRefs(profilesStore);
 
 const { isTablet } = useBreakpoints();
+const { usesMobileAppShell } = useMobileAppShell();
 
 const isLoading = computed(() => (getUserState.value.loading || getProfileByIdState.value.loading));
-const showPwaProfileDetailsLink = computed(() => isTablet.value && isPwaMobile());
+const showPwaProfileDetailsLink = computed(() => isTablet.value && usesMobileAppShell.value);
 const profileDetailsLink = computed(() => ({
   name: ROUTE_DASHBOARD_ACCOUNT,
   params: { profileId: selectedUserProfileId.value || 0 },

@@ -142,7 +142,7 @@ export const useRepositoryOffer = defineStore('repository-offer', () => {
     if (objectId === undefined) return;
 
     const one = getOfferOneState.value.data;
-    if (one) {
+    if (one?.id === objectId) {
       const updated = { ...one, ...fields } as IOfferApp;
       getOfferOneState.value.data = offerCache.format(updated);
     }

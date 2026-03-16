@@ -2,6 +2,15 @@ import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 import { IAuthFlow } from 'InvestCommon/data/auth/auth.type';
 import { h } from 'vue';
 
+type OryUiMessage = {
+  type?: string;
+  text?: string;
+  context?: {
+    duplicate_identifier?: string;
+    duplicateIdentifier?: string;
+  };
+};
+
 /**
  * Handles successful Ory auth flow responses that contain UI messages or special states
  * This is for successful responses (200 status) that need special handling
@@ -10,34 +19,40 @@ import { h } from 'vue';
  */
 export const oryResponseHandling = (response: IAuthFlow) => {
   const { toast } = useToast();
+  const messages = (response.ui?.messages ?? []) as OryUiMessage[];
 
-  const duplicateMessage = response.ui?.messages?.find((m: any) => 
-    m.text?.includes('already used by another account') || 
-    m.context?.duplicate_identifier
+  const duplicateMessage = messages.find((message) =>
+    message.text?.includes('already used by another account')
+    || message.context?.duplicate_identifier
+    || message.context?.duplicateIdentifier
   );
-  
+
   // Handle choose_method state with duplicate identifier scenario
   if (duplicateMessage) {
-    const duplicateIdentifier = duplicateMessage.context?.duplicate_identifier || 
-                               duplicateMessage.context?.duplicateIdentifier;
+    const duplicateIdentifier = duplicateMessage.context?.duplicate_identifier
+      || duplicateMessage.context?.duplicateIdentifier
+      || '';
+    const loginHref = `/signin?email=${encodeURIComponent(duplicateIdentifier)}`;
 
     toast({
-       title: 'Account Already Exists',
-       description: h('div', {
-        innerHTML: `Sorry, your email ${duplicateIdentifier} already used, do you want to <a href="/signin?email=${encodeURIComponent(duplicateIdentifier)}">log in</a>?`
-      }),
-       variant: 'info',
-       duration: 8000,
-     });
-    
+      title: 'Account Already Exists',
+      description: h('div', [
+        h('span', `Sorry, your email ${duplicateIdentifier} already used, do you want to `),
+        h('a', { href: loginHref }, 'log in'),
+        h('span', '?'),
+      ]),
+      variant: 'info',
+      duration: 8000,
+    });
+
     return;
   }
-  
+
   // Handle other UI messages that might need attention
-  const infoMessages = response.ui?.messages?.filter((m: any) => m.type === 'info');
+  const infoMessages = messages.filter((message) => message.type === 'info');
   if (infoMessages && infoMessages.length > 0) {
     const importantMessage = infoMessages[0];
-    
+
     if (importantMessage) {
       toast({
         title: 'Authentication Information',
@@ -46,7 +61,6 @@ export const oryResponseHandling = (response: IAuthFlow) => {
       });
     }
   }
-  
+
   return;
 };
-

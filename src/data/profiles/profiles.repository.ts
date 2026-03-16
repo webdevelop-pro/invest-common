@@ -195,7 +195,7 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
       return response.data;
     });
 
-  const updateUserData = async (id: string | number, body: any) =>
+  const updateUserData = async (body: Record<string, unknown>) =>
     withActionState(updateUserDataState, async () => {
       const response = await apiClient.patch('/auth/user', body, {
         headers: {

@@ -45,6 +45,11 @@ export const useRepositoryNotifications = defineStore('repository-notifications'
     formattedNotifications.value = notificationCache.formatMany(items);
   };
 
+  const updateRawNotificationState = (updater: (items: INotification[]) => INotification[]) => {
+    const current = getAllState.value.data ?? [];
+    getAllState.value.data = updater(current);
+  };
+
   const states = createRepositoryStates<NotificationStates>({
     getAllState: undefined,
     markAllAsReadState: undefined,
@@ -71,6 +76,10 @@ export const useRepositoryNotifications = defineStore('repository-notifications'
       await apiClient.put(`/notification/all`, undefined, {
         showGlobalAlertOnServerError: false,
       });
+      updateRawNotificationState((items) => items.map((notification) => ({
+        ...notification,
+        status: 'read',
+      })));
       formattedNotifications.value = formattedNotifications.value.map((notification) => ({
         ...notification,
         status: 'read',
@@ -83,6 +92,11 @@ export const useRepositoryNotifications = defineStore('repository-notifications'
       await apiClient.put(`/notification/${id}`, undefined, {
         showGlobalAlertOnServerError: false,
       });
+      updateRawNotificationState((items) => items.map((notification) => (
+        notification.id === id
+          ? { ...notification, status: 'read' }
+          : notification
+      )));
       formattedNotifications.value = formattedNotifications.value.map((notification) => (notification.id === id
         ? { ...notification, status: 'read', isUnread: false }
         : notification));
@@ -98,8 +112,36 @@ export const useRepositoryNotifications = defineStore('repository-notifications'
   const reset = () => resetAll();
 
   const updateNotificationsData = (data: string) => {
-    const notification = JSON.parse(data) as INotification;
-    formattedNotifications.value.unshift(notificationCache.format(notification));
+    let notification: INotification;
+
+    try {
+      notification = JSON.parse(data) as INotification;
+    } catch {
+      return;
+    }
+
+    const formatted = notificationCache.format(notification);
+    const existingIndex = formattedNotifications.value.findIndex((item) => item.id === formatted.id);
+    updateRawNotificationState((items) => {
+      const rawIndex = items.findIndex((item) => item.id === notification.id);
+
+      if (rawIndex === -1) {
+        return [notification, ...items];
+      }
+
+      const next = [...items];
+      next.splice(rawIndex, 1);
+      return [notification, ...next];
+    });
+
+    if (existingIndex === -1) {
+      formattedNotifications.value = [formatted, ...formattedNotifications.value];
+      return;
+    }
+
+    const next = [...formattedNotifications.value];
+    next.splice(existingIndex, 1);
+    formattedNotifications.value = [formatted, ...next];
   };
 
   return {

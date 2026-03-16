@@ -186,6 +186,33 @@ describe('ApiClient', () => {
       expect(response1).toEqual(response2);
     });
 
+    it('should not deduplicate concurrent mutation requests to the same URL', async () => {
+      const firstResponse = {
+        ok: true,
+        status: 200,
+        headers: new Headers({ 'content-type': 'application/json' }),
+        json: () => Promise.resolve({ data: 'first' }),
+      };
+      const secondResponse = {
+        ok: true,
+        status: 200,
+        headers: new Headers({ 'content-type': 'application/json' }),
+        json: () => Promise.resolve({ data: 'second' }),
+      };
+      mockFetch
+        .mockResolvedValueOnce(firstResponse)
+        .mockResolvedValueOnce(secondResponse);
+
+      const [response1, response2] = await Promise.all([
+        apiClient.post('/test', { order: 1 }),
+        apiClient.post('/test', { order: 2 }),
+      ]);
+
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+      expect(response1.data).toEqual({ data: 'first' });
+      expect(response2.data).toEqual({ data: 'second' });
+    });
+
     it('should not deduplicate requests with different params', async () => {
       const mockResponse = {
         ok: true,

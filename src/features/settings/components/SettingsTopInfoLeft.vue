@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 import { storeToRefs } from 'pinia';
 import VAvatarUpload from 'InvestCommon/features/filer/VAvatarUpload.vue';
@@ -12,6 +12,7 @@ import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useRepositoryFiler } from 'InvestCommon/data/filer/filer.repository';
+import { reportError } from 'InvestCommon/domain/error/errorReporting';
 
 const { FILER_URL } = env;
 
@@ -39,13 +40,25 @@ watch(
       clearTimeout(debounceTimeout);
     }
 
-    debounceTimeout = setTimeout(async () => {
-      await useRepositoryProfilesStore.getUser();
-      debounceTimeout = null;
+debounceTimeout = setTimeout(async () => {
+      try {
+        await useRepositoryProfilesStore.getUser();
+      } catch (error) {
+        reportError(error, 'Failed to refresh user data');
+      } finally {
+        debounceTimeout = null;
+      }
     }, 3000);
   },
   { deep: true },
 );
+
+onBeforeUnmount(() => {
+  if (debounceTimeout) {
+    clearTimeout(debounceTimeout);
+    debounceTimeout = null;
+  }
+});
 
 const onUploadId = async (id: string) => {
   isAvatarLoading.value = true;
@@ -54,10 +67,15 @@ const onUploadId = async (id: string) => {
     image_link_id: id,
   };
 
-  await useRepositoryProfilesStore.updateUserData(Number(getUserState.value.data?.id), body as unknown);
-  // Fallback: explicitly refresh user data even if no notification arrives
-  await useRepositoryProfilesStore.getUser();
-  isAvatarLoading.value = false;
+  try {
+    await useRepositoryProfilesStore.updateUserData(body as Record<string, unknown>);
+    // Fallback: explicitly refresh user data even if no notification arrives
+    await useRepositoryProfilesStore.getUser();
+  } catch (error) {
+    reportError(error, 'Failed to update avatar');
+  } finally {
+    isAvatarLoading.value = false;
+  }
 };
 </script>
 

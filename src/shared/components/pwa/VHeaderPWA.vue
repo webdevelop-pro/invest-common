@@ -61,7 +61,7 @@ const props = defineProps({
   },
 });
 
-const isMobilePWA = true;
+const isMobileAppShell = true;
 const USER_MENU_QUERY_KEY = 'fromUserMenu';
 const USER_MENU_QUERY_VALUE = '1';
 const USER_MENU_FROM_QUERY_KEY = 'menuFrom';
@@ -262,7 +262,7 @@ const backHandler = () => {
     v-model="isMobileSidebarOpen"
     :show-navigation="showNavigation"
     :show-mobile-sidebar="showMobileSidebar"
-    :is-mobile-p-w-a="isMobilePWA"
+    :is-mobile-p-w-a="isMobileAppShell"
     :show-profile-link="false"
     :url-profile="urlProfile"
     :user-logged-in="userLoggedIn"

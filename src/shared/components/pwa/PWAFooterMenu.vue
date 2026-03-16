@@ -1,152 +1,305 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { Component } from 'vue';
-import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { storeToRefs } from 'pinia';
-import { VNavigationMenuLink } from 'UiKit/components/Base/VNavigationMenu';
-import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
-import { useNotifications } from 'InvestCommon/features/notifications/store/useNotifications';
+import { RouterLink } from 'vue-router';
 
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
+import env from 'InvestCommon/config/env';
+import {
+  urlFaq,
+  urlHome,
+  urlHowItWorks,
+  urlOffers,
+  urlProfilePortfolio,
+  urlProfileSummary,
+  urlProfileWallet,
+  urlProfileEarn,
+  urlProfileTabSummary,
+  urlProfileTabPortfolio,
+  urlProfileTabWallet,
+  urlProfileTabEarn,
+} from 'InvestCommon/domain/config/links';
+import { useNotifications } from 'InvestCommon/features/notifications/store/useNotifications';
+import { VNavigationMenuLink } from 'UiKit/components/Base/VNavigationMenu';
+
+import EarnIcon from 'UiKit/assets/images/menu_common/percent.svg';
+import FaqIcon from 'UiKit/assets/images/menu_common/faq.svg';
+import HelpIcon from 'UiKit/assets/images/menu_common/help.svg';
 import HomeIcon from 'UiKit/assets/images/menu_common/home.svg';
 import InvestmentIcon from 'UiKit/assets/images/menu_common/investments.svg';
 import PortfolioIcon from 'UiKit/assets/images/menu_common/portfolio.svg';
 import WalletIcon from 'UiKit/assets/images/menu_common/wallet.svg';
-import CryptoIcon from 'UiKit/assets/images/menu_common/crypto1.svg';
-import HelpIcon from 'UiKit/assets/images/menu_common/help.svg';
-import FaqIcon from 'UiKit/assets/images/menu_common/faq.svg';
-import {
-  urlHome, 
-  urlHowItWorks, 
-  urlFaq, 
-  urlOffers,
-  urlProfileCryptoWallet, 
-  urlProfileSummary,
-  urlProfileWallet, 
-  urlProfilePortfolio
-} from 'InvestCommon/domain/config/links';
-
 
 defineOptions({ name: 'PWAFooterMenu' });
 
-const props = defineProps<{
-  currentPath?: string
-  currentLayout?: string
-  withBase?: (to: string) => string
-  baseUrl?: string
-}>();
-
-const fallbackPath = typeof window !== 'undefined' ? window.location.pathname + window.location.search + window.location.hash : '/';
-const currentPath = computed(() => (props.currentPath ?? fallbackPath));
-
-function defaultWithBase(to: string): string {
-
-  if (/^(https?:)?\/\//i.test(to) || /^[a-z]+:/i.test(to)) return to;
-  return to.startsWith('/') ? to : `/${to}`;
-
-}
-
-const withBaseUniversal = (to: string) => (props.withBase ? props.withBase(to) : defaultWithBase(to));
-
-const layoutActiveFallbackMap: Record<string, string[]> = {
-  'offer-single': [urlOffers],
+type MenuContext = {
+  profileId: string | number | null | undefined;
 };
 
-function getProfileSectionKey(pathname: string): string | null {
-  const match = pathname.match(/\/profile\/[^/]+\/([^/]+)/);
-  return match ? `profile/${match[1]}` : null;
-}
+type MenuItemDefinition = {
+  key: string;
+  icon: Component;
+  text: string;
+  resolveTo: (context: MenuContext) => string;
+  resolveActivePaths?: (context: MenuContext) => readonly string[];
+};
 
-function isActive(to: string): boolean {
+type LayoutName = 'offer-single' | (string & {});
 
-  const target = withBaseUniversal(to);
-  const origin = typeof window !== 'undefined'
-    ? window.location.origin
-    : (props.baseUrl ?? '/');
+type MenuItem = MenuItemDefinition & {
+  isActive: boolean;
+  routerTo: string | null;
+  to: string;
+};
 
-  const targetPath = new URL(target, origin).pathname;
+const props = defineProps<{
+  currentPath?: string;
+  currentLayout?: LayoutName;
+  withBase?: (to: string) => string;
+}>();
 
-  const p = (currentPath.value || '/').split('#')[0].split('?')[0];
+const GUEST_MENU_ITEMS: readonly MenuItemDefinition[] = [
+  { key: 'home', icon: HomeIcon, text: 'Home', resolveTo: () => urlHome },
+  { key: 'invest', icon: InvestmentIcon, text: 'Invest', resolveTo: () => urlOffers },
+  { key: 'help', icon: HelpIcon, text: 'Help', resolveTo: () => urlHowItWorks },
+  { key: 'faq', icon: FaqIcon, text: 'FAQ', resolveTo: () => urlFaq },
+];
 
-  if (p === targetPath || p.startsWith(`${targetPath}/`)) {
-    return true;
-  }
-
-  const currentProfileSection = getProfileSectionKey(p);
-  const targetProfileSection = getProfileSectionKey(targetPath);
-  if (targetProfileSection === 'profile/portfolio' && currentProfileSection === 'profile/account') {
-    return true;
-  }
-  if (currentProfileSection && targetProfileSection && currentProfileSection === targetProfileSection) {
-    return true;
-  }
-
-  const layout = props.currentLayout;
-  if (!layout) return false;
-
-  const layoutFallbackTargets = layoutActiveFallbackMap[layout];
-
-  return layoutFallbackTargets?.includes(to) ?? false;
-
-}
+const AUTH_MENU_ITEMS: readonly MenuItemDefinition[] = [
+  {
+    key: 'home',
+    icon: HomeIcon,
+    text: 'Home',
+    resolveTo: ({ profileId }) => urlProfileTabSummary(profileId),
+    resolveActivePaths: ({ profileId }) => [
+      urlProfileSummary(profileId),
+      urlProfileTabSummary(profileId),
+    ],
+  },
+  {
+    key: 'portfolio',
+    icon: PortfolioIcon,
+    text: 'Portfolio',
+    resolveTo: ({ profileId }) => urlProfileTabPortfolio(profileId),
+    resolveActivePaths: ({ profileId }) => [
+      urlProfilePortfolio(profileId),
+      urlProfileTabPortfolio(profileId),
+    ],
+  },
+  {
+    key: 'invest',
+    icon: InvestmentIcon,
+    text: 'Invest',
+    resolveTo: () => urlOffers,
+  },
+  {
+    key: 'wallet',
+    icon: WalletIcon,
+    text: 'Wallet',
+    resolveTo: ({ profileId }) => urlProfileTabWallet(profileId),
+    resolveActivePaths: ({ profileId }) => [
+      urlProfileWallet(profileId),
+      urlProfileTabWallet(profileId),
+    ],
+  },
+  {
+    key: 'earn',
+    icon: EarnIcon,
+    text: 'Earn',
+    resolveTo: ({ profileId }) => urlProfileTabEarn(profileId),
+    resolveActivePaths: ({ profileId }) => [
+      urlProfileEarn(profileId),
+      urlProfileTabEarn(profileId),
+    ],
+  },
+];
 
 const sessionStore = useSessionStore();
 const { userLoggedIn } = storeToRefs(sessionStore);
 
 const profilesStore = useProfilesStore();
 const { selectedUserProfileId } = storeToRefs(profilesStore);
+
 const notificationsStore = useNotifications();
 const { isSidebarOpen } = storeToRefs(notificationsStore);
 
-type Item = { to: string; icon: Component; text: string };
+type NormalizedLocation = {
+  pathname: string;
+  searchParams: URLSearchParams;
+};
 
-const menuItems = computed<Item[]>(() =>
-  userLoggedIn.value
-  ? [
-      { to: urlProfileSummary(selectedUserProfileId.value), icon: HomeIcon, text: 'Home' },  
-      { to: urlProfilePortfolio(selectedUserProfileId.value), icon: PortfolioIcon, text: 'Portfolio' },
-      { to: urlProfileWallet(selectedUserProfileId.value), icon: WalletIcon, text: 'Wallet' },
-      { to: urlOffers, icon: InvestmentIcon, text: 'Invest' },
-      { to: urlProfileCryptoWallet(selectedUserProfileId.value), icon: CryptoIcon, text: 'Crypto' },
-    ]
-  : [
-      { to: urlHome, icon: HomeIcon, text: 'Home' },  
-      { to: urlOffers, icon: InvestmentIcon, text: 'Invest' },
-      { to: urlHowItWorks, icon: HelpIcon, text: 'Help' },   
-      { to: urlFaq, icon: FaqIcon, text: 'FAQ' },   
-    ]
-);
+function resolveBasePath(url: string | undefined): string | null {
+  if (!url) {
+    return null;
+  }
+
+  const pathname = new URL(url, 'https://pwa-footer.local').pathname;
+  const normalizedPathname = pathname === '/' ? pathname : pathname.replace(/\/+$/, '') || '/';
+  return normalizedPathname === '/' ? null : normalizedPathname;
+}
+
+const dashboardBasePath = resolveBasePath(env.FRONTEND_URL);
+
+function normalizePath(path: string | undefined): string {
+  if (!path) {
+    return '/';
+  }
+
+  const pathname = new URL(path, 'https://pwa-footer.local').pathname;
+  const normalizedPathname = pathname === '/' ? pathname : pathname.replace(/\/+$/, '') || '/';
+
+  if (!dashboardBasePath) {
+    return normalizedPathname;
+  }
+
+  if (normalizedPathname === dashboardBasePath) {
+    return '/';
+  }
+
+  if (normalizedPathname.startsWith(`${dashboardBasePath}/`)) {
+    return normalizedPathname.slice(dashboardBasePath.length) || '/';
+  }
+
+  return normalizedPathname;
+}
+
+function normalizeLocation(path: string | undefined): NormalizedLocation {
+  const source = path || '/';
+  const url = new URL(source, 'https://pwa-footer.local');
+
+  return {
+    pathname: normalizePath(url.pathname),
+    searchParams: url.searchParams,
+  };
+}
+
+function resolveTargetLocation(to: string): NormalizedLocation {
+  return normalizeLocation(props.withBase ? props.withBase(to) : to);
+}
+
+function resolveRouterTo(to: string): string | null {
+  const url = new URL(to, 'https://pwa-footer.local');
+  const pathname = normalizePath(url.pathname);
+
+  if (!pathname.startsWith('/profile/')) {
+    return null;
+  }
+
+  return `${pathname}${url.search}${url.hash}`;
+}
+
+function hasMatchingSearchParams(
+  currentSearchParams: URLSearchParams,
+  targetSearchParams: URLSearchParams,
+): boolean {
+  const targetEntries = Array.from(targetSearchParams.entries());
+
+  if (!targetEntries.length) {
+    return true;
+  }
+
+  return targetEntries.every(([key, value]) => currentSearchParams.get(key) === value);
+}
+
+function isPathActive(currentLocation: NormalizedLocation, paths: readonly string[]): boolean {
+  return paths.some((path) => {
+    const targetLocation = resolveTargetLocation(path);
+
+    if (!hasMatchingSearchParams(currentLocation.searchParams, targetLocation.searchParams)) {
+      return false;
+    }
+
+    return currentLocation.pathname === targetLocation.pathname
+      || currentLocation.pathname.startsWith(`${targetLocation.pathname}/`);
+  });
+}
+
+const currentLocation = computed(() => {
+  const fallbackPath = typeof window !== 'undefined'
+    ? `${window.location.pathname}${window.location.search}${window.location.hash}`
+    : '/';
+  return normalizeLocation(props.currentPath ?? fallbackPath);
+});
+
+const menuDefinitions = computed(() => (
+  userLoggedIn.value ? AUTH_MENU_ITEMS : GUEST_MENU_ITEMS
+));
+
+const menuItems = computed<MenuItem[]>(() => {
+  const context: MenuContext = { profileId: selectedUserProfileId.value };
+
+  return menuDefinitions.value.map((item) => {
+    const to = item.resolveTo(context);
+    const activePaths = item.resolveActivePaths?.(context) ?? [to];
+    const isActive = isPathActive(currentLocation.value, activePaths);
+    const routerTo = resolveRouterTo(to);
+
+    return {
+      ...item,
+      to,
+      routerTo,
+      isActive,
+    };
+  });
+});
+
+const menuColumnClass = computed(() => (
+  menuItems.value.length === AUTH_MENU_ITEMS.length
+    ? 'pwa-footer-menu__list--cols-5'
+    : 'pwa-footer-menu__list--cols-4'
+));
 
 const shouldHideMenu = computed(() => (
-  isSidebarOpen.value
-  || props.currentLayout === 'offer-single'
+  isSidebarOpen.value || props.currentLayout === 'offer-single'
 ));
 </script>
 
 <template>
   <nav
     v-if="!shouldHideMenu"
-    class="pwamenu"
+    class="PWAFooterMenu pwa-footer-menu"
     role="navigation"
     aria-label="PWA Bottom Menu"
   >
-    <ul
-      :class="['pwamenu__list', menuItems.length === 5 ? 'cols-5' : 'cols-4']"
-    >
+    <ul :class="['pwa-footer-menu__list', menuColumnClass]">
       <li
         v-for="item in menuItems"
-        :key="item.to"
-        class="pwamenu__item"
+        :key="item.key"
+        class="pwa-footer-menu__item"
       >
-        <VNavigationMenuLink 
+        <VNavigationMenuLink
+          v-if="item.routerTo"
+          as-child
+          :class="['pwa-footer-menu__link', { 'pwa-footer-menu__link--active': item.isActive }]"
+          :aria-current="item.isActive ? 'page' : undefined"
+        >
+          <RouterLink :to="item.routerTo">
+            <component
+              :is="item.icon"
+              class="pwa-footer-menu__icon"
+              aria-hidden="true"
+            />
+            <span class="pwa-footer-menu__label is--small">
+              {{ item.text }}
+            </span>
+          </RouterLink>
+        </VNavigationMenuLink>
+        <VNavigationMenuLink
+          v-else
           :href="item.to"
-          :class="['pwamenu__link', isActive(item.to) ? 'is-active' : '']"
+          :class="['pwa-footer-menu__link', { 'pwa-footer-menu__link--active': item.isActive }]"
+          :aria-current="item.isActive ? 'page' : undefined"
         >
           <component
             :is="item.icon"
-            class="pwamenu__icon"
+            class="pwa-footer-menu__icon"
             aria-hidden="true"
           />
-          <span class="pwamenu__label">{{ item.text }}</span>
+          <span class="pwa-footer-menu__label is--small">
+            {{ item.text }}
+          </span>
         </VNavigationMenuLink>
       </li>
     </ul>
@@ -154,102 +307,107 @@ const shouldHideMenu = computed(() => (
 </template>
 
 <style scoped lang="scss">
+@use 'UiKit/styles/_variables.scss' as *;
+@use 'UiKit/styles/_colors.scss' as *;
+
 :global(:root) {
   --pwa-footer-safe-offset: 104px;
 }
 
-:host, .pwamenu {
-  --pwamenu-gx: 12px;
-  --pwamenu-gb: 12px;
-  --pwamenu-radius: 16px;
-  --pwamenu-bg: rgb(243 243 243 / 96%);
-  --pwamenu-border: rgb(255 255 255 / 5%);
-  --pwamenu-shadow: 0 10px 30px rgb(0 0 0 / 24%), 0 2px 8px rgb(0 0 0 / 8%);
+:host,
+.pwa-footer-menu {
+  --pwa-footer-menu-background: #{$white};
+  --pwa-footer-menu-border-color: #{rgba($white, 0.05)};
+  --pwa-footer-menu-border-radius: 2px;
+  --pwa-footer-menu-shadow: #{$box-shadow-large};
+  --pwa-footer-menu-color: #{$gray-60};
+  --pwa-footer-menu-link-active-background: #{$primary-light};
+  --pwa-footer-menu-label-active-color: #{$gray-90};
 }
 
 @media (width <= 768px) {
-  body.pwa-standalone .pwamenu { display: block; }
+  body.pwa-standalone .pwa-footer-menu {
+    display: block;
+  }
 }
 
-.pwamenu {
+.pwa-footer-menu {
   position: fixed;
-  left: 0; right: 0; bottom: 0;
-  padding-inline: var(--pwamenu-gx);
-  padding-bottom: calc(var(--pwamenu-gb) + env(safe-area-inset-bottom));
-  z-index: 110; 
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: block;
+  padding-inline: 0;
+  padding-bottom: 0; //calc(12px + env(safe-area-inset-bottom))
+  z-index: 110;
   pointer-events: none;
-  display: block;// fix it
-
-  &.is-hidden {
-    display: none;
-  }
-
-  .pwamenu__list {
-    pointer-events: auto;
-    list-style: none;
-    margin: 0;
-    padding: 8px;
-    display: grid;
-    gap: 6px;
-    background: var(--pwamenu-bg);
-    border: 1px solid var(--pwamenu-border);
-    border-radius: var(--pwamenu-radius);
-    box-shadow: var(--pwamenu-shadow);
-    backdrop-filter: blur(6px);
-
-    &.cols-5 { grid-template-columns: repeat(5, 1fr); }
-
-    &.cols-4 { grid-template-columns: repeat(4, 1fr); }
-  }
-
-  .pwamenu__item { display: flex; }
-
-  
-
-  .pwamenu__link {
-    width: 100%;
-    padding: 8px 0;
-    border-radius: 12px;
-    display: flex;
-    flex-direction: column; 
-    align-items: center;
-    justify-content: center;
-    text-decoration: none; 
-    color: inherit;        
-    transition: background .2s ease, color .2s ease;
-
-    .pwamenu__icon {
-      width: 24px;
-      height: 24px;
-      display: block;
-      margin-bottom: 4px;
-      color: #000 !important;
-    }
-
-    .pwamenu__label {
-      font-size: 12px;     
-      line-height: 1.2;
-      color: #000;         
-      text-decoration: none;
-    }
-
-    &.is-active {
-      background: rgb(17 24 39 / 6%);
-
-      .pwamenu__label {
-        font-weight: 600;  
-        color: #111827;    
-      }
-    }
-
-    .pwamenu__notification-badge {
-      top: 4px;
-      right: 50%;
-      transform: translateX(calc(50% + 8px));
-    }
-  }
 }
 
+.pwa-footer-menu--hidden {
+  display: none;
+}
 
+.pwa-footer-menu__list {
+  pointer-events: auto;
+  display: grid;
+  gap: 11px;
+  margin: 0;
+  padding: 4px 6px;
+  list-style: none;
+  color: var(--pwa-footer-menu-color);
+  background: var(--pwa-footer-menu-background);
+  border: 1px solid var(--pwa-footer-menu-border-color);
+  border-radius: var(--pwa-footer-menu-border-radius);
+  box-shadow: var(--pwa-footer-menu-shadow);
+  backdrop-filter: blur(6px);
+}
+
+.pwa-footer-menu__list--cols-5 {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.pwa-footer-menu__list--cols-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.pwa-footer-menu__item {
+  display: flex;
+}
+
+.pwa-footer-menu__link {
+  display: flex;
+  width: 100%;
+  padding: 8px 0;
+  border-radius: 12px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+  text-decoration: none;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.pwa-footer-menu__link--active {
+  background: var(--pwa-footer-menu-link-active-background);
+  color: $black;
+}
+
+.pwa-footer-menu__icon {
+  display: block;
+  width: 18px;
+  height: 18px;
+  margin-bottom: 3px;
+  color: inherit;
+}
+
+.pwa-footer-menu__link--active .pwa-footer-menu__label {
+  font-weight: 600;
+  color: var(--pwa-footer-menu-label-active-color);
+}
+
+.pwa-footer-menu__notification-badge {
+  top: 4px;
+  right: 50%;
+  transform: translateX(calc(50% + 8px));
+}
 </style>
-  

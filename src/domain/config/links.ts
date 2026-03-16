@@ -53,3 +53,13 @@ export const urlProfileSummary = (profileId: number) => (
 export const urlProfile = () => `${env.FRONTEND_URL_DASHBOARD}/profile`;
 export const urlOfferSingle = (slug: string) => `${env.FRONTEND_URL_STATIC}/${slug}`;
 export const urlBlogSingle = (slug: string) => `${env.FRONTEND_URL_STATIC}/resource-center/${slug}`;
+
+const urlProfileTab = (profileId: number, tab: string) => (
+  `${env.FRONTEND_URL_DASHBOARD}/profile/${profileId}/account?tab=${tab}`
+);
+
+export const urlProfileTabSummary = (profileId: number) => urlProfileTab(profileId, 'summary');
+export const urlProfileTabPortfolio = (profileId: number) => urlProfileTab(profileId, 'portfolio');
+export const urlProfileTabWallet = (profileId: number) => urlProfileTab(profileId, 'wallet');
+export const urlProfileTabDistributions = (profileId: number) => urlProfileTab(profileId, 'distributions');
+export const urlProfileTabEarn = (profileId: number) => urlProfileTab(profileId, 'earn');
