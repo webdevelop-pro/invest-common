@@ -7,6 +7,11 @@ import { setActivePinia, createPinia } from 'pinia';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
 import ViewOffersDetails from '../ViewOffersDetails.vue';
 
+const getOfferOneMock = vi.fn().mockResolvedValue(undefined);
+const getOfferCommentsMock = vi.fn().mockResolvedValue(undefined);
+const getPublicFilesMock = vi.fn().mockResolvedValue(undefined);
+const getFilesMock = vi.fn().mockResolvedValue(undefined);
+
 vi.mock('InvestCommon/data/service/apiClient', () => {
   class ApiClient {
     get = vi.fn().mockResolvedValue({ data: { data: [] } });
@@ -61,15 +66,15 @@ vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
 vi.mock('InvestCommon/data/offer/offer.repository', () => ({
   useRepositoryOffer: () => ({
     getOfferOneState: ref({ loading: false, data: null as unknown }),
-    getOfferOne: vi.fn().mockResolvedValue(undefined),
-    getOfferComments: vi.fn().mockResolvedValue(undefined),
+    getOfferOne: getOfferOneMock,
+    getOfferComments: getOfferCommentsMock,
   }),
 }));
 
 vi.mock('InvestCommon/data/filer/filer.repository', () => ({
   useRepositoryFiler: () => ({
-    getPublicFiles: vi.fn().mockResolvedValue(undefined),
-    getFiles: vi.fn().mockResolvedValue(undefined),
+    getPublicFiles: getPublicFilesMock,
+    getFiles: getFilesMock,
   }),
 }));
 
@@ -90,6 +95,20 @@ describe('ViewOffersDetails - investHandler', () => {
     if (typeof (investmentStore as any).resetAll === 'function') {
       (investmentStore as any).resetAll();
     }
+  });
+
+  it('does not request comments or files before the offer has a valid id', () => {
+    mount(ViewOffersDetails, {
+      global: {
+        stubs: {
+          OffersDetails: true,
+        },
+      },
+    });
+
+    expect(getOfferCommentsMock).not.toHaveBeenCalled();
+    expect(getPublicFilesMock).not.toHaveBeenCalled();
+    expect(getFilesMock).not.toHaveBeenCalled();
   });
 
   it('creates a new investment when getInvestUnconfirmedOne contains default values (id = 0)', async () => {
@@ -121,4 +140,3 @@ describe('ViewOffersDetails - investHandler', () => {
     );
   });
 });
-

@@ -11,6 +11,7 @@ import {
   urlSignup,
 } from 'InvestCommon/domain/config/links';
 import VHeader from 'UiKit/components/VHeader/VHeader.vue';
+import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { MenuItem } from 'InvestCommon/types/global'; // Use shared MenuItem type
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useBreakpoints } from 'UiKit/composables/useBreakpoints';
@@ -23,11 +24,6 @@ const VHeaderProfileMobile = defineAsyncComponent({
   loader: () => import('./VHeaderProfileMobile.vue'),
   hydrate: hydrateOnVisible(),
 });
-const VButton = defineAsyncComponent({
-  loader: () => import('UiKit/components/Base/VButton/VButton.vue'),
-  hydrate: hydrateOnVisible(),
-});
-
 const props = defineProps({
   profileMenu: Array as PropType<MenuItem[]>,
   // Header navigation menu (e.g. Explore, How It Works, etc.)

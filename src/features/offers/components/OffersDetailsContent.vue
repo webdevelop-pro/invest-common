@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { PropType, computed, defineAsyncComponent } from 'vue';
+import { PropType, computed } from 'vue';
 import { IOfferFormatted } from 'InvestCommon/data/offer/offer.types';
 import { VTabs, VTabsContent, VTabsList, VTabsTrigger } from 'UiKit/components/Base/VTabs';
 import VTableDocuments from 'InvestCommon/shared/components/VTableDocuments.vue';
@@ -10,16 +10,13 @@ import { useRoute } from 'vitepress';
 import OffersComments from './OffersComments.vue';
 import { useBreakpoints } from 'UiKit/composables/useBreakpoints';
 import { storeToRefs } from 'pinia';
+import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 
 // const OffersComments = defineAsyncComponent({
 //   loader: () => import('./OffersComments.vue'),
 // });
 
 const { isTablet } = storeToRefs(useBreakpoints());
-
-const VButton = defineAsyncComponent({
-  loader: () => import('UiKit/components/Base/VButton/VButton.vue'),
-});
 
 const props = defineProps({
   offer: {

@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
-import VSectionWhatOurClientsSay from 'UiKit/components/VWhatOurClientsSay/VSectionWhatOurClientsSay.vue';
 import {
   computed, defineAsyncComponent, hydrateOnVisible,
-  watch,
+  onUnmounted, watch,
 } from 'vue';
 import { storeToRefs } from 'pinia';
 import VSectionCardOfferGrid from 'UiKit/components/VCard/VSectionCardOfferGrid.vue';
@@ -15,15 +14,21 @@ const VSliderSectionCardOffer = defineAsyncComponent({
   loader: () => import('UiKit/components/VSlider/VSliderSectionCardOffer.vue'),
   hydrate: hydrateOnVisible(),
 });
+const VSectionWhatOurClientsSay = defineAsyncComponent({
+  loader: () => import('UiKit/components/VWhatOurClientsSay/VSectionWhatOurClientsSay.vue'),
+  hydrate: hydrateOnVisible(),
+});
 
 const offerRepository = useRepositoryOffer();
 const { getOffersState } = storeToRefs(offerRepository);
+const globalLoader = useGlobalLoader();
+let routeHideLoaderTimeoutId = 0;
 
 const offers = computed(() => getOffersState.value.data?.data || []);
 const offersClosed = computed(() => offers.value.filter((item) => item.isStatusClosedSuccessfully));
 const showClosed = computed(() => ((offersClosed.value?.length || 0) > 0));
 
-useGlobalLoader().hide();
+globalLoader.hide();
 
 if (!getOffersState.value.data) {
   offerRepository.getOffers()
@@ -34,11 +39,16 @@ const route = useRoute();
 watch(
   () => route.path,
   () => {
-    setTimeout(() => {
-      useGlobalLoader().hide();
-    }, 100);
+    window.clearTimeout(routeHideLoaderTimeoutId);
+    routeHideLoaderTimeoutId = window.setTimeout(() => {
+      globalLoader.hide();
+    }, 0);
   },
 );
+
+onUnmounted(() => {
+  window.clearTimeout(routeHideLoaderTimeoutId);
+});
 </script>
 
 <template>

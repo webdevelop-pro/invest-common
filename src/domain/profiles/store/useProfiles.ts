@@ -43,7 +43,8 @@ export const useProfilesStore = defineStore('profiles', () => {
 
   const urlProfileId = computed(() => {
     if (!isStaticSite) return route?.params?.profileId;
-    return (window && window?.location?.pathname.split('/')[3]); // TODO change if url changes
+    if (typeof window === 'undefined') return undefined;
+    return window.location.pathname.split('/')[3]; // TODO change if url changes
   });
 
   const isUrlProfileSameAsSelected = computed(() => Number(urlProfileId.value) === selectedUserProfileId.value);

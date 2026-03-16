@@ -394,8 +394,8 @@ const shouldHideMenu = computed(() => (
 
 .pwa-footer-menu__icon {
   display: block;
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   margin-bottom: 3px;
   color: inherit;
 }

@@ -30,6 +30,7 @@ import NotificationsSidebarButton from 'InvestCommon/features/notifications/VNot
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import VLogo from 'UiKit/components/VLogo.vue';
 import env from 'InvestCommon/config/env';
+import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 
 const VHeaderProfilePWA = defineAsyncComponent({
   loader: () => import('../VHeader/VHeaderProfilePWA.vue'),
@@ -39,11 +40,6 @@ const VHeaderProfileMobile = defineAsyncComponent({
   loader: () => import('../VHeader/VHeaderProfileMobile.vue'),
   hydrate: hydrateOnVisible(),
 });
-const VButton = defineAsyncComponent({
-  loader: () => import('UiKit/components/Base/VButton/VButton.vue'),
-  hydrate: hydrateOnVisible(),
-});
-
 const props = defineProps({
   profileMenu: Array as PropType<MenuItem[]>,
   path: {
@@ -216,7 +212,9 @@ const showPwaBackButton = computed(() => {
   return !rootProfileSections.includes(currentProfileSection);
 });
 
-const queryParams = computed(() => new URLSearchParams(window?.location?.search));
+const queryParams = computed(() => new URLSearchParams(
+  typeof window !== 'undefined' ? window.location.search : '',
+));
 const showMobileSidebar = computed(() => showNavigation.value);
 
 const signInHandler = () => {

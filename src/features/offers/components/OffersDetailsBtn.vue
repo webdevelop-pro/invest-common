@@ -58,6 +58,10 @@ const showKYCBtn = computed(() => (
   && selectedUserProfileData.value?.isKycNew
   && !props.isSharesReached
 ));
+const canFloatButton = computed(() => (
+  isClient
+  && activeTab.value === OfferTabTypes.description
+));
 
 const signInHandler = () => {
   const redirect = `${route.path}${window.location.search}${window.location.hash}`;
@@ -81,7 +85,10 @@ const startKycHandler = () => {
 };
 
 const updateFloatingState = () => {
-  if (!isClient) return;
+  if (!canFloatButton.value) {
+    isFloating.value = false;
+    return;
+  }
 
   // Use floating behavior only on mobile / small screens
   const isMobile = window.innerWidth < 768;
@@ -131,13 +138,6 @@ if (isClient) {
 watch(
   () => activeTab.value,
   () => {
-    if (!isClient) return;
-
-    if (activeTab.value !== OfferTabTypes.description) {
-      isFloating.value = false;
-      return;
-    }
-
     scheduleFloatingStateUpdate();
   },
 );

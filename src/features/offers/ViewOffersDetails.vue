@@ -67,6 +67,10 @@ const { sendEvent } = useSendAnalyticsEvent();
 
 const investSteps = computed(() => defaultInvestSteps);
 const offer = ref(params.value?.data || null);
+const activeOfferId = computed(() => {
+  const id = Number(offer.value?.id);
+  return Number.isFinite(id) && id > 0 ? id : null;
+});
 
 const offerLoading = ref(true);
 
@@ -147,16 +151,18 @@ watch(() => getOfferOneState.value.data, (newValue) => {
     offer.value = newValue;
   }
 }, { immediate: true });
-watch(() => offer.value?.id, () => {
-  if (offer.value?.id !== 0) {
-    offerRepository.getOfferComments(offer.value?.id)
-      .catch((e) => reportError(e, 'Failed to load offer comments'));
-    filerRepository.getPublicFiles(offer.value?.id, 'offer')
+watch(activeOfferId, (offerId) => {
+  if (!offerId) {
+    return;
+  }
+
+  offerRepository.getOfferComments(offerId)
+    .catch((e) => reportError(e, 'Failed to load offer comments'));
+  filerRepository.getPublicFiles(offerId, 'offer')
+    .catch((e) => reportError(e, 'Failed to load offer files'));
+  if (userLoggedIn.value) {
+    filerRepository.getFiles(offerId, 'offer')
       .catch((e) => reportError(e, 'Failed to load offer files'));
-    if (userLoggedIn.value) {
-      filerRepository.getFiles(offer.value?.id, 'offer')
-        .catch((e) => reportError(e, 'Failed to load offer files'));
-    }
   }
 }, { immediate: true });
 </script>
