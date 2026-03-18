@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 const resetAllMock = vi.fn();
 const makeRepoMock = () => ({ resetAll: vi.fn(), resetProfileData: vi.fn() });
+const clearPrivatePwaDataMock = vi.hoisted(() => vi.fn().mockResolvedValue(undefined));
 
 const authRepo = makeRepoMock();
 const kycRepo = makeRepoMock();
@@ -19,7 +20,6 @@ const esignRepo = makeRepoMock();
 const earnRepo = makeRepoMock();
 
 const removeCookieMock = vi.fn();
-
 vi.mock('@vueuse/integrations/useCookies', () => ({
   useCookies: () => ({
     getAll: () => ({ a: '1', b: '2' }),
@@ -29,6 +29,9 @@ vi.mock('@vueuse/integrations/useCookies', () => ({
 
 vi.mock('InvestCommon/domain/session/store/useSession', () => ({
   useSessionStore: () => ({ resetAll: resetAllMock }),
+}));
+vi.mock('InvestCommon/domain/pwa/pwaOfflineStore', () => ({
+  clearPrivatePwaData: clearPrivatePwaDataMock,
 }));
 
 vi.mock('InvestCommon/data/auth/auth.repository', () => ({
@@ -79,6 +82,7 @@ import { resetAllData, resetAllProfileData } from '../resetAllData';
 describe('resetAllData & resetAllProfileData', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    clearPrivatePwaDataMock.mockResolvedValue(undefined);
   });
 
   it('resetAllProfileData resets only profile-dependent repositories', () => {
@@ -97,10 +101,11 @@ describe('resetAllData & resetAllProfileData', () => {
 
     // Earn is intentionally not reset here
     expect(earnRepo.resetAll).not.toHaveBeenCalled();
+    expect(clearPrivatePwaDataMock).toHaveBeenCalledTimes(1);
   });
 
-  it('resetAllData clears cookies, session, and all repositories including earn', () => {
-    resetAllData();
+  it('resetAllData clears cookies, session, repositories, and private offline data', async () => {
+    await resetAllData();
 
     // Cookies cleared for each key
     expect(removeCookieMock).toHaveBeenCalledTimes(2);
@@ -127,6 +132,6 @@ describe('resetAllData & resetAllProfileData', () => {
 
     // Earn is reset only here
     expect(earnRepo.resetAll).toHaveBeenCalledTimes(1);
+    expect(clearPrivatePwaDataMock).toHaveBeenCalledTimes(1);
   });
 });
-

@@ -2,7 +2,12 @@ import { ref, computed } from 'vue';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import env from 'InvestCommon/config/env';
-import { createRepositoryStates, withActionState, type OptionsStateData } from 'InvestCommon/data/repository/repository';
+import {
+  applyOfflineHydrationMeta,
+  createRepositoryStates,
+  withActionState,
+  type OptionsStateData,
+} from 'InvestCommon/data/repository/repository';
 import {
   IProfileData, IUser, IProfileIndividual, ISchema,
   IProfileFormatted,
@@ -121,6 +126,7 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
       // This prevents stale responses from overwriting current profile data
       if (requestId === currentProfileRequestId) {
         getProfileByIdState.value.data = profileCache.format(response.data as IProfileIndividual);
+        applyOfflineHydrationMeta(getProfileByIdState, response.headers);
       }
       
       return getProfileByIdState.value.data;
@@ -175,13 +181,20 @@ export const useRepositoryProfiles = defineStore('repository-profiles', () => {
       return response.data;
     });
 
-  const getUser = async () =>
-    withActionState(getUserState, async () => {
+  const getUser = async () => {
+    let responseHeaders: Headers | null = null;
+    const result = await withActionState(getUserState, async () => {
       const response = await apiClient.get<IUser>('/auth/user');
+      responseHeaders = response.headers;
       const user = response.data as IUser;
       profileCache.prune(user.profiles ?? []);
       return userCache.format(user);
     });
+    if (responseHeaders) {
+      applyOfflineHydrationMeta(getUserState, responseHeaders);
+    }
+    return result;
+  };
 
   const setUser = async (data: IProfileData) =>
     withActionState(setUserState, async () => {

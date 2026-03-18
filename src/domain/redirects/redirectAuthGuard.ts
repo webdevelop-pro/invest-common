@@ -14,8 +14,8 @@ import { ISession } from 'InvestCommon/data/auth/auth.type';
  * Shared 401 / unauthorized redirect: reset state and go to sign-in with optional return URL.
  * Used by the auth guard and by the global error handler (onUnauthorized).
  */
-export function redirectToSigninForUnauthorized(redirectPath?: string): void {
-  resetAllData();
+export async function redirectToSigninForUnauthorized(redirectPath?: string): Promise<void> {
+  await resetAllData();
   const redirect = redirectPath ?? window.location.href;
   navigateWithQueryParams(urlSignin, { redirect });
 }
@@ -42,12 +42,12 @@ export const redirectAuthGuard = async (
     // const websocketsStore = useDomainWebSocketStore();
 
     // Helper for redirecting to signin
-    const redirectToSignin = () => {
+    const redirectToSignin = async () => {
       // Prevent redirect loops - if we're already going to signin, don't redirect again
       if (to.path.includes('/signin') || to.path.includes('/signup')) {
         return;
       }
-      redirectToSigninForUnauthorized(`${window.location.origin}${to.fullPath}`);
+      await redirectToSigninForUnauthorized(`${window.location.origin}${to.fullPath}`);
     };
 
     // Not logged in: try to get session from server
@@ -61,7 +61,7 @@ export const redirectAuthGuard = async (
       }
 
       if (to.meta.requiresAuth) {
-        redirectToSignin();
+        await redirectToSignin();
       }
       return;
     }
@@ -73,9 +73,9 @@ export const redirectAuthGuard = async (
 
       if (!session?.active) {
         // Session is invalid, clear everything and redirect if route requires auth
-        resetAllData();
+        await resetAllData();
         if (to.meta.requiresAuth) {
-          redirectToSignin();
+          await redirectToSignin();
         }
         return;
       }
@@ -89,7 +89,7 @@ export const redirectAuthGuard = async (
 
     // Logged in but session missing: reset all data
     if (!userSession.value) {
-      resetAllData();
+      await resetAllData();
       return;
     }
 
@@ -98,7 +98,7 @@ export const redirectAuthGuard = async (
   } catch (error) {
     // Handle Ory-specific session errors (e.g. session_aal2_required) and generic failures.
     await oryErrorHandling(error as any, 'browser', () => {}, 'Auth guard');
-    resetAllData();
+    await resetAllData();
     return;
   }
 };

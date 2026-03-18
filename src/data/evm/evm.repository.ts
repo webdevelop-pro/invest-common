@@ -2,7 +2,12 @@ import { computed, ref } from 'vue';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import env from 'InvestCommon/config/env';
-import { createRepositoryStates, withActionState, type OptionsStateData } from 'InvestCommon/data/repository/repository';
+import {
+  applyOfflineHydrationMeta,
+  createRepositoryStates,
+  withActionState,
+  type OptionsStateData,
+} from 'InvestCommon/data/repository/repository';
 import { createFormatterCache } from 'InvestCommon/data/repository/formatterCache';
 import { INotification } from 'InvestCommon/data/notifications/notifications.types';
 import { EvmWalletFormatter } from './formatter/wallet.formatter';
@@ -275,13 +280,18 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
   };
 
   const getEvmWalletByProfile = async (profileId: number, earnPositions?: IEvmEarnPositionOverlay[]) => {
+    let responseHeaders: Headers | null = null;
     const result = await withActionState(getEvmWalletState, async () => {
       const response = await apiClient.get<IEvmWalletDataResponse>(`/auth/wallet/${profileId}`);
+      responseHeaders = response.headers;
       const data = response.data as IEvmWalletDataResponse;
       baseWalletSnapshot.value = data;
       recomputeWalletFromEarnOverlay(profileId, earnPositions);
       return getEvmWalletState.value.data!;
     });
+    if (responseHeaders) {
+      applyOfflineHydrationMeta(getEvmWalletState, responseHeaders);
+    }
     return result;
   };
 

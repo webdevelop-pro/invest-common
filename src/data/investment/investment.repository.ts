@@ -5,7 +5,12 @@ import {
   IInvestFunding,
 } from 'InvestCommon/data/investment/investment.types';
 import env from 'InvestCommon/config/env';
-import { createRepositoryStates, withActionState, type OptionsStateData } from 'InvestCommon/data/repository/repository';
+import {
+  applyOfflineHydrationMeta,
+  createRepositoryStates,
+  withActionState,
+  type OptionsStateData,
+} from 'InvestCommon/data/repository/repository';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { InvestmentFormatter } from 'InvestCommon/data/investment/investment.formatter';
 import { IInvestmentFormatted, IInvestment, IInvestmentsData, IInvestmentsDataRaw } from 'InvestCommon/data/investment/investment.types';
@@ -169,9 +174,11 @@ export const useRepositoryInvestment = defineStore('repository-investment', () =
     return createEmptyInvestmentFormatted();
   });
 
-  const getInvestments = async (id: string) =>
-    withActionState(getInvestmentsState, async () => {
+  const getInvestments = async (id: string) => {
+    let responseHeaders: Headers | null = null;
+    const result = await withActionState(getInvestmentsState, async () => {
       const response = await apiClient.get<IInvestmentsDataRaw>(`/auth/investment/${id}/confirmed`);
+      responseHeaders = response.headers;
       const rawData = response.data;
       const emptyMeta: IInvestmentsData['meta'] = {
         avarange_annual: 0,
@@ -189,21 +196,35 @@ export const useRepositoryInvestment = defineStore('repository-investment', () =
       };
       return formattedData;
     });
+    if (responseHeaders) {
+      applyOfflineHydrationMeta(getInvestmentsState, responseHeaders);
+    }
+    return result;
+  };
 
-  const getInvestOne = async (id: string) =>
-    withActionState(getInvestOneState, async () => {
+  const getInvestOne = async (id: string) => {
+    let responseHeaders: Headers | null = null;
+    const result = await withActionState(getInvestOneState, async () => {
       const response = await apiClient.get(`/auth/investment/${id}`);
+      responseHeaders = response.headers;
       const investmentData = response.data as IInvestment;
       return investmentCache.format(investmentData);
     });
+    if (responseHeaders) {
+      applyOfflineHydrationMeta(getInvestOneState, responseHeaders);
+    }
+    return result;
+  };
 
   const getInvestUnconfirmed = async (
     slug: string,
     profileId: number | string,
     investmentId?: number | string,
   ) => {
+    let responseHeaders: Headers | null = null;
     const result = await withActionState(getInvestUnconfirmedState, async () => {
       const response = await apiClient.get(`/auth/investment/${profileId}/unconfirmed`);
+      responseHeaders = response.headers;
       const rawData = response.data as IInvestUnconfirmed;
       // API type declares data as IInvestmentFormatted[] but backend returns raw; we format here.
       const formattedData = rawData.data && Array.isArray(rawData.data)
@@ -223,6 +244,9 @@ export const useRepositoryInvestment = defineStore('repository-investment', () =
       }
       return formattedData;
     });
+    if (responseHeaders) {
+      applyOfflineHydrationMeta(getInvestUnconfirmedState, responseHeaders);
+    }
     return result || null;
   };
 

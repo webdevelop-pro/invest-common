@@ -17,6 +17,7 @@ import { useRepositoryEsign } from 'InvestCommon/data/esign/esign.repository';
 import { useRepositoryEarn } from 'InvestCommon/data/earn/earn.repository';
 
 import { cookiesOptions } from 'InvestCommon/domain/config/cookies';
+import { clearPrivatePwaData } from 'InvestCommon/domain/pwa/pwaOfflineStore';
 
 function clearAllCookies() {
   const cookies = useCookies();
@@ -26,7 +27,8 @@ function clearAllCookies() {
   });
 }
 
-export const resetAllProfileData = () => {
+export const resetAllProfileData = (options: { clearPrivatePwa?: boolean } = {}) => {
+  const { clearPrivatePwa = true } = options;
   // Reset profile-specific data (NOT the profiles list)
   useRepositoryProfiles().resetProfileData();
   
@@ -42,15 +44,19 @@ export const resetAllProfileData = () => {
   useRepositoryEsign().resetAll();
   // Note: useRepositoryEarn is NOT reset here to preserve positions data across page navigation
   // It will only be reset on logout via resetAllData()
+  if (clearPrivatePwa) {
+    void clearPrivatePwaData();
+  }
 };
 
-export const resetAllData = () => {
+export const resetAllData = async () => {
   clearAllCookies();
   useSessionStore().resetAll();
   useRepositoryAuth().resetAll();
-  resetAllProfileData();
+  resetAllProfileData({ clearPrivatePwa: false });
   useRepositoryOffer().resetAll();
   useRepositoryNotifications().resetAll();
   // Reset earn data on full logout/reset
   useRepositoryEarn().resetAll();
+  await clearPrivatePwaData();
 };

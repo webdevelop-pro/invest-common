@@ -22,10 +22,10 @@ export const useLogoutStore = defineStore('logout', () => {
   const token = ref('');
 
   // Logout handlers
-  const handleLogoutSuccess = () => {
+  const handleLogoutSuccess = async () => {
     useGlobalLoader().show();
+    await resetAllData();
     redirectAfterLogout();
-    resetAllData();
   };
 
   const logoutHandler = async () => {
@@ -50,7 +50,7 @@ export const useLogoutStore = defineStore('logout', () => {
         isLoading.value = false;
         return;
       }
-      handleLogoutSuccess();
+      await handleLogoutSuccess();
     } catch (error) {
       await oryErrorHandling(
         error as any,

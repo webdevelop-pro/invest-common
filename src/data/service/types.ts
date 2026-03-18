@@ -30,6 +30,11 @@ export interface RequestConfig extends RequestInit {
    * set to false for non-core domains (e.g. analytics, notifications).
    */
   showGlobalAlertOnServerError?: boolean;
+  /**
+   * Allows a mutation request to proceed while offline.
+   * Defaults to false so write actions are blocked in read-only offline mode.
+   */
+  allowOfflineMutation?: boolean;
 }
 
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';

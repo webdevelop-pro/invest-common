@@ -1,6 +1,10 @@
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import env from 'InvestCommon/config/env';
-import { createRepositoryStates, withActionState } from 'InvestCommon/data/repository/repository';
+import {
+  applyOfflineHydrationMeta,
+  createRepositoryStates,
+  withActionState,
+} from 'InvestCommon/data/repository/repository';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { IDistributions, IDistributionsMeta, IDistributionFormatted } from 'InvestCommon/data/distributions/distributions.types';
 import { ref, computed } from 'vue';
@@ -19,13 +23,20 @@ export const useRepositoryDistributions = defineStore('repository-distributions'
   });
   const getDistributionsMetaState = ref<IDistributionsMeta>();
 
-  const getDistributions = async (profileId?: string) =>
-    withActionState(getDistributionsState, async () => {
+  const getDistributions = async (profileId?: string) => {
+    let responseHeaders: Headers | null = null;
+    const result = await withActionState(getDistributionsState, async () => {
       const response = await apiClient.get<IDistributions>(`/auth/${profileId}/distribution`);
+      responseHeaders = response.headers;
       const list = response.data?.data || [];
       getDistributionsMetaState.value = response.data?.meta;
       return list;
     });
+    if (responseHeaders) {
+      applyOfflineHydrationMeta(getDistributionsState, responseHeaders);
+    }
+    return result;
+  };
 
   const resetAll = () => {
     resetActionStates();

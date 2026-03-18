@@ -1,4 +1,4 @@
-function isPWA(): boolean {
+export function isPwaStandalone(): boolean {
   if (typeof window === "undefined") return false;
 
   // iOS Safari standalone
@@ -17,6 +17,18 @@ function isPWA(): boolean {
   return false;
 }
 
+export function isIosSafariBrowser(): boolean {
+  if (typeof navigator === 'undefined') {
+    return false;
+  }
+
+  const ua = navigator.userAgent.toLowerCase();
+  const isIos = /iphone|ipad|ipod/.test(ua);
+  const isWebkit = /webkit/.test(ua);
+  const isOtherIosBrowser = /crios|fxios|edgios|opios/.test(ua);
+  return isIos && isWebkit && !isOtherIosBrowser;
+}
+
 function isMobilePhone(): boolean {
   if (typeof navigator === "undefined") return false;
   const ua = navigator.userAgent.toLowerCase();
@@ -24,5 +36,5 @@ function isMobilePhone(): boolean {
 }
 
 export function isPwaMobile(): boolean {
-  return isPWA() && isMobilePhone();
+  return isPwaStandalone() && isMobilePhone();
 }

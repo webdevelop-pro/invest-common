@@ -2,7 +2,11 @@ import { acceptHMRUpdate, defineStore } from 'pinia';
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import env from 'InvestCommon/config/env';
 import { IFilerItem, IPostSignurlResponse } from 'InvestCommon/data/filer/filer.type';
-import { createRepositoryStates, withActionState } from 'InvestCommon/data/repository/repository';
+import {
+  applyOfflineHydrationMeta,
+  createRepositoryStates,
+  withActionState,
+} from 'InvestCommon/data/repository/repository';
 import { INotification } from 'InvestCommon/data/notifications/notifications.types';
 
 const { FILER_URL } = env;
@@ -58,17 +62,31 @@ export const useRepositoryFiler = defineStore('repository-filer', () => {
   });
 
   // Actions
-  const getFiles = async (object_id: number | string, object_name: string) =>
-    withActionState(getFilesState, async () => {
+  const getFiles = async (object_id: number | string, object_name: string) => {
+    let responseHeaders: Headers | null = null;
+    const result = await withActionState(getFilesState, async () => {
       const response = await apiClient.get<IFilerItem[]>(`/auth/objects/${object_name}/${object_id}`);
+      responseHeaders = response.headers;
       return response.data;
     });
+    if (responseHeaders) {
+      applyOfflineHydrationMeta(getFilesState, responseHeaders);
+    }
+    return result;
+  };
 
-  const getPublicFiles = async (object_id: number | string, object_name: string) =>
-    withActionState(getPublicFilesState, async () => {
+  const getPublicFiles = async (object_id: number | string, object_name: string) => {
+    let responseHeaders: Headers | null = null;
+    const result = await withActionState(getPublicFilesState, async () => {
       const response = await apiClient.get<IFilerItem[]>(`/public/objects/${object_name}/${object_id}`);
+      responseHeaders = response.headers;
       return response.data;
     });
+    if (responseHeaders) {
+      applyOfflineHydrationMeta(getPublicFilesState, responseHeaders);
+    }
+    return result;
+  };
 
   const postSignurl = async (body: object) =>
     withActionState(postSignurlState, async () => {
@@ -88,12 +106,19 @@ export const useRepositoryFiler = defineStore('repository-filer', () => {
       return result;
     });
 
-  const getFileByIdLink = async (id: number | string, size?: string) =>
-    withActionState(getFileByIdLinkState, async () => {
+  const getFileByIdLink = async (id: number | string, size?: string) => {
+    let responseHeaders: Headers | null = null;
+    const result = await withActionState(getFileByIdLinkState, async () => {
       const url = size ? `/auth/files/${id}?size=${size}` : `/auth/files/${id}`;
       const response = await apiClient.get<IFilerItem[]>(url);
+      responseHeaders = response.headers;
       return response.data;
     });
+    if (responseHeaders) {
+      applyOfflineHydrationMeta(getFileByIdLinkState, responseHeaders);
+    }
+    return result;
+  };
 
   const uploadHandler = async (file: File, objectId: string | number, objectName: string | number, userId: number) => {
     await postSignurl({

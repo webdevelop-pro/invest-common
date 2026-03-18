@@ -214,3 +214,15 @@ export const reportError = (error: unknown, fallbackMessage: string, context?: u
     }
   }
 };
+
+/**
+ * Report read-only/background request failures only when the browser is online.
+ * Offline misses for cached page data are expected and should not surface as toasts.
+ */
+export const reportOfflineReadError = (error: unknown, fallbackMessage: string, context?: unknown) => {
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+    return;
+  }
+
+  reportError(error, fallbackMessage, context);
+};

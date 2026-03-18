@@ -2,7 +2,12 @@ import { computed } from 'vue';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import env from 'InvestCommon/config/env';
-import { createRepositoryStates, withActionState, type OptionsStateData } from 'InvestCommon/data/repository/repository';
+import {
+  applyOfflineHydrationMeta,
+  createRepositoryStates,
+  withActionState,
+  type OptionsStateData,
+} from 'InvestCommon/data/repository/repository';
 import { INotification } from 'InvestCommon/data/notifications/notifications.types';
 import { TransactionFormatter } from './formatter/transactions.formatter';
 import { WalletFormatter } from './formatter/wallet.formatter';
@@ -91,22 +96,36 @@ export const useRepositoryWallet = defineStore('repository-wallet', () => {
 
   const walletId = computed(() => getWalletState.value.data?.id || 0);
 
-  const getWalletByProfile = async (profileId: number) =>
-    withActionState(getWalletState, async () => {
+  const getWalletByProfile = async (profileId: number) => {
+    let responseHeaders: Headers | null = null;
+    const result = await withActionState(getWalletState, async () => {
       const response = await apiClient.get<IWalletDataResponse>(`/auth/wallet/${profileId}`);
+      responseHeaders = response.headers;
       const data = response.data;
       if (data === undefined) throw new Error('Wallet response missing data');
       return walletCache.format(data);
     });
+    if (responseHeaders) {
+      applyOfflineHydrationMeta(getWalletState, responseHeaders);
+    }
+    return result;
+  };
 
-  const getTransactions = async (walletIdProp: number) =>
-    withActionState(getTransactionsState, async () => {
+  const getTransactions = async (walletIdProp: number) => {
+    let responseHeaders: Headers | null = null;
+    const result = await withActionState(getTransactionsState, async () => {
       const response = await apiClient.get<{ items: ITransactionDataResponse[] }>(`/auth/wallet/${walletIdProp}/transactions`);
+      responseHeaders = response.headers;
       const items = response.data?.items ?? [];
       transactionCache.prune(items);
       const formatted = items.map((transaction: ITransactionDataResponse) => transactionCache.format(transaction));
       return formatted;
     });
+    if (responseHeaders) {
+      applyOfflineHydrationMeta(getTransactionsState, responseHeaders);
+    }
+    return result;
+  };
 
   const addBankAccount = async (walletIdProp: number) =>
     withActionState(addBankAccountState, async () => {

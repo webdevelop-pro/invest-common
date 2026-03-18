@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
   normalizeError,
   reportError,
+  reportOfflineReadError,
   toasterErrorHandling,
   setErrorLogger,
   setErrorHandlers,
@@ -87,6 +88,10 @@ describe('reportError', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    Object.defineProperty(window.navigator, 'onLine', {
+      configurable: true,
+      value: true,
+    });
     setErrorReporter(null);
     setErrorLogger(null);
     setErrorHandlers({});
@@ -143,6 +148,19 @@ describe('reportError', () => {
       throw new Error('reporter threw');
     });
     expect(() => reportError(new Error('x'), 'Fallback')).not.toThrow();
+  });
+
+  it('suppresses background read errors while the browser is offline', () => {
+    Object.defineProperty(window.navigator, 'onLine', {
+      configurable: true,
+      value: false,
+    });
+
+    setErrorLogger(mockLogger);
+    reportOfflineReadError(new Error('offline miss'), 'Failed to load offers');
+
+    expect(mockLogger).not.toHaveBeenCalled();
+    expect(mockToast).not.toHaveBeenCalled();
   });
 });
 

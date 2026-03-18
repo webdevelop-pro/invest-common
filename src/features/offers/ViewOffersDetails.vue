@@ -13,6 +13,8 @@ import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
 import { useRepositoryOffer } from 'InvestCommon/data/offer/offer.repository';
+import { OfferFormatter } from 'InvestCommon/data/offer/offer.formatter';
+import type { IOffer, IOfferFormatted } from 'InvestCommon/data/offer/offer.types';
 import { useRepositoryFiler } from 'InvestCommon/data/filer/filer.repository';
 import { useSendAnalyticsEvent } from 'InvestCommon/domain/analytics/useSendAnalyticsEvent';
 import { reportError } from 'InvestCommon/domain/error/errorReporting';
@@ -66,13 +68,29 @@ const filerRepository = useRepositoryFiler();
 const { sendEvent } = useSendAnalyticsEvent();
 
 const investSteps = computed(() => defaultInvestSteps);
-const offer = ref(params.value?.data || null);
+const formatStaticOffer = (value: unknown): IOfferFormatted | null => {
+  if (!value || typeof value !== 'object' || !('id' in value) || !('slug' in value)) {
+    return null;
+  }
+
+  return new OfferFormatter(value as IOffer).format();
+};
+const fallbackOffer = computed(() => formatStaticOffer(params.value?.data));
+const offer = ref<IOfferFormatted | null>(fallbackOffer.value);
 const activeOfferId = computed(() => {
   const id = Number(offer.value?.id);
   return Number.isFinite(id) && id > 0 ? id : null;
 });
 
 const offerLoading = ref(true);
+
+const reportReadError = (error: unknown, message: string) => {
+  if (typeof window !== 'undefined' && window.navigator?.onLine === false) {
+    return;
+  }
+
+  reportError(error, message);
+};
 
 const investHandler = async () => {
   // If current selected profile is not KYC approved, switch to a random approved profile (if any)
@@ -126,11 +144,11 @@ watch(
 onBeforeMount(() => {
   if (userLoggedIn.value && params.value?.slug) {
     investmentRepository.getInvestUnconfirmed(String(params.value?.slug), selectedUserProfileId.value)
-      .catch((e) => reportError(e, 'Failed to load investment'));
+      .catch((e) => reportReadError(e, 'Failed to load investment'));
   }
   if (params.value?.slug) {
     offerRepository.getOfferOne(String(params.value?.slug))
-      .catch((e) => reportError(e, 'Failed to load offer'));
+      .catch((e) => reportReadError(e, 'Failed to load offer'));
     void sendEvent({
       event_type: 'open',
       method: 'GET',
@@ -146,6 +164,12 @@ watch(() => getOfferOneState.value.loading, () => {
   offerLoading.value = getOfferOneState.value.loading;
 });
 
+watch(fallbackOffer, (newValue) => {
+  if (newValue && !offer.value) {
+    offer.value = newValue;
+  }
+}, { immediate: true });
+
 watch(() => getOfferOneState.value.data, (newValue) => {
   if (newValue) {
     offer.value = newValue;
@@ -157,12 +181,12 @@ watch(activeOfferId, (offerId) => {
   }
 
   offerRepository.getOfferComments(offerId)
-    .catch((e) => reportError(e, 'Failed to load offer comments'));
+    .catch((e) => reportReadError(e, 'Failed to load offer comments'));
   filerRepository.getPublicFiles(offerId, 'offer')
-    .catch((e) => reportError(e, 'Failed to load offer files'));
+    .catch((e) => reportReadError(e, 'Failed to load offer files'));
   if (userLoggedIn.value) {
     filerRepository.getFiles(offerId, 'offer')
-      .catch((e) => reportError(e, 'Failed to load offer files'));
+      .catch((e) => reportReadError(e, 'Failed to load offer files'));
   }
 }, { immediate: true });
 </script>

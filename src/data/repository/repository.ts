@@ -1,9 +1,17 @@
 import { ref, type Ref } from 'vue';
+import {
+  PWA_OFFLINE_LAST_SYNC_HEADER,
+  PWA_OFFLINE_RESPONSE_SOURCE_HEADER,
+} from 'InvestCommon/domain/pwa/pwaOfflineStore';
+
+export type OfflineHydrationSource = 'network' | 'offline-cache';
 
 export type ActionState<T> = {
   data: T | undefined;
   loading: boolean;
   error: Error | null;
+  lastSyncedAt?: string | null;
+  dataSource?: OfflineHydrationSource | null;
 };
 
 /**
@@ -18,6 +26,26 @@ const createInitialState = <T>(data?: T): ActionState<T> => ({
   loading: false,
   error: null,
 });
+
+export function applyOfflineHydrationMeta<T>(
+  stateRef: Ref<ActionState<T | undefined>>,
+  headers: Headers,
+): void {
+  const lastSyncedAt = headers.get(PWA_OFFLINE_LAST_SYNC_HEADER);
+  const dataSource = headers.get(PWA_OFFLINE_RESPONSE_SOURCE_HEADER);
+
+  if (!lastSyncedAt && !dataSource) {
+    return;
+  }
+
+  stateRef.value = {
+    ...stateRef.value,
+    lastSyncedAt: lastSyncedAt ?? null,
+    dataSource: dataSource === 'network' || dataSource === 'offline-cache'
+      ? dataSource
+      : null,
+  };
+}
 
 /**
  * Creates a single action state ref.

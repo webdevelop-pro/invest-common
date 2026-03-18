@@ -16,7 +16,7 @@ import { filterPages } from 'UiKit/helpers/allData';
 import { IFrontmatter } from 'UiKit/types/types';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import { useRepositoryOffer } from 'InvestCommon/data/offer/offer.repository';
-import { reportError } from 'InvestCommon/domain/error/errorReporting';
+import { reportOfflineReadError } from 'InvestCommon/domain/error/errorReporting';
 
 import { __pageData as topData } from 'Docs/home/top.md';
 import { __pageData as partnersData } from 'Docs/home/partners.md';
@@ -73,7 +73,7 @@ const loadOffers = () => {
   }
 
   offerRepository.getOffers()
-    .catch((e) => reportError(e, 'Failed to load offers'));
+    .catch((e) => reportOfflineReadError(e, 'Failed to load offers'));
 };
 
 onMounted(() => {

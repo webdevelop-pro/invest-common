@@ -311,7 +311,7 @@ const shouldHideMenu = computed(() => (
 @use 'UiKit/styles/_colors.scss' as *;
 
 :global(:root) {
-  --pwa-footer-safe-offset: 104px;
+  --pwa-footer-safe-offset: 67px;
 }
 
 :host,

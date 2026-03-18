@@ -2,7 +2,12 @@ import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import { IAccreditationData } from 'InvestCommon/data/accreditation/accreditation.types';
 import env from 'InvestCommon/config/env';
 import { v4 as uuidv4 } from 'uuid';
-import { createRepositoryStates, withActionState, type OptionsStateData } from 'InvestCommon/data/repository/repository';
+import {
+  applyOfflineHydrationMeta,
+  createRepositoryStates,
+  withActionState,
+  type OptionsStateData,
+} from 'InvestCommon/data/repository/repository';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 
 const { ACCREDITATION_URL } = env;
@@ -33,11 +38,18 @@ export const useRepositoryAccreditation = defineStore('repository-accreditation'
     createEscrowState: undefined,
   });
 
-  const getAll = async (profileId: number) =>
-    withActionState(getAllState, async () => {
+  const getAll = async (profileId: number) => {
+    let responseHeaders: Headers | null = null;
+    const result = await withActionState(getAllState, async () => {
       const response = await apiClient.get(`/auth/accreditation/${profileId}`);
+      responseHeaders = response.headers;
       return response.data;
     });
+    if (responseHeaders) {
+      applyOfflineHydrationMeta(getAllState, responseHeaders);
+    }
+    return result;
+  };
 
   const create = async (profileId: number, note: string) =>
     withActionState(createState, async () => {

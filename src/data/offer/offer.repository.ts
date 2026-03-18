@@ -6,7 +6,12 @@ import {
   IOfferCommentPayload,
 } from 'InvestCommon/data/offer/offer.types';
 import env from 'InvestCommon/config/env';
-import { createRepositoryStates, withActionState, type OptionsStateData } from 'InvestCommon/data/repository/repository';
+import {
+  applyOfflineHydrationMeta,
+  createRepositoryStates,
+  withActionState,
+  type OptionsStateData,
+} from 'InvestCommon/data/repository/repository';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { OfferFormatter } from 'InvestCommon/data/offer/offer.formatter';
 import { IOfferFormatted, IOffer as IOfferApp } from 'InvestCommon/data/offer/offer.types';
@@ -27,42 +32,75 @@ export const useRepositoryOffer = defineStore('repository-offer', () => {
   const apiClient = new ApiClient(OFFER_URL);
   const getOfferSignature = (offer: IOfferApp) => {
     const securityInfo = offer.security_info ?? {};
+    const offerData = offer.data ?? {};
 
-    return [
-      offer.updated_at ?? '',
-      offer.status ?? '',
-      offer.id ?? '',
-      offer.name ?? '',
-      offer.slug ?? '',
-      offer.amount_raised ?? '',
-      offer.target_raise ?? '',
-      offer.total_shares ?? '',
-      offer.subscribed_shares ?? '',
-      offer.min_investment ?? '',
-      offer.price_per_share ?? '',
-      offer.image_link_id ?? '',
-      offer.approved_at ?? '',
-      offer.close_at ?? '',
-      offer.security_type ?? '',
-      offer.valuation ?? '',
-      offer.reg_type ?? '',
-      securityInfo.pre_money_valuation ?? '',
-      securityInfo.voting_rights ?? '',
-      securityInfo.liquidation_preference ?? '',
-      securityInfo.dividend_type ?? '',
-      securityInfo.dividend_rate ?? '',
-      securityInfo.dividend_payment_frequency ?? '',
-      securityInfo.cn_valuation_cap ?? '',
-      securityInfo.cn_discount_rate ?? '',
-      securityInfo.cn_interest_rate ?? '',
-      securityInfo.cn_maturity_date ?? '',
-      securityInfo.interest_rate_apy ?? '',
-      securityInfo.debt_payment_schedule ?? '',
-      securityInfo.debt_maturity_date ?? '',
-      securityInfo.debt_interest_rate ?? '',
-      securityInfo.debt_term_length ?? '',
-      securityInfo.debt_term_unit ?? '',
-    ].join('|');
+    return JSON.stringify({
+      id: offer.id ?? 0,
+      name: offer.name ?? '',
+      legal_name: offer.legal_name ?? '',
+      slug: offer.slug ?? '',
+      title: offer.title ?? '',
+      security_type: offer.security_type ?? '',
+      price_per_share: offer.price_per_share ?? 0,
+      min_investment: offer.min_investment ?? 0,
+      image_link_id: offer.image_link_id ?? 0,
+      total_shares: offer.total_shares ?? 0,
+      valuation: offer.valuation ?? 0,
+      subscribed_shares: offer.subscribed_shares ?? 0,
+      confirmed_shares: offer.confirmed_shares ?? 0,
+      status: offer.status ?? '',
+      approved_at: offer.approved_at ?? '',
+      close_at: offer.close_at ?? '',
+      seo_title: offer.seo_title ?? '',
+      seo_description: offer.seo_description ?? '',
+      description: offer.description ?? '',
+      highlights: offer.highlights ?? '',
+      risk_disclosures: offer.risk_disclosures ?? '',
+      additional_details: offer.additional_details ?? '',
+      website: offer.website ?? '',
+      state: offer.state ?? '',
+      city: offer.city ?? '',
+      amount_raised: offer.amount_raised ?? 0,
+      target_raise: offer.target_raise ?? 0,
+      reg_type: offer.reg_type ?? '',
+      linkedin: offer.linkedin ?? '',
+      facebook: offer.facebook ?? '',
+      twitter: offer.twitter ?? '',
+      github: offer.github ?? '',
+      instagram: offer.instagram ?? '',
+      telegram: offer.telegram ?? '',
+      mastodon: offer.mastodon ?? '',
+      data: {
+        wire_to: offerData.wire_to ?? '',
+        swift_id: offerData.swift_id ?? '',
+        custodian: offerData.custodian ?? '',
+        account_number: offerData.account_number ?? '',
+        routing_number: offerData.routing_number ?? '',
+        apy: offerData.apy ?? '',
+        distribution_frequency: offerData.distribution_frequency ?? '',
+        investment_strategy: offerData.investment_strategy ?? '',
+        estimated_hold_period: offerData.estimated_hold_period ?? '',
+        video: offerData.video ?? '',
+      },
+      security_info: {
+        voting_rights: securityInfo.voting_rights ?? '',
+        liquidation_preference: securityInfo.liquidation_preference ?? '',
+        dividend_type: securityInfo.dividend_type ?? '',
+        dividend_rate: securityInfo.dividend_rate ?? '',
+        dividend_payment_frequency: securityInfo.dividend_payment_frequency ?? '',
+        cn_valuation_cap: securityInfo.cn_valuation_cap ?? '',
+        cn_discount_rate: securityInfo.cn_discount_rate ?? '',
+        cn_interest_rate: securityInfo.cn_interest_rate ?? '',
+        cn_maturity_date: securityInfo.cn_maturity_date ?? '',
+        interest_rate_apy: securityInfo.interest_rate_apy ?? '',
+        debt_payment_schedule: securityInfo.debt_payment_schedule ?? '',
+        debt_maturity_date: securityInfo.debt_maturity_date ?? '',
+        debt_interest_rate: securityInfo.debt_interest_rate ?? '',
+        debt_term_length: securityInfo.debt_term_length ?? '',
+        debt_term_unit: securityInfo.debt_term_unit ?? '',
+        pre_money_valuation: securityInfo.pre_money_valuation ?? 0,
+      },
+    });
   };
   const offerCache = createFormatterCache<IOfferApp, IOfferFormatted>({
     getKey: (offer) => Number(offer.id) || 0,
@@ -88,6 +126,7 @@ export const useRepositoryOffer = defineStore('repository-offer', () => {
   const getOffers = async () =>
     withActionState(getOffersState, async () => {
       const response = await apiClient.get('/public/offer');
+      applyOfflineHydrationMeta(getOffersState, response.headers);
       const rawData = response.data as IOfferData;
       if (rawData.data && Array.isArray(rawData.data)) {
         offerCache.prune(rawData.data as unknown as IOfferApp[]);
@@ -110,6 +149,7 @@ export const useRepositoryOffer = defineStore('repository-offer', () => {
   const getOfferOne = async (slug: string | number) =>
     withActionState(getOfferOneState, async () => {
       const response = await apiClient.get(`/public/offer/${slug}`);
+      applyOfflineHydrationMeta(getOfferOneState, response.headers);
       const offerData = response.data as IOffer;
       return offerCache.format(offerData as unknown as IOfferApp);
     });
@@ -117,6 +157,7 @@ export const useRepositoryOffer = defineStore('repository-offer', () => {
   const getOfferComments = async (id: number) =>
     withActionState(getOfferCommentsState, async () => {
       const response = await apiClient.get(`/public/comment/${id}`);
+      applyOfflineHydrationMeta(getOfferCommentsState, response.headers);
       return response.data as IOfferCommentsResponse;
     });
 

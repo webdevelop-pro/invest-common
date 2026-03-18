@@ -24,7 +24,7 @@ vi.mock('InvestCommon/domain/redirects/redirectAfterLogout', () => ({
 }));
 
 vi.mock('InvestCommon/domain/resetAllData', () => ({
-  resetAllData: vi.fn(),
+  resetAllData: vi.fn().mockResolvedValue(undefined),
 }));
 
 describe('useLogoutStore', () => {
