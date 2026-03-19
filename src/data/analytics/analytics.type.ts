@@ -14,9 +14,7 @@ export type AnalyticsEventType =
   | 'open'
   | 'click'
   | 'send'
-  | 'close'
-  // Allow additional, descriptive event names (e.g. 'kyc_started')
-  | (string & {});
+  | 'close';
 
 export type AnalyticsHttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD' | 'OPTIONS' | 'PATCH';
 

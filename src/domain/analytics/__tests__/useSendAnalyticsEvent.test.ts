@@ -50,8 +50,7 @@ describe('useSendAnalyticsEvent', () => {
     const { sendEvent } = useSendAnalyticsEvent();
 
     await sendEvent({
-      // Cast as any to avoid depending on concrete enum values
-      event_type: 'test_event' as any,
+      event_type: 'open',
       request_path: '/test-path',
       httpRequestUrl: 'https://api.test.local/v1/example',
     });
@@ -59,7 +58,7 @@ describe('useSendAnalyticsEvent', () => {
     expect(trackEventMock).toHaveBeenCalledTimes(1);
     const payload = trackEventMock.mock.calls[0][0] as IAnalyticsEventRequest;
 
-    expect(payload.event_type).toBe('test_event');
+    expect(payload.event_type).toBe('open');
     expect(payload.method).toBe('GET');
     expect(payload.status_code).toBe(200);
     expect(payload.identity_id).toBe('user-123');
@@ -80,11 +79,10 @@ describe('useSendAnalyticsEvent', () => {
     const { sendEvent } = useSendAnalyticsEvent();
 
     await sendEvent({
-      event_type: 'test_event' as any,
+      event_type: 'send',
       request_path: '/error-path',
     });
 
     expect(trackEventMock).toHaveBeenCalledTimes(1);
   });
 });
-

@@ -3,6 +3,7 @@ import {
   type Ref,
 } from 'vue';
 import { useSendAnalyticsEvent } from 'InvestCommon/domain/analytics/useSendAnalyticsEvent';
+import type { AnalyticsEventType } from 'InvestCommon/data/analytics/analytics.type';
 import type { InstallPromptOutcome, InstallPromptState } from './usePwaInstallPrompt';
 
 type MaybeError = unknown;
@@ -30,56 +31,105 @@ const getRequestPath = () => {
   return window.location.pathname || '/';
 };
 
+const PWA_TELEMETRY_EVENTS = {
+  installPromptShown: {
+    eventType: 'open',
+    httpRequestUrl: 'pwa://install/prompt-shown',
+  },
+  updateAvailable: {
+    eventType: 'open',
+    httpRequestUrl: 'pwa://update/available',
+  },
+  offlineReady: {
+    eventType: 'open',
+    httpRequestUrl: 'pwa://offline/ready',
+  },
+  offlineEntered: {
+    eventType: 'open',
+    httpRequestUrl: 'pwa://offline/entered',
+  },
+  reconnected: {
+    eventType: 'close',
+    httpRequestUrl: 'pwa://offline/reconnected',
+  },
+  registrationFailed: {
+    eventType: 'send',
+    httpRequestUrl: 'pwa://service-worker/register',
+    statusCode: 500,
+  },
+  installAccepted: {
+    eventType: 'click',
+    httpRequestUrl: 'pwa://install/accepted',
+  },
+  installDismissed: {
+    eventType: 'close',
+    httpRequestUrl: 'pwa://install/dismissed',
+  },
+  updateAccepted: {
+    eventType: 'click',
+    httpRequestUrl: 'pwa://update/accepted',
+  },
+  updateDismissed: {
+    eventType: 'close',
+    httpRequestUrl: 'pwa://update/dismissed',
+  },
+  offlineReadyDismissed: {
+    eventType: 'close',
+    httpRequestUrl: 'pwa://offline/ready-dismissed',
+  },
+} as const satisfies Record<string, {
+  eventType: AnalyticsEventType;
+  httpRequestUrl: string;
+  statusCode?: number;
+}>;
+
+type PwaTelemetryEventKey = keyof typeof PWA_TELEMETRY_EVENTS;
+
 export function usePwaTelemetry(options: UsePwaTelemetryOptions) {
   const { sendEvent } = useSendAnalyticsEvent({
     serviceName: 'vitepress-pwa',
   });
 
-  const track = (eventType: string, statusCode = 200) => void sendEvent({
-    event_type: eventType,
+  const track = (eventKey: PwaTelemetryEventKey) => void sendEvent({
+    event_type: PWA_TELEMETRY_EVENTS[eventKey].eventType,
     request_path: getRequestPath(),
-    status_code: statusCode,
+    status_code: PWA_TELEMETRY_EVENTS[eventKey].statusCode ?? 200,
+    httpRequestUrl: PWA_TELEMETRY_EVENTS[eventKey].httpRequestUrl,
   });
 
   watch(options.installState, (value, oldValue) => {
     if (value !== 'hidden' && oldValue === 'hidden') {
-      track('pwa_install_prompt_shown');
+      track('installPromptShown');
     }
   });
 
   watch(options.isUpdateReady, (value, oldValue) => {
     if (value && !oldValue) {
-      track('pwa_update_available');
+      track('updateAvailable');
     }
   });
 
   watch(options.isOfflineReady, (value, oldValue) => {
     if (value && !oldValue) {
-      track('pwa_offline_ready');
+      track('offlineReady');
     }
   });
 
   watch(options.isOffline, (value, oldValue) => {
     if (value && !oldValue) {
-      track('pwa_offline_entered');
+      track('offlineEntered');
     }
   });
 
   watch(options.isReconnected, (value, oldValue) => {
     if (value && !oldValue) {
-      track('pwa_reconnected');
+      track('reconnected');
     }
   });
 
   watch(options.registrationError, (value, oldValue) => {
     if (value && value !== oldValue) {
-      void sendEvent({
-        event_type: 'pwa_sw_registration_failed',
-        request_path: getRequestPath(),
-        status_code: 500,
-        service_name: 'vitepress-pwa',
-        httpRequestUrl: 'pwa://service-worker/register',
-      });
+      track('registrationFailed');
     }
   });
 
@@ -87,30 +137,30 @@ export function usePwaTelemetry(options: UsePwaTelemetryOptions) {
     const outcome = await options.promptInstall();
 
     if (outcome === 'accepted') {
-      track('pwa_install_accepted');
+      track('installAccepted');
     } else if (outcome === 'dismissed') {
-      track('pwa_install_dismissed');
+      track('installDismissed');
     }
   };
 
   const handleDismissInstall = () => {
     options.dismissInstallPrompt();
-    track('pwa_install_dismissed');
+    track('installDismissed');
   };
 
   const handleReloadApp = async () => {
-    track('pwa_update_accepted');
+    track('updateAccepted');
     await options.reloadApp();
   };
 
   const handleDismissUpdate = () => {
     options.dismissUpdateReady();
-    track('pwa_update_dismissed');
+    track('updateDismissed');
   };
 
   const handleDismissOfflineReady = () => {
     options.dismissOfflineReady();
-    track('pwa_offline_ready_dismissed');
+    track('offlineReadyDismissed');
   };
 
   return {
