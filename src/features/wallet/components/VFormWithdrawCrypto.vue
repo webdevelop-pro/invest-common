@@ -32,6 +32,9 @@ const emit = defineEmits<{
   submit: [];
   cancel: [];
 }>();
+
+const walletAddressHelperText = 'Send only to an Ethereum (ERC20) address. '
+  + 'Transfers to other networks will result in permanent loss.';
 </script>
 
 <template>
@@ -108,7 +111,7 @@ const emit = defineEmits<{
           :required="isFieldRequired('to')"
           :error-text="getErrorText('to', errorData) ? [getErrorText('to', errorData)!] : undefined"
           label="Recipient Wallet Address"
-          helper-text="Send only to an Ethereum (ERC20) address. Transfers to other networks will result in permanent loss."
+          :helper-text="walletAddressHelperText"
           class="v-form-withdraw-crypto__input"
         >
           <VFormInput

@@ -10,11 +10,25 @@ const hoisted = vi.hoisted(() => ({
 
 // ------------------- MOCKS -------------------
 
+const localSessionState = {
+  value: undefined as { active?: boolean; id?: string } | undefined,
+}
 const updateSessionMock = vi.fn()
 const resetAllMock = vi.fn()
+const oryErrorHandlingMock = vi.fn().mockResolvedValue(undefined)
+
+const setNavigatorOnline = (online: boolean) => {
+  Object.defineProperty(window.navigator, 'onLine', {
+    configurable: true,
+    get: () => online,
+  })
+}
 
 vi.mock('InvestCommon/domain/session/store/useSession', () => ({
   useSessionStore: () => ({
+    get userSession() {
+      return localSessionState.value
+    },
     updateSession: updateSessionMock,
     resetAll: resetAllMock,
   }),
@@ -30,6 +44,10 @@ vi.mock('InvestCommon/domain/config/links', () => ({
   urlAuthenticator: '/authenticator',
 }))
 
+vi.mock('InvestCommon/domain/error/oryErrorHandling', () => ({
+  oryErrorHandling: (...args: unknown[]) => oryErrorHandlingMock(...args),
+}))
+
 const reportErrorMock = vi.fn()
 vi.mock('InvestCommon/domain/error/errorReporting', () => ({
   reportError: (...args: unknown[]) => reportErrorMock(...args),
@@ -42,6 +60,14 @@ function redirectAuthGuardStaticTests() {
   beforeEach(() => {
     vi.clearAllMocks()
     hoisted.getSessionMock.mockResolvedValue(null)
+    localSessionState.value = undefined
+    updateSessionMock.mockImplementation((session: { active?: boolean; id?: string }) => {
+      localSessionState.value = session
+    })
+    resetAllMock.mockImplementation(() => {
+      localSessionState.value = undefined
+    })
+    setNavigatorOnline(true)
     Object.defineProperty(window, 'location', {
       value: { pathname: '/' },
       writable: true,
@@ -113,6 +139,18 @@ function redirectAuthGuardStaticTests() {
     expect(updateSessionMock).toHaveBeenCalledWith(session)
   })
 
+  it('keeps the local session while offline', async () => {
+    localSessionState.value = { id: 's1', active: true }
+    setNavigatorOnline(false)
+    window.location.pathname = '/dashboard'
+
+    await redirectAuthGuardStatic()
+
+    expect(hoisted.getSessionMock).not.toHaveBeenCalled()
+    expect(resetAllMock).not.toHaveBeenCalled()
+    expect(localSessionState.value).toEqual({ id: 's1', active: true })
+  })
+
   it('handles session fetch errors gracefully', async () => {
     hoisted.getSessionMock.mockRejectedValue(new Error('Network error'))
     window.location.pathname = '/signin'
@@ -120,6 +158,19 @@ function redirectAuthGuardStaticTests() {
     await expect(redirectAuthGuardStatic()).resolves.toBeUndefined()
     expect(hoisted.getSessionMock).toHaveBeenCalled()
     expect(updateSessionMock).not.toHaveBeenCalled()
+  })
+
+  it('keeps the local session when session refresh fails like an offline fetch', async () => {
+    localSessionState.value = { id: 's1', active: true }
+    hoisted.getSessionMock.mockRejectedValue(new TypeError('Failed to fetch'))
+    window.location.pathname = '/dashboard'
+
+    await expect(redirectAuthGuardStatic()).resolves.toBeUndefined()
+
+    expect(hoisted.getSessionMock).toHaveBeenCalled()
+    expect(resetAllMock).not.toHaveBeenCalled()
+    expect(localSessionState.value).toEqual({ id: 's1', active: true })
+    expect(oryErrorHandlingMock).not.toHaveBeenCalled()
   })
 }
 

@@ -20,6 +20,10 @@ const TOAST_OPTIONS = {
   variant: 'error' as const,
 };
 
+const isBrowserOffline = () => (
+  typeof navigator !== 'undefined' && navigator.onLine === false
+);
+
 export const useDomainWebSocketStore = defineStore('domainWebsockets', () => {
   const userSessionStore = useSessionStore();
   const { userLoggedIn } = storeToRefs(userSessionStore);
@@ -37,9 +41,22 @@ export const useDomainWebSocketStore = defineStore('domainWebsockets', () => {
   let stopUserLoggedInWatch: WatchStopHandle | null = null;
   let stopDataWatch: WatchStopHandle | null = null;
   let stopStatusWatch: WatchStopHandle | null = null;
+  let closeConnection: (() => void) | null = null;
+  let hasConnectivityListeners = false;
+
+  const cleanupConnectivityListeners = () => {
+    if (typeof window === 'undefined' || !hasConnectivityListeners) {
+      return;
+    }
+
+    window.removeEventListener('online', handleBrowserOnline);
+    window.removeEventListener('offline', handleBrowserOffline);
+    hasConnectivityListeners = false;
+  };
 
   const cleanupConnection = () => {
     isConnectingOrOpen.value = false;
+    closeConnection = null;
 
     if (stopUserLoggedInWatch) {
       stopUserLoggedInWatch();
@@ -53,6 +70,33 @@ export const useDomainWebSocketStore = defineStore('domainWebsockets', () => {
       stopStatusWatch();
       stopStatusWatch = null;
     }
+  };
+
+  function handleBrowserOnline() {
+    if (!userLoggedIn.value) {
+      return;
+    }
+
+    debugLog('browser online: retrying websocket connection');
+    window.setTimeout(() => {
+      void webSocketHandler();
+    }, 0);
+  }
+
+  function handleBrowserOffline() {
+    debugLog('browser offline: closing websocket connection');
+    closeConnection?.();
+    cleanupConnection();
+  }
+
+  const ensureConnectivityListeners = () => {
+    if (typeof window === 'undefined' || hasConnectivityListeners) {
+      return;
+    }
+
+    window.addEventListener('online', handleBrowserOnline);
+    window.addEventListener('offline', handleBrowserOffline);
+    hasConnectivityListeners = true;
   };
 
   const handleInternalMessage = (notification: INotification) => {
@@ -100,11 +144,19 @@ export const useDomainWebSocketStore = defineStore('domainWebsockets', () => {
   const webSocketHandler = async (): Promise<void> => {
     debugLog('webSocketHandler called');
     if (!userLoggedIn.value) {
+      cleanupConnectivityListeners();
       return;
     }
 
     if (isConnectingOrOpen.value) {
       debugLog('webSocketHandler skipped: connection already active');
+      return;
+    }
+
+    ensureConnectivityListeners();
+
+    if (isBrowserOffline()) {
+      debugLog('webSocketHandler skipped: browser offline');
       return;
     }
 
@@ -125,6 +177,10 @@ export const useDomainWebSocketStore = defineStore('domainWebsockets', () => {
         delay: 1000,
         onFailed() {
           cleanupConnection();
+          if (isBrowserOffline()) {
+            debugLog('websocket reconnect retries exhausted while offline');
+            return;
+          }
           toast(TOAST_OPTIONS);
         },
       },
@@ -134,12 +190,14 @@ export const useDomainWebSocketStore = defineStore('domainWebsockets', () => {
         pongTimeout: 1000,
       },
     });
+    closeConnection = close;
 
     stopUserLoggedInWatch = watch(userLoggedIn, () => {
       if (!userLoggedIn.value) {
         close();
         debugLog(`connection to ${uri} is closed`);
         cleanupConnection();
+        cleanupConnectivityListeners();
       }
     });
 

@@ -1,12 +1,14 @@
 // import { storeToRefs } from 'pinia';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
+import { ISession } from 'InvestCommon/data/auth/auth.type';
 import {
   urlAuthenticator,
   // urlSignin, urlSignup, urlForgot, urlCheckEmail,
   // urlProfile,
 } from 'InvestCommon/domain/config/links';
 import { oryErrorHandling } from 'InvestCommon/domain/error/oryErrorHandling';
+import { shouldPreserveOfflineSession } from './authGuardOffline';
 // import { navigateWithQueryParams } from 'UiKit/helpers/general';
 
 // const pagesToRedirectIfLoggedIn = [
@@ -23,10 +25,15 @@ export const redirectAuthGuardStatic = async () => {
 
   const userSessionStore = useSessionStore();
   // const { userLoggedIn } = storeToRefs(userSessionStore);
+  const getLocalSession = () => (userSessionStore.userSession as ISession | null | undefined);
 
   try {
     // Skip session check if we're on the authenticator page
     if (window.location.pathname !== '/' && urlAuthenticator.includes(window.location.pathname)) {
+      return;
+    }
+
+    if (shouldPreserveOfflineSession(getLocalSession())) {
       return;
     }
 
@@ -50,6 +57,10 @@ export const redirectAuthGuardStatic = async () => {
     //   }
     // }
   } catch (error) {
+    if (shouldPreserveOfflineSession(getLocalSession(), error)) {
+      return;
+    }
+
     // Handle Ory-specific session errors (e.g. session_aal2_required) and generic failures.
     await oryErrorHandling(error as any, 'browser', () => {}, 'Auth guard (static)');
   }

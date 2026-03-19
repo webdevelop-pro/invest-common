@@ -1,0 +1,75 @@
+import {
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
+import { mount } from '@vue/test-utils';
+import VOfflineStatusBanner from '../VOfflineStatusBanner.vue';
+
+const mountBanner = (props: Record<string, unknown>) => mount(VOfflineStatusBanner, {
+  props,
+  global: {
+    stubs: {
+      VAlert: {
+        props: ['variant'],
+        template: '<section data-testid="alert" :data-variant="variant"><slot name="title" /><slot name="description" /></section>',
+      },
+    },
+  },
+});
+
+describe('VOfflineStatusBanner', () => {
+  it('stays hidden when the app is neither offline nor reconnected', () => {
+    const wrapper = mountBanner({
+      isOffline: false,
+      isReconnected: false,
+      isShowingCachedContent: false,
+      lastSyncedAt: null,
+    });
+
+    expect(wrapper.find('[data-testid="offline-status-banner"]').exists()).toBe(false);
+  });
+
+  it('shows the cached-content offline message and formatted sync timestamp', () => {
+    const localeSpy = vi.spyOn(Date.prototype, 'toLocaleString').mockReturnValue('Mar 19, 2026, 5:00 PM');
+    const wrapper = mountBanner({
+      isOffline: true,
+      isReconnected: false,
+      isShowingCachedContent: true,
+      lastSyncedAt: '2026-03-19T17:00:00.000Z',
+    });
+
+    expect(wrapper.text()).toContain('Offline mode');
+    expect(wrapper.text()).toContain('read-only mode');
+    expect(wrapper.text()).toContain('Last synced: Mar 19, 2026, 5:00 PM.');
+    expect(wrapper.find('[data-testid="alert"]').attributes('data-variant')).toBe('info');
+
+    localeSpy.mockRestore();
+  });
+
+  it('shows the uncached offline message when cached content is unavailable', () => {
+    const wrapper = mountBanner({
+      isOffline: true,
+      isReconnected: false,
+      isShowingCachedContent: false,
+      lastSyncedAt: null,
+    });
+
+    expect(wrapper.text()).toContain('Some sections may be unavailable');
+  });
+
+  it('shows the reconnect message and ignores invalid sync timestamps', () => {
+    const wrapper = mountBanner({
+      isOffline: false,
+      isReconnected: true,
+      isShowingCachedContent: false,
+      lastSyncedAt: 'not-a-date',
+    });
+
+    expect(wrapper.text()).toContain('Back online');
+    expect(wrapper.text()).toContain('Connection restored');
+    expect(wrapper.text()).not.toContain('Last synced:');
+    expect(wrapper.find('[data-testid="alert"]').attributes('data-variant')).toBe('success');
+  });
+});

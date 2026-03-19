@@ -9,6 +9,36 @@ import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles
 import { oryErrorHandling } from 'InvestCommon/domain/error/oryErrorHandling';
 // import { useDomainWebSocketStore } from 'InvestCommon/domain/websockets/store/useWebsockets';
 import { ISession } from 'InvestCommon/data/auth/auth.type';
+import { shouldPreserveOfflineSession } from './authGuardOffline';
+
+const PRESERVED_SIGNIN_QUERY_PARAMS = new Set([
+  '__pwa_test',
+]);
+
+const getPreservedSigninQueryParams = (sourceUrl?: string) => {
+  if (typeof window === 'undefined') {
+    return {};
+  }
+
+  let params = new URLSearchParams(window.location.search);
+
+  if (sourceUrl) {
+    try {
+      params = new URL(sourceUrl, window.location.origin).searchParams;
+    } catch {
+      params = new URLSearchParams(window.location.search);
+    }
+  }
+  const preservedParams: Record<string, string> = {};
+
+  params.forEach((value, key) => {
+    if (PRESERVED_SIGNIN_QUERY_PARAMS.has(key)) {
+      preservedParams[key] = value;
+    }
+  });
+
+  return preservedParams;
+};
 
 /**
  * Shared 401 / unauthorized redirect: reset state and go to sign-in with optional return URL.
@@ -17,7 +47,10 @@ import { ISession } from 'InvestCommon/data/auth/auth.type';
 export async function redirectToSigninForUnauthorized(redirectPath?: string): Promise<void> {
   await resetAllData();
   const redirect = redirectPath ?? window.location.href;
-  navigateWithQueryParams(urlSignin, { redirect });
+  navigateWithQueryParams(urlSignin, {
+    ...getPreservedSigninQueryParams(redirect),
+    redirect,
+  });
 }
 
 /**
@@ -35,10 +68,12 @@ export async function redirectToSigninForUnauthorized(redirectPath?: string): Pr
 export const redirectAuthGuard = async (
   to: RouteLocationNormalized,
 ): Promise<void> => {
+  const userSessionStore = useSessionStore();
+  const { userLoggedIn, userSession } = storeToRefs(userSessionStore);
+  const profilesStore = useProfilesStore();
+  const getLocalSession = () => (userSession.value as ISession | null | undefined);
+
   try {
-    const userSessionStore = useSessionStore();
-    const { userLoggedIn, userSession } = storeToRefs(userSessionStore);
-    const profilesStore = useProfilesStore();
     // const websocketsStore = useDomainWebSocketStore();
 
     // Helper for redirecting to signin
@@ -63,6 +98,10 @@ export const redirectAuthGuard = async (
       if (to.meta.requiresAuth) {
         await redirectToSignin();
       }
+      return;
+    }
+
+    if (shouldPreserveOfflineSession(getLocalSession())) {
       return;
     }
 
@@ -96,6 +135,10 @@ export const redirectAuthGuard = async (
     // Authenticated and session present: allow navigation
     return;
   } catch (error) {
+    if (shouldPreserveOfflineSession(getLocalSession(), error)) {
+      return;
+    }
+
     // Handle Ory-specific session errors (e.g. session_aal2_required) and generic failures.
     await oryErrorHandling(error as any, 'browser', () => {}, 'Auth guard');
     await resetAllData();

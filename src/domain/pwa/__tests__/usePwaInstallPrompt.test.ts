@@ -1,3 +1,4 @@
+/* eslint-disable vue/one-component-per-file */
 import {
   afterEach,
   beforeEach,
@@ -8,7 +9,10 @@ import {
 } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { defineComponent, nextTick } from 'vue';
-import { usePwaInstallPrompt } from 'InvestCommon/domain/pwa/usePwaInstallPrompt';
+import {
+  resetPwaInstallPromptRuntimeForTests,
+  usePwaInstallPrompt,
+} from 'InvestCommon/domain/pwa/usePwaInstallPrompt';
 
 const INSTALL_PROMPT_DISMISS_KEY = 'invest:pwa-install-prompt:dismissed-at';
 
@@ -60,9 +64,32 @@ const dispatchBeforeInstallPrompt = (outcome: 'accepted' | 'dismissed' = 'accept
   return { event, prompt };
 };
 
+const dispatchStorageUpdate = (dismissedAt: number | null) => {
+  if (dismissedAt == null) {
+    localStorage.removeItem(INSTALL_PROMPT_DISMISS_KEY);
+  } else {
+    localStorage.setItem(INSTALL_PROMPT_DISMISS_KEY, String(dismissedAt));
+  }
+
+  const event = new Event('storage');
+  Object.assign(event, {
+    key: INSTALL_PROMPT_DISMISS_KEY,
+  });
+  window.dispatchEvent(event);
+};
+
+const setDocumentVisibilityState = (value: DocumentVisibilityState) => {
+  Object.defineProperty(document, 'visibilityState', {
+    configurable: true,
+    value,
+  });
+};
+
 describe('usePwaInstallPrompt', () => {
   beforeEach(() => {
+    resetPwaInstallPromptRuntimeForTests();
     localStorage.clear();
+    sessionStorage.clear();
     window.history.replaceState({}, '', '/');
     Object.defineProperty(window, 'matchMedia', {
       configurable: true,
@@ -71,9 +98,11 @@ describe('usePwaInstallPrompt', () => {
     });
     setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)');
     setStandaloneNavigator(undefined);
+    setDocumentVisibilityState('visible');
   });
 
   afterEach(() => {
+    resetPwaInstallPromptRuntimeForTests();
     vi.restoreAllMocks();
   });
 
@@ -114,6 +143,223 @@ describe('usePwaInstallPrompt', () => {
     secondMount.wrapper.unmount();
   });
 
+  it('hides the prompt after the appinstalled event fires', async () => {
+    const { wrapper, api } = mountComposable();
+
+    dispatchBeforeInstallPrompt('accepted');
+    await nextTick();
+
+    expect(api.installState.value).toBe('native');
+
+    window.dispatchEvent(new Event('appinstalled'));
+    await nextTick();
+
+    expect(api.installState.value).toBe('hidden');
+    expect(api.canInstall.value).toBe(false);
+
+    wrapper.unmount();
+  });
+
+  it('captures install events fired during setup before mount completes', async () => {
+    let api!: InstallPromptResult;
+    const prompt = vi.fn().mockResolvedValue(undefined);
+
+    const wrapper = mount(defineComponent({
+      setup() {
+        api = usePwaInstallPrompt();
+
+        const event = new Event('beforeinstallprompt');
+        Object.assign(event, {
+          prompt,
+          userChoice: Promise.resolve({
+            outcome: 'accepted',
+            platform: 'web',
+          }),
+        });
+        window.dispatchEvent(event);
+
+        return () => null;
+      },
+    }));
+
+    await nextTick();
+
+    expect(api.installState.value).toBe('native');
+    await expect(api.promptInstall()).resolves.toBe('accepted');
+    expect(prompt).toHaveBeenCalledTimes(1);
+
+    wrapper.unmount();
+  });
+
+  it('keeps the pending install prompt across composable remounts in the same page session', async () => {
+    const firstMount = mountComposable();
+
+    dispatchBeforeInstallPrompt('accepted');
+    await nextTick();
+
+    expect(firstMount.api.installState.value).toBe('native');
+    firstMount.wrapper.unmount();
+
+    const secondMount = mountComposable();
+    await nextTick();
+
+    expect(secondMount.api.installState.value).toBe('native');
+    expect(secondMount.api.canInstall.value).toBe(true);
+
+    secondMount.wrapper.unmount();
+  });
+
+  it('syncs prompt dismissal updates from storage while mounted', async () => {
+    const { wrapper, api } = mountComposable();
+
+    dispatchBeforeInstallPrompt('accepted');
+    await nextTick();
+
+    expect(api.installState.value).toBe('native');
+
+    dispatchStorageUpdate(Date.now());
+    await nextTick();
+
+    expect(api.installState.value).toBe('hidden');
+    expect(api.canInstall.value).toBe(false);
+
+    wrapper.unmount();
+  });
+
+  it('ignores unrelated storage events', async () => {
+    const { wrapper, api } = mountComposable();
+
+    dispatchBeforeInstallPrompt('accepted');
+    await nextTick();
+
+    const event = new Event('storage');
+    Object.assign(event, {
+      key: 'invest:pwa:other-key',
+    });
+    window.dispatchEvent(event);
+    await nextTick();
+
+    expect(api.installState.value).toBe('native');
+
+    wrapper.unmount();
+  });
+
+  it('keeps state unchanged when the storage event repeats the same dismissal timestamp', async () => {
+    const dismissedAt = Date.now();
+    localStorage.setItem(INSTALL_PROMPT_DISMISS_KEY, String(dismissedAt));
+
+    const { wrapper, api } = mountComposable();
+    await nextTick();
+
+    expect(api.installState.value).toBe('hidden');
+
+    dispatchStorageUpdate(dismissedAt);
+    await nextTick();
+
+    expect(api.installState.value).toBe('hidden');
+
+    wrapper.unmount();
+  });
+
+  it('refreshes install state when the tab becomes visible and standalone mode changes', async () => {
+    const { wrapper, api } = mountComposable();
+
+    expect(api.installState.value).toBe('hidden');
+
+    Object.defineProperty(window, 'matchMedia', {
+      configurable: true,
+      writable: true,
+      value: createMatchMedia(true),
+    });
+    setDocumentVisibilityState('visible');
+
+    document.dispatchEvent(new Event('visibilitychange'));
+    await nextTick();
+
+    expect(api.installState.value).toBe('hidden');
+    expect(api.canInstall.value).toBe(false);
+
+    wrapper.unmount();
+  });
+
+  it('does nothing when the tab becomes visible but prompt state did not change', async () => {
+    const { wrapper, api } = mountComposable();
+
+    setDocumentVisibilityState('visible');
+    document.dispatchEvent(new Event('visibilitychange'));
+    await nextTick();
+
+    expect(api.installState.value).toBe('hidden');
+
+    wrapper.unmount();
+  });
+
+  it('ignores visibility changes while the tab is hidden', async () => {
+    const { wrapper, api } = mountComposable();
+
+    setDocumentVisibilityState('hidden');
+    Object.defineProperty(window, 'matchMedia', {
+      configurable: true,
+      writable: true,
+      value: createMatchMedia(true),
+    });
+
+    document.dispatchEvent(new Event('visibilitychange'));
+    await nextTick();
+
+    expect(api.installState.value).toBe('hidden');
+
+    wrapper.unmount();
+  });
+
+  it('returns null when promptInstall is called without a deferred prompt', async () => {
+    const { wrapper, api } = mountComposable();
+
+    await expect(api.promptInstall()).resolves.toBeNull();
+
+    wrapper.unmount();
+  });
+
+  it('can dismiss manually even when storage writes fail', async () => {
+    const { wrapper, api } = mountComposable();
+    vi.spyOn(window.localStorage.__proto__, 'setItem').mockImplementation(() => {
+      throw new Error('storage disabled');
+    });
+
+    api.dismissInstallPrompt();
+    await nextTick();
+
+    expect(api.installState.value).toBe('hidden');
+
+    wrapper.unmount();
+  });
+
+  it('can dismiss manually when window is unavailable', async () => {
+    const { wrapper, api } = mountComposable();
+
+    vi.stubGlobal('window', undefined);
+    api.dismissInstallPrompt();
+    vi.unstubAllGlobals();
+
+    await nextTick();
+    expect(api.installState.value).toBe('hidden');
+
+    wrapper.unmount();
+  });
+
+  it('ignores the localhost test prompt event when test mode is not enabled', async () => {
+    const { wrapper, api } = mountComposable();
+
+    window.dispatchEvent(new CustomEvent('invest:pwa-test:before-install-prompt', {
+      detail: { outcome: 'accepted' },
+    }));
+    await nextTick();
+
+    expect(api.installState.value).toBe('hidden');
+
+    wrapper.unmount();
+  });
+
   it('shows the manual iOS install guidance when Safari does not expose beforeinstallprompt', () => {
     setUserAgent(
       'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1',
@@ -141,5 +387,25 @@ describe('usePwaInstallPrompt', () => {
     await expect(api.promptInstall()).resolves.toBe('accepted');
 
     wrapper.unmount();
+  });
+
+  it('keeps localhost PWA test mode enabled across same-tab route changes', async () => {
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    window.history.replaceState({}, '', '/?__pwa_test=1');
+    const firstMount = mountComposable();
+
+    firstMount.wrapper.unmount();
+
+    window.history.replaceState({}, '', '/dashboard');
+    const secondMount = mountComposable();
+
+    window.dispatchEvent(new CustomEvent('invest:pwa-test:before-install-prompt', {
+      detail: { outcome: 'accepted' },
+    }));
+    await nextTick();
+
+    expect(secondMount.api.installState.value).toBe('native');
+
+    secondMount.wrapper.unmount();
   });
 });

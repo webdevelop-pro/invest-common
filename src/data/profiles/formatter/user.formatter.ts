@@ -33,7 +33,9 @@ export class UserFormatter {
 
   constructor(
     user: IUser,
-    formatProfile: (profile: IProfileIndividual) => IProfileFormatted = (profile) => new ProfileFormatter(profile).format(),
+    formatProfile: (profile: IProfileIndividual) => IProfileFormatted = (
+      profile,
+    ) => new ProfileFormatter(profile).format(),
   ) {
     this.user = user;
     this.formatProfile = formatProfile;
@@ -69,4 +71,3 @@ export class UserFormatter {
     } as IUserFormatted;
   }
 }
-

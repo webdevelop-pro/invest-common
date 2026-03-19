@@ -2,13 +2,20 @@ import {
   computed,
   onBeforeUnmount,
   shallowRef,
-  watch,
-  type Ref,
 } from 'vue';
-import { useRegisterSW } from 'virtual:pwa-register/vue';
+import {
+  isLocalPwaTestEnabled,
+  isLocalPwaTestHost,
+  logPwaDebug,
+  toPwaDebugError,
+} from './pwaDebug';
+import {
+  type PwaRegistrationBridge,
+  usePwaRegistrationBridge,
+} from './pwaRegistrationBridge';
 
 const PWA_TEST_UPDATE_READY_EVENT = 'invest:pwa-test:update-ready';
-const SERVICE_WORKER_RELOAD_FALLBACK_MS = 2500;
+const SERVICE_WORKER_RELOAD_TIMEOUT_MS = 2500;
 
 export type PwaUpdateLifecycleState =
   | 'idle'
@@ -17,129 +24,140 @@ export type PwaUpdateLifecycleState =
   | 'reloading'
   | 'registrationError';
 
-const isLocalPwaTestEnabled = () => {
-  if (typeof window === 'undefined') {
-    return false;
+const createControllerChangeWatcher = (
+  serviceWorker?: ServiceWorkerContainer | null,
+) => {
+  if (typeof window === 'undefined' || !serviceWorker) {
+    return null;
   }
 
-  const isLocalHost = window.location.hostname === '127.0.0.1'
-    || window.location.hostname === 'localhost';
+  let settled = false;
+  let timeoutId = 0;
+  let resolvePromise: (value: boolean) => void = () => {};
 
-  return isLocalHost && new URLSearchParams(window.location.search).has('__pwa_test');
-};
+  const finish = (value: boolean) => {
+    if (settled) {
+      return;
+    }
 
-export const reloadCurrentPage = () => {
-  if (typeof window === 'undefined') {
-    return;
-  }
+    settled = true;
+    window.clearTimeout(timeoutId);
+    serviceWorker.removeEventListener('controllerchange', handleControllerChange);
+    resolvePromise(value);
+  };
 
-  window.location.reload();
-};
+  const handleControllerChange = () => {
+    logPwaDebug('update', 'service worker controller changed');
+    finish(true);
+  };
 
-export const pwaUpdatePromptRuntime = {
-  reloadCurrentPage,
+  const promise = new Promise<boolean>((resolve) => {
+    resolvePromise = resolve;
+    serviceWorker.addEventListener('controllerchange', handleControllerChange);
+    timeoutId = window.setTimeout(() => {
+      finish(false);
+    }, SERVICE_WORKER_RELOAD_TIMEOUT_MS);
+  });
+
+  return {
+    promise,
+    cancel: () => {
+      finish(false);
+    },
+  };
 };
 
 export function usePwaUpdatePrompt() {
-  const needRefresh = shallowRef<Ref<boolean> | null>(null);
-  const offlineReady = shallowRef<Ref<boolean> | null>(null);
-  const updateServiceWorker = shallowRef<((reloadPage?: boolean) => Promise<void>) | null>(null);
-  const updateReadyState = shallowRef(false);
-  const offlineReadyState = shallowRef(false);
+  const bridge = shallowRef<PwaRegistrationBridge | null>(null);
+  const serviceWorker = typeof navigator === 'undefined' ? null : navigator.serviceWorker;
+  const localTestHost = isLocalPwaTestHost();
+  const testUpdateReadyState = shallowRef(false);
   const registrationError = shallowRef<unknown>(null);
   const isReloading = shallowRef(false);
 
-  const syncFlag = (source: Ref<boolean>, target: typeof updateReadyState) => {
-    watch(() => source.value, (value) => {
-      target.value = value;
-    }, { immediate: true });
+  const updateBridgeFlags = (flags: {
+    needRefresh?: boolean;
+    offlineReady?: boolean;
+  }) => {
+    if (!bridge.value) {
+      return;
+    }
+
+    if (typeof flags.needRefresh === 'boolean') {
+      bridge.value.needRefresh.value = flags.needRefresh;
+    }
+
+    if (typeof flags.offlineReady === 'boolean') {
+      bridge.value.offlineReady.value = flags.offlineReady;
+    }
   };
 
   const handleTestUpdateReady = () => {
-    updateReadyState.value = true;
-    offlineReadyState.value = false;
-
-    if (needRefresh.value) {
-      needRefresh.value.value = true;
+    if (!isLocalPwaTestEnabled()) {
+      return;
     }
 
-    if (offlineReady.value) {
-      offlineReady.value.value = false;
-    }
+    testUpdateReadyState.value = true;
+    updateBridgeFlags({ needRefresh: true, offlineReady: false });
+    logPwaDebug('update', 'received local test update-ready event');
   };
 
-  const createControllerChangeWatcher = () => {
-    if (typeof window === 'undefined' || typeof navigator === 'undefined' || !navigator.serviceWorker) {
-      return null;
+  const clearUpdateReady = () => {
+    testUpdateReadyState.value = false;
+    updateBridgeFlags({ needRefresh: false });
+  };
+
+  const handleServiceWorkerControllerChange = () => {
+    testUpdateReadyState.value = false;
+    updateBridgeFlags({ needRefresh: false, offlineReady: false });
+    isReloading.value = false;
+    logPwaDebug('update', 'reset local test update-ready state after controllerchange');
+  };
+
+  const initializeBridge = () => {
+    try {
+      bridge.value = usePwaRegistrationBridge();
+      registrationError.value = null;
+      logPwaDebug('update', 'initialized pwa registration bridge', {
+        needRefresh: bridge.value.needRefresh.value,
+        offlineReady: bridge.value.offlineReady.value,
+        hasUpdateServiceWorker: bridge.value.updateServiceWorker != null,
+        hasCleanup: bridge.value.cleanup != null,
+      });
+    } catch (error) {
+      bridge.value = null;
+      registrationError.value = error;
+      logPwaDebug('update', 'failed to initialize pwa registration bridge', {
+        error: toPwaDebugError(error),
+      });
     }
-
-    let settled = false;
-    let timeoutId = 0;
-    let resolvePromise: (value: boolean) => void = () => {};
-
-    const finish = (value: boolean) => {
-      if (settled) {
-        return;
-      }
-
-      settled = true;
-      window.clearTimeout(timeoutId);
-      navigator.serviceWorker.removeEventListener('controllerchange', handleControllerChange);
-      resolvePromise(value);
-    };
-
-    const handleControllerChange = () => {
-      finish(true);
-    };
-
-    const promise = new Promise<boolean>((resolve) => {
-      resolvePromise = resolve;
-      navigator.serviceWorker.addEventListener('controllerchange', handleControllerChange);
-      timeoutId = window.setTimeout(() => {
-        finish(false);
-      }, SERVICE_WORKER_RELOAD_FALLBACK_MS);
-    });
-
-    return {
-      promise,
-      cancel: () => {
-        finish(false);
-      },
-    };
   };
 
   if (typeof window !== 'undefined') {
-    try {
-      const sw = useRegisterSW({
-        immediate: true,
-      });
+    initializeBridge();
 
-      needRefresh.value = sw.needRefresh;
-      offlineReady.value = sw.offlineReady;
-      updateServiceWorker.value = sw.updateServiceWorker;
+    serviceWorker?.addEventListener('controllerchange', handleServiceWorkerControllerChange);
 
-      syncFlag(sw.needRefresh, updateReadyState);
-      syncFlag(sw.offlineReady, offlineReadyState);
-      registrationError.value = null;
-    } catch (error) {
-      registrationError.value = error;
-    }
-
-    if (isLocalPwaTestEnabled()) {
+    if (localTestHost) {
       window.addEventListener(PWA_TEST_UPDATE_READY_EVENT, handleTestUpdateReady);
     }
   }
 
   onBeforeUnmount(() => {
-    if (!isLocalPwaTestEnabled()) {
+    if (typeof window === 'undefined') {
       return;
     }
 
-    window.removeEventListener(PWA_TEST_UPDATE_READY_EVENT, handleTestUpdateReady);
+    if (localTestHost) {
+      window.removeEventListener(PWA_TEST_UPDATE_READY_EVENT, handleTestUpdateReady);
+    }
+
+    bridge.value?.cleanup?.();
+    serviceWorker?.removeEventListener('controllerchange', handleServiceWorkerControllerChange);
   });
 
-  const isUpdateReady = computed(() => updateReadyState.value);
-  const isOfflineReady = computed(() => offlineReadyState.value);
+  const isUpdateReady = computed(() => (bridge.value?.needRefresh.value ?? false) || testUpdateReadyState.value);
+  const isOfflineReady = computed(() => (bridge.value?.offlineReady.value ?? false) && !isUpdateReady.value);
   const lifecycleState = computed<PwaUpdateLifecycleState>(() => {
     if (registrationError.value) {
       return 'registrationError';
@@ -147,48 +165,68 @@ export function usePwaUpdatePrompt() {
     if (isReloading.value) {
       return 'reloading';
     }
-    if (updateReadyState.value) {
+    if (isUpdateReady.value) {
       return 'updateReady';
     }
-    if (offlineReadyState.value) {
+    if (isOfflineReady.value) {
       return 'offlineReady';
     }
     return 'idle';
   });
 
   const reloadApp = async () => {
+    logPwaDebug('update', 'refresh app clicked', {
+      lifecycleState: lifecycleState.value,
+      isUpdateReady: isUpdateReady.value,
+      isOfflineReady: isOfflineReady.value,
+      needRefresh: bridge.value?.needRefresh.value ?? null,
+      offlineReady: bridge.value?.offlineReady.value ?? null,
+    });
     isReloading.value = true;
-    const controllerChangeWatcher = createControllerChangeWatcher();
+    const controllerChangeWatcher = createControllerChangeWatcher(serviceWorker);
 
     try {
-      await updateServiceWorker.value?.(true);
+      await bridge.value?.updateServiceWorker(true);
+      logPwaDebug('update', 'updateServiceWorker resolved', {
+        hasControllerChangeWatcher: Boolean(controllerChangeWatcher),
+      });
 
-      if (controllerChangeWatcher) {
-        const didControllerChange = await controllerChangeWatcher.promise;
+      if (!controllerChangeWatcher) {
+        logPwaDebug('update', 'controller change watcher unavailable; leaving reloading state');
+        isReloading.value = false;
+        return;
+      }
 
-        if (!didControllerChange) {
-          pwaUpdatePromptRuntime.reloadCurrentPage();
-        }
+      const didControllerChange = await controllerChangeWatcher.promise;
+      logPwaDebug('update', 'controller change wait finished', {
+        didControllerChange,
+      });
+
+      isReloading.value = false;
+
+      // Workbox reloads once the updated worker controls the page. If takeover
+      // never happens, keep the prompt available so the user can retry.
+      if (!didControllerChange) {
+        logPwaDebug('update', 'controller change timed out; keeping update prompt visible');
       }
     } catch (error) {
       controllerChangeWatcher?.cancel();
+      logPwaDebug('update', 'refresh app failed', {
+        error: toPwaDebugError(error),
+      });
       isReloading.value = false;
       throw error;
     }
   };
 
   const dismissOfflineReady = () => {
-    offlineReadyState.value = false;
-    if (offlineReady.value) {
-      offlineReady.value.value = false;
-    }
+    updateBridgeFlags({ offlineReady: false });
+    logPwaDebug('update', 'dismissed offline-ready state');
   };
 
   const dismissUpdateReady = () => {
-    updateReadyState.value = false;
-    if (needRefresh.value) {
-      needRefresh.value.value = false;
-    }
+    clearUpdateReady();
+    logPwaDebug('update', 'dismissed update-ready state');
   };
 
   return {

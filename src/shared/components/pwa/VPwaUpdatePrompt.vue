@@ -24,7 +24,7 @@ const emit = defineEmits<{
     data-testid="pwa-update-prompt"
   >
     <VAlert
-      v-if="isUpdateReady"
+      v-if="isUpdateReady || lifecycleState === 'reloading'"
       variant="info"
       class="v-pwa-update-prompt__alert"
     >
@@ -41,6 +41,7 @@ const emit = defineEmits<{
         <VButton
           size="small"
           color="primary"
+          :loading="lifecycleState === 'reloading'"
           @click="emit('reload')"
         >
           Refresh app
@@ -87,7 +88,8 @@ const emit = defineEmits<{
         Offline features unavailable
       </template>
       <template #description>
-        The app could not finish service worker setup, so install, offline reopen, and in-app update prompts are temporarily unavailable.
+        The app could not finish service worker setup, so install, offline reopen,
+        and in-app update prompts are temporarily unavailable.
       </template>
     </VAlert>
   </div>

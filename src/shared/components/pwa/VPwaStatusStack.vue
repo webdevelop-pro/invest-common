@@ -58,11 +58,18 @@ const {
 });
 const appVersion = computed(() => env.APP_VERSION || '');
 const hasRegistrationError = computed(() => Boolean(registrationError.value));
+const canShowInteractiveUpdatePrompt = computed(() => !isOffline.value);
 const shouldShowInstallPrompt = computed(() => installState.value !== 'hidden');
 const shouldShowPwaPrompts = computed(() => isStandalone.value);
 const shouldShowUpdatePrompt = computed(() => (
-  shouldShowPwaPrompts.value
-  && (isUpdateReady.value || isOfflineReady.value || hasRegistrationError.value)
+  canShowInteractiveUpdatePrompt.value
+  && shouldShowPwaPrompts.value
+  && (
+    lifecycleState.value === 'reloading'
+    || isUpdateReady.value
+    || isOfflineReady.value
+    || hasRegistrationError.value
+  )
 ));
 const shouldShowOfflineBanner = computed(() => isOffline.value || isReconnected.value);
 const shouldRenderStack = computed(() => (

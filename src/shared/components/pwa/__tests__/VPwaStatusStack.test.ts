@@ -128,6 +128,19 @@ describe('VPwaStatusStack', () => {
     installState.value = 'native';
     canInstall.value = true;
     isUpdateReady.value = true;
+
+    const wrapper = mountStatusStack();
+
+    expect(wrapper.find('.v-pwa-status-stack').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="install-prompt"]').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="update-prompt"]').exists()).toBe(false);
+    expect(wrapper.find('[data-testid="offline-banner"]').exists()).toBe(false);
+  });
+
+  it('keeps the install prompt visible while offline and still hides update prompt', () => {
+    installState.value = 'native';
+    canInstall.value = true;
+    isUpdateReady.value = true;
     isOffline.value = true;
 
     const wrapper = mountStatusStack();
@@ -141,7 +154,6 @@ describe('VPwaStatusStack', () => {
   it('shows runtime PWA alerts inside standalone sessions', () => {
     isStandalone.value = true;
     isUpdateReady.value = true;
-    isOffline.value = true;
 
     const wrapper = mountStatusStack({
       usesMobileShell: true,
@@ -149,8 +161,50 @@ describe('VPwaStatusStack', () => {
     });
 
     expect(wrapper.find('[data-testid="update-prompt"]').exists()).toBe(true);
-    expect(wrapper.find('[data-testid="offline-banner"]').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="offline-banner"]').exists()).toBe(false);
     expect(wrapper.find('.v-pwa-status-stack').classes()).toContain('is--footer-offset');
+  });
+
+  it('suppresses standalone update prompts while offline', () => {
+    isStandalone.value = true;
+    isUpdateReady.value = true;
+    isOfflineReady.value = true;
+    isOffline.value = true;
+
+    const wrapper = mountStatusStack();
+
+    expect(wrapper.find('[data-testid="update-prompt"]').exists()).toBe(false);
+    expect(wrapper.find('[data-testid="offline-banner"]').exists()).toBe(true);
+  });
+
+  it('hides the standalone update prompt while offline even during reload state', () => {
+    isStandalone.value = true;
+    lifecycleState.value = 'reloading';
+    isOffline.value = true;
+
+    const wrapper = mountStatusStack();
+
+    expect(wrapper.find('[data-testid="update-prompt"]').exists()).toBe(false);
+    expect(wrapper.find('[data-testid="offline-banner"]').exists()).toBe(true);
+  });
+
+  it('keeps the update prompt visible while a refresh is in progress', () => {
+    isStandalone.value = true;
+    lifecycleState.value = 'reloading';
+
+    const wrapper = mountStatusStack();
+
+    expect(wrapper.find('[data-testid="update-prompt"]').exists()).toBe(true);
+  });
+
+  it('shows the standalone update prompt for offline-ready state and registration errors', () => {
+    isStandalone.value = true;
+    isOfflineReady.value = true;
+    registrationError.value = new Error('register failed');
+
+    const wrapper = mountStatusStack();
+
+    expect(wrapper.find('[data-testid="update-prompt"]').exists()).toBe(true);
   });
 
   it('pins the stack to the viewport bottom when the footer menu is hidden', () => {

@@ -33,6 +33,12 @@ export interface PwaPolicyEnv {
 
 type PathPattern = string | RegExp;
 
+type SerializedPathPattern = {
+  source: string;
+  flags: string;
+  type: 'prefix' | 'regex';
+};
+
 type OfflineDomainDefinition = {
   key: OfflineDomainKey;
   envKey: keyof PwaPolicyEnv;
@@ -274,6 +280,20 @@ const matchesResolvedPolicy = (
   return !(policy.excludePathPatterns?.some((pattern) => matchesPathPattern(url.pathname, pattern)));
 };
 
+const serializePathPattern = (pattern: PathPattern): SerializedPathPattern => (
+  typeof pattern === 'string'
+    ? {
+      type: 'prefix',
+      source: pattern,
+      flags: '',
+    }
+    : {
+      type: 'regex',
+      source: pattern.source,
+      flags: pattern.flags,
+    }
+);
+
 export const matchOfflineDomainPolicy = (
   requestUrl: string,
   method: string,
@@ -287,11 +307,48 @@ export const matchOfflineDomainPolicy = (
   }
 };
 
-const createUrlMatcher = (policy: ResolvedOfflineDomainPolicy) => (
-  ({ request, url }: { request: Request; url: URL }) => (
-    matchesResolvedPolicy(policy, url, request.method)
-  )
-);
+const createUrlMatcher = (policy: ResolvedOfflineDomainPolicy) => {
+  const serializedPolicy = JSON.stringify({
+    excludePathPatterns: policy.excludePathPatterns?.map(serializePathPattern) ?? [],
+    includePathPatterns: policy.includePathPatterns?.map(serializePathPattern) ?? [],
+    normalizedPathname: policy.normalizedPathname,
+    origin: policy.origin,
+    pathname: policy.pathname,
+  });
+
+  return new Function(`
+    return ({ request, url }) => {
+      const policy = ${serializedPolicy};
+      const matchesPathPrefix = (pathname, prefix) => (
+        pathname === prefix
+        || pathname.startsWith(prefix.endsWith('/') ? prefix : \`\${prefix}/\`)
+      );
+      const matchesPathPattern = (pathname, pattern) => (
+        pattern.type === 'prefix'
+          ? matchesPathPrefix(pathname, pattern.source)
+          : new RegExp(pattern.source, pattern.flags).test(pathname)
+      );
+
+      if (request.method !== 'GET') {
+        return false;
+      }
+
+      if (url.origin !== policy.origin) {
+        return false;
+      }
+
+      if (!(url.pathname === policy.pathname || url.pathname.startsWith(policy.normalizedPathname))) {
+        return false;
+      }
+
+      if (policy.includePathPatterns.length) {
+        return policy.includePathPatterns.some((pattern) => matchesPathPattern(url.pathname, pattern));
+      }
+
+      return !policy.excludePathPatterns.some((pattern) => matchesPathPattern(url.pathname, pattern));
+    };
+  `)() as (context: { request: Request; url: URL }) => boolean;
+};
 
 const createNetworkFirstRule = (policy: ResolvedOfflineDomainPolicy): RuntimeCacheRule => ({
   urlPattern: createUrlMatcher(policy),
@@ -328,9 +385,23 @@ const createNavigationRule = (policy: ResolvedOfflineDomainPolicy): RuntimeCache
     networkTimeoutSeconds: policy.networkTimeoutSeconds ?? 3,
     plugins: [
       {
-        handlerDidError: async () => {
-          const offlinePage = await caches.match('/offline.html', { ignoreSearch: true });
-          return offlinePage ?? Response.error();
+        handlerDidError: async ({ request }: { request?: Request }) => {
+          const requestPathname = request?.url ? new URL(request.url).pathname : '';
+           const fallbackCandidates = (
+            requestPathname === '/dashboard'
+            || requestPathname.startsWith('/dashboard/')
+          )
+            ? ['/dashboard/index.html', '/dashboard.html', '/offline.html']
+            : ['/offline.html'];
+
+          for (const fallbackPath of fallbackCandidates) {
+            const cachedResponse = await caches.match(fallbackPath, { ignoreSearch: true });
+            if (cachedResponse) {
+              return cachedResponse;
+            }
+          }
+
+          return Response.error();
         },
       },
     ],

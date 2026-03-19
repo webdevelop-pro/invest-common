@@ -49,8 +49,20 @@ function normalizeErrorMessage(error: unknown, fallback: string): string {
 export function normalizeError(error: unknown, fallbackMessage: string): NormalizedError {
   const message = normalizeErrorMessage(error, fallbackMessage);
   if (!error || typeof error !== 'object') return { message };
-  const data = (error as { data?: { responseJson?: { __error__?: string }; status?: number; statusCode?: number } }).data;
-  const statusCode = typeof data?.statusCode === 'number' ? data.statusCode : typeof data?.status === 'number' ? data.status : undefined;
+  const data = (
+    error as {
+      data?: {
+        responseJson?: { __error__?: string };
+        status?: number;
+        statusCode?: number;
+      };
+    }
+  ).data;
+  const statusCode = typeof data?.statusCode === 'number'
+    ? data.statusCode
+    : typeof data?.status === 'number'
+      ? data.status
+      : undefined;
   return {
     message,
     code: typeof data?.responseJson?.__error__ === 'string' ? data.responseJson.__error__ : undefined,

@@ -2,7 +2,6 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { ref } from 'vue';
 import {
-  urlHome,
   urlProfileAccount,
   urlProfileEarn,
   urlProfilePortfolio,
@@ -105,7 +104,7 @@ describe('VHeaderPWA', () => {
   });
 
   it('hides back button on root path', () => {
-    const wrapper = mountHeader('', urlHome);
+    const wrapper = mountHeader('', '/');
     expect(wrapper.find('.v-header-invest__pwa-back').exists()).toBe(false);
   });
 

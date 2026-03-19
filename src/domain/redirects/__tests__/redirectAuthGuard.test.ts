@@ -10,6 +10,14 @@ const hoisted = vi.hoisted(() => ({
   getSessionMock: vi.fn(),
   navigateWithQueryParamsMock: vi.fn(),
 }))
+const initProfilesMock = vi.fn()
+
+const setNavigatorOnline = (online: boolean) => {
+  Object.defineProperty(window.navigator, 'onLine', {
+    configurable: true,
+    get: () => online,
+  })
+}
 
 // ------------------- MOCKS -------------------
 
@@ -86,6 +94,12 @@ vi.mock('vue-router', () => ({
   }),
 }))
 
+vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
+  useProfilesStore: () => ({
+    init: initProfilesMock,
+  }),
+}))
+
 // ------------------- HELPERS -------------------
 const createMockRoute = (path: string, requiresAuth = false) => ({
   path,
@@ -102,8 +116,13 @@ function redirectAuthGuardTests() {
     hoisted.getSessionMock.mockResolvedValue(null)
     mockCookies.get.mockReturnValue(undefined)
     mockCookies.getAll.mockReturnValue({})
+    setNavigatorOnline(true)
     Object.defineProperty(window, 'location', {
-      value: { origin: 'http://localhost:3000' },
+      value: {
+        origin: 'http://localhost:3000',
+        href: 'http://localhost:3000/',
+        search: '',
+      },
       writable: true,
     })
   })
@@ -130,6 +149,26 @@ function redirectAuthGuardTests() {
 
     expect(hoisted.navigateWithQueryParamsMock).toHaveBeenCalledWith('https://static.example.com/signin', {
       redirect: 'http://localhost:3000/protected',
+    })
+  })
+
+  it('preserves the target route PWA test flag when redirecting protected dashboard routes to signin', async () => {
+    hoisted.getSessionMock.mockResolvedValue({ data: null })
+    Object.defineProperty(window, 'location', {
+      value: {
+        origin: 'http://localhost:3000',
+        href: 'http://localhost:3000/offers',
+        search: '',
+      },
+      writable: true,
+    })
+    const to = createMockRoute('/dashboard?__pwa_test=1', true)
+
+    await redirectAuthGuard(to)
+
+    expect(hoisted.navigateWithQueryParamsMock).toHaveBeenCalledWith('https://static.example.com/signin', {
+      __pwa_test: '1',
+      redirect: 'http://localhost:3000/dashboard?__pwa_test=1',
     })
   })
 
@@ -205,6 +244,40 @@ function redirectAuthGuardTests() {
 
     expect(hoisted.getSessionMock).toHaveBeenCalled()
     expect(hoisted.navigateWithQueryParamsMock).not.toHaveBeenCalled()
+  })
+
+  it('keeps the cached session when the browser is offline', async () => {
+    const { useSessionStore } = await import('InvestCommon/domain/session/store/useSession')
+    const sessionStore = useSessionStore()
+
+    const existingSession = createMockSession(true)
+    sessionStore.updateSession(existingSession)
+    setNavigatorOnline(false)
+
+    const to = createMockRoute('/dashboard', true)
+    await redirectAuthGuard(to)
+
+    expect(hoisted.getSessionMock).not.toHaveBeenCalled()
+    expect(sessionStore.userSession).toEqual(existingSession)
+    expect(hoisted.navigateWithQueryParamsMock).not.toHaveBeenCalled()
+    expect(oryErrorHandlingMock).not.toHaveBeenCalled()
+  })
+
+  it('keeps the cached session when session refresh fails like an offline fetch', async () => {
+    const { useSessionStore } = await import('InvestCommon/domain/session/store/useSession')
+    const sessionStore = useSessionStore()
+
+    const existingSession = createMockSession(true)
+    sessionStore.updateSession(existingSession)
+    hoisted.getSessionMock.mockRejectedValue(new TypeError('Failed to fetch'))
+
+    const to = createMockRoute('/dashboard', true)
+    await redirectAuthGuard(to)
+
+    expect(hoisted.getSessionMock).toHaveBeenCalled()
+    expect(sessionStore.userSession).toEqual(existingSession)
+    expect(hoisted.navigateWithQueryParamsMock).not.toHaveBeenCalled()
+    expect(oryErrorHandlingMock).not.toHaveBeenCalled()
   })
 
   it('resets data and redirects when session becomes invalid', async () => {

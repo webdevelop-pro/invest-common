@@ -42,6 +42,15 @@ const isNonZero = (value?: string) => {
   if (Number.isNaN(numeric)) return false;
   return numeric !== 0;
 };
+
+const hasSecondaryDivider = (card: BalanceCardItem) => (
+  Boolean(
+    card.secondaryDepositText
+    && card.secondaryDepositValue
+    && card.secondaryWithdrawText
+    && card.secondaryWithdrawValue,
+  )
+);
 </script>
 
 <template>
@@ -81,7 +90,7 @@ const isNonZero = (value?: string) => {
           </span>
         </span>
         <span
-          v-if="card.secondaryDepositText && card.secondaryDepositValue && card.secondaryWithdrawText && card.secondaryWithdrawValue"
+          v-if="hasSecondaryDivider(card)"
         >
           &nbsp;|&nbsp;
         </span>
@@ -102,4 +111,3 @@ const isNonZero = (value?: string) => {
     </template>
   </VCardInfo>
 </template>
-
