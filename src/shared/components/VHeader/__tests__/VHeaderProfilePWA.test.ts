@@ -70,7 +70,7 @@ vi.mock('InvestCommon/domain/config/links', async () => {
   return {
     ...actual,
     urlProfilePortfolio: (id: string | number) => `/profile/${id}/portfolio`,
-    urlFaq: '/faq',
+    urlHowItWorks: '/how-it-works',
     urlContactUs: '/contact-us',
     urlSettingsAccountDetails: (id: string | number) => `/settings/${id}/account-details`,
     urlSettingsMfa: (id: string | number) => `/settings/${id}/mfa`,
@@ -209,11 +209,11 @@ describe('VHeaderProfilePWA', () => {
                 :data-account="accountDetailsHref"
                 :data-mfa="mfaHref"
                 :data-security="securityHref"
-                :data-help="helpHref"
+                :data-how-it-works="howItWorksHref"
                 :data-contact="contactHref"
               />
             `,
-            props: ['accountDetailsHref', 'mfaHref', 'securityHref', 'helpHref', 'contactHref'],
+            props: ['accountDetailsHref', 'mfaHref', 'securityHref', 'howItWorksHref', 'contactHref'],
           },
         },
       },
@@ -224,7 +224,10 @@ describe('VHeaderProfilePWA', () => {
     expect(overlay.attributes('data-account')).toContain('fromUserMenu=1');
     expect(overlay.attributes('data-mfa')).toContain('fromUserMenu=1');
     expect(overlay.attributes('data-security')).toContain('fromUserMenu=1');
-    expect(overlay.attributes('data-help')).toContain('fromUserMenu=1');
+    expect(overlay.attributes('data-how-it-works')).toContain('/how-it-works');
+    expect(overlay.attributes('data-how-it-works')).toContain('fromUserMenu=1');
     expect(overlay.attributes('data-contact')).toContain('fromUserMenu=1');
+    expect(overlay.attributes('data-contact')).toContain('/contact-us');
+    expect(overlay.attributes('data-contact')).not.toContain('/faq');
   });
 });

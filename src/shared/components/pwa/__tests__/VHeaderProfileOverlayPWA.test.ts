@@ -17,8 +17,8 @@ vi.mock('UiKit/assets/images/menu_common/gear.svg', () => ({
 vi.mock('UiKit/assets/images/menu_common/help.svg', () => ({
   default: { template: '<i data-testid="icon-help" />' },
 }));
-vi.mock('UiKit/assets/images/menu_common/faq.svg', () => ({
-  default: { template: '<i data-testid="icon-faq" />' },
+vi.mock('UiKit/assets/images/message.svg', () => ({
+  default: { template: '<i data-testid="icon-contact" />' },
 }));
 vi.mock('UiKit/assets/images/menu_common/logout.svg', () => ({
   default: { template: '<i data-testid="icon-logout" />' },
@@ -31,7 +31,7 @@ const mountOverlay = (props: Record<string, unknown> = {}) => mount(VHeaderProfi
     accountDetailsHref: '/settings/1/account-details',
     mfaHref: '/settings/1/mfa',
     securityHref: '/settings/1/security',
-    helpHref: '/faq',
+    howItWorksHref: '/how-it-works',
     contactHref: '/contact-us',
     ...props,
   },
@@ -47,6 +47,20 @@ describe('VHeaderProfileOverlayPWA', () => {
     const wrapper = mountOverlay();
     expect(wrapper.find('.v-header-profile-pwa__overlay-email').text()).toBe('maria@webdevelop.pro');
     expect(wrapper.find('.v-header-profile-pwa__overlay-link').text()).toBe('Account Details');
+  });
+
+  it('renders grouped menu items in the expected order', () => {
+    const wrapper = mountOverlay();
+    const labels = wrapper.findAll('.v-header-profile-pwa__overlay-item-label').map((item) => item.text());
+
+    expect(labels).toEqual([
+      'MFA & Password',
+      'Account Security',
+      'How It Works',
+      'Contact Us',
+      'Log Out',
+    ]);
+    expect(wrapper.findAll('.v-header-profile-pwa__overlay-group')).toHaveLength(3);
   });
 
   it('emits close on close button click', async () => {
@@ -72,7 +86,7 @@ describe('VHeaderProfileOverlayPWA', () => {
       accountDetailsHref: '',
       mfaHref: '',
       securityHref: '',
-      helpHref: '',
+      howItWorksHref: '',
       contactHref: '',
     });
     expect(wrapper.find('.v-header-profile-pwa__overlay-link').exists()).toBe(false);

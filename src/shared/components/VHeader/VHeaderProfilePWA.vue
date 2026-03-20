@@ -10,6 +10,7 @@ import { useRepositoryFiler } from 'InvestCommon/data/filer/filer.repository';
 import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 import { reportError } from 'InvestCommon/domain/error/errorReporting';
 import {
+  urlContactUs,
   urlFaq,
   urlHowItWorks,
   urlSettingsAccountDetails,
@@ -117,8 +118,9 @@ const mfaPath = computed(() => (
 const securityPath = computed(() => (
   Number.isFinite(getProfileId.value) ? withUserMenuSource(urlSettingsSecurity(getProfileId.value)) : ''
 ));
-const helpCenterPath = computed(() => withUserMenuSource(toPathname(urlHowItWorks)));
-const contactUsPath = computed(() => withUserMenuSource(toPathname(urlFaq)));
+const howItWorksPath = computed(() => withUserMenuSource(toPathname(urlHowItWorks)));
+const contactUsPath = computed(() => withUserMenuSource(toPathname(urlContactUs)));
+const faqPath = computed(() => withUserMenuSource(toPathname(urlFaq)));
 
 const refFiles = ref<HTMLInputElement>();
 const isAvatarLoading = ref(false);
@@ -231,7 +233,8 @@ onUnmounted(() => {
       :account-details-href="accountDetailsPath"
       :mfa-href="mfaPath"
       :security-href="securityPath"
-      :help-href="helpCenterPath"
+      :how-it-works-href="howItWorksPath"
+      :faq-href="faqPath"
       :contact-href="contactUsPath"
       @close="closeProfileOverlay"
       @logout="onLogout"
