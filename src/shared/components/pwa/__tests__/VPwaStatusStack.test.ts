@@ -6,7 +6,10 @@ import {
   vi,
 } from 'vitest';
 import { mount } from '@vue/test-utils';
-import { ref } from 'vue';
+import {
+  computed,
+  ref,
+} from 'vue';
 import VPwaStatusStack from 'InvestCommon/shared/components/pwa/VPwaStatusStack.vue';
 
 const isStandalone = ref(false);
@@ -20,6 +23,7 @@ const isOffline = ref(false);
 const isReconnected = ref(false);
 const isShowingCachedContent = ref(false);
 const lastSyncedAt = ref<string | null>(null);
+const dismissOfflineBanner = vi.fn();
 
 vi.mock('InvestCommon/domain/pwa/usePwaStandalone', () => ({
   usePwaStandalone: () => ({
@@ -72,6 +76,13 @@ vi.mock('InvestCommon/domain/pwa/usePwaTelemetry', () => ({
   }),
 }));
 
+vi.mock('InvestCommon/domain/pwa/usePwaBannerDismissals', () => ({
+  usePwaBannerDismissals: () => ({
+    isBannerVisible: computed(() => isOffline.value || isReconnected.value),
+    dismissActiveBanner: dismissOfflineBanner,
+  }),
+}));
+
 vi.mock('InvestCommon/config/env', () => ({
   default: {
     APP_VERSION: 'test-build',
@@ -93,7 +104,7 @@ const mountStatusStack = (props: Record<string, unknown> = {}) => mount(VPwaStat
         template: '<div data-testid="update-prompt" />',
       },
       VOfflineStatusBanner: {
-        template: '<div data-testid="offline-banner" />',
+        template: '<button data-testid="offline-banner" @click="$emit(\'dismiss\')" />',
       },
     },
   },
@@ -101,6 +112,7 @@ const mountStatusStack = (props: Record<string, unknown> = {}) => mount(VPwaStat
 
 describe('VPwaStatusStack', () => {
   beforeEach(() => {
+    dismissOfflineBanner.mockReset();
     isStandalone.value = false;
     canInstall.value = false;
     installState.value = 'hidden';
@@ -216,5 +228,15 @@ describe('VPwaStatusStack', () => {
     });
 
     expect(wrapper.find('.v-pwa-status-stack').classes()).not.toContain('is--footer-offset');
+  });
+
+  it('forwards offline banner dismiss actions', async () => {
+    isOffline.value = true;
+
+    const wrapper = mountStatusStack();
+
+    await wrapper.get('[data-testid="offline-banner"]').trigger('click');
+
+    expect(dismissOfflineBanner).toHaveBeenCalledTimes(1);
   });
 });

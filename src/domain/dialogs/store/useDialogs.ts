@@ -54,8 +54,9 @@ export const useDialogs = defineStore('dialogs', () => {
   };
 });
 
-// Enable HMR in dev, but avoid wiring it up in tests where it can
-// interfere with Vitest's module runner shutdown lifecycle.
-if (import.meta.hot && import.meta.env.MODE !== 'test') {
+// Avoid registering Pinia HMR handlers inside Vitest workers.
+// The extra accept hook can outlive the module runner during teardown
+// and trigger "Closing rpc while fetch was pending" crashes.
+if (import.meta.hot && import.meta.env.MODE !== 'test' && !import.meta.vitest) {
   import.meta.hot.accept(acceptHMRUpdate(useDialogs, import.meta.hot));
 }

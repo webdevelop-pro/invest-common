@@ -1,12 +1,17 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import VAlert from 'UiKit/components/VAlert.vue';
+import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 
 const props = defineProps<{
   isOffline: boolean;
   isReconnected?: boolean;
   isShowingCachedContent: boolean;
   lastSyncedAt?: string | null;
+}>();
+
+const emit = defineEmits<{
+  dismiss: [];
 }>();
 
 const bannerTitle = 'Offline mode';
@@ -55,6 +60,15 @@ const bannerText = computed(() => (
           Last synced: {{ lastSyncedLabel }}.
         </span>
       </template>
+      <div class="v-offline-status-banner__actions">
+        <VButton
+          size="small"
+          variant="outlined"
+          @click="emit('dismiss')"
+        >
+          OK
+        </VButton>
+      </div>
     </VAlert>
   </div>
 </template>
@@ -66,6 +80,13 @@ const bannerText = computed(() => (
   &__alert {
     width: 100%;
     margin: 0;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-left: auto;
   }
 }
 </style>

@@ -19,11 +19,18 @@ vi.mock('vue-router', () => ({
 // Mock useProfilesStore
 const mockSelectedUserProfileId = ref(1);
 const mockSelectedUserProfileData = ref({ id: 1, name: 'Test Profile', isKycApproved: true });
+const mockUserLoggedIn = ref(true);
 
 vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
   useProfilesStore: () => ({
     selectedUserProfileId: mockSelectedUserProfileId,
     selectedUserProfileData: mockSelectedUserProfileData,
+  }),
+}));
+
+vi.mock('InvestCommon/domain/session/store/useSession', () => ({
+  useSessionStore: () => ({
+    userLoggedIn: mockUserLoggedIn,
   }),
 }));
 
@@ -94,6 +101,7 @@ describe('useEarnDetail', () => {
     mockRoute.params = { poolId: 'pool-123' };
     mockSelectedUserProfileId.value = 1;
     mockSelectedUserProfileData.value = { id: 1, name: 'Test Profile' };
+    mockUserLoggedIn.value = true;
     
     mockDefiLlamaRepo.getYieldsState.value = { loading: false, error: null, data: [] };
     mockDefiLlamaRepo.getPoolEnrichedState.value = { loading: false, error: null, data: undefined };

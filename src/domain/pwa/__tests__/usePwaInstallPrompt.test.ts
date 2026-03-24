@@ -107,6 +107,7 @@ describe('usePwaInstallPrompt', () => {
   });
 
   it('shows the native install prompt after beforeinstallprompt fires and hides it after acceptance', async () => {
+    setUserAgent('Mozilla/5.0 (Linux; Android 14; Pixel 8)');
     const { wrapper, api } = mountComposable();
 
     const { prompt } = dispatchBeforeInstallPrompt('accepted');
@@ -124,6 +125,7 @@ describe('usePwaInstallPrompt', () => {
   });
 
   it('persists dismissal cooldown after the native prompt is dismissed', async () => {
+    setUserAgent('Mozilla/5.0 (Linux; Android 14; Pixel 8)');
     const firstMount = mountComposable();
 
     dispatchBeforeInstallPrompt('dismissed');
@@ -144,6 +146,7 @@ describe('usePwaInstallPrompt', () => {
   });
 
   it('hides the prompt after the appinstalled event fires', async () => {
+    setUserAgent('Mozilla/5.0 (Linux; Android 14; Pixel 8)');
     const { wrapper, api } = mountComposable();
 
     dispatchBeforeInstallPrompt('accepted');
@@ -161,6 +164,7 @@ describe('usePwaInstallPrompt', () => {
   });
 
   it('captures install events fired during setup before mount completes', async () => {
+    setUserAgent('Mozilla/5.0 (Linux; Android 14; Pixel 8)');
     let api!: InstallPromptResult;
     const prompt = vi.fn().mockResolvedValue(undefined);
 
@@ -192,6 +196,7 @@ describe('usePwaInstallPrompt', () => {
   });
 
   it('keeps the pending install prompt across composable remounts in the same page session', async () => {
+    setUserAgent('Mozilla/5.0 (Linux; Android 14; Pixel 8)');
     const firstMount = mountComposable();
 
     dispatchBeforeInstallPrompt('accepted');
@@ -210,6 +215,7 @@ describe('usePwaInstallPrompt', () => {
   });
 
   it('syncs prompt dismissal updates from storage while mounted', async () => {
+    setUserAgent('Mozilla/5.0 (Linux; Android 14; Pixel 8)');
     const { wrapper, api } = mountComposable();
 
     dispatchBeforeInstallPrompt('accepted');
@@ -227,6 +233,7 @@ describe('usePwaInstallPrompt', () => {
   });
 
   it('ignores unrelated storage events', async () => {
+    setUserAgent('Mozilla/5.0 (Linux; Android 14; Pixel 8)');
     const { wrapper, api } = mountComposable();
 
     dispatchBeforeInstallPrompt('accepted');
@@ -360,6 +367,19 @@ describe('usePwaInstallPrompt', () => {
     wrapper.unmount();
   });
 
+  it('keeps the install prompt hidden on desktop even if beforeinstallprompt fires', async () => {
+    const { wrapper, api } = mountComposable();
+
+    dispatchBeforeInstallPrompt('accepted');
+    await nextTick();
+
+    expect(api.installState.value).toBe('hidden');
+    expect(api.canInstall.value).toBe(false);
+    await expect(api.promptInstall()).resolves.toBeNull();
+
+    wrapper.unmount();
+  });
+
   it('shows the manual iOS install guidance when Safari does not expose beforeinstallprompt', () => {
     setUserAgent(
       'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1',
@@ -375,6 +395,7 @@ describe('usePwaInstallPrompt', () => {
   });
 
   it('ignores localStorage read failures and keeps the prompt logic usable', async () => {
+    setUserAgent('Mozilla/5.0 (Linux; Android 14; Pixel 8)');
     vi.spyOn(window.localStorage.__proto__, 'getItem').mockImplementation(() => {
       throw new Error('storage disabled');
     });
@@ -390,6 +411,7 @@ describe('usePwaInstallPrompt', () => {
   });
 
   it('keeps localhost PWA test mode enabled across same-tab route changes', async () => {
+    setUserAgent('Mozilla/5.0 (Linux; Android 14; Pixel 8)');
     vi.spyOn(console, 'log').mockImplementation(() => {});
     window.history.replaceState({}, '', '/?__pwa_test=1');
     const firstMount = mountComposable();

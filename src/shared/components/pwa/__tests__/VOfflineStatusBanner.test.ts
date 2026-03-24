@@ -13,7 +13,11 @@ const mountBanner = (props: Record<string, unknown>) => mount(VOfflineStatusBann
     stubs: {
       VAlert: {
         props: ['variant'],
-        template: '<section data-testid="alert" :data-variant="variant"><slot name="title" /><slot name="description" /></section>',
+        template: '<section data-testid="alert" :data-variant="variant"><slot name="title" /><slot name="description" /><slot /></section>',
+      },
+      VButton: {
+        props: ['size', 'color'],
+        template: '<button :data-color="color" :data-size="size"><slot /></button>',
       },
     },
   },
@@ -43,6 +47,7 @@ describe('VOfflineStatusBanner', () => {
     expect(wrapper.text()).toContain('Offline mode');
     expect(wrapper.text()).toContain('read-only mode');
     expect(wrapper.text()).toContain('Last synced: Mar 19, 2026, 5:00 PM.');
+    expect(wrapper.find('button').text()).toBe('OK');
     expect(wrapper.find('[data-testid="alert"]').attributes('data-variant')).toBe('info');
 
     localeSpy.mockRestore();
@@ -71,5 +76,18 @@ describe('VOfflineStatusBanner', () => {
     expect(wrapper.text()).toContain('Connection restored');
     expect(wrapper.text()).not.toContain('Last synced:');
     expect(wrapper.find('[data-testid="alert"]').attributes('data-variant')).toBe('success');
+  });
+
+  it('emits dismiss when the button is clicked', async () => {
+    const wrapper = mountBanner({
+      isOffline: true,
+      isReconnected: false,
+      isShowingCachedContent: true,
+      lastSyncedAt: null,
+    });
+
+    await wrapper.get('button').trigger('click');
+
+    expect(wrapper.emitted('dismiss')).toHaveLength(1);
   });
 });

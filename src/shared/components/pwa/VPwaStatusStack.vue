@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useOfflineStatus } from 'InvestCommon/domain/pwa/useOfflineStatus';
+import { usePwaBannerDismissals } from 'InvestCommon/domain/pwa/usePwaBannerDismissals';
 import { usePwaOfflineDataStatus } from 'InvestCommon/domain/pwa/usePwaOfflineDataStatus';
 import { usePwaInstallPrompt } from 'InvestCommon/domain/pwa/usePwaInstallPrompt';
 import { usePwaStandalone } from 'InvestCommon/domain/pwa/usePwaStandalone';
@@ -61,6 +62,21 @@ const hasRegistrationError = computed(() => Boolean(registrationError.value));
 const canShowInteractiveUpdatePrompt = computed(() => !isOffline.value);
 const shouldShowInstallPrompt = computed(() => installState.value !== 'hidden');
 const shouldShowPwaPrompts = computed(() => isStandalone.value);
+const activeOfflineBannerKey = computed(() => {
+  if (isOffline.value) {
+    return 'offline' as const;
+  }
+
+  if (isReconnected.value) {
+    return 'reconnected' as const;
+  }
+
+  return null;
+});
+const {
+  isBannerVisible: shouldShowOfflineBanner,
+  dismissActiveBanner: dismissOfflineBanner,
+} = usePwaBannerDismissals(activeOfflineBannerKey);
 const shouldShowUpdatePrompt = computed(() => (
   canShowInteractiveUpdatePrompt.value
   && shouldShowPwaPrompts.value
@@ -71,7 +87,6 @@ const shouldShowUpdatePrompt = computed(() => (
     || hasRegistrationError.value
   )
 ));
-const shouldShowOfflineBanner = computed(() => isOffline.value || isReconnected.value);
 const shouldRenderStack = computed(() => (
   shouldShowInstallPrompt.value
   || shouldShowUpdatePrompt.value
@@ -112,6 +127,7 @@ const shouldOffsetForFooterMenu = computed(() => (
       :is-reconnected="isReconnected"
       :is-showing-cached-content="isShowingCachedContent"
       :last-synced-at="lastSyncedAt"
+      @dismiss="dismissOfflineBanner"
     />
   </div>
 </template>

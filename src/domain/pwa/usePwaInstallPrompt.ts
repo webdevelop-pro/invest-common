@@ -2,7 +2,11 @@ import {
   computed,
   shallowRef,
 } from 'vue';
-import { isIosSafariBrowser, isPwaStandalone } from './pwaDetector';
+import {
+  isInstallPromptSupportedDevice,
+  isIosSafariBrowser,
+  isPwaStandalone,
+} from './pwaDetector';
 import {
   isLocalPwaTestEnabled,
   isLocalPwaTestHost,
@@ -67,6 +71,7 @@ const installPromptRuntime = {
   isInstalled: shallowRef(false),
   dismissedAt: shallowRef(0),
   isIosSafari: shallowRef(false),
+  isInstallPromptSupportedDevice: shallowRef(false),
   localTestHost: shallowRef(false),
   listenersBound: false,
 };
@@ -80,11 +85,17 @@ const installState = computed<InstallPromptState>(() => {
     return 'hidden';
   }
 
-  if (installPromptRuntime.deferredPrompt.value) {
+  if (
+    installPromptRuntime.deferredPrompt.value
+    && installPromptRuntime.isInstallPromptSupportedDevice.value
+  ) {
     return 'native';
   }
 
-  return installPromptRuntime.isIosSafari.value ? 'manual-ios' : 'hidden';
+  return (
+    installPromptRuntime.isIosSafari.value
+    && installPromptRuntime.isInstallPromptSupportedDevice.value
+  ) ? 'manual-ios' : 'hidden';
 });
 
 const syncDismissedState = () => {
@@ -94,8 +105,10 @@ const syncDismissedState = () => {
 
 const syncRuntimeState = () => {
   installPromptRuntime.isInstalled.value = isPwaStandalone();
+  installPromptRuntime.isInstallPromptSupportedDevice.value = isInstallPromptSupportedDevice();
   return {
     isInstalled: installPromptRuntime.isInstalled.value,
+    isInstallPromptSupportedDevice: installPromptRuntime.isInstallPromptSupportedDevice.value,
     dismissedRecently: syncDismissedState(),
   };
 };
@@ -169,6 +182,15 @@ const handleVisibilityChange = () => {
 
 const handleBeforeInstallPrompt = (event: Event) => {
   event.preventDefault();
+
+  if (!installPromptRuntime.isInstallPromptSupportedDevice.value) {
+    logPwaDebug('install', 'ignored beforeinstallprompt on unsupported device', {
+      isInstallPromptSupportedDevice: installPromptRuntime.isInstallPromptSupportedDevice.value,
+      installState: installState.value,
+    });
+    return;
+  }
+
   setDeferredPrompt(
     event as BeforeInstallPromptEvent,
     'received beforeinstallprompt event',
@@ -252,6 +274,7 @@ const resetInstallPromptRuntime = () => {
   installPromptRuntime.isInstalled.value = false;
   installPromptRuntime.dismissedAt.value = 0;
   installPromptRuntime.isIosSafari.value = false;
+  installPromptRuntime.isInstallPromptSupportedDevice.value = false;
   installPromptRuntime.localTestHost.value = false;
 };
 

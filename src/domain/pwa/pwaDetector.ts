@@ -29,12 +29,12 @@ export function isIosSafariBrowser(): boolean {
   return isIos && isWebkit && !isOtherIosBrowser;
 }
 
-function isMobilePhone(): boolean {
+export function isInstallPromptSupportedDevice(): boolean {
   if (typeof navigator === "undefined") return false;
   const ua = navigator.userAgent.toLowerCase();
-  return /android|iphone/.test(ua);
+  return /android|iphone|ipad|ipod|mobile|tablet/.test(ua);
 }
 
 export function isPwaMobile(): boolean {
-  return isPwaStandalone() && isMobilePhone();
+  return isPwaStandalone() && isInstallPromptSupportedDevice();
 }

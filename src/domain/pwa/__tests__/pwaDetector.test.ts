@@ -7,6 +7,7 @@ import {
 } from 'vitest';
 import {
   isIosSafariBrowser,
+  isInstallPromptSupportedDevice,
   isPwaMobile,
   isPwaStandalone,
 } from '../pwaDetector';
@@ -71,6 +72,17 @@ describe('pwaDetector', () => {
 
     setUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/122.0.0.0 Mobile/15E148 Safari/604.1');
     expect(isIosSafariBrowser()).toBe(false);
+  });
+
+  it('detects install-prompt-supported devices and excludes desktop browsers', () => {
+    setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)');
+    expect(isInstallPromptSupportedDevice()).toBe(false);
+
+    setUserAgent('Mozilla/5.0 (Linux; Android 14; Pixel 8)');
+    expect(isInstallPromptSupportedDevice()).toBe(true);
+
+    setUserAgent('Mozilla/5.0 (iPad; CPU OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1');
+    expect(isInstallPromptSupportedDevice()).toBe(true);
   });
 
   it('detects mobile PWAs only when both standalone and phone user agent are present', () => {
