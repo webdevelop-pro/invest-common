@@ -175,6 +175,24 @@ describe('useFormFinancialInformationAndKyc', () => {
     });
   });
 
+  describe('back navigation', () => {
+    it('should expose the dashboard route by default', () => {
+      expect(composable.backButtonRoute.value).toEqual({
+        name: ROUTE_DASHBOARD_ACCOUNT,
+        params: { profileId: '123' },
+      });
+      expect(composable.breadcrumbs.value[0]?.to).toEqual(composable.backButtonRoute.value);
+    });
+
+    it('should expose the redirect query as the back route when present', () => {
+      mockRoute.query = { redirect: '/profile/123/wallet?wallet-tab=holdings' };
+      composable = useFormFinancialInformationAndKyc();
+
+      expect(composable.backButtonRoute.value).toBe('/profile/123/wallet?wallet-tab=holdings');
+      expect(composable.breadcrumbs.value[0]?.to).toBe('/profile/123/wallet?wallet-tab=holdings');
+    });
+  });
+
   describe('handleSave', () => {
     beforeEach(() => {
       mockPersonalFormRef.value.isValid = true;
@@ -183,12 +201,13 @@ describe('useFormFinancialInformationAndKyc', () => {
       mockUnderstandingRisksFormRef.value.isValid = true;
       mockRepositoryProfiles.setProfileById.mockResolvedValue({});
       mockRepositoryProfiles.getProfileById.mockResolvedValue({});
-      mockKycRepository.handlePlaidKyc.mockResolvedValue({});
+      mockKycRepository.handlePlaidKyc.mockResolvedValue({ success: true });
       mockAccreditationRepository.createEscrow.mockResolvedValue({});
     });
 
     it('should save successfully when all forms are valid', async () => {
       mockRoute.query = {};
+      composable = useFormFinancialInformationAndKyc();
       await composable.handleSave();
       expect(mockPersonalFormRef.value.onValidate).toHaveBeenCalled();
       expect(mockFinancialInfoFormRef.value.onValidate).toHaveBeenCalled();
@@ -205,21 +224,24 @@ describe('useFormFinancialInformationAndKyc', () => {
         'individual',
         '123',
       );
+      expect(mockRepositoryProfiles.setUser).toHaveBeenCalledWith({ phone: undefined });
+      expect(mockRepositoryProfiles.getUser).toHaveBeenCalled();
+      expect(mockRepositoryProfiles.setUser.mock.invocationCallOrder[0]).toBeLessThan(
+        mockRepositoryProfiles.getUser.mock.invocationCallOrder[0],
+      );
       expect(mockKycRepository.handlePlaidKyc).toHaveBeenCalled();
       expect(mockAccreditationRepository.createEscrow).toHaveBeenCalledWith('user123', 'profile123');
       expect(mockSubmitFormToHubspot).toHaveBeenCalledTimes(4);
       expect(mockRepositoryProfiles.getProfileById).toHaveBeenCalledWith('individual', '123');
-      expect(mockPush).toHaveBeenCalledWith({
-        name: ROUTE_DASHBOARD_ACCOUNT,
-        params: { profileId: '123' },
-      });
+      expect(mockPush).toHaveBeenCalledWith(composable.backButtonRoute.value);
       expect(composable.isLoading.value).toBe(false);
     });
 
     it('should redirect back when redirect query param is present', async () => {
       mockRoute.query = { redirect: '/profile/123/wallet?wallet-tab=holdings' };
+      composable = useFormFinancialInformationAndKyc();
       await composable.handleSave();
-      expect(mockPush).toHaveBeenCalledWith('/profile/123/wallet?wallet-tab=holdings');
+      expect(mockPush).toHaveBeenCalledWith(composable.backButtonRoute.value);
     });
 
     it('should not save and should scroll to error if any form is invalid', async () => {
@@ -244,6 +266,117 @@ describe('useFormFinancialInformationAndKyc', () => {
         expect.any(Error),
         'Failed to save KYC and financial information',
       );
+      expect(mockRepositoryProfiles.setUser).not.toHaveBeenCalled();
+      expect(mockRepositoryProfiles.getUser).not.toHaveBeenCalled();
+      expect(composable.isLoading.value).toBe(false);
+    });
+
+    it('should report Plaid KYC error with the correct message', async () => {
+      mockKycRepository.handlePlaidKyc.mockRejectedValue(new Error('kyc fail'));
+      const { reportError } = await import('InvestCommon/domain/error/errorReporting');
+
+      await composable.handleSave();
+
+      expect(mockKycRepository.handlePlaidKyc).toHaveBeenCalled();
+      expect(reportError).toHaveBeenCalledWith(
+        expect.any(Error),
+        'Failed to handle Plaid KYC',
+      );
+      expect(mockRepositoryProfiles.setUser).toHaveBeenCalledWith({ phone: undefined });
+      expect(mockRepositoryProfiles.getUser).toHaveBeenCalled();
+      expect(mockRepositoryProfiles.setUser.mock.invocationCallOrder[0]).toBeLessThan(
+        mockRepositoryProfiles.getUser.mock.invocationCallOrder[0],
+      );
+      expect(mockAccreditationRepository.createEscrow).not.toHaveBeenCalled();
+      expect(composable.isLoading.value).toBe(false);
+    });
+
+    it('should continue with escrow creation and redirect when Plaid closes without throwing', async () => {
+      mockKycRepository.handlePlaidKyc.mockResolvedValue({ success: false });
+
+      await composable.handleSave();
+
+      expect(mockKycRepository.handlePlaidKyc).toHaveBeenCalledWith('123');
+      expect(mockAccreditationRepository.createEscrow).toHaveBeenCalledWith('user123', 'profile123');
+      expect(mockRepositoryProfiles.getProfileById).toHaveBeenCalledWith('individual', '123');
+      expect(mockPush).toHaveBeenCalledWith(composable.backButtonRoute.value);
+      expect(composable.isLoading.value).toBe(false);
+    });
+
+    it('should still wait for hubspot before redirecting when Plaid is closed', async () => {
+      let resolveHubspotRequest!: () => void;
+      mockKycRepository.handlePlaidKyc.mockResolvedValue({ success: false });
+      mockSubmitFormToHubspot
+        .mockImplementationOnce(() => new Promise<void>((resolve) => {
+          resolveHubspotRequest = resolve;
+        }))
+        .mockResolvedValue(undefined);
+
+      const savePromise = composable.handleSave();
+
+      await vi.waitFor(() => {
+        expect(mockKycRepository.handlePlaidKyc).toHaveBeenCalledWith('123');
+        expect(mockAccreditationRepository.createEscrow).toHaveBeenCalledWith('user123', 'profile123');
+        expect(mockRepositoryProfiles.getProfileById).toHaveBeenCalledWith('individual', '123');
+      });
+      expect(mockPush).not.toHaveBeenCalled();
+
+      resolveHubspotRequest();
+      await savePromise;
+
+      expect(mockPush).toHaveBeenCalledWith(composable.backButtonRoute.value);
+    });
+
+    it('should not wait for user sync after profile save', async () => {
+      mockRepositoryProfiles.setUser.mockImplementation(() => new Promise(() => {}));
+
+      await composable.handleSave();
+
+      expect(mockRepositoryProfiles.setUser).toHaveBeenCalledWith({ phone: undefined });
+      expect(mockRepositoryProfiles.getUser).not.toHaveBeenCalled();
+      expect(mockKycRepository.handlePlaidKyc).toHaveBeenCalled();
+      expect(mockAccreditationRepository.createEscrow).toHaveBeenCalledWith('user123', 'profile123');
+      expect(mockSubmitFormToHubspot).toHaveBeenCalledTimes(4);
+      expect(mockPush).toHaveBeenCalledWith(composable.backButtonRoute.value);
+      expect(composable.isLoading.value).toBe(false);
+    });
+
+    it('should wait for hubspot before routing without blocking the main save flow', async () => {
+      let resolveHubspotRequest!: () => void;
+      mockSubmitFormToHubspot
+        .mockImplementationOnce(() => new Promise<void>((resolve) => {
+          resolveHubspotRequest = resolve;
+        }))
+        .mockResolvedValue(undefined);
+
+      const savePromise = composable.handleSave();
+
+      await vi.waitFor(() => {
+        expect(mockKycRepository.handlePlaidKyc).toHaveBeenCalled();
+        expect(mockAccreditationRepository.createEscrow).toHaveBeenCalledWith('user123', 'profile123');
+      });
+      expect(mockPush).not.toHaveBeenCalled();
+
+      resolveHubspotRequest();
+      await savePromise;
+
+      expect(mockPush).toHaveBeenCalledWith(composable.backButtonRoute.value);
+    });
+
+    it('should report escrow creation error with the correct message', async () => {
+      mockAccreditationRepository.createEscrow.mockRejectedValue(new Error('escrow fail'));
+      const { reportError } = await import('InvestCommon/domain/error/errorReporting');
+
+      await composable.handleSave();
+
+      expect(mockAccreditationRepository.createEscrow).toHaveBeenCalledWith('user123', 'profile123');
+      expect(reportError).toHaveBeenCalledWith(
+        expect.any(Error),
+        'Failed to create escrow',
+      );
+      expect(mockRepositoryProfiles.getProfileById).toHaveBeenCalledWith('individual', '123');
+      expect(mockSubmitFormToHubspot).toHaveBeenCalledTimes(4);
+      expect(mockPush).toHaveBeenCalledWith(composable.backButtonRoute.value);
       expect(composable.isLoading.value).toBe(false);
     });
 

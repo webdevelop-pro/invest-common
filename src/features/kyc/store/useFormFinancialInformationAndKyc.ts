@@ -16,6 +16,19 @@ import { useRepositoryAccreditation } from 'InvestCommon/data/accreditation/accr
 import { useRepositoryKyc } from 'InvestCommon/data/kyc/kyc.repository';
 import { reportError } from 'InvestCommon/domain/error/errorReporting';
 
+const runSaveStep = async (
+  action: () => Promise<unknown>,
+  fallbackMessage: string,
+) => {
+  try {
+    await action();
+    return true;
+  } catch (error) {
+    reportError(error, fallbackMessage);
+    return false;
+  }
+};
+
 export const useFormFinancialInformationAndKyc = () => {
   const router = useRouter();
   const route = useRoute();
@@ -30,10 +43,16 @@ export const useFormFinancialInformationAndKyc = () => {
   const accreditationRepository = useRepositoryAccreditation();
 
   const backButtonText = ref('Go Back');
+  const backButtonRoute = computed(() => (
+    route.query.redirect || {
+      name: ROUTE_DASHBOARD_ACCOUNT,
+      params: { profileId: selectedUserProfileId.value },
+    }
+  ));
   const breadcrumbs = computed(() => [
     {
       text: 'Dashboard',
-      to: { name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } },
+      to: backButtonRoute.value,
     },
     {
       text: 'Identity Verification (KYC)',
@@ -77,6 +96,22 @@ export const useFormFinancialInformationAndKyc = () => {
     });
   };
 
+  const syncUserAfterSave = async (phone?: string) => {
+    const isUserUpdated = await runSaveStep(
+      () => useRepositoryProfilesStore.setUser({ phone }),
+      'Failed to update user phone',
+    );
+
+    if (!isUserUpdated) {
+      return false;
+    }
+
+    return runSaveStep(
+      () => useRepositoryProfilesStore.getUser(),
+      'Failed to refresh user',
+    );
+  };
+
   const handleSave = async () => {
     personalFormRef.value?.onValidate();
     financialInfoFormRef.value?.onValidate();
@@ -96,51 +131,66 @@ export const useFormFinancialInformationAndKyc = () => {
     };
 
     const { consent_plaid, ...fields } = modelLocal;
+    let hubspotPromise: Promise<void> | null = null;
 
     isLoading.value = true;
     try {
-      await useRepositoryProfilesStore.setProfileById(
-        {
-          ...fields,
-        },
-        selectedUserProfileType.value,
-        selectedUserProfileId.value,
+      let canContinue = await runSaveStep(
+        () => useRepositoryProfilesStore.setProfileById(
+          {
+            ...fields,
+          },
+          selectedUserProfileType.value,
+          selectedUserProfileId.value,
+        ),
+        'Failed to save KYC and financial information',
       );
-      if (!setProfileByIdState.value.error) await useRepositoryKycStore.handlePlaidKyc(selectedUserProfileId.value);
 
-      await useRepositoryProfilesStore.setUser({ phone: fields?.phone });
-      await useRepositoryProfilesStore.getUser();
-      if (!tokenState.value.error && !setProfileByIdState.value.error
-    && selectedUserProfileData.value?.user_id && selectedUserProfileData.value?.id
-    && !selectedUserProfileData.value?.escrow_id) {
-        await accreditationRepository.createEscrow(
-          selectedUserProfileData.value?.user_id,
-          selectedUserProfileData.value?.id
+      if (canContinue && !setProfileByIdState.value.error) {
+        hubspotPromise = hubspotHandle();
+        void syncUserAfterSave(fields?.phone);
+        canContinue = await runSaveStep(
+          () => useRepositoryKycStore.handlePlaidKyc(selectedUserProfileId.value),
+          'Failed to handle Plaid KYC',
         );
-
       }
-      useRepositoryProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
-      
-    } catch (error) {
-      reportError(error, 'Failed to save KYC and financial information');
+
+      if (canContinue
+        && !tokenState.value.error
+        && !setProfileByIdState.value.error
+        && selectedUserProfileData.value?.user_id
+        && selectedUserProfileData.value?.id
+        && !selectedUserProfileData.value?.escrow_id) {
+        canContinue = await runSaveStep(
+          () => accreditationRepository.createEscrow(
+            selectedUserProfileData.value?.user_id,
+            selectedUserProfileData.value?.id,
+          ),
+          'Failed to create escrow',
+        );
+      }
     } finally {
       isLoading.value = false;
     }
-    if (!setProfileByIdState.value.error) await hubspotHandle();
 
-    const redirectParam = route.query.redirect;
-    if (redirectParam) {
-      await router.push(redirectParam);
-    } else {
-      await router.push({
-        name: ROUTE_DASHBOARD_ACCOUNT,
-        params: { profileId: selectedUserProfileId.value },
-      });
+    await runSaveStep(
+      () => useRepositoryProfilesStore.getProfileById(
+        selectedUserProfileType.value,
+        selectedUserProfileId.value,
+      ),
+      'Failed to refresh profile',
+    );
+
+    if (hubspotPromise) {
+      await hubspotPromise;
     }
+
+    await router.push(backButtonRoute.value);
   };
 
   return {
     backButtonText,
+    backButtonRoute,
     breadcrumbs,
     isDisabledButton,
     isLoading,

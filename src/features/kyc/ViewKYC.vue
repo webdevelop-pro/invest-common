@@ -11,7 +11,7 @@ const globalLoader = useGlobalLoader();
 globalLoader.hide();
 
 const {
-  backButtonText, breadcrumbs, isLoading, isDisabledButton,
+  backButtonText, backButtonRoute, breadcrumbs, isLoading, isDisabledButton,
   modelData, schemaBackend, errorData, handleSave,
 } = useFormFinancialInformationAndKyc();
 
@@ -21,6 +21,7 @@ const {
   <div class="ViewKYC view-kyc is--no-margin">
     <VLayoutForm
       :button-text="backButtonText"
+      :button-route="backButtonRoute"
       :breadcrumbs="breadcrumbs"
       :is-disabled-button="isDisabledButton"
       :is-loading="isLoading"

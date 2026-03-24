@@ -98,7 +98,7 @@ export const useAccreditationUpload = defineStore('useAccreditationUpload', () =
   );
 
   const isAccreditationCanUpload = computed(() => {
-    if (!selectedUserProfileData.value) {
+    if (!selectedUserProfileData.value?.accreditation_status) {
       return false;
     }
     return (
