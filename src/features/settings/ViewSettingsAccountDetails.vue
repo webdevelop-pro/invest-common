@@ -5,6 +5,7 @@ import VFormPartialAccount from './components/VFormPartialAccount.vue';
 import { useSettingsAccountDetails } from './logic/useSettingsAccountDetails';
 
 const {
+  avatarLoadingState,
   isLoading,
   isDisabledButton,
   userData,
@@ -34,7 +35,7 @@ const {
         class="is--margin-top-40"
         :image-id="Number(getUserState.data?.image_link_id)"
         :user-id="Number(getUserState.data?.id)"
-        :loading="getUserState.loading"
+        :loading="avatarLoadingState"
         @upload-id="onUploadId"
       />
       <div class="is--margin-top-30 VFormAccount">

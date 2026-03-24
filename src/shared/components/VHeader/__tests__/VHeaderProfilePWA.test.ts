@@ -1,21 +1,40 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { mount } from '@vue/test-utils';
-import { ref } from 'vue';
+import { flushPromises, mount } from '@vue/test-utils';
+import { defineComponent, ref } from 'vue';
+import VHeaderProfilePWA from '../VHeaderProfilePWA.vue';
+
 vi.mock('UiKit/components/VAvatar.vue', () => ({
-  default: {
-    template: '<div data-testid="avatar" />',
-  },
+  default: defineComponent({
+    name: 'VAvatar',
+    props: {
+      loading: {
+        type: Boolean,
+        default: false,
+      },
+    },
+    template: '<div data-testid="avatar" :data-loading="String(loading)" />',
+  }),
 }));
 
 const userSessionTraits = ref({ email: 'user@example.com' });
 const getUserState = ref({ data: { id: 123, image_link_id: 55 } });
 const selectedUserProfileId = ref(872);
+const notificationFieldsState = ref({ data: undefined as Record<string, unknown> | undefined });
 const postSignurlState = ref({ data: { meta: { id: 999 } } });
 const isDialogLogoutOpen = ref(false);
 
 const uploadHandler = vi.fn(async () => true);
 const updateUserData = vi.fn(async () => true);
 const getUser = vi.fn(async () => true);
+
+const createDeferred = () => {
+  let resolve!: (value: boolean) => void;
+  const promise = new Promise<boolean>((resolver) => {
+    resolve = resolver;
+  });
+
+  return { promise, resolve };
+};
 
 vi.mock('pinia', async () => {
   const actual = await vi.importActual<typeof import('pinia')>('pinia');
@@ -25,7 +44,7 @@ vi.mock('pinia', async () => {
       if ('getUserState' in store) return { getUserState };
       if ('userSessionTraits' in store) return { userSessionTraits };
       if ('selectedUserProfileId' in store) return { selectedUserProfileId };
-      if ('postSignurlState' in store) return { postSignurlState };
+      if ('postSignurlState' in store) return { notificationFieldsState, postSignurlState };
       if ('isDialogLogoutOpen' in store) return { isDialogLogoutOpen };
       return {};
     },
@@ -59,6 +78,7 @@ vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
 
 vi.mock('InvestCommon/data/filer/filer.repository', () => ({
   useRepositoryFiler: () => ({
+    notificationFieldsState,
     postSignurlState,
     uploadHandler,
   }),
@@ -83,6 +103,7 @@ describe('VHeaderProfilePWA', () => {
     userSessionTraits.value = { email: 'user@example.com' };
     getUserState.value = { data: { id: 123, image_link_id: 55 } };
     selectedUserProfileId.value = 872;
+    notificationFieldsState.value = { data: undefined };
     postSignurlState.value = { data: { meta: { id: 999 } } };
     uploadHandler.mockClear();
     updateUserData.mockClear();
@@ -90,46 +111,27 @@ describe('VHeaderProfilePWA', () => {
   });
 
   it('renders avatar and email', async () => {
-    const { default: VHeaderProfilePWA } = await import('../VHeaderProfilePWA.vue');
-    const wrapper = mount(VHeaderProfilePWA, {
-      global: {
-        stubs: {
-          VAvatar: {
-            template: '<div data-testid="avatar" />',
-          },
-        },
-      },
-    });
+    const wrapper = mount(VHeaderProfilePWA);
 
     expect(wrapper.find('[data-testid="avatar"]').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="avatar"]').attributes('data-loading')).toBe('false');
     expect(wrapper.text()).toContain('user@example.com');
   });
 
   it('clicking avatar triggers file input click', async () => {
     const clickSpy = vi.spyOn(HTMLInputElement.prototype, 'click');
-    const { default: VHeaderProfilePWA } = await import('../VHeaderProfilePWA.vue');
-    const wrapper = mount(VHeaderProfilePWA, {
-      global: {
-        stubs: {
-          VAvatar: true,
-        },
-      },
-    });
+    const wrapper = mount(VHeaderProfilePWA);
 
     await wrapper.find('.v-header-profile-pwa__avatar-btn').trigger('click');
     expect(clickSpy).toHaveBeenCalled();
     clickSpy.mockRestore();
   });
 
-  it('uploads and updates avatar on file change', async () => {
-    const { default: VHeaderProfilePWA } = await import('../VHeaderProfilePWA.vue');
-    const wrapper = mount(VHeaderProfilePWA, {
-      global: {
-        stubs: {
-          VAvatar: true,
-        },
-      },
-    });
+  it('shows header avatar loading during upload and resets afterward', async () => {
+    const deferredUpload = createDeferred();
+    uploadHandler.mockImplementationOnce(() => deferredUpload.promise);
+
+    const wrapper = mount(VHeaderProfilePWA);
 
     const input = wrapper.find('input[type="file"]');
     const file = new File(['avatar'], 'avatar.png', { type: 'image/png' });
@@ -139,18 +141,82 @@ describe('VHeaderProfilePWA', () => {
     });
 
     await input.trigger('change');
+    expect(wrapper.find('[data-testid="avatar"]').attributes('data-loading')).toBe('true');
+
+    deferredUpload.resolve(true);
+    await flushPromises();
 
     expect(uploadHandler).toHaveBeenCalledWith(file, 123, 'user', 123);
     expect(updateUserData).toHaveBeenCalledWith({ image_link_id: 999 });
-    expect(getUser).toHaveBeenCalled();
+    expect(getUser).toHaveBeenCalledTimes(1);
+    expect(wrapper.find('[data-testid="avatar"]').attributes('data-loading')).toBe('true');
+
+    notificationFieldsState.value = {
+      data: {
+        object_id: 700174,
+        type: 'file_thumbnail',
+      },
+    };
+    await flushPromises();
+
+    expect(getUser).toHaveBeenCalledTimes(2);
+    expect(wrapper.find('[data-testid="avatar"]').attributes('data-loading')).toBe('false');
   });
 
-  it('opens profile overlay on email click', async () => {
-    const { default: VHeaderProfilePWA } = await import('../VHeaderProfilePWA.vue');
+  it('forwards avatar loading state to the overlay', async () => {
+    const deferredUpload = createDeferred();
+    uploadHandler.mockImplementationOnce(() => deferredUpload.promise);
+
     const wrapper = mount(VHeaderProfilePWA, {
       global: {
         stubs: {
-          VAvatar: true,
+          VHeaderProfileOverlayPWA: defineComponent({
+            name: 'VHeaderProfileOverlayPWA',
+            props: {
+              avatarLoading: {
+                type: Boolean,
+                default: false,
+              },
+            },
+            template: '<div class="v-header-profile-pwa__overlay" :data-avatar-loading="String(avatarLoading)" />',
+          }),
+        },
+      },
+    });
+
+    await wrapper.find('.v-header-profile-pwa__email').trigger('click');
+    expect(wrapper.find('.v-header-profile-pwa__overlay').attributes('data-avatar-loading')).toBe('false');
+
+    const input = wrapper.find('input[type="file"]');
+    const file = new File(['avatar'], 'avatar.png', { type: 'image/png' });
+    Object.defineProperty(input.element, 'files', {
+      value: [file],
+      writable: false,
+    });
+
+    await input.trigger('change');
+    expect(wrapper.find('.v-header-profile-pwa__overlay').attributes('data-avatar-loading')).toBe('true');
+
+    deferredUpload.resolve(true);
+    await flushPromises();
+
+    expect(wrapper.find('.v-header-profile-pwa__overlay').attributes('data-avatar-loading')).toBe('true');
+
+    notificationFieldsState.value = {
+      data: {
+        object_id: 700174,
+        type: 'file_thumbnail',
+      },
+    };
+    await flushPromises();
+
+    expect(wrapper.find('.v-header-profile-pwa__overlay').attributes('data-avatar-loading')).toBe('false');
+  });
+
+  it('opens profile overlay on email click', async () => {
+    const wrapper = mount(VHeaderProfilePWA, {
+      global: {
+        stubs: {
           VHeaderProfileOverlayPWA: {
             template: `
               <div class="v-header-profile-pwa__overlay">
@@ -172,11 +238,9 @@ describe('VHeaderProfilePWA', () => {
   });
 
   it('opens logout dialog from overlay', async () => {
-    const { default: VHeaderProfilePWA } = await import('../VHeaderProfilePWA.vue');
     const wrapper = mount(VHeaderProfilePWA, {
       global: {
         stubs: {
-          VAvatar: true,
           VHeaderProfileOverlayPWA: {
             template: `
               <div class="v-header-profile-pwa__overlay">
@@ -197,11 +261,9 @@ describe('VHeaderProfilePWA', () => {
   });
 
   it('adds fromUserMenu marker to overlay navigation links', async () => {
-    const { default: VHeaderProfilePWA } = await import('../VHeaderProfilePWA.vue');
     const wrapper = mount(VHeaderProfilePWA, {
       global: {
         stubs: {
-          VAvatar: true,
           VHeaderProfileOverlayPWA: {
             template: `
               <div

@@ -1,11 +1,21 @@
+import { defineComponent } from 'vue';
 import { describe, it, expect } from 'vitest';
 import { mount } from '@vue/test-utils';
 import VHeaderProfileOverlayPWA from '../VHeaderProfileOverlayPWA.vue';
 
 vi.mock('UiKit/components/VAvatar.vue', () => ({
-  default: { template: '<div data-testid="avatar" />' },
+  default: defineComponent({
+    name: 'VAvatar',
+    props: {
+      loading: {
+        type: Boolean,
+        default: false,
+      },
+    },
+    template: '<div data-testid="avatar" :data-loading="String(loading)" />',
+  }),
 }));
-vi.mock('UiKit/assets/images/arrow-right.svg', () => ({
+vi.mock('UiKit/assets/images/chevron-right.svg', () => ({
   default: { template: '<i data-testid="chevron" />' },
 }));
 vi.mock('UiKit/assets/images/menu_common/user.svg', () => ({
@@ -28,6 +38,7 @@ const mountOverlay = (props: Record<string, unknown> = {}) => mount(VHeaderProfi
   props: {
     email: 'maria@webdevelop.pro',
     avatarSrc: '/avatar.png',
+    avatarLoading: false,
     accountDetailsHref: '/settings/1/account-details',
     mfaHref: '/settings/1/mfa',
     securityHref: '/settings/1/security',
@@ -47,6 +58,12 @@ describe('VHeaderProfileOverlayPWA', () => {
     const wrapper = mountOverlay();
     expect(wrapper.find('.v-header-profile-pwa__overlay-email').text()).toBe('maria@webdevelop.pro');
     expect(wrapper.find('.v-header-profile-pwa__overlay-link').text()).toBe('Account Details');
+    expect(wrapper.find('[data-testid="avatar"]').attributes('data-loading')).toBe('false');
+  });
+
+  it('passes avatar loading state to the avatar', () => {
+    const wrapper = mountOverlay({ avatarLoading: true });
+    expect(wrapper.find('[data-testid="avatar"]').attributes('data-loading')).toBe('true');
   });
 
   it('renders grouped menu items in the expected order', () => {

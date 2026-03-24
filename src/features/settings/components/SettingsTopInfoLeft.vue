@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, watch } from 'vue';
+import { computed, ref } from 'vue';
 import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 import { storeToRefs } from 'pinia';
 import VAvatarUpload from 'InvestCommon/features/filer/VAvatarUpload.vue';
@@ -11,8 +11,8 @@ import { useBreakpoints } from 'UiKit/composables/useBreakpoints';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
-import { useRepositoryFiler } from 'InvestCommon/data/filer/filer.repository';
 import { reportError } from 'InvestCommon/domain/error/errorReporting';
+import { useFilerNotificationRefresh } from 'InvestCommon/domain/filer/useFilerNotificationRefresh';
 
 const { FILER_URL } = env;
 
@@ -23,42 +23,39 @@ const { getUserState } = storeToRefs(useRepositoryProfilesStore);
 const { isTablet } = useBreakpoints();
 const profilesStore = useProfilesStore();
 const { selectedUserProfileId } = storeToRefs(profilesStore);
-const filerRepository = useRepositoryFiler();
-const { notificationFieldsState } = storeToRefs(filerRepository);
 
 const isLoading = computed(() => getUserState.value.loading);
 const imageID = computed(() => Number(getUserState.value.data?.image_link_id || 0));
 const isAvatarLoading = ref(false);
 const avatarLoadingState = computed(() => isLoading.value || isAvatarLoading.value);
 
-// Debounced notification-based refresh of user data
-let debounceTimeout: ReturnType<typeof setTimeout> | null = null;
-watch(
-  notificationFieldsState,
-  () => {
-    if (debounceTimeout) {
-      clearTimeout(debounceTimeout);
-    }
-
-debounceTimeout = setTimeout(async () => {
-      try {
-        await useRepositoryProfilesStore.getUser();
-      } catch (error) {
-        reportError(error, 'Failed to refresh user data');
-      } finally {
-        debounceTimeout = null;
-      }
-    }, 3000);
-  },
-  { deep: true },
-);
-
-onBeforeUnmount(() => {
-  if (debounceTimeout) {
-    clearTimeout(debounceTimeout);
-    debounceTimeout = null;
-  }
+useFilerNotificationRefresh({
+  delayMs: 3000,
+  enabled: computed(() => !getUserState.value.loading && !isAvatarLoading.value),
+  match: (fields) => fields.type !== 'file_thumbnail',
+  refresh: () => useRepositoryProfilesStore.getUser(),
+  refreshErrorMessage: 'Failed to refresh user data',
 });
+
+const {
+  clearPendingRefresh: clearAvatarNotificationRefresh,
+  scheduleFallbackRefresh,
+} = useFilerNotificationRefresh({
+  enabled: isAvatarLoading,
+  fallbackMs: 5000,
+  match: (fields) => fields.type === 'file_thumbnail',
+  refresh: () => useRepositoryProfilesStore.getUser(),
+  refreshErrorMessage: 'Failed to refresh avatar after thumbnail generation',
+  fallbackErrorMessage: 'Failed to refresh avatar after upload',
+  onSettled: () => {
+    isAvatarLoading.value = false;
+  },
+});
+
+const finishAvatarRefresh = () => {
+  clearAvatarNotificationRefresh();
+  isAvatarLoading.value = false;
+};
 
 const onUploadId = async (id: string) => {
   isAvatarLoading.value = true;
@@ -69,12 +66,11 @@ const onUploadId = async (id: string) => {
 
   try {
     await useRepositoryProfilesStore.updateUserData(body as Record<string, unknown>);
-    // Fallback: explicitly refresh user data even if no notification arrives
     await useRepositoryProfilesStore.getUser();
+    scheduleFallbackRefresh();
   } catch (error) {
     reportError(error, 'Failed to update avatar');
-  } finally {
-    isAvatarLoading.value = false;
+    finishAvatarRefresh();
   }
 };
 </script>

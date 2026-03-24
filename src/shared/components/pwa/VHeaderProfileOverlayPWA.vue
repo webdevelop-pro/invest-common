@@ -13,6 +13,7 @@ import LogoutIcon from 'UiKit/assets/images/menu_common/logout.svg';
 const props = defineProps<{
   email?: string;
   avatarSrc?: string;
+  avatarLoading?: boolean;
   accountDetailsHref?: string;
   mfaHref?: string;
   securityHref?: string;
@@ -163,6 +164,7 @@ const onOverlayItemClick = (item: OverlayActionItem) => {
                 <VAvatar
                   size="small"
                   :src="avatarSrc"
+                  :loading="avatarLoading"
                   alt="avatar image"
                   class="v-header-profile-pwa__overlay-avatar"
                 />

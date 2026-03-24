@@ -11,7 +11,7 @@ export default defineConfig({
   ],
   test: {
     globals: true,
-    environment: 'happy-dom',
+    environment: 'jsdom',
     coverage: {
       provider: 'v8',
     },
@@ -21,7 +21,7 @@ export default defineConfig({
       { find: 'InvestCommon', replacement: fileURLToPath(new URL('./src', import.meta.url)) },
       { find: 'UiKit', replacement: path.resolve(__dirname, '../ui-kit/src') },
       { find: /^@vueuse\/integrations\/(.*)$/, replacement: '@vueuse/integrations/$1.js' },
-      { find: /^pinia$/, replacement: path.resolve(__dirname, './node_modules/pinia/dist/pinia.mjs') },
+      { find: /^pinia$/, replacement: path.resolve(__dirname, '../node_modules/pinia/dist/pinia.mjs') },
       { find: /^vue-router$/, replacement: path.resolve(__dirname, './test/mocks/vue-router.ts') },
     ],
   },

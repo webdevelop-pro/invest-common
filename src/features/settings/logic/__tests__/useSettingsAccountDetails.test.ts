@@ -28,6 +28,7 @@ const mockGetUser = vi.fn().mockResolvedValue(undefined);
 
 const mockGetUserState = ref({ data: { id: 123, name: 'Test User' } });
 const mockSetUserState = ref({ loading: false, error: null });
+const mockNotificationFieldsState = ref({ data: undefined });
 
 vi.mock('InvestCommon/data/profiles/profiles.repository', () => ({
   useRepositoryProfiles: vi.fn(() => ({
@@ -37,6 +38,12 @@ vi.mock('InvestCommon/data/profiles/profiles.repository', () => ({
     setUser: mockSetUser,
     getUser: mockGetUser
   }))
+}));
+
+vi.mock('InvestCommon/data/filer/filer.repository', () => ({
+  useRepositoryFiler: vi.fn(() => ({
+    notificationFieldsState: mockNotificationFieldsState,
+  })),
 }));
 
 const mockSubmitFormToHubspot = vi.fn().mockResolvedValue(undefined);

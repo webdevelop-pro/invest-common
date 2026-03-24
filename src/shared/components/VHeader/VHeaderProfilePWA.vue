@@ -9,6 +9,7 @@ import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles
 import { useRepositoryFiler } from 'InvestCommon/data/filer/filer.repository';
 import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 import { reportError } from 'InvestCommon/domain/error/errorReporting';
+import { useFilerNotificationRefresh } from 'InvestCommon/domain/filer/useFilerNotificationRefresh';
 import {
   urlContactUs,
   urlFaq,
@@ -36,6 +37,7 @@ const USER_MENU_QUERY_VALUE = '1';
 const USER_MENU_FROM_QUERY_KEY = 'menuFrom';
 const USER_MENU_OPEN_QUERY_KEY = 'openUserMenu';
 const OPEN_PWA_PROFILE_OVERLAY_EVENT = 'invest:pwa-profile-overlay:open';
+const AVATAR_NOTIFICATION_FALLBACK_MS = 5000;
 
 const toPathname = (url: string) => {
   try {
@@ -126,6 +128,23 @@ const refFiles = ref<HTMLInputElement>();
 const isAvatarLoading = ref(false);
 const isProfileOverlayOpen = ref(false);
 
+const finishAvatarUpload = () => {
+  clearPendingRefresh();
+  isAvatarLoading.value = false;
+};
+
+const { clearPendingRefresh, scheduleFallbackRefresh } = useFilerNotificationRefresh({
+  enabled: isAvatarLoading,
+  fallbackMs: AVATAR_NOTIFICATION_FALLBACK_MS,
+  match: (fields) => fields.type === 'file_thumbnail',
+  refresh: () => useRepositoryProfilesStore.getUser(),
+  refreshErrorMessage: 'Failed to refresh avatar after thumbnail generation',
+  fallbackErrorMessage: 'Failed to refresh avatar after upload',
+  onSettled: () => {
+    isAvatarLoading.value = false;
+  },
+});
+
 const onAvatarClick = () => {
   refFiles.value?.click();
 };
@@ -140,16 +159,28 @@ const onFileChange = async () => {
 
   isAvatarLoading.value = true;
   try {
-    await filerRepository.uploadHandler(file, userId, 'user', userId);
-    const uploadedId = postSignurlState.value.data?.meta?.id;
-    if (uploadedId) {
-      await useRepositoryProfilesStore.updateUserData({ image_link_id: uploadedId });
-      await useRepositoryProfilesStore.getUser();
+    const uploaded = await filerRepository.uploadHandler(file, userId, 'user', userId);
+    if (!uploaded) {
+      finishAvatarUpload();
+      return;
     }
+
+    const uploadedId = postSignurlState.value.data?.meta?.id;
+    if (!uploadedId) {
+      finishAvatarUpload();
+      return;
+    }
+
+    await useRepositoryProfilesStore.updateUserData({ image_link_id: uploadedId });
+    await useRepositoryProfilesStore.getUser();
+    scheduleFallbackRefresh();
   } catch (e) {
     reportError(e, 'Failed to update avatar');
+    finishAvatarUpload();
   } finally {
-  isAvatarLoading.value = false;
+    if (refFiles.value) {
+      refFiles.value.value = '';
+    }
   }
 };
 
@@ -204,6 +235,7 @@ onUnmounted(() => {
       <VAvatar
         size="small"
         :src="avatarSrc"
+        :loading="isAvatarLoading"
         alt="avatar image"
         class="v-header-profile-pwa__avatar"
       />
@@ -230,6 +262,7 @@ onUnmounted(() => {
       v-if="isProfileOverlayOpen"
       :email="userEmail"
       :avatar-src="avatarSrc"
+      :avatar-loading="isAvatarLoading"
       :account-details-href="accountDetailsPath"
       :mfa-href="mfaPath"
       :security-href="securityPath"

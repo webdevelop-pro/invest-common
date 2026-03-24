@@ -4,6 +4,8 @@ import { mount } from '@vue/test-utils';
 import {
   defineComponent, h, nextTick, ref,
 } from 'vue';
+import VHeaderPWA from '../VHeaderPWA.vue';
+import PWAFooterMenu from '../PWAFooterMenu.vue';
 
 const userLoggedIn = ref(true);
 const selectedUserProfileId = ref(10);
@@ -15,6 +17,22 @@ const hoisted = vi.hoisted(() => ({
   mockIcon: (name: string) =>
     defineComponent({ name, setup: () => () => h('i', { 'data-icon': name }) }),
 }));
+
+vi.mock('vue-router', async () => {
+  const actual = await vi.importActual<typeof import('vue-router')>('vue-router');
+  return {
+    ...actual,
+    RouterLink: defineComponent({
+      name: 'RouterLink',
+      props: {
+        to: { type: String, required: true },
+      },
+      setup(props, { slots, attrs }) {
+        return () => h('a', { href: props.to, ...attrs }, slots.default?.());
+      },
+    }),
+  };
+});
 
 vi.mock('InvestCommon/domain/session/store/useSession', () => ({
   useSessionStore: () => ({
@@ -140,7 +158,6 @@ describe('PWA notifications flow', () => {
   });
 
   it('renders notifications icon and unread badge in PWA header', async () => {
-    const { default: VHeaderPWA } = await import('../VHeaderPWA.vue');
     const wrapper = mount(VHeaderPWA, {
       props: {
         layout: '',
@@ -164,7 +181,6 @@ describe('PWA notifications flow', () => {
 
   it('shows unread badge with single digit count', async () => {
     notificationUnreadLength.value = 5;
-    const { default: VHeaderPWA } = await import('../VHeaderPWA.vue');
     const wrapper = mount(VHeaderPWA, {
       props: {
         layout: '',
@@ -187,7 +203,6 @@ describe('PWA notifications flow', () => {
 
   it('shows unread badge with two digit count', async () => {
     notificationUnreadLength.value = 12;
-    const { default: VHeaderPWA } = await import('../VHeaderPWA.vue');
     const wrapper = mount(VHeaderPWA, {
       props: {
         layout: '',
@@ -209,9 +224,6 @@ describe('PWA notifications flow', () => {
   });
 
   it('hides PWA footer after opening notifications sidebar', async () => {
-    const { default: VHeaderPWA } = await import('../VHeaderPWA.vue');
-    const { default: PWAFooterMenu } = await import('../PWAFooterMenu.vue');
-
     const Shell = defineComponent({
       components: { VHeaderPWA, PWAFooterMenu },
       template: `
