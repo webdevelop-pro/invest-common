@@ -4,6 +4,7 @@ import VAccreditationButton from 'InvestCommon/features/accreditation/VAccredita
 import VKycButton from 'InvestCommon/features/kyc/VKycButton.vue';
 import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 import { storeToRefs } from 'pinia';
+import { useRoute } from 'vue-router';
 import VProfileSelectList from 'InvestCommon/features/profiles/VProfileSelectList.vue';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
@@ -28,9 +29,19 @@ const { selectedUserProfileId } = storeToRefs(profilesStore);
 
 const { isTablet } = useBreakpoints();
 const { usesMobileAppShell } = useMobileAppShell();
+const route = useRoute();
 
 const isLoading = computed(() => (getUserState.value.loading || getProfileByIdState.value.loading));
-const showPwaProfileDetailsLink = computed(() => isTablet.value && usesMobileAppShell.value);
+const currentTab = computed(() => {
+  const routeTab = route.query.tab;
+  return Array.isArray(routeTab) ? routeTab[0] || '' : routeTab || '';
+});
+const isCurrentProfileDetailsPage = computed(() => (
+  route.name === ROUTE_DASHBOARD_ACCOUNT && (!currentTab.value || currentTab.value === 'account')
+));
+const showPwaProfileDetailsLink = computed(() => (
+  isTablet.value && usesMobileAppShell.value && !isCurrentProfileDetailsPage.value
+));
 const profileDetailsLink = computed(() => ({
   name: ROUTE_DASHBOARD_ACCOUNT,
   params: { profileId: selectedUserProfileId.value || 0 },

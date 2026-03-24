@@ -10,6 +10,7 @@ import { urlOfferSingle } from 'InvestCommon/domain/config/links';
 import VImage from 'UiKit/components/Base/VImage/VImage.vue';
 import { useInvestmentTopInfo } from './logic/useInvestmentTopInfo';
 import VTooltip from 'UiKit/components/VTooltip.vue';
+import { useMobileAppShell } from 'InvestCommon/domain/mobile/useMobileAppShell';
 
 const VDialogPortfolioTransaction = defineAsyncComponent({
   loader: () => import('InvestCommon/features/investment/components/VDialogPortfolioTransaction.vue'),
@@ -29,6 +30,8 @@ const props = defineProps({
   profileData: Object,
 });
 
+const { usesMobileAppShell } = useMobileAppShell();
+
 const {
   getInvestOneState,
   getInvestOneData,
@@ -46,7 +49,10 @@ const {
 
 <template>
   <div class="InvestmentTopInfo investment-top-info">
-    <div class="investment-top-info__button-wrap">
+    <div
+      v-if="!usesMobileAppShell"
+      class="investment-top-info__button-wrap"
+    >
       <VButton
         variant="link"
         size="large"

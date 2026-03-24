@@ -3,6 +3,7 @@ import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import InfoSlot from 'UiKit/components/VInfo/VInfoSlot.vue';
 import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 import arrowLeft from 'UiKit/assets/images/arrow-left.svg';
+import { useMobileAppShell } from 'InvestCommon/domain/mobile/useMobileAppShell';
 import EarnDepositCard from './EarnDepositCard.vue';
 import { useEarnTopInfo, type InfoDataItem } from './composables/useEarnTopInfo';
 import type { DefiLlamaYieldPoolFormatted } from 'InvestCommon/data/3dParty/formatter/yields.formatter';
@@ -32,6 +33,8 @@ const emit = defineEmits<{
   (e: 'exchange-click'): void;
 }>();
 
+const { usesMobileAppShell } = useMobileAppShell();
+
 const {
   defaultSymbol,
   hasPoolData,
@@ -41,7 +44,10 @@ const {
 
 <template>
   <div class="EarnTopInfo earn-top-info">
-    <div class="earn-top-info__button-wrap">
+    <div
+      v-if="!usesMobileAppShell"
+      class="earn-top-info__button-wrap"
+    >
       <VButton
         variant="link"
         size="large"
@@ -217,4 +223,3 @@ const {
   }
 }
 </style>
-

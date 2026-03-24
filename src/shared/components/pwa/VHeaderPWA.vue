@@ -146,6 +146,10 @@ const getProfileSectionKey = (pathname: string) => {
   return match ? `profile/${match[1]}` : null;
 };
 
+const isEarnDetailsPath = (pathname: string) => (
+  /\/profile\/[^/]+\/earn\/[^/]+\/[^/]+$/.test(pathname)
+);
+
 const pwaRootPaths = computed(() => {
   if (!userLoggedIn.value) {
     return [
@@ -202,13 +206,19 @@ const showPwaBackButton = computed(() => {
   if (pwaRootPaths.value.includes(current)) {
     return false;
   }
+  if (isEarnDetailsPath(current)) {
+    return true;
+  }
+
   const currentProfileSection = getProfileSectionKey(current);
   if (!currentProfileSection) {
     return true;
   }
+
   const rootProfileSections = pwaRootPaths.value
     .map(getProfileSectionKey)
     .filter(Boolean) as string[];
+
   return !rootProfileSections.includes(currentProfileSection);
 });
 

@@ -2,6 +2,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { ref } from 'vue';
 import {
+  urlEarnOverview,
   urlProfileAccount,
   urlProfileEarn,
   urlProfilePortfolio,
@@ -185,6 +186,20 @@ describe('VHeaderPWA', () => {
     userLoggedIn.value = true;
     selectedUserProfileId.value = 10;
     const wrapper = mountHeader('', urlProfileEarn(10));
+    expect(wrapper.find('.v-header-invest__pwa-back').exists()).toBe(false);
+  });
+
+  it('shows back button on logged-in earn details path', () => {
+    userLoggedIn.value = true;
+    selectedUserProfileId.value = 10;
+    const wrapper = mountHeader('', urlEarnOverview(10, 'pool-1'));
+    expect(wrapper.find('.v-header-invest__pwa-back').exists()).toBe(true);
+  });
+
+  it('keeps nested logged-in account section pages without back button', () => {
+    userLoggedIn.value = true;
+    selectedUserProfileId.value = 10;
+    const wrapper = mountHeader('', '/profile/10/account/history');
     expect(wrapper.find('.v-header-invest__pwa-back').exists()).toBe(false);
   });
 
