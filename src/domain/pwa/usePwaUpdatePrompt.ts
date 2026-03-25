@@ -2,6 +2,7 @@ import {
   computed,
   onBeforeUnmount,
   shallowRef,
+  watch,
 } from 'vue';
 import {
   isLocalPwaTestEnabled,
@@ -16,6 +17,7 @@ import {
 
 const PWA_TEST_UPDATE_READY_EVENT = 'invest:pwa-test:update-ready';
 const SERVICE_WORKER_RELOAD_TIMEOUT_MS = 2500;
+const UPDATE_PROMPT_DISMISS_KEY = 'invest:pwa-update-prompt:dismissed-key';
 
 export type PwaUpdateLifecycleState =
   | 'idle'
@@ -23,6 +25,46 @@ export type PwaUpdateLifecycleState =
   | 'updateReady'
   | 'reloading'
   | 'registrationError';
+
+type PwaUpdateDismissalKey =
+  | 'offlineReady'
+  | 'updateReady';
+
+const readDismissedPromptKey = (): PwaUpdateDismissalKey | null => {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  try {
+    const storedValue = window.localStorage.getItem(UPDATE_PROMPT_DISMISS_KEY);
+    return storedValue === 'offlineReady' || storedValue === 'updateReady'
+      ? storedValue
+      : null;
+  } catch {
+    return null;
+  }
+};
+
+const writeDismissedPromptKey = (value: PwaUpdateDismissalKey | null) => {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  try {
+    if (value == null) {
+      window.localStorage.removeItem(UPDATE_PROMPT_DISMISS_KEY);
+      return;
+    }
+
+    window.localStorage.setItem(UPDATE_PROMPT_DISMISS_KEY, value);
+  } catch {
+    // Ignore storage failures and keep dismissal state in memory only.
+  }
+};
+
+const shouldSyncDismissedPromptFromStorage = (key: string | null) => (
+  key == null || key === UPDATE_PROMPT_DISMISS_KEY
+);
 
 const createControllerChangeWatcher = (
   serviceWorker?: ServiceWorkerContainer | null,
@@ -74,6 +116,7 @@ export function usePwaUpdatePrompt() {
   const testUpdateReadyState = shallowRef(false);
   const registrationError = shallowRef<unknown>(null);
   const isReloading = shallowRef(false);
+  const dismissedPromptKey = shallowRef<PwaUpdateDismissalKey | null>(readDismissedPromptKey());
 
   const updateBridgeFlags = (flags: {
     needRefresh?: boolean;
@@ -102,15 +145,29 @@ export function usePwaUpdatePrompt() {
     logPwaDebug('update', 'received local test update-ready event');
   };
 
-  const clearUpdateReady = () => {
-    testUpdateReadyState.value = false;
-    updateBridgeFlags({ needRefresh: false });
+  const clearDismissedPrompt = () => {
+    dismissedPromptKey.value = null;
+    writeDismissedPromptKey(null);
+  };
+
+  const dismissPrompt = (key: PwaUpdateDismissalKey) => {
+    dismissedPromptKey.value = key;
+    writeDismissedPromptKey(key);
+  };
+
+  const handleDismissedPromptStorageChange = (event: StorageEvent) => {
+    if (!shouldSyncDismissedPromptFromStorage(event.key)) {
+      return;
+    }
+
+    dismissedPromptKey.value = readDismissedPromptKey();
   };
 
   const handleServiceWorkerControllerChange = () => {
     testUpdateReadyState.value = false;
     updateBridgeFlags({ needRefresh: false, offlineReady: false });
     isReloading.value = false;
+    clearDismissedPrompt();
     logPwaDebug('update', 'reset local test update-ready state after controllerchange');
   };
 
@@ -137,6 +194,7 @@ export function usePwaUpdatePrompt() {
     initializeBridge();
 
     serviceWorker?.addEventListener('controllerchange', handleServiceWorkerControllerChange);
+    window.addEventListener('storage', handleDismissedPromptStorageChange);
 
     if (localTestHost) {
       window.addEventListener(PWA_TEST_UPDATE_READY_EVENT, handleTestUpdateReady);
@@ -154,10 +212,45 @@ export function usePwaUpdatePrompt() {
 
     bridge.value?.cleanup?.();
     serviceWorker?.removeEventListener('controllerchange', handleServiceWorkerControllerChange);
+    window.removeEventListener('storage', handleDismissedPromptStorageChange);
   });
 
-  const isUpdateReady = computed(() => (bridge.value?.needRefresh.value ?? false) || testUpdateReadyState.value);
-  const isOfflineReady = computed(() => (bridge.value?.offlineReady.value ?? false) && !isUpdateReady.value);
+  const rawIsUpdateReady = computed(() => (
+    (bridge.value?.needRefresh.value ?? false) || testUpdateReadyState.value
+  ));
+  const rawIsOfflineReady = computed(() => (
+    (bridge.value?.offlineReady.value ?? false) && !rawIsUpdateReady.value
+  ));
+  const activePromptKey = computed<PwaUpdateDismissalKey | null>(() => {
+    if (rawIsUpdateReady.value) {
+      return 'updateReady';
+    }
+
+    if (rawIsOfflineReady.value) {
+      return 'offlineReady';
+    }
+
+    return null;
+  });
+
+  watch(activePromptKey, (nextPromptKey, previousPromptKey) => {
+    if (dismissedPromptKey.value == null || nextPromptKey === previousPromptKey) {
+      return;
+    }
+
+    if (nextPromptKey === dismissedPromptKey.value) {
+      return;
+    }
+
+    clearDismissedPrompt();
+  });
+
+  const isUpdateReady = computed(() => (
+    rawIsUpdateReady.value && dismissedPromptKey.value !== 'updateReady'
+  ));
+  const isOfflineReady = computed(() => (
+    rawIsOfflineReady.value && dismissedPromptKey.value !== 'offlineReady'
+  ));
   const lifecycleState = computed<PwaUpdateLifecycleState>(() => {
     if (registrationError.value) {
       return 'registrationError';
@@ -220,12 +313,12 @@ export function usePwaUpdatePrompt() {
   };
 
   const dismissOfflineReady = () => {
-    updateBridgeFlags({ offlineReady: false });
+    dismissPrompt('offlineReady');
     logPwaDebug('update', 'dismissed offline-ready state');
   };
 
   const dismissUpdateReady = () => {
-    clearUpdateReady();
+    dismissPrompt('updateReady');
     logPwaDebug('update', 'dismissed update-ready state');
   };
 

@@ -16,6 +16,7 @@ import * as pwaUpdatePromptModule from 'InvestCommon/domain/pwa/usePwaUpdateProm
 import { setPwaRegistrationBridgeFactory } from 'InvestCommon/domain/pwa/pwaRegistrationBridge';
 
 const { usePwaUpdatePrompt } = pwaUpdatePromptModule;
+const UPDATE_PROMPT_DISMISS_KEY = 'invest:pwa-update-prompt:dismissed-key';
 
 type PwaUpdateResult = ReturnType<typeof usePwaUpdatePrompt>;
 type ControllerChangeListener = EventListenerOrEventListenerObject;
@@ -328,8 +329,28 @@ describe('usePwaUpdatePrompt', () => {
 
     expect(api.isUpdateReady.value).toBe(false);
     expect(api.lifecycleState.value).toBe('idle');
+    expect(localStorage.getItem(UPDATE_PROMPT_DISMISS_KEY)).toBe('updateReady');
 
     wrapper.unmount();
+  });
+
+  it('keeps update-ready dismissed across remount while the same update state remains active', async () => {
+    setBridgeMockState({ needRefresh: true });
+    const firstMount = mountComposable();
+    await nextTick();
+
+    firstMount.api.dismissUpdateReady();
+    expect(firstMount.api.isUpdateReady.value).toBe(false);
+
+    firstMount.wrapper.unmount();
+
+    const secondMount = mountComposable();
+    await nextTick();
+
+    expect(secondMount.api.isUpdateReady.value).toBe(false);
+    expect(secondMount.api.lifecycleState.value).toBe('idle');
+
+    secondMount.wrapper.unmount();
   });
 
   it('returns to update-ready state when the new worker does not claim the page in time', async () => {
@@ -405,8 +426,28 @@ describe('usePwaUpdatePrompt', () => {
 
     expect(api.isOfflineReady.value).toBe(false);
     expect(api.lifecycleState.value).toBe('idle');
+    expect(localStorage.getItem(UPDATE_PROMPT_DISMISS_KEY)).toBe('offlineReady');
 
     wrapper.unmount();
+  });
+
+  it('keeps offline-ready dismissed across remount while the same state remains active', async () => {
+    setBridgeMockState({ offlineReady: true });
+    const firstMount = mountComposable();
+    await nextTick();
+
+    firstMount.api.dismissOfflineReady();
+    expect(firstMount.api.isOfflineReady.value).toBe(false);
+
+    firstMount.wrapper.unmount();
+
+    const secondMount = mountComposable();
+    await nextTick();
+
+    expect(secondMount.api.isOfflineReady.value).toBe(false);
+    expect(secondMount.api.lifecycleState.value).toBe('idle');
+
+    secondMount.wrapper.unmount();
   });
 
   it('ignores dismiss actions when the registration bridge failed to initialize', () => {
@@ -437,11 +478,36 @@ describe('usePwaUpdatePrompt', () => {
     await nextTick();
     expect(api.isUpdateReady.value).toBe(true);
 
+    api.dismissUpdateReady();
+    expect(localStorage.getItem(UPDATE_PROMPT_DISMISS_KEY)).toBe('updateReady');
+
     serviceWorker.dispatchControllerChange();
     await nextTick();
 
     expect(api.isUpdateReady.value).toBe(false);
     expect(api.lifecycleState.value).toBe('idle');
+    expect(localStorage.getItem(UPDATE_PROMPT_DISMISS_KEY)).toBeNull();
+
+    wrapper.unmount();
+  });
+
+  it('shows a new prompt kind after clearing the previous dismissal', async () => {
+    setBridgeMockState({ offlineReady: true });
+    const { wrapper, api } = mountComposable();
+    await nextTick();
+
+    api.dismissOfflineReady();
+    expect(api.isOfflineReady.value).toBe(false);
+
+    setBridgeMockState({
+      offlineReady: false,
+      needRefresh: true,
+    });
+    await nextTick();
+
+    expect(localStorage.getItem(UPDATE_PROMPT_DISMISS_KEY)).toBeNull();
+    expect(api.isUpdateReady.value).toBe(true);
+    expect(api.lifecycleState.value).toBe('updateReady');
 
     wrapper.unmount();
   });

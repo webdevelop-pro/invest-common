@@ -36,6 +36,7 @@ This directory is the source of truth for the shared PWA implementation used by 
 - `usePwaUpdatePrompt.ts` reads service worker update state from `pwaRegistrationBridge.ts`
 - the bridge can come from the host app via `installVitePwaRegistrationBridge.ts` or fall back to browser APIs
 - update state is exposed as `idle`, `offlineReady`, `updateReady`, `reloading`, or `registrationError`
+- update and offline-ready dismissals persist in local storage until the underlying prompt lifecycle changes
 - refresh waits for `controllerchange` before clearing the prompt; if takeover never happens, the prompt stays available so the user can retry
 - localhost test mode can dispatch `invest:pwa-test:update-ready`
 
@@ -54,6 +55,7 @@ This directory is the source of truth for the shared PWA implementation used by 
 - public and private cache namespaces stay separated
 - navigation fallback prefers the cached dashboard shell for dashboard routes and falls back directly to `/offline.html` everywhere else
 - offline UI is read-only and communicates whether cached content is available
+- offline and reconnected banner dismissals persist while offline and are cleared once the app is back online
 
 ### UI composition
 
