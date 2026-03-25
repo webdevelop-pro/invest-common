@@ -106,41 +106,48 @@ describe('usePwaBannerDismissals', () => {
     const activeBannerKey = ref<'offline' | 'reconnected' | null>(null);
     const { wrapper, api } = mountComposable(activeBannerKey);
 
-    expect(localStorage.getItem(PWA_BANNER_DISMISS_KEY)).toBeNull();
+    expect(localStorage.getItem(PWA_BANNER_DISMISS_KEY)).toBe('offline');
     expect(api.isBannerVisible.value).toBe(false);
 
     activeBannerKey.value = 'offline';
     await nextTick();
 
-    expect(localStorage.getItem(PWA_BANNER_DISMISS_KEY)).toBeNull();
-    expect(api.isBannerVisible.value).toBe(true);
+    expect(localStorage.getItem(PWA_BANNER_DISMISS_KEY)).toBe('offline');
+    expect(api.isBannerVisible.value).toBe(false);
 
     wrapper.unmount();
   });
 
-  it('shows the banner again after the app goes online and later returns offline', async () => {
+  it('clears the offline dismissal after reconnect and shows the offline banner again later', async () => {
     const activeBannerKey = ref<'offline' | 'reconnected' | null>('offline');
     const { wrapper, api } = mountComposable(activeBannerKey);
 
     api.dismissActiveBanner();
     expect(api.isBannerVisible.value).toBe(false);
+    expect(localStorage.getItem(PWA_BANNER_DISMISS_KEY)).toBe('offline');
 
-    activeBannerKey.value = null;
+    activeBannerKey.value = 'reconnected';
     await nextTick();
+
+    expect(localStorage.getItem(PWA_BANNER_DISMISS_KEY)).toBeNull();
+    expect(api.isBannerVisible.value).toBe(true);
+
     activeBannerKey.value = 'offline';
     await nextTick();
 
+    expect(localStorage.getItem(PWA_BANNER_DISMISS_KEY)).toBeNull();
     expect(api.isBannerVisible.value).toBe(true);
 
     wrapper.unmount();
   });
 
-  it('clears a stored dismissal when a different banner state becomes active', async () => {
+  it('clears a stored dismissal when the reconnected banner becomes active', async () => {
     localStorage.setItem(PWA_BANNER_DISMISS_KEY, 'offline');
     const activeBannerKey = ref<'offline' | 'reconnected' | null>(null);
     const { wrapper, api } = mountComposable(activeBannerKey);
 
-    expect(localStorage.getItem(PWA_BANNER_DISMISS_KEY)).toBeNull();
+    expect(localStorage.getItem(PWA_BANNER_DISMISS_KEY)).toBe('offline');
+    expect(api.isBannerVisible.value).toBe(false);
 
     activeBannerKey.value = 'reconnected';
     await nextTick();

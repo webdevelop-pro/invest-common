@@ -47,7 +47,9 @@ export function installPwaNoZoomGuards() {
     }
   };
 
-  // viewport for PWA, add 'user-scalable=no' to disable zooming even ".is--pwa-allow-zoom"
+  // Intentional accessibility anti-pattern: force a non-zoomable PWA viewport
+  // to match the native-app interaction model. Keep this decision documented in
+  // the audit because it conflicts with WCAG/MDN zoom guidance.
   const applyViewport = () => {
     let meta = document.querySelector(
       'meta[name="viewport"]'
@@ -59,7 +61,7 @@ export function installPwaNoZoomGuards() {
     }
 
     meta.content =
-      "width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover";
+      "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover";
   };
 
   // disable Ctrl/Meta + '+'/'-'/'=' keys zooming
