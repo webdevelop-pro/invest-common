@@ -3,6 +3,7 @@ import { computed, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryNotifications } from 'InvestCommon/data/notifications/notifications.repository';
+import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 
 defineOptions({ name: 'VNotificationBadge' });
 
@@ -27,24 +28,31 @@ const sessionStore = useSessionStore();
 const { userLoggedIn } = storeToRefs(sessionStore);
 
 const notificationsRepository = useRepositoryNotifications();
-const { formattedNotifications, unreadNotificationsCount, getAllState } = storeToRefs(notificationsRepository);
+const { unreadNotificationsCount, getAllState } = storeToRefs(notificationsRepository);
+
+const hasResolvedNotifications = computed(() => (
+  getAllState.value?.data !== undefined || Boolean(getAllState.value?.error)
+));
 
 onMounted(() => {
   if (!userLoggedIn.value) {
     return;
   }
 
-  const hasNotifications = Array.isArray(formattedNotifications.value) && formattedNotifications.value.length > 0;
   const isLoading = Boolean(getAllState.value?.loading);
-  const hasError = Boolean(getAllState.value?.error);
 
-  if (!hasNotifications && !isLoading && !hasError) {
+  if (!hasResolvedNotifications.value && !isLoading) {
     notificationsRepository.getAll();
   }
 });
 
 const displayCount = computed(() => props.count ?? unreadNotificationsCount.value);
-const shouldShow = computed(() => displayCount.value > 0);
+const shouldShowLoading = computed(() => (
+  props.count === undefined
+  && userLoggedIn.value
+  && !hasResolvedNotifications.value
+));
+const shouldShow = computed(() => !shouldShowLoading.value && displayCount.value > 0);
 
 const badgeClasses = computed(() => [
   'notification-number',
@@ -54,8 +62,17 @@ const badgeClasses = computed(() => [
 </script>
 
 <template>
+  <VSkeleton
+    v-if="shouldShowLoading"
+    width="18px"
+    height="18px"
+    radius="9px"
+    class="notification-number notification-number--loading"
+    :class="badgeClasses"
+    aria-hidden="true"
+  />
   <span
-    v-if="shouldShow"
+    v-else-if="shouldShow"
     :class="badgeClasses"
     aria-label="Unread notifications"
   >
@@ -104,6 +121,12 @@ const badgeClasses = computed(() => [
 
   &--inline {
     display: inline-flex;
+  }
+
+  &--loading {
+    border: 2px solid colors.$white;
+    box-shadow: 0 2px 4px rgb(0 0 0 / 15%);
+    pointer-events: none;
   }
 }
 </style>
