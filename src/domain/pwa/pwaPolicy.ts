@@ -3,6 +3,7 @@ export type OfflineCacheScope = 'public' | 'private';
 export type OfflineDomainKey =
   | 'frontend-navigation'
   | 'offer-api'
+  | 'notification-api'
   | 'user-api'
   | 'investment-api'
   | 'wallet-api'
@@ -21,6 +22,7 @@ export type RuntimeCacheRule = {
 export interface PwaPolicyEnv {
   FRONTEND_URL?: string;
   OFFER_URL?: string;
+  NOTIFICATION_URL?: string;
   USER_URL?: string;
   INVESTMENT_URL?: string;
   WALLET_URL?: string;
@@ -62,6 +64,7 @@ export type ResolvedOfflineDomainPolicy = OfflineDomainDefinition & {
 export const PWA_CACHE_NAMES = {
   frontendShell: 'frontend-shell-cache',
   offerApi: 'offer-api-cache',
+  notificationApi: 'notification-api-cache',
   userApi: 'user-api-cache',
   investmentApi: 'investment-api-cache',
   walletApi: 'wallet-api-cache',
@@ -79,6 +82,7 @@ export const PWA_PUBLIC_CACHE_NAMES = [
 ] as const;
 
 export const PWA_PRIVATE_CACHE_NAMES = [
+  PWA_CACHE_NAMES.notificationApi,
   PWA_CACHE_NAMES.userApi,
   PWA_CACHE_NAMES.investmentApi,
   PWA_CACHE_NAMES.walletApi,
@@ -108,6 +112,17 @@ export const OFFLINE_DOMAINS: readonly OfflineDomainDefinition[] = [
     strategy: 'network-first',
     maxEntries: 150,
     maxAgeSeconds: 24 * 60 * 60,
+    networkTimeoutSeconds: 3,
+    persistToIndexedDb: true,
+  },
+  {
+    key: 'notification-api',
+    envKey: 'NOTIFICATION_URL',
+    scope: 'private',
+    cacheName: PWA_CACHE_NAMES.notificationApi,
+    strategy: 'network-first',
+    maxEntries: 60,
+    maxAgeSeconds: 12 * 60 * 60,
     networkTimeoutSeconds: 3,
     persistToIndexedDb: true,
   },

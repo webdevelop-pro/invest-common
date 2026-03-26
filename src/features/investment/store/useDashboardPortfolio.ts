@@ -5,6 +5,7 @@ import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useReactiveQuery } from 'UiKit/composables/useReactiveQuery';
 import { IInvestmentFormatted } from 'InvestCommon/data/investment/investment.types';
+import { reportOfflineReadError } from 'InvestCommon/domain/error/errorReporting';
 
 // Status mapping from display names to actual values
 const STATUS_MAPPING = {
@@ -142,7 +143,13 @@ export const useDashboardPortfolioStore = defineStore('dashboard-portfolio', () 
   // Watchers
   watch(() => selectedUserProfileId.value, () => {
     if (selectedUserProfileId.value && selectedUserProfileId.value > 0) {
-      investmentRepository.getInvestments(selectedUserProfileId.value);
+      try {
+        void Promise.resolve(investmentRepository.getInvestments(selectedUserProfileId.value)).catch((error) => {
+          reportOfflineReadError(error, 'Failed to load investments');
+        });
+      } catch (error) {
+        reportOfflineReadError(error, 'Failed to load investments');
+      }
     }
   }, { immediate: true });
 

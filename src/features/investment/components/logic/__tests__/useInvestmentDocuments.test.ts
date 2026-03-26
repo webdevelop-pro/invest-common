@@ -5,6 +5,10 @@ import { setActivePinia, createPinia } from 'pinia';
 import { ref, nextTick } from 'vue';
 import { useInvestmentDocuments } from '../useInvestmentDocuments';
 
+const { reportOfflineReadErrorMock } = vi.hoisted(() => ({
+  reportOfflineReadErrorMock: vi.fn(),
+}));
+
 vi.mock('InvestCommon/data/filer/filer.formatter', () => ({
   FilerFormatter: {
     getFolderedInvestmentDocuments: vi.fn(() => ['investment-agreements', 'financial-documents']),
@@ -64,12 +68,19 @@ vi.mock('InvestCommon/data/filer/filer.repository', () => ({
   useRepositoryFiler: vi.fn(() => mockFilerRepository),
 }));
 
+vi.mock('InvestCommon/domain/error/errorReporting', () => ({
+  reportOfflineReadError: reportOfflineReadErrorMock,
+}));
+
 describe('useInvestmentDocuments', () => {
   let composable: ReturnType<typeof useInvestmentDocuments>;
 
   beforeEach(() => {
     setActivePinia(createPinia());
     vi.clearAllMocks();
+    reportOfflineReadErrorMock.mockReset();
+    mockFilerRepository.getFiles.mockResolvedValue([]);
+    mockFilerRepository.getPublicFiles.mockResolvedValue([]);
   });
 
   afterEach(() => {
@@ -112,6 +123,20 @@ describe('useInvestmentDocuments', () => {
 
       expect(mockFilerRepository.getFiles).toHaveBeenCalledWith('offer/new-offer-456', 'user');
       expect(mockFilerRepository.getPublicFiles).toHaveBeenCalledWith('new-offer-456', 'offer');
+    });
+
+    it('reports secondary read misses without throwing when filer requests fail offline', async () => {
+      const offlineError = new Error('Failed to fetch');
+      mockFilerRepository.getFiles.mockRejectedValueOnce(offlineError);
+      mockFilerRepository.getPublicFiles.mockRejectedValueOnce(offlineError);
+
+      useInvestmentDocuments();
+
+      await nextTick();
+      await Promise.resolve();
+
+      expect(reportOfflineReadErrorMock).toHaveBeenCalledTimes(2);
+      expect(reportOfflineReadErrorMock).toHaveBeenCalledWith(offlineError, 'Failed to load investment documents');
     });
   });
 });

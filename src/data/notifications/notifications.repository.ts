@@ -3,7 +3,11 @@ import { acceptHMRUpdate, defineStore } from 'pinia';
 import { ApiClient } from 'InvestCommon/data/service/apiClient';
 import env from 'InvestCommon/config/env';
 import { IFormattedNotification, INotification } from './notifications.types';
-import { createRepositoryStates, withActionState } from 'InvestCommon/data/repository/repository';
+import {
+  applyOfflineHydrationMeta,
+  createRepositoryStates,
+  withActionState,
+} from 'InvestCommon/data/repository/repository';
 import { NotificationFormatter } from './notifications.formatter';
 import { createFormatterCache } from 'InvestCommon/data/repository/formatterCache';
 
@@ -59,15 +63,20 @@ export const useRepositoryNotifications = defineStore('repository-notifications'
 
   // Actions
   const getAll = async (): Promise<INotification[]> => {
+    let responseHeaders: Headers | null = null;
     const result = await withActionState(getAllState, async () => {
       const response = await apiClient.get<INotification[]>(`/notification`, {
         showGlobalAlertOnServerError: false,
       });
+      responseHeaders = response.headers;
       const data = response.data ?? [];
       notificationCache.prune(data);
       setFormattedNotifications(data);
       return data;
     });
+    if (responseHeaders) {
+      applyOfflineHydrationMeta(getAllState, responseHeaders);
+    }
     return result ?? [];
   };
 

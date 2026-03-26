@@ -5,6 +5,7 @@ import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment
 import type { IInvestmentFormatted } from 'InvestCommon/data/investment/investment.types';
 import { usePageSeo } from 'InvestCommon/shared/composables/usePageSeo';
 import { reportError } from 'InvestCommon/domain/error/errorReporting';
+import { isOfflineReadFailure } from 'InvestCommon/domain/pwa/offlineRead';
 
 const { setMetaData } = usePageSeo();
 
@@ -18,25 +19,46 @@ export const createInvestmentRouteGuard = (seoTitle: string, seoDescription: str
 
     const investmentRepository = useRepositoryInvestment();
     const { getInvestOneState, getInvestmentsState } = storeToRefs(investmentRepository);
+    const investmentID = computed(() => to?.params?.id);
 
     try {
       if (!getInvestmentsState.value.data?.data?.length) {
         await investmentRepository.getInvestments(to?.params?.profileId as string);
       }
-
-      const investmentID = computed(() => to?.params?.id);
       const investmentExists = getInvestmentsState.value.data?.data?.some(
         (investment: IInvestmentFormatted) => String(investment.id) === investmentID.value,
       );
 
       if (!investmentExists) {
+        if (investmentID.value) {
+          try {
+            await investmentRepository.getInvestOne(String(investmentID.value));
+            return;
+          } catch (error) {
+            if (isOfflineReadFailure(error)) {
+              return;
+            }
+          }
+        }
         return '/error/404';
       }
 
       if (investmentID.value && (String(getInvestOneState.value.data?.id) !== investmentID.value)) {
-        await investmentRepository.getInvestOne(String(investmentID.value));
+        try {
+          await investmentRepository.getInvestOne(String(investmentID.value));
+        } catch (error) {
+          if (isOfflineReadFailure(error)) {
+            return;
+          }
+
+          throw error;
+        }
       }
     } catch (error) {
+      if (isOfflineReadFailure(error)) {
+        return;
+      }
+
       reportError(error, 'Failed to load investment');
       return '/error/404';
     }

@@ -5,6 +5,7 @@ import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import { ROUTE_DASHBOARD_PORTFOLIO, ROUTE_INVESTMENT_TIMELINE } from 'InvestCommon/domain/config/enums/routes';
 import { storeToRefs } from 'pinia';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
+import { reportOfflineReadError } from 'InvestCommon/domain/error/errorReporting';
 
 export function useInvestThank() {
   const globalLoader = useGlobalLoader();
@@ -47,8 +48,14 @@ export function useInvestThank() {
   ));
 
   onMounted(async () => {
-    if (route.params.id) investmentRepository.getInvestOne(route.params.id.toString());
-    else router.push({ name: ROUTE_DASHBOARD_PORTFOLIO, params: { profileId: selectedUserProfileId.value } });
+    if (route.params.id) {
+      void investmentRepository.getInvestOne(route.params.id.toString()).catch((error) => {
+        reportOfflineReadError(error, 'Failed to load investment');
+      });
+      return;
+    }
+
+    void router.push({ name: ROUTE_DASHBOARD_PORTFOLIO, params: { profileId: selectedUserProfileId.value } });
   });
 
   return {

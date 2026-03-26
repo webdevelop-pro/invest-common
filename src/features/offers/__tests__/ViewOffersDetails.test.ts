@@ -13,6 +13,7 @@ const {
   getPublicFilesMock,
   getFilesMock,
   reportErrorMock,
+  reportOfflineReadErrorMock,
   routeParams,
 } = vi.hoisted(() => ({
   getOfferOneMock: vi.fn().mockResolvedValue(undefined),
@@ -20,6 +21,7 @@ const {
   getPublicFilesMock: vi.fn().mockResolvedValue(undefined),
   getFilesMock: vi.fn().mockResolvedValue(undefined),
   reportErrorMock: vi.fn(),
+  reportOfflineReadErrorMock: vi.fn(),
   routeParams: {
     value: {
       slug: 'test-offer',
@@ -148,6 +150,7 @@ vi.mock('InvestCommon/domain/analytics/useSendAnalyticsEvent', () => ({
 
 vi.mock('InvestCommon/domain/error/errorReporting', () => ({
   reportError: reportErrorMock,
+  reportOfflineReadError: reportOfflineReadErrorMock,
 }));
 
 describe('ViewOffersDetails - investHandler', () => {
@@ -218,6 +221,7 @@ describe('ViewOffersDetails - investHandler', () => {
     expect(getPublicFilesMock).toHaveBeenCalledWith(12, 'offer');
     expect(getFilesMock).toHaveBeenCalledWith(12, 'offer');
     expect(reportErrorMock).not.toHaveBeenCalled();
+    expect(reportOfflineReadErrorMock).toHaveBeenCalledTimes(4);
   });
 
   it('creates a new investment when getInvestUnconfirmedOne contains default values (id = 0)', async () => {

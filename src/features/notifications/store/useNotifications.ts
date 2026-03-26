@@ -8,7 +8,7 @@ import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import type { INotification } from 'InvestCommon/data/notifications/notifications.types';
 import { IVFilter } from 'UiKit/components/VFilter/VFilter.vue';
 import { useBreakpoints } from 'UiKit/composables/useBreakpoints';
-import { reportError } from 'InvestCommon/domain/error/errorReporting';
+import { reportError, reportOfflineReadError } from 'InvestCommon/domain/error/errorReporting';
 
 export const useNotifications = defineStore('notifications', () => {
   const notificationsRepository = useRepositoryNotifications();
@@ -81,7 +81,9 @@ export const useNotifications = defineStore('notifications', () => {
 
   const loadData = () => {
     if (conditionToLoadAllData.value) {
-      notificationsRepository.getAll();
+      void notificationsRepository.getAll().catch((error) => {
+        reportOfflineReadError(error, 'Failed to load notifications');
+      });
     }
   };
 
@@ -325,6 +327,7 @@ export const useNotifications = defineStore('notifications', () => {
     onSidebarToggle,
     isSidebarOpen,
     markAsReadById,
+    getAllState,
     clearFilterType,
     clearFilterStatus,
     clearSearch,

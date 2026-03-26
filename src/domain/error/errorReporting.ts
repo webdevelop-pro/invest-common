@@ -1,5 +1,6 @@
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 import { useGlobalAlert } from 'UiKit/store/useGlobalAlert';
+import { isOfflineReadFailure } from 'InvestCommon/domain/pwa/offlineRead';
 
 /**
  * Error reporting layer: normalize, log, branch (401/429), show toast.
@@ -232,7 +233,7 @@ export const reportError = (error: unknown, fallbackMessage: string, context?: u
  * Offline misses for cached page data are expected and should not surface as toasts.
  */
 export const reportOfflineReadError = (error: unknown, fallbackMessage: string, context?: unknown) => {
-  if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+  if (isOfflineReadFailure(error)) {
     return;
   }
 
