@@ -162,19 +162,6 @@ describe('reportError', () => {
     expect(mockLogger).not.toHaveBeenCalled();
     expect(mockToast).not.toHaveBeenCalled();
   });
-
-  it('suppresses fetch-style offline misses even when navigator still reports online', () => {
-    Object.defineProperty(window.navigator, 'onLine', {
-      configurable: true,
-      value: true,
-    });
-
-    setErrorLogger(mockLogger);
-    reportOfflineReadError(new Error('Failed to fetch'), 'Failed to load offers');
-
-    expect(mockLogger).not.toHaveBeenCalled();
-    expect(mockToast).not.toHaveBeenCalled();
-  });
 });
 
 describe('toasterErrorHandling', () => {

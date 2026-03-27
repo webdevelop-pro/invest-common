@@ -1,5 +1,16 @@
 import type { ISession } from 'InvestCommon/data/auth/auth.type';
-import { isBrowserOffline, isOfflineReadFailure } from 'InvestCommon/domain/pwa/offlineRead';
+import { APIError } from 'InvestCommon/data/service/handlers/apiError';
+
+const OFFLINE_ERROR_MESSAGES = [
+  'failed to fetch',
+  'load failed',
+  'network request failed',
+  'networkerror when attempting to fetch resource',
+] as const;
+
+export const isBrowserOffline = () => (
+  typeof navigator !== 'undefined' && navigator.onLine === false
+);
 
 export const hasActiveLocalSession = (session?: ISession | null) => Boolean(session?.active);
 
@@ -15,5 +26,10 @@ export const shouldPreserveOfflineSession = (
     return true;
   }
 
-  return isOfflineReadFailure(error);
+  if (error instanceof APIError || !(error instanceof Error)) {
+    return false;
+  }
+
+  const errorMessage = error.message.toLowerCase();
+  return OFFLINE_ERROR_MESSAGES.some((candidate) => errorMessage.includes(candidate));
 };

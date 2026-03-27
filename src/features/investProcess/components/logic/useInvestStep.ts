@@ -10,7 +10,6 @@ import {
 } from 'InvestCommon/domain/config/enums/routes';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
 import { reportError } from 'InvestCommon/domain/error/errorReporting';
-import { isOfflineReadFailure } from 'InvestCommon/domain/pwa/offlineRead';
 
 
 interface Props {
@@ -53,7 +52,7 @@ export function useInvestStep(props: Props) {
   const sessionStore = useSessionStore();
   const { userLoggedIn } = storeToRefs(sessionStore);
   const investmentRepository = useRepositoryInvestment();
-  const { getInvestUnconfirmedOne, getInvestUnconfirmedState } = storeToRefs(investmentRepository);
+  const { getInvestUnconfirmedOne } = storeToRefs(investmentRepository);
 
   // Extract route params once with better type safety
   const routeParams = computed(() => {
@@ -74,11 +73,6 @@ export function useInvestStep(props: Props) {
     const config = INVEST_STEPS_CONFIG[backendStep];
     return config?.step ?? props.stepNumber;
   });
-  const hasUnconfirmedInvestment = computed(() => Number(getInvestUnconfirmedOne.value?.id ?? 0) > 0);
-  const isOfflineUnavailable = computed(() => (
-    !hasUnconfirmedInvestment.value
-    && isOfflineReadFailure(getInvestUnconfirmedState.value.error)
-  ));
 
   // Optimized watch with better error handling
   watch(
@@ -105,14 +99,10 @@ export function useInvestStep(props: Props) {
           routeParams.value.profileId,
           routeParams.value.id,
         );
-        if (!res && !isOfflineReadFailure(getInvestUnconfirmedState.value.error)) {
-          void router.push('/dashboard/error/404');
+        if (!res) {
+          router.push('/dashboard/error/404');
         }
       } catch (error) {
-        if (isOfflineReadFailure(error)) {
-          return;
-        }
-
         reportError(error, 'Failed to fetch investment');
       }
     }
@@ -123,6 +113,5 @@ export function useInvestStep(props: Props) {
     steps,
     routeParams,
     maxAvailableStep,
-    isOfflineUnavailable,
   };
 } 

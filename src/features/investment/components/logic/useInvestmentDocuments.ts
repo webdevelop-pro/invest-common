@@ -6,7 +6,6 @@ import { FilerFormatter } from 'InvestCommon/data/filer/filer.formatter';
 import { IFilerItemFormatted } from 'InvestCommon/data/filer/filer.type';
 import { useRepositoryFiler } from 'InvestCommon/data/filer/filer.repository';
 import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment.repository';
-import { reportOfflineReadError } from 'InvestCommon/domain/error/errorReporting';
 
 export interface UseInvestmentDocumentsOptions {
   investmentId: string;
@@ -72,22 +71,13 @@ export const useInvestmentDocuments = (options?: UseInvestmentDocumentsOptions):
     const offerId = getInvestOneState.value.data?.offer?.id;
     if (!offerId) return;
 
-    const [userData, publicData] = await Promise.allSettled([
+    const [userData, publicData] = await Promise.all([
       filerRepository.getFiles(`offer/${offerId}`, 'user'),
       filerRepository.getPublicFiles(offerId, 'offer'),
     ]);
 
-    if (userData.status === 'fulfilled' && userData.value) {
-      userFileSources.value.push(userData.value);
-    } else if (userData.status === 'rejected') {
-      reportOfflineReadError(userData.reason, 'Failed to load investment documents');
-    }
-
-    if (publicData.status === 'fulfilled' && publicData.value) {
-      publicFileSources.value.push(publicData.value);
-    } else if (publicData.status === 'rejected') {
-      reportOfflineReadError(publicData.reason, 'Failed to load investment documents');
-    }
+    if (userData) userFileSources.value.push(userData);
+    if (publicData) publicFileSources.value.push(publicData);
   };
 
   const loadingTable = computed(
@@ -101,12 +91,9 @@ export const useInvestmentDocuments = (options?: UseInvestmentDocumentsOptions):
   }, { immediate: true });
 
   if (options?.investmentId) {
-    void filerRepository.getFiles(options.investmentId, 'investment')
+    filerRepository.getFiles(options.investmentId, 'investment')
       .then((data) => {
         if (data) userFileSources.value.push(data);
-      })
-      .catch((error) => {
-        reportOfflineReadError(error, 'Failed to load investment documents');
       });
   }
 

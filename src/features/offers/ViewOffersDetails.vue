@@ -17,7 +17,7 @@ import { OfferFormatter } from 'InvestCommon/data/offer/offer.formatter';
 import type { IOffer, IOfferFormatted } from 'InvestCommon/data/offer/offer.types';
 import { useRepositoryFiler } from 'InvestCommon/data/filer/filer.repository';
 import { useSendAnalyticsEvent } from 'InvestCommon/domain/analytics/useSendAnalyticsEvent';
-import { reportError, reportOfflineReadError } from 'InvestCommon/domain/error/errorReporting';
+import { reportError } from 'InvestCommon/domain/error/errorReporting';
 
 const defaultInvestSteps = {
   [InvestStepTypes.amount]: {
@@ -84,6 +84,14 @@ const activeOfferId = computed(() => {
 
 const offerLoading = ref(true);
 
+const reportReadError = (error: unknown, message: string) => {
+  if (typeof window !== 'undefined' && window.navigator?.onLine === false) {
+    return;
+  }
+
+  reportError(error, message);
+};
+
 const investHandler = async () => {
   // If current selected profile is not KYC approved, switch to a random approved profile (if any)
   try {
@@ -136,11 +144,11 @@ watch(
 onBeforeMount(() => {
   if (userLoggedIn.value && params.value?.slug) {
     investmentRepository.getInvestUnconfirmed(String(params.value?.slug), selectedUserProfileId.value)
-      .catch((e) => reportOfflineReadError(e, 'Failed to load investment'));
+      .catch((e) => reportReadError(e, 'Failed to load investment'));
   }
   if (params.value?.slug) {
     offerRepository.getOfferOne(String(params.value?.slug))
-      .catch((e) => reportOfflineReadError(e, 'Failed to load offer'));
+      .catch((e) => reportReadError(e, 'Failed to load offer'));
     void sendEvent({
       event_type: 'open',
       method: 'GET',
@@ -173,12 +181,12 @@ watch(activeOfferId, (offerId) => {
   }
 
   offerRepository.getOfferComments(offerId)
-    .catch((e) => reportOfflineReadError(e, 'Failed to load offer comments'));
+    .catch((e) => reportReadError(e, 'Failed to load offer comments'));
   filerRepository.getPublicFiles(offerId, 'offer')
-    .catch((e) => reportOfflineReadError(e, 'Failed to load offer files'));
+    .catch((e) => reportReadError(e, 'Failed to load offer files'));
   if (userLoggedIn.value) {
     filerRepository.getFiles(offerId, 'offer')
-      .catch((e) => reportOfflineReadError(e, 'Failed to load offer files'));
+      .catch((e) => reportReadError(e, 'Failed to load offer files'));
   }
 }, { immediate: true });
 </script>

@@ -1,33 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ref, nextTick } from 'vue';
 
-const {
-  routerPushMock,
-  reportErrorMock,
-  mockGetInvestUnconfirmed,
-  mockGetInvestUnconfirmedState,
-  mockGetInvestUnconfirmedOne,
-} = vi.hoisted(() => ({
-  routerPushMock: vi.fn(() => Promise.resolve()),
-  reportErrorMock: vi.fn(),
-  mockGetInvestUnconfirmed: vi.fn().mockResolvedValue({}),
-  mockGetInvestUnconfirmedState: {
-    value: {
-      loading: false,
-      error: null as Error | null,
-      data: undefined,
-    },
-  },
-  mockGetInvestUnconfirmedOne: { value: { step: undefined, id: 0 } },
-}));
-
-vi.mock('pinia', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('pinia')>();
-  return {
-    ...actual,
-    storeToRefs: (store: Record<string, unknown>) => store,
-  };
-});
+const routerPushMock = vi.fn(() => Promise.resolve());
 
 vi.mock('vue', async (importOriginal) => {
   const actual = await importOriginal<typeof import('vue')>();
@@ -56,16 +30,13 @@ vi.mock('InvestCommon/domain/session/store/useSession', () => ({
   }),
 }));
 
+const mockGetInvestUnconfirmed = vi.fn().mockResolvedValue({});
+
 vi.mock('InvestCommon/data/investment/investment.repository', () => ({
   useRepositoryInvestment: () => ({
     getInvestUnconfirmed: mockGetInvestUnconfirmed,
-    getInvestUnconfirmedOne: mockGetInvestUnconfirmedOne,
-    getInvestUnconfirmedState: mockGetInvestUnconfirmedState,
+    getInvestUnconfirmedOne: ref({ step: undefined }),
   }),
-}));
-
-vi.mock('InvestCommon/domain/error/errorReporting', () => ({
-  reportError: reportErrorMock,
 }));
 
 import { ROUTE_INVEST_REVIEW } from 'InvestCommon/domain/config/enums/routes';
@@ -74,15 +45,6 @@ import { useInvestStep } from '../useInvestStep';
 describe('useInvestStep', () => {
   beforeEach(() => {
     routerPushMock.mockReset();
-    reportErrorMock.mockReset();
-    mockGetInvestUnconfirmed.mockReset();
-    mockGetInvestUnconfirmed.mockResolvedValue({});
-    mockGetInvestUnconfirmedState.value = {
-      loading: false,
-      error: null,
-      data: undefined,
-    };
-    mockGetInvestUnconfirmedOne.value = { step: undefined, id: 0 };
   });
 
   it('exposes routeParams based on current route', () => {
@@ -117,19 +79,6 @@ describe('useInvestStep', () => {
     expect(payload.name).toBe(ROUTE_INVEST_REVIEW);
     expect(payload.params).toEqual(composable.routeParams.value);
   });
-
-  it('suppresses offline bootstrap failures and exposes the offline unavailable state', async () => {
-    const offlineError = new Error('Failed to fetch');
-    mockGetInvestUnconfirmed.mockRejectedValueOnce(offlineError);
-    mockGetInvestUnconfirmedState.value.error = offlineError;
-
-    const composable = useInvestStep({ stepNumber: 1 });
-
-    await Promise.resolve();
-    await nextTick();
-
-    expect(composable.isOfflineUnavailable.value).toBe(true);
-    expect(routerPushMock).not.toHaveBeenCalled();
-    expect(reportErrorMock).not.toHaveBeenCalled();
-  });
 });
+
+
