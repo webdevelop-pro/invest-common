@@ -30,6 +30,7 @@ vi.mock('InvestCommon/config/env', () => ({
 
 vi.mock('InvestCommon/domain/config/links', () => ({
   urlProfile: () => '/profile',
+  urlCreateProfile: () => '/profile/create-new-profile',
 }));
 
 vi.mock('UiKit/helpers/general', () => ({
@@ -168,7 +169,7 @@ describe('useProfileSwitchMenu', () => {
 
     await composable.onSelectProfile('new');
 
-    expect(mockNavigateWithQueryParams).toHaveBeenCalledWith('/profile');
+    expect(mockNavigateWithQueryParams).toHaveBeenCalledWith('/profile/create-new-profile');
     expect(mockRouterPush).not.toHaveBeenCalled();
     expect(mockSetSelectedUserProfileById).not.toHaveBeenCalled();
   });

@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router';
 import { capitalizeFirstLetter } from 'UiKit/helpers/text';
 import type { IProfileFormatted } from 'InvestCommon/data/profiles/profiles.types';
 import env from 'InvestCommon/config/env';
-import { urlProfile } from 'InvestCommon/domain/config/links';
+import { urlCreateProfile } from 'InvestCommon/domain/config/links';
 import { ROUTE_CREATE_PROFILE } from 'InvestCommon/domain/config/enums/routes';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
@@ -102,7 +102,7 @@ export function useProfileSwitchMenu() {
 
     if (id === CREATE_PROFILE_ITEM_ID) {
       if (isStaticSite) {
-        navigateWithQueryParams(urlProfile());
+        navigateWithQueryParams(urlCreateProfile());
         return;
       }
 

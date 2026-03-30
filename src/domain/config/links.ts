@@ -51,6 +51,7 @@ export const urlProfileSummary = (profileId: number) => (
   `${env.FRONTEND_URL_DASHBOARD}/profile/${profileId}/summary`
 );
 export const urlProfile = () => `${env.FRONTEND_URL_DASHBOARD}/profile`;
+export const urlCreateProfile = () => `${env.FRONTEND_URL_DASHBOARD}/profile/create-new-profile`;
 export const urlOfferSingle = (slug: string) => `${env.FRONTEND_URL_STATIC}/${slug}`;
 export const urlBlogSingle = (slug: string) => `${env.FRONTEND_URL_STATIC}/resource-center/${slug}`;
 
