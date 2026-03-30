@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { defineAsyncComponent, onMounted } from 'vue';
+import { computed, defineAsyncComponent, onMounted } from 'vue';
 import VAlert from 'UiKit/components/VAlert.vue';
 import VSwitch from 'UiKit/components/VSwitch.vue';
+import env from 'InvestCommon/config/env';
 import { useSettingsMfa } from './logic/useSettingsMfa';
 
 const VDialogMfa = defineAsyncComponent({
@@ -17,6 +18,12 @@ const {
   onMfaClick,
   initializeMfa,
 } = useSettingsMfa();
+
+const appVersionLabel = computed(() => (
+  env.APP_VERSION
+    ? `Commit: ${env.APP_VERSION}`
+    : ''
+));
 
 onMounted(() => {
   initializeMfa();
@@ -64,6 +71,13 @@ onMounted(() => {
     <VDialogMfa
       v-model="isDialogMfaOpen"
     />
+
+    <div
+      v-if="appVersionLabel"
+      class="settings-mfa__version is--small is--color-gray-60"
+    >
+      {{ appVersionLabel }}
+    </div>
   </div>
 </template>
 
