@@ -14,6 +14,17 @@ export function useHeaderUser() {
   const { getUserState } = storeToRefs(profilesRepository);
 
   const userEmail = computed(() => userSessionTraits.value?.email);
+  const sessionUserName = computed(() => {
+    const first = userSessionTraits.value?.name?.first?.trim() || '';
+    const last = userSessionTraits.value?.name?.last?.trim() || '';
+    return `${first} ${last}`.trim();
+  });
+  const userDisplayName = computed(() => (
+    getUserState.value.data?.fullName?.trim()
+    || sessionUserName.value
+    || userEmail.value
+    || ''
+  ));
   const imageID = computed<number | null | undefined>(
     () => getUserState.value.data?.image_link_id as number | null | undefined,
   );
@@ -29,8 +40,8 @@ export function useHeaderUser() {
 
   return {
     userEmail,
+    userDisplayName,
     imageID,
     avatarSrc,
   };
 }
-

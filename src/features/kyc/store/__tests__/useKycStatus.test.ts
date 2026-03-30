@@ -10,7 +10,7 @@ import { urlContactUs, urlProfileKYC } from 'InvestCommon/domain/config/links';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useRepositoryKyc } from 'InvestCommon/data/kyc/kyc.repository';
-import { useKycButton } from '../useKycButton';
+import { useKycStatus } from '../useKycStatus';
 import { PROFILE_TYPES } from 'InvestCommon/domain/config/enums/profileTypes';
 
 const mockCookies = {
@@ -76,7 +76,7 @@ vi.mock('vue-router', () => ({
   useRoute: () => mockRoute,
 }));
 
-describe('useKycButton', () => {
+describe('useKycStatus', () => {
   let pinia: any;
   let sessionStore: any;
   let profilesStore: any;
@@ -116,7 +116,7 @@ describe('useKycButton', () => {
 
   describe('initial state', () => {
     it('should initialize with correct default values', () => {
-      const store = useKycButton();
+      const store = useKycStatus();
 
       expect(store.isLoading).toBe(true);
       expect(store.isButtonLoading).toBe(false);
@@ -127,21 +127,21 @@ describe('useKycButton', () => {
 
   describe('kycStatus computed', () => {
     it('should return none when no profile data exists', () => {
-      const store = useKycButton();
+      const store = useKycStatus();
       expect(store.data.class).toBe(KycTextStatuses[InvestKycTypes.none].class);
     });
 
     it('should return profile kyc_status when available', () => {
       mockProfilesStore.selectedUserProfileData.value = { kyc_status: InvestKycTypes.approved };
 
-      const store = useKycButton();
+      const store = useKycStatus();
       expect(store.data.class).toBe(KycTextStatuses[InvestKycTypes.approved].class);
     });
   });
 
   describe('data computed', () => {
     it('should return correct data structure for none status', () => {
-      const store = useKycButton();
+      const store = useKycStatus();
       const expectedData = {
         ...KycTextStatuses[InvestKycTypes.none],
         to: {
@@ -157,7 +157,7 @@ describe('useKycButton', () => {
     it('should return correct data structure for approved status', () => {
       mockProfilesStore.selectedUserProfileData.value = { kyc_status: InvestKycTypes.approved };
 
-      const store = useKycButton();
+      const store = useKycStatus();
       const expectedData = {
         ...KycTextStatuses[InvestKycTypes.approved],
         to: {
@@ -173,7 +173,7 @@ describe('useKycButton', () => {
     it('should return correct data structure for declined status', () => {
       mockProfilesStore.selectedUserProfileData.value = { kyc_status: InvestKycTypes.declined };
 
-      const store = useKycButton();
+      const store = useKycStatus();
       const expectedData = {
         ...KycTextStatuses[InvestKycTypes.declined],
         to: {
@@ -191,21 +191,21 @@ describe('useKycButton', () => {
     it('should return secondary for success class', () => {
       mockProfilesStore.selectedUserProfileData.value = { kyc_status: InvestKycTypes.approved };
 
-      const store = useKycButton();
+      const store = useKycStatus();
       expect(store.tagBackground).toBe('secondary');
     });
 
     it('should return red for declined', () => {
       mockProfilesStore.selectedUserProfileData.value = { kyc_status: InvestKycTypes.declined };
 
-      const store = useKycButton();
+      const store = useKycStatus();
       expect(store.tagBackground).toBe('red');
     });
 
     it('should return yellow for pending', () => {
       mockProfilesStore.selectedUserProfileData.value = { kyc_status: InvestKycTypes.pending };
 
-      const store = useKycButton();
+      const store = useKycStatus();
       expect(store.tagBackground).toBe('yellow');
     });
   });
@@ -215,7 +215,7 @@ describe('useKycButton', () => {
       mockProfilesStore.selectedUserProfileData.value = null;
       mockProfilesStore.isSelectedProfileLoading.value = true;
 
-      const store = useKycButton();
+      const store = useKycStatus();
       expect(store.isLoading).toBe(true);
     });
 
@@ -223,7 +223,7 @@ describe('useKycButton', () => {
       mockProfilesStore.selectedUserProfileData.value = { kyc_status: InvestKycTypes.approved };
       mockProfilesStore.isSelectedProfileLoading.value = false;
 
-      const store = useKycButton();
+      const store = useKycStatus();
       expect(store.isLoading).toBe(false);
     });
 
@@ -231,7 +231,7 @@ describe('useKycButton', () => {
       mockProfilesStore.selectedUserProfileData.value = null;
       mockProfilesStore.isSelectedProfileLoading.value = false;
 
-      const store = useKycButton();
+      const store = useKycStatus();
       expect(store.isLoading).toBe(false);
     });
   });
@@ -240,7 +240,7 @@ describe('useKycButton', () => {
     it('should set button loading state based on plaid loading', () => {
       mockKycRepository.isPlaidLoading.value = true;
 
-      const store = useKycButton();
+      const store = useKycStatus();
       expect(store.isButtonLoading).toBe(true);
       expect(store.isButtonDisabled).toBe(true);
     });
@@ -248,7 +248,7 @@ describe('useKycButton', () => {
     it('should set button states to false when plaid is not loading', () => {
       mockKycRepository.isPlaidLoading.value = false;
 
-      const store = useKycButton();
+      const store = useKycStatus();
       expect(store.isButtonLoading).toBe(false);
       expect(store.isButtonDisabled).toBe(false);
     });
@@ -258,14 +258,14 @@ describe('useKycButton', () => {
     it('should return true when kyc status is declined', () => {
       mockProfilesStore.selectedUserProfileData.value = { kyc_status: InvestKycTypes.declined };
 
-      const store = useKycButton();
+      const store = useKycStatus();
       expect(store.showContactUs).toBe(true);
     });
 
     it('should return false when kyc status is not declined', () => {
       mockProfilesStore.selectedUserProfileData.value = { kyc_status: InvestKycTypes.approved };
 
-      const store = useKycButton();
+      const store = useKycStatus();
       expect(store.showContactUs).toBe(false);
     });
   });
@@ -274,7 +274,7 @@ describe('useKycButton', () => {
     it('should not execute when user is not logged in', async () => {
       mockSessionStore.userLoggedIn.value = false;
 
-      const store = useKycButton();
+      const store = useKycStatus();
       await store.onClick();
       expect(mockKycRepository.handlePlaidKyc).not.toHaveBeenCalled();
     });
@@ -282,13 +282,13 @@ describe('useKycButton', () => {
     it('should not execute when no profile ID exists', async () => {
       mockProfilesStore.selectedUserProfileId.value = null;
 
-      const store = useKycButton();
+      const store = useKycStatus();
       await store.onClick();
       expect(mockKycRepository.handlePlaidKyc).not.toHaveBeenCalled();
     });
 
     it('should call handlePlaidKyc when user is logged in and profile exists', async () => {
-      const store = useKycButton();
+      const store = useKycStatus();
       await store.onClick();
       expect(mockKycRepository.handlePlaidKyc).toHaveBeenCalled();
     });
@@ -298,7 +298,7 @@ describe('useKycButton', () => {
     it('should update data when profile data changes', async () => {
       mockProfilesStore.selectedUserProfileData.value = { kyc_status: InvestKycTypes.none };
 
-      const store = useKycButton();
+      const store = useKycStatus();
       expect(store.data.class).toBe(KycTextStatuses[InvestKycTypes.none].class);
 
       mockProfilesStore.selectedUserProfileData.value = { kyc_status: InvestKycTypes.approved };
@@ -312,7 +312,7 @@ describe('useKycButton', () => {
     it('should use selectedUserIndividualProfile.id when type is SDIRA and id is present', () => {
       mockProfilesStore.selectedUserProfileType.value = PROFILE_TYPES.SDIRA;
       mockProfilesStore.selectedUserIndividualProfile.value = { id: 999 } as any;
-      const store = useKycButton();
+      const store = useKycStatus();
       expect(store.data.to.params.profileId).toBe(123);
       mockProfilesStore.selectedUserProfileShowKycInitForm.value = false;
       store.onClick();
@@ -321,7 +321,7 @@ describe('useKycButton', () => {
     it('should fallback to selectedUserProfileId when type is SDIRA and individual profile is null', async () => {
       mockProfilesStore.selectedUserProfileType.value = PROFILE_TYPES.SDIRA;
       mockProfilesStore.selectedUserIndividualProfile.value = null;
-      const store = useKycButton();
+      const store = useKycStatus();
       mockProfilesStore.selectedUserProfileShowKycInitForm.value = false;
       await store.onClick();
       expect(mockKycRepository.handlePlaidKyc).toHaveBeenCalledWith(123);
@@ -329,7 +329,7 @@ describe('useKycButton', () => {
     it('should use selectedUserProfileId when type is not SDIRA/SOLO401K', async () => {
       mockProfilesStore.selectedUserProfileType.value = 'individual';
       mockProfilesStore.selectedUserIndividualProfile.value = { id: 999 } as any;
-      const store = useKycButton();
+      const store = useKycStatus();
       mockProfilesStore.selectedUserProfileShowKycInitForm.value = false;
       await store.onClick();
       expect(mockKycRepository.handlePlaidKyc).toHaveBeenCalledWith(123);
@@ -341,7 +341,7 @@ describe('useKycButton', () => {
       mockProfilesStore.selectedUserProfileShowKycInitForm.value = true;
       mockProfilesStore.selectedUserProfileType.value = PROFILE_TYPES.SDIRA;
       mockProfilesStore.selectedUserIndividualProfile.value = { id: 555 } as any;
-      const store = useKycButton();
+      const store = useKycStatus();
 
       await store.onClick();
 
@@ -358,7 +358,7 @@ describe('useKycButton', () => {
       mockProfilesStore.selectedUserProfileShowKycInitForm.value = false;
       mockProfilesStore.selectedUserProfileType.value = PROFILE_TYPES.SDIRA;
       mockProfilesStore.selectedUserIndividualProfile.value = { id: 777 } as any;
-      const store = useKycButton();
+      const store = useKycStatus();
       const originalHref = window.location.href;
       await store.onClick();
       expect(mockKycRepository.handlePlaidKyc).toHaveBeenCalledWith(777);

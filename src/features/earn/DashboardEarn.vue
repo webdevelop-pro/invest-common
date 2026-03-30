@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, defineAsyncComponent, onMounted } from 'vue';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
-import DashboardTabsTopInfo from 'InvestCommon/features/dashboard/components/DashboardTabsTopInfo.vue';
 import VTableDefault from 'InvestCommon/shared/components/VTableDefault.vue';
 import VTableToolbar from 'InvestCommon/shared/components/VTableToolbar.vue';
 import VTableYieldItem from './components/VTableYieldItem.vue';
@@ -34,12 +33,6 @@ const TABLE_HEADERS: TableHeader[] = [
   { text: 'Actions', class: 'is--gt-desktop-show' },
 ];
 
-const EARN_TAB_INFO = {
-  title: 'Earn',
-  subTitle: 'Yield opportunities',
-  text: 'Discover earning opportunities and explore ways to grow your wealth and maximize returns. Explore Aave lending pools with the highest yields. Data provided by DefiLlama.',
-} as const;
-
 const {
   search,
   loading,
@@ -53,7 +46,6 @@ const {
 
 const {
   isAlertShow,
-  isTopTextShow,
   showTable,
   isAlertType,
   isAlertText,
@@ -95,12 +87,6 @@ onMounted(() => {
 
 <template>
   <div class="DashboardEarn dashboard-earn">
-    <DashboardTabsTopInfo
-      v-if="isTopTextShow"
-      :title="EARN_TAB_INFO.title"
-      :sub-title="EARN_TAB_INFO.subTitle"
-      :text="EARN_TAB_INFO.text"
-    />
     <div
       v-if="isDataLoading"
       class="dashboard-earn__alert dashboard-earn__alert-skeleton"
@@ -201,12 +187,9 @@ onMounted(() => {
   }
 
   &__tablet {
-    margin-top: 40px;
-
     @media screen and (max-width: $tablet) {
       width: 100%;
       overflow: auto;
-      margin-top: 20px;
     }
   }
 

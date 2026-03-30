@@ -3,15 +3,17 @@ import {
   watch,
 } from 'vue';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
-import { AccreditationTypes, AccreditationTextStatuses } from 'InvestCommon/data/accreditation/accreditation.types';
+import { AccreditationTypes, AccreditationTextStatuses, AccreditationAlerts } from 'InvestCommon/data/accreditation/accreditation.types';
 import { useRouter } from 'vue-router';
 import { ROUTE_ACCREDITATION_UPLOAD, ROUTE_DASHBOARD_PERSONAL_DETAILS } from 'InvestCommon/domain/config/enums/routes';
+import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { PROFILE_TYPES } from 'InvestCommon/domain/config/enums/profileTypes';
 
-export const useAccreditationButton = defineStore('useAccreditationButton', () => {
+export const useAccreditationStatus = defineStore('useAccreditationStatus', () => {
   const router = useRouter();
+  const dialogsStore = useDialogs();
   const userProfileStore = useProfilesStore();
   const {
     selectedUserProfileData, selectedUserProfileId, isSelectedProfileLoading, isTrustRevocable,
@@ -28,17 +30,27 @@ export const useAccreditationButton = defineStore('useAccreditationButton', () =
     isLoading.value = !selectedUserProfileData.value && isSelectedProfileLoading.value;
   });
 
-  const data = computed(() => {
-    const status = selectedUserProfileData.value?.accreditation_status
-      ? selectedUserProfileData.value?.accreditation_status : AccreditationTypes.new;
-    return {
-      ...AccreditationTextStatuses[status],
-      to: {
-        name: ROUTE_ACCREDITATION_UPLOAD,
-        params: { profileId: selectedUserProfileId.value },
-      },
-    };
-  });
+  const status = computed(() => (
+    selectedUserProfileData.value?.accreditation_status
+      ? selectedUserProfileData.value?.accreditation_status
+      : AccreditationTypes.new
+  ));
+
+  const to = computed(() => ({
+    name: ROUTE_ACCREDITATION_UPLOAD,
+    params: { profileId: selectedUserProfileId.value },
+  }));
+
+  const data = computed(() => ({
+    ...AccreditationTextStatuses[status.value],
+    to: to.value,
+  }));
+
+  const dataAlert = computed(() => ({
+    ...AccreditationAlerts[status.value],
+    to: to.value,
+  }));
+
   const tagBackground = computed(() => {
     if (data.value.class === 'success') return 'secondary';
     if (data.value.class === 'failed') return 'red';
@@ -80,15 +92,30 @@ export const useAccreditationButton = defineStore('useAccreditationButton', () =
     }
   };
 
+  const onAlertDescriptionClick = (event: Event) => {
+    const target = event.target as HTMLElement | null;
+    const contactTarget = target?.closest('[data-action="contact-us"]');
+
+    if (!contactTarget) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    dialogsStore.openContactUsDialog('dashboard verification');
+  };
+
   return {
     isLoading,
     tagBackground,
     data,
+    dataAlert,
     onClick,
+    onAlertDescriptionClick,
     isAccreditationIsClickable,
   };
 });
 
 if (import.meta.hot) {
-  import.meta.hot.accept(acceptHMRUpdate(useAccreditationButton, import.meta.hot));
+  import.meta.hot.accept(acceptHMRUpdate(useAccreditationStatus, import.meta.hot));
 }

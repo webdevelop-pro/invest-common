@@ -4,17 +4,10 @@ import {
 } from 'vue';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
-import DashboardTabsTopInfo from 'InvestCommon/features/dashboard/components/DashboardTabsTopInfo.vue';;
 import { storeToRefs } from 'pinia';
 import DashboardDistributionsSummary from './components/DashboardDistributionsSummary.vue';
 import { useRepositoryDistributions } from 'InvestCommon/data/distributions/distributions.repository';
 import { reportError } from 'InvestCommon/domain/error/errorReporting';
-
-// todo: need to refactor
-
-const DISTRIBUTIONS_TAB_INFO = {
-  title: 'Your Total Assets',
-};
 
 const VShadcnChartArea = defineAsyncComponent({
   loader: () => import('UiKit/components/VCharts/VShadcnChartArea/VShadcnChartArea.vue'),
@@ -65,9 +58,6 @@ onMounted(() => {
 
 <template>
   <div class="DashboardDistributions dashboard-distributions">
-    <DashboardTabsTopInfo
-      :title="DISTRIBUTIONS_TAB_INFO.title"
-    />
     <div
       v-if="(distributionGeograficData.length > 0) || (distributionPerformanceData.length > 0)"
       class="dashboard-distributions__charts"

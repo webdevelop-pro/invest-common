@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { PropType } from 'vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
-import VTextCurrencyWithUnit from 'UiKit/components/VText/VTextCurrencyWithUnit.vue';
 import { VMoreActions } from 'UiKit/components/Base/VMoreActions';
 import { useDashboardWalletHeader, type DashboardWalletHeaderProps, type PrimaryActionButton } from './logic/useDashboardWalletHeader';
 
@@ -49,22 +48,6 @@ const {
 
 <template>
   <section class="DashboardWalletHeader dashboard-wallet-header">
-    <div class="dashboard-wallet-header__total">
-      <div class="dashboard-wallet-header__total-label is--h6__title">
-        Total Balance:
-      </div>
-      <VTextCurrencyWithUnit
-        class="dashboard-wallet-header__total-value"
-        :amount="amount"
-        :unit="coin"
-        :loading="loading"
-        amount-class="is--h1__title"
-      />
-      <div class="dashboard-wallet-header__total-subtitle is--small">
-        Fiat, Crypto, and RWA holdings in one wallet.
-      </div>
-    </div>
-
     <div class="dashboard-wallet-header__actions">
       <VButton
         v-for="button in visibleButtons"
@@ -97,24 +80,12 @@ const {
 <style lang="scss">
 .dashboard-wallet-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 20px;
 
   @media screen and (width < $tablet) {
     flex-direction: column;
     align-items: flex-start;
-  }
-
-  &__total-label {
-    color: $gray-70;
-  }
-
-  &__total-value {
-    color: $black;
-  }
-
-  &__total-subtitle {
-    color: $gray-80;
   }
 
   &__actions {
@@ -129,4 +100,3 @@ const {
   }
 }
 </style>
-

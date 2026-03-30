@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import { DashboardTabTypes } from './utils';
-import DashboardTopInfo from './components/DashboardTopInfo.vue';
 import DashboardTabSkeleton from './components/DashboardTabSkeleton.vue';
+import DashboardPageHeaderSkeleton from './components/DashboardPageHeaderSkeleton.vue';
 import VPageTopInfoAndTabs from 'InvestCommon/shared/components/VPageTopInfoAndTabs.vue';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { storeToRefs } from 'pinia';
@@ -118,12 +118,34 @@ const tabLoaders: Record<DashboardTabTypes, () => Promise<Component>> = {
     import('InvestCommon/features/earn/DashboardEarn.vue'),
 };
 
+const tabTopLeftLoaders: Record<DashboardTabTypes, () => Promise<Component>> = {
+  [DashboardTabTypes.portfolio]: () =>
+    import('InvestCommon/features/investment/DashboardPortfolioTopLeft.vue'),
+  [DashboardTabTypes.summary]: () =>
+    import('InvestCommon/features/summary/DashboardSummaryTopLeft.vue'),
+  [DashboardTabTypes.acount]: () =>
+    import('InvestCommon/features/profiles/DashboardProfilesTopLeft.vue'),
+  // Wallet and Crypto Wallet are combined into a single tab
+  [DashboardTabTypes.wallet]: () =>
+    import('InvestCommon/features/wallet/DashboardWalletTopLeft.vue'),
+  [DashboardTabTypes.distributions]: () =>
+    import('InvestCommon/features/distributions/DashboardDistributionsTopLeft.vue'),
+  [DashboardTabTypes.earn]: () =>
+    import('InvestCommon/features/earn/DashboardEarnTopLeft.vue'),
+};
+
 const createTabComponent = (loader: () => Promise<Component>) =>
   defineAsyncComponent({
     loader,
     loadingComponent: DashboardTabSkeleton,
     delay: 0,
   });
+
+const DashboardPageHeader = defineAsyncComponent({
+  loader: () => import('./components/DashboardPageHeader.vue'),
+  loadingComponent: DashboardPageHeaderSkeleton,
+  delay: 0,
+});
 
 const tabComponents: Record<DashboardTabTypes, Component> = {
   [DashboardTabTypes.portfolio]: createTabComponent(tabLoaders[DashboardTabTypes.portfolio]),
@@ -133,6 +155,16 @@ const tabComponents: Record<DashboardTabTypes, Component> = {
   [DashboardTabTypes.evmwallet]: createTabComponent(tabLoaders[DashboardTabTypes.evmwallet]),
   [DashboardTabTypes.distributions]: createTabComponent(tabLoaders[DashboardTabTypes.distributions]),
   [DashboardTabTypes.earn]: createTabComponent(tabLoaders[DashboardTabTypes.earn]),
+};
+
+const tabTopLeftComponents: Record<DashboardTabTypes, Component> = {
+  [DashboardTabTypes.portfolio]: createTabComponent(tabTopLeftLoaders[DashboardTabTypes.portfolio]),
+  [DashboardTabTypes.summary]: createTabComponent(tabTopLeftLoaders[DashboardTabTypes.summary]),
+  [DashboardTabTypes.acount]: createTabComponent(tabTopLeftLoaders[DashboardTabTypes.acount]),
+  [DashboardTabTypes.wallet]: createTabComponent(tabTopLeftLoaders[DashboardTabTypes.wallet]),
+  [DashboardTabTypes.evmwallet]: createTabComponent(tabTopLeftLoaders[DashboardTabTypes.evmwallet]),
+  [DashboardTabTypes.distributions]: createTabComponent(tabTopLeftLoaders[DashboardTabTypes.distributions]),
+  [DashboardTabTypes.earn]: createTabComponent(tabTopLeftLoaders[DashboardTabTypes.earn]),
 };
 
 // VTabs controls the active tab via URL query param `tab`.
@@ -160,6 +192,7 @@ watch(
     }
     // Warm the active tab chunk; component mount will also load if needed.
     void tabLoaders[tab]?.();
+    void tabTopLeftLoaders[tab]?.();
   },
   { immediate: true },
 );
@@ -177,7 +210,10 @@ const currentPwaComponent = computed(() => (
     class="ViewDashboard view-dashboard is--no-margin"
   >
     <template #top-info>
-      <DashboardTopInfo />
+      <DashboardPageHeader
+        :active-tab="activeTab"
+        :tab-top-left-components="tabTopLeftComponents"
+      />
     </template>
     <template #tabs-content>
       <component

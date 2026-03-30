@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, defineAsyncComponent } from 'vue';
-import DashboardTabsTopInfo from 'InvestCommon/features/dashboard/components/DashboardTabsTopInfo.vue';
 import CryptoPricesTicker from 'InvestCommon/features/summary/components/CryptoPricesTicker.vue';
 import { useSummaryData } from 'InvestCommon/features/summary/composables/useSummaryData';
 import VCardOffer from 'UiKit/components/VCard/VCardOffer.vue';
@@ -72,10 +71,6 @@ const topInfoSliderOptions = {
 
 <template>
   <div class="DashboardSummary dashboard-summary">
-    <DashboardTabsTopInfo
-      title="Overview"
-      text="An overview of your account, portfolio and recent activity."
-    />
     <div class="dashboard-summary__content">
       <CryptoPricesTicker
         :items="cryptoItems"

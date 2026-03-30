@@ -43,6 +43,14 @@ interface ITextStatuses {
   mobileText?: string;
 }
 
+interface IAlerts {
+  title: string;
+  class: string;
+  button?: boolean;
+  tooltip?: string;
+  description?: string;
+}
+
 export const KycTextStatuses: Record<InvestKycTypes, ITextStatuses> = {
   [InvestKycTypes.none]: {
     text: 'Verify Identity',
@@ -73,6 +81,42 @@ export const KycTextStatuses: Record<InvestKycTypes, ITextStatuses> = {
   },
   [InvestKycTypes.approved]: {
     text: 'Verified',
+    class: 'success',
+  },
+};
+
+export const KycAlerts: Record<InvestKycTypes, IAlerts> = {
+  [InvestKycTypes.none]: {
+    title: 'Verify Identity',
+    description: 'Complete identity verification to unlock investing access for this profile.',
+    class: 'none',
+    button: true,
+  },
+  [InvestKycTypes.new]: {
+    title: 'Verify Identity',
+    description: 'Complete identity verification to unlock investing access for this profile.',
+    class: 'none',
+    button: true,
+  },
+  [InvestKycTypes.pending]: {
+    title: 'Finish Your KYC',
+    description: 'Complete the remaining identity verification steps so we can continue reviewing your submission.',
+    class: 'pending',
+    button: true,
+  },
+  [InvestKycTypes.in_progress]: {
+    title: 'Verification In Progress',
+    description: 'Your KYC review is in progress. We will notify you as soon as there is an update.',
+    class: 'pending',
+  },
+  [InvestKycTypes.declined]: {
+    title: 'Verification Declined',
+    description: 'Your identity verification was declined. <a href="#contact-us-dialog" class="is--link-1" data-action="contact-us">Contact support</a> and we will help resolve the issue.',
+    class: 'failed',
+  },
+  [InvestKycTypes.approved]: {
+    title: 'Identity Verified',
+    description: 'Your identity has been successfully verified for this investment profile.',
     class: 'success',
   },
 };

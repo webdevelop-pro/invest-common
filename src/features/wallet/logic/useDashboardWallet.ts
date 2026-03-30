@@ -157,14 +157,16 @@ export function useDashboardWallet() {
     }
   };
 
-  const primaryButtons = computed(() =>
-    buttonConfigs.value.filter((b) =>
-      ['add-funds', 'withdraw', 'exchange'].includes(String(b.id)),
-    ),
-  );
-  const moreButtons = computed(() =>
-    buttonConfigs.value.filter((b) => ['earn', 'buy', 'bank-accounts'].includes(String(b.id))),
-  );
+  // const primaryButtons = computed(() =>
+  //   buttonConfigs.value.filter((b) =>
+  //     ['add-funds', 'withdraw', 'exchange'].includes(String(b.id)),
+  //   ),
+  // );
+  const primaryButtons = computed(() => buttonConfigs.value);
+  // const moreButtons = computed(() =>
+  //   buttonConfigs.value.filter((b) => ['earn', 'buy', 'bank-accounts'].includes(String(b.id))),
+  // );
+  const moreButtons = [];
 
   const handlePrimaryActionClick = (id: string | number, transactionType?: unknown) => {
     handleButtonClick({ id, transactionType });

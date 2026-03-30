@@ -3,13 +3,8 @@ import {
   computed, onMounted, onUnmounted, ref,
 } from 'vue';
 import { storeToRefs } from 'pinia';
-import VAvatar from 'UiKit/components/VAvatar.vue';
-import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
-import { useRepositoryFiler } from 'InvestCommon/data/filer/filer.repository';
 import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
-import { reportError } from 'InvestCommon/domain/error/errorReporting';
-import { useFilerNotificationRefresh } from 'InvestCommon/domain/filer/useFilerNotificationRefresh';
 import {
   urlContactUs,
   urlFaq,
@@ -19,25 +14,27 @@ import {
   urlSettingsSecurity,
 } from 'InvestCommon/domain/config/links';
 import VHeaderProfileOverlayPWA from 'InvestCommon/shared/components/pwa/VHeaderProfileOverlayPWA.vue';
+import VHeaderProfileSwitchSidebarPWA from 'InvestCommon/shared/components/pwa/VHeaderProfileSwitchSidebarPWA.vue';
+import { useProfileSwitchMenu } from 'InvestCommon/features/profiles/composables/useProfileSwitchMenu';
 import { useHeaderUser } from './useHeaderUser';
+import { getProfileAvatarInitial } from './getProfileAvatarInitial';
+import VAvatarIdentity from 'UiKit/components/VAvatarIdentity.vue';
+import { usePwaProfilePanels } from './usePwaProfilePanels';
 
-const useRepositoryProfilesStore = useRepositoryProfiles();
-const { getUserState } = storeToRefs(useRepositoryProfilesStore);
 const profilesStore = useProfilesStore();
 const { selectedUserProfileId } = storeToRefs(profilesStore);
-const filerRepository = useRepositoryFiler();
-const { postSignurlState } = storeToRefs(filerRepository);
 const dialogsStore = useDialogs();
 const { isDialogLogoutOpen } = storeToRefs(dialogsStore);
 
 const { userEmail, avatarSrc } = useHeaderUser();
+const { selectedProfileLabel } = useProfileSwitchMenu();
+const profileAvatarInitial = computed(() => getProfileAvatarInitial(selectedProfileLabel.value));
 const getProfileId = computed(() => Number(selectedUserProfileId.value));
 const USER_MENU_QUERY_KEY = 'fromUserMenu';
 const USER_MENU_QUERY_VALUE = '1';
 const USER_MENU_FROM_QUERY_KEY = 'menuFrom';
 const USER_MENU_OPEN_QUERY_KEY = 'openUserMenu';
 const OPEN_PWA_PROFILE_OVERLAY_EVENT = 'invest:pwa-profile-overlay:open';
-const AVATAR_NOTIFICATION_FALLBACK_MS = 5000;
 
 const toPathname = (url: string) => {
   try {
@@ -126,80 +123,35 @@ const faqPath = computed(() => withUserMenuSource(toPathname(urlFaq)));
 
 const refFiles = ref<HTMLInputElement>();
 const isAvatarLoading = ref(false);
-const isProfileOverlayOpen = ref(false);
-
-const finishAvatarUpload = () => {
-  clearPendingRefresh();
-  isAvatarLoading.value = false;
-};
-
-const { clearPendingRefresh, scheduleFallbackRefresh } = useFilerNotificationRefresh({
-  enabled: isAvatarLoading,
-  fallbackMs: AVATAR_NOTIFICATION_FALLBACK_MS,
-  match: (fields) => fields.type === 'file_thumbnail',
-  refresh: () => useRepositoryProfilesStore.getUser(),
-  refreshErrorMessage: 'Failed to refresh avatar after thumbnail generation',
-  fallbackErrorMessage: 'Failed to refresh avatar after upload',
-  onSettled: () => {
-    isAvatarLoading.value = false;
-  },
-});
+const {
+  isProfileOverlayOpen,
+  isProfileSwitchSidebarOpen,
+  openProfileOverlay,
+  closeProfileOverlay,
+  openProfileSwitchSidebar,
+  closeProfileSwitchSidebar,
+} = usePwaProfilePanels();
+const profileMenuButtonLabel = computed(() => (
+  selectedProfileLabel.value
+    ? `Open profile menu for ${selectedProfileLabel.value}`
+    : 'Open profile menu'
+));
 
 const onAvatarClick = () => {
   refFiles.value?.click();
 };
 
-const onFileChange = async () => {
-  const fileList = refFiles.value?.files;
-  const file = fileList && fileList.length ? fileList[0] : undefined;
-  const userId = Number(getUserState.value.data?.id);
-  if (!file || !Number.isFinite(userId)) {
-    return;
-  }
-
-  isAvatarLoading.value = true;
-  try {
-    const uploaded = await filerRepository.uploadHandler(file, userId, 'user', userId);
-    if (!uploaded) {
-      finishAvatarUpload();
-      return;
-    }
-
-    const uploadedId = postSignurlState.value.data?.meta?.id;
-    if (!uploadedId) {
-      finishAvatarUpload();
-      return;
-    }
-
-    await useRepositoryProfilesStore.updateUserData({ image_link_id: uploadedId });
-    await useRepositoryProfilesStore.getUser();
-    scheduleFallbackRefresh();
-  } catch (e) {
-    reportError(e, 'Failed to update avatar');
-    finishAvatarUpload();
-  } finally {
-    if (refFiles.value) {
-      refFiles.value.value = '';
-    }
-  }
+const onProfileSwitchOpen = () => {
+  openProfileSwitchSidebar();
 };
 
-const openProfileOverlay = () => {
-  isProfileOverlayOpen.value = true;
-  if (typeof document !== 'undefined') {
-    document.body?.classList.add('pwa-profile-overlay-open');
-  }
-};
-
-const closeProfileOverlay = () => {
-  isProfileOverlayOpen.value = false;
-  if (typeof document !== 'undefined') {
-    document.body?.classList.remove('pwa-profile-overlay-open');
-  }
+const onProfileSelect = () => {
+  closeProfileSwitchSidebar();
 };
 
 const onLogout = () => {
   closeProfileOverlay();
+  closeProfileSwitchSidebar();
   isDialogLogoutOpen.value = true;
 };
 
@@ -218,6 +170,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   closeProfileOverlay();
+  closeProfileSwitchSidebar();
   if (typeof window !== 'undefined') {
     window.removeEventListener(OPEN_PWA_PROFILE_OVERLAY_EVENT, openProfileOverlay);
   }
@@ -229,33 +182,18 @@ onUnmounted(() => {
     <button
       type="button"
       class="v-header-profile-pwa__avatar-btn"
-      :class="{ 'is--loading': isAvatarLoading }"
-      @click="onAvatarClick"
-    >
-      <VAvatar
-        size="small"
-        :src="avatarSrc"
-        :loading="isAvatarLoading"
-        alt="avatar image"
-        class="v-header-profile-pwa__avatar"
-      />
-    </button>
-    <input
-      id="pwa-profile-avatar-upload"
-      ref="refFiles"
-      name="file"
-      type="file"
-      accept="image/png, image/jpeg, image/jpg"
-      aria-label="Upload avatar image"
-      hidden
-      @change="onFileChange"
-    >
-    <button
-      type="button"
-      class="v-header-profile-pwa__email is--h6__title"
+      :aria-label="profileMenuButtonLabel"
+      aria-haspopup="dialog"
+      :aria-expanded="String(isProfileOverlayOpen)"
       @click="openProfileOverlay"
     >
-      {{ userEmail }}
+      <VAvatarIdentity
+        class="v-header-profile-pwa__avatar"
+        size="small"
+        alt="avatar image"
+        :avatar-text="profileAvatarInitial"
+        :label="selectedProfileLabel"
+      />
     </button>
 
     <VHeaderProfileOverlayPWA
@@ -272,6 +210,12 @@ onUnmounted(() => {
       @close="closeProfileOverlay"
       @logout="onLogout"
       @avatar-click="onAvatarClick"
+      @switch-profile-open="onProfileSwitchOpen"
+    />
+
+    <VHeaderProfileSwitchSidebarPWA
+      v-model:open="isProfileSwitchSidebarOpen"
+      @select="onProfileSelect"
     />
   </div>
 </template>
@@ -291,21 +235,33 @@ onUnmounted(() => {
   }
 
   &__avatar-btn,
-  &__email {
+  &__identity {
     border: none;
     background: transparent;
     padding: 0;
     cursor: pointer;
   }
 
-  &__avatar-btn.is--loading {
-    opacity: 0.6;
-    pointer-events: none;
+  &__avatar-btn {
+    border-radius: 999px;
+  }
+
+  &__identity {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  &__file-input {
+    display: none;
   }
 
 }
 
-body.pwa-profile-overlay-open .pwamenu {
+body.pwa-profile-overlay-open .pwamenu,
+body.pwa-profile-switch-sidebar-open .pwamenu {
   display: none;
 }
 </style>

@@ -26,6 +26,7 @@ const emit = defineEmits<{
   (e: 'close'): void;
   (e: 'logout'): void;
   (e: 'avatar-click'): void;
+  (e: 'switch-profile-open'): void;
 }>();
 
 type OverlayItemBase = {
@@ -186,6 +187,22 @@ const onOverlayItemClick = (item: OverlayActionItem) => {
             </div>
           </section>
 
+          <section class="v-header-profile-pwa__overlay-section">
+            <button
+              type="button"
+              class="v-header-profile-pwa__overlay-switch-trigger"
+              @click="emit('switch-profile-open')"
+            >
+              <span class="v-header-profile-pwa__overlay-switch-text is--h6__title">
+                Switch profile
+              </span>
+              <ArrowRight
+                class="v-header-profile-pwa__overlay-switch-chevron"
+                aria-hidden="true"
+              />
+            </button>
+          </section>
+
           <section
             class="v-header-profile-pwa__overlay-section"
           >
@@ -213,7 +230,7 @@ const onOverlayItemClick = (item: OverlayActionItem) => {
                       aria-hidden="true"
                     />
                   </span>
-                  <span class="v-header-profile-pwa__overlay-item-label  is--h6__title">
+                  <span class="v-header-profile-pwa__overlay-item-label is--h6__title">
                     {{ item.label }}
                   </span>
                   <ArrowRight
@@ -235,7 +252,7 @@ const onOverlayItemClick = (item: OverlayActionItem) => {
                       aria-hidden="true"
                     />
                   </span>
-                  <span class="v-header-profile-pwa__overlay-item-label  is--h6__title">
+                  <span class="v-header-profile-pwa__overlay-item-label is--h6__title">
                     {{ item.label }}
                   </span>
                   <ArrowRight
@@ -346,6 +363,35 @@ const onOverlayItemClick = (item: OverlayActionItem) => {
   &__overlay-section {
     width: 100%;
     padding: 5px 0;
+  }
+
+  &__overlay-switch-trigger {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: calc(100% - 32px);
+    margin: 0 16px;
+    border: 1px solid $gray-20;
+    border-radius: 2px;
+    background: $gray-10;
+    padding: 12px 14px;
+    color: $black;
+    cursor: pointer;
+    text-align: left;
+  }
+
+  &__overlay-switch-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__overlay-switch-chevron {
+    margin-left: auto;
+    width: 18px;
+    height: 18px;
+    color: $gray-60;
+    flex-shrink: 0;
   }
 
   &__overlay-group {
