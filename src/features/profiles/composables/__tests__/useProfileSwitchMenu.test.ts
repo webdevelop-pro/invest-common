@@ -1,10 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ref } from 'vue';
 import { InvestKycTypes } from 'InvestCommon/data/kyc/kyc.types';
-import { useProfileSwitchMenu } from '../useProfileSwitchMenu';
 
-const mockPush = vi.fn();
+const mockRouterPush = vi.fn();
 const mockSetSelectedUserProfileById = vi.fn();
+const mockNavigateWithQueryParams = vi.fn();
+const envState = {
+  IS_STATIC_SITE: '0',
+};
 const selectedUserProfileId = ref(2);
 const userProfiles = ref([
   {
@@ -21,21 +24,21 @@ const userProfiles = ref([
   },
 ] as any[]);
 
+vi.mock('InvestCommon/config/env', () => ({
+  default: envState,
+}));
+
+vi.mock('InvestCommon/domain/config/links', () => ({
+  urlProfile: () => '/profile',
+}));
+
+vi.mock('UiKit/helpers/general', () => ({
+  navigateWithQueryParams: mockNavigateWithQueryParams,
+}));
+
 vi.mock('vue-router', () => ({
   useRouter: () => ({
-    push: mockPush,
-    currentRoute: {
-      value: {
-        name: 'ROUTE_DASHBOARD_SUMMARY',
-        params: {
-          profileId: '2',
-          investId: '77',
-        },
-        query: {
-          tab: 'summary',
-        },
-      },
-    },
+    push: mockRouterPush,
   }),
 }));
 
@@ -64,8 +67,14 @@ vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
   }),
 }));
 
+const loadComposable = async () => {
+  vi.resetModules();
+  return (await import('../useProfileSwitchMenu')).useProfileSwitchMenu;
+};
+
 describe('useProfileSwitchMenu', () => {
   beforeEach(() => {
+    envState.IS_STATIC_SITE = '0';
     selectedUserProfileId.value = 2;
     userProfiles.value = [
       {
@@ -83,17 +92,20 @@ describe('useProfileSwitchMenu', () => {
         kyc_status: InvestKycTypes.approved,
       },
     ] as any[];
-    mockPush.mockClear();
+    mockRouterPush.mockClear();
     mockSetSelectedUserProfileById.mockClear();
+    mockNavigateWithQueryParams.mockClear();
   });
 
-  it('exposes the selected profile label and eligibility', () => {
+  it('exposes the selected profile label and eligibility', async () => {
+    const useProfileSwitchMenu = await loadComposable();
     const composable = useProfileSwitchMenu();
 
     expect(composable.selectedProfileLabel.value).toBe('EN2: Growth SPV');
   });
 
-  it('builds profile items with active and create states', () => {
+  it('builds profile items with active and create states', async () => {
+    const useProfileSwitchMenu = await loadComposable();
     const composable = useProfileSwitchMenu();
 
     expect(composable.profileItems.value).toEqual([
@@ -120,41 +132,54 @@ describe('useProfileSwitchMenu', () => {
     ]);
   });
 
-  it('preserves existing route params and query when switching profiles', async () => {
+  it('updates selected profile for a different numeric id', async () => {
+    const useProfileSwitchMenu = await loadComposable();
     const composable = useProfileSwitchMenu();
 
     await composable.onSelectProfile('1');
 
-    expect(mockPush).toHaveBeenCalledWith({
-      name: 'ROUTE_DASHBOARD_SUMMARY',
-      params: {
-        profileId: '1',
-        investId: '77',
-      },
-      query: {
-        tab: 'summary',
-      },
-    });
     expect(mockSetSelectedUserProfileById).toHaveBeenCalledWith(1);
   });
 
-  it('routes to create-profile when choosing the add-new action', async () => {
-    const composable = useProfileSwitchMenu();
-
-    await composable.onSelectProfile('new');
-
-    expect(mockSetSelectedUserProfileById).not.toHaveBeenCalled();
-    expect(mockPush).toHaveBeenCalledWith({
-      name: 'ROUTE_CREATE_PROFILE',
-    });
-  });
-
-  it('does not navigate or mutate state when selecting the active profile', async () => {
+  it('does not update the active profile again', async () => {
+    const useProfileSwitchMenu = await loadComposable();
     const composable = useProfileSwitchMenu();
 
     await composable.onSelectProfile('2');
 
-    expect(mockPush).not.toHaveBeenCalled();
+    expect(mockSetSelectedUserProfileById).not.toHaveBeenCalled();
+  });
+
+  it('routes to create-profile in app mode', async () => {
+    const useProfileSwitchMenu = await loadComposable();
+    const composable = useProfileSwitchMenu();
+
+    await composable.onSelectProfile('new');
+
+    expect(mockRouterPush).toHaveBeenCalledWith({ name: 'ROUTE_CREATE_PROFILE' });
+    expect(mockNavigateWithQueryParams).not.toHaveBeenCalled();
+    expect(mockSetSelectedUserProfileById).not.toHaveBeenCalled();
+  });
+
+  it('uses navigateWithQueryParams for create-profile in static mode', async () => {
+    envState.IS_STATIC_SITE = '1';
+    const useProfileSwitchMenu = await loadComposable();
+    const composable = useProfileSwitchMenu();
+
+    await composable.onSelectProfile('new');
+
+    expect(mockNavigateWithQueryParams).toHaveBeenCalledWith('/profile');
+    expect(mockRouterPush).not.toHaveBeenCalled();
+    expect(mockSetSelectedUserProfileById).not.toHaveBeenCalled();
+  });
+
+  it('does not update selection for invalid ids', async () => {
+    const useProfileSwitchMenu = await loadComposable();
+    const composable = useProfileSwitchMenu();
+
+    await composable.onSelectProfile('');
+    await composable.onSelectProfile('abc');
+
     expect(mockSetSelectedUserProfileById).not.toHaveBeenCalled();
   });
 });

@@ -3,10 +3,14 @@ import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
 import { capitalizeFirstLetter } from 'UiKit/helpers/text';
 import type { IProfileFormatted } from 'InvestCommon/data/profiles/profiles.types';
-import { ROUTE_CREATE_PROFILE, ROUTE_DASHBOARD_SUMMARY } from 'InvestCommon/domain/config/enums/routes';
+import env from 'InvestCommon/config/env';
+import { urlProfile } from 'InvestCommon/domain/config/links';
+import { ROUTE_CREATE_PROFILE } from 'InvestCommon/domain/config/enums/routes';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
+import { navigateWithQueryParams } from 'UiKit/helpers/general';
 
 const CREATE_PROFILE_ITEM_ID = 'new';
+const isStaticSite = Number(env.IS_STATIC_SITE ?? 0) === 1;
 
 export type ProfileSwitchMenuItem = {
   id: string;
@@ -56,7 +60,7 @@ const getProfileEligibility = (profile?: IProfileFormatted | null) => ({
 });
 
 export function useProfileSwitchMenu() {
-  const router = useRouter();
+  const router = isStaticSite ? null : useRouter();
   const profilesStore = useProfilesStore();
   const { selectedUserProfileId, userProfiles } = storeToRefs(profilesStore);
   const currentProfileId = computed(() => Number(selectedUserProfileId.value));
@@ -97,6 +101,11 @@ export function useProfileSwitchMenu() {
     }
 
     if (id === CREATE_PROFILE_ITEM_ID) {
+      if (isStaticSite) {
+        navigateWithQueryParams(urlProfile());
+        return;
+      }
+
       await router.push({ name: ROUTE_CREATE_PROFILE });
       return;
     }
@@ -104,23 +113,6 @@ export function useProfileSwitchMenu() {
     const nextProfileId = Number(id);
     if (!Number.isFinite(nextProfileId) || currentProfileId.value === nextProfileId) {
       return;
-    }
-
-    const currentRoute = router.currentRoute.value;
-    if (currentRoute.name) {
-      await router.push({
-        name: currentRoute.name,
-        params: {
-          ...currentRoute.params,
-          profileId: id,
-        },
-        query: Object.keys(currentRoute.query).length > 0 ? currentRoute.query : undefined,
-      });
-    } else {
-      await router.push({
-        name: ROUTE_DASHBOARD_SUMMARY,
-        params: { profileId: nextProfileId },
-      });
     }
 
     profilesStore.setSelectedUserProfileById(nextProfileId);

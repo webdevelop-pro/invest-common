@@ -74,6 +74,7 @@ const onLogout = () => {
       <VAvatarIdentity
         class="v-header-profile__avatar"
         size="small"
+        :src="undefined"
         alt="avatar image"
         :avatar-text="profileAvatarInitial"
         :label="selectedProfileLabel"
