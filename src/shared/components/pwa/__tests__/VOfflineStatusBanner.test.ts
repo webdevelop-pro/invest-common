@@ -61,7 +61,7 @@ describe('VOfflineStatusBanner', () => {
       lastSyncedAt: null,
     });
 
-    expect(wrapper.text()).toContain('Some sections may be unavailable');
+    expect(wrapper.text()).toContain('Sections that were not saved on this device may be unavailable');
   });
 
   it('shows the reconnect message and ignores invalid sync timestamps', () => {

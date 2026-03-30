@@ -34,8 +34,8 @@ const bannerText = computed(() => (
   props.isReconnected
     ? 'Connection restored. The app can refresh live content again.'
     : props.isShowingCachedContent
-      ? 'You are offline and the app is now in read-only mode. Previously visited pages are available from cache.'
-      : 'You are offline. Some sections may be unavailable until the connection returns.'
+      ? 'You are offline and seeing saved content in read-only mode.'
+      : 'You are offline. Sections that were not saved on this device may be unavailable until the connection returns.'
 ));
 </script>
 

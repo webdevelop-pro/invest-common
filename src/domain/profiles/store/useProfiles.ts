@@ -11,6 +11,8 @@ import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { PROFILE_TYPES } from 'InvestCommon/domain/config/enums/profileTypes';
 import { useLogoutStore } from 'InvestCommon/features/auth/store/useLogout';
 import { resetAllProfileData } from 'InvestCommon/domain/resetAllData';
+import { reportOfflineReadError } from 'InvestCommon/domain/error/errorReporting';
+import { shouldPreserveOfflineSession } from 'InvestCommon/domain/redirects/authGuardOffline';
 
 const isStaticSite = Number(env.IS_STATIC_SITE ?? 0);
 
@@ -108,7 +110,8 @@ export const useProfilesStore = defineStore('profiles', () => {
       return;
     }
     if (!getUserState.value?.data && !getUserState.value?.loading) {
-      useRepositoryProfilesStore.getUser();
+      void useRepositoryProfilesStore.getUser()
+        .catch((error) => reportOfflineReadError(error, 'Failed to load profiles'));
     }
   };
   // if user is logged in and profile is not loaded, load it - step 1
@@ -119,6 +122,9 @@ export const useProfilesStore = defineStore('profiles', () => {
   // if there is error in getUser (profiles) call logout - could happen if session expired
   watch(() => getUserState.value.error, async () => {
     if (getUserState.value.error) {
+      if (shouldPreserveOfflineSession(userSession.value, getUserState.value.error)) {
+        return;
+      }
       logoutStore.logoutHandler();
     }
   }, { immediate: true });
@@ -196,8 +202,14 @@ export const useProfilesStore = defineStore('profiles', () => {
       useRepositoryProfilesStore.resetProfileData();
       
       // Fetch new profile data
-      useRepositoryProfilesStore.getProfileById(selectedUserProfileType.value, selectedUserProfileId.value);
-      useRepositoryProfilesStore.getProfileByIdOptions(selectedUserProfileType.value, selectedUserProfileId.value);
+      void useRepositoryProfilesStore.getProfileById(
+        selectedUserProfileType.value,
+        selectedUserProfileId.value,
+      ).catch((error) => reportOfflineReadError(error, 'Failed to load profile details'));
+      void useRepositoryProfilesStore.getProfileByIdOptions(
+        selectedUserProfileType.value,
+        selectedUserProfileId.value,
+      ).catch(() => undefined);
     }
   }, { immediate: true });
 

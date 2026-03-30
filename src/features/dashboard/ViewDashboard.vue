@@ -27,6 +27,8 @@ import { VTabsContent } from 'UiKit/components/Base/VTabs';
 import { useBreakpoints } from 'UiKit/composables/useBreakpoints';
 import { useMobileAppShell } from 'InvestCommon/domain/mobile/useMobileAppShell';
 import { useSyncWithUrl } from 'UiKit/composables/useSyncWithUrl';
+import VOfflineDataUnavailable from 'InvestCommon/shared/components/pwa/VOfflineDataUnavailable.vue';
+import { useDashboardOfflineTabState } from './composables/useDashboardOfflineTabState';
 
 const props = defineProps({
   tab: {
@@ -199,6 +201,10 @@ watch(
 
 const currentPwaComponent = computed(() => (
   tabComponents[activeTab.value] ?? tabComponents[DashboardTabTypes.portfolio]));
+const {
+  activeTabCopy,
+  shouldShowUnavailableState,
+} = useDashboardOfflineTabState(activeTab);
 
 </script>
 
@@ -216,20 +222,34 @@ const currentPwaComponent = computed(() => (
       />
     </template>
     <template #tabs-content>
-      <component
-        :is="currentPwaComponent"
-        v-if="isMobileAppShellDashboard"
-        :key="activeTab"
-      />
+      <template v-if="isMobileAppShellDashboard">
+        <VOfflineDataUnavailable
+          v-if="shouldShowUnavailableState"
+          :title="activeTabCopy.title"
+          :message="activeTabCopy.message"
+          :detail="activeTabCopy.detail"
+        />
+        <component
+          :is="currentPwaComponent"
+          v-else
+          :key="activeTab"
+        />
+      </template>
       <template v-else>
         <VTabsContent
           v-for="item in tabsList"
           :key="item.value"
           :value="item.value"
         >
+          <VOfflineDataUnavailable
+            v-if="item.value === activeTab && shouldShowUnavailableState"
+            :title="activeTabCopy.title"
+            :message="activeTabCopy.message"
+            :detail="activeTabCopy.detail"
+          />
           <component
             :is="tabComponents[item.value]"
-            v-if="loadedTabs.includes(item.value)"
+            v-else-if="loadedTabs.includes(item.value)"
             v-show="item.value === activeTab"
           />
         </VTabsContent>

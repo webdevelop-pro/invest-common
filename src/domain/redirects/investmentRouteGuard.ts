@@ -5,8 +5,18 @@ import { useRepositoryInvestment } from 'InvestCommon/data/investment/investment
 import type { IInvestmentFormatted } from 'InvestCommon/data/investment/investment.types';
 import { usePageSeo } from 'InvestCommon/shared/composables/usePageSeo';
 import { reportError } from 'InvestCommon/domain/error/errorReporting';
+import { isBrowserOffline } from './authGuardOffline';
+import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 
 const { setMetaData } = usePageSeo();
+const showOfflineUncachedInvestmentToast = () => {
+  const { toast } = useToast();
+  toast({
+    title: 'Investment page unavailable offline',
+    description: 'This page was not saved on this device. Reconnect to open it.',
+    variant: 'error',
+  });
+};
 
 export const createInvestmentRouteGuard = (seoTitle: string, seoDescription: string) => {
   return async (to: RouteLocationNormalized) => {
@@ -30,15 +40,31 @@ export const createInvestmentRouteGuard = (seoTitle: string, seoDescription: str
       );
 
       if (!investmentExists) {
+        if (isBrowserOffline()) {
+          showOfflineUncachedInvestmentToast();
+          return false;
+        }
         return '/error/404';
       }
 
       if (investmentID.value && (String(getInvestOneState.value.data?.id) !== investmentID.value)) {
-        await investmentRepository.getInvestOne(String(investmentID.value));
+        try {
+          await investmentRepository.getInvestOne(String(investmentID.value));
+        } catch (error) {
+          if (isBrowserOffline()) {
+            showOfflineUncachedInvestmentToast();
+            return false;
+          }
+          throw error;
+        }
       }
     } catch (error) {
+      if (isBrowserOffline()) {
+        showOfflineUncachedInvestmentToast();
+        return false;
+      }
       reportError(error, 'Failed to load investment');
       return '/error/404';
     }
   };
-}; 
+};

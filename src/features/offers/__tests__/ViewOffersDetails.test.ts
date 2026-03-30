@@ -13,13 +13,17 @@ const {
   getPublicFilesMock,
   getFilesMock,
   reportErrorMock,
+  reportOfflineReadErrorMock,
   routeParams,
+  offerRepositoryState,
 } = vi.hoisted(() => ({
   getOfferOneMock: vi.fn().mockResolvedValue(undefined),
   getOfferCommentsMock: vi.fn().mockResolvedValue(undefined),
   getPublicFilesMock: vi.fn().mockResolvedValue(undefined),
   getFilesMock: vi.fn().mockResolvedValue(undefined),
   reportErrorMock: vi.fn(),
+  reportOfflineReadErrorMock: vi.fn(),
+  offerRepositoryState: { current: null as { value: { loading: boolean; data: unknown } } | null },
   routeParams: {
     value: {
       slug: 'test-offer',
@@ -125,13 +129,19 @@ vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
   }),
 }));
 
-vi.mock('InvestCommon/data/offer/offer.repository', () => ({
-  useRepositoryOffer: () => ({
-    getOfferOneState: ref({ loading: false, data: null as unknown }),
-    getOfferOne: getOfferOneMock,
-    getOfferComments: getOfferCommentsMock,
-  }),
-}));
+vi.mock('InvestCommon/data/offer/offer.repository', async () => {
+  const { ref } = await import('vue');
+
+  offerRepositoryState.current = ref({ loading: false, data: null as unknown });
+
+  return {
+    useRepositoryOffer: () => ({
+      getOfferOneState: offerRepositoryState.current,
+      getOfferOne: getOfferOneMock,
+      getOfferComments: getOfferCommentsMock,
+    }),
+  };
+});
 
 vi.mock('InvestCommon/data/filer/filer.repository', () => ({
   useRepositoryFiler: () => ({
@@ -148,6 +158,7 @@ vi.mock('InvestCommon/domain/analytics/useSendAnalyticsEvent', () => ({
 
 vi.mock('InvestCommon/domain/error/errorReporting', () => ({
   reportError: reportErrorMock,
+  reportOfflineReadError: reportOfflineReadErrorMock,
 }));
 
 describe('ViewOffersDetails - investHandler', () => {
@@ -157,6 +168,7 @@ describe('ViewOffersDetails - investHandler', () => {
       slug: 'test-offer',
       data: {},
     };
+    offerRepositoryState.current!.value = { loading: false, data: null };
     Object.defineProperty(window.navigator, 'onLine', {
       configurable: true,
       value: true,
@@ -220,9 +232,77 @@ describe('ViewOffersDetails - investHandler', () => {
     expect(reportErrorMock).not.toHaveBeenCalled();
   });
 
+  it('prefers runtime offer data while preserving static fallback fields', async () => {
+    routeParams.value = {
+      slug: 'test-offer',
+      data: createRawOffer({
+        id: 12,
+        name: 'Static Offer',
+        city: 'Static City',
+        data: {
+          wire_to: '',
+          swift_id: '',
+          custodian: '',
+          account_number: '',
+          routing_number: '',
+          apy: '',
+          distribution_frequency: '',
+          investment_strategy: 'Static strategy',
+          estimated_hold_period: '',
+        },
+      }),
+    };
+
+    const wrapper = mount(ViewOffersDetails, {
+      global: {
+        stubs: {
+          OffersDetails: {
+            props: ['offer', 'loading'],
+            template: `
+              <div>
+                <div data-testid="offer-name">{{ offer?.name }}</div>
+                <div data-testid="offer-city">{{ offer?.city }}</div>
+                <div data-testid="offer-strategy">{{ offer?.data?.investment_strategy }}</div>
+              </div>
+            `,
+          },
+        },
+      },
+    });
+
+    offerRepositoryState.current!.value = {
+      loading: false,
+      data: createRawOffer({
+        id: 12,
+        name: 'Live Offer',
+        city: '',
+        data: {
+          wire_to: '',
+          swift_id: '',
+          custodian: '',
+          account_number: '',
+          routing_number: '',
+          apy: '',
+          distribution_frequency: '',
+          estimated_hold_period: '',
+        },
+      }),
+    };
+
+    await flushPromises();
+
+    expect(wrapper.get('[data-testid="offer-name"]').text()).toContain('Live Offer');
+    expect(wrapper.get('[data-testid="offer-city"]').text()).toContain('Static City');
+    expect(wrapper.get('[data-testid="offer-strategy"]').text()).toContain('Static strategy');
+  });
+
   it('creates a new investment when getInvestUnconfirmedOne contains default values (id = 0)', async () => {
     const investmentStore = useRepositoryInvestment();
     const setInvestSpy = vi.spyOn(investmentStore, 'setInvest');
+    routeParams.value = {
+      slug: 'test-offer',
+      data: createRawOffer({ id: 12, name: 'Investable Offer' }),
+    };
 
     const wrapper = mount(ViewOffersDetails, {
       global: {

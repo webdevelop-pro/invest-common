@@ -4,7 +4,7 @@ import { InvestStepTypes } from 'InvestCommon/data/investment/investment.types';
 import OffersDetails from './components/OffersDetails.vue';
 import { storeToRefs } from 'pinia';
 import {
-  computed, onBeforeMount, ref, watch, nextTick,
+  computed, onBeforeMount, watch, nextTick,
 } from 'vue';
 import { useData, useRoute } from 'vitepress';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
@@ -17,7 +17,7 @@ import { OfferFormatter } from 'InvestCommon/data/offer/offer.formatter';
 import type { IOffer, IOfferFormatted } from 'InvestCommon/data/offer/offer.types';
 import { useRepositoryFiler } from 'InvestCommon/data/filer/filer.repository';
 import { useSendAnalyticsEvent } from 'InvestCommon/domain/analytics/useSendAnalyticsEvent';
-import { reportError } from 'InvestCommon/domain/error/errorReporting';
+import { reportError, reportOfflineReadError } from 'InvestCommon/domain/error/errorReporting';
 
 const defaultInvestSteps = {
   [InvestStepTypes.amount]: {
@@ -76,21 +76,60 @@ const formatStaticOffer = (value: unknown): IOfferFormatted | null => {
   return new OfferFormatter(value as IOffer).format();
 };
 const fallbackOffer = computed(() => formatStaticOffer(params.value?.data));
-const offer = ref<IOfferFormatted | null>(fallbackOffer.value);
+const runtimeOffer = computed<IOfferFormatted | null>(() => {
+  const nextOffer = getOfferOneState.value.data;
+  const id = Number(nextOffer?.id);
+
+  if (!Number.isFinite(id) || id <= 0) {
+    return null;
+  }
+
+  return nextOffer;
+});
+const mergePreferMeaningful = <T extends Record<string, unknown>>(
+  staticValue: T,
+  liveValue: T,
+) => {
+  const merged = { ...staticValue };
+
+  for (const [key, value] of Object.entries(liveValue)) {
+    if (value === null || value === undefined) {
+      continue;
+    }
+    if (typeof value === 'string' && value.trim() === '') {
+      continue;
+    }
+
+    merged[key as keyof T] = value as T[keyof T];
+  }
+
+  return merged;
+};
+const mergeOfferData = (
+  staticOffer: IOfferFormatted | null,
+  liveOffer: IOfferFormatted | null,
+): IOfferFormatted | null => {
+  if (!staticOffer) return liveOffer;
+  if (!liveOffer) return staticOffer;
+
+  return {
+    ...mergePreferMeaningful(staticOffer, liveOffer),
+    data: mergePreferMeaningful(staticOffer.data ?? {}, liveOffer.data ?? {}),
+    security_info: mergePreferMeaningful(
+      staticOffer.security_info ?? {},
+      liveOffer.security_info ?? {},
+    ),
+  };
+};
+const offer = computed(() => mergeOfferData(fallbackOffer.value, runtimeOffer.value));
 const activeOfferId = computed(() => {
   const id = Number(offer.value?.id);
   return Number.isFinite(id) && id > 0 ? id : null;
 });
 
-const offerLoading = ref(true);
-
-const reportReadError = (error: unknown, message: string) => {
-  if (typeof window !== 'undefined' && window.navigator?.onLine === false) {
-    return;
-  }
-
-  reportError(error, message);
-};
+const offerLoading = computed(() => (
+  getOfferOneState.value.loading && !fallbackOffer.value
+));
 
 const investHandler = async () => {
   // If current selected profile is not KYC approved, switch to a random approved profile (if any)
@@ -144,11 +183,11 @@ watch(
 onBeforeMount(() => {
   if (userLoggedIn.value && params.value?.slug) {
     investmentRepository.getInvestUnconfirmed(String(params.value?.slug), selectedUserProfileId.value)
-      .catch((e) => reportReadError(e, 'Failed to load investment'));
+      .catch((e) => reportOfflineReadError(e, 'Failed to load investment'));
   }
   if (params.value?.slug) {
     offerRepository.getOfferOne(String(params.value?.slug))
-      .catch((e) => reportReadError(e, 'Failed to load offer'));
+      .catch((e) => reportOfflineReadError(e, 'Failed to load offer'));
     void sendEvent({
       event_type: 'open',
       method: 'GET',
@@ -159,34 +198,18 @@ onBeforeMount(() => {
     });
   }
 });
-
-watch(() => getOfferOneState.value.loading, () => {
-  offerLoading.value = getOfferOneState.value.loading;
-});
-
-watch(fallbackOffer, (newValue) => {
-  if (newValue && !offer.value) {
-    offer.value = newValue;
-  }
-}, { immediate: true });
-
-watch(() => getOfferOneState.value.data, (newValue) => {
-  if (newValue) {
-    offer.value = newValue;
-  }
-}, { immediate: true });
 watch(activeOfferId, (offerId) => {
   if (!offerId) {
     return;
   }
 
   offerRepository.getOfferComments(offerId)
-    .catch((e) => reportReadError(e, 'Failed to load offer comments'));
+    .catch((e) => reportOfflineReadError(e, 'Failed to load offer comments'));
   filerRepository.getPublicFiles(offerId, 'offer')
-    .catch((e) => reportReadError(e, 'Failed to load offer files'));
+    .catch((e) => reportOfflineReadError(e, 'Failed to load offer files'));
   if (userLoggedIn.value) {
     filerRepository.getFiles(offerId, 'offer')
-      .catch((e) => reportReadError(e, 'Failed to load offer files'));
+      .catch((e) => reportOfflineReadError(e, 'Failed to load offer files'));
   }
 }, { immediate: true });
 </script>

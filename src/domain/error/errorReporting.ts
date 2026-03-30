@@ -1,5 +1,6 @@
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 import { useGlobalAlert } from 'UiKit/store/useGlobalAlert';
+import { OfflineRequestError } from 'InvestCommon/data/service/handlers/offlineRequestError';
 
 /**
  * Error reporting layer: normalize, log, branch (401/429), show toast.
@@ -156,6 +157,16 @@ function defaultErrorReporter(error: unknown, fallbackMessage: string, context?:
 
   // For "silent" errors (e.g. global window error handlers), log but do not show any UI.
   if (isSilent) {
+    return;
+  }
+
+  const isOffline = typeof navigator !== 'undefined' && navigator.onLine === false;
+  if (error instanceof OfflineRequestError) {
+    toasterErrorHandling(error, 'Action unavailable offline');
+    return;
+  }
+
+  if (isOffline) {
     return;
   }
 

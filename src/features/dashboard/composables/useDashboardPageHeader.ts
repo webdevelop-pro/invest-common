@@ -5,6 +5,7 @@ import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { InvestKycTypes, KycTextStatuses } from 'InvestCommon/data/kyc/kyc.types';
 import { ACCREDITATION_HISTORY, INVEST_KYC_HISTORY } from 'InvestCommon/features/investment/utils';
+import { useBreakpoints } from 'UiKit/composables/useBreakpoints';
 
 type DashboardHeaderBanner = {
   type: 'kyc' | 'accreditation';
@@ -85,6 +86,7 @@ export function useDashboardPageHeader() {
   const profilesStore = useProfilesStore();
   const { selectedUserProfileData } = storeToRefs(profilesStore);
   const dialogsStore = useDialogs();
+  const { isDesktop } = useBreakpoints();
 
   const verificationBanner = computed<DashboardHeaderBanner | null>(() => {
     const selectedProfile = selectedUserProfileData.value;
@@ -105,7 +107,9 @@ export function useDashboardPageHeader() {
     return null;
   });
 
-  const showPerformanceCards = computed(() => verificationBanner.value === null);
+  const showPerformanceCards = computed(() => (
+    verificationBanner.value === null && isDesktop.value
+  ));
 
   const onInfoCtaClick = () => {
     dialogsStore.openContactUsDialog('dashboard profile details');

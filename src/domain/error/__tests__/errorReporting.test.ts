@@ -8,6 +8,7 @@ import {
   setErrorHandlers,
   setErrorReporter,
 } from '../errorReporting';
+import { OfflineRequestError } from 'InvestCommon/data/service/handlers/offlineRequestError';
 
 const mockToast = vi.fn();
 const mockShowGlobalAlert = vi.fn();
@@ -162,6 +163,36 @@ describe('reportError', () => {
     expect(mockLogger).not.toHaveBeenCalled();
     expect(mockToast).not.toHaveBeenCalled();
   });
+
+  it('shows a dedicated toast for offline-blocked write requests', () => {
+    Object.defineProperty(window.navigator, 'onLine', {
+      configurable: true,
+      value: false,
+    });
+
+    setErrorLogger(mockLogger);
+    reportError(new OfflineRequestError('POST', '/auth/wallet/1/transactions'), 'Failed to submit');
+
+    expect(mockLogger).toHaveBeenCalled();
+    expect(mockToast).toHaveBeenCalledWith(expect.objectContaining({
+      title: 'Action unavailable offline',
+      description: 'This action requires an internet connection. Reconnect and try again.',
+      variant: 'error',
+    }));
+  });
+
+  it('suppresses generic offline read toasts even when reported through reportError', () => {
+    Object.defineProperty(window.navigator, 'onLine', {
+      configurable: true,
+      value: false,
+    });
+
+    setErrorLogger(mockLogger);
+    reportError(new Error('Failed to fetch'), 'Failed to load wallet');
+
+    expect(mockLogger).toHaveBeenCalled();
+    expect(mockToast).not.toHaveBeenCalled();
+  });
 });
 
 describe('toasterErrorHandling', () => {
@@ -198,6 +229,10 @@ describe('setErrorLogger / setErrorHandlers', () => {
     setErrorHandlers({});
     mockToast.mockClear();
     mockShowGlobalAlert.mockClear();
+    Object.defineProperty(window.navigator, 'onLine', {
+      configurable: true,
+      value: true,
+    });
   });
 
   it('setErrorHandlers merges with existing handlers', () => {

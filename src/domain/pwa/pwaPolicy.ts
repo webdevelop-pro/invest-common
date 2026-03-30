@@ -366,6 +366,53 @@ const createNetworkFirstRule = (policy: ResolvedOfflineDomainPolicy): RuntimeCac
   },
 });
 
+const RESERVED_TOP_LEVEL_STATIC_SEGMENTS = new Set([
+  'offers',
+  'how-it-works',
+  'resource-center',
+  'faq',
+  'signin',
+  'signup',
+  'contact-us',
+  'legal',
+  'dashboard',
+  'error',
+  'offline.html',
+]);
+
+const isLikelyOfferDetailPath = (pathname: string) => {
+  if (!pathname || pathname === '/') {
+    return false;
+  }
+
+  const segments = pathname.split('/').filter(Boolean);
+  if (segments.length !== 1) {
+    return false;
+  }
+
+  const [segment] = segments;
+  if (!segment || segment.includes('.')) {
+    return false;
+  }
+
+  return !RESERVED_TOP_LEVEL_STATIC_SEGMENTS.has(segment);
+};
+
+const createStaticRouteCandidates = (pathname: string) => {
+  const candidates = new Set<string>();
+  const normalizedPath = pathname === '/' ? '/index.html' : pathname.replace(/\/+$/, '') || '/';
+
+  candidates.add(pathname);
+  candidates.add(normalizedPath);
+
+  if (normalizedPath !== '/' && !normalizedPath.endsWith('.html')) {
+    candidates.add(`${normalizedPath}.html`);
+    candidates.add(`${normalizedPath}/index.html`);
+  }
+
+  return [...candidates];
+};
+
 const createNavigationRule = (policy: ResolvedOfflineDomainPolicy): RuntimeCacheRule => ({
   urlPattern: ({ request, url }) => (
     request.mode === 'navigate'
@@ -387,12 +434,14 @@ const createNavigationRule = (policy: ResolvedOfflineDomainPolicy): RuntimeCache
       {
         handlerDidError: async ({ request }: { request?: Request }) => {
           const requestPathname = request?.url ? new URL(request.url).pathname : '';
-           const fallbackCandidates = (
+          const fallbackCandidates = (
             requestPathname === '/dashboard'
             || requestPathname.startsWith('/dashboard/')
           )
-            ? ['/dashboard/index.html', '/dashboard.html', '/offline.html']
-            : ['/offline.html'];
+            ? ['/dashboard/index.html', '/dashboard.html', '/index.html', '/offline.html']
+            : isLikelyOfferDetailPath(requestPathname)
+              ? [...createStaticRouteCandidates(requestPathname), '/index.html', '/offline.html']
+              : ['/offline.html'];
 
           for (const fallbackPath of fallbackCandidates) {
             const cachedResponse = await caches.match(fallbackPath, { ignoreSearch: true });

@@ -5,6 +5,7 @@ import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles
 import type { RouteLocationNormalized } from 'vue-router';
 import { redirectProfileIdGuard } from '../redirectProfileIdGuard';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 
 // Mock the profiles store
 vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
@@ -16,12 +17,22 @@ vi.mock('InvestCommon/data/profiles/profiles.repository', () => ({
   useRepositoryProfiles: vi.fn(),
 }));
 
+vi.mock('InvestCommon/domain/session/store/useSession', () => ({
+  useSessionStore: vi.fn(),
+}));
+
 // Mock storeToRefs
 vi.mock('pinia', () => ({
-  storeToRefs: (store: any) => ({
-    userProfiles: { value: store.userProfiles.value },
-    selectedUserProfileId: { value: store.selectedUserProfileId.value },
-  }),
+  storeToRefs: (store: any) => {
+    if (store.userProfiles && store.selectedUserProfileId) {
+      return {
+        userProfiles: { value: store.userProfiles.value },
+        selectedUserProfileId: { value: store.selectedUserProfileId.value },
+      };
+    }
+
+    return store;
+  },
 }));
 
 describe('redirectProfileIdGuard', () => {
@@ -45,6 +56,9 @@ describe('redirectProfileIdGuard', () => {
     mockGetUser = vi.fn().mockResolvedValue(undefined);
     mockRepositoryProfiles = { getUser: mockGetUser };
     vi.mocked(useRepositoryProfiles).mockReturnValue(mockRepositoryProfiles as any);
+    vi.mocked(useSessionStore).mockReturnValue({
+      userSession: { value: { active: true } },
+    } as any);
   });
 
   it('should return undefined when checkProfileIdInUrl is false', async () => {
@@ -134,5 +148,26 @@ describe('redirectProfileIdGuard', () => {
 
     expect(result).toBeUndefined();
     expect(mockGetUser).toHaveBeenCalled();
+  });
+
+  it('preserves offline session when profile fetch fails offline', async () => {
+    const mockStore = {
+      userProfiles: { value: [] },
+      selectedUserProfileId: { value: 42 },
+      setSelectedUserProfileById: vi.fn(),
+    };
+    vi.mocked(useProfilesStore).mockReturnValue(mockStore as any);
+    mockGetUser.mockRejectedValueOnce(new Error('Failed to fetch'));
+
+    Object.defineProperty(window.navigator, 'onLine', {
+      configurable: true,
+      value: false,
+    });
+
+    const to = { ...mockTo, meta: { checkProfileIdInUrl: true }, params: { profileId: '77' } };
+    const result = await redirectProfileIdGuard(to);
+
+    expect(result).toBeUndefined();
+    expect(mockStore.setSelectedUserProfileById).toHaveBeenCalledWith(77);
   });
 });

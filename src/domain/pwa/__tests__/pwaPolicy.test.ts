@@ -158,10 +158,10 @@ describe('buildWorkboxRuntimeCaching', () => {
     vi.unstubAllGlobals();
   });
 
-  it('falls back directly to offline.html for non-dashboard navigations', async () => {
+  it('prefers the cached offer detail route before offline.html for offer detail navigations', async () => {
     const navigationFallbackPlugin = getNavigationFallbackPlugin();
     const cachesMatchMock = vi.fn()
-      .mockResolvedValueOnce(new Response('<html>offline fallback</html>'));
+      .mockResolvedValueOnce(new Response('<html>offer detail</html>'));
 
     vi.stubGlobal('caches', {
       match: cachesMatchMock,
@@ -171,14 +171,13 @@ describe('buildWorkboxRuntimeCaching', () => {
       request: new Request('https://frontend.test/city-of-springfield-2025-bond'),
     });
 
-    expect(await response?.text()).toContain('offline fallback');
-    expect(cachesMatchMock).toHaveBeenCalledTimes(1);
-    expect(cachesMatchMock).toHaveBeenCalledWith('/offline.html', { ignoreSearch: true });
+    expect(await response?.text()).toContain('offer detail');
+    expect(cachesMatchMock).toHaveBeenNthCalledWith(1, '/city-of-springfield-2025-bond', { ignoreSearch: true });
 
     vi.unstubAllGlobals();
   });
 
-  it('checks only offline.html for non-dashboard section routes', async () => {
+  it('checks only offline.html for non-offer static section routes', async () => {
     const navigationFallbackPlugin = getNavigationFallbackPlugin();
     const cachesMatchMock = vi.fn()
       .mockResolvedValueOnce(new Response('<html>offline</html>'));
@@ -194,6 +193,33 @@ describe('buildWorkboxRuntimeCaching', () => {
     expect(await response?.text()).toContain('offline');
     expect(cachesMatchMock).toHaveBeenCalledTimes(1);
     expect(cachesMatchMock).toHaveBeenNthCalledWith(1, '/offline.html', { ignoreSearch: true });
+
+    vi.unstubAllGlobals();
+  });
+
+  it('falls back to offline.html when an offer detail route is not cached', async () => {
+    const navigationFallbackPlugin = getNavigationFallbackPlugin();
+    const cachesMatchMock = vi.fn()
+      .mockResolvedValueOnce(undefined)
+      .mockResolvedValueOnce(undefined)
+      .mockResolvedValueOnce(undefined)
+      .mockResolvedValueOnce(undefined)
+      .mockResolvedValueOnce(new Response('<html>offline fallback</html>'));
+
+    vi.stubGlobal('caches', {
+      match: cachesMatchMock,
+    });
+
+    const response = await navigationFallbackPlugin?.handlerDidError?.({
+      request: new Request('https://frontend.test/city-of-springfield-2025-bond'),
+    });
+
+    expect(await response?.text()).toContain('offline fallback');
+    expect(cachesMatchMock).toHaveBeenNthCalledWith(1, '/city-of-springfield-2025-bond', { ignoreSearch: true });
+    expect(cachesMatchMock).toHaveBeenNthCalledWith(2, '/city-of-springfield-2025-bond.html', { ignoreSearch: true });
+    expect(cachesMatchMock).toHaveBeenNthCalledWith(3, '/city-of-springfield-2025-bond/index.html', { ignoreSearch: true });
+    expect(cachesMatchMock).toHaveBeenNthCalledWith(4, '/index.html', { ignoreSearch: true });
+    expect(cachesMatchMock).toHaveBeenNthCalledWith(5, '/offline.html', { ignoreSearch: true });
 
     vi.unstubAllGlobals();
   });

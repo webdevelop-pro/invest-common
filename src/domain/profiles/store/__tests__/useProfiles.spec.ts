@@ -9,6 +9,7 @@ import { useRoute } from 'vue-router';
 import { ref, computed } from 'vue';
 import { useProfilesStore } from '../useProfiles';
 import { resetAllProfileData } from 'InvestCommon/domain/resetAllData';
+import { useLogoutStore } from 'InvestCommon/features/auth/store/useLogout';
 
 // Mock dependencies
 vi.mock('vue-router', () => ({
@@ -29,6 +30,10 @@ vi.mock('InvestCommon/data/profiles/profiles.repository', () => ({
 
 vi.mock('InvestCommon/domain/resetAllData', () => ({
   resetAllProfileData: vi.fn(),
+}));
+
+vi.mock('InvestCommon/features/auth/store/useLogout', () => ({
+  useLogoutStore: vi.fn(),
 }));
 
 describe('useProfilesStore', () => {
@@ -78,12 +83,15 @@ describe('useProfilesStore', () => {
         loading: false,
         error: null,
       }),
-      getUser: vi.fn(),
-      getProfileById: vi.fn(),
-      getProfileByIdOptions: vi.fn(),
+      getUser: vi.fn().mockResolvedValue(undefined),
+      getProfileById: vi.fn().mockResolvedValue(undefined),
+      getProfileByIdOptions: vi.fn().mockResolvedValue(undefined),
       resetProfileData: vi.fn(),
     };
     (useRepositoryProfiles as any).mockReturnValue(mockRepository);
+    (useLogoutStore as any).mockReturnValue({
+      logoutHandler: vi.fn(),
+    });
   });
 
   it('should initialize with default values when user is logged in', () => {
@@ -132,9 +140,9 @@ describe('useProfilesStore', () => {
         loading: false,
         error: null,
       }),
-      getUser: vi.fn(),
-      getProfileById: vi.fn(),
-      getProfileByIdOptions: vi.fn(),
+      getUser: vi.fn().mockResolvedValue(undefined),
+      getProfileById: vi.fn().mockResolvedValue(undefined),
+      getProfileByIdOptions: vi.fn().mockResolvedValue(undefined),
       resetProfileData: vi.fn(),
     };
     (useRepositoryProfiles as any).mockReturnValue(mockRepository);
@@ -179,9 +187,9 @@ describe('useProfilesStore', () => {
         loading: false,
         error: null,
       }),
-      getUser: vi.fn(),
-      getProfileById: vi.fn(),
-      getProfileByIdOptions: vi.fn(),
+      getUser: vi.fn().mockResolvedValue(undefined),
+      getProfileById: vi.fn().mockResolvedValue(undefined),
+      getProfileByIdOptions: vi.fn().mockResolvedValue(undefined),
       resetProfileData: vi.fn(),
     };
     (useRepositoryProfiles as any).mockReturnValue(mockRepository);
@@ -277,5 +285,43 @@ describe('useProfilesStore', () => {
     // Verify resetAllProfileData was called to clear stale data
     expect(resetAllProfileData).toHaveBeenCalledTimes(1);
     expect(store.selectedUserProfileId).toBe(456);
+  });
+
+  it('preserves the local session when profiles fail to load offline', async () => {
+    setActivePinia(createPinia());
+
+    Object.defineProperty(window.navigator, 'onLine', {
+      configurable: true,
+      value: false,
+    });
+
+    const logoutHandler = vi.fn();
+    (useLogoutStore as any).mockReturnValue({ logoutHandler });
+
+    const profileError = new Error('Failed to fetch');
+    const getUserState = ref({
+      data: undefined,
+      loading: false,
+      error: profileError,
+    });
+
+    (useRepositoryProfiles as any).mockReturnValue({
+      getUserState,
+      getProfileByIdState: ref({
+        data: undefined,
+        loading: false,
+        error: null,
+      }),
+      getUser: vi.fn().mockRejectedValue(profileError),
+      getProfileById: vi.fn(),
+      getProfileByIdOptions: vi.fn(),
+      resetProfileData: vi.fn(),
+    });
+
+    useProfilesStore();
+
+    await Promise.resolve();
+
+    expect(logoutHandler).not.toHaveBeenCalled();
   });
 });

@@ -2,6 +2,9 @@ import { RouteLocationNormalized } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
+import { storeToRefs as piniaStoreToRefs } from 'pinia';
+import { shouldPreserveOfflineSession } from './authGuardOffline';
 
 export const redirectProfileIdGuard = async (to: RouteLocationNormalized) => {
   if (!to.meta.checkProfileIdInUrl) return;
@@ -9,9 +12,22 @@ export const redirectProfileIdGuard = async (to: RouteLocationNormalized) => {
   const profilesStore = useProfilesStore();
   const { userProfiles, selectedUserProfileId } = storeToRefs(profilesStore);
   const useRepositoryProfilesStore = useRepositoryProfiles();
+  const sessionStore = useSessionStore();
+  const { userSession } = piniaStoreToRefs(sessionStore);
 
   if (userProfiles.value.length < 1) {
-    await useRepositoryProfilesStore.getUser();
+    try {
+      await useRepositoryProfilesStore.getUser();
+    } catch (error) {
+      const urlProfileId = Number(to.params.profileId);
+      if (shouldPreserveOfflineSession(userSession.value, error)) {
+        if (urlProfileId) {
+          profilesStore.setSelectedUserProfileById(urlProfileId);
+        }
+        return;
+      }
+      throw error;
+    }
   }
   const urlProfileId = Number(to.params.profileId);
   const profiles = userProfiles.value;
