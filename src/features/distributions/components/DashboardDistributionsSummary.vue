@@ -140,9 +140,3 @@ const onApplyFilter = (items: IVFilter[]) => {
     </VTableDefault>
   </div>
 </template>
-
-<style lang="scss">
-.dashboard-distributions-summary {
-  margin-top: 40px;
-}
-</style>

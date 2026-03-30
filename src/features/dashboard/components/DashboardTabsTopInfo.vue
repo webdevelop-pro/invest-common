@@ -33,12 +33,6 @@ defineProps({
   align-items: flex-start;
   gap: 4px;
   flex: 1 0 0;
-  margin-bottom: 40px;
-  
-
-  @media screen and (width < $tablet){
-        margin-bottom: 20px;
-  }
 
   &__text {
     color: $gray-80;

@@ -31,8 +31,19 @@ export const useProfilesStore = defineStore('profiles', () => {
   const selectedUserProfileId = ref(cookies.get('selectedUserProfileId'));
   const profileByIdInProfilesList = computed(() => (
     userProfiles.value.find((item) => item.id === selectedUserProfileId.value)));
+  const selectedProfileDetails = computed(() => {
+    const currentProfileDetails = getProfileByIdState.value?.data;
+
+    if (!currentProfileDetails) {
+      return undefined;
+    }
+
+    return currentProfileDetails.id === Number(selectedUserProfileId.value)
+      ? currentProfileDetails
+      : undefined;
+  });
   const selectedUserProfileData = computed(() => (
-    { ...profileByIdInProfilesList.value, ...getProfileByIdState.value?.data }));
+    { ...profileByIdInProfilesList.value, ...selectedProfileDetails.value }));
   const selectedUserProfileType = computed(() => (
     userProfiles.value.find((item: { id: number; type: string }) => (
       item.id === Number(selectedUserProfileId.value)))?.type));
@@ -64,11 +75,11 @@ export const useProfilesStore = defineStore('profiles', () => {
   });
 
   const selectedUserProfielKYCStatusNotStarted = computed(() => (
-    getProfileByIdState.value.data?.kyc_status === 'new'
+    selectedProfileDetails.value?.kyc_status === 'new'
   ));
 
   const selectedUserProfileShowKycInitFormIndividual = computed(() => ((
-    !getProfileByIdState.value.data?.data.citizenship || !selectedUserProfileRiskAcknowledged.value
+    !selectedProfileDetails.value?.data?.citizenship || !selectedUserProfileRiskAcknowledged.value
     || !selectedUserProfileAccreditationDataOK.value || selectedUserProfielKYCStatusNotStarted.value
   ) && (selectedUserProfileType.value === PROFILE_TYPES.INDIVIDUAL)));
 

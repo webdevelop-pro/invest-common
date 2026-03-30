@@ -4,17 +4,19 @@ import {
 } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
-import { InvestKycTypes, KycTextStatuses } from 'InvestCommon/data/kyc/kyc.types';
+import { InvestKycTypes, KycAlerts, KycTextStatuses } from 'InvestCommon/data/kyc/kyc.types';
 import { ROUTE_SUBMIT_KYC } from 'InvestCommon/domain/config/enums/routes';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { urlContactUs } from 'InvestCommon/domain/config/links';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useRepositoryKyc } from 'InvestCommon/data/kyc/kyc.repository';
 import { PROFILE_TYPES } from 'InvestCommon/domain/config/enums/profileTypes';
+import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 
-export const useKycButton = defineStore('useKycButton', () => {
+export const useKycStatus = defineStore('useKycStatus', () => {
   const route = useRoute();
   const router = useRouter();
+  const dialogsStore = useDialogs();
   const userProfilesStore = useProfilesStore();
   const {
     selectedUserProfileData, selectedUserProfileId, isSelectedProfileLoading, selectedUserProfileShowKycInitForm,
@@ -51,6 +53,14 @@ export const useKycButton = defineStore('useKycButton', () => {
         params: { profileId: selectedUserProfileId.value },
       },
       contactUsUrl: urlContactUs,
+    };
+  });
+
+  const dataAlert = computed(() => {
+    const status = kycStatus.value;
+    return {
+      ...KycAlerts[status],
+      buttonText: KycTextStatuses[status].button ? KycTextStatuses[status].text : undefined,
     };
   });
 
@@ -117,11 +127,26 @@ export const useKycButton = defineStore('useKycButton', () => {
     await handleKycClick();
   };
 
+  const onAlertDescriptionClick = (event: Event) => {
+    const target = event.target as HTMLElement | null;
+    const contactTarget = target?.closest('[data-action="contact-us"]');
+
+    if (!contactTarget) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    dialogsStore.openContactUsDialog('dashboard verification');
+  };
+
   return {
     isLoading,
     tagBackground,
     data,
+    dataAlert,
     onClick,
+    onAlertDescriptionClick,
     isButtonLoading,
     isButtonDisabled,
     showContactUs,
@@ -131,5 +156,5 @@ export const useKycButton = defineStore('useKycButton', () => {
 });
 
 if (import.meta.hot) {
-  import.meta.hot.accept(acceptHMRUpdate(useKycButton, import.meta.hot));
+  import.meta.hot.accept(acceptHMRUpdate(useKycStatus, import.meta.hot));
 }

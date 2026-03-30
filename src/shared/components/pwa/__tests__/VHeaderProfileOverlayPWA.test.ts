@@ -59,6 +59,7 @@ describe('VHeaderProfileOverlayPWA', () => {
     expect(wrapper.find('.v-header-profile-pwa__overlay-email').text()).toBe('maria@webdevelop.pro');
     expect(wrapper.find('.v-header-profile-pwa__overlay-link').text()).toBe('Account Details');
     expect(wrapper.find('[data-testid="avatar"]').attributes('data-loading')).toBe('false');
+    expect(wrapper.find('.v-header-profile-pwa__overlay-switch-trigger').text()).toContain('Switch profile');
   });
 
   it('passes avatar loading state to the avatar', () => {
@@ -96,6 +97,12 @@ describe('VHeaderProfileOverlayPWA', () => {
     const wrapper = mountOverlay();
     await wrapper.find('.v-header-profile-pwa__overlay-avatar-btn').trigger('click');
     expect(wrapper.emitted('avatar-click')).toBeTruthy();
+  });
+
+  it('emits switch-profile-open on switch trigger click', async () => {
+    const wrapper = mountOverlay();
+    await wrapper.find('.v-header-profile-pwa__overlay-switch-trigger').trigger('click');
+    expect(wrapper.emitted('switch-profile-open')).toBeTruthy();
   });
 
   it('hides optional links when hrefs are missing', () => {

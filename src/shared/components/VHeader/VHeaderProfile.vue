@@ -1,15 +1,25 @@
 <script setup lang="ts">
-import { PropType } from 'vue';
-import VDropdown from 'UiKit/components/VDropdown.vue';
+import { computed, PropType, ref } from 'vue';
 import { storeToRefs } from 'pinia';
-import VAvatar from 'UiKit/components/VAvatar.vue';
-import { VDropdownMenuItem } from 'UiKit/components/Base/VDropdownMenu';
+
+import VDropdown from 'UiKit/components/VDropdown.vue';
+import {
+  DropdownMenuPortal,
+  VDropdownMenuItem,
+  VDropdownMenuSub,
+  VDropdownMenuSubContent,
+  VDropdownMenuSubTrigger,
+} from 'UiKit/components/Base/VDropdownMenu';
 import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 import NotificationsSidebarButton from 'InvestCommon/features/notifications/VNotificationsSidebarButton.vue';
 import env from 'InvestCommon/config/env';
 import LogOutIcon from 'UiKit/assets/images/menu_common/logout.svg';
+import VAvatarIdentity from 'UiKit/components/VAvatarIdentity.vue';
 import type { MenuItem } from 'InvestCommon/types/global';
+import ProfileSwitchMenuList from 'InvestCommon/features/profiles/components/ProfileSwitchMenuList.vue';
+import { useProfileSwitchMenu } from 'InvestCommon/features/profiles/composables/useProfileSwitchMenu';
 import { useHeaderUser } from './useHeaderUser';
+import { getProfileAvatarInitial } from './getProfileAvatarInitial';
 
 const { IS_STATIC_SITE } = env;
 
@@ -29,12 +39,21 @@ defineProps({
   }
 });
 
-const { userEmail, avatarSrc } = useHeaderUser();
+const { userEmail, userDisplayName } = useHeaderUser();
+const { selectedProfileLabel } = useProfileSwitchMenu();
 
 const useDialogsStore = useDialogs();
 const { isDialogLogoutOpen } = storeToRefs(useDialogsStore);
 
+const profileAvatarInitial = computed(() => getProfileAvatarInitial(selectedProfileLabel.value));
+const isMenuOpen = ref(false);
+
+const closeMenu = () => {
+  isMenuOpen.value = false;
+};
+
 const onLogout = () => {
+  closeMenu();
   isDialogLogoutOpen.value = true;
 };
 </script>
@@ -47,19 +66,45 @@ const onLogout = () => {
       :show-icon="isMobilePwa || isDesktop"
     />
     <VDropdown
+      v-model:open="isMenuOpen"
       with-chevron
       :menu="menu"
       :content-props="{ sideOffset: 14 }"
     >
-      <VAvatar
-        size="small"
-        :src="avatarSrc"
-        alt="avatar image"
+      <VAvatarIdentity
         class="v-header-profile__avatar"
+        size="small"
+        alt="avatar image"
+        :avatar-text="profileAvatarInitial"
+        :label="selectedProfileLabel"
       />
-      <span class="is--h6__title">
-        {{ userEmail }}
-      </span>
+
+      <template #content-start>
+        <div class="v-header-profile__menu-head">
+          <div class="v-header-profile__menu-title is--h6__title">
+            {{ userDisplayName }}
+          </div>
+          <div class="v-header-profile__menu-email is--small">
+            {{ userEmail }}
+          </div>
+        </div>
+
+        <VDropdownMenuSub>
+          <VDropdownMenuSubTrigger class="v-header-profile__switch-trigger">
+            <span class="v-header-profile__switch-text is--h6__title">
+              Switch profile
+            </span>
+          </VDropdownMenuSubTrigger>
+          <DropdownMenuPortal>
+            <VDropdownMenuSubContent
+              side="left"
+              :side-offset="2"
+            >
+              <ProfileSwitchMenuList @select="closeMenu" />
+            </VDropdownMenuSubContent>
+          </DropdownMenuPortal>
+        </VDropdownMenuSub>
+      </template>
       <template #content>
         <VDropdownMenuItem
           class="v-header-profile__item"
@@ -85,8 +130,6 @@ const onLogout = () => {
 @use 'UiKit/styles/_colors.scss' as colors;
 
 .v-header-profile {
-  $root: &;
-
   width: fit-content;
   display: flex;
   align-items: center;
@@ -101,8 +144,21 @@ const onLogout = () => {
     width: fit-content;
   }
 
-  &__avatar {
-    margin-right: 5px;
+  &__menu-head {
+    padding: 4px 14px 12px;
+  }
+
+  &__menu-email {
+    color: colors.$gray-70;
+    margin-top: 2px;
+    overflow-wrap: anywhere;
+  }
+
+  &__switch-trigger {
+    border: 1px solid colors.$gray-20;
+    border-radius: 2px;
+    background: colors.$gray-10;
+    padding: 12px 14px;
   }
 
   &__item {

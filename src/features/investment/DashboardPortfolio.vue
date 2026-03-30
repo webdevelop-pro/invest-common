@@ -1,22 +1,7 @@
 <script setup lang="ts">
 import { ref, defineAsyncComponent } from 'vue';
-import { urlBlogSingle } from 'InvestCommon/domain/config/links';
-import DashboardTabsTopInfo from 'InvestCommon/features/dashboard/components/DashboardTabsTopInfo.vue';;
-import { PostLinkTypes } from 'InvestCommon/data/blog/blog.types';
 import { VTabs, VTabsList, VTabsTrigger, VTabsContent } from 'UiKit/components/Base/VTabs';
 import PortfolioInvestmentsTable from './components/PortfolioInvestmentsTable.vue';
-
-const PORTFOLIO_TAB_INFO = {
-  title: 'Portfolio',
-  subTitle: 'Your holdings and belongings',
-  text: `
-    One of the most important things to consider when creating a portfolio is your personal risk tolerance.
-    Your risk tolerance is your ability to accept investment losses in exchange for the possibility of
-    earning higher investment returns. Learn more about 
-    <a href="${urlBlogSingle(PostLinkTypes.investorsDueDiligence)}"  class="is--link-2">due diligence</a> 
-    process in our blog post.
-  `,
-};
 
 const activeTab = ref('investments');
 
@@ -27,11 +12,6 @@ const DashboardDistributions = defineAsyncComponent(
 
 <template>
   <div class="DashboardPortfolio dashboard-portfolio">
-    <DashboardTabsTopInfo
-      :title="PORTFOLIO_TAB_INFO.title"
-      :sub-title="PORTFOLIO_TAB_INFO.subTitle"
-      :text="PORTFOLIO_TAB_INFO.text"
-    />
     <div class="dashboard-portfolio__tablet">
       <h3 class="is--h3__title">
         Your Investments

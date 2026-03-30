@@ -8,7 +8,7 @@ import { AccreditationTypes, AccreditationTextStatuses } from 'InvestCommon/data
 import { ROUTE_ACCREDITATION_UPLOAD, ROUTE_DASHBOARD_PERSONAL_DETAILS } from 'InvestCommon/domain/config/enums/routes';
 import { ref } from 'vue';
 import { PROFILE_TYPES } from 'InvestCommon/domain/config/enums/profileTypes';
-import { useAccreditationButton } from '../useAccreditationButton';
+import { useAccreditationStatus } from '../useAccreditationStatus';
 
 vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
   useProfilesStore: vi.fn(() => ({
@@ -56,7 +56,7 @@ function createMockProfilesStore({
   };
 }
 
-describe('useAccreditationButton', () => {
+describe('useAccreditationStatus', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
     routerMock.push.mockClear();
@@ -64,7 +64,7 @@ describe('useAccreditationButton', () => {
   });
 
   it('should initialize with correct default values', () => {
-    const store = useAccreditationButton();
+      const store = useAccreditationStatus();
     expect(store.isLoading).toBe(true);
   });
 
@@ -78,7 +78,7 @@ describe('useAccreditationButton', () => {
     });
     vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStore);
 
-    const store = useAccreditationButton();
+      const store = useAccreditationStatus();
 
     expect(store.data).toEqual({
       ...AccreditationTextStatuses[AccreditationTypes.new],
@@ -98,7 +98,7 @@ describe('useAccreditationButton', () => {
     });
     vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStore);
 
-    const store = useAccreditationButton();
+      const store = useAccreditationStatus();
     expect(store.tagBackground).toBe('secondary');
   });
 
@@ -111,7 +111,7 @@ describe('useAccreditationButton', () => {
     });
     vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStore);
 
-    const store = useAccreditationButton();
+      const store = useAccreditationStatus();
     expect(store.tagBackground).toBe('red');
   });
 
@@ -124,7 +124,7 @@ describe('useAccreditationButton', () => {
     });
     vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStore);
 
-    const store = useAccreditationButton();
+      const store = useAccreditationStatus();
     expect(store.tagBackground).toBe('yellow');
   });
 
@@ -137,7 +137,7 @@ describe('useAccreditationButton', () => {
     });
     vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStore);
 
-    const store = useAccreditationButton();
+      const store = useAccreditationStatus();
     expect(store.isAccreditationIsClickable).toBe(true);
   });
 
@@ -150,7 +150,7 @@ describe('useAccreditationButton', () => {
     });
     vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStore);
 
-    const store = useAccreditationButton();
+      const store = useAccreditationStatus();
     expect(store.isAccreditationIsClickable).toBe(false);
   });
 
@@ -163,7 +163,7 @@ describe('useAccreditationButton', () => {
     });
     vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStore);
 
-    const store = useAccreditationButton();
+      const store = useAccreditationStatus();
     expect(store.isAccreditationIsClickable).toBe(false);
   });
 
@@ -181,7 +181,7 @@ describe('useAccreditationButton', () => {
     vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStore);
     vi.mocked(useSessionStore).mockReturnValue(mockSessionStore);
 
-    const store = useAccreditationButton();
+      const store = useAccreditationStatus();
 
     await store.onClick();
     expect(routerMock.push).toHaveBeenCalledWith({
@@ -205,7 +205,7 @@ describe('useAccreditationButton', () => {
     vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStore);
     vi.mocked(useSessionStore).mockReturnValue(mockSessionStore);
 
-    const store = useAccreditationButton();
+      const store = useAccreditationStatus();
 
     await store.onClick();
     expect(routerMock.push).toHaveBeenCalledWith({
@@ -227,7 +227,7 @@ describe('useAccreditationButton', () => {
     vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStore);
     vi.mocked(useSessionStore).mockReturnValue(mockSessionStore);
 
-    const store = useAccreditationButton();
+      const store = useAccreditationStatus();
 
     await store.onClick();
     expect(routerMock.push).not.toHaveBeenCalled();
@@ -244,7 +244,7 @@ describe('useAccreditationButton', () => {
     });
     vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStorePending);
 
-    const storePending = useAccreditationButton();
+      const storePending = useAccreditationStatus();
     await storePending.onClick();
     expect(routerMock.push).not.toHaveBeenCalled();
 
@@ -258,7 +258,7 @@ describe('useAccreditationButton', () => {
     });
     vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStoreApproved);
 
-    const storeApproved = useAccreditationButton();
+      const storeApproved = useAccreditationStatus();
     await storeApproved.onClick();
     expect(routerMock.push).not.toHaveBeenCalled();
   });
@@ -270,7 +270,7 @@ describe('useAccreditationButton', () => {
     });
     vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStore);
 
-    const store = useAccreditationButton();
+      const store = useAccreditationStatus();
 
     expect(store.data).toBeDefined();
     expect(store.isAccreditationIsClickable).toBe(false);
@@ -286,7 +286,7 @@ describe('useAccreditationButton', () => {
     });
     vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStore);
 
-    const store = useAccreditationButton();
+      const store = useAccreditationStatus();
 
     expect(store.tagBackground).toBeDefined();
     expect(store.isAccreditationIsClickable).toBe(false);
@@ -306,7 +306,7 @@ describe('useAccreditationButton', () => {
     vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStore);
     vi.mocked(useSessionStore).mockReturnValue(mockSessionStore);
 
-    const store = useAccreditationButton();
+      const store = useAccreditationStatus();
 
     await store.onClick();
     expect(routerMock.push).not.toHaveBeenCalled();
@@ -325,7 +325,7 @@ describe('useAccreditationButton', () => {
     const mockSessionStore = { userLoggedIn: ref(true) };
     vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStore);
     vi.mocked(useSessionStore).mockReturnValue(mockSessionStore);
-    const store = useAccreditationButton();
+      const store = useAccreditationStatus();
     await store.onClick();
     expect(routerMock.push).toHaveBeenCalledWith({
       name: ROUTE_DASHBOARD_PERSONAL_DETAILS,
@@ -347,7 +347,7 @@ describe('useAccreditationButton', () => {
     const mockSessionStore = { userLoggedIn: ref(true) };
     vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStore);
     vi.mocked(useSessionStore).mockReturnValue(mockSessionStore);
-    const store = useAccreditationButton();
+      const store = useAccreditationStatus();
     await store.onClick();
     expect(routerMock.push).toHaveBeenCalledWith({
       name: ROUTE_DASHBOARD_PERSONAL_DETAILS,
@@ -370,7 +370,7 @@ describe('useAccreditationButton', () => {
     const mockSessionStore = { userLoggedIn: ref(true) };
     vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStore);
     vi.mocked(useSessionStore).mockReturnValue(mockSessionStore);
-    const store = useAccreditationButton();
+      const store = useAccreditationStatus();
     await store.onClick();
     expect(routerMock.push).toHaveBeenCalledWith({
       name: ROUTE_DASHBOARD_PERSONAL_DETAILS,
@@ -392,7 +392,7 @@ describe('useAccreditationButton', () => {
     const mockSessionStore = { userLoggedIn: ref(true) };
     vi.mocked(useProfilesStore).mockReturnValue(mockProfilesStore);
     vi.mocked(useSessionStore).mockReturnValue(mockSessionStore);
-    const store = useAccreditationButton();
+      const store = useAccreditationStatus();
     await store.onClick();
     expect(routerMock.push).toHaveBeenCalledWith({
       name: ROUTE_DASHBOARD_PERSONAL_DETAILS,

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import DashboardTabsTopInfo from 'InvestCommon/features/dashboard/components/DashboardTabsTopInfo.vue';;
 import { storeToRefs } from 'pinia';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { PROFILE_TYPES } from 'InvestCommon/domain/config/enums/profileTypes';
@@ -9,7 +8,6 @@ import VTableBeneficialItem from './components/VTableBeneficialItem.vue';
 import VTableDefault from 'InvestCommon/shared/components/VTableDefault.vue';
 import VTableResponsiveLoadingRow from 'InvestCommon/shared/components/VTableResponsiveLoadingRow.vue';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
-import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 import { 
   ROUTE_DASHBOARD_PERSONAL_DETAILS,
   ROUTE_DASHBOARD_TRUSTED_CONTACT,
@@ -216,37 +214,10 @@ const formSections = computed(() => {
   return sections.filter(section => section.show);
 });
 
-const dialogsStore = useDialogs();
-
-const handleContactUsClick = () => {
-  dialogsStore.openContactUsDialog('profile details');
-};
-
-const ACCOUNT_TAB_INFO = {
-  title: 'Profile Details',
-  description: 'To help the government fight the funding of terrorism and money laundering activities, federal law requires all financial institutions to obtain, verify, and record information that identifies each person who opens an account. If you have any questions, feel free to',
-  ctaLabel: 'chat with us.',
-};
 </script>
 
 <template>
   <div class="DashboardAccountDetails dashboard-account-details">
-    <DashboardTabsTopInfo
-      :title="ACCOUNT_TAB_INFO.title"
-    >
-      <template #text>
-        <p>
-          {{ ACCOUNT_TAB_INFO.description }}
-          <button
-            type="button"
-            class="is--link-2"
-            @click="handleContactUsClick"
-          >
-            {{ ACCOUNT_TAB_INFO.ctaLabel }}
-          </button>
-        </p>
-      </template>
-    </DashboardTabsTopInfo>
     <div class="dashboard-account-details__form is--two-col-grid is--gap-40-80">
       <DashboardAccountDetailsReadonlyForm
         v-for="section in formSections"

@@ -4,11 +4,11 @@ import VBadge from 'UiKit/components/Base/VBadge/VBadge.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import VTooltip from 'UiKit/components/VTooltip.vue';
 import arrowRight from 'UiKit/assets/images/arrow-right.svg?component';
-import { useKycButton } from './store/useKycButton';
+import { useKycStatus } from './store/useKycStatus';
 import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 
-const kycButtonStore = useKycButton();
+const kycButtonStore = useKycStatus();
 const {
   data, tagBackground, isButtonLoading, isButtonDisabled, showContactUs,
   showSkeleton,

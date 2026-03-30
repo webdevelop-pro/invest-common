@@ -9,7 +9,7 @@ import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import { urlSignin } from 'InvestCommon/domain/config/links';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
-import { useKycButton } from 'InvestCommon/features/kyc/store/useKycButton';
+import { useKycStatus } from 'InvestCommon/features/kyc/store/useKycStatus';
 import { useSendAnalyticsEvent } from 'InvestCommon/domain/analytics/useSendAnalyticsEvent';
 import { useEventListener } from '@vueuse/core';
 import { OfferTabTypes } from './logic/useOffersDetailsContent';
@@ -29,7 +29,7 @@ const userSessionStore = useSessionStore();
 const { userLoggedIn } = storeToRefs(userSessionStore);
 const profilesStore = useProfilesStore();
 const { selectedUserProfileData, hasAnyKycApprovedProfile } = storeToRefs(profilesStore);
-const kycButtonStore = useKycButton();
+const kycButtonStore = useKycStatus();
 const route = useRoute();
 const { sendEvent } = useSendAnalyticsEvent();
 

@@ -188,11 +188,10 @@ describe('useDashboardWallet', () => {
     expect(ids).toContain('exchange');
   });
 
-  it('moreButtons includes earn and buy', () => {
+  it('moreButtons defaults to an empty array', () => {
     const api = useDashboardWallet();
-    const ids = api.moreButtons.value.map((b: { id: string }) => b.id);
-    expect(ids).toContain('earn');
-    expect(ids).toContain('buy');
+    expect(Array.isArray(api.moreButtons)).toBe(true);
+    expect(api.moreButtons).toEqual([]);
   });
 
   it('onTransactionClick opens dialog and sets transaction type', () => {

@@ -4,10 +4,10 @@ import VBadge from 'UiKit/components/Base/VBadge/VBadge.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import VTooltip from 'UiKit/components/VTooltip.vue';
 import arrowRight from 'UiKit/assets/images/arrow-right.svg?component';
-import { useAccreditationButton } from './store/useAccreditationButton';
+import { useAccreditationStatus } from './store/useAccreditationStatus';
 import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 
-const accreditationButtonStore = useAccreditationButton();
+const accreditationButtonStore = useAccreditationStatus();
 const { data, tagBackground } = storeToRefs(accreditationButtonStore);
 
 const onClick = () => {
