@@ -213,9 +213,11 @@ const handleContactUsClick = () => {
   &__details-value {
     color: $gray-80;
     width: fit-content;
-    display: inline-block;
+    display: flex;
     text-align: end;
     gap: 6px;
+    justify-content: end;
+    align-items: center;
 
     &.is--tooltip {
       cursor: help;
