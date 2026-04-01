@@ -1,3 +1,5 @@
+/* eslint-disable vue/one-component-per-file */
+
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { defineComponent, ref } from 'vue';

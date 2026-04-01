@@ -138,4 +138,12 @@ describe('DashboardTopInfo', () => {
     const wrapper = mountComponent();
     expect(wrapper.find('.dashboard-top-info__profile-details-link').exists()).toBe(true);
   });
+
+  it('hides profile details link when the query selects the account tab on another dashboard route', () => {
+    routeState.name = ROUTE_DASHBOARD_SUMMARY;
+    routeState.query = { tab: 'acount' };
+
+    const wrapper = mountComponent();
+    expect(wrapper.find('.dashboard-top-info__profile-details-link').exists()).toBe(false);
+  });
 });

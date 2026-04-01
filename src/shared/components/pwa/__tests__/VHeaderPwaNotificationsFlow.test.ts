@@ -132,9 +132,14 @@ vi.mock('UiKit/components/Base/VNavigationMenu', () => ({
     },
   }),
 }));
-vi.mock('UiKit/components/VHeader/VHeader.vue', () => ({
+vi.mock('UiKit/components/VHeader/VHeaderGuest.vue', () => ({
   default: {
-    template: '<div><slot name="leading" /><slot name="logo" /><slot /><slot name="pwa" /><slot name="mobile" /></div>',
+    template: '<div data-testid="guest-header"><slot name="leading" /><slot name="logo" /><slot /><slot name="pwa" /><slot name="mobile" /></div>',
+  },
+}));
+vi.mock('UiKit/components/VHeader/VHeaderAuthorized.vue', () => ({
+  default: {
+    template: '<div data-testid="authorized-header"><slot name="leading" /><slot name="logo" /><slot /><slot name="pwa" /><slot name="mobile" /></div>',
   },
 }));
 vi.mock('../VHeader/VHeaderProfilePWA.vue', () => ({

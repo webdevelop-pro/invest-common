@@ -34,9 +34,14 @@ vi.mock('UiKit/composables/useBreakpoints', () => ({
 vi.mock('UiKit/helpers/general', () => ({
   navigateWithQueryParams: vi.fn(),
 }));
-vi.mock('UiKit/components/VHeader/VHeader.vue', () => ({
+vi.mock('UiKit/components/VHeader/VHeaderGuest.vue', () => ({
   default: {
-    template: '<div><slot /><slot name="mobile" /><slot name="leading" /><slot name="logo" /><slot name="pwa" /></div>',
+    template: '<div data-testid="guest-header"><slot /><slot name="mobile" /><slot name="leading" /><slot name="logo" /><slot name="pwa" /></div>',
+  },
+}));
+vi.mock('UiKit/components/VHeader/VHeaderAuthorized.vue', () => ({
+  default: {
+    template: '<div data-testid="authorized-header"><slot /><slot name="mobile" /><slot name="leading" /><slot name="logo" /><slot name="pwa" /></div>',
   },
 }));
 
@@ -56,9 +61,6 @@ const mountHeader = (layout = '') => mount(VHeader, {
         template: '<div data-testid="profile-menu" />',
       },
       VHeaderProfileMobile: true,
-      VHeader: {
-        template: '<div><slot /><slot name="mobile" /></div>',
-      },
     },
   },
 });
@@ -71,6 +73,7 @@ describe('VHeader (web)', () => {
 
   it('shows both auth buttons on a regular page', () => {
     const wrapper = mountHeader('');
+    expect(wrapper.find('[data-testid="guest-header"]').exists()).toBe(true);
     expect(wrapper.text()).toContain('Log In');
     expect(wrapper.text()).toContain('Sign Up');
     expect(wrapper.find('.v-header-invest__pwa-back').exists()).toBe(false);
@@ -96,6 +99,7 @@ describe('VHeader (web)', () => {
   it('shows profile menu when logged in', () => {
     userLoggedIn.value = true;
     const wrapper = mountHeader('');
+    expect(wrapper.find('[data-testid="authorized-header"]').exists()).toBe(true);
     expect(wrapper.find('[data-testid="profile-menu"]').exists()).toBe(true);
     expect(wrapper.find('.v-header-invest__pwa-logout').exists()).toBe(false);
   });

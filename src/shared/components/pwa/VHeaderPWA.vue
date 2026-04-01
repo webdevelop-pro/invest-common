@@ -21,7 +21,8 @@ import {
   urlSignin,
   urlSignup,
 } from 'InvestCommon/domain/config/links';
-import VHeader from 'UiKit/components/VHeader/VHeader.vue';
+import VHeaderAuthorized from 'UiKit/components/VHeader/VHeaderAuthorized.vue';
+import VHeaderGuest from 'UiKit/components/VHeader/VHeaderGuest.vue';
 import { MenuItem } from 'InvestCommon/types/global';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import ArrowLeft from 'UiKit/assets/images/arrow-left.svg';
@@ -31,6 +32,7 @@ import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles
 import VLogo from 'UiKit/components/VLogo.vue';
 import env from 'InvestCommon/config/env';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
+import { VSidebarTrigger } from 'UiKit/components/Base/VSidebar';
 
 const VHeaderProfilePWA = defineAsyncComponent({
   loader: () => import('../VHeader/VHeaderProfilePWA.vue'),
@@ -57,6 +59,10 @@ const props = defineProps({
   layout: {
     type: String,
     default: '',
+  },
+  showSidebarTrigger: {
+    type: Boolean,
+    default: false,
   },
 });
 
@@ -111,6 +117,9 @@ const showPwaNotifications = computed(() => (
   && !isAuthenticatorPage.value
   && !isKYCBoPage.value
   && !isOfferDetailsPage.value
+));
+const showSidebarLeadingTrigger = computed(() => (
+  props.showSidebarTrigger && userLoggedIn.value && !showPwaBackButton.value
 ));
 const showPwaAuthCta = computed(() => (
   !userLoggedIn.value
@@ -225,7 +234,9 @@ const showPwaBackButton = computed(() => {
 const queryParams = computed(() => new URLSearchParams(
   typeof window !== 'undefined' ? window.location.search : '',
 ));
-const showMobileSidebar = computed(() => showNavigation.value);
+const showMobileSidebar = computed(() => (
+  showNavigation.value && userLoggedIn.value && !props.showSidebarTrigger
+));
 
 const signInHandler = () => {
   const paramsObj: Record<string, string> = {};
@@ -269,10 +280,14 @@ const backHandler = () => {
   }
   navigateWithQueryParams(urlHome);
 };
+const headerComponent = computed(() => (
+  userLoggedIn.value ? VHeaderAuthorized : VHeaderGuest
+));
 </script>
 
 <template>
-  <VHeader
+  <component
+    :is="headerComponent"
     v-model="isMobileSidebarOpen"
     :show-navigation="showNavigation"
     :show-mobile-sidebar="showMobileSidebar"
@@ -296,6 +311,10 @@ const backHandler = () => {
           aria-hidden="true"
         />
       </button>
+      <VSidebarTrigger
+        v-else-if="showSidebarLeadingTrigger"
+        class="v-header-invest__pwa-sidebar-trigger"
+      />
     </template>
     <template #logo>
       <span
@@ -382,7 +401,7 @@ const backHandler = () => {
         @click="isMobileSidebarOpen = false"
       />
     </template>
-  </VHeader>
+  </component>
 </template>
 
 <style lang="scss">
@@ -501,6 +520,11 @@ const backHandler = () => {
       left: auto;
       right: -8px;
     }
+  }
+
+  &__pwa-sidebar-trigger {
+    flex-shrink: 0;
+    margin-left: -4px;
   }
 
   &__pwa-back {

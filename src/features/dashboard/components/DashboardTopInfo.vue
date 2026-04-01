@@ -13,6 +13,7 @@ import { useBreakpoints } from 'UiKit/composables/useBreakpoints';
 import { ROUTE_DASHBOARD_ACCOUNT } from 'InvestCommon/domain/config/enums/routes';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useMobileAppShell } from 'InvestCommon/domain/mobile/useMobileAppShell';
+import { DashboardTabTypes } from '../utils';
 
 const DashboardTopInfoRight = defineAsyncComponent(
   () => import('./DashboardTopInfoRight.vue'),
@@ -34,10 +35,12 @@ const route = useRoute();
 const isLoading = computed(() => (getUserState.value.loading || getProfileByIdState.value.loading));
 const currentTab = computed(() => {
   const routeTab = route.query.tab;
-  return Array.isArray(routeTab) ? routeTab[0] || '' : routeTab || '';
+  const tab = Array.isArray(routeTab) ? routeTab[0] || '' : routeTab || '';
+  return tab === 'account' ? DashboardTabTypes.acount : tab;
 });
 const isCurrentProfileDetailsPage = computed(() => (
-  route.name === ROUTE_DASHBOARD_ACCOUNT && (!currentTab.value || currentTab.value === 'account')
+  currentTab.value === DashboardTabTypes.acount
+  || (route.name === ROUTE_DASHBOARD_ACCOUNT && !currentTab.value)
 ));
 const showPwaProfileDetailsLink = computed(() => (
   isTablet.value && usesMobileAppShell.value && !isCurrentProfileDetailsPage.value

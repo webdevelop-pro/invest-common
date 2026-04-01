@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { PropType } from 'vue';
-import { type RouteLocationRaw } from 'vue-router';
+import {
+  type RouteLocationRaw,
+  useRoute,
+  useRouter,
+} from 'vue-router';
 import {
   VTabs, VTabsList, VTabsTrigger,
 } from 'UiKit/components/Base/VTabs';
@@ -11,7 +15,7 @@ interface ITab {
   to?: RouteLocationRaw;
   subTitle?: string;
 }
-defineProps({
+const props = defineProps({
   tab: {
     type: String,
     required: true,
@@ -22,6 +26,29 @@ defineProps({
   },
   tabs: Object as PropType<{ [key: string]: ITab }>,
 });
+
+const route = useRoute();
+const router = useRouter();
+
+const handleTabChange = (nextTab: string) => {
+  if (nextTab === props.tab) {
+    return;
+  }
+
+  const nextRouteTarget = props.tabs?.[nextTab]?.to;
+
+  if (!nextRouteTarget) {
+    return;
+  }
+
+  const nextResolvedRoute = router.resolve(nextRouteTarget);
+
+  if (nextResolvedRoute.fullPath === route.fullPath) {
+    return;
+  }
+
+  void router.push(nextRouteTarget);
+};
 </script>
 
 <template>
@@ -33,9 +60,9 @@ defineProps({
     </section>
     <VTabs
       v-if="!hideTabs"
-      :default-value="tab"
-      tabs-to-url
+      :model-value="tab"
       class="v-page-top-info-and-tabs__tabs"
+      @update:model-value="handleTabChange"
     >
       <div class="wd-container">
         <VTabsList>
@@ -79,9 +106,15 @@ defineProps({
   width: 100%;
   background-color: $gray-10;
   position: relative;
-  height: calc($header-height + 100%);
-  padding-top: $header-height;
+  // height: calc($header-height + 100%);
+  // padding-top: $header-height;
   margin-bottom: 90px;
+
+
+  // @media screen and (max-width: $tablet){
+  //   height: calc($header-height + 100%);
+  //   padding-top: $header-height;
+  // }
 
   &__top-info {
     margin: 40px 0 45px;
@@ -94,6 +127,7 @@ defineProps({
   &__tabs-content {
     background: $white;
     padding-bottom: 40px;
+    height: 100%;
 
     @media screen and (width < $tablet) {
       padding-top: 24px;

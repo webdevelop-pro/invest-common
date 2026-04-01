@@ -56,9 +56,14 @@ vi.mock('UiKit/helpers/general', () => ({
 vi.mock('vue-router', () => ({
   useRoute: () => ({}),
 }), { virtual: true });
-vi.mock('UiKit/components/VHeader/VHeader.vue', () => ({
+vi.mock('UiKit/components/VHeader/VHeaderGuest.vue', () => ({
   default: {
-    template: '<div><slot name="leading" /><slot name="logo" /><slot /><slot name="pwa" /><slot name="mobile" /></div>',
+    template: '<div data-testid="guest-header"><slot name="leading" /><slot name="logo" /><slot /><slot name="pwa" /><slot name="mobile" /></div>',
+  },
+}));
+vi.mock('UiKit/components/VHeader/VHeaderAuthorized.vue', () => ({
+  default: {
+    template: '<div data-testid="authorized-header"><slot name="leading" /><slot name="logo" /><slot /><slot name="pwa" /><slot name="mobile" /></div>',
   },
 }));
 
@@ -87,10 +92,6 @@ const mountHeader = (
       },
       NotificationsSidebarButton: {
         template: '<div class="notifications-sidebar-button" />',
-      },
-      VHeader: {
-        props: ['showProfileLink'],
-        template: '<div :data-show-profile-link="String(showProfileLink)"><slot name="leading" /><slot name="logo" /><slot /><slot name="pwa" /><slot name="mobile" /></div>',
       },
     },
   },
@@ -130,12 +131,14 @@ describe('VHeaderPWA', () => {
 
   it('shows login link when logged out on non-auth page', () => {
     const wrapper = mountHeader('', '/offers');
+    expect(wrapper.find('[data-testid="guest-header"]').exists()).toBe(true);
     expect(wrapper.text()).toContain('Log in');
   });
 
   it('shows notifications icon when logged in', () => {
     userLoggedIn.value = true;
     const wrapper = mountHeader('', '/offers');
+    expect(wrapper.find('[data-testid="authorized-header"]').exists()).toBe(true);
     expect(wrapper.find('.v-header-invest__pwa-notifications').exists()).toBe(true);
   });
 

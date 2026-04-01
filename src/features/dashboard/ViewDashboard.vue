@@ -4,8 +4,6 @@ import { DashboardTabTypes } from './utils';
 import DashboardTabSkeleton from './components/DashboardTabSkeleton.vue';
 import DashboardPageHeaderSkeleton from './components/DashboardPageHeaderSkeleton.vue';
 import VPageTopInfoAndTabs from 'InvestCommon/shared/components/VPageTopInfoAndTabs.vue';
-import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
-import { storeToRefs } from 'pinia';
 import {
   computed,
   PropType,
@@ -15,20 +13,13 @@ import {
   type Component,
   defineAsyncComponent,
 } from 'vue';
-import {
-  ROUTE_DASHBOARD_PORTFOLIO,
-  ROUTE_DASHBOARD_ACCOUNT,
-  ROUTE_DASHBOARD_WALLET,
-  ROUTE_DASHBOARD_DISTRIBUTIONS,
-  ROUTE_DASHBOARD_SUMMARY,
-  ROUTE_DASHBOARD_EARN,
-} from 'InvestCommon/domain/config/enums/routes';
 import { VTabsContent } from 'UiKit/components/Base/VTabs';
 import { useBreakpoints } from 'UiKit/composables/useBreakpoints';
 import { useMobileAppShell } from 'InvestCommon/domain/mobile/useMobileAppShell';
 import { useSyncWithUrl } from 'UiKit/composables/useSyncWithUrl';
 import VOfflineDataUnavailable from 'InvestCommon/shared/components/pwa/VOfflineDataUnavailable.vue';
 import { useDashboardOfflineTabState } from './composables/useDashboardOfflineTabState';
+import { useRoute } from 'vue-router';
 
 const props = defineProps({
   tab: {
@@ -43,44 +34,64 @@ onMounted(() => {
   globalLoader.hide();
 });
 
-const profilesStore = useProfilesStore();
-const { selectedUserProfileId } = storeToRefs(profilesStore);
-
 const { isTablet } = useBreakpoints();
 const { usesMobileAppShell } = useMobileAppShell();
+const route = useRoute();
 const isMobileAppShellDashboard = computed(() => isTablet.value && usesMobileAppShell.value);
+const dashboardTabValues = new Set(Object.values(DashboardTabTypes));
+
+const normalizeDashboardTab = (tab: string | null | undefined): DashboardTabTypes | undefined => {
+  if (tab === 'account') return DashboardTabTypes.acount;
+  if (tab && dashboardTabValues.has(tab as DashboardTabTypes)) return tab as DashboardTabTypes;
+  return undefined;
+};
+
+const createTabRouteTarget = (tab: DashboardTabTypes) => {
+  const nextQuery = { ...route.query };
+
+  if (tab === props.tab) {
+    delete nextQuery.tab;
+  } else {
+    nextQuery.tab = tab;
+  }
+
+  return {
+    path: route.path,
+    query: nextQuery,
+  };
+};
 
 const tabs = computed(() => ({
   [DashboardTabTypes.summary]: {
     value: DashboardTabTypes.summary,
     label: 'Summary',
-    to: { name: ROUTE_DASHBOARD_SUMMARY, params: { profileId: selectedUserProfileId.value } },
+    to: createTabRouteTarget(DashboardTabTypes.summary),
   },
   [DashboardTabTypes.portfolio]: {
     value: DashboardTabTypes.portfolio,
     label: 'Portfolio',
-    to: { name: ROUTE_DASHBOARD_PORTFOLIO, params: { profileId: selectedUserProfileId.value } },
+    to: createTabRouteTarget(DashboardTabTypes.portfolio),
   },
   [DashboardTabTypes.acount]: {
     value: DashboardTabTypes.acount,
     label: 'Profile Details',
-    to: { name: ROUTE_DASHBOARD_ACCOUNT, params: { profileId: selectedUserProfileId.value } },
+    to: createTabRouteTarget(DashboardTabTypes.acount),
   },
   [DashboardTabTypes.wallet]: {
     value: DashboardTabTypes.wallet,
     label: 'Wallet',
-    to: { name: ROUTE_DASHBOARD_WALLET, params: { profileId: selectedUserProfileId.value } },
+    to: createTabRouteTarget(DashboardTabTypes.wallet),
   },
   [DashboardTabTypes.distributions]: {
     value: DashboardTabTypes.distributions,
     label: 'Distributions',
     // subTitle: '+1',
-    to: { name: ROUTE_DASHBOARD_DISTRIBUTIONS, params: { profileId: selectedUserProfileId.value } },
+    to: createTabRouteTarget(DashboardTabTypes.distributions),
   },
   [DashboardTabTypes.earn]: {
     value: DashboardTabTypes.earn,
     label: 'Earn',
-    to: { name: ROUTE_DASHBOARD_EARN, params: { profileId: selectedUserProfileId.value } },
+    to: createTabRouteTarget(DashboardTabTypes.earn),
   },
 }) as const);
 
@@ -175,11 +186,12 @@ const selectedTab = useSyncWithUrl<string>({
   key: 'tab',
   defaultValue: props.tab,
   syncToUrl: true,
+  parse: (value) => normalizeDashboardTab(value) ?? props.tab,
 });
 
 const activeTab = computed<DashboardTabTypes>(() => {
-  const maybeTab = selectedTab.value as DashboardTabTypes;
-  if (maybeTab in tabLoaders) return maybeTab;
+  const maybeTab = normalizeDashboardTab(selectedTab.value);
+  if (maybeTab) return maybeTab;
   if (props.tab in tabLoaders) return props.tab;
   return DashboardTabTypes.portfolio;
 });
@@ -210,7 +222,7 @@ const {
 
 <template>
   <VPageTopInfoAndTabs
-    :tab="props.tab"
+    :tab="activeTab"
     :tabs="filteredTabs"
     :hide-tabs="isMobileAppShellDashboard"
     class="ViewDashboard view-dashboard is--no-margin"

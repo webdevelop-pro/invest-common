@@ -100,12 +100,18 @@ const saveHandler = () => {
   $root: &;
 
   width: 100%;
-  padding-top: $header-height;
   margin-bottom: 60px;
 
+  // @media screen and (max-width: $desktop){
+  //   padding-top: $header-height;
+  // }
+
   &.is--pwa {
-    padding-top: calc(#{$header-height} + env(safe-area-inset-top));
     margin-bottom: 67px;
+  
+    // @media screen and (max-width: $desktop){
+    //   padding-top: calc(#{$header-height} + env(safe-area-inset-top));
+    // }
   }
 
   &.is--loading {

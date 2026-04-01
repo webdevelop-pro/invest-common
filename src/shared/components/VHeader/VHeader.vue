@@ -10,7 +10,8 @@ import {
   urlSignin,
   urlSignup,
 } from 'InvestCommon/domain/config/links';
-import VHeader from 'UiKit/components/VHeader/VHeader.vue';
+import VHeaderAuthorized from 'UiKit/components/VHeader/VHeaderAuthorized.vue';
+import VHeaderGuest from 'UiKit/components/VHeader/VHeaderGuest.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { MenuItem } from 'InvestCommon/types/global'; // Use shared MenuItem type
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
@@ -124,6 +125,9 @@ const showDontHaveAccount = computed(
 const showAuthButtons = computed(
   () => !userLoggedIn.value && !isAuthenticatorPage.value && !isKYCBoPage.value,
 );
+const headerComponent = computed(() => (
+  userLoggedIn.value ? VHeaderAuthorized : VHeaderGuest
+));
 
 const buildQueryParamsObject = (): Record<string, string> => {
   if (typeof window === 'undefined') {
@@ -152,7 +156,8 @@ const signUpHandler = () => {
 </script>
 
 <template>
-  <VHeader
+  <component
+    :is="headerComponent"
     v-model="isMobileSidebarOpen"
     :show-navigation="showNavigation"
     :show-mobile-sidebar="showNavigation"
@@ -163,6 +168,13 @@ const signUpHandler = () => {
     :user-logged-in="userLoggedIn"
     class="VHeaderInvest v-header-invest"
   >
+    <template
+      v-if="$slots.leading"
+      #leading
+    >
+      <slot name="leading" />
+    </template>
+
     <div class="v-header-invest__wrap">
       <template v-if="showAccountText">
         <span class="v-header-invest__auth-text is--body">
@@ -252,7 +264,7 @@ const signUpHandler = () => {
         @click="isMobileSidebarOpen = false"
       />
     </template>
-  </VHeader>
+  </component>
 </template>
 
 <style lang="scss">

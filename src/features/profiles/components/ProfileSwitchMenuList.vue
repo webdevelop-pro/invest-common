@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import VBadge from 'UiKit/components/Base/VBadge/VBadge.vue';
-import { useProfileSwitchMenu } from '../composables/useProfileSwitchMenu';
+import { computed } from 'vue';
+import { useProfileSwitchMenu, type ProfileSwitchMenuItem } from '../composables/useProfileSwitchMenu';
 
-withDefaults(defineProps<{
+const props = withDefaults(defineProps<{
+  items?: ProfileSwitchMenuItem[];
   variant?: 'dropdown' | 'overlay';
 }>(), {
+  items: undefined,
   variant: 'dropdown',
 });
 
@@ -13,9 +16,12 @@ const emit = defineEmits<{
 }>();
 
 const { profileItems, onSelectProfile } = useProfileSwitchMenu();
+const resolvedItems = computed(() => props.items ?? profileItems.value);
 
 const handleSelect = async (id: string) => {
-  await onSelectProfile(id);
+  if (!props.items) {
+    await onSelectProfile(id);
+  }
   emit('select', id);
 };
 </script>
@@ -26,7 +32,7 @@ const handleSelect = async (id: string) => {
     :class="`is--${variant}`"
   >
     <button
-      v-for="item in profileItems"
+      v-for="item in resolvedItems"
       :key="item.id"
       type="button"
       class="profile-switch-menu-list__item"
