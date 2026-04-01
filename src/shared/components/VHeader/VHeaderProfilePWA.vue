@@ -21,6 +21,12 @@ import { getProfileAvatarInitial } from './getProfileAvatarInitial';
 import VAvatarIdentity from 'UiKit/components/VAvatarIdentity.vue';
 import { usePwaProfilePanels } from './usePwaProfilePanels';
 
+const props = withDefaults(defineProps<{
+  interactive?: boolean;
+}>(), {
+  interactive: true,
+});
+
 const profilesStore = useProfilesStore();
 const { selectedUserProfileId } = storeToRefs(profilesStore);
 const dialogsStore = useDialogs();
@@ -180,6 +186,7 @@ onUnmounted(() => {
 <template>
   <div class="VHeaderProfilePWA v-header-profile-pwa">
     <button
+      v-if="props.interactive"
       type="button"
       class="v-header-profile-pwa__avatar-btn"
       :aria-label="profileMenuButtonLabel"
@@ -197,27 +204,39 @@ onUnmounted(() => {
       />
     </button>
 
-    <VHeaderProfileOverlayPWA
-      v-if="isProfileOverlayOpen"
-      :email="userEmail"
-      :avatar-src="avatarSrc"
-      :avatar-loading="isAvatarLoading"
-      :account-details-href="accountDetailsPath"
-      :mfa-href="mfaPath"
-      :security-href="securityPath"
-      :how-it-works-href="howItWorksPath"
-      :faq-href="faqPath"
-      :contact-href="contactUsPath"
-      @close="closeProfileOverlay"
-      @logout="onLogout"
-      @avatar-click="onAvatarClick"
-      @switch-profile-open="onProfileSwitchOpen"
+    <VAvatarIdentity
+      v-else
+      class="v-header-profile-pwa__avatar"
+      size="small"
+      :src="undefined"
+      alt="avatar image"
+      :avatar-text="profileAvatarInitial"
+      :label="selectedProfileLabel"
     />
 
-    <VHeaderProfileSwitchSidebarPWA
-      v-model:open="isProfileSwitchSidebarOpen"
-      @select="onProfileSelect"
-    />
+    <template v-if="props.interactive">
+      <VHeaderProfileOverlayPWA
+        v-if="isProfileOverlayOpen"
+        :email="userEmail"
+        :avatar-src="avatarSrc"
+        :avatar-loading="isAvatarLoading"
+        :account-details-href="accountDetailsPath"
+        :mfa-href="mfaPath"
+        :security-href="securityPath"
+        :how-it-works-href="howItWorksPath"
+        :faq-href="faqPath"
+        :contact-href="contactUsPath"
+        @close="closeProfileOverlay"
+        @logout="onLogout"
+        @avatar-click="onAvatarClick"
+        @switch-profile-open="onProfileSwitchOpen"
+      />
+
+      <VHeaderProfileSwitchSidebarPWA
+        v-model:open="isProfileSwitchSidebarOpen"
+        @select="onProfileSelect"
+      />
+    </template>
   </div>
 </template>
 

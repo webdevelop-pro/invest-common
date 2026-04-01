@@ -22,7 +22,6 @@ const hoisted = vi.hoisted(() => ({
 const userLoggedIn = ref(true);
 const getUserState = ref({ loading: false });
 const selectedUserProfileId = ref(1031);
-
 vi.mock('pinia', () => ({
   storeToRefs: (store: Record<string, unknown>) => store,
 }));
@@ -136,7 +135,7 @@ vi.mock('UiKit/components/Base/VButton/VButton.vue', () => ({
 vi.mock('UiKit/components/Base/VSidebar', () => ({
   VSidebarTrigger: defineComponent({
     name: 'VSidebarTrigger',
-    template: '<button data-testid="sidebar-trigger" type="button">toggle</button>',
+    template: '<button data-testid="sidebar-trigger" type="button"><slot /></button>',
   }),
 }));
 
@@ -212,6 +211,7 @@ describe('VHeaderPWA', () => {
     expect(wrapper.get('[data-testid="authorized-header"]').attributes('data-show-mobile-sidebar')).toBe('false');
     expect(wrapper.find('[data-testid="notifications-button"]').exists()).toBe(true);
     expect(wrapper.find('[data-testid="sidebar-trigger"]').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="sidebar-trigger"] [data-testid="profile-pwa"]').exists()).toBe(true);
     expect(headerChildren[0]).toBe('sidebar-trigger');
   });
 

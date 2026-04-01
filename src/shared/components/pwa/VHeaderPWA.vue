@@ -311,14 +311,24 @@ const headerComponent = computed(() => (
           aria-hidden="true"
         />
       </button>
-      <VSidebarTrigger
-        v-else-if="showSidebarLeadingTrigger"
-        class="v-header-invest__pwa-sidebar-trigger"
-      />
     </template>
     <template #logo>
+      <VSidebarTrigger
+        v-if="showSidebarLeadingTrigger"
+        class="v-header-invest__pwa-sidebar-trigger"
+      >
+        <span
+          v-if="showPwaBackButton || isOfferDetailsPage"
+          class="v-header-invest__pwa-logo-empty"
+          aria-hidden="true"
+        />
+        <VHeaderProfilePWA
+          v-else-if="userLoggedIn"
+          :interactive="false"
+        />
+      </VSidebarTrigger>
       <span
-        v-if="showPwaBackButton || isOfferDetailsPage"
+        v-else-if="showPwaBackButton || isOfferDetailsPage"
         class="v-header-invest__pwa-logo-empty"
         aria-hidden="true"
       />
@@ -523,8 +533,7 @@ const headerComponent = computed(() => (
   }
 
   &__pwa-sidebar-trigger {
-    flex-shrink: 0;
-    margin-left: -4px;
+    min-width: 0;
   }
 
   &__pwa-back {
