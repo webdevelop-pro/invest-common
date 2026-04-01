@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {
-  computed, defineAsyncComponent, hydrateOnVisible, PropType,
+  computed, defineAsyncComponent, PropType,
 } from 'vue';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { storeToRefs } from 'pinia';
@@ -10,6 +10,7 @@ import {
   urlSignin,
   urlSignup,
 } from 'InvestCommon/domain/config/links';
+import VHeaderProfile from './VHeaderProfile.vue';
 import VHeaderAuthorized from 'UiKit/components/VHeader/VHeaderAuthorized.vue';
 import VHeaderGuest from 'UiKit/components/VHeader/VHeaderGuest.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
@@ -17,13 +18,8 @@ import { MenuItem } from 'InvestCommon/types/global'; // Use shared MenuItem typ
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useBreakpoints } from 'UiKit/composables/useBreakpoints';
 
-const VHeaderProfile = defineAsyncComponent({
-  loader: () => import('./VHeaderProfile.vue'),
-  hydrate: hydrateOnVisible(),
-});
 const VHeaderProfileMobile = defineAsyncComponent({
   loader: () => import('./VHeaderProfileMobile.vue'),
-  hydrate: hydrateOnVisible(),
 });
 const props = defineProps({
   profileMenu: Array as PropType<MenuItem[]>,
