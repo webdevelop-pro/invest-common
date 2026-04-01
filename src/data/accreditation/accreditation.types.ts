@@ -74,7 +74,7 @@ export const AccreditationTextStatuses: Record<AccreditationTypes, ITextStatuses
 export const AccreditationAlerts: Record<AccreditationTypes, IAlerts> = {
   [AccreditationTypes.new]: {
     title: 'Verify Accreditation',
-    description: 'Complete your accreditation verification to unlock investment eligibility for this profile.',
+    description: 'Complete your accreditation verification for this profile.',
     class: 'new',
     button: true,
   },
@@ -92,7 +92,7 @@ export const AccreditationAlerts: Record<AccreditationTypes, IAlerts> = {
   },
   [AccreditationTypes.expired]: {
     title: 'Expired',
-    description: 'Your accreditation has expired. Please upload updated documents to continue investing.',
+    description: 'Your accreditation has expired. Please upload updated documents to renew verification for this profile.',
     class: 'expired',
     button: true,
   },

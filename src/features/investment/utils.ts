@@ -28,7 +28,7 @@ export const ACCREDITATION_HISTORY: Record<AccreditationTypes, ITimelineItemsHis
     title: 'Please complete your accreditation',
     duration: '~3 days.',
     text: `
-      In order to invest you need to complete your accreditation verification process
+      Complete your accreditation verification for this profile.
     `,
     buttonText: 'Verify Accreditation',
     buttonRoute: ROUTE_ACCREDITATION_UPLOAD,
@@ -66,7 +66,7 @@ export const ACCREDITATION_HISTORY: Record<AccreditationTypes, ITimelineItemsHis
     title: 'Your accreditation is expired',
     duration: '2-4 days.',
     text: `
-      Please upload your accreditation documents in order to finish investment.
+      Please upload your accreditation documents to renew verification for this profile.
     `,
     buttonText: 'Verify Accreditation',
     buttonRoute: ROUTE_ACCREDITATION_UPLOAD,
