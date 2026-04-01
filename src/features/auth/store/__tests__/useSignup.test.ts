@@ -7,6 +7,10 @@ import { ref } from 'vue';
 // use real form validation; no mock import needed
 import { useSignupStore } from '../useSignup';
 
+const mockDemoAccountAuthenticate = vi.fn().mockResolvedValue(true);
+const mockIsDemoAccountAvailable = ref(true);
+const mockIsDemoAccountLoading = ref(false);
+
 // Create a mock auth store
 const mockAuthStore = defineStore('auth', () => {
   const getSchemaState = ref({ data: {} });
@@ -54,10 +58,21 @@ vi.mock('InvestCommon/domain/analytics/useSendAnalyticsEvent', () => ({
   }),
 }));
 
+vi.mock('InvestCommon/features/auth/composables/useDemoAccountAuth', () => ({
+  useDemoAccountAuth: () => ({
+    authenticate: mockDemoAccountAuthenticate,
+    isAvailable: mockIsDemoAccountAvailable,
+    isLoading: mockIsDemoAccountLoading,
+  }),
+}));
+
 describe('useSignup Store', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
     vi.clearAllMocks();
+    mockDemoAccountAuthenticate.mockReset().mockResolvedValue(true);
+    mockIsDemoAccountAvailable.value = true;
+    mockIsDemoAccountLoading.value = false;
   });
 
   describe('Initial State', () => {
@@ -133,6 +148,17 @@ describe('useSignup Store', () => {
 
       await store.signupPasswordHandler();
       expect(store.isLoading).toBe(false);
+    });
+
+    it('should delegate demo account signup to the shared demo auth helper without requiring form validation', async () => {
+      const store = useSignupStore();
+
+      await store.demoAccountHandler();
+
+      expect(mockDemoAccountAuthenticate).toHaveBeenCalledTimes(1);
+      expect(store.checkbox).toBe(false);
+      expect(store.isDemoAccountAvailable).toBe(true);
+      expect(store.isDemoAccountLoading).toBe(false);
     });
   });
 

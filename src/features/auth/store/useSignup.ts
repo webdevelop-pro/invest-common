@@ -16,6 +16,7 @@ import { SELFSERVICE } from 'InvestCommon/data/auth/auth.constants';
 import { oryErrorHandling } from 'InvestCommon/domain/error/oryErrorHandling';
 import { oryResponseHandling } from 'InvestCommon/domain/error/oryResponseHandling';
 import { useSendAnalyticsEvent } from 'InvestCommon/domain/analytics/useSendAnalyticsEvent';
+import { useDemoAccountAuth } from 'InvestCommon/features/auth/composables/useDemoAccountAuth';
 
 const HUBSPOT_FORM_ID = '726ad71f-e168-467f-9847-25e9377f69cf';
 
@@ -47,6 +48,7 @@ export const useSignupStore = defineStore('signup', () => {
 
   const userSessionStore = useSessionStore();
   const { sendEvent } = useSendAnalyticsEvent();
+  const demoAccountAuth = useDemoAccountAuth();
 
   const resetSignupFlow = () => {
     void authRepository
@@ -239,6 +241,8 @@ export const useSignupStore = defineStore('signup', () => {
     }
   };
 
+  const demoAccountHandler = async () => demoAccountAuth.authenticate();
+
   /**
    * Maps form fields from UI nodes to the form model
    * @param nodes - Array of UI nodes containing form field data
@@ -306,6 +310,9 @@ export const useSignupStore = defineStore('signup', () => {
     onLogin,
     signupPasswordHandler,
     signupSocialHandler,
+    demoAccountHandler,
+    isDemoAccountAvailable: demoAccountAuth.isAvailable,
+    isDemoAccountLoading: demoAccountAuth.isLoading,
     onMountedHandler,
     onValidate,
     isValid,

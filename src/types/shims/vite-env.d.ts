@@ -18,6 +18,8 @@ interface ImportMetaEnv {
   VITE_EVM_URL: string;
   VITE_FILER_URL: string;
   VITE_DISTRIBUTIONS_URL: string;
+  VITE_DEMO_ACCOUNT_EMAIL?: string;
+  VITE_DEMO_ACCOUNT_PASSWORD?: string;
   VITE_ANALYTIC_URL: string;
   VITE_ENABLE_ANALYTICS: string;
   VITE_HUBSPOT_FORM_ID_RECEIVE_LATEST_NEWS: string;
@@ -34,4 +36,3 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
-

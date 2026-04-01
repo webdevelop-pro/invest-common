@@ -14,6 +14,7 @@ import { SELFSERVICE } from 'InvestCommon/data/auth/auth.constants';
 import { oryErrorHandling } from 'InvestCommon/domain/error/oryErrorHandling';
 import { oryResponseHandling } from 'InvestCommon/domain/error/oryResponseHandling';
 import { useSendAnalyticsEvent } from 'InvestCommon/domain/analytics/useSendAnalyticsEvent';
+import { useDemoAccountAuth } from 'InvestCommon/features/auth/composables/useDemoAccountAuth';
 
 type FormModelSignIn = {
   email: string;
@@ -29,6 +30,7 @@ export const useLoginStore = defineStore('login', () => {
   } = storeToRefs(authRepository);
   const userSessionStore = useSessionStore();
   const { sendEvent } = useSendAnalyticsEvent();
+  const demoAccountAuth = useDemoAccountAuth();
 
   const resetLoginFlow = () => {
     void authRepository
@@ -187,6 +189,8 @@ export const useLoginStore = defineStore('login', () => {
     }
   };
 
+  const demoAccountHandler = async () => demoAccountAuth.authenticate();
+
   const onMountedHandler = async () => {
     if (getQueryParam('flow')) {
       try {
@@ -218,6 +222,9 @@ export const useLoginStore = defineStore('login', () => {
     onSignup,
     loginPasswordHandler,
     loginSocialHandler,
+    demoAccountHandler,
+    isDemoAccountAvailable: demoAccountAuth.isAvailable,
+    isDemoAccountLoading: demoAccountAuth.isLoading,
     onValidate,
     isValid,
     getQueryParam,

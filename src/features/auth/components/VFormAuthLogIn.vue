@@ -8,11 +8,13 @@ import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import { urlForgot } from 'InvestCommon/domain/config/links';
 import { useLoginStore } from '../store/useLogin';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
+import VAuthDemoAccountButton from './VAuthDemoAccountButton.vue';
 
 const loginStore = useLoginStore();
 const {
   isLoading, model, isDisabledButton,
   setLoginState,
+  isDemoAccountAvailable, isDemoAccountLoading,
 } = storeToRefs(loginStore);
 
 const globalLoader = useGlobalLoader();
@@ -25,6 +27,10 @@ const onSignup = () => {
 
 const loginHandler = async () => {
   loginStore.loginPasswordHandler();
+};
+
+const demoAccountHandler = async () => {
+  loginStore.demoAccountHandler();
 };
 
 const syncAuthLoading = (active: boolean) => {
@@ -108,6 +114,13 @@ watch(isGlobalLoading, (active) => {
       >
         Log In
       </VButton>
+
+      <VAuthDemoAccountButton
+        :visible="isDemoAccountAvailable"
+        :loading="isDemoAccountLoading"
+        :disabled="isLoading"
+        @click="demoAccountHandler"
+      />
 
       <div
         class="login-form__signup-wrap  is--no-margin"

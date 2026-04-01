@@ -13,11 +13,13 @@ import {
 import { useSignupStore } from '../store/useSignup';
 import { onMounted, ref, watch } from 'vue';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
+import VAuthDemoAccountButton from './VAuthDemoAccountButton.vue';
 
 const signupStore = useSignupStore();
 const {
   isLoading, model, isDisabledButton,
   setSignupState, queryFlow, checkbox,
+  isDemoAccountAvailable, isDemoAccountLoading,
 } = storeToRefs(signupStore);
 
 const globalLoader = useGlobalLoader();
@@ -32,6 +34,10 @@ const isDisabled = (field: string) => queryFlow.value && (field?.length > 1);
 
 const signupHandler = async () => {
   signupStore.signupPasswordHandler();
+};
+
+const demoAccountHandler = async () => {
+  signupStore.demoAccountHandler();
 };
 
 const syncAuthLoading = (active: boolean) => {
@@ -220,6 +226,13 @@ watch(isGlobalLoading, (active) => {
       >
         Sign Up
       </VButton>
+
+      <VAuthDemoAccountButton
+        :visible="isDemoAccountAvailable"
+        :loading="isDemoAccountLoading"
+        :disabled="isLoading"
+        @click="demoAccountHandler"
+      />
 
       <div
         v-if="!queryFlow"

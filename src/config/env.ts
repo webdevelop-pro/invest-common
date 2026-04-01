@@ -40,8 +40,9 @@ const env = {
   CRYPTO_WALLET_SCAN_URL: import.meta.env.VITE_CRYPTO_WALLET_SCAN_URL,
   DOCUSEAL_URL: import.meta.env.VITE_DOCUSEAL_URL,
   COOKIE_DOMAIN: import.meta.env.VITE_COOKIE_DOMAIN,
+  DEMO_ACCOUNT_EMAIL: import.meta.env.VITE_DEMO_ACCOUNT_EMAIL,
+  DEMO_ACCOUNT_PASSWORD: import.meta.env.VITE_DEMO_ACCOUNT_PASSWORD,
   APP_VERSION: import.meta.env.VITE_GIT_HASH,
 };
 
 export default env;
-

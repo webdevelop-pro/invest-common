@@ -95,7 +95,7 @@ const {
 
 .view-invest-amount{
   width: 100%;
-  padding-top: $header-height;
+  // padding-top: $header-height;
 
   &__subtitle {
     margin-bottom: 20px;

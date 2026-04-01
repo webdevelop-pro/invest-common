@@ -13,6 +13,9 @@ const mockGetAuthFlowState = ref<any>({ error: null });
 const mockSetLoginState = ref<any>({ data: null, error: null });
 const mockGetLoginState = ref<any>({ data: { requested_aal: 'aal1' }, error: null });
 const mockGetSchemaState = ref<any>({ data: undefined, loading: false, error: null });
+const mockDemoAccountAuthenticate = vi.fn().mockResolvedValue(true);
+const mockIsDemoAccountAvailable = ref(true);
+const mockIsDemoAccountLoading = ref(false);
 
 vi.mock('InvestCommon/data/auth/auth.repository', () => ({
   useRepositoryAuth: () => ({
@@ -62,6 +65,14 @@ vi.mock('InvestCommon/domain/analytics/useSendAnalyticsEvent', () => ({
   }),
 }));
 
+vi.mock('InvestCommon/features/auth/composables/useDemoAccountAuth', () => ({
+  useDemoAccountAuth: () => ({
+    authenticate: mockDemoAccountAuthenticate,
+    isAvailable: mockIsDemoAccountAvailable,
+    isLoading: mockIsDemoAccountLoading,
+  }),
+}));
+
 describe('useLogin Store', () => {
   let store: ReturnType<typeof useLoginStore>;
 
@@ -74,6 +85,9 @@ describe('useLogin Store', () => {
     mockSetLoginState.value = { data: null, error: null };
     mockGetLoginState.value = { data: { requested_aal: 'aal1' }, error: null };
     mockGetSchemaState.value = { data: undefined, loading: false, error: null };
+    mockDemoAccountAuthenticate.mockReset().mockResolvedValue(true);
+    mockIsDemoAccountAvailable.value = true;
+    mockIsDemoAccountLoading.value = false;
     
     store = useLoginStore();
   });
@@ -159,6 +173,16 @@ describe('useLogin Store', () => {
       await testStore.loginSocialHandler('google');
 
       expect(testStore.isLoading).toBe(false);
+    });
+  });
+
+  describe('Demo Account', () => {
+    it('should delegate demo account login to the shared demo auth helper', async () => {
+      await store.demoAccountHandler();
+
+      expect(mockDemoAccountAuthenticate).toHaveBeenCalledTimes(1);
+      expect(store.isDemoAccountAvailable).toBe(true);
+      expect(store.isDemoAccountLoading).toBe(false);
     });
   });
 

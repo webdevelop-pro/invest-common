@@ -43,9 +43,10 @@ declare module 'InvestCommon/config/env' {
     CRYPTO_WALLET_SCAN_URL: MaybeString;
     DOCUSEAL_URL: MaybeString;
     COOKIE_DOMAIN: MaybeString;
+    DEMO_ACCOUNT_EMAIL: MaybeString;
+    DEMO_ACCOUNT_PASSWORD: MaybeString;
     APP_VERSION: MaybeString;
   };
 
   export default env;
 }
-

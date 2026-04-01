@@ -49,7 +49,7 @@ onBeforeMount(() => {
 .view-notifications-table {
   width: 100%;
   margin: 40px 0 130px;
-  padding-top: $header-height;
+  // padding-top: $header-height;
 
   @include media-lte(tablet) {
     margin: 40px 0 100px;

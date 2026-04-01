@@ -47,6 +47,6 @@ const {
 
 .view-invest-review {
   width: 100%;
-  padding-top: $header-height;
+  // padding-top: $header-height;
 }
 </style>

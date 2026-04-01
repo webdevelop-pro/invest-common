@@ -61,7 +61,7 @@ const {
 
 .view-invest-signature {
   width: 100%;
-  padding-top: $header-height;
+  // padding-top: $header-height;
 }
 
 .form-invest-signature {
