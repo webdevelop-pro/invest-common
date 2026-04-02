@@ -4,6 +4,7 @@ import { InvestKycTypes } from 'InvestCommon/data/kyc/kyc.types';
 
 const mockRouterPush = vi.fn();
 const mockSetSelectedUserProfileById = vi.fn();
+const mockUpdateSelectedAccount = vi.fn();
 const mockNavigateWithQueryParams = vi.fn();
 const envState = {
   IS_STATIC_SITE: '0',
@@ -65,6 +66,7 @@ vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
     selectedUserProfileId,
     userProfiles,
     setSelectedUserProfileById: mockSetSelectedUserProfileById,
+    updateSelectedAccount: mockUpdateSelectedAccount,
   }),
 }));
 
@@ -95,6 +97,7 @@ describe('useProfileSwitchMenu', () => {
     ] as any[];
     mockRouterPush.mockClear();
     mockSetSelectedUserProfileById.mockClear();
+    mockUpdateSelectedAccount.mockClear();
     mockNavigateWithQueryParams.mockClear();
   });
 
@@ -140,6 +143,7 @@ describe('useProfileSwitchMenu', () => {
     await composable.onSelectProfile('1');
 
     expect(mockSetSelectedUserProfileById).toHaveBeenCalledWith(1);
+    expect(mockUpdateSelectedAccount).toHaveBeenCalledTimes(1);
   });
 
   it('does not update the active profile again', async () => {
@@ -149,6 +153,7 @@ describe('useProfileSwitchMenu', () => {
     await composable.onSelectProfile('2');
 
     expect(mockSetSelectedUserProfileById).not.toHaveBeenCalled();
+    expect(mockUpdateSelectedAccount).not.toHaveBeenCalled();
   });
 
   it('routes to create-profile in app mode', async () => {
@@ -160,6 +165,7 @@ describe('useProfileSwitchMenu', () => {
     expect(mockRouterPush).toHaveBeenCalledWith({ name: 'ROUTE_CREATE_PROFILE' });
     expect(mockNavigateWithQueryParams).not.toHaveBeenCalled();
     expect(mockSetSelectedUserProfileById).not.toHaveBeenCalled();
+    expect(mockUpdateSelectedAccount).not.toHaveBeenCalled();
   });
 
   it('uses navigateWithQueryParams for create-profile in static mode', async () => {
@@ -172,6 +178,7 @@ describe('useProfileSwitchMenu', () => {
     expect(mockNavigateWithQueryParams).toHaveBeenCalledWith('/profile/create-new-profile');
     expect(mockRouterPush).not.toHaveBeenCalled();
     expect(mockSetSelectedUserProfileById).not.toHaveBeenCalled();
+    expect(mockUpdateSelectedAccount).not.toHaveBeenCalled();
   });
 
   it('does not update selection for invalid ids', async () => {
@@ -182,5 +189,6 @@ describe('useProfileSwitchMenu', () => {
     await composable.onSelectProfile('abc');
 
     expect(mockSetSelectedUserProfileById).not.toHaveBeenCalled();
+    expect(mockUpdateSelectedAccount).not.toHaveBeenCalled();
   });
 });

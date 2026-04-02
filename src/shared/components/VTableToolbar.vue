@@ -10,6 +10,7 @@ const props = defineProps({
   totalResultsLength: Number,
   filterResultsLength: Number,
   filterItems: Array as PropType<IVFilter[]>,
+  filterQueryKey: String,
 });
 
 const emit = defineEmits(['filterItems']);
@@ -40,6 +41,8 @@ const onApplyFilter = (items: IVFilter[]) => {
         v-if="filterItems"
         :items="filterItems"
         :disabled="!isActiveToolbar"
+        :filters-to-url="Boolean(filterQueryKey)"
+        :query-key="filterQueryKey"
         class="v-table-toolbar__filter"
         @apply="onApplyFilter"
       />

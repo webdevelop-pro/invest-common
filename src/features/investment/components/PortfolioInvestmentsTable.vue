@@ -40,6 +40,7 @@ const { onApplyFilter } = portfolioStore;
     <VTableToolbar
       v-model="search"
       :filter-items="filterPortfolio"
+      filter-query-key="portfolio-filter"
       :filter-results-length="filterResults"
       :total-results-length="totalResults"
       @filter-items="onApplyFilter"

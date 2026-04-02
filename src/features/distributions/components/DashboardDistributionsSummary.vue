@@ -99,6 +99,7 @@ const onApplyFilter = (items: IVFilter[]) => {
     <VTableToolbar
       v-model="search"
       :filter-items="filterPortfolio"
+      filter-query-key="distribution-filter"
       :filter-results-length="filterResults"
       :total-results-length="totalResults"
       @filter-items="onApplyFilter"

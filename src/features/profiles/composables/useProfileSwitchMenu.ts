@@ -116,6 +116,7 @@ export function useProfileSwitchMenu() {
     }
 
     profilesStore.setSelectedUserProfileById(nextProfileId);
+    profilesStore.updateSelectedAccount();
   };
 
   return {

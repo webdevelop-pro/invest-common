@@ -76,6 +76,8 @@ const onApplyFilter = (items: IVFilter[]) => {
         <VFilter
           :items="filterSettings"
           :disabled="!showFilter"
+          filters-to-url
+          query-key="notification-filter"
           class="wd-notification-table__filter"
           @apply="onApplyFilter"
         />

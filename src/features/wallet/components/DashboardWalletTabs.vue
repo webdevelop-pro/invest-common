@@ -54,6 +54,8 @@ const { activeTabModel, filterDisabledComputed } = useDashboardWalletTabs(props,
       <VFilter
         :items="filterItems"
         :disabled="filterDisabledComputed"
+        filters-to-url
+        query-key="wallet-filter"
         class="dashboard-wallet__filters-button"
         @apply="emit('filterApply', $event)"
       />
