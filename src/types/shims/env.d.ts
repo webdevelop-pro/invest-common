@@ -46,6 +46,7 @@ declare module 'InvestCommon/config/env' {
     DEMO_ACCOUNT_EMAIL: MaybeString;
     DEMO_ACCOUNT_PASSWORD: MaybeString;
     APP_VERSION: MaybeString;
+    APP_BUILD_TIMESTAMP: MaybeString;
   };
 
   export default env;

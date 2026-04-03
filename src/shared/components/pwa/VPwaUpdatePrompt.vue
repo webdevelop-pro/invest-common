@@ -1,13 +1,16 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import VAlert from 'UiKit/components/VAlert.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
+import { formatBuildDisplay } from 'InvestCommon/config/buildInfo';
 
-defineProps<{
+const props = defineProps<{
   isUpdateReady: boolean;
   isOfflineReady: boolean;
   lifecycleState: 'idle' | 'offlineReady' | 'updateReady' | 'reloading' | 'registrationError';
   hasRegistrationError: boolean;
   appVersion?: string;
+  appBuildTimestamp?: string;
 }>();
 
 const emit = defineEmits<{
@@ -15,6 +18,10 @@ const emit = defineEmits<{
   dismissUpdate: [];
   dismissOfflineReady: [];
 }>();
+
+const currentBuildLabel = computed(() => (
+  formatBuildDisplay('Current build: ', props.appVersion, props.appBuildTimestamp)
+));
 </script>
 
 <template>
@@ -33,8 +40,8 @@ const emit = defineEmits<{
       </template>
       <template #description>
         A newer version of the app is ready. Refresh to load the latest code and cached content.
-        <span v-if="appVersion">
-          Current build: {{ appVersion }}
+        <span v-if="currentBuildLabel">
+          {{ currentBuildLabel }}
         </span>
       </template>
       <div class="v-pwa-update-prompt__actions">

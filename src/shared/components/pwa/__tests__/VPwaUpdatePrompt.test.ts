@@ -30,6 +30,7 @@ describe('VPwaUpdatePrompt', () => {
       lifecycleState: 'idle',
       hasRegistrationError: false,
       appVersion: '',
+      appBuildTimestamp: '',
     });
 
     expect(wrapper.find('[data-testid="pwa-update-prompt"]').exists()).toBe(false);
@@ -42,10 +43,11 @@ describe('VPwaUpdatePrompt', () => {
       lifecycleState: 'updateReady',
       hasRegistrationError: false,
       appVersion: 'build-123',
+      appBuildTimestamp: '2026-04-03T12:34:56.000Z',
     });
 
     expect(wrapper.text()).toContain('App update available');
-    expect(wrapper.text()).toContain('Current build: build-123');
+    expect(wrapper.text()).toContain('Current build: build-123 (built at Apr 3, 2026, 12:34 PM UTC)');
 
     const buttons = wrapper.findAll('button');
     expect(buttons).toHaveLength(2);
@@ -64,6 +66,7 @@ describe('VPwaUpdatePrompt', () => {
       lifecycleState: 'reloading',
       hasRegistrationError: false,
       appVersion: '',
+      appBuildTimestamp: '',
     });
 
     const buttons = wrapper.findAll('button');
@@ -79,6 +82,7 @@ describe('VPwaUpdatePrompt', () => {
       lifecycleState: 'offlineReady',
       hasRegistrationError: false,
       appVersion: '',
+      appBuildTimestamp: '',
     });
 
     expect(wrapper.text()).toContain('Offline mode ready');
@@ -97,6 +101,7 @@ describe('VPwaUpdatePrompt', () => {
       lifecycleState: 'registrationError',
       hasRegistrationError: true,
       appVersion: '',
+      appBuildTimestamp: '',
     });
 
     expect(wrapper.text()).toContain('Offline features unavailable');

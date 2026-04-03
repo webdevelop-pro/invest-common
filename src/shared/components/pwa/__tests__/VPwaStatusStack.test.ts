@@ -86,6 +86,7 @@ vi.mock('InvestCommon/domain/pwa/usePwaBannerDismissals', () => ({
 vi.mock('InvestCommon/config/env', () => ({
   default: {
     APP_VERSION: 'test-build',
+    APP_BUILD_TIMESTAMP: '2026-04-03T12:34:56.000Z',
   },
 }));
 
@@ -101,7 +102,8 @@ const mountStatusStack = (props: Record<string, unknown> = {}) => mount(VPwaStat
         template: '<div data-testid="install-prompt" />',
       },
       VPwaUpdatePrompt: {
-        template: '<div data-testid="update-prompt" />',
+        props: ['appVersion', 'appBuildTimestamp'],
+        template: '<div data-testid="update-prompt">{{ appVersion }}|{{ appBuildTimestamp }}</div>',
       },
       VOfflineStatusBanner: {
         template: '<button data-testid="offline-banner" @click="$emit(\'dismiss\')" />',
@@ -173,6 +175,7 @@ describe('VPwaStatusStack', () => {
     });
 
     expect(wrapper.find('[data-testid="update-prompt"]').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="update-prompt"]').text()).toContain('test-build|2026-04-03T12:34:56.000Z');
     expect(wrapper.find('[data-testid="offline-banner"]').exists()).toBe(false);
     expect(wrapper.find('.v-pwa-status-stack').classes()).toContain('is--footer-offset');
   });

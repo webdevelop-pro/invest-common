@@ -57,7 +57,6 @@ const {
   dismissUpdateReady,
   dismissOfflineReady,
 });
-const appVersion = computed(() => env.APP_VERSION || '');
 const hasRegistrationError = computed(() => Boolean(registrationError.value));
 const canShowInteractiveUpdatePrompt = computed(() => !isOffline.value);
 const shouldShowInstallPrompt = computed(() => installState.value !== 'hidden');
@@ -95,6 +94,8 @@ const shouldRenderStack = computed(() => (
 const shouldOffsetForFooterMenu = computed(() => (
   props.usesMobileShell && props.hasFooterMenu
 ));
+const appVersion = env.APP_VERSION || '';
+const appBuildTimestamp = env.APP_BUILD_TIMESTAMP || '';
 </script>
 
 <template>
@@ -117,6 +118,7 @@ const shouldOffsetForFooterMenu = computed(() => (
       :lifecycle-state="lifecycleState"
       :has-registration-error="hasRegistrationError"
       :app-version="appVersion"
+      :app-build-timestamp="appBuildTimestamp"
       @reload="handleReloadApp"
       @dismiss-update="handleDismissUpdate"
       @dismiss-offline-ready="handleDismissOfflineReady"

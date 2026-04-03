@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, defineAsyncComponent, onMounted } from 'vue';
+import { defineAsyncComponent, onMounted } from 'vue';
 import VAlert from 'UiKit/components/VAlert.vue';
 import VSwitch from 'UiKit/components/VSwitch.vue';
+import { formatBuildDisplay } from 'InvestCommon/config/buildInfo';
 import env from 'InvestCommon/config/env';
 import { useSettingsMfa } from './logic/useSettingsMfa';
 
@@ -19,11 +20,7 @@ const {
   initializeMfa,
 } = useSettingsMfa();
 
-const appVersionLabel = computed(() => (
-  env.APP_VERSION
-    ? `Commit: ${env.APP_VERSION}`
-    : ''
-));
+const appVersionLabel = formatBuildDisplay('Commit: ', env.APP_VERSION, env.APP_BUILD_TIMESTAMP);
 
 onMounted(() => {
   initializeMfa();

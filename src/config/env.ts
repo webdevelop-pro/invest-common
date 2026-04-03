@@ -43,6 +43,7 @@ const env = {
   DEMO_ACCOUNT_EMAIL: import.meta.env.VITE_DEMO_ACCOUNT_EMAIL,
   DEMO_ACCOUNT_PASSWORD: import.meta.env.VITE_DEMO_ACCOUNT_PASSWORD,
   APP_VERSION: import.meta.env.VITE_GIT_HASH,
+  APP_BUILD_TIMESTAMP: import.meta.env.VITE_BUILD_TIMESTAMP,
 };
 
 export default env;
