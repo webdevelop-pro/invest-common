@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import VBadge from 'UiKit/components/Base/VBadge/VBadge.vue';
+import { usePublicFilerImage } from 'InvestCommon/shared/composables/usePublicFilerImage';
 import { PropType, computed } from 'vue';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { storeToRefs } from 'pinia';
@@ -7,7 +8,7 @@ import { ROUTE_INVESTMENT_DOCUMENTS } from 'InvestCommon/domain/config/enums/rou
 import VImage from 'UiKit/components/Base/VImage/VImage.vue';
 import { IInvestmentFormatted } from 'InvestCommon/data/investment/investment.types';
 
-defineProps({
+const props = defineProps({
   id: String,
   item: {
     type: Object as PropType<IInvestmentFormatted>,
@@ -24,6 +25,16 @@ const profilesStore = useProfilesStore();
 const { selectedUserProfileId, selectedUserProfileData } = storeToRefs(profilesStore);
 
 const profileType = computed(() => selectedUserProfileData.value?.type || '');
+
+const {
+  src: offerImageSrc,
+  srcset: offerImageSrcset,
+  sizes: offerImageSizes,
+} = usePublicFilerImage({
+  fileId: computed(() => props.item?.offer?.image_link_id),
+  fallbackSrc: computed(() => props.item?.offer?.imageMedium),
+  preset: 'investmentTableItemHeaderMobile',
+});
 </script>
 
 <template>
@@ -35,7 +46,9 @@ const profileType = computed(() => selectedUserProfileData.value?.type || '');
     <div class="v-table-item-header-mobile__offer">
       <div class="v-table-item-header-mobile__image-wrap">
         <VImage
-          :src="item?.offer?.imageMedium"
+          :src="offerImageSrc"
+          :srcset="offerImageSrcset || undefined"
+          :sizes="offerImageSizes || undefined"
           :alt="`${item.offer?.name} image`"
           fit="cover"
           loading="lazy"
@@ -105,7 +118,8 @@ const profileType = computed(() => selectedUserProfileData.value?.type || '');
 
   &__image-wrap {
     width: 100%;
-    height: 150px;
+    height: auto;
+    aspect-ratio: 16 / 9;
     margin-bottom: 8px;
     background-color: $primary-light;
     display: flex;

@@ -6,6 +6,7 @@ import {
 } from '../evm.types';
 import defaultImage from 'InvestCommon/shared/assets/images/default.svg?url';
 import env from 'InvestCommon/config/env';
+import { buildPublicFilerImageUrl } from 'InvestCommon/data/filer/publicImage';
 
 const BASE_OPTIONS = {
   year: 'numeric',
@@ -133,7 +134,7 @@ export class EvmTransactionFormatter {
     // Handle iconLinkId as number or string (number as string)
     const iconId = typeof iconLinkId === 'string' ? Number(iconLinkId) : iconLinkId;
     if (iconId && (iconId > 0)) {
-      return `${env.FILER_URL}/public/files/${iconId}?size=${metaSize}`;
+      return buildPublicFilerImageUrl(iconId, metaSize) ?? defaultImage;
     }
     // If iconLinkId is a string that looks like a URL, use it
     if (typeof iconLinkId === 'string' && (iconLinkId.startsWith('http') || iconLinkId.startsWith('/'))) {

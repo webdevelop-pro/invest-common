@@ -1,15 +1,14 @@
 import { computed, type Ref } from 'vue';
 import { useData } from 'vitepress';
-import env from 'InvestCommon/config/env';
 import { useRepositoryFiler } from 'InvestCommon/data/filer/filer.repository';
+import { buildPublicFilerImageUrl } from 'InvestCommon/data/filer/publicImage';
+import { usePublicFilerImage } from 'InvestCommon/shared/composables/usePublicFilerImage';
 import { storeToRefs } from 'pinia';
 import type { IOfferFormatted } from 'InvestCommon/data/offer/offer.types';
 import {
   urlHome, urlOffers, 
 } from 'InvestCommon/domain/config/links';
 import { socials } from 'UiKit/utils/socials';
-
-const { FILER_URL } = env;
 
 export function useOffersDetails(offerRef: Ref<IOfferFormatted | undefined>) {
   const { frontmatter } = useData();
@@ -41,6 +40,24 @@ export function useOffersDetails(offerRef: Ref<IOfferFormatted | undefined>) {
   const filesLoading = computed(() => getPublicFilesState.value.loading);
   const videoSrc = computed(() => offerRef.value?.data?.video);
   const imageID = computed(() => offerRef.value?.image_link_id as number | undefined);
+  const {
+    src: offerMainImageSrc,
+    srcset: offerMainImageSrcset,
+    sizes: offerMainImageSizes,
+  } = usePublicFilerImage({
+    fileId: imageID,
+    fallbackSrc: computed(() => offerRef.value?.imageBig),
+    preset: 'offerCarouselMain',
+  });
+  const {
+    src: offerThumbSrc,
+    srcset: offerThumbSrcset,
+    sizes: offerThumbSizes,
+  } = usePublicFilerImage({
+    fileId: imageID,
+    fallbackSrc: computed(() => offerRef.value?.imageSmall),
+    preset: 'offerCarouselThumb',
+  });
   const documentsMedia = computed(() => filesData.value?.entities?.media?.entities || {});
   const documentsMediaArray = computed(() => Object.values(documentsMedia.value) || []);
   const documentsMediaFormatted = computed(() => documentsMediaArray.value?.map((item: any) => {
@@ -49,10 +66,25 @@ export function useOffersDetails(offerRef: Ref<IOfferFormatted | undefined>) {
   }).filter(Boolean) || []);
 
   const carouselFiles = computed(() => {
-    const array: Array<{ image?: string; video?: string; thumb?: string }> = [...documentsMediaFormatted.value];
+    const array: Array<{
+      image?: string;
+      video?: string;
+      thumb?: string;
+      srcset?: string;
+      sizes?: string;
+      thumbSrcset?: string;
+      thumbSizes?: string;
+    }> = [...documentsMediaFormatted.value];
     if (videoSrc.value) array.unshift({ video: videoSrc.value });
     if (!(array.length === 1 && !!videoSrc.value) && (imageID.value && imageID.value > 0)) {
-      array.push({ image: `${FILER_URL}/public/files/${imageID.value}?size=big`, thumb: `${FILER_URL}/public/files/${imageID.value}?size=small` });
+      array.push({
+        image: offerMainImageSrc.value || buildPublicFilerImageUrl(imageID.value, 'big'),
+        thumb: offerThumbSrc.value || buildPublicFilerImageUrl(imageID.value, 'small'),
+        srcset: offerMainImageSrcset.value || undefined,
+        sizes: offerMainImageSizes.value || undefined,
+        thumbSrcset: offerThumbSrcset.value || undefined,
+        thumbSizes: offerThumbSizes.value || undefined,
+      });
     }
     return array;
   });
@@ -80,5 +112,3 @@ export function useOffersDetails(offerRef: Ref<IOfferFormatted | undefined>) {
     filesLoading,
   };
 }
-
-

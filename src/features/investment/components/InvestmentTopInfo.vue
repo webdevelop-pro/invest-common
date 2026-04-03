@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { defineAsyncComponent } from 'vue';
+import { computed, defineAsyncComponent } from 'vue';
+import { usePublicFilerImage } from 'InvestCommon/shared/composables/usePublicFilerImage';
 import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import VBadge from 'UiKit/components/Base/VBadge/VBadge.vue';
@@ -45,6 +46,16 @@ const {
   onFundingType,
   onContactUsClick,
 } = useInvestmentTopInfo(props);
+
+const {
+  src: offerImageSrc,
+  srcset: offerImageSrcset,
+  sizes: offerImageSizes,
+} = usePublicFilerImage({
+  fileId: computed(() => getInvestOneState.value.data?.offer?.image_link_id),
+  fallbackSrc: computed(() => getInvestOneState.value.data?.offer?.imageMedium),
+  preset: 'investmentTopInfo',
+});
 </script>
 
 <template>
@@ -79,7 +90,9 @@ const {
           class="investment-top-info__img-wrap"
         >
           <VImage
-            :src="getInvestOneState.data?.offer?.imageMedium"
+            :src="offerImageSrc"
+            :srcset="offerImageSrcset || undefined"
+            :sizes="offerImageSizes || undefined"
             :alt="getInvestOneData?.offer?.name"
             class="investment-top-info__img"
             :class="{
@@ -266,7 +279,8 @@ const {
 
   &__img-wrap {
     width: 361px;
-    height: 190px;
+    aspect-ratio: 16 / 9;
+    height: auto;
     background-color: $primary-light;
     display: flex;
     justify-content: center;
@@ -275,12 +289,10 @@ const {
 
     @media screen and (max-width: $desktop){
       width: 100%;
-      height: 300px;
     }
 
     @media screen and (max-width: $tablet){
       width: 100%;
-      height: 200px;
     }
   }
 

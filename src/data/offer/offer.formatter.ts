@@ -1,5 +1,5 @@
 import defaultImage from 'InvestCommon/shared/assets/images/default.svg?url';
-import env from 'InvestCommon/config/env';
+import { buildPublicFilerImageUrl } from 'InvestCommon/data/filer/publicImage';
 import {
   IOfferFormatted, IOffer, OfferStatuses, PaymentScheduleTypes, VotingRightsTypes,
   DividendType, DividendFrequencyTypes,
@@ -145,7 +145,7 @@ export class OfferFormatter {
   getOfferImage(metaSize: 'big' | 'small' | 'medium' = 'small'): string {
     const imageID = this.offer?.image_link_id;
     if (imageID && (imageID > 0)) {
-      return `${env.FILER_URL}/public/files/${imageID}?size=${metaSize}`;
+      return buildPublicFilerImageUrl(imageID, metaSize) ?? defaultImage;
     }
     return defaultImage;
   }

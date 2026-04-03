@@ -198,7 +198,8 @@ const profileType = computed(() => selectedUserProfileData.value?.type || '');
 
     @media screen and (width < $tablet){
       width: 100%;
-      height: 150px;
+      height: auto;
+      aspect-ratio: 16 / 9;
       margin-bottom: 8px;
     }
   }
