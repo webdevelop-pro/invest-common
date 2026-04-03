@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
-import { ref } from 'vue';
+import { nextTick, ref } from 'vue';
 import { AccreditationTypes } from 'InvestCommon/data/accreditation/accreditation.types';
 import { InvestKycTypes } from 'InvestCommon/data/kyc/kyc.types';
 import { DashboardTabTypes } from '../../utils';
@@ -156,8 +156,9 @@ describe('DashboardPageHeader', () => {
     accreditationDataAlert.value = { title: '', description: '', buttonText: '' };
   });
 
-  it('shows performance cards when verification is complete', () => {
+  it('shows performance cards when verification is complete', async () => {
     const wrapper = mountHeader(DashboardTabTypes.summary);
+    await nextTick();
 
     expect(wrapper.text()).toContain('Overview');
     expect(wrapper.find('[data-testid="performance-cards"]').exists()).toBe(true);
