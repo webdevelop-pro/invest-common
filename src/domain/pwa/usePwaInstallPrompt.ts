@@ -1,5 +1,7 @@
 import {
   computed,
+  onBeforeUnmount,
+  onMounted,
   shallowRef,
 } from 'vue';
 import {
@@ -73,6 +75,7 @@ const installPromptRuntime = {
   isIosSafari: shallowRef(false),
   isInstallPromptSupportedDevice: shallowRef(false),
   localTestHost: shallowRef(false),
+  consumerCount: 0,
   listenersBound: false,
 };
 
@@ -269,6 +272,26 @@ const unbindWindowListeners = () => {
   installPromptRuntime.listenersBound = false;
 };
 
+const retainWindowListeners = () => {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  installPromptRuntime.consumerCount += 1;
+  bindWindowListeners();
+};
+
+const releaseWindowListeners = () => {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  installPromptRuntime.consumerCount = Math.max(0, installPromptRuntime.consumerCount - 1);
+  if (installPromptRuntime.consumerCount === 0) {
+    unbindWindowListeners();
+  }
+};
+
 const resetInstallPromptRuntime = () => {
   installPromptRuntime.deferredPrompt.value = null;
   installPromptRuntime.isInstalled.value = false;
@@ -276,11 +299,8 @@ const resetInstallPromptRuntime = () => {
   installPromptRuntime.isIosSafari.value = false;
   installPromptRuntime.isInstallPromptSupportedDevice.value = false;
   installPromptRuntime.localTestHost.value = false;
+  installPromptRuntime.consumerCount = 0;
 };
-
-if (typeof window !== 'undefined') {
-  bindWindowListeners();
-}
 
 export const resetPwaInstallPromptRuntimeForTests = () => {
   unbindWindowListeners();
@@ -288,9 +308,13 @@ export const resetPwaInstallPromptRuntimeForTests = () => {
 };
 
 export function usePwaInstallPrompt() {
-  if (typeof window !== 'undefined') {
-    bindWindowListeners();
-  }
+  onMounted(() => {
+    retainWindowListeners();
+  });
+
+  onBeforeUnmount(() => {
+    releaseWindowListeners();
+  });
 
   const canInstall = computed(() => installState.value === 'native');
   const showManualInstall = computed(() => installState.value === 'manual-ios');

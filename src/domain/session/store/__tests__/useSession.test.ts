@@ -37,15 +37,31 @@ describe('useSession', () => {
       const store = useSessionStore();
       expect(store.userSession).toBeUndefined();
       expect(store.userLoggedIn).toBe(false);
+      expect(store.isSessionHydrated).toBe(false);
     });
 
-    it('should initialize with session from cookie', () => {
+    it('should not read session from cookie until hydration sync runs', () => {
       const mockSession = createMockSession(true);
       cookies.get.mockReturnValue(mockSession);
 
       const store = useSessionStore();
+      expect(store.userSession).toBeUndefined();
+      expect(store.userLoggedIn).toBe(false);
+      expect(store.isSessionHydrated).toBe(false);
+    });
+  });
+
+  describe('syncSessionFromCookies', () => {
+    it('should read session from cookies and mark session as hydrated', () => {
+      const mockSession = createMockSession(true);
+      cookies.get.mockReturnValue(mockSession);
+
+      const store = useSessionStore();
+      store.syncSessionFromCookies();
+
       expect(store.userSession).toEqual(mockSession);
       expect(store.userLoggedIn).toBe(true);
+      expect(store.isSessionHydrated).toBe(true);
     });
   });
 
@@ -57,6 +73,7 @@ describe('useSession', () => {
       store.updateSession(newSession);
 
       expect(store.userSession).toEqual(newSession);
+      expect(store.isSessionHydrated).toBe(true);
       expect(cookies.set).toHaveBeenCalledWith(
         'session',
         newSession,
@@ -71,6 +88,7 @@ describe('useSession', () => {
       store.resetAll();
 
       expect(store.userSession).toBeUndefined();
+      expect(store.isSessionHydrated).toBe(true);
       expect(cookies.remove).toHaveBeenCalledWith('session', expect.any(Object));
     });
   });
@@ -81,6 +99,7 @@ describe('useSession', () => {
       cookies.get.mockReturnValue(mockSession);
 
       const store = useSessionStore();
+      store.syncSessionFromCookies();
       expect(store.userLoggedIn).toBe(true);
     });
 
@@ -89,6 +108,7 @@ describe('useSession', () => {
       cookies.get.mockReturnValue(mockSession);
 
       const store = useSessionStore();
+      store.syncSessionFromCookies();
       expect(store.userLoggedIn).toBe(false);
     });
 

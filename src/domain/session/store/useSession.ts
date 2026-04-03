@@ -7,12 +7,19 @@ import { ISession } from 'InvestCommon/data/auth/auth.type';
 export const useSessionStore = defineStore('userSession', () => {
   const cookies = useCookies(['session']);
 
-  const userSession = ref(cookies.get('session'));
+  const userSession = ref<ISession | undefined>();
+  const isSessionHydrated = ref(false);
   const userLoggedIn = computed(() => Boolean(userSession.value?.active));
   const userSessionTraits = computed(() => userSession.value?.identity?.traits);
 
+  const syncSessionFromCookies = () => {
+    userSession.value = cookies.get('session');
+    isSessionHydrated.value = true;
+  };
+
   const updateSession = (session: ISession) => {
     userSession.value = session;
+    isSessionHydrated.value = true;
     cookies.set(
       'session',
       session,
@@ -22,6 +29,7 @@ export const useSessionStore = defineStore('userSession', () => {
 
   const resetAll = () => {
     userSession.value = undefined;
+    isSessionHydrated.value = true;
     cookies.remove('session', cookiesOptions());
   };
 
@@ -30,7 +38,9 @@ export const useSessionStore = defineStore('userSession', () => {
   // handle multiple tabs/ windows and close session from other window
 
   return {
+    isSessionHydrated,
     resetAll,
+    syncSessionFromCookies,
     updateSession,
     userSession,
     userLoggedIn,

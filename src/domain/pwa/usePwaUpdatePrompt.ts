@@ -1,6 +1,7 @@
 import {
   computed,
   onBeforeUnmount,
+  onMounted,
   shallowRef,
   watch,
 } from 'vue';
@@ -116,7 +117,7 @@ export function usePwaUpdatePrompt() {
   const testUpdateReadyState = shallowRef(false);
   const registrationError = shallowRef<unknown>(null);
   const isReloading = shallowRef(false);
-  const dismissedPromptKey = shallowRef<PwaUpdateDismissalKey | null>(readDismissedPromptKey());
+  const dismissedPromptKey = shallowRef<PwaUpdateDismissalKey | null>(null);
 
   const updateBridgeFlags = (flags: {
     needRefresh?: boolean;
@@ -190,7 +191,12 @@ export function usePwaUpdatePrompt() {
     }
   };
 
-  if (typeof window !== 'undefined') {
+  onMounted(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    dismissedPromptKey.value = readDismissedPromptKey();
     initializeBridge();
 
     serviceWorker?.addEventListener('controllerchange', handleServiceWorkerControllerChange);
@@ -199,7 +205,7 @@ export function usePwaUpdatePrompt() {
     if (localTestHost) {
       window.addEventListener(PWA_TEST_UPDATE_READY_EVENT, handleTestUpdateReady);
     }
-  }
+  });
 
   onBeforeUnmount(() => {
     if (typeof window === 'undefined') {

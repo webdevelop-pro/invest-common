@@ -67,7 +67,7 @@ useGlobalLoader().hide();
               :title="item.title"
             >
               <div>
-                <p v-dompurify-html="item.text" />
+                <div v-dompurify-html="item.text" />
                 <VListsCaption
                   v-if="item.captions"
                   :items="item.captions"

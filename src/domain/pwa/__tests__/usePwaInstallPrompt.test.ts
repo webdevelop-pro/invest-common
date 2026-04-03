@@ -163,7 +163,7 @@ describe('usePwaInstallPrompt', () => {
     wrapper.unmount();
   });
 
-  it('captures install events fired during setup before mount completes', async () => {
+  it('ignores install events fired before mount finishes binding browser listeners', async () => {
     setUserAgent('Mozilla/5.0 (Linux; Android 14; Pixel 8)');
     let api!: InstallPromptResult;
     const prompt = vi.fn().mockResolvedValue(undefined);
@@ -188,9 +188,9 @@ describe('usePwaInstallPrompt', () => {
 
     await nextTick();
 
-    expect(api.installState.value).toBe('native');
-    await expect(api.promptInstall()).resolves.toBe('accepted');
-    expect(prompt).toHaveBeenCalledTimes(1);
+    expect(api.installState.value).toBe('hidden');
+    await expect(api.promptInstall()).resolves.toBeNull();
+    expect(prompt).not.toHaveBeenCalled();
 
     wrapper.unmount();
   });
