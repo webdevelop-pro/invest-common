@@ -139,8 +139,9 @@ export const useLoginRefreshStore = defineStore('loginRefresh', () => {
       }
 
       if (setLoginState.value.data?.session) {
+        const session = setLoginState.value.data.session;
+        userSessionStore.updateSession(session);
         await trackLoginRefreshEvent(200, loginRefreshRequestBody);
-        userSessionStore.updateSession(setLoginState.value.data.session);
         completeSessionRefresh(true); // Success - complete the session refresh
       }
     } catch (error) {

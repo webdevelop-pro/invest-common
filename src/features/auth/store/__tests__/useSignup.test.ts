@@ -19,6 +19,8 @@ const mockCsrfToken = { value: 'test-csrf-token' };
 const mockGetAuthFlow = vi.fn().mockResolvedValue({ id: 'test-flow-id', ui: {} });
 const mockSetSignup = vi.fn().mockResolvedValue(undefined);
 const mockGetSignup = vi.fn().mockResolvedValue(undefined);
+const sendEventMock = vi.fn().mockResolvedValue(undefined);
+const mockUpdateSession = vi.fn();
 
 // Mock the dependencies
 vi.mock('InvestCommon/data/auth/auth.repository', () => ({
@@ -37,7 +39,7 @@ vi.mock('InvestCommon/data/auth/auth.repository', () => ({
 
 vi.mock('InvestCommon/domain/session/store/useSession', () => ({
   useSessionStore: vi.fn(() => ({
-    updateSession: vi.fn(),
+    updateSession: mockUpdateSession,
   })),
 }));
 
@@ -51,7 +53,7 @@ vi.mock('UiKit/composables/useHubspotForm', () => ({
 
 vi.mock('InvestCommon/domain/analytics/useSendAnalyticsEvent', () => ({
   useSendAnalyticsEvent: () => ({
-    sendEvent: vi.fn().mockResolvedValue(undefined),
+    sendEvent: sendEventMock,
   }),
 }));
 
@@ -85,6 +87,8 @@ describe('useSignup Store', () => {
     authRepository.getAuthFlow.mockReset().mockResolvedValue(undefined);
     authRepository.setSignup.mockReset().mockResolvedValue(undefined);
     authRepository.getSignup.mockReset().mockResolvedValue(undefined);
+    sendEventMock.mockReset().mockResolvedValue(undefined);
+    mockUpdateSession.mockReset();
     mockDemoAccountAuthenticate.mockReset().mockResolvedValue(true);
     mockIsDemoAccountAvailable.value = true;
     mockIsDemoAccountLoading.value = false;
@@ -135,7 +139,15 @@ describe('useSignup Store', () => {
       store.model.create_password = 'password123';
       store.model.repeat_password = 'password123';
 
-      const mockSession: any = { id: 'test-session' };
+      const mockSession: any = {
+        id: 'test-session',
+        identity: {
+          id: 'identity-456',
+          traits: {
+            email: 'test@example.com',
+          },
+        },
+      };
       authRepository.getAuthFlow.mockImplementationOnce(async () => {
         authRepository.csrfToken.value = 'fresh-signup-csrf-token';
       });
@@ -152,6 +164,13 @@ describe('useSignup Store', () => {
           csrf_token: 'fresh-signup-csrf-token',
           password: 'password123',
         }),
+      );
+      expect(mockUpdateSession).toHaveBeenCalledWith(mockSession);
+      expect(sendEventMock).toHaveBeenCalledWith(expect.objectContaining({
+        status_code: 200,
+      }));
+      expect(mockUpdateSession.mock.invocationCallOrder[0]).toBeLessThan(
+        sendEventMock.mock.invocationCallOrder[0],
       );
     });
 

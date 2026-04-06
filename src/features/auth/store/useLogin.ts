@@ -115,10 +115,9 @@ export const useLoginStore = defineStore('login', () => {
   };
 
   // Login handlers
-  const handleLoginSuccess = async (session: any) => {
+  const handleLoginSuccess = async () => {
     const { submitFormToHubspot } = useHubspotForm(HUBSPOT_FORM_ID);
     if (model.email) await submitFormToHubspot({ email: model.email });
-    userSessionStore.updateSession(session);
     navigateWithQueryParams(getQueryParam('redirect') || urlProfile());
   };
 
@@ -169,8 +168,10 @@ export const useLoginStore = defineStore('login', () => {
     }
 
     if (setLoginState.value.data?.session && loginRequestBody) {
+      const session = setLoginState.value.data.session;
+      userSessionStore.updateSession(session);
       await trackLoginEvent(200, loginRequestBody);
-      await handleLoginSuccess(setLoginState.value.data.session);
+      await handleLoginSuccess();
     }
   };
 

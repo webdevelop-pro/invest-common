@@ -175,7 +175,7 @@ export const useSignupStore = defineStore('signup', () => {
   });
 
   // Signup handlers
-  const handleSignupSuccess = async (session: any) => {
+  const handleSignupSuccess = async () => {
     const { submitFormToHubspot } = useHubspotForm(HUBSPOT_FORM_ID);
     if (model.email) {
       await submitFormToHubspot({
@@ -184,7 +184,6 @@ export const useSignupStore = defineStore('signup', () => {
         lastname: model.last_name,
       });
     }
-    userSessionStore.updateSession(session);
     navigateToProfile();
   };
 
@@ -219,8 +218,10 @@ export const useSignupStore = defineStore('signup', () => {
     }
 
     if (setSignupState.value.data?.session && signupRequestBody) {
+      const session = setSignupState.value.data.session;
+      userSessionStore.updateSession(session);
       await trackSignupEvent(200, signupRequestBody);
-      await handleSignupSuccess(setSignupState.value.data.session);
+      await handleSignupSuccess();
     }
   };
 

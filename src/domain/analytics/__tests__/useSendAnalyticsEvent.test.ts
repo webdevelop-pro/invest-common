@@ -2,6 +2,19 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { IAnalyticsEventRequest } from 'InvestCommon/data/analytics/analytics.type';
 
 const trackEventMock = vi.fn();
+const mockUserSession = {
+  value: {
+    identity: {
+      id: 'user-123',
+      traits: { email: 'user@example.com' },
+    },
+  },
+};
+const mockUserSessionTraits = {
+  value: {
+    email: 'user@example.com',
+  },
+};
 
 vi.mock('pinia', () => ({
   storeToRefs: (store: unknown) => store,
@@ -9,19 +22,8 @@ vi.mock('pinia', () => ({
 
 vi.mock('InvestCommon/domain/session/store/useSession', () => ({
   useSessionStore: () => ({
-    userSession: {
-      value: {
-        identity: {
-          id: 'user-123',
-          traits: { email: 'user@example.com' },
-        },
-      },
-    },
-    userSessionTraits: {
-      value: {
-        email: 'user@example.com',
-      },
-    },
+    userSession: mockUserSession,
+    userSessionTraits: mockUserSessionTraits,
   }),
 }));
 
@@ -44,6 +46,15 @@ import { useSendAnalyticsEvent } from '../useSendAnalyticsEvent';
 describe('useSendAnalyticsEvent', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockUserSession.value = {
+      identity: {
+        id: 'user-123',
+        traits: { email: 'user@example.com' },
+      },
+    };
+    mockUserSessionTraits.value = {
+      email: 'user@example.com',
+    };
   });
 
   it('builds analytics event payload with session and defaults', async () => {

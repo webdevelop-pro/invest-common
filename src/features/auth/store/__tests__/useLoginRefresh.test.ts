@@ -23,6 +23,7 @@ const mockSetLogin = vi.fn().mockResolvedValue(undefined);
 const mockGetSchemaState = ref({ data: undefined, loading: false, error: null });
 const mockSetLoginState = ref({ data: null, error: null });
 const mockGetAuthFlowState = ref({ error: null });
+const sendEventMock = vi.fn().mockResolvedValue(undefined);
 
 // Mock all required dependencies
 vi.mock('InvestCommon/data/auth/auth.repository', () => {
@@ -41,6 +42,11 @@ vi.mock('InvestCommon/data/auth/auth.repository', () => {
 
 vi.mock('InvestCommon/domain/error/oryResponseHandling', () => ({ oryResponseHandling: vi.fn() }));
 vi.mock('InvestCommon/domain/error/oryErrorHandling', () => ({ oryErrorHandling: vi.fn().mockResolvedValue(undefined) }));
+vi.mock('InvestCommon/domain/analytics/useSendAnalyticsEvent', () => ({
+  useSendAnalyticsEvent: () => ({
+    sendEvent: sendEventMock,
+  }),
+}));
 
 vi.mock('InvestCommon/domain/session/store/useSession', () => ({
   useSessionStore: vi.fn(() => ({
@@ -104,6 +110,7 @@ describe('useLoginRefresh Store', () => {
     mockGetSchemaState.value = { data: undefined, loading: false, error: null };
     mockSetLoginState.value = { data: null, error: null };
     mockGetAuthFlowState.value = { error: null };
+    sendEventMock.mockReset().mockResolvedValue(undefined);
 
     store = useLoginRefreshStore();
     mockAuthRepository = useRepositoryAuth();
@@ -171,7 +178,15 @@ describe('useLoginRefresh Store', () => {
       store.model.email = 'test@example.com';
       store.model.password = 'validPassword123!';
 
-      const mockSession = { id: 'test-session' };
+      const mockSession = {
+        id: 'test-session',
+        identity: {
+          id: 'identity-789',
+          traits: {
+            email: 'test@example.com',
+          },
+        },
+      };
       mockGetAuthFlow.mockImplementationOnce(async () => {
         mockCsrfToken.value = 'fresh-refresh-csrf-token';
       });
@@ -185,6 +200,13 @@ describe('useLoginRefresh Store', () => {
           csrf_token: 'fresh-refresh-csrf-token',
           password: 'validPassword123!',
         }),
+      );
+      expect(mockUpdateSession).toHaveBeenCalledWith(mockSession);
+      expect(sendEventMock).toHaveBeenCalledWith(expect.objectContaining({
+        status_code: 200,
+      }));
+      expect(mockUpdateSession.mock.invocationCallOrder[0]).toBeLessThan(
+        sendEventMock.mock.invocationCallOrder[0],
       );
     });
 

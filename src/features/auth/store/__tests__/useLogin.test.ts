@@ -5,11 +5,20 @@ import { useLoginStore } from '../useLogin';
 
 // Mock data
 const mockFlowId = 'test-flow-id';
-const mockSession = { id: 'test-session' };
+const mockSession = {
+  id: 'test-session',
+  identity: {
+    id: 'identity-123',
+    traits: {
+      email: 'test@example.com',
+    },
+  },
+};
 const mockAuthFlowId = { value: mockFlowId };
 const mockAuthCsrfToken = { value: 'test-csrf-token' };
 const mockGetAuthFlow = vi.fn().mockResolvedValue({ id: mockFlowId, ui: {} });
 const mockSetLogin = vi.fn().mockResolvedValue(undefined);
+const sendEventMock = vi.fn().mockResolvedValue(undefined);
 
 // Mock the auth repository
 const mockGetAuthFlowState = ref<any>({ error: null });
@@ -64,7 +73,7 @@ vi.mock('InvestCommon/config/env', () => ({
 
 vi.mock('InvestCommon/domain/analytics/useSendAnalyticsEvent', () => ({
   useSendAnalyticsEvent: () => ({
-    sendEvent: vi.fn().mockResolvedValue(undefined),
+    sendEvent: sendEventMock,
   }),
 }));
 
@@ -100,6 +109,7 @@ describe('useLogin Store', () => {
     mockAuthCsrfToken.value = 'test-csrf-token';
     mockGetAuthFlow.mockReset().mockResolvedValue({ id: mockFlowId, ui: {} });
     mockSetLogin.mockReset().mockResolvedValue(undefined);
+    sendEventMock.mockReset().mockResolvedValue(undefined);
     mockDemoAccountAuthenticate.mockReset().mockResolvedValue(true);
     mockIsDemoAccountAvailable.value = true;
     mockIsDemoAccountLoading.value = false;
@@ -148,6 +158,13 @@ describe('useLogin Store', () => {
           csrf_token: 'fresh-csrf-token',
           password: 'validPassword123!',
         }),
+      );
+      expect(mockCookies.set).toHaveBeenCalled();
+      expect(sendEventMock).toHaveBeenCalledWith(expect.objectContaining({
+        status_code: 200,
+      }));
+      expect(mockCookies.set.mock.invocationCallOrder[0]).toBeLessThan(
+        sendEventMock.mock.invocationCallOrder[0],
       );
     });
 
