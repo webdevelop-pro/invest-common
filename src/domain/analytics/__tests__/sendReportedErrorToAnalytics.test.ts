@@ -128,7 +128,7 @@ describe('sendReportedErrorToAnalytics', () => {
     const payload = logMessageMock.mock.calls[0][0] as any;
     expect(payload.body).toEqual({
       code: '[redacted]',
-      email: '[redacted]',
+      email: 'user@example.com',
       first_name: '[redacted]',
       totp_code: '[redacted]',
       city: '[redacted]',

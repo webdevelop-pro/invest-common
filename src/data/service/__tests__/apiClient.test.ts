@@ -281,7 +281,7 @@ describe('ApiClient', () => {
         data: {
           body: {
             code: '[redacted]',
-            email: '[redacted]',
+            email: 'user@example.com',
             identifier: 'user@example.com',
             first_name: '[redacted]',
             password: '[redacted]',

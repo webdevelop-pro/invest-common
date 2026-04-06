@@ -76,7 +76,7 @@ describe('useSendAnalyticsEvent', () => {
     expect(payload.identity_id).toBe('user-123');
     expect(payload.request_path).toBe('/test-path');
     expect(payload.body).toEqual({
-      email: '[redacted]',
+      email: 'user@example.com',
       first_name: '[redacted]',
       city: '[redacted]',
       state: '[redacted]',
