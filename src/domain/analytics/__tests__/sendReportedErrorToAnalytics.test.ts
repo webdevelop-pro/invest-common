@@ -111,6 +111,10 @@ describe('sendReportedErrorToAnalytics', () => {
         email: 'user@example.com',
         first_name: 'Jamie',
         totp_code: '123456',
+        city: 'Kyiv',
+        state: 'CA',
+        zip_code: '90210',
+        country: 'US',
         remember_device: true,
         nested: {
           access_token: 'secret-token',
@@ -127,6 +131,10 @@ describe('sendReportedErrorToAnalytics', () => {
       email: '[redacted]',
       first_name: '[redacted]',
       totp_code: '[redacted]',
+      city: '[redacted]',
+      state: '[redacted]',
+      zip_code: '[redacted]',
+      country: '[redacted]',
       remember_device: true,
       nested: {
         access_token: '[redacted]',

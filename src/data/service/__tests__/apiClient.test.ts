@@ -265,6 +265,10 @@ describe('ApiClient', () => {
           first_name: 'Jamie',
           password: 'super-secret',
           csrf_token: 'csrf-token',
+          city: 'Kyiv',
+          state: 'CA',
+          zip_code: '90210',
+          country: 'US',
           nested: {
             access_token: 'access-token',
             account_number: '9876543210',
@@ -278,10 +282,14 @@ describe('ApiClient', () => {
           body: {
             code: '[redacted]',
             email: '[redacted]',
-            identifier: '[redacted]',
+            identifier: 'user@example.com',
             first_name: '[redacted]',
             password: '[redacted]',
             csrf_token: '[redacted]',
+            city: '[redacted]',
+            state: '[redacted]',
+            zip_code: '[redacted]',
+            country: '[redacted]',
             nested: {
               access_token: '[redacted]',
               account_number: '[redacted]',
@@ -304,7 +312,7 @@ describe('ApiClient', () => {
       mockFetch.mockResolvedValueOnce(mockResponse);
 
       const formData = new FormData();
-      formData.append('file', new Blob(['test']));
+      formData.append('file', new File(['test'], 'john-doe-tax-return.pdf', { type: 'application/pdf' }));
       formData.append('tag', 'first');
       formData.append('tag', 'second');
 
@@ -313,7 +321,7 @@ describe('ApiClient', () => {
       await expect(promise).rejects.toMatchObject({
         data: {
           body: {
-            file: 'blob',
+            file: '[binary]',
             tag: ['first', 'second'],
           },
           httpRequest: expect.objectContaining({

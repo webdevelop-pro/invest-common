@@ -6,6 +6,8 @@ const SENSITIVE_EXACT_KEYS = new Set([
   'address',
   'address1',
   'address2',
+  'city',
+  'country',
   'account_holder_name',
   'code',
   'dob',
@@ -14,18 +16,18 @@ const SENSITIVE_EXACT_KEYS = new Set([
   'ip_address',
   'last_name',
   'middle_name',
+  'postal_code',
+  'state',
   'wallet',
   'user_browser',
+  'zip',
+  'zip_code',
 ]);
 const SENSITIVE_KEY_SUBSTRINGS = [
   'account_number',
-  'birth',
   'csrf',
-  'email',
-  'identifier',
   'passcode',
   'password',
-  'phone',
   'routing_number',
   'secret',
   'social_security',
@@ -85,7 +87,7 @@ const isFileSupported = () => typeof File !== 'undefined';
 
 const normalizeBinaryValue = (value: Blob): string => {
   if (isFileSupported() && value instanceof File && value.name.trim()) {
-    return value.name;
+    return '[binary]';
   }
 
   return '[binary]';

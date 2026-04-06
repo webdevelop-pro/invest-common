@@ -56,6 +56,10 @@ describe('useSendAnalyticsEvent', () => {
       body: {
         email: 'user@example.com',
         first_name: 'Jamie',
+        city: 'Kyiv',
+        state: 'CA',
+        zip_code: '90210',
+        country: 'US',
         nested: {
           accepted: true,
           routing_number: '021000021',
@@ -74,6 +78,10 @@ describe('useSendAnalyticsEvent', () => {
     expect(payload.body).toEqual({
       email: '[redacted]',
       first_name: '[redacted]',
+      city: '[redacted]',
+      state: '[redacted]',
+      zip_code: '[redacted]',
+      country: '[redacted]',
       nested: {
         accepted: true,
         routing_number: '[redacted]',
@@ -116,6 +124,10 @@ describe('useSendAnalyticsEvent', () => {
         identifier: 'user@example.com',
         code: '123456',
         csrf_token: 'csrf-token',
+        city: 'Kyiv',
+        state: 'CA',
+        zip_code: '90210',
+        country: 'US',
         nested: {
           access_token: 'access-token',
           account_number: '9876543210',
@@ -128,9 +140,13 @@ describe('useSendAnalyticsEvent', () => {
     const payload = trackEventMock.mock.calls[0][0] as IAnalyticsEventRequest;
     expect(payload.body).toEqual({
       password: '[redacted]',
-      identifier: '[redacted]',
+      identifier: 'user@example.com',
       code: '[redacted]',
       csrf_token: '[redacted]',
+      city: '[redacted]',
+      state: '[redacted]',
+      zip_code: '[redacted]',
+      country: '[redacted]',
       nested: {
         access_token: '[redacted]',
         account_number: '[redacted]',
