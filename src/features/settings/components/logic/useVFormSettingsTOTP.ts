@@ -20,7 +20,7 @@ export function useVFormSettingsTOTP() {
   const { toast } = useToast();
   const { sendEvent } = useSendAnalyticsEvent();
 
-  const trackTotpEvent = (statusCode: number) => {
+  const trackTotpEvent = (statusCode: number, body?: unknown) => {
     const uiPath = typeof window !== 'undefined' ? window.location.pathname : '';
     void sendEvent({
       event_type: 'send',
@@ -31,6 +31,7 @@ export function useVFormSettingsTOTP() {
       request_path: uiPath,
       httpRequestUrl: SELFSERVICE.settings,
       status_code: statusCode,
+      body,
     });
   };
 
@@ -93,6 +94,12 @@ export function useVFormSettingsTOTP() {
 
   const errorTotpCode = computed(() => totpCodeError.value || getErrorText('totp_code', errorData.value));
 
+  const buildTotpRequestBody = () => ({
+    method: 'totp' as const,
+    totp_code: model.totp_code?.toString() || '',
+    csrf_token: csrfToken.value,
+  });
+
   const onSave = async () => {
     onValidate();
     if (!isValid.value) {
@@ -100,6 +107,7 @@ export function useVFormSettingsTOTP() {
       return;
     }
 
+    let totpRequestBody: ReturnType<typeof buildTotpRequestBody> | undefined;
     isLoading.value = true;
     try {
       if (!flowId.value) {
@@ -112,11 +120,8 @@ export function useVFormSettingsTOTP() {
         return;
       }
 
-      await settingsRepository.setSettings(flowId.value, {
-        method: 'totp',
-        totp_code: model.totp_code?.toString() || '',
-        csrf_token: csrfToken.value,
-      });
+      totpRequestBody = buildTotpRequestBody();
+      await settingsRepository.setSettings(flowId.value, totpRequestBody);
 
       if (!setSettingsState.value.error) {
         settingsRepository.getAuthFlow(SELFSERVICE.settings);
@@ -125,11 +130,11 @@ export function useVFormSettingsTOTP() {
           description: 'Setup confirmed',
           variant: 'success',
         });
-        trackTotpEvent(200);
+        trackTotpEvent(200, totpRequestBody);
         return true; // Indicate success
       }
     } catch (error) {
-      trackTotpEvent(400);
+      trackTotpEvent(400, totpRequestBody ?? buildTotpRequestBody());
       await oryErrorHandling(
         error as any,
         'settings',

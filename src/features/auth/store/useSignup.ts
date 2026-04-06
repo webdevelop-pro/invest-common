@@ -56,7 +56,7 @@ export const useSignupStore = defineStore('signup', () => {
       .then((flow) => oryResponseHandling(flow as any));
   };
 
-  const trackSignupEvent = async (statusCode: number) => {
+  const trackSignupEvent = async (statusCode: number, body?: unknown) => {
     const uiPath = typeof window !== 'undefined' ? window.location.pathname : '';
     await sendEvent({
       event_type: 'send',
@@ -67,6 +67,7 @@ export const useSignupStore = defineStore('signup', () => {
       request_path: uiPath,
       httpRequestUrl: SELFSERVICE.registration,
       status_code: statusCode,
+      body,
     });
   };
 
@@ -155,6 +156,24 @@ export const useSignupStore = defineStore('signup', () => {
     return true;
   };
 
+  const buildPasswordSignupRequestBody = () => ({
+    identifier: model.email,
+    password: model.create_password,
+    method: 'password' as const,
+    traits: {
+      email: model.email,
+      first_name: model.first_name,
+      last_name: model.last_name,
+    },
+    csrf_token: authRepository.csrfToken.value,
+  });
+
+  const buildSocialSignupRequestBody = (provider: string) => ({
+    csrf_token: authRepository.csrfToken.value,
+    provider,
+    method: 'oidc' as const,
+  });
+
   // Signup handlers
   const handleSignupSuccess = async (session: any) => {
     const { submitFormToHubspot } = useHubspotForm(HUBSPOT_FORM_ID);
@@ -173,30 +192,22 @@ export const useSignupStore = defineStore('signup', () => {
     if (!checkbox.value) return;
     if (!validateForm()) return;
 
+    let signupRequestBody: ReturnType<typeof buildPasswordSignupRequestBody> | undefined;
     isLoading.value = true;
     try {
       const flowData = await authRepository.getAuthFlow(SELFSERVICE.registration);
       oryResponseHandling(flowData);
       if (getAuthFlowState.value.error) return;
 
-      await authRepository.setSignup(authRepository.flowId.value, {
-        identifier: model.email,
-        password: model.create_password,
-        method: 'password',
-        traits: {
-          email: model.email,
-          first_name: model.first_name,
-          last_name: model.last_name,
-        },
-        csrf_token: authRepository.csrfToken.value,
-      });
+      signupRequestBody = buildPasswordSignupRequestBody();
+      await authRepository.setSignup(authRepository.flowId.value, signupRequestBody);
 
       if (setSignupState.value.error) {
-        void trackSignupEvent(400);
+        void trackSignupEvent(400, signupRequestBody);
         return;
       }
     } catch (error) {
-      void trackSignupEvent(400);
+      void trackSignupEvent(400, signupRequestBody ?? buildPasswordSignupRequestBody());
       await oryErrorHandling(
         error as any,
         'signup',
@@ -207,13 +218,14 @@ export const useSignupStore = defineStore('signup', () => {
       isLoading.value = false;
     }
 
-    if (setSignupState.value.data?.session) {
-      await trackSignupEvent(200);
+    if (setSignupState.value.data?.session && signupRequestBody) {
+      await trackSignupEvent(200, signupRequestBody);
       await handleSignupSuccess(setSignupState.value.data.session);
     }
   };
 
   const signupSocialHandler = async (provider: string) => {
+    let signupRequestBody: ReturnType<typeof buildSocialSignupRequestBody> | undefined;
     isLoading.value = true;
     try {
       const currentFlowId = getQueryParam('flow');
@@ -223,13 +235,13 @@ export const useSignupStore = defineStore('signup', () => {
         if (getAuthFlowState.value.error) return;
       }
 
-      await authRepository.setSignup(currentFlowId || authRepository.flowId.value, {
-        csrf_token: authRepository.csrfToken.value,
-        provider,
-        method: 'oidc',
-      });
+      signupRequestBody = buildSocialSignupRequestBody(provider);
+      await authRepository.setSignup(
+        currentFlowId || authRepository.flowId.value,
+        signupRequestBody,
+      );
     } catch (error) {
-      trackSignupEvent(400);
+      void trackSignupEvent(400, signupRequestBody ?? buildSocialSignupRequestBody(provider));
       await oryErrorHandling(
         error as any,
         'signup',

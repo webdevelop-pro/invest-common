@@ -1,7 +1,7 @@
 import {
   describe, it, expect, vi, beforeEach,
 } from 'vitest';
-import { setActivePinia, createPinia, defineStore } from 'pinia';
+import { setActivePinia, createPinia } from 'pinia';
 import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
 import { ref } from 'vue';
 // use real form validation; no mock import needed
@@ -10,32 +10,29 @@ import { useSignupStore } from '../useSignup';
 const mockDemoAccountAuthenticate = vi.fn().mockResolvedValue(true);
 const mockIsDemoAccountAvailable = ref(true);
 const mockIsDemoAccountLoading = ref(false);
-
-// Create a mock auth store
-const mockAuthStore = defineStore('auth', () => {
-  const getSchemaState = ref({ data: {} });
-  const setSignupState = ref({ error: null, data: null });
-  const getSignupState = ref({ data: null });
-  const getAuthFlowState = ref({ error: null });
-  const flowId = ref('test-flow-id');
-  const csrfToken = ref('test-csrf-token');
-
-  return {
-    getSchemaState,
-    setSignupState,
-    getSignupState,
-    getAuthFlowState,
-    flowId,
-    csrfToken,
-    getAuthFlow: vi.fn(),
-    setSignup: vi.fn(),
-    getSignup: vi.fn(),
-  };
-});
+const mockGetSchemaState = ref({ data: {} });
+const mockSetSignupState = ref({ error: null, data: null });
+const mockGetSignupState = ref({ data: null });
+const mockGetAuthFlowState = ref({ error: null });
+const mockFlowId = { value: 'test-flow-id' };
+const mockCsrfToken = { value: 'test-csrf-token' };
+const mockGetAuthFlow = vi.fn().mockResolvedValue({ id: 'test-flow-id', ui: {} });
+const mockSetSignup = vi.fn().mockResolvedValue(undefined);
+const mockGetSignup = vi.fn().mockResolvedValue(undefined);
 
 // Mock the dependencies
 vi.mock('InvestCommon/data/auth/auth.repository', () => ({
-  useRepositoryAuth: vi.fn(() => mockAuthStore()),
+  useRepositoryAuth: vi.fn(() => ({
+    getSchemaState: mockGetSchemaState,
+    setSignupState: mockSetSignupState,
+    getSignupState: mockGetSignupState,
+    getAuthFlowState: mockGetAuthFlowState,
+    flowId: mockFlowId,
+    csrfToken: mockCsrfToken,
+    getAuthFlow: mockGetAuthFlow,
+    setSignup: mockSetSignup,
+    getSignup: mockGetSignup,
+  })),
 }));
 
 vi.mock('InvestCommon/domain/session/store/useSession', () => ({
@@ -58,6 +55,14 @@ vi.mock('InvestCommon/domain/analytics/useSendAnalyticsEvent', () => ({
   }),
 }));
 
+vi.mock('InvestCommon/domain/error/oryResponseHandling', () => ({
+  oryResponseHandling: vi.fn(),
+}));
+
+vi.mock('InvestCommon/domain/error/oryErrorHandling', () => ({
+  oryErrorHandling: vi.fn().mockResolvedValue(undefined),
+}));
+
 vi.mock('InvestCommon/features/auth/composables/useDemoAccountAuth', () => ({
   useDemoAccountAuth: () => ({
     authenticate: mockDemoAccountAuthenticate,
@@ -70,6 +75,16 @@ describe('useSignup Store', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
     vi.clearAllMocks();
+    const authRepository = useRepositoryAuth() as any;
+    authRepository.getSchemaState.value = { data: {} };
+    authRepository.setSignupState.value = { error: null, data: null };
+    authRepository.getSignupState.value = { data: null };
+    authRepository.getAuthFlowState.value = { error: null };
+    authRepository.flowId.value = 'test-flow-id';
+    authRepository.csrfToken.value = 'test-csrf-token';
+    authRepository.getAuthFlow.mockReset().mockResolvedValue(undefined);
+    authRepository.setSignup.mockReset().mockResolvedValue(undefined);
+    authRepository.getSignup.mockReset().mockResolvedValue(undefined);
     mockDemoAccountAuthenticate.mockReset().mockResolvedValue(true);
     mockIsDemoAccountAvailable.value = true;
     mockIsDemoAccountLoading.value = false;
@@ -112,23 +127,32 @@ describe('useSignup Store', () => {
   describe('Signup Handlers', () => {
     it('should handle password signup successfully', async () => {
       const store = useSignupStore();
+      const authRepository = useRepositoryAuth() as any;
       store.checkbox = true;
-      store.model = {
-        email: 'test@example.com',
-        first_name: 'John',
-        last_name: 'Doe',
-        create_password: 'password123',
-        repeat_password: 'password123',
-      };
+      store.model.email = 'test@example.com';
+      store.model.first_name = 'John';
+      store.model.last_name = 'Doe';
+      store.model.create_password = 'password123';
+      store.model.repeat_password = 'password123';
 
       const mockSession: any = { id: 'test-session' };
-      vi.mocked(useRepositoryAuth).mockReturnValueOnce({
-        ...(useRepositoryAuth() as any),
-        setSignupState: { value: { error: null, data: { session: mockSession, session_token: 'token' } } },
-      } as any);
+      authRepository.getAuthFlow.mockImplementationOnce(async () => {
+        authRepository.csrfToken.value = 'fresh-signup-csrf-token';
+      });
+      authRepository.setSignupState.value = {
+        error: null,
+        data: { session: mockSession, session_token: 'token' },
+      };
 
       await store.signupPasswordHandler();
       expect(store.isLoading).toBe(false);
+      expect(authRepository.setSignup).toHaveBeenCalledWith(
+        'test-flow-id',
+        expect.objectContaining({
+          csrf_token: 'fresh-signup-csrf-token',
+          password: 'password123',
+        }),
+      );
     });
 
     it('should handle social signup successfully', async () => {
@@ -139,12 +163,14 @@ describe('useSignup Store', () => {
 
     it('should handle signup errors', async () => {
       const store = useSignupStore();
+      const authRepository = useRepositoryAuth() as any;
       store.checkbox = true;
 
-      vi.mocked(useRepositoryAuth).mockReturnValueOnce({
-        ...(useRepositoryAuth() as any),
-        getAuthFlowState: { value: { data: undefined, loading: false, error: new Error('Test error') } },
-      } as any);
+      authRepository.getAuthFlowState.value = {
+        data: undefined,
+        loading: false,
+        error: new Error('Test error'),
+      };
 
       await store.signupPasswordHandler();
       expect(store.isLoading).toBe(false);
@@ -222,31 +248,6 @@ describe('useSignup Store', () => {
       // Create a new pinia instance for this test
       const pinia = createPinia();
       setActivePinia(pinia);
-
-      // Create a mock auth store
-      const mockAuthStore = defineStore('auth', () => {
-        const getSchemaState = ref({ data: {} });
-        const setSignupState = ref({ error: null, data: null });
-        const getSignupState = ref({ data: null });
-        const getAuthFlowState = ref({ error: null });
-        const flowId = ref('test-flow-id');
-        const csrfToken = ref('test-csrf-token');
-
-        return {
-          getSchemaState,
-          setSignupState,
-          getSignupState,
-          getAuthFlowState,
-          flowId,
-          csrfToken,
-          getAuthFlow: vi.fn(),
-          setSignup: vi.fn(),
-          getSignup: vi.fn(),
-        };
-      });
-
-      // Mock the repository before creating the store
-      vi.mocked(useRepositoryAuth).mockReturnValue(mockAuthStore() as any);
 
       // Create the store after mocking
       const store = useSignupStore();

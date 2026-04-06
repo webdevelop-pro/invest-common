@@ -16,7 +16,7 @@ vi.mock('InvestCommon/config/env', () => ({
 }));
 
 const buildHttpRequestMock = vi.fn(() => ({
-  method: 'GET',
+  method: 'POST',
   url: '/from-mock',
   path: '/from-mock',
   userAgent: 'mock-ua',
@@ -81,9 +81,59 @@ describe('sendReportedErrorToAnalytics', () => {
     expect(buildHttpRequestMock).toHaveBeenCalled();
     expect(getClientContextMock).toHaveBeenCalled();
 
+    expect(payload.body).toEqual({});
     expect(payload.data.serviceContext.httpRequest).toEqual(buildHttpRequestMock.mock.results[0].value);
     expect(payload.data.serviceContext.service_name).toBe('vue3-app');
     expect(payload.data.client).toEqual(getClientContextMock.mock.results[0].value);
+  });
+
+  it('forwards request body to analytics logs for mutation requests', () => {
+    buildHttpRequestMock.mockReturnValueOnce({
+      method: 'PATCH',
+      url: '/from-mock',
+      path: '/from-mock',
+      userAgent: 'mock-ua',
+      referer: '-',
+      remoteIp: '-',
+      protocol: 'https:',
+    });
+
+    const normalized = {
+      message: 'Something broke',
+      code: 'E_TEST',
+      statusCode: 500,
+    };
+
+    sendReportedErrorToAnalytics(normalized as any, 'Fallback message', {
+      serviceName: 'vue3-app',
+      body: {
+        code: '123456',
+        email: 'user@example.com',
+        first_name: 'Jamie',
+        totp_code: '123456',
+        remember_device: true,
+        nested: {
+          access_token: 'secret-token',
+          account_number: '9876543210',
+          keep: true,
+        },
+      },
+    });
+
+    expect(logMessageMock).toHaveBeenCalledTimes(1);
+    const payload = logMessageMock.mock.calls[0][0] as any;
+    expect(payload.body).toEqual({
+      code: '[redacted]',
+      email: '[redacted]',
+      first_name: '[redacted]',
+      totp_code: '[redacted]',
+      remember_device: true,
+      nested: {
+        access_token: '[redacted]',
+        account_number: '[redacted]',
+        keep: true,
+      },
+    });
   });
 
   it('skips analytics when user agent is a bot', () => {
@@ -121,4 +171,3 @@ describe('sendReportedErrorToAnalytics', () => {
     expect(logMessageMock).toHaveBeenCalledTimes(1);
   });
 });
-

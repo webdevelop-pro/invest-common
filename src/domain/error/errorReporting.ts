@@ -130,6 +130,8 @@ function defaultErrorReporter(error: unknown, fallbackMessage: string, context?:
   // Enrich context with HTTP request details when available (e.g. APIError.data.httpRequest)
   const httpRequest =
     (error as { data?: { httpRequest?: unknown } })?.data?.httpRequest ?? undefined;
+  const body =
+    (error as { data?: { body?: unknown } })?.data?.body ?? undefined;
 
   // Prefer existing stack/httpRequest on context; fall back to values from the error.
   const stackString =
@@ -141,6 +143,10 @@ function defaultErrorReporter(error: unknown, fallbackMessage: string, context?:
 
   if (httpRequest != null && enrichedContext.httpRequest == null) {
     enrichedContext.httpRequest = httpRequest;
+  }
+
+  if (body != null && enrichedContext.body == null) {
+    enrichedContext.body = body;
   }
 
   if (stackString && enrichedContext.stack == null) {

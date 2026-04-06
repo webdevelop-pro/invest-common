@@ -26,6 +26,7 @@ describe('APIError', () => {
     expect(error.data.statusCode).toBe(400);
     expect(error.data.timestamp).toBeInstanceOf(Date);
     expect(error.data.response).toBeInstanceOf(Response);
+    expect(error.data.body).toEqual({});
   });
 
   it('should initialize responseJson and update message when valid JSON is available', async () => {

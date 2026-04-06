@@ -40,6 +40,7 @@ export function useInvestReview() {
         request_path: route.path,
         httpRequestUrl: `/auth/invest/${slug}/review/${id}/${profileId}`,
         status_code: 200,
+        body: {},
       });
     } catch (error) {
       reportError(error, 'Failed to confirm investment');
@@ -51,6 +52,7 @@ export function useInvestReview() {
         request_path: route.path,
         httpRequestUrl: `/auth/invest/${slug}/review/${id}/${profileId}`,
         status_code: 400,
+        body: {},
       });
     }
   };

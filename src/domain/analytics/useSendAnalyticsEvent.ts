@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useRepositoryAnalytics } from 'InvestCommon/data/analytics/analytics.repository';
 import type { AnalyticsEventType, AnalyticsHttpMethod, IAnalyticsEventRequest } from 'InvestCommon/data/analytics/analytics.type';
+import { normalizeAnalyticsBodyForMethod } from 'InvestCommon/data/analytics/analyticsBody';
 import env from 'InvestCommon/config/env';
 import { buildHttpRequest } from 'InvestCommon/domain/analytics/useAnalyticsError';
 
@@ -39,6 +40,7 @@ export interface SendEventOptions {
    */
   service_name?: string;
   version?: string;
+  body?: unknown;
 }
 
 export const useSendAnalyticsEvent = (options?: UseSendAnalyticsEventOptions) => {
@@ -65,6 +67,8 @@ export const useSendAnalyticsEvent = (options?: UseSendAnalyticsEventOptions) =>
       // Prefer explicit API URL if provided; otherwise fall back to browser URL
       url: eventOptions.httpRequestUrl || undefined,
     });
+    const requestMethod =
+      (httpLike.method as AnalyticsHttpMethod) || (eventOptions.httpRequestMethod || 'POST');
 
     const eventData: IAnalyticsEventRequest = {
       event_type: eventOptions.event_type,
@@ -72,9 +76,10 @@ export const useSendAnalyticsEvent = (options?: UseSendAnalyticsEventOptions) =>
       status_code: eventOptions.status_code || 200,
       identity_id: identityId,
       request_path: requestPath,
+      body: normalizeAnalyticsBodyForMethod(requestMethod, eventOptions.body),
       service_context: {
         httpRequest: {
-          method: (httpLike.method as AnalyticsHttpMethod) || (eventOptions.httpRequestMethod || 'POST'),
+          method: requestMethod,
           url: httpLike.url,
           userAgent: httpLike.userAgent,
           referer: httpLike.referer,

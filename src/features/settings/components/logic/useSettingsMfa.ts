@@ -21,7 +21,7 @@ export function useSettingsMfa() {
       .then((flow) => oryResponseHandling(flow as any));
   };
 
-  const trackMfaEvent = (statusCode: number) => {
+  const trackMfaEvent = (statusCode: number, body?: unknown) => {
     const uiPath = typeof window !== 'undefined' ? window.location.pathname : '';
     void sendEvent({
       event_type: 'send',
@@ -32,6 +32,7 @@ export function useSettingsMfa() {
       request_path: uiPath,
       httpRequestUrl: SELFSERVICE.settings,
       status_code: statusCode,
+      body,
     });
   };
 
@@ -61,12 +62,13 @@ export function useSettingsMfa() {
       isDialogMfaOpen.value = true;
     } else if (totpUnlink.value) {
       // unlink
+      const unlinkRequestBody = {
+        method: 'totp',
+        totp_unlink: true,
+        csrf_token: csrfToken.value,
+      };
       try {
-        await settingsRepository.setSettings(flowId.value, {
-          method: 'totp',
-          totp_unlink: true,
-          csrf_token: csrfToken.value,
-        });
+        await settingsRepository.setSettings(flowId.value, unlinkRequestBody);
         const flowData = await settingsRepository.getAuthFlow(SELFSERVICE.settings);
         oryResponseHandling(flowData as any);
 
@@ -76,10 +78,10 @@ export function useSettingsMfa() {
             description: 'Unlinked',
             variant: 'success',
           });
-          trackMfaEvent(200);
+          trackMfaEvent(200, unlinkRequestBody);
         }
       } catch (error) {
-        trackMfaEvent(400);
+        trackMfaEvent(400, unlinkRequestBody);
         await oryErrorHandling(
           error as any,
           'settings',

@@ -128,6 +128,7 @@ describe('useInvestReview (logic)', () => {
       request_path: mockRoute.path,
       httpRequestUrl: '/auth/invest/test-slug/review/test-id/test-profile-id',
       status_code: 200,
+      body: {},
     }));
   });
 
@@ -152,6 +153,7 @@ describe('useInvestReview (logic)', () => {
       request_path: mockRoute.path,
       httpRequestUrl: '/auth/invest/test-slug/review/test-id/test-profile-id',
       status_code: 400,
+      body: {},
     }));
   });
 
@@ -222,4 +224,3 @@ describe('useInvestReview (logic)', () => {
     expect(mockHubspotForm.submitFormToHubspot).not.toHaveBeenCalled();
   });
 });
-

@@ -17,6 +17,7 @@ export type AnalyticsEventType =
   | 'close';
 
 export type AnalyticsHttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD' | 'OPTIONS' | 'PATCH';
+export type AnalyticsBody = Record<string, unknown>;
 
 /**
  * HTTP request information for analytics context
@@ -106,6 +107,7 @@ export interface IAnalyticsMessage {
   level: AnalyticsLogLevel;
   message: string;
   error: string;
+  body: AnalyticsBody;
   data: IAnalyticsData;
 }
 
@@ -115,6 +117,7 @@ export interface IAnalyticsEventRequest {
   status_code: number;
   identity_id: string;
   request_path: string;
+  body: AnalyticsBody;
   service_context: IServiceContextEvent;
 }
 

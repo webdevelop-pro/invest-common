@@ -34,7 +34,7 @@ export const useLoginRefreshStore = defineStore('loginRefresh', () => {
       .then((flow) => oryResponseHandling(flow as any));
   };
 
-  const trackLoginRefreshEvent = async (statusCode: number) => {
+  const trackLoginRefreshEvent = async (statusCode: number, body?: unknown) => {
     const uiPath = typeof window !== 'undefined' ? window.location.pathname : '';
     await sendEvent({
       event_type: 'send',
@@ -45,6 +45,7 @@ export const useLoginRefreshStore = defineStore('loginRefresh', () => {
       request_path: uiPath,
       httpRequestUrl: `${SELFSERVICE.login}?refresh=true`,
       status_code: statusCode,
+      body,
     });
   };
 
@@ -102,9 +103,23 @@ export const useLoginRefreshStore = defineStore('loginRefresh', () => {
     return true;
   };
 
+  const buildPasswordLoginRefreshRequestBody = () => ({
+    identifier: model.email,
+    password: model.password,
+    method: 'password' as const,
+    csrf_token: authRepository.csrfToken.value,
+  });
+
+  const buildSocialLoginRefreshRequestBody = (provider: string) => ({
+    csrf_token: authRepository.csrfToken.value,
+    provider,
+    method: 'oidc' as const,
+  });
+
   const loginPasswordHandler = async () => {
     if (!validateForm()) return;
 
+    let loginRefreshRequestBody: ReturnType<typeof buildPasswordLoginRefreshRequestBody> | undefined;
     isLoading.value = true;
     try {
       const flowData = await authRepository.getAuthFlow(SELFSERVICE.login, { refresh: true });
@@ -114,21 +129,17 @@ export const useLoginRefreshStore = defineStore('loginRefresh', () => {
         return;
       }
 
-      await authRepository.setLogin(authRepository.flowId.value, {
-        identifier: model.email,
-        password: model.password,
-        method: 'password',
-        csrf_token: authRepository.csrfToken.value,
-      });
+      loginRefreshRequestBody = buildPasswordLoginRefreshRequestBody();
+      await authRepository.setLogin(authRepository.flowId.value, loginRefreshRequestBody);
 
       if (setLoginState.value.error) {
         isLoading.value = false;
-        void trackLoginRefreshEvent(400);
+        void trackLoginRefreshEvent(400, loginRefreshRequestBody);
         return;
       }
 
       if (setLoginState.value.data?.session) {
-        await trackLoginRefreshEvent(200);
+        await trackLoginRefreshEvent(200, loginRefreshRequestBody);
         userSessionStore.updateSession(setLoginState.value.data.session);
         completeSessionRefresh(true); // Success - complete the session refresh
       }
@@ -140,13 +151,14 @@ export const useLoginRefreshStore = defineStore('loginRefresh', () => {
         'Failed to login',
       );
       completeSessionRefresh(false); // Failure - complete with false
-      void trackLoginRefreshEvent(400);
+      void trackLoginRefreshEvent(400, loginRefreshRequestBody ?? buildPasswordLoginRefreshRequestBody());
     } finally {
       isLoading.value = false;
     }
   };
 
   const loginSocialHandler = async (provider: string) => {
+    let loginRefreshRequestBody: ReturnType<typeof buildSocialLoginRefreshRequestBody> | undefined;
     isLoading.value = true;
     try {
       const flowId = getQueryParam('flow');
@@ -156,11 +168,8 @@ export const useLoginRefreshStore = defineStore('loginRefresh', () => {
         if (getAuthFlowState.value.error) return;
       }
 
-      await authRepository.setLogin(flowId || authRepository.flowId.value, {
-        csrf_token: authRepository.csrfToken.value,
-        provider,
-        method: 'oidc',
-      });
+      loginRefreshRequestBody = buildSocialLoginRefreshRequestBody(provider);
+      await authRepository.setLogin(flowId || authRepository.flowId.value, loginRefreshRequestBody);
 
       // Complete session refresh after successful social login
       if (setLoginState.value.data?.session) {

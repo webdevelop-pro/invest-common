@@ -1,3 +1,5 @@
+import type { AnalyticsBody } from 'InvestCommon/data/analytics/analytics.type';
+
 export interface APIErrorData {
   timestamp: Date;
   response: Response;
@@ -5,6 +7,7 @@ export interface APIErrorData {
   /** Parsed JSON body when content-type is application/json; null otherwise. */
   responseJson: APIErrorResponseJson | null;
   stack: string;
+  body: AnalyticsBody;
   httpRequest: {
     method: string;
     url: string;
@@ -33,7 +36,12 @@ export class APIError extends Error {
   /** When true (default), non-fatal 5xx errors may show a global alert banner. */
   public showGlobalAlertOnServerError?: boolean;
 
-  constructor(message: string, response: Response, httpRequest?: APIErrorData['httpRequest']) {
+  constructor(
+    message: string,
+    response: Response,
+    httpRequest?: APIErrorData['httpRequest'],
+    body: AnalyticsBody = {},
+  ) {
     super(message);
 
     // Maintains proper stack trace (only in V8 engines)
@@ -48,6 +56,7 @@ export class APIError extends Error {
       statusCode: response.status,
       responseJson: null,
       stack: this.stack || '',
+      body,
       httpRequest: httpRequest || {
         method: '',
         url: '',

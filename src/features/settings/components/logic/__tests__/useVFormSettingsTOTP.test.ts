@@ -40,6 +40,14 @@ vi.mock('InvestCommon/domain/analytics/useSendAnalyticsEvent', () => ({
   }),
 }));
 
+vi.mock('InvestCommon/domain/error/oryResponseHandling', () => ({
+  oryResponseHandling: vi.fn(),
+}));
+
+vi.mock('InvestCommon/domain/error/oryErrorHandling', () => ({
+  oryErrorHandling: vi.fn().mockResolvedValue(undefined),
+}));
+
 vi.mock('vue', async () => {
   const actual = await vi.importActual('vue');
   return { ...actual, onMounted: vi.fn() };
@@ -178,11 +186,24 @@ describe('useVFormSettingsTOTP', () => {
       });
 
       it('should get auth flow if flowId is missing', async () => {
-        mockFlowId.value = null;
+        mockFlowId.value = null as any;
+        mockSettingsRepositoryInstance.getAuthFlow.mockImplementationOnce(async () => {
+          mockFlowId.value = 'fresh-flow-id';
+          mockCsrfToken.value = 'fresh-totp-csrf-token';
+        });
+        composable.model.totp_code = 123456;
         
         await composable.onSave();
         
         expect(mockSettingsRepositoryInstance.getAuthFlow).toHaveBeenCalledWith('/self-service/settings/browser');
+        expect(mockSettingsRepositoryInstance.setSettings).toHaveBeenCalledWith(
+          'fresh-flow-id',
+          {
+            method: 'totp',
+            totp_code: '123456',
+            csrf_token: 'fresh-totp-csrf-token',
+          },
+        );
       });
 
       it('should return early if auth flow has error', async () => {

@@ -3,7 +3,7 @@ import {
 } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
 import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
-import { ref } from 'vue';
+import { reactive, ref } from 'vue';
 import { SELFSERVICE } from 'InvestCommon/data/auth/auth.constants';
 import { useLoginRefreshStore } from '../useLoginRefresh';
 
@@ -16,21 +16,25 @@ vi.mock('InvestCommon/config/env', () => ({
 
 // Add at the top of your file, before vi.mock:
 export const mockUpdateSession = vi.fn();
+const mockFlowId = { value: 'test-flow-id' };
+const mockCsrfToken = { value: 'test-csrf-token' };
+const mockGetAuthFlow = vi.fn().mockResolvedValue({ id: 'test-flow-id', ui: {} });
+const mockSetLogin = vi.fn().mockResolvedValue(undefined);
+const mockGetSchemaState = ref({ data: undefined, loading: false, error: null });
+const mockSetLoginState = ref({ data: null, error: null });
+const mockGetAuthFlowState = ref({ error: null });
 
 // Mock all required dependencies
 vi.mock('InvestCommon/data/auth/auth.repository', () => {
-  const mockGetAuthFlow = vi.fn().mockResolvedValue({ id: 'test-flow-id', ui: {} });
-  const mockSetLogin = vi.fn().mockResolvedValue(undefined);
-
   return {
     useRepositoryAuth: vi.fn(() => ({
-      flowId: { value: 'test-flow-id' },
-      csrfToken: { value: 'test-csrf-token' },
+      flowId: mockFlowId,
+      csrfToken: mockCsrfToken,
       getAuthFlow: mockGetAuthFlow,
       setLogin: mockSetLogin,
-      getSchemaState: ref({ data: undefined, loading: false, error: null }),
-      setLoginState: ref({ data: null, error: null }),
-      getAuthFlowState: ref({ error: null }),
+      getSchemaState: mockGetSchemaState,
+      setLoginState: mockSetLoginState,
+      getAuthFlowState: mockGetAuthFlowState,
     })),
   };
 });
@@ -46,14 +50,14 @@ vi.mock('InvestCommon/domain/session/store/useSession', () => ({
 
 vi.mock('UiKit/helpers/validation/useFormValidation', () => ({
   useFormValidation: vi.fn(() => {
-    const model = ref({ email: '', password: '' });
+    const model = reactive({ email: '', password: '' });
     const isValid = ref(true);
     const validation = ref({});
 
     const onValidate = vi.fn().mockImplementation(() => {
       // Simple validation logic for testing
-      const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(model.value.email);
-      const passwordValid = model.value.password.length >= 8;
+      const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(model.email);
+      const passwordValid = model.password.length >= 8;
 
       isValid.value = emailValid && passwordValid;
       validation.value = {
@@ -93,6 +97,13 @@ describe('useLoginRefresh Store', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
     vi.clearAllMocks();
+    mockFlowId.value = 'test-flow-id';
+    mockCsrfToken.value = 'test-csrf-token';
+    mockGetAuthFlow.mockReset().mockResolvedValue({ id: 'test-flow-id', ui: {} });
+    mockSetLogin.mockReset().mockResolvedValue(undefined);
+    mockGetSchemaState.value = { data: undefined, loading: false, error: null };
+    mockSetLoginState.value = { data: null, error: null };
+    mockGetAuthFlowState.value = { error: null };
 
     store = useLoginRefreshStore();
     mockAuthRepository = useRepositoryAuth();
@@ -157,32 +168,32 @@ describe('useLoginRefresh Store', () => {
   describe('Password Login', () => {
     it('should handle successful password login', async () => {
       const store = useLoginRefreshStore();
-      store.model = {
-        email: 'test@example.com',
-        password: 'validPassword123!',
-      };
+      store.model.email = 'test@example.com';
+      store.model.password = 'validPassword123!';
 
       const mockSession = { id: 'test-session' };
-      vi.mocked(useRepositoryAuth).mockReturnValueOnce({
-        ...useRepositoryAuth(),
-        setLoginState: { value: { error: null, data: { session: mockSession } } },
+      mockGetAuthFlow.mockImplementationOnce(async () => {
+        mockCsrfToken.value = 'fresh-refresh-csrf-token';
       });
+      mockSetLoginState.value = { error: null, data: { session: mockSession } };
 
       await store.loginPasswordHandler();
       expect(store.isLoading).toBe(false);
+      expect(mockSetLogin).toHaveBeenCalledWith(
+        'test-flow-id',
+        expect.objectContaining({
+          csrf_token: 'fresh-refresh-csrf-token',
+          password: 'validPassword123!',
+        }),
+      );
     });
 
     it('should handle login errors', async () => {
       const store = useLoginRefreshStore();
-      store.model = {
-        email: 'test@example.com',
-        password: 'validPassword123!',
-      };
+      store.model.email = 'test@example.com';
+      store.model.password = 'validPassword123!';
 
-      vi.mocked(useRepositoryAuth).mockReturnValueOnce({
-        ...useRepositoryAuth(),
-        getAuthFlowState: { value: { error: 'Test error' } },
-      });
+      mockGetAuthFlowState.value = { error: 'Test error' };
 
       await store.loginPasswordHandler();
       expect(store.isLoading).toBe(false);
@@ -216,6 +227,9 @@ describe('useLoginRefresh Store', () => {
         value: { search: '' },
         writable: true,
       });
+      mockGetAuthFlow.mockImplementationOnce(async () => {
+        mockCsrfToken.value = 'fresh-refresh-social-token';
+      });
 
       await store.loginSocialHandler('google');
 
@@ -225,7 +239,7 @@ describe('useLoginRefresh Store', () => {
         expect.objectContaining({
           provider: 'google',
           method: 'oidc',
-          csrf_token: 'test-csrf-token',
+          csrf_token: 'fresh-refresh-social-token',
         }),
       );
       expect(store.isLoading).toBe(false);

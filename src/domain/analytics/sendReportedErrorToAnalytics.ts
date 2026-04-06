@@ -1,6 +1,7 @@
 import type { NormalizedError } from 'InvestCommon/domain/error/errorReporting';
 import { useRepositoryAnalytics } from 'InvestCommon/data/analytics/analytics.repository';
 import { AnalyticsLogLevel } from 'InvestCommon/data/analytics/analytics.type';
+import { normalizeAnalyticsBodyForMethod } from 'InvestCommon/data/analytics/analyticsBody';
 import env from 'InvestCommon/config/env';
 import {
   buildHttpRequest,
@@ -26,6 +27,7 @@ export interface AnalyticsErrorContext {
    * When provided, it is merged via buildHttpRequest to ensure consistent shape.
    */
   httpRequest?: Partial<HttpRequestLike>;
+  body?: unknown;
 }
 
 /**
@@ -133,6 +135,7 @@ export function sendReportedErrorToAnalytics(
   try {
     const analytics = useRepositoryAnalytics();
     const httpRequest = buildHttpRequest(options.httpRequest);
+    const body = normalizeAnalyticsBodyForMethod(httpRequest.method, options.body);
     const errorLabel = [fallbackMessage, normalized.message].filter(Boolean).join(': ');
 
     const stack = sanitizeStack(options.stack);
@@ -153,6 +156,7 @@ export function sendReportedErrorToAnalytics(
         level: AnalyticsLogLevel.ERROR,
         message: normalizeGroupMessage(normalized.message),
         error: errorLabel,
+        body,
         data: {
           component,
           caller,

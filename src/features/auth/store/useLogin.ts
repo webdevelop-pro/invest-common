@@ -38,7 +38,7 @@ export const useLoginStore = defineStore('login', () => {
       .then((flow) => oryResponseHandling(flow as any));
   };
 
-  const trackLoginEvent = async (statusCode: number) => {
+  const trackLoginEvent = async (statusCode: number, body?: unknown) => {
     const uiPath = typeof window !== 'undefined' ? window.location.pathname : '';
     await sendEvent({
       event_type: 'send',
@@ -49,6 +49,7 @@ export const useLoginStore = defineStore('login', () => {
       request_path: uiPath,
       httpRequestUrl: SELFSERVICE.login,
       status_code: statusCode,
+      body,
     });
   };
 
@@ -121,9 +122,23 @@ export const useLoginStore = defineStore('login', () => {
     navigateWithQueryParams(getQueryParam('redirect') || urlProfile());
   };
 
+  const buildPasswordLoginRequestBody = () => ({
+    identifier: model.email,
+    password: model.password,
+    method: 'password' as const,
+    csrf_token: authRepository.csrfToken.value,
+  });
+
+  const buildSocialLoginRequestBody = (provider: string) => ({
+    csrf_token: authRepository.csrfToken.value,
+    provider,
+    method: 'oidc' as const,
+  });
+
   const loginPasswordHandler = async () => {
     if (!validateForm()) return;
 
+    let loginRequestBody: ReturnType<typeof buildPasswordLoginRequestBody> | undefined;
     isLoading.value = true;
     try {
       const flowData = await authRepository.getAuthFlow(SELFSERVICE.login);
@@ -133,20 +148,16 @@ export const useLoginStore = defineStore('login', () => {
         return;
       }
 
-      await authRepository.setLogin(authRepository.flowId.value, {
-        identifier: model.email,
-        password: model.password,
-        method: 'password',
-        csrf_token: authRepository.csrfToken.value,
-      });
+      loginRequestBody = buildPasswordLoginRequestBody();
+      await authRepository.setLogin(authRepository.flowId.value, loginRequestBody);
 
       if (setLoginState.value.error) {
-        void trackLoginEvent(400);
+        void trackLoginEvent(400, loginRequestBody);
         isLoading.value = false;
         return;
       }
     } catch (error) {
-      void trackLoginEvent(400);
+      void trackLoginEvent(400, loginRequestBody ?? buildPasswordLoginRequestBody());
       await oryErrorHandling(
         error as any,
         'login',
@@ -157,13 +168,14 @@ export const useLoginStore = defineStore('login', () => {
       isLoading.value = false;
     }
 
-    if (setLoginState.value.data?.session) {
-      await trackLoginEvent(200);
+    if (setLoginState.value.data?.session && loginRequestBody) {
+      await trackLoginEvent(200, loginRequestBody);
       await handleLoginSuccess(setLoginState.value.data.session);
     }
   };
 
   const loginSocialHandler = async (provider: string) => {
+    let loginRequestBody: ReturnType<typeof buildSocialLoginRequestBody> | undefined;
     isLoading.value = true;
     try {
       const flowId = getQueryParam('flow');
@@ -171,13 +183,10 @@ export const useLoginStore = defineStore('login', () => {
       oryResponseHandling(flowData);
       if (getAuthFlowState.value.error) return;
 
-      await authRepository.setLogin(flowId || authRepository.flowId.value, {
-        csrf_token: authRepository.csrfToken.value,
-        provider,
-        method: 'oidc',
-      });
+      loginRequestBody = buildSocialLoginRequestBody(provider);
+      await authRepository.setLogin(flowId || authRepository.flowId.value, loginRequestBody);
     } catch (error) {
-      trackLoginEvent(400);
+      void trackLoginEvent(400, loginRequestBody ?? buildSocialLoginRequestBody(provider));
       await oryErrorHandling(
         error as any,
         'login',

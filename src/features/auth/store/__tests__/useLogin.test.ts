@@ -5,8 +5,11 @@ import { useLoginStore } from '../useLogin';
 
 // Mock data
 const mockFlowId = 'test-flow-id';
-const mockCsrfToken = 'test-csrf-token';
 const mockSession = { id: 'test-session' };
+const mockAuthFlowId = { value: mockFlowId };
+const mockAuthCsrfToken = { value: 'test-csrf-token' };
+const mockGetAuthFlow = vi.fn().mockResolvedValue({ id: mockFlowId, ui: {} });
+const mockSetLogin = vi.fn().mockResolvedValue(undefined);
 
 // Mock the auth repository
 const mockGetAuthFlowState = ref<any>({ error: null });
@@ -19,10 +22,10 @@ const mockIsDemoAccountLoading = ref(false);
 
 vi.mock('InvestCommon/data/auth/auth.repository', () => ({
   useRepositoryAuth: () => ({
-    flowId: { value: mockFlowId },
-    csrfToken: { value: mockCsrfToken },
-    getAuthFlow: vi.fn().mockResolvedValue(undefined),
-    setLogin: vi.fn().mockResolvedValue(undefined),
+    flowId: mockAuthFlowId,
+    csrfToken: mockAuthCsrfToken,
+    getAuthFlow: mockGetAuthFlow,
+    setLogin: mockSetLogin,
     getLogin: vi.fn().mockResolvedValue(undefined),
     getSchemaState: mockGetSchemaState,
     setLoginState: mockSetLoginState,
@@ -65,6 +68,14 @@ vi.mock('InvestCommon/domain/analytics/useSendAnalyticsEvent', () => ({
   }),
 }));
 
+vi.mock('InvestCommon/domain/error/oryResponseHandling', () => ({
+  oryResponseHandling: vi.fn(),
+}));
+
+vi.mock('InvestCommon/domain/error/oryErrorHandling', () => ({
+  oryErrorHandling: vi.fn().mockResolvedValue(undefined),
+}));
+
 vi.mock('InvestCommon/features/auth/composables/useDemoAccountAuth', () => ({
   useDemoAccountAuth: () => ({
     authenticate: mockDemoAccountAuthenticate,
@@ -85,6 +96,10 @@ describe('useLogin Store', () => {
     mockSetLoginState.value = { data: null, error: null };
     mockGetLoginState.value = { data: { requested_aal: 'aal1' }, error: null };
     mockGetSchemaState.value = { data: undefined, loading: false, error: null };
+    mockAuthFlowId.value = mockFlowId;
+    mockAuthCsrfToken.value = 'test-csrf-token';
+    mockGetAuthFlow.mockReset().mockResolvedValue({ id: mockFlowId, ui: {} });
+    mockSetLogin.mockReset().mockResolvedValue(undefined);
     mockDemoAccountAuthenticate.mockReset().mockResolvedValue(true);
     mockIsDemoAccountAvailable.value = true;
     mockIsDemoAccountLoading.value = false;
@@ -116,23 +131,29 @@ describe('useLogin Store', () => {
 
   describe('Password Login', () => {
     it('should handle successful password login', async () => {
-      store.model = {
-        email: 'test@example.com',
-        password: 'validPassword123!',
-      };
+      store.model.email = 'test@example.com';
+      store.model.password = 'validPassword123!';
 
       mockSetLoginState.value = { error: null, data: { session: mockSession } };
+      mockGetAuthFlow.mockImplementationOnce(async () => {
+        mockAuthCsrfToken.value = 'fresh-csrf-token';
+      });
 
       await store.loginPasswordHandler();
 
       expect(store.isLoading).toBe(false);
+      expect(mockSetLogin).toHaveBeenCalledWith(
+        mockFlowId,
+        expect.objectContaining({
+          csrf_token: 'fresh-csrf-token',
+          password: 'validPassword123!',
+        }),
+      );
     });
 
     it('should handle login errors', async () => {
-      store.model = {
-        email: 'test@example.com',
-        password: 'validPassword123!',
-      };
+      store.model.email = 'test@example.com';
+      store.model.password = 'validPassword123!';
 
       mockGetAuthFlowState.value = { error: new Error('Test error') };
 
@@ -162,6 +183,9 @@ describe('useLogin Store', () => {
     it('should handle social login without flow parameter', async () => {
       setActivePinia(createPinia());
       const testStore = useLoginStore();
+      mockGetAuthFlow.mockImplementationOnce(async () => {
+        mockAuthCsrfToken.value = 'fresh-social-csrf-token';
+      });
       
       // Mock getQueryParam to return undefined for flow
       vi.spyOn(testStore, 'getQueryParam').mockImplementation(() => {
@@ -173,6 +197,13 @@ describe('useLogin Store', () => {
       await testStore.loginSocialHandler('google');
 
       expect(testStore.isLoading).toBe(false);
+      expect(mockSetLogin).toHaveBeenCalledWith(
+        mockFlowId,
+        expect.objectContaining({
+          provider: 'google',
+          csrf_token: 'fresh-social-csrf-token',
+        }),
+      );
     });
   });
 

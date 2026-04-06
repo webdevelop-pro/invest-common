@@ -53,6 +53,14 @@ describe('useSendAnalyticsEvent', () => {
       event_type: 'open',
       request_path: '/test-path',
       httpRequestUrl: 'https://api.test.local/v1/example',
+      body: {
+        email: 'user@example.com',
+        first_name: 'Jamie',
+        nested: {
+          accepted: true,
+          routing_number: '021000021',
+        },
+      },
     });
 
     expect(trackEventMock).toHaveBeenCalledTimes(1);
@@ -63,6 +71,14 @@ describe('useSendAnalyticsEvent', () => {
     expect(payload.status_code).toBe(200);
     expect(payload.identity_id).toBe('user-123');
     expect(payload.request_path).toBe('/test-path');
+    expect(payload.body).toEqual({
+      email: '[redacted]',
+      first_name: '[redacted]',
+      nested: {
+        accepted: true,
+        routing_number: '[redacted]',
+      },
+    });
 
     expect(payload.service_context.httpRequest.method).toBe('POST');
     expect(payload.service_context.httpRequest.url).toBe('https://api.test.local/v1/example');
@@ -84,5 +100,42 @@ describe('useSendAnalyticsEvent', () => {
     });
 
     expect(trackEventMock).toHaveBeenCalledTimes(1);
+    const payload = trackEventMock.mock.calls[0][0] as IAnalyticsEventRequest;
+    expect(payload.body).toEqual({});
+  });
+
+  it('redacts sensitive fields from mutation bodies', async () => {
+    const { sendEvent } = useSendAnalyticsEvent();
+
+    await sendEvent({
+      event_type: 'send',
+      request_path: '/sensitive',
+      httpRequestMethod: 'PATCH',
+      body: {
+        password: 'top-secret',
+        identifier: 'user@example.com',
+        code: '123456',
+        csrf_token: 'csrf-token',
+        nested: {
+          access_token: 'access-token',
+          account_number: '9876543210',
+          keep: 'value',
+        },
+      },
+    });
+
+    expect(trackEventMock).toHaveBeenCalledTimes(1);
+    const payload = trackEventMock.mock.calls[0][0] as IAnalyticsEventRequest;
+    expect(payload.body).toEqual({
+      password: '[redacted]',
+      identifier: '[redacted]',
+      code: '[redacted]',
+      csrf_token: '[redacted]',
+      nested: {
+        access_token: '[redacted]',
+        account_number: '[redacted]',
+        keep: 'value',
+      },
+    });
   });
 });

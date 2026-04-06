@@ -148,6 +148,10 @@ describe('useResetPassword', () => {
 
   describe('resetHandler Method', () => {
     it('should handle successful password reset flow', async () => {
+      mockGetAuthFlow.mockImplementationOnce(async () => {
+        mockCsrfToken.value = 'fresh-reset-csrf-token';
+      });
+
       await composable.resetHandler();
       
       expect(mockOnValidate).toHaveBeenCalled();
@@ -157,7 +161,7 @@ describe('useResetPassword', () => {
         {
           password: 'TestPassword123!',
           method: 'password',
-          csrf_token: 'test-csrf-token'
+          csrf_token: 'fresh-reset-csrf-token'
         },
       );
       expect(mockToast).toHaveBeenCalledWith({
@@ -237,6 +241,22 @@ describe('useResetPassword', () => {
       
       const newComposable = useResetPassword();
       await expect(newComposable.resetHandler()).resolves.not.toThrow();
+    });
+
+    it('uses the refreshed csrf token after reloading the settings flow', async () => {
+      mockCsrfToken.value = 'stale-reset-csrf-token';
+      mockGetAuthFlow.mockImplementationOnce(async () => {
+        mockCsrfToken.value = 'fresh-reset-csrf-token';
+      });
+
+      await composable.resetHandler();
+
+      expect(mockSetSettings).toHaveBeenCalledWith(
+        'test-flow-id',
+        expect.objectContaining({
+          csrf_token: 'fresh-reset-csrf-token',
+        }),
+      );
     });
   });
 });

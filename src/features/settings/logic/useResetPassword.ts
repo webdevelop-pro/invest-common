@@ -34,7 +34,7 @@ export function useResetPassword() {
       .then((flow) => oryResponseHandling(flow as any));
   };
 
-  const trackPasswordResetEvent = (statusCode: number) => {
+  const trackPasswordResetEvent = (statusCode: number, body?: unknown) => {
     const uiPath = typeof window !== 'undefined' ? window.location.pathname : '';
     void sendEvent({
       event_type: 'send',
@@ -45,6 +45,7 @@ export function useResetPassword() {
       request_path: uiPath,
       httpRequestUrl: SELFSERVICE.settings,
       status_code: statusCode,
+      body,
     });
   };
 
@@ -88,6 +89,12 @@ export function useResetPassword() {
   const isLoading = ref(false);
   const isDisabledButton = computed(() => (!isValid.value || isLoading.value));
 
+  const buildPasswordResetBody = () => ({
+    password: model.create_password,
+    method: 'password' as const,
+    csrf_token: csrfToken.value,
+  });
+
   const resetHandler = async () => {
     onValidate();
     if (!isValid.value) {
@@ -95,6 +102,7 @@ export function useResetPassword() {
       return;
     }
 
+    let passwordResetBody: ReturnType<typeof buildPasswordResetBody> | undefined;
     isLoading.value = true;
     try {
       const flowData = await settingsRepository.getAuthFlow(SELFSERVICE.settings);
@@ -105,11 +113,8 @@ export function useResetPassword() {
         return;
       }
 
-      await settingsRepository.setSettings(flowId.value, {
-        password: model.create_password,
-        method: 'password',
-        csrf_token: csrfToken.value,
-      });
+      passwordResetBody = buildPasswordResetBody();
+      await settingsRepository.setSettings(flowId.value, passwordResetBody);
 
       if (!setSettingsState.value.error) {
         toast({
@@ -117,14 +122,14 @@ export function useResetPassword() {
           description: 'Password reset success',
           variant: 'success',
         });
-        trackPasswordResetEvent(200);
+        trackPasswordResetEvent(200, passwordResetBody);
         router.push({
           name: ROUTE_SETTINGS_MFA,
           params: { profileId: selectedUserProfileId.value }
         });
       }
     } catch (error) {
-      trackPasswordResetEvent(400);
+      trackPasswordResetEvent(400, passwordResetBody ?? buildPasswordResetBody());
       await oryErrorHandling(
         error as any,
         'settings',

@@ -13,6 +13,7 @@ import {
   readOfflineResponseMetadata,
 } from 'InvestCommon/domain/pwa/pwaOfflineStore';
 import { matchOfflineDomainPolicy, type PwaPolicyEnv } from 'InvestCommon/domain/pwa/pwaPolicy';
+import { normalizeAnalyticsBodyForMethod } from 'InvestCommon/data/analytics/analyticsBody';
 
 const MUTATION_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
@@ -131,6 +132,7 @@ export class ApiClient {
     const fatalOnServerError = config.fatalOnServerError ?? false;
 
     // Gather HTTP request data
+    const requestBody = normalizeAnalyticsBodyForMethod(method, config.body);
     const httpRequest = {
       method,
       url: fullUrl,
@@ -169,7 +171,7 @@ export class ApiClient {
     }
 
     if (!response.ok) {
-      const error = new APIError('Failed to fetch data', response, httpRequest);
+      const error = new APIError('Failed to fetch data', response, httpRequest, requestBody);
       error.isFatal = fatalOnServerError && response.status >= 500;
       error.showGlobalAlertOnServerError = config.showGlobalAlertOnServerError ?? true;
       await error.initializeResponseJson();

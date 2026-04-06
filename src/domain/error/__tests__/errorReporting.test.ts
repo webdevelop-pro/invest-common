@@ -281,4 +281,32 @@ describe('setErrorLogger / setErrorHandlers', () => {
     expect(Array.isArray(stack)).toBe(true);
     expect((stack as unknown[]).length).toBeGreaterThan(0);
   });
+
+  it('forwards request body context to logger when available', () => {
+    const logger = vi.fn();
+    setErrorLogger(logger);
+
+    reportError({
+      data: {
+        httpRequest: {
+          method: 'POST',
+        },
+        body: {
+          password: 'secret',
+          remember: true,
+        },
+      },
+    }, 'Fallback');
+
+    expect(logger).toHaveBeenCalledTimes(1);
+    const [, , context] = logger.mock.calls[0];
+    if (!context || typeof context !== 'object') {
+      throw new Error('Expected context object to be passed to logger');
+    }
+
+    expect((context as { body?: unknown }).body).toEqual({
+      password: 'secret',
+      remember: true,
+    });
+  });
 });

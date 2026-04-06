@@ -174,14 +174,177 @@ describe('ApiClient', () => {
       const promise = apiClient.request('/meta', {
         method: 'POST',
         params: { q: 'search' },
+        body: JSON.stringify({
+          key: 'value',
+          nested: {
+            valid: true,
+          },
+        }),
       });
 
       await expect(promise).rejects.toMatchObject({
         data: {
+          body: {
+            key: 'value',
+            nested: {
+              valid: true,
+            },
+          },
           httpRequest: expect.objectContaining({
             method: 'POST',
             url: `${baseURL}/meta?q=search`,
             path: '/meta',
+          }),
+        },
+      } as any);
+    });
+
+    it('attaches an empty body to GET APIError metadata', async () => {
+      const mockResponse = new Response(
+        JSON.stringify({ message: 'Oops' }),
+        {
+          status: 500,
+          statusText: 'Server Error',
+          headers: new Headers({ 'content-type': 'application/json' }),
+        },
+      );
+      mockFetch.mockResolvedValueOnce(mockResponse);
+
+      const promise = apiClient.request('/meta');
+
+      await expect(promise).rejects.toMatchObject({
+        data: {
+          body: {},
+          httpRequest: expect.objectContaining({
+            method: 'GET',
+          }),
+        },
+      } as any);
+    });
+
+    it('attaches an empty body for mutation APIError metadata when the request body is empty', async () => {
+      const mockResponse = new Response(
+        JSON.stringify({ message: 'Oops' }),
+        {
+          status: 500,
+          statusText: 'Server Error',
+          headers: new Headers({ 'content-type': 'application/json' }),
+        },
+      );
+      mockFetch.mockResolvedValueOnce(mockResponse);
+
+      const promise = apiClient.patch('/meta');
+
+      await expect(promise).rejects.toMatchObject({
+        data: {
+          body: {},
+          httpRequest: expect.objectContaining({
+            method: 'PATCH',
+          }),
+        },
+      } as any);
+    });
+
+    it('redacts sensitive fields before attaching APIError metadata', async () => {
+      const mockResponse = new Response(
+        JSON.stringify({ message: 'Oops' }),
+        {
+          status: 500,
+          statusText: 'Server Error',
+          headers: new Headers({ 'content-type': 'application/json' }),
+        },
+      );
+      mockFetch.mockResolvedValueOnce(mockResponse);
+
+      const promise = apiClient.request('/meta', {
+        method: 'POST',
+        body: JSON.stringify({
+          code: '123456',
+          email: 'user@example.com',
+          identifier: 'user@example.com',
+          first_name: 'Jamie',
+          password: 'super-secret',
+          csrf_token: 'csrf-token',
+          nested: {
+            access_token: 'access-token',
+            account_number: '9876543210',
+            safe: true,
+          },
+        }),
+      });
+
+      await expect(promise).rejects.toMatchObject({
+        data: {
+          body: {
+            code: '[redacted]',
+            email: '[redacted]',
+            identifier: '[redacted]',
+            first_name: '[redacted]',
+            password: '[redacted]',
+            csrf_token: '[redacted]',
+            nested: {
+              access_token: '[redacted]',
+              account_number: '[redacted]',
+              safe: true,
+            },
+          },
+        },
+      } as any);
+    });
+
+    it('normalizes FormData bodies before attaching them to APIError metadata', async () => {
+      const mockResponse = new Response(
+        JSON.stringify({ message: 'Oops' }),
+        {
+          status: 500,
+          statusText: 'Server Error',
+          headers: new Headers({ 'content-type': 'application/json' }),
+        },
+      );
+      mockFetch.mockResolvedValueOnce(mockResponse);
+
+      const formData = new FormData();
+      formData.append('file', new Blob(['test']));
+      formData.append('tag', 'first');
+      formData.append('tag', 'second');
+
+      const promise = apiClient.post('/upload', formData);
+
+      await expect(promise).rejects.toMatchObject({
+        data: {
+          body: {
+            file: 'blob',
+            tag: ['first', 'second'],
+          },
+          httpRequest: expect.objectContaining({
+            method: 'POST',
+          }),
+        },
+      } as any);
+    });
+
+    it('attaches DELETE bodies to APIError metadata', async () => {
+      const mockResponse = new Response(
+        JSON.stringify({ message: 'Oops' }),
+        {
+          status: 500,
+          statusText: 'Server Error',
+          headers: new Headers({ 'content-type': 'application/json' }),
+        },
+      );
+      mockFetch.mockResolvedValueOnce(mockResponse);
+
+      const promise = apiClient.delete('/meta', {
+        funding_source_id: 42,
+      });
+
+      await expect(promise).rejects.toMatchObject({
+        data: {
+          body: {
+            funding_source_id: 42,
+          },
+          httpRequest: expect.objectContaining({
+            method: 'DELETE',
           }),
         },
       } as any);
