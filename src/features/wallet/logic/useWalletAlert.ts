@@ -94,10 +94,12 @@ export function useWalletAlert(options: UseWalletAlertOptions = {}) {
   );
 
   const isWalletCreated = computed(() => {
-    const evmCreated = getEvmWalletState.value.data?.isStatusCreated ?? false;
     const fiatCreated = getWalletState.value.data?.isWalletStatusCreated ?? false;
-    const created = hideFiatAlerts ? evmCreated : fiatCreated || evmCreated;
-    return created && !isWalletError.value && !isWalletCreationRequired.value;
+    if (hideFiatAlerts) {
+      return false;
+    }
+
+    return fiatCreated && !isWalletError.value && !isWalletCreationRequired.value;
   });
 
   const isKYCNeedToPass = computed(

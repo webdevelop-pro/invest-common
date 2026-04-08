@@ -23,6 +23,8 @@ const {
   selectedAsset,
   selectedAssetWarning,
   depositNetworkLabel,
+  networkOptions,
+  selectedNetwork,
   cryptoAddress,
   errorData,
   isFieldRequired,
@@ -75,7 +77,10 @@ const {
       :selected-asset="selectedAsset"
       :selected-asset-warning="selectedAssetWarning"
       :deposit-network-label="depositNetworkLabel"
+      :network-options="networkOptions"
+      :selected-network="selectedNetwork"
       @update:selected-asset="selectedAsset = $event"
+      @update:selected-network="selectedNetwork = $event"
       @copy="onCopyClick"
     />
   </div>

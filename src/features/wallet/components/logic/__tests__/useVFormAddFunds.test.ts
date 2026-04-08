@@ -5,6 +5,10 @@ import { ref } from 'vue';
 const getEvmWalletStateRef = ref({
   data: {
     address: '0xCABBAc435948510D24820746Ee29706a05A54369',
+    chains: [
+      { chain: 'ethereum', wallet_address: '0xETH', chain_account_status: 'verified' },
+      { chain: 'base', wallet_address: '0xBASE', chain_account_status: 'verified' },
+    ],
     balances: [
       { id: 1, symbol: 'USDC', name: 'USD Coin', address: '0xusdc', amount: 1000 },
       { id: 2, symbol: 'ETH', name: 'Ether', address: '0xeth', amount: 0.5 },
@@ -68,6 +72,10 @@ describe('useVFormAddFunds', () => {
     getEvmWalletStateRef.value = {
       data: {
         address: '0xCABBAc435948510D24820746Ee29706a05A54369',
+        chains: [
+          { chain: 'ethereum', wallet_address: '0xETH', chain_account_status: 'verified' },
+          { chain: 'base', wallet_address: '0xBASE', chain_account_status: 'verified' },
+        ],
         balances: [
           { id: 1, symbol: 'USDC', name: 'USD Coin', address: '0xusdc', amount: 1000 },
           { id: 2, symbol: 'ETH', name: 'Ether', address: '0xeth', amount: 0.5 },
@@ -104,6 +112,8 @@ describe('useVFormAddFunds', () => {
     expect(api.fiatSubmitHandler).toBeDefined();
     expect(api.assetOptions).toBeDefined();
     expect(api.selectedAsset).toBeDefined();
+    expect(api.networkOptions).toBeDefined();
+    expect(api.selectedNetwork).toBeDefined();
     expect(api.maxFiatAmount).toBeDefined();
     expect(api.maxFiatAmount.value).toBe(1_000_000);
   });
@@ -125,6 +135,20 @@ describe('useVFormAddFunds', () => {
     expect(api.assetOptions.value).toHaveLength(1);
     expect(api.assetOptions.value[0].value).toBe('USDC');
     expect(api.assetOptions.value[0].text).toBe('USDC');
+  });
+
+  it('exposes selectable crypto network options and updates the chosen address', () => {
+    const api = useVFormAddFunds(onClose);
+    expect(api.networkOptions.value.map((option) => option.value)).toEqual([
+      'ethereum',
+      'polygon',
+      'base',
+      'ethereum-sepolia',
+    ]);
+    expect(api.cryptoAddress.value).toBe('0xETH');
+
+    api.selectedNetwork.value = 'base';
+    expect(api.cryptoAddress.value).toBe('0xBASE');
   });
 
   it('isFiatSubmitDisabled is false when amount and funding source are set', () => {

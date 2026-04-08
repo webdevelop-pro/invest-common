@@ -51,6 +51,12 @@ export interface IEvmWalletBalances {
   tokenValue?: string;
 }
 
+export interface IEvmWalletChainAccount {
+  chain: string;
+  wallet_address: string;
+  chain_account_status?: string;
+}
+
 export interface IEvmWalletDataResponse {
   id: number;
   status: EvmWalletStatusTypes;
@@ -58,6 +64,7 @@ export interface IEvmWalletDataResponse {
   inc_balance: number;
   out_balance: number;
   address: string;
+  chains?: IEvmWalletChainAccount[];
   balances: IEvmWalletBalancesMap;
   transactions: IEvmTransactionDataResponse[];
   created_at: string;

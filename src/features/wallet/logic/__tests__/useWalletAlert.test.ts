@@ -180,14 +180,19 @@ describe('useWalletAlert', () => {
     expect(api.isWalletBlocked.value).toBe(false);
   });
 
-  it('shows info alert when wallet is being created', () => {
+  it('does not show the wallet-created info alert for crypto created status', () => {
     getEvmWalletStateRef.value.data!.isStatusCreated = true;
     getEvmWalletStateRef.value.data!.isStatusVerified = false;
+    selectedUserProfileDataRef.value!.isKycApproved = true;
+    getWalletStateRef.value.data = {
+      ...getWalletStateRef.value.data,
+      isSomeLinkedBankAccount: true,
+    };
+
     const api = useWalletAlert();
-    expect(api.isAlertShow.value).toBe(true);
-    expect(api.isAlertType.value).toBe('info');
-    expect(api.isAlertText.value).toContain('usually takes a few moments');
-    expect(api.alertTitle.value).toContain('wallet is being created');
+
+    expect(api.isAlertShow.value).toBe(false);
+    expect(api.alertTitle.value).toBeUndefined();
   });
 
   it('shows KYC needed alert when profile is KYC pending', () => {

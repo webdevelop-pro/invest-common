@@ -34,7 +34,7 @@ export function useWalletActions(
   const hasRestrictedWallet = computed(() =>
     hasRestrictedWalletBehavior((selectedUserProfileData.value ?? null) as IProfileFormatted | null),
   );
-  const isWalletReady = computed(() => {
+  const isWalletOperational = computed(() => {
     const { data, loading, error } = getEvmWalletState.value;
     return (
       !loading &&
@@ -48,7 +48,7 @@ export function useWalletActions(
 
   const canAccessKycFeatures = computed(
     () =>
-      isWalletReady.value &&
+      isWalletOperational.value &&
       !hasRestrictedWallet.value &&
       !!selectedUserProfileData.value?.isKycApproved,
   );
@@ -68,9 +68,9 @@ export function useWalletActions(
   const hasFiatAvailable = computed(() => fiatMaxWithdrawable.value > 0);
 
   const canWithdraw = computed(
-    () => isWalletReady.value && (hasAvailableBalances.value || hasFiatAvailable.value),
+    () => isWalletOperational.value && (hasAvailableBalances.value || hasFiatAvailable.value),
   );
-  const canExchange = computed(() => isWalletReady.value && hasAvailableBalances.value);
+  const canExchange = computed(() => isWalletOperational.value && hasAvailableBalances.value);
 
   const buttonConfigs = computed(() => [
     {

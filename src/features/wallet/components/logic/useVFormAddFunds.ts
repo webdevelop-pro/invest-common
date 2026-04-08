@@ -23,6 +23,8 @@ export function useVFormAddFunds(onClose: () => void) {
     selectedAsset,
     selectedAssetWarning,
     depositNetworkLabel,
+    networkOptions,
+    selectedNetwork,
     address: cryptoAddress,
   } = useVFormAddFundsCrypto();
 
@@ -81,6 +83,8 @@ export function useVFormAddFunds(onClose: () => void) {
     selectedAsset,
     selectedAssetWarning,
     cryptoAddress,
+    networkOptions,
+    selectedNetwork,
     getWalletState,
   };
 }
