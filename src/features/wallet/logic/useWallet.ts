@@ -13,6 +13,7 @@ import {
   canLoadWalletData as canLoadWalletDataRule,
   canLoadEvmWalletData as canLoadEvmWalletDataRule,
 } from './walletLoadRules';
+import { isWalletSetupRequiredError } from './walletSetupError';
 
 let walletEffectsScope: EffectScope | null = null;
 
@@ -127,6 +128,13 @@ export function useWallet() {
           unref(earnRepository.positionsPools) ?? [],
         );
       } catch (e) {
+        if (isWalletSetupRequiredError(e, {
+          isKycApproved: selectedUserProfileData.value?.isKycApproved ?? false,
+          walletData: getEvmWalletState.value.data,
+        })) {
+          return;
+        }
+
         reportError(e, 'Failed to fetch EVM wallet');
       }
     } else if (!canLoadEvmWalletData.value && getEvmWalletState.value.data) {

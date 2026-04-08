@@ -2,6 +2,26 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
 import { ref } from 'vue';
 
+const {
+  reportErrorMock,
+  getEvmWalletByProfileMock,
+  selectedUserProfileDataState,
+  selectedUserProfileIdState,
+} = vi.hoisted(() => ({
+  reportErrorMock: vi.fn(),
+  getEvmWalletByProfileMock: vi.fn().mockResolvedValue(undefined),
+  selectedUserProfileDataState: { value: { id: 1, isKycApproved: true } },
+  selectedUserProfileIdState: { value: 1 },
+}));
+
+vi.mock('pinia', async () => {
+  const actual = await vi.importActual<typeof import('pinia')>('pinia');
+  return {
+    ...actual,
+    storeToRefs: (store: Record<string, unknown>) => store,
+  };
+});
+
 const mockFiatWallet = {
   id: 1,
   status: 'verified',
@@ -54,16 +74,20 @@ vi.mock('InvestCommon/data/wallet/wallet.repository', () => ({
 vi.mock('InvestCommon/data/evm/evm.repository', () => ({
   useRepositoryEvm: () => ({
     getEvmWalletState: getEvmWalletStateRef,
-    getEvmWalletByProfile: vi.fn().mockResolvedValue(undefined),
+    getEvmWalletByProfile: getEvmWalletByProfileMock,
     resetAll: vi.fn(),
   }),
 }));
 
 vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
   useProfilesStore: () => ({
-    selectedUserProfileData: ref({ id: 1, isKycApproved: true }),
-    selectedUserProfileId: ref(1),
+    selectedUserProfileData: selectedUserProfileDataState,
+    selectedUserProfileId: selectedUserProfileIdState,
   }),
+}));
+
+vi.mock('InvestCommon/domain/error/errorReporting', () => ({
+  reportError: reportErrorMock,
 }));
 
 vi.mock('InvestCommon/domain/session/store/useSession', () => ({
@@ -79,6 +103,11 @@ import { useWallet } from '../useWallet';
 describe('useWallet', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
+    reportErrorMock.mockReset();
+    getEvmWalletByProfileMock.mockReset();
+    getEvmWalletByProfileMock.mockResolvedValue(undefined);
+    selectedUserProfileDataState.value = { id: 1, isKycApproved: true };
+    selectedUserProfileIdState.value = 1;
     getWalletStateRef.value = { data: { ...mockFiatWallet }, loading: false, error: null };
     getEvmWalletStateRef.value = { data: { ...mockEvmWallet }, loading: false, error: null };
   });
@@ -187,5 +216,19 @@ describe('useWallet', () => {
     };
     api = useWallet();
     expect(api.isWalletDataLoading.value).toBe(false);
+  });
+
+  it('does not report a toast-worthy error when the EVM wallet just needs setup', async () => {
+    getEvmWalletStateRef.value = {
+      data: undefined,
+      loading: false,
+      error: null,
+    };
+    getEvmWalletByProfileMock.mockRejectedValueOnce(new Error('Wallet not found'));
+
+    const api = useWallet();
+    await api.updateData();
+
+    expect(reportErrorMock).not.toHaveBeenCalled();
   });
 });

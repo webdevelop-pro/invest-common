@@ -64,6 +64,7 @@ vi.mock('InvestCommon/data/accreditation/accreditation.repository', () => ({
 }));
 
 const mockSubmitFormToHubspot = vi.fn();
+const mockMaybeOpenAfterKyc = vi.fn();
 vi.mock('UiKit/composables/useHubspotForm', () => ({
   useHubspotForm: vi.fn(() => ({
     submitFormToHubspot: mockSubmitFormToHubspot,
@@ -85,6 +86,12 @@ vi.mock('InvestCommon/config/env', () => ({
 
 vi.mock('InvestCommon/domain/error/errorReporting', () => ({
   reportError: vi.fn(),
+}));
+
+vi.mock('InvestCommon/features/wallet/store/useWalletAuth', () => ({
+  useWalletAuth: vi.fn(() => ({
+    maybeOpenAfterKyc: mockMaybeOpenAfterKyc,
+  })),
 }));
 
 const mockPersonalFormRef = {
@@ -145,6 +152,7 @@ describe('useFormFinancialInformationAndKyc', () => {
     vi.clearAllMocks();
     mockRepositoryProfiles.setProfileByIdState = ref({ loading: false, error: null, data: undefined });
     mockRepositoryProfiles.getProfileByIdOptionsState = ref({ loading: false, error: null, data: { schema: {} } });
+    mockMaybeOpenAfterKyc.mockResolvedValue(undefined);
     composable = useFormFinancialInformationAndKyc();
   });
 
@@ -234,6 +242,15 @@ describe('useFormFinancialInformationAndKyc', () => {
       expect(mockSubmitFormToHubspot).toHaveBeenCalledTimes(4);
       expect(mockRepositoryProfiles.getProfileById).toHaveBeenCalledWith('individual', '123');
       expect(mockPush).toHaveBeenCalledWith(composable.backButtonRoute.value);
+      expect(mockMaybeOpenAfterKyc).toHaveBeenCalledWith({
+        profileId: 123,
+        isKycApproved: undefined,
+        profileType: 'individual',
+        profileName: undefined,
+        fullAccountName: undefined,
+        userEmail: 'test@example.com',
+        walletStatus: undefined,
+      });
       expect(composable.isLoading.value).toBe(false);
     });
 

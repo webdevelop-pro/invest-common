@@ -2,6 +2,10 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
 import { ref } from 'vue';
 
+const openDialogMock = vi.fn();
+const maybeOpenAfterKycMock = vi.fn();
+const startFlowForProfileMock = vi.fn();
+
 const getWalletStateRef = ref({
   data: {
     id: 1,
@@ -57,12 +61,23 @@ vi.mock('InvestCommon/data/profiles/profiles.repository', () => ({
   }),
 }));
 vi.mock('InvestCommon/domain/session/store/useSession', () => ({
-  useSessionStore: () => ({ userLoggedIn: ref(true) }),
+  useSessionStore: () => ({
+    userLoggedIn: ref(true),
+    userSessionTraits: ref({ email: 'wallet@example.com' }),
+  }),
 }));
 vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
   useProfilesStore: () => ({
     selectedUserProfileData: selectedUserProfileDataRef,
     selectedUserProfileId: selectedUserProfileIdRef,
+    selectedUserProfileType: ref('individual'),
+  }),
+}));
+vi.mock('InvestCommon/features/wallet/store/useWalletAuth', () => ({
+  useWalletAuth: () => ({
+    openDialog: openDialogMock,
+    maybeOpenAfterKyc: maybeOpenAfterKycMock,
+    startFlowForProfile: startFlowForProfileMock,
   }),
 }));
 const mockPush = vi.fn();
@@ -111,6 +126,9 @@ describe('useWalletAlert', () => {
     selectedUserProfileIdRef.value = 1;
     getProfileByIdStateRef.value = { loading: false };
     mockPush.mockClear();
+    openDialogMock.mockClear();
+    maybeOpenAfterKycMock.mockClear();
+    startFlowForProfileMock.mockClear();
   });
 
   it('returns all alert API fields', () => {
@@ -199,6 +217,59 @@ describe('useWalletAlert', () => {
     const api = useWalletAlert();
     expect(api.isAlertShow.value).toBe(true);
     expect(api.isAlertText.value).toContain('contact us');
+  });
+
+  it('shows wallet setup alert when backend says the user needs to create a wallet', () => {
+    getEvmWalletStateRef.value = {
+      data: undefined,
+      loading: false,
+      error: new Error('User need to create wallet'),
+    };
+    selectedUserProfileDataRef.value!.isKycApproved = true;
+
+    const api = useWalletAlert();
+
+    expect(api.isAlertShow.value).toBe(true);
+    expect(api.isAlertType.value).toBe('info');
+    expect(api.alertTitle.value).toContain('Set up your wallet');
+    expect(api.alertButtonText.value).toBe('Set Up Wallet');
+    expect(api.isAlertText.value).toContain('has not been created');
+    expect(api.showTable.value).toBe(false);
+    expect(api.isWalletBlocked.value).toBe(false);
+  });
+
+  it('opens wallet auth when the wallet setup alert CTA is clicked', () => {
+    getEvmWalletStateRef.value = {
+      data: undefined,
+      loading: false,
+      error: new Error('User need to create wallet'),
+    };
+    selectedUserProfileDataRef.value = {
+      ...selectedUserProfileDataRef.value,
+      isKycApproved: true,
+      name: 'Primary Profile',
+      data: {
+        full_account_name: 'Primary Profile LLC',
+      },
+      wallet: {
+        status: undefined,
+      },
+    };
+
+    const api = useWalletAlert();
+    api.onAlertButtonClick();
+
+    expect(openDialogMock).not.toHaveBeenCalled();
+    expect(maybeOpenAfterKycMock).not.toHaveBeenCalled();
+    expect(startFlowForProfileMock).toHaveBeenCalledWith({
+      profileId: 1,
+      isKycApproved: true,
+      profileType: 'individual',
+      profileName: 'Primary Profile',
+      fullAccountName: 'Primary Profile LLC',
+      userEmail: 'wallet@example.com',
+      walletStatus: undefined,
+    });
   });
 
   it('sets isDataLoading only for real loading or initial load when wallets can load', () => {

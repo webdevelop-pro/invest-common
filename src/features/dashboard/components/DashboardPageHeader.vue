@@ -18,8 +18,12 @@ defineProps({
 
 const {
   onInfoCtaClick,
+  onWalletBannerClick,
+  onWalletBannerContactUsClick,
+  isWalletAlertLoading,
   showPerformanceCards,
   verificationBanner,
+  walletBanner,
 } = useDashboardPageHeader();
 </script>
 
@@ -33,9 +37,13 @@ const {
     />
 
     <DashboardPageHeaderRight
+      :wallet-banner="walletBanner"
+      :is-wallet-alert-loading="isWalletAlertLoading"
       :show-performance-cards="showPerformanceCards"
       :verification-banner="verificationBanner"
       class="dashboard-page-header__aside"
+      @wallet-banner-click="onWalletBannerClick"
+      @wallet-banner-contact-us-click="onWalletBannerContactUsClick"
     />
   </section>
 </template>

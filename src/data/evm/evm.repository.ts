@@ -20,6 +20,20 @@ import {
 
 /** Duration (ms) to show loading state after a notification-driven wallet/transaction update. */
 const NOTIFICATION_LOADING_DURATION_MS = 2000;
+type WalletChain = 'all' | 'ethereum' | 'ethereum-sepolia' | 'polygon' | 'base';
+const DEFAULT_WALLET_CHAIN: WalletChain = 'all';
+
+export type RegisterWalletPayload = {
+  profile_id: number;
+  provider_name: 'alchemy';
+  wallet_address: string;
+  stamped_whoami_request: unknown;
+};
+
+export type UpdateWalletMfaPayload = {
+  provider_name: 'alchemy';
+  mfa_enabled: boolean;
+};
 
 type EvmStates = {
   getEvmWalletState: IEvmWalletDataFormatted;
@@ -27,6 +41,8 @@ type EvmStates = {
   withdrawFundsOptionsState: OptionsStateData;
   exchangeTokensState: IEvmExchangeResponse;
   exchangeTokensOptionsState: OptionsStateData;
+  registerWalletState: OptionsStateData;
+  updateWalletMfaState: OptionsStateData;
 };
 
 export const useRepositoryEvm = defineStore('repository-evm', () => {
@@ -80,6 +96,8 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
     withdrawFundsOptionsState,
     exchangeTokensState,
     exchangeTokensOptionsState,
+    registerWalletState,
+    updateWalletMfaState,
     resetAll: resetActionStates,
   } = createRepositoryStates<EvmStates>({
     getEvmWalletState: undefined,
@@ -87,6 +105,8 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
     withdrawFundsOptionsState: undefined,
     exchangeTokensState: undefined,
     exchangeTokensOptionsState: undefined,
+    registerWalletState: undefined,
+    updateWalletMfaState: undefined,
   });
 
   // Stores the latest raw wallet response from backend so we can
@@ -279,10 +299,18 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
     recomputeWalletFromEarnOverlay(profileId, earnPositions);
   };
 
-  const getEvmWalletByProfile = async (profileId: number, earnPositions?: IEvmEarnPositionOverlay[]) => {
+  const getEvmWalletByProfile = async (
+    profileId: number,
+    earnPositions?: IEvmEarnPositionOverlay[],
+    chain: WalletChain = DEFAULT_WALLET_CHAIN,
+  ) => {
     let responseHeaders: Headers | null = null;
     const result = await withActionState(getEvmWalletState, async () => {
-      const response = await apiClient.get<IEvmWalletDataResponse>(`/auth/wallet/${profileId}`);
+      const response = await apiClient.get<IEvmWalletDataResponse>(`/auth/wallet/${profileId}`, {
+        params: {
+          chain,
+        },
+      });
       responseHeaders = response.headers;
       const data = response.data as IEvmWalletDataResponse;
       baseWalletSnapshot.value = data;
@@ -316,6 +344,18 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
   const exchangeTokensOptions = async () =>
     withActionState(exchangeTokensOptionsState, async () => {
       const response = await apiClient.options<IEvmExchangeResponse>(`/auth/exchange`);
+      return response.data;
+    });
+
+  const registerWallet = async (profileId: number, payload: RegisterWalletPayload) =>
+    withActionState(registerWalletState, async () => {
+      const response = await apiClient.put(`/auth/wallet/register/${profileId}`, payload);
+      return response.data;
+    });
+
+  const updateWalletMfa = async (profileId: number, payload: UpdateWalletMfaPayload) =>
+    withActionState(updateWalletMfaState, async () => {
+      const response = await apiClient.put(`/auth/wallet/mfa/${profileId}`, payload);
       return response.data;
     });
 
@@ -489,11 +529,15 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
     withdrawFundsOptionsState,
     exchangeTokensState,
     exchangeTokensOptionsState,
+    registerWalletState,
+    updateWalletMfaState,
     getEvmWalletByProfile,
     withdrawFunds,
     withdrawFundsOptions,
     exchangeTokens,
     exchangeTokensOptions,
+    registerWallet,
+    updateWalletMfa,
     resetAll,
     updateNotificationData,
     isLoadingNotificationTransaction,
