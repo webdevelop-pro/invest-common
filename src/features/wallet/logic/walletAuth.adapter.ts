@@ -113,6 +113,20 @@ const getSigner = async () => {
   return signerPromise;
 };
 
+const getSignableMessagePayload = (payload: unknown) => {
+  if (typeof payload === 'string') {
+    return payload;
+  }
+
+  const message = (payload as { message?: unknown } | null | undefined)?.message;
+
+  if (typeof message === 'string') {
+    return message;
+  }
+
+  return undefined;
+};
+
 export const walletAuthAdapter = {
   async startEmailOtp(email: string) {
     const signer = await getSigner();
@@ -226,6 +240,13 @@ export const walletAuthAdapter = {
     return signer.getAuthDetails();
   },
 
+  async hasActiveSession() {
+    const signer = await getSigner();
+    const user = await signer.getAuthDetails().catch(() => null);
+
+    return Boolean(user);
+  },
+
   async getStampedWhoamiRequest() {
     const signer = await getSigner();
     const stampedWhoamiRequest = await signer.inner?.stampWhoami?.();
@@ -240,8 +261,17 @@ export const walletAuthAdapter = {
   async signAuthorizationRequest(signatureRequest: AuthorizationSignatureRequest) {
     const signer = await getSigner();
     const requestType = String(signatureRequest?.type ?? '').trim().toLowerCase();
+    const signableMessage = getSignableMessagePayload(signatureRequest?.data);
 
     if (requestType === 'eth_signtypeddata_v4' || requestType === 'eth_signtypeddata') {
+      if (signableMessage) {
+        if (!signer.signMessage) {
+          throw new Error('Wallet signer does not support message signing.');
+        }
+
+        return signer.signMessage(signableMessage);
+      }
+
       if (!signer.signTypedData) {
         throw new Error('Wallet signer does not support typed-data signing.');
       }
@@ -254,7 +284,7 @@ export const walletAuthAdapter = {
         throw new Error('Wallet signer does not support message signing.');
       }
 
-      return signer.signMessage(signatureRequest.data);
+      return signer.signMessage(signableMessage ?? signatureRequest.data);
     }
 
     if (signer.signTypedData) {

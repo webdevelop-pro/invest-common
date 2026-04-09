@@ -106,12 +106,14 @@ describe('evm.helpers', () => {
 
     expect(normalizeEvmWalletInfoResponse(payload).balances).toEqual({
       '0xusdc': {
+        asset: 'USDC',
         address: '0xusdc',
         amount: '10.5',
         symbol: 'USDC',
         name: 'USDC',
       },
       '0xeth': {
+        asset: 'ETH',
         address: '0xeth',
         amount: '1.25',
         symbol: 'ETH',

@@ -68,11 +68,6 @@ const {
           allow-integer-only
           class="v-dialog-wallet-auth__input"
         />
-
-        <div
-          id="alchemy-signer-iframe-container"
-          class="v-dialog-wallet-auth__iframe"
-        />
       </div>
 
       <VDialogFooter class="v-dialog-wallet-auth__footer">
@@ -115,12 +110,6 @@ const {
     justify-content: flex-end;
     gap: 12px;
     margin-top: 24px;
-  }
-
-  &__iframe {
-    width: 0;
-    height: 0;
-    overflow: hidden;
   }
 }
 </style>

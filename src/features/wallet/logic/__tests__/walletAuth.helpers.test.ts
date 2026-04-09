@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import {
   deriveWalletAuthEmail,
+  isRecoverableWalletAuthError,
   isWalletBackendError,
   isWalletBackendReady,
+  isUserRejectedWalletSignatureError,
   shouldPromptWalletAuth,
 } from '../walletAuth.helpers';
 
@@ -34,5 +36,20 @@ describe('walletAuth.helpers', () => {
     expect(shouldPromptWalletAuth({ isKycApproved: true, walletStatus: 'verified' })).toBe(false);
     expect(shouldPromptWalletAuth({ isKycApproved: true, walletStatus: 'error' })).toBe(false);
     expect(shouldPromptWalletAuth({ isKycApproved: false, walletStatus: '' })).toBe(false);
+  });
+
+  it('classifies signer-auth errors as recoverable wallet-auth failures', () => {
+    expect(isRecoverableWalletAuthError(new Error('Wallet signer is not connected.'))).toBe(true);
+    expect(isRecoverableWalletAuthError(new Error('Iframe container cannot be found'))).toBe(true);
+    expect(isRecoverableWalletAuthError({
+      name: 'NotAuthenticatedError',
+      message: 'Signer not authenticated. Please authenticate to use this signer',
+    })).toBe(true);
+    expect(isRecoverableWalletAuthError(new Error('User rejected signature'))).toBe(false);
+  });
+
+  it('detects explicit user-rejected signing errors', () => {
+    expect(isUserRejectedWalletSignatureError(new Error('User rejected the request.'))).toBe(true);
+    expect(isUserRejectedWalletSignatureError(new Error('Request rejected by backend.'))).toBe(false);
   });
 });

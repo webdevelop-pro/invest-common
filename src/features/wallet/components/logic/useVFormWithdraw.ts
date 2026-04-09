@@ -36,7 +36,7 @@ export function useVFormWithdraw(onClose: () => void) {
     () =>
       baseWithdrawalMethodOptions.map((option) => ({
         ...option,
-        disabled: option.value === 'crypto' ? !hasCryptoBalance.value : option.disabled,
+        // disabled: option.value === 'crypto' ? !hasCryptoBalance.value : option.disabled,
       })) as unknown as Record<string, string | number | boolean>[],
   );
 

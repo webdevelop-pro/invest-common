@@ -20,7 +20,10 @@ const {
   model: cryptoModel,
   chainOptions,
   tokenFormatted,
-  text: cryptoAvailableText,
+  availableAmountText: cryptoAvailableText,
+  networkHelperText,
+  assetHelperText,
+  destinationAddressHelperText,
   fiatErrorData,
   fiatIsFieldRequired,
   fiatGetErrorText,
@@ -78,6 +81,9 @@ const {
       :chain-options="chainOptions"
       :token-options="tokenFormatted"
       :available-text="cryptoAvailableText"
+      :network-helper-text="networkHelperText"
+      :asset-helper-text="assetHelperText"
+      :destination-address-helper-text="destinationAddressHelperText"
       :error-data="errorData"
       :is-field-required="isFieldRequired"
       :get-error-text="getErrorText"

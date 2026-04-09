@@ -46,6 +46,7 @@ const normalizeWalletInfoBalances = (
 
   return balancesArray.reduce<IEvmWalletDataResponse['balances']>((acc, balance, index) => {
     const address = String(balance?.address ?? '').trim();
+    const asset = String(balance?.asset ?? balance?.symbol ?? '').trim();
     const symbol = String(balance?.symbol ?? balance?.asset ?? '').trim();
 
     if (!address && !symbol) {
@@ -54,6 +55,7 @@ const normalizeWalletInfoBalances = (
 
     const key = address || symbol || String(index);
     acc[key] = {
+      asset: asset || undefined,
       address,
       amount: balance?.amount ?? 0,
       symbol,

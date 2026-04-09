@@ -42,6 +42,7 @@ export type IEvmWalletDataForFormatter = Omit<IEvmWalletDataResponse, 'balances'
 
 export interface IEvmWalletBalances {
   id: number;
+  asset?: string;
   address: string;
   amount: number;
   symbol: string;
@@ -197,7 +198,7 @@ export interface IEvmTransactionDataFormatted extends IEvmTransactionDataRespons
 
 export interface IEvmWithdrawRequestBody {
   chain: string;
-  asset: string;
+  asset_address: string;
   amount: string;
   destination_address: string;
   idempotency_key: string;
@@ -205,7 +206,7 @@ export interface IEvmWithdrawRequestBody {
 
 export interface IEvmWalletAuthorizeStartRequestBody {
   chain: string;
-  asset: string;
+  asset_address: string;
   max_amount: string;
   nonce: string;
 }

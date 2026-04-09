@@ -16,6 +16,9 @@ defineProps<{
   chainOptions: { id: string; text: string }[];
   tokenOptions: { id: string; text: string; icon?: string; symbol?: string }[];
   availableText: string;
+  networkHelperText: string;
+  assetHelperText: string;
+  destinationAddressHelperText: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   errorData?: any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -35,9 +38,6 @@ const emit = defineEmits<{
   submit: [];
   cancel: [];
 }>();
-
-const walletAddressHelperText = 'Send only to an Ethereum (ERC20) address. '
-  + 'Transfers to other networks will result in permanent loss.';
 </script>
 
 <template>
@@ -54,12 +54,15 @@ const walletAddressHelperText = 'Send only to an Ethereum (ERC20) address. '
     <FormRow class="v-form-withdraw-crypto__row">
       <FormCol col2>
         <VFormGroup
+          v-slot="VFormGroupProps"
           label="Network"
-          required
-          helper-text="Choose the network that will be authorized for this withdrawal."
+          :required="isFieldRequired('chain')"
+          :error-text="getErrorText('chain', errorData) ? [getErrorText('chain', errorData)!] : undefined"
+          :helper-text="networkHelperText"
           class="v-form-withdraw-crypto__input"
         >
           <VFormSelect
+            :is-error="VFormGroupProps.isFieldError"
             :model-value="chain || undefined"
             :options="chainOptions"
             item-label="text"
@@ -73,12 +76,15 @@ const walletAddressHelperText = 'Send only to an Ethereum (ERC20) address. '
       </FormCol>
       <FormCol col2>
         <VFormGroup
+          v-slot="VFormGroupProps"
           label="Asset to Withdraw"
-          required
-          helper-text="Select the specific asset you wish to transfer out."
+          :required="isFieldRequired('asset')"
+          :error-text="getErrorText('asset', errorData) ? [getErrorText('asset', errorData)!] : undefined"
+          :helper-text="assetHelperText"
           class="v-form-withdraw-crypto__input"
         >
           <VFormSelect
+            :is-error="VFormGroupProps.isFieldError"
             :model-value="asset || undefined"
             :options="tokenOptions"
             item-label="text"
@@ -110,7 +116,7 @@ const walletAddressHelperText = 'Send only to an Ethereum (ERC20) address. '
           :required="isFieldRequired('amount')"
           :error-text="getErrorText('amount', errorData) ? [getErrorText('amount', errorData)!] : undefined"
           data-testid="withdraw-amount-group"
-          :helper-text="`Available: ${availableText} (Max)`"
+          :helper-text="availableText"
           label="Amount"
           class="v-form-withdraw-crypto__input"
         >
@@ -130,17 +136,17 @@ const walletAddressHelperText = 'Send only to an Ethereum (ERC20) address. '
       <FormCol>
         <VFormGroup
           v-slot="VFormGroupProps"
-          :required="isFieldRequired('to')"
-          :error-text="getErrorText('to', errorData) ? [getErrorText('to', errorData)!] : undefined"
+          :required="isFieldRequired('destination_address')"
+          :error-text="getErrorText('destination_address', errorData) ? [getErrorText('destination_address', errorData)!] : undefined"
           label="Recipient Wallet Address"
-          :helper-text="walletAddressHelperText"
+          :helper-text="destinationAddressHelperText"
           class="v-form-withdraw-crypto__input"
         >
           <VFormInput
             :is-error="VFormGroupProps.isFieldError"
             placeholder="Address"
             :model-value="destinationAddress || undefined"
-            name="to"
+            name="destination_address"
             size="large"
             data-testid="withdraw-address"
             @update:model-value="emit('update:destinationAddress', $event as string)"

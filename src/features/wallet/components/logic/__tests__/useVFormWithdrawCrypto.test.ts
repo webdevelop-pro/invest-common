@@ -3,19 +3,18 @@ import { setActivePinia, createPinia } from 'pinia';
 import { ref, reactive } from 'vue';
 
 const hoisted = vi.hoisted(() => ({
-  authorizeWithdrawStart: vi.fn(),
-  authorizeWithdrawConfirm: vi.fn(),
   withdrawFundsOptions: vi.fn(),
   withdrawFunds: vi.fn(),
   getEvmWalletByProfile: vi.fn(),
-  startFlowForProfile: vi.fn(),
-  getAuthDetails: vi.fn(),
-  signAuthorizationRequest: vi.fn(),
+  authorizeOperation: vi.fn(),
+  selectedNetwork: {
+    value: 'ethereum-sepolia' as 'ethereum' | 'polygon' | 'base' | 'ethereum-sepolia',
+  },
 }));
 
 const mockBalances = [
-  { id: 1, address: '0xusdc', symbol: 'USDC', name: 'USD Coin', amount: 1000 },
-  { id: 2, address: '0xeth', symbol: 'ETH', name: 'Ether', amount: 0.5 },
+  { id: 1, asset: 'USDC', address: '0xusdc', symbol: 'USDC', name: 'USD Coin', amount: 1000 },
+  { id: 2, asset: 'ETH', address: '0xeth', symbol: 'ETH', name: 'Ether', amount: 0.5 },
 ];
 
 const getEvmWalletStateRef = ref({
@@ -50,17 +49,9 @@ vi.mock('InvestCommon/data/evm/evm.repository', () => ({
     getEvmWalletState: getEvmWalletStateRef,
     withdrawFundsState: withdrawFundsStateRef,
     withdrawFundsOptionsState: withdrawFundsOptionsStateRef,
-    authorizeWithdrawStart: hoisted.authorizeWithdrawStart,
-    authorizeWithdrawConfirm: hoisted.authorizeWithdrawConfirm,
     withdrawFundsOptions: hoisted.withdrawFundsOptions,
     withdrawFunds: hoisted.withdrawFunds,
     getEvmWalletByProfile: hoisted.getEvmWalletByProfile,
-  }),
-}));
-
-vi.mock('InvestCommon/features/wallet/store/useWalletAuth', () => ({
-  useWalletAuth: () => ({
-    startFlowForProfile: hoisted.startFlowForProfile,
   }),
 }));
 
@@ -81,11 +72,24 @@ vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
   }),
 }));
 
-vi.mock('InvestCommon/features/wallet/logic/walletAuth.adapter', () => ({
-  walletAuthAdapter: {
-    getAuthDetails: hoisted.getAuthDetails,
-    signAuthorizationRequest: hoisted.signAuthorizationRequest,
-  },
+vi.mock('InvestCommon/features/wallet/logic/useWalletOperationAuthorization', () => ({
+  useWalletOperationAuthorization: () => ({
+    authorizeOperation: hoisted.authorizeOperation,
+  }),
+}));
+
+vi.mock('InvestCommon/features/wallet/logic/useWalletNetwork', () => ({
+  DEFAULT_WALLET_NETWORK: 'ethereum-sepolia',
+  useWalletNetwork: () => ({
+    defaultNetwork: 'ethereum-sepolia',
+    selectedNetwork: hoisted.selectedNetwork,
+    networkOptions: ref([
+      { value: 'ethereum', text: 'ETH Ethereum (ERC20)', warningLabel: 'Ethereum (ERC20)' },
+      { value: 'polygon', text: 'POL Polygon', warningLabel: 'Polygon' },
+      { value: 'base', text: 'BASE Base', warningLabel: 'Base' },
+      { value: 'ethereum-sepolia', text: 'ETH Ethereum Sepolia', warningLabel: 'Ethereum Sepolia' },
+    ]),
+  }),
 }));
 
 const mockModel = reactive({
@@ -117,6 +121,7 @@ import { useVFormWithdrawCrypto } from '../useVFormWithdrawCrypto';
 describe('useVFormWithdrawCrypto', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
+    hoisted.selectedNetwork.value = 'ethereum-sepolia';
     getEvmWalletStateRef.value = {
       data: {
         id: 1,
@@ -139,18 +144,13 @@ describe('useVFormWithdrawCrypto', () => {
     mockModel.destination_address = '';
     mockModel.idempotency_key = '';
     isValidRef.value = false;
-    hoisted.authorizeWithdrawStart.mockReset();
-    hoisted.authorizeWithdrawStart.mockResolvedValue({
-      session_id: 'session_confirm_1',
-      signature_request: {
-        type: 'eth_signTypedData_v4',
-        data: { hello: 'world' },
+    hoisted.authorizeOperation.mockReset();
+    hoisted.authorizeOperation.mockResolvedValue({
+      status: 'authorized',
+      data: {
+        session_id: 'session_confirm_1',
+        authorization_status: 'active',
       },
-    });
-    hoisted.authorizeWithdrawConfirm.mockReset();
-    hoisted.authorizeWithdrawConfirm.mockResolvedValue({
-      session_id: 'session_confirm_1',
-      authorization_status: 'active',
     });
     hoisted.withdrawFundsOptions.mockReset();
     hoisted.withdrawFundsOptions.mockResolvedValue(undefined);
@@ -158,12 +158,6 @@ describe('useVFormWithdrawCrypto', () => {
     hoisted.withdrawFunds.mockResolvedValue(undefined);
     hoisted.getEvmWalletByProfile.mockReset();
     hoisted.getEvmWalletByProfile.mockResolvedValue(undefined);
-    hoisted.getAuthDetails.mockReset();
-    hoisted.getAuthDetails.mockResolvedValue({ address: '0xabc' });
-    hoisted.signAuthorizationRequest.mockReset();
-    hoisted.signAuthorizationRequest.mockResolvedValue('0xsigned');
-    hoisted.startFlowForProfile.mockReset();
-    hoisted.startFlowForProfile.mockResolvedValue(undefined);
   });
 
   it('returns chain options, asset options, handlers, and form helpers', () => {
@@ -179,29 +173,105 @@ describe('useVFormWithdrawCrypto', () => {
   it('defaults chain to ethereum-sepolia and asset to the first token', () => {
     const api = useVFormWithdrawCrypto();
     expect(api.model.chain).toBe('ethereum-sepolia');
-    expect(api.model.asset).toBe('USDC');
+    expect(api.model.asset).toBe('0xusdc');
+  });
+
+  it('keeps the dashboard-selected network available when it is supported', () => {
+    hoisted.selectedNetwork.value = 'base';
+
+    const api = useVFormWithdrawCrypto();
+
+    expect(api.chainOptions.value.map((option) => option.value)).toEqual([
+      'ethereum',
+      'base',
+      'ethereum-sepolia',
+    ]);
+  });
+
+  it('falls back to shared network options when wallet chains are unavailable', () => {
+    hoisted.selectedNetwork.value = 'base';
+    getEvmWalletStateRef.value = {
+      data: {
+        id: 1,
+        address: '0xCABBA',
+        chains: [],
+        balances: [...mockBalances],
+      },
+      loading: false,
+      error: null,
+    };
+
+    const api = useVFormWithdrawCrypto();
+
+    expect(api.chainOptions.value.map((option) => option.value)).toEqual([
+      'ethereum',
+      'polygon',
+      'base',
+      'ethereum-sepolia',
+    ]);
   });
 
   it('available text reflects the selected asset amount', () => {
     const api = useVFormWithdrawCrypto();
     api.model.asset = 'USDC';
-    expect(api.text.value).toContain('1000');
+    expect(api.availableAmountText.value).toContain('1000');
   });
 
-  it('starts wallet auth flow after authorize/start when signing is unavailable', async () => {
-    hoisted.signAuthorizationRequest.mockRejectedValueOnce(new Error('not authenticated'));
+  it('defers the withdrawal when wallet auth recovery is required and resumes with the same payload', async () => {
+    let pendingResume: (() => Promise<void>) | undefined;
+    const emitClose = vi.fn();
+    hoisted.authorizeOperation
+      .mockImplementationOnce(async (params) => {
+        await params.onBeforeWalletAuth?.();
+        pendingResume = params.onAuthRecovered as (() => Promise<void>) | undefined;
+        return { status: 'deferred_to_wallet_auth' };
+      })
+      .mockResolvedValueOnce({
+        status: 'authorized',
+        data: {
+          session_id: 'session_confirm_1',
+          authorization_status: 'active',
+        },
+      });
     isValidRef.value = true;
-    const api = useVFormWithdrawCrypto();
+    const api = useVFormWithdrawCrypto(emitClose);
     api.model.chain = 'ethereum';
     api.model.asset = 'USDC';
     api.model.amount = 50;
     api.model.destination_address = '0xrecipient';
+    api.model.idempotency_key = 'wdr_test_0001';
 
     await api.saveHandler();
-
-    expect(hoisted.authorizeWithdrawStart).toHaveBeenCalledTimes(1);
-    expect(hoisted.startFlowForProfile).toHaveBeenCalledTimes(1);
     expect(hoisted.withdrawFunds).not.toHaveBeenCalled();
+    expect(emitClose).toHaveBeenCalledTimes(1);
+
+    await pendingResume?.();
+
+    expect(hoisted.authorizeOperation).toHaveBeenNthCalledWith(1, expect.objectContaining({
+      profileId: 1,
+      request: {
+        chain: 'ethereum',
+        asset_address: '0xusdc',
+        max_amount: '50',
+        nonce: 'wdr_test_0001',
+      },
+    }));
+    expect(hoisted.authorizeOperation).toHaveBeenNthCalledWith(2, expect.objectContaining({
+      profileId: 1,
+      request: {
+        chain: 'ethereum',
+        asset_address: '0xusdc',
+        max_amount: '50',
+        nonce: 'wdr_test_0001',
+      },
+    }));
+    expect(hoisted.withdrawFunds).toHaveBeenCalledWith(1, {
+      chain: 'ethereum',
+      asset_address: '0xusdc',
+      amount: '50',
+      destination_address: '0xrecipient',
+      idempotency_key: 'wdr_test_0001',
+    });
   });
 
   it('completes authorize-sign-confirm-withdraw flow and closes on success', async () => {
@@ -216,28 +286,109 @@ describe('useVFormWithdrawCrypto', () => {
 
     await api.saveHandler();
 
-    expect(hoisted.authorizeWithdrawStart).toHaveBeenCalledWith(1, {
-      chain: 'ethereum',
-      asset: 'USDC',
-      max_amount: '50',
-      nonce: 'wdr_test_0001',
-    });
-    expect(hoisted.signAuthorizationRequest).toHaveBeenCalledWith({
-      type: 'eth_signTypedData_v4',
-      data: { hello: 'world' },
-    });
-    expect(hoisted.authorizeWithdrawConfirm).toHaveBeenCalledWith(1, {
-      session_id: 'session_confirm_1',
-      owner_signature: '0xsigned',
-    });
+    expect(hoisted.authorizeOperation).toHaveBeenCalledWith(expect.objectContaining({
+      profileId: 1,
+      request: {
+        chain: 'ethereum',
+        asset_address: '0xusdc',
+        max_amount: '50',
+        nonce: 'wdr_test_0001',
+      },
+    }));
     expect(hoisted.withdrawFunds).toHaveBeenCalledWith(1, {
       chain: 'ethereum',
-      asset: 'USDC',
+      asset_address: '0xusdc',
       amount: '50',
       destination_address: '0xrecipient',
       idempotency_key: 'wdr_test_0001',
     });
     expect(hoisted.getEvmWalletByProfile).toHaveBeenCalledWith(1);
     expect(emitClose).toHaveBeenCalled();
+  });
+
+  it('normalizes the submitted asset to the selected token address when available', async () => {
+    isValidRef.value = true;
+    getEvmWalletStateRef.value = {
+      data: {
+        id: 1,
+        address: '0xCABBA',
+        chains: [
+          { chain: 'ethereum-sepolia', wallet_address: '0xSEP', chain_account_status: 'verified' },
+        ],
+        balances: [
+          { id: 3, asset: 'BTRP', address: '0xbtrp', symbol: 'BTRP', name: 'BTRP', amount: 200 },
+        ],
+      },
+      loading: false,
+      error: null,
+    };
+
+    const api = useVFormWithdrawCrypto();
+    api.model.chain = 'ethereum-sepolia';
+    api.model.asset = '0xbtrp';
+    api.model.amount = 10;
+    api.model.destination_address = '0xrecipient';
+    api.model.idempotency_key = 'wdr_test_address_asset';
+
+    await api.saveHandler();
+
+    expect(hoisted.authorizeOperation).toHaveBeenCalledWith(expect.objectContaining({
+      request: {
+        chain: 'ethereum-sepolia',
+        asset_address: '0xbtrp',
+        max_amount: '10',
+        nonce: 'wdr_test_address_asset',
+      },
+    }));
+    expect(hoisted.withdrawFunds).toHaveBeenCalledWith(1, {
+      chain: 'ethereum-sepolia',
+      asset_address: '0xbtrp',
+      amount: '10',
+      destination_address: '0xrecipient',
+      idempotency_key: 'wdr_test_address_asset',
+    });
+  });
+
+  it('resolves a symbol-style selected asset to the chosen token address before submit', async () => {
+    isValidRef.value = true;
+    getEvmWalletStateRef.value = {
+      data: {
+        id: 1,
+        address: '0xCABBA',
+        chains: [
+          { chain: 'ethereum-sepolia', wallet_address: '0xSEP', chain_account_status: 'verified' },
+        ],
+        balances: [
+          { id: 3, asset: 'BTRP', address: '0xbtrp', symbol: 'BTRP', name: 'BTRP', amount: 200 },
+        ],
+      },
+      loading: false,
+      error: null,
+    };
+
+    const api = useVFormWithdrawCrypto();
+    api.model.chain = 'ethereum-sepolia';
+    api.model.asset = 'BTRP';
+    api.model.amount = 10;
+    api.model.destination_address = '0xrecipient';
+    api.model.idempotency_key = 'wdr_test_symbol_asset';
+
+    await api.saveHandler();
+
+    expect(hoisted.authorizeOperation).toHaveBeenCalledWith(expect.objectContaining({
+      request: {
+        chain: 'ethereum-sepolia',
+        asset_address: '0xbtrp',
+        max_amount: '10',
+        nonce: 'wdr_test_symbol_asset',
+      },
+    }));
+    expect(hoisted.withdrawFunds).toHaveBeenCalledWith(1, {
+      chain: 'ethereum-sepolia',
+      asset_address: '0xbtrp',
+      amount: '10',
+      destination_address: '0xrecipient',
+      idempotency_key: 'wdr_test_symbol_asset',
+    });
   });
 });

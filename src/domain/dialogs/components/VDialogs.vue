@@ -30,7 +30,11 @@ const {
 </script>
 
 <template>
-  <div>
+  <div class="v-dialogs">
+    <div
+      id="alchemy-signer-iframe-container"
+      class="v-dialogs__wallet-auth-iframe"
+    />
     <VDialogLogOut
       v-model="isDialogLogoutOpen"
     />
@@ -46,3 +50,13 @@ const {
     />
   </div>
 </template>
+
+<style lang="scss" scoped>
+.v-dialogs {
+  &__wallet-auth-iframe {
+    width: 0;
+    height: 0;
+    overflow: hidden;
+  }
+}
+</style>

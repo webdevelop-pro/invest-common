@@ -47,6 +47,13 @@ type OpenPayload = {
   isKycApproved?: boolean | null;
 };
 
+export type WalletAuthOpenPayload = OpenPayload;
+
+type PendingPostAuthAction = {
+  profileId: number;
+  run: () => Promise<void>;
+};
+
 const STORAGE_KEY = 'invest:wallet-auth:profiles';
 
 const createEmptyState = (): WalletAuthProfileState => ({
@@ -91,6 +98,7 @@ export const useWalletAuth = defineStore('wallet-auth', () => {
   const isDialogWalletAuthOpen = ref(false);
   const currentProfileId = ref<number | null>(null);
   const profileStates = ref<Record<string, WalletAuthProfileState>>(readStorage());
+  const pendingPostAuthAction = ref<PendingPostAuthAction | null>(null);
 
   const profilesRepository = useRepositoryProfiles();
   const evmRepository = useRepositoryEvm();
@@ -167,10 +175,44 @@ export const useWalletAuth = defineStore('wallet-auth', () => {
     });
   };
 
-  const closeDialog = () => {
+  const clearPendingPostAuthAction = (profileId?: number) => {
+    if (!pendingPostAuthAction.value) {
+      return;
+    }
+
+    if (profileId && pendingPostAuthAction.value.profileId !== profileId) {
+      return;
+    }
+
+    pendingPostAuthAction.value = null;
+  };
+
+  const closeDialog = (options?: { clearPendingAction?: boolean }) => {
     clearCurrentError();
+    if (options?.clearPendingAction !== false) {
+      clearPendingPostAuthAction(currentProfileId.value ?? undefined);
+    }
     isDialogWalletAuthOpen.value = false;
     dialogsStore.closeWalletAuthDialog();
+  };
+
+  const setPendingPostAuthAction = (action: PendingPostAuthAction) => {
+    pendingPostAuthAction.value = action;
+  };
+
+  const runPendingPostAuthAction = async (profileId: number) => {
+    const action = pendingPostAuthAction.value;
+    if (!action || action.profileId !== profileId) {
+      return;
+    }
+
+    pendingPostAuthAction.value = null;
+
+    try {
+      await action.run();
+    } catch {
+      // The resumed feature flow is responsible for exposing its own errors.
+    }
   };
 
   const clearProfileState = (profileId: number) => {
@@ -221,6 +263,14 @@ export const useWalletAuth = defineStore('wallet-auth', () => {
       errorMessage: '',
       retryAction: 'start',
     });
+
+    const shouldResumePendingAction = pendingPostAuthAction.value?.profileId === profileId;
+    if (!shouldResumePendingAction) {
+      return;
+    }
+
+    closeDialog({ clearPendingAction: false });
+    await runPendingPostAuthAction(profileId);
   };
 
   const finalizeAfterMfa = async (profileId: number) => {
@@ -454,6 +504,9 @@ export const useWalletAuth = defineStore('wallet-auth', () => {
     currentProfileState,
     openDialog,
     closeDialog,
+    pendingPostAuthAction,
+    setPendingPostAuthAction,
+    clearPendingPostAuthAction,
     getProfileState,
     hasResumableState,
     clearProfileState,

@@ -233,4 +233,39 @@ describe('useWalletAuth', () => {
 
     expect(store.currentProfileState.errorMessage).toBe('');
   });
+
+  it('runs the pending post-auth action after wallet bind succeeds', async () => {
+    const pendingAction = vi.fn().mockResolvedValue(undefined);
+    const store = useWalletAuth();
+
+    store.setPendingPostAuthAction({
+      profileId: 7,
+      run: pendingAction,
+    });
+
+    await store.startFlowForProfile({
+      profileId: 7,
+      profileType: 'individual',
+      userEmail: 'user@example.com',
+    });
+    await store.submitOtp('123456');
+
+    expect(dialogsStore.closeWalletAuthDialog).toHaveBeenCalledTimes(1);
+    expect(pendingAction).toHaveBeenCalledTimes(1);
+    expect(store.pendingPostAuthAction).toBeNull();
+  });
+
+  it('clears any pending post-auth action when the dialog closes', () => {
+    const store = useWalletAuth();
+
+    store.setPendingPostAuthAction({
+      profileId: 7,
+      run: vi.fn().mockResolvedValue(undefined),
+    });
+
+    store.openDialog(7);
+    store.closeDialog();
+
+    expect(store.pendingPostAuthAction).toBeNull();
+  });
 });

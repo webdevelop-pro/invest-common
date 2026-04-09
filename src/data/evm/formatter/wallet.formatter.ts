@@ -133,6 +133,7 @@ export class EvmWalletFormatter {
 
         return {
           ...bal,
+          asset: bal.asset ? String(bal.asset) : undefined,
           address: String(bal.address),
           amount,
           symbol: String(bal.symbol ?? ''),

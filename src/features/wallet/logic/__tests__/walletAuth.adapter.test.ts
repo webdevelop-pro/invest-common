@@ -8,12 +8,18 @@ import {
 
 const {
   authenticateMock,
+  getAuthDetailsMock,
   signerConstructorMock,
+  signMessageMock,
+  signTypedDataMock,
   statusListeners,
   errorListeners,
 } = vi.hoisted(() => ({
   authenticateMock: vi.fn(),
+  getAuthDetailsMock: vi.fn(),
   signerConstructorMock: vi.fn(),
+  signMessageMock: vi.fn(),
+  signTypedDataMock: vi.fn(),
   statusListeners: [] as Array<(status: string) => void>,
   errorListeners: [] as Array<(error?: { message: string }) => void>,
 }));
@@ -37,7 +43,9 @@ vi.mock('@account-kit/signer', () => ({
     return {
       authenticate: authenticateMock,
       validateMultiFactors: vi.fn(),
-      getAuthDetails: vi.fn(),
+      getAuthDetails: getAuthDetailsMock,
+      signMessage: signMessageMock,
+      signTypedData: signTypedDataMock,
       on: (event: string, listener: (...args: any[]) => void) => {
         if (event === 'statusChanged') {
           statusListeners.push(listener as (status: string) => void);
@@ -62,7 +70,13 @@ describe('walletAuthAdapter', () => {
     vi.useFakeTimers();
     document.body.innerHTML = '';
     authenticateMock.mockReset();
+    getAuthDetailsMock.mockReset();
     signerConstructorMock.mockReset();
+    signMessageMock.mockReset();
+    signTypedDataMock.mockReset();
+    signMessageMock.mockResolvedValue('0xsigned-message');
+    signTypedDataMock.mockResolvedValue('0xsigned-typed-data');
+    getAuthDetailsMock.mockResolvedValue({ address: '0xabc123' });
     statusListeners.length = 0;
     errorListeners.length = 0;
     authenticateMock.mockImplementation(async () => {
@@ -110,5 +124,70 @@ describe('walletAuthAdapter', () => {
       statusListeners.forEach((listener) => listener('CONNECTED'));
     });
     await expect(walletAuthAdapter.startEmailOtp('user@example.com')).resolves.toBe('connected');
+  });
+
+  it('signs signature_request.data.message when the backend returns a message payload', async () => {
+    const { walletAuthAdapter } = await import('../walletAuth.adapter');
+
+    const container = document.createElement('div');
+    container.id = 'alchemy-signer-iframe-container';
+    document.body.appendChild(container);
+
+    await walletAuthAdapter.startEmailOtp('user@example.com');
+    await expect(walletAuthAdapter.signAuthorizationRequest({
+      type: 'eth_signTypedData_v4',
+      data: {
+        message: 'Authorize wallet session',
+      },
+    })).resolves.toBe('0xsigned-message');
+
+    expect(signMessageMock).toHaveBeenCalledWith('Authorize wallet session');
+    expect(signTypedDataMock).not.toHaveBeenCalled();
+  });
+
+  it('keeps full typed-data signing for eip712 payloads', async () => {
+    const { walletAuthAdapter } = await import('../walletAuth.adapter');
+
+    const container = document.createElement('div');
+    container.id = 'alchemy-signer-iframe-container';
+    document.body.appendChild(container);
+
+    const typedData = {
+      domain: { name: 'Wallet Session', version: '1', chainId: 1 },
+      types: {
+        EIP712Domain: [
+          { name: 'name', type: 'string' },
+        ],
+        WalletSessionAuthorization: [
+          { name: 'sessionId', type: 'string' },
+        ],
+      },
+      primaryType: 'WalletSessionAuthorization',
+      message: {
+        sessionId: 'session_confirm_1',
+      },
+    };
+
+    await walletAuthAdapter.startEmailOtp('user@example.com');
+    await expect(walletAuthAdapter.signAuthorizationRequest({
+      type: 'eth_signTypedData_v4',
+      data: typedData,
+    })).resolves.toBe('0xsigned-typed-data');
+
+    expect(signTypedDataMock).toHaveBeenCalledWith(typedData);
+    expect(signMessageMock).not.toHaveBeenCalled();
+  });
+
+  it('reports whether the signer has an active cached session', async () => {
+    const { walletAuthAdapter } = await import('../walletAuth.adapter');
+
+    const container = document.createElement('div');
+    container.id = 'alchemy-signer-iframe-container';
+    document.body.appendChild(container);
+
+    await expect(walletAuthAdapter.hasActiveSession()).resolves.toBe(true);
+
+    getAuthDetailsMock.mockRejectedValueOnce(new Error('Not authenticated'));
+    await expect(walletAuthAdapter.hasActiveSession()).resolves.toBe(false);
   });
 });

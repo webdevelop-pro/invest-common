@@ -72,3 +72,53 @@ export const shouldPromptWalletAuth = ({
   && !isWalletBackendReady(walletStatus)
   && !isWalletBackendError(walletStatus)
 );
+
+const normalizeErrorMessage = (error?: unknown) => {
+  const errorLike = error as Error | undefined;
+
+  return `${String(errorLike?.name ?? '').trim()} ${String(errorLike?.message ?? error ?? '').trim()}`
+    .trim()
+    .toLowerCase();
+};
+
+export const isUserRejectedWalletSignatureError = (error?: unknown) => {
+  const message = normalizeErrorMessage(error);
+
+  return [
+    'user rejected',
+    'user denied',
+    'rejected the request',
+    'signature rejected',
+    'cancelled',
+    'canceled',
+  ].some((pattern) => message.includes(pattern));
+};
+
+export const isRecoverableWalletAuthError = (error?: unknown) => {
+  const message = normalizeErrorMessage(error);
+
+  if (!message) {
+    return false;
+  }
+
+  if (isUserRejectedWalletSignatureError(error)) {
+    return false;
+  }
+
+  return [
+    'notauthenticatederror',
+    'not authenticated',
+    'signer not authenticated',
+    'please authenticate',
+    'authentication failed',
+    'wallet auth',
+    'wallet signer',
+    'not connected',
+    'disconnected',
+    'session expired',
+    'expired session',
+    'iframe container cannot be found',
+    'missing signer',
+    'no signer',
+  ].some((pattern) => message.includes(pattern));
+};
