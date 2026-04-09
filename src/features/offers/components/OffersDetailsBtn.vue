@@ -4,12 +4,13 @@ import {
 } from 'vue';
 import { useRoute } from 'vitepress';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
+import VKycActionButton from 'InvestCommon/features/kyc/VKycActionButton.vue';
 import { storeToRefs } from 'pinia';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
 import { urlSignin } from 'InvestCommon/domain/config/links';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
-import { useKycStatus } from 'InvestCommon/features/kyc/store/useKycStatus';
+import { useKycAlertViewModel } from 'InvestCommon/features/kyc/logic/useKycAlertViewModel';
 import { useSendAnalyticsEvent } from 'InvestCommon/domain/analytics/useSendAnalyticsEvent';
 import { useEventListener } from '@vueuse/core';
 import { OfferTabTypes } from './logic/useOffersDetailsContent';
@@ -29,7 +30,7 @@ const userSessionStore = useSessionStore();
 const { userLoggedIn } = storeToRefs(userSessionStore);
 const profilesStore = useProfilesStore();
 const { selectedUserProfileData, hasAnyKycApprovedProfile } = storeToRefs(profilesStore);
-const kycButtonStore = useKycStatus();
+const { alertModel: kycAlertModel } = useKycAlertViewModel();
 const route = useRoute();
 const { sendEvent } = useSendAnalyticsEvent();
 
@@ -53,9 +54,11 @@ const showInvestBtn = computed(() => (
   || hasAnyKycApprovedProfile.value
   || props.isSharesReached
 ));
-const showKYCBtn = computed(() => (
+const showKycBtn = computed(() => (
   !hasAnyKycApprovedProfile.value
-  && selectedUserProfileData.value?.isKycNew
+  && !showInvestBtn.value
+  && kycAlertModel.value.show
+  && Boolean(kycAlertModel.value.buttonText)
   && !props.isSharesReached
 ));
 const canFloatButton = computed(() => (
@@ -77,11 +80,6 @@ const investClickHandler = async () => {
     request_path: route.path,
   });
   emit('invest');
-};
-
-
-const startKycHandler = () => {
-  kycButtonStore.onClick();
 };
 
 const updateFloatingState = () => {
@@ -216,14 +214,11 @@ onUnmounted(() => {
       >
         Invest Now
       </VButton>
-      <VButton
-        v-else-if="showKYCBtn"
+      <VKycActionButton
+        v-else-if="showKycBtn"
         class="offer-details-btn__btn"
         size="large"
-        @click="startKycHandler"
-      >
-        Start KYC
-      </VButton>
+      />
       <p
         v-else
         class="offer-details-btn__info is--small"

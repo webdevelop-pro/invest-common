@@ -94,12 +94,14 @@ import {
   TRANSACTIONS_TAB,
   EVM_WALLET_TAB_INFO,
 } from '../useDashboardWallet';
+import { DEFAULT_WALLET_NETWORK } from '../useWalletNetwork';
 
 describe('useDashboardWallet', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
     getEvmWalletStateRef.value = { data: { ...mockEvmData }, loading: false, error: null };
     getWalletStateRef.value = { data: { ...mockWalletData }, loading: false, error: null };
+    useDashboardWallet().selectedEvmNetwork.value = DEFAULT_WALLET_NETWORK;
   });
 
   it('returns dialog state, tabs, balance cards, tables, and handlers', () => {
@@ -120,6 +122,8 @@ describe('useDashboardWallet', () => {
     expect(api.isAlertShow).toBeDefined();
     expect(api.showTable).toBeDefined();
     expect(api.totalBalanceMainFormatted).toBeDefined();
+    expect(api.selectedEvmNetwork).toBeDefined();
+    expect(api.evmNetworkOptions).toBeDefined();
   });
 
   it('exports tab constants', () => {
@@ -200,5 +204,10 @@ describe('useDashboardWallet', () => {
     api.onTransactionClick('withdrawal' as any);
     expect(api.isDialogTransactionOpen.value).toBe(true);
     expect(api.transactionType.value).toBe('withdrawal');
+  });
+
+  it('defaults the wallet network selector to ethereum sepolia', () => {
+    const api = useDashboardWallet();
+    expect(api.selectedEvmNetwork.value).toBe(DEFAULT_WALLET_NETWORK);
   });
 });

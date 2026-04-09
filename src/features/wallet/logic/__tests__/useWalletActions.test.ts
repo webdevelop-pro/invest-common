@@ -105,12 +105,30 @@ describe('useWalletActions', () => {
     expect(api.buttonConfigs.value[0].transactionType).toBe(EvmTransactionTypes.deposit);
   });
 
-  it('disables add-funds when wallet not ready', () => {
+  it('disables add-funds when wallet is neither created nor verified', () => {
     getEvmWalletStateRef.value.data!.isStatusVerified = false;
     getEvmWalletStateRef.value.data!.isStatusCreated = false;
     const api = useWalletActions();
     const addFunds = api.buttonConfigs.value.find((b: { id: string }) => b.id === 'add-funds');
     expect(addFunds?.disabled).toBe(true);
+  });
+
+  it('keeps non-balance actions enabled while crypto wallet is in created status', () => {
+    getEvmWalletStateRef.value.data = {
+      ...getEvmWalletStateRef.value.data!,
+      isStatusVerified: false,
+      isStatusCreated: true,
+      balances: [],
+    };
+
+    const api = useWalletActions();
+
+    expect(api.buttonConfigs.value.find((b: { id: string }) => b.id === 'add-funds')?.disabled).toBe(false);
+    expect(api.buttonConfigs.value.find((b: { id: string }) => b.id === 'withdraw')?.disabled).toBe(true);
+    expect(api.buttonConfigs.value.find((b: { id: string }) => b.id === 'exchange')?.disabled).toBe(true);
+    expect(api.buttonConfigs.value.find((b: { id: string }) => b.id === 'buy')?.disabled).toBe(false);
+    expect(api.buttonConfigs.value.find((b: { id: string }) => b.id === 'earn')?.disabled).toBe(false);
+    expect(api.buttonConfigs.value.find((b: { id: string }) => b.id === 'bank-accounts')?.disabled).toBe(false);
   });
 
   it('calls emit when handleButtonClick is called with transaction type', () => {

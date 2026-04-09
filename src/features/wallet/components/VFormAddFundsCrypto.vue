@@ -17,10 +17,13 @@ defineProps<{
   selectedAsset: string;
   selectedAssetWarning: string;
   depositNetworkLabel: string;
+  networkOptions: { value: string; text: string }[];
+  selectedNetwork: string;
 }>();
 
 const emit = defineEmits<{
   'update:selectedAsset': [value: string];
+  'update:selectedNetwork': [value: string];
   copy: [];
 }>();
 </script>
@@ -70,9 +73,14 @@ const emit = defineEmits<{
             helper-text="Scan the QR code with your external wallet app to send funds."
             class="v-form-add-funds-crypto__input"
           >
-            <VFormInput
-              :model-value="depositNetworkLabel"
-              readonly
+            <VFormSelect
+              :model-value="selectedNetwork"
+              :options="networkOptions"
+              item-label="text"
+              item-value="value"
+              placeholder="Select network"
+              data-testid="add-funds-network"
+              @update:model-value="emit('update:selectedNetwork', $event as string)"
             />
           </VFormGroup>
         </div>

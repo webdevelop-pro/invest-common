@@ -23,6 +23,8 @@ export function useVFormAddFunds(onClose: () => void) {
     selectedAsset,
     selectedAssetWarning,
     depositNetworkLabel,
+    networkOptions,
+    selectedNetwork,
     address: cryptoAddress,
   } = useVFormAddFundsCrypto();
 
@@ -58,7 +60,6 @@ export function useVFormAddFunds(onClose: () => void) {
 
   return {
     depositMethod,
-    depositNetworkLabel,
     // Fiat-related values from wallet transaction composable
     fiatModel,
     fundingSourceFormatted,
@@ -80,7 +81,10 @@ export function useVFormAddFunds(onClose: () => void) {
     assetOptions,
     selectedAsset,
     selectedAssetWarning,
+    depositNetworkLabel,
     cryptoAddress,
+    selectedNetwork,
+    networkOptions,
     getWalletState,
   };
 }

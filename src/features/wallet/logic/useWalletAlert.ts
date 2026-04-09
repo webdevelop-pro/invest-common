@@ -5,13 +5,18 @@ import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository'
 import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { hasRestrictedWalletBehavior } from 'InvestCommon/data/profiles/profiles.helpers';
 import type { IProfileFormatted } from 'InvestCommon/data/profiles/profiles.types';
+import { useWalletAuth } from 'InvestCommon/features/wallet/store/useWalletAuth';
+import { isWalletSetupRequiredError } from './walletSetupError';
 
 const CONTACT_US_LINK =
   '<a href="#contact-us-dialog" class="is--link-1" data-action="contact-us">contact us</a>';
 const CONTACT_US_MSG = `Unfortunately, we were not able to create a wallet for you. Please ${CONTACT_US_LINK} to resolve the issue.`;
 const WALLET_CREATING_MSG = `This usually takes a few moments. If it takes longer than expected, ${CONTACT_US_LINK} for assistance.`;
+const WALLET_SETUP_REQUIRED_TITLE = 'Set up your wallet to continue.';
+const WALLET_SETUP_REQUIRED_MSG = 'Your crypto wallet has not been created yet. Start wallet setup to continue.';
 const KYC_NEED_MSG = (profileId: string | number, redirect?: string) => {
   const baseHref = `/profile/${profileId}/kyc`;
   const href =
@@ -24,7 +29,6 @@ const KYC_IN_PROGRESS_MSG =
   'Your KYC is in progress. You need to pass KYC before you can make a transfer';
 const BANK_ACCOUNTS_NEED_MSG = (profileId: string | number) =>
   `You need to <a href="/settings/${profileId}/bank-accounts">connect a bank account</a> before you can add funds.`;
-
 export interface UseWalletAlertOptions {
   /** When true, do not show alerts related to fiat wallet (e.g. bank account, fiat wallet status). Use for crypto-only contexts like Earn. */
   hideFiatAlerts?: boolean;
@@ -44,7 +48,14 @@ export function useWalletAlert(options: UseWalletAlertOptions = {}) {
   const router = useRouter();
   const route = useRoute();
   const profilesStore = useProfilesStore();
-  const { selectedUserProfileData, selectedUserProfileId } = storeToRefs(profilesStore);
+  const walletAuthStore = useWalletAuth();
+  const sessionStore = useSessionStore();
+  const {
+    selectedUserProfileData,
+    selectedUserProfileId,
+    selectedUserProfileType,
+  } = storeToRefs(profilesStore);
+  const { userSessionTraits } = storeToRefs(sessionStore);
   const { getProfileByIdState } = storeToRefs(useRepositoryProfiles());
   const {
     getWalletState,
@@ -57,12 +68,19 @@ export function useWalletAlert(options: UseWalletAlertOptions = {}) {
     () => (selectedUserProfileData.value ?? null) as IProfileFormatted | null,
   );
   const hasRestrictedWallet = computed(() => hasRestrictedWalletBehavior(profile.value));
+  const isWalletCreationRequired = computed(() => {
+    return isWalletSetupRequiredError(getEvmWalletState.value.error, {
+      isKycApproved: profile.value?.isKycApproved ?? false,
+      walletData: getEvmWalletState.value.data,
+    });
+  });
 
   const isFiatWalletError = computed(
-    () => getWalletState.value.data?.isWalletStatusAnyError ?? getWalletState.value.error,
+    () => Boolean(getWalletState.value.data?.isWalletStatusAnyError ?? getWalletState.value.error),
   );
   const isEvmWalletError = computed(
-    () => getEvmWalletState.value.data?.isStatusAnyError ?? getEvmWalletState.value.error,
+    () => !isWalletCreationRequired.value
+      && Boolean(getEvmWalletState.value.data?.isStatusAnyError ?? getEvmWalletState.value.error),
   );
   const isWalletError = computed(
     () =>
@@ -76,10 +94,12 @@ export function useWalletAlert(options: UseWalletAlertOptions = {}) {
   );
 
   const isWalletCreated = computed(() => {
-    const evmCreated = getEvmWalletState.value.data?.isStatusCreated ?? false;
     const fiatCreated = getWalletState.value.data?.isWalletStatusCreated ?? false;
-    const created = hideFiatAlerts ? evmCreated : fiatCreated || evmCreated;
-    return created && !isWalletError.value;
+    if (hideFiatAlerts) {
+      return false;
+    }
+
+    return fiatCreated && !isWalletError.value && !isWalletCreationRequired.value;
   });
 
   const isKYCNeedToPass = computed(
@@ -92,9 +112,11 @@ export function useWalletAlert(options: UseWalletAlertOptions = {}) {
   );
   const isError = computed(
     () =>
-      (profile.value?.isKycDeclined ?? false) ||
-      isWalletError.value ||
-      hasRestrictedWallet.value,
+      !isWalletCreationRequired.value && (
+        (profile.value?.isKycDeclined ?? false) ||
+        isWalletError.value ||
+        hasRestrictedWallet.value
+      ),
   );
 
   const isKycPassed = computed(
@@ -163,6 +185,7 @@ export function useWalletAlert(options: UseWalletAlertOptions = {}) {
       (hasRestrictedWallet.value ||
         isKYCNeedToPass.value ||
         isKYCInProgress.value ||
+        isWalletCreationRequired.value ||
         isWalletCreated.value ||
         shouldShowBankAccountMissing.value ||
         isError.value),
@@ -178,12 +201,13 @@ export function useWalletAlert(options: UseWalletAlertOptions = {}) {
     () => isAlertShow.value && isAlertType.value === 'error',
   );
   const isAlertType = computed(() => {
-    if (isError.value) return 'error';
     if (isWalletCreated.value || shouldShowBankAccountMissing.value) return 'info';
+    if (isWalletCreationRequired.value || isError.value) return 'error';
     return 'error';
   });
   const isAlertText = computed(() => {
     if (isError.value) return CONTACT_US_MSG;
+    if (isWalletCreationRequired.value) return WALLET_SETUP_REQUIRED_MSG;
     if (isWalletCreated.value) return WALLET_CREATING_MSG;
     if (isKYCNeedToPass.value) {
       return KYC_NEED_MSG(selectedUserProfileId.value, route.fullPath);
@@ -196,16 +220,21 @@ export function useWalletAlert(options: UseWalletAlertOptions = {}) {
   });
   const alertTitle = computed(() => {
     if (isKYCNeedToPass.value) return 'Identity verification is needed. ';
+    if (isWalletCreationRequired.value) return WALLET_SETUP_REQUIRED_TITLE;
     if (isWalletCreated.value) return 'Your wallet is being created and verified.';
     return undefined;
   });
   const alertButtonText = computed(() =>
-    isKYCNeedToPass.value ? 'Verify Identity' : undefined,
+    isKYCNeedToPass.value
+      ? 'Verify Identity'
+      : isWalletCreationRequired.value
+        ? 'Set Up Wallet'
+        : undefined,
   );
 
   const showTable = computed(
     () =>
-      !hasRestrictedWallet.value && !isError.value,
+      !hasRestrictedWallet.value && !isError.value && !isWalletCreationRequired.value,
   );
   const isTopTextShow = computed(
     () =>
@@ -222,7 +251,27 @@ export function useWalletAlert(options: UseWalletAlertOptions = {}) {
         params: { profileId: selectedUserProfileId.value },
         query: { redirect },
       });
+      return;
     }
+
+    if (!isWalletCreationRequired.value) {
+      return;
+    }
+
+    const profileId = Number(selectedUserProfileId.value);
+    if (!profileId) {
+      return;
+    }
+
+    void walletAuthStore.startFlowForProfile({
+      profileId,
+      isKycApproved: selectedUserProfileData.value?.isKycApproved,
+      profileType: selectedUserProfileType.value,
+      profileName: selectedUserProfileData.value?.name,
+      fullAccountName: selectedUserProfileData.value?.data?.full_account_name,
+      userEmail: userSessionTraits.value?.email,
+      walletStatus: selectedUserProfileData.value?.wallet?.status,
+    });
   };
 
   return {

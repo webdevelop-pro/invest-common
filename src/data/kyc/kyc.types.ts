@@ -35,6 +35,18 @@ export interface IKycProfile {
   updated_at: string;
 }
 
+export type KycAlertVariant = 'error' | 'info';
+
+export interface KycAlertModel {
+  show: boolean;
+  variant: KycAlertVariant;
+  title: string;
+  description: string;
+  buttonText?: string;
+  isLoading: boolean;
+  isDisabled: boolean;
+}
+
 interface ITextStatuses {
   text: string;
   class: string;

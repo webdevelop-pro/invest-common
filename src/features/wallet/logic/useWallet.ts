@@ -9,10 +9,12 @@ import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
 import { useRepositoryEarn } from 'InvestCommon/data/earn/earn.repository';
 import { reportError } from 'InvestCommon/domain/error/errorReporting';
 import { currency } from 'UiKit/helpers/currency';
+import { useWalletNetwork } from './useWalletNetwork';
 import {
   canLoadWalletData as canLoadWalletDataRule,
   canLoadEvmWalletData as canLoadEvmWalletDataRule,
 } from './walletLoadRules';
+import { isWalletSetupRequiredError } from './walletSetupError';
 
 let walletEffectsScope: EffectScope | null = null;
 
@@ -26,6 +28,10 @@ export function useWallet() {
   const evmRepository = useRepositoryEvm();
   const earnRepository = useRepositoryEarn();
   const { getEvmWalletState } = storeToRefs(evmRepository);
+  const {
+    selectedNetwork: selectedEvmNetwork,
+    networkOptions: evmNetworkOptions,
+  } = useWalletNetwork();
 
   const canLoadWalletData = computed(() => canLoadWalletDataRule(
     selectedUserProfileData.value,
@@ -125,8 +131,16 @@ export function useWallet() {
         await evmRepository.getEvmWalletByProfile(
           selectedUserProfileId.value,
           unref(earnRepository.positionsPools) ?? [],
+          selectedEvmNetwork.value,
         );
       } catch (e) {
+        if (isWalletSetupRequiredError(e, {
+          isKycApproved: selectedUserProfileData.value?.isKycApproved ?? false,
+          walletData: getEvmWalletState.value.data,
+        })) {
+          return;
+        }
+
         reportError(e, 'Failed to fetch EVM wallet');
       }
     } else if (!canLoadEvmWalletData.value && getEvmWalletState.value.data) {
@@ -145,7 +159,11 @@ export function useWallet() {
     walletEffectsScope = effectScope(true);
     walletEffectsScope.run(() => {
       watch(
-        () => [selectedUserProfileData.value?.id, selectedUserProfileData.value?.kyc_status],
+        () => [
+          selectedUserProfileData.value?.id,
+          selectedUserProfileData.value?.kyc_status,
+          selectedEvmNetwork.value,
+        ],
         () => {
           void nextTick(() => updateData());
         },
@@ -184,5 +202,7 @@ export function useWallet() {
     // Controls
     updateData,
     isWalletDataLoading,
+    selectedEvmNetwork,
+    evmNetworkOptions,
   };
 }

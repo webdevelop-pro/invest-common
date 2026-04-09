@@ -15,11 +15,16 @@ const VDialogContactUs = defineAsyncComponent({
   loader: () => import('InvestCommon/shared/components/dialogs/VDialogContactUs.vue'),
 });
 
+const VDialogWalletAuth = defineAsyncComponent({
+  loader: () => import('InvestCommon/features/wallet/components/VDialogWalletAuth.vue'),
+});
+
 const useDialogsStore = useDialogs();
 const {
   isDialogLogoutOpen,
   isDialogRefreshSessionOpen,
   isDialogContactUsOpen,
+  isDialogWalletAuthOpen,
   dialogContactUsSubject,
 } = storeToRefs(useDialogsStore);
 </script>
@@ -35,6 +40,9 @@ const {
     <VDialogContactUs
       v-model:open="isDialogContactUsOpen"
       :subject="dialogContactUsSubject ?? undefined"
+    />
+    <VDialogWalletAuth
+      v-model:open="isDialogWalletAuthOpen"
     />
   </div>
 </template>

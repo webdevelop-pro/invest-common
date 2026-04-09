@@ -27,6 +27,8 @@ const {
   showTable,
   totalBalanceMainFormatted,
   totalBalanceCoins,
+  selectedEvmNetwork,
+  evmNetworkOptions,
   primaryButtons,
   moreButtons,
   handlePrimaryActionClick,
@@ -70,12 +72,15 @@ const {
       :amount="totalBalanceMainFormatted"
       :coin="totalBalanceCoins"
       :loading="isWalletDataLoading"
+      :network-options="evmNetworkOptions"
+      :selected-network="selectedEvmNetwork"
       :buttons="primaryButtons"
       :more-buttons="moreButtons"
       :class="[
         'dashboard-wallet__content',
         { 'dashboard-wallet__content--blocked': isWalletBlocked },
       ]"
+      @update:selected-network="selectedEvmNetwork = $event"
       @click="handlePrimaryActionClick"
     />
 

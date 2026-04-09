@@ -85,6 +85,8 @@ export function useDashboardWallet() {
     totalBalanceCoins,
     isWalletDataLoading,
     updateData,
+    selectedEvmNetwork,
+    evmNetworkOptions,
   } = useWallet();
 
   // Whenever the Wallet tab/view is opened, explicitly refresh wallet data.
@@ -270,6 +272,8 @@ export function useDashboardWallet() {
     isTopTextShow,
     totalBalanceMainFormatted,
     totalBalanceCoins,
+    selectedEvmNetwork,
+    evmNetworkOptions,
     primaryButtons,
     moreButtons,
     handlePrimaryActionClick,

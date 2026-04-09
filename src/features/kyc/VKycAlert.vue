@@ -1,44 +1,70 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { storeToRefs } from 'pinia';
 import VAlert from 'UiKit/components/VAlert.vue';
-import { useKycStatus } from './store/useKycStatus';
+import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   variant: 'error' | 'info';
   title: string;
   description: string;
   buttonText?: string;
+  isLoading?: boolean;
+  isDisabled?: boolean;
+}>(), {
+  buttonText: undefined,
+  isLoading: false,
+  isDisabled: false,
+});
+
+const emit = defineEmits<{
+  action: [];
+  descriptionAction: [event: Event];
 }>();
 
-const kycStatusStore = useKycStatus();
-const { dataAlert } = storeToRefs(kycStatusStore);
+const buttonColor = computed(() => (props.variant === 'info' ? 'primary' : 'red'));
+const hasDescriptionAction = computed(() => (
+  props.description.includes('data-action="contact-us"')
+  || props.description.includes('data-action=\'contact-us\'')
+));
 
-const resolvedTitle = computed(() => dataAlert.value.title || props.title);
-const resolvedDescription = computed(() => dataAlert.value.description || props.description);
-const resolvedButtonText = computed(() => props.buttonText || dataAlert.value.buttonText);
+const handleDescriptionAction = (event: Event) => {
+  if (!hasDescriptionAction.value) {
+    return;
+  }
+
+  emit('descriptionAction', event);
+};
 </script>
 
 <template>
   <VAlert
     :variant="variant"
-    :button-text="resolvedButtonText"
     class="VKycAlert v-kyc-alert"
-    @click="kycStatusStore.onClick"
   >
     <template #title>
-      {{ resolvedTitle }}
+      {{ title }}
     </template>
     <template #description>
       <span
-        v-dompurify-html="resolvedDescription"
-        role="button"
-        tabindex="0"
-        @click="kycStatusStore.onAlertDescriptionClick($event)"
-        @keydown.enter="kycStatusStore.onAlertDescriptionClick($event)"
-        @keydown.space.prevent="kycStatusStore.onAlertDescriptionClick($event)"
+        v-dompurify-html="description"
+        :role="hasDescriptionAction ? 'button' : undefined"
+        :tabindex="hasDescriptionAction ? 0 : undefined"
+        @click="handleDescriptionAction($event)"
+        @keydown.enter="handleDescriptionAction($event)"
+        @keydown.space.prevent="handleDescriptionAction($event)"
       />
     </template>
+    <VButton
+      v-if="buttonText"
+      size="small"
+      :color="buttonColor"
+      :loading="isLoading"
+      :disabled="isDisabled"
+      class="v-kyc-alert__button is--margin-top-0"
+      @click="emit('action')"
+    >
+      {{ buttonText }}
+    </VButton>
   </VAlert>
 </template>
 

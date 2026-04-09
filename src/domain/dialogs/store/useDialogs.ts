@@ -5,6 +5,7 @@ export const useDialogs = defineStore('dialogs', () => {
   const isDialogLogoutOpen = ref(false);
   const isDialogRefreshSessionOpen = ref(false);
   const isDialogContactUsOpen = ref(false);
+  const isDialogWalletAuthOpen = ref(false);
   const dialogContactUsSubject = ref<string | null>(null);
   
   // Promise resolver for session refresh completion
@@ -36,6 +37,14 @@ export const useDialogs = defineStore('dialogs', () => {
     dialogContactUsSubject.value = null;
   };
 
+  const openWalletAuthDialog = () => {
+    isDialogWalletAuthOpen.value = true;
+  };
+
+  const closeWalletAuthDialog = () => {
+    isDialogWalletAuthOpen.value = false;
+  };
+
   watch(isDialogContactUsOpen, (isOpen) => {
     if (!isOpen) {
       dialogContactUsSubject.value = null;
@@ -46,11 +55,14 @@ export const useDialogs = defineStore('dialogs', () => {
     isDialogLogoutOpen,
     isDialogRefreshSessionOpen,
     isDialogContactUsOpen,
+    isDialogWalletAuthOpen,
     dialogContactUsSubject,
     showRefreshSession,
     completeSessionRefresh,
     openContactUsDialog,
     closeContactUsDialog,
+    openWalletAuthDialog,
+    closeWalletAuthDialog,
   };
 });
 

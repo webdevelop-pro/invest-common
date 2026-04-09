@@ -15,6 +15,7 @@ import { FormChild } from 'InvestCommon/types/form';
 import { useRepositoryAccreditation } from 'InvestCommon/data/accreditation/accreditation.repository';
 import { useRepositoryKyc } from 'InvestCommon/data/kyc/kyc.repository';
 import { reportError } from 'InvestCommon/domain/error/errorReporting';
+import { useWalletAuth } from 'InvestCommon/features/wallet/store/useWalletAuth';
 
 const runSaveStep = async (
   action: () => Promise<unknown>,
@@ -41,6 +42,7 @@ export const useFormFinancialInformationAndKyc = () => {
   const useRepositoryKycStore = useRepositoryKyc();
   const { tokenState } = storeToRefs(useRepositoryKycStore);
   const accreditationRepository = useRepositoryAccreditation();
+  const walletAuthStore = useWalletAuth();
 
   const backButtonText = ref('Go Back');
   const backButtonRoute = computed(() => (
@@ -186,6 +188,16 @@ export const useFormFinancialInformationAndKyc = () => {
     }
 
     await router.push(backButtonRoute.value);
+
+    await walletAuthStore.maybeOpenAfterKyc({
+      profileId: Number(selectedUserProfileId.value),
+      isKycApproved: selectedUserProfileData.value?.isKycApproved,
+      profileType: selectedUserProfileType.value,
+      profileName: selectedUserProfileData.value?.name,
+      fullAccountName: selectedUserProfileData.value?.data?.full_account_name,
+      userEmail: userSessionTraits.value?.email,
+      walletStatus: selectedUserProfileData.value?.wallet?.status,
+    });
   };
 
   return {
