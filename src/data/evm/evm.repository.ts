@@ -16,6 +16,8 @@ import {
   IEvmWalletDataFormatted, IEvmWalletDataResponse, IEvmWithdrawRequestBody,
   IEvmExchangeRequestBody, IEvmExchangeResponse, EvmTransactionTypes, EvmTransactionStatusTypes,
   IEvmTransactionDataResponse, IEvmEarnPositionOverlay, IEvmWalletBalancesMap, IEvmWalletBalances,
+  IEvmWalletAuthorizeStartRequestBody, IEvmWalletAuthorizeStartResponse, IEvmWalletAuthorizeConfirmRequestBody,
+  IEvmWalletAuthorizeConfirmResponse, IEvmWithdrawResponse,
 } from './evm.types';
 import {
   extractDepositAddressFromWalletInfo,
@@ -28,6 +30,10 @@ const NOTIFICATION_LOADING_DURATION_MS = 2000;
 export type WalletChain = 'all' | 'ethereum' | 'ethereum-sepolia' | 'polygon' | 'base';
 const DEFAULT_WALLET_CHAIN: WalletChain = 'all';
 const DEPOSIT_WALLET_CHAINS: WalletChain[] = ['ethereum', 'polygon', 'base', 'ethereum-sepolia'];
+const DEFAULT_BALANCE_HYDRATION_CHAIN: WalletChain = 'ethereum-sepolia';
+
+const hasWalletBalances = (wallet?: IEvmWalletDataResponse | null): boolean =>
+  Object.keys(wallet?.balances ?? {}).length > 0;
 
 export type RegisterWalletPayload = {
   profile_id: number;
@@ -43,8 +49,10 @@ export type UpdateWalletMfaPayload = {
 
 type EvmStates = {
   getEvmWalletState: IEvmWalletDataFormatted;
-  withdrawFundsState: IEvmWalletDataResponse;
+  withdrawFundsState: IEvmWithdrawResponse;
   withdrawFundsOptionsState: OptionsStateData;
+  authorizeWithdrawStartState: IEvmWalletAuthorizeStartResponse;
+  authorizeWithdrawConfirmState: IEvmWalletAuthorizeConfirmResponse;
   exchangeTokensState: IEvmExchangeResponse;
   exchangeTokensOptionsState: OptionsStateData;
   registerWalletState: OptionsStateData;
@@ -104,6 +112,8 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
     getEvmWalletState,
     withdrawFundsState,
     withdrawFundsOptionsState,
+    authorizeWithdrawStartState,
+    authorizeWithdrawConfirmState,
     exchangeTokensState,
     exchangeTokensOptionsState,
     registerWalletState,
@@ -113,6 +123,8 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
     getEvmWalletState: undefined,
     withdrawFundsState: undefined,
     withdrawFundsOptionsState: undefined,
+    authorizeWithdrawStartState: undefined,
+    authorizeWithdrawConfirmState: undefined,
     exchangeTokensState: undefined,
     exchangeTokensOptionsState: undefined,
     registerWalletState: undefined,
@@ -322,8 +334,29 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
         },
       });
       responseHeaders = response.headers;
-      const data = normalizeEvmWalletInfoResponse(response.data as IEvmWalletInfoApiResponse);
-      baseWalletSnapshot.value = data;
+      const rawData = response.data as IEvmWalletInfoApiResponse;
+      const data = normalizeEvmWalletInfoResponse(rawData);
+
+      let walletData = data;
+      if (chain === 'all' && !hasWalletBalances(data)) {
+        const hydrationResponse = await apiClient.get<IEvmWalletInfoApiResponse>(`/auth/wallet/${profileId}`, {
+          params: {
+            chain: DEFAULT_BALANCE_HYDRATION_CHAIN,
+          },
+        });
+        const hydrationRawData = hydrationResponse.data as IEvmWalletInfoApiResponse;
+        const hydrationData = normalizeEvmWalletInfoResponse(hydrationRawData);
+        const hydrationAddress = extractDepositAddressFromWalletInfo(hydrationRawData)
+          || String(hydrationData.address ?? '').trim();
+
+        walletData = {
+          ...data,
+          address: hydrationAddress || data.address,
+          balances: hasWalletBalances(hydrationData) ? hydrationData.balances : data.balances,
+          updated_at: hydrationData.updated_at || data.updated_at,
+        };
+      }
+      baseWalletSnapshot.value = walletData;
       recomputeWalletFromEarnOverlay(profileId, earnPositions);
       return getEvmWalletState.value.data!;
     });
@@ -350,9 +383,33 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
     };
   };
 
-  const withdrawFunds = async (body: IEvmWithdrawRequestBody) =>
+  const authorizeWithdrawStart = async (
+    profileId: number,
+    body: IEvmWalletAuthorizeStartRequestBody,
+  ) =>
+    withActionState(authorizeWithdrawStartState, async () => {
+      const response = await apiClient.post<IEvmWalletAuthorizeStartResponse>(
+        `/auth/wallet/authorize/start/${profileId}`,
+        body,
+      );
+      return response.data!;
+    });
+
+  const authorizeWithdrawConfirm = async (
+    profileId: number,
+    body: IEvmWalletAuthorizeConfirmRequestBody,
+  ) =>
+    withActionState(authorizeWithdrawConfirmState, async () => {
+      const response = await apiClient.post<IEvmWalletAuthorizeConfirmResponse>(
+        `/auth/wallet/authorize/confirm/${profileId}`,
+        body,
+      );
+      return response.data!;
+    });
+
+  const withdrawFunds = async (profileId: number, body: IEvmWithdrawRequestBody) =>
     withActionState(withdrawFundsState, async () => {
-      const response = await apiClient.post<IEvmWalletDataResponse>(`/auth/withdrawal`, body);
+      const response = await apiClient.post<IEvmWithdrawResponse>(`/auth/withdrawal/${profileId}`, body);
       return response.data!;
     });
 
@@ -554,6 +611,8 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
     getEvmWalletState,
     withdrawFundsState,
     withdrawFundsOptionsState,
+    authorizeWithdrawStartState,
+    authorizeWithdrawConfirmState,
     exchangeTokensState,
     exchangeTokensOptionsState,
     registerWalletState,
@@ -561,6 +620,8 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
     getEvmWalletByProfile,
     getDepositNetworkByProfile,
     depositWalletChains: DEPOSIT_WALLET_CHAINS,
+    authorizeWithdrawStart,
+    authorizeWithdrawConfirm,
     withdrawFunds,
     withdrawFundsOptions,
     exchangeTokens,

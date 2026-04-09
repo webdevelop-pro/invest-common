@@ -12,10 +12,17 @@ type WalletSigner = {
   authenticate: (payload: unknown) => Promise<unknown>;
   validateMultiFactors: (payload: unknown) => Promise<unknown>;
   getAuthDetails: () => Promise<unknown>;
+  signTypedData?: (payload: unknown) => Promise<string>;
+  signMessage?: (payload: unknown) => Promise<string>;
   on: (event: string, listener: (...args: any[]) => void) => () => void;
   inner?: {
     stampWhoami?: () => Promise<unknown>;
   };
+};
+
+type AuthorizationSignatureRequest = {
+  type?: string;
+  data?: unknown;
 };
 
 type OtpSubmissionResult = 'connected' | 'awaiting_mfa';
@@ -228,5 +235,36 @@ export const walletAuthAdapter = {
     }
 
     return stampedWhoamiRequest;
+  },
+
+  async signAuthorizationRequest(signatureRequest: AuthorizationSignatureRequest) {
+    const signer = await getSigner();
+    const requestType = String(signatureRequest?.type ?? '').trim().toLowerCase();
+
+    if (requestType === 'eth_signtypeddata_v4' || requestType === 'eth_signtypeddata') {
+      if (!signer.signTypedData) {
+        throw new Error('Wallet signer does not support typed-data signing.');
+      }
+
+      return signer.signTypedData(signatureRequest.data);
+    }
+
+    if (requestType === 'personal_sign' || requestType === 'eth_sign' || requestType === 'signmessage') {
+      if (!signer.signMessage) {
+        throw new Error('Wallet signer does not support message signing.');
+      }
+
+      return signer.signMessage(signatureRequest.data);
+    }
+
+    if (signer.signTypedData) {
+      return signer.signTypedData(signatureRequest.data);
+    }
+
+    if (signer.signMessage) {
+      return signer.signMessage(signatureRequest.data);
+    }
+
+    throw new Error('Wallet signer cannot sign the authorization request.');
   },
 };

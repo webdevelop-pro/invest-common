@@ -18,6 +18,7 @@ const {
   maxFiatAmountFormatted,
   numberFormatter,
   model: cryptoModel,
+  chainOptions,
   tokenFormatted,
   text: cryptoAvailableText,
   fiatErrorData,
@@ -70,9 +71,11 @@ const {
 
     <VFormWithdrawCrypto
       v-else
-      :token="cryptoModel.token"
+      :chain="cryptoModel.chain"
+      :asset="cryptoModel.asset"
       :amount="cryptoModel.amount"
-      :to="cryptoModel.to"
+      :destination-address="cryptoModel.destination_address"
+      :chain-options="chainOptions"
       :token-options="tokenFormatted"
       :available-text="cryptoAvailableText"
       :error-data="errorData"
@@ -81,9 +84,10 @@ const {
       :number-formatter="numberFormatter"
       :loading="withdrawFundsState.loading"
       :disabled="cryptoDisabled"
-      @update:token="cryptoModel.token = $event"
+      @update:chain="cryptoModel.chain = $event"
+      @update:asset="cryptoModel.asset = $event"
       @update:amount="cryptoModel.amount = $event as number"
-      @update:to="cryptoModel.to = $event"
+      @update:destination-address="cryptoModel.destination_address = $event"
       @submit="cryptoSaveHandler"
       @cancel="cryptoCancelHandler"
     />

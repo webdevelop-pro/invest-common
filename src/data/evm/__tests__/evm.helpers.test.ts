@@ -85,6 +85,33 @@ describe('evm.helpers', () => {
     ]);
   });
 
+  it('normalizes balances from the new wallet info payload shape', () => {
+    const payload = {
+      profile_id: 1124,
+      wallet_status: 'verified',
+      balances: [
+        { asset: 'USDC', address: '0xusdc', amount: '10.5' },
+        { symbol: 'ETH', address: '0xeth', amount: '1.25' },
+      ],
+      updated_at: '2026-04-08T17:35:45Z',
+    };
+
+    expect(normalizeEvmWalletInfoResponse(payload).balances).toEqual({
+      '0xusdc': {
+        address: '0xusdc',
+        amount: '10.5',
+        symbol: 'USDC',
+        name: 'USDC',
+      },
+      '0xeth': {
+        address: '0xeth',
+        amount: '1.25',
+        symbol: 'ETH',
+        name: 'ETH',
+      },
+    });
+  });
+
   it('prefers deposit instructions address when present', () => {
     const payload = {
       profile_id: 1124,

@@ -4,8 +4,8 @@ import { AccreditationTypes } from 'InvestCommon/data/accreditation/accreditatio
 import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
-import { InvestKycTypes, KycTextStatuses } from 'InvestCommon/data/kyc/kyc.types';
-import { ACCREDITATION_HISTORY, INVEST_KYC_HISTORY } from 'InvestCommon/features/investment/utils';
+import { ACCREDITATION_HISTORY } from 'InvestCommon/features/investment/utils';
+import { useKycAlertViewModel } from 'InvestCommon/features/kyc/logic/useKycAlertViewModel';
 import { useWallet } from 'InvestCommon/features/wallet/logic/useWallet';
 import { useWalletAlert } from 'InvestCommon/features/wallet/logic/useWalletAlert';
 import { useWalletAuth } from 'InvestCommon/features/wallet/store/useWalletAuth';
@@ -17,38 +17,9 @@ type DashboardHeaderBanner = {
   title: string;
   description: string;
   buttonText?: string;
+  isLoading?: boolean;
+  isDisabled?: boolean;
   action?: 'kyc' | 'accreditation' | 'wallet';
-};
-
-const getKycBanner = (status: InvestKycTypes): DashboardHeaderBanner => {
-  const history = INVEST_KYC_HISTORY[status];
-
-  if (status === InvestKycTypes.declined) {
-    return {
-      type: 'kyc',
-      variant: 'error',
-      title: history.title,
-      description: history.text,
-    };
-  }
-
-  if (status === InvestKycTypes.in_progress) {
-    return {
-      type: 'kyc',
-      variant: 'info',
-      title: history.title,
-      description: history.text,
-    };
-  }
-
-  return {
-    type: 'kyc',
-    variant: 'error',
-    title: history.title,
-    description: history.text,
-    buttonText: KycTextStatuses[status].text,
-    action: 'kyc',
-  };
 };
 
 const getAccreditationBanner = (status: AccreditationTypes): DashboardHeaderBanner => {
@@ -100,6 +71,11 @@ export function useDashboardPageHeader() {
   const { isDesktop } = useBreakpoints();
   const { isWalletDataLoading } = useWallet();
   const {
+    alertModel: kycAlertModel,
+    onPrimaryAction: onKycBannerClick,
+    onDescriptionAction: onKycBannerDescriptionAction,
+  } = useKycAlertViewModel();
+  const {
     isAlertShow,
     isAlertType,
     isAlertText,
@@ -119,9 +95,17 @@ export function useDashboardPageHeader() {
       return null;
     }
 
-    const kycStatus = selectedProfile.kyc_status;
-    if (kycStatus && !selectedProfile.isKycApproved) {
-      return getKycBanner(kycStatus);
+    if (kycAlertModel.value.show) {
+      return {
+        type: 'kyc',
+        variant: kycAlertModel.value.variant,
+        title: kycAlertModel.value.title,
+        description: kycAlertModel.value.description,
+        buttonText: kycAlertModel.value.buttonText,
+        isLoading: kycAlertModel.value.isLoading,
+        isDisabled: kycAlertModel.value.isDisabled,
+        action: 'kyc',
+      };
     }
 
     const accreditationStatus = selectedProfile.accreditation_status;
@@ -189,6 +173,8 @@ export function useDashboardPageHeader() {
 
   return {
     onInfoCtaClick,
+    onKycBannerClick,
+    onKycBannerDescriptionAction,
     onWalletBannerClick,
     onWalletBannerContactUsClick,
     showPerformanceCards,

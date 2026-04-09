@@ -22,7 +22,7 @@ const getEvmWalletStateRef = ref({
   loading: false,
   error: null as Error | null,
 });
-const getDepositNetworkByProfile = vi.fn().mockResolvedValue({ chain: 'ethereum', wallet_address: '', chain_account_status: 'verified' });
+const getDepositNetworkByProfile = vi.fn().mockResolvedValue({ chain: 'ethereum-sepolia', wallet_address: '', chain_account_status: 'verified' });
 
 vi.mock('InvestCommon/data/evm/evm.repository', () => ({
   useRepositoryEvm: () => ({
@@ -83,8 +83,8 @@ describe('useVFormAddFundsCrypto', () => {
 
   it('address is derived from the selected wallet network', () => {
     const api = useVFormAddFundsCrypto();
-    expect(api.selectedNetwork.value).toBe('ethereum');
-    expect(api.address.value).toBe('0xETH');
+    expect(api.selectedNetwork.value).toBe('ethereum-sepolia');
+    expect(api.address.value).toBeUndefined();
     api.selectedNetwork.value = 'base';
     expect(api.address.value).toBe('0xBASE');
     getEvmWalletStateRef.value = { data: null, loading: false, error: null };
@@ -142,24 +142,25 @@ describe('useVFormAddFundsCrypto', () => {
         warningLabel: 'Ethereum Sepolia',
       },
     ]);
-    expect(api.depositNetworkLabel.value).toBe('ETH Ethereum (ERC20)');
+    expect(api.depositNetworkLabel.value).toBe('ETH Ethereum Sepolia');
   });
 
   it('selectedAssetWarning follows the selected network', () => {
     const api = useVFormAddFundsCrypto();
     expect(api.selectedAssetWarning.value).toContain('USDC');
-    expect(api.selectedAssetWarning.value).toContain('Ethereum (ERC20)');
+    expect(api.selectedAssetWarning.value).toContain('Ethereum Sepolia');
     api.selectedNetwork.value = 'base';
     expect(api.selectedAssetWarning.value).toContain('Base');
   });
 
   it('onCopyClick copies address when present', () => {
     const api = useVFormAddFundsCrypto();
+    api.selectedNetwork.value = 'base';
     api.onCopyClick();
-    expect(mockCopy).toHaveBeenCalledWith('0xETH');
+    expect(mockCopy).toHaveBeenCalledWith('0xBASE');
   });
 
-  it('falls back to the legacy single wallet address for ethereum when chains are unavailable', async () => {
+  it('falls back to the legacy single wallet address for ethereum-sepolia when chains are unavailable', async () => {
     getEvmWalletStateRef.value = {
       data: {
         ...mockEvmData,
@@ -179,7 +180,7 @@ describe('useVFormAddFundsCrypto', () => {
   it('loads the selected network address on demand when chains are missing in wallet state', async () => {
     getDepositNetworkByProfile
       .mockResolvedValueOnce({
-        chain: 'ethereum',
+        chain: 'ethereum-sepolia',
         wallet_address: '',
         chain_account_status: 'verified',
       })
@@ -204,7 +205,7 @@ describe('useVFormAddFundsCrypto', () => {
     await Promise.resolve();
     await nextTick();
 
-    expect(getDepositNetworkByProfile).toHaveBeenNthCalledWith(1, 1, 'ethereum');
+    expect(getDepositNetworkByProfile).toHaveBeenNthCalledWith(1, 1, 'ethereum-sepolia');
     expect(getDepositNetworkByProfile).toHaveBeenNthCalledWith(2, 1, 'base');
     expect(api.address.value).toBe('0xBASE-FETCHED');
   });

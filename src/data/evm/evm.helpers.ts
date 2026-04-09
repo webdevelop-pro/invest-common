@@ -37,6 +37,32 @@ export type IEvmWalletInfoApiResponse = IEvmWalletDataResponse | IEvmWalletInfoS
 
 const KNOWN_WALLET_STATUSES = new Set<string>(Object.values(EvmWalletStatusTypes));
 
+const normalizeWalletInfoBalances = (
+  balances?: IEvmWalletInfoStatusResponse['balances'],
+): IEvmWalletDataResponse['balances'] => {
+  const balancesArray = Array.isArray(balances)
+    ? balances
+    : Object.values(balances ?? {});
+
+  return balancesArray.reduce<IEvmWalletDataResponse['balances']>((acc, balance, index) => {
+    const address = String(balance?.address ?? '').trim();
+    const symbol = String(balance?.symbol ?? balance?.asset ?? '').trim();
+
+    if (!address && !symbol) {
+      return acc;
+    }
+
+    const key = address || symbol || String(index);
+    acc[key] = {
+      address,
+      amount: balance?.amount ?? 0,
+      symbol,
+      name: symbol || undefined,
+    };
+    return acc;
+  }, {});
+};
+
 const normalizeStatus = (
   walletStatus?: string | null,
   chainStatuses: string[] = [],
@@ -97,7 +123,7 @@ export const normalizeEvmWalletInfoResponse = (
     out_balance: 0,
     address: firstWalletAddress,
     chains: normalizedChains,
-    balances: {},
+    balances: normalizeWalletInfoBalances(data.balances),
     transactions: [],
     created_at: data.created_at ?? updatedAt,
     updated_at: updatedAt,

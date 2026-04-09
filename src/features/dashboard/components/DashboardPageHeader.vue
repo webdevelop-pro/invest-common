@@ -18,6 +18,8 @@ defineProps({
 
 const {
   onInfoCtaClick,
+  onKycBannerClick,
+  onKycBannerDescriptionAction,
   onWalletBannerClick,
   onWalletBannerContactUsClick,
   isWalletAlertLoading,
@@ -42,6 +44,8 @@ const {
       :show-performance-cards="showPerformanceCards"
       :verification-banner="verificationBanner"
       class="dashboard-page-header__aside"
+      @kyc-banner-click="onKycBannerClick"
+      @kyc-banner-description-action="onKycBannerDescriptionAction"
       @wallet-banner-click="onWalletBannerClick"
       @wallet-banner-contact-us-click="onWalletBannerContactUsClick"
     />

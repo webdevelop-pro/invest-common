@@ -11,6 +11,8 @@ type DashboardPageHeaderBanner = {
   title: string;
   description: string;
   buttonText?: string;
+  isLoading?: boolean;
+  isDisabled?: boolean;
 };
 
 defineProps<{
@@ -21,6 +23,8 @@ defineProps<{
 }>();
 
 const emit = defineEmits<{
+  kycBannerClick: [];
+  kycBannerDescriptionAction: [event: Event];
   walletBannerClick: [];
   walletBannerContactUsClick: [event: Event];
 }>();
@@ -38,6 +42,10 @@ const emit = defineEmits<{
         :title="verificationBanner.title"
         :description="verificationBanner.description"
         :button-text="verificationBanner.buttonText"
+        :is-loading="verificationBanner.isLoading"
+        :is-disabled="verificationBanner.isDisabled"
+        @action="emit('kycBannerClick')"
+        @description-action="emit('kycBannerDescriptionAction', $event)"
       />
       <VAccreditationAlert
         v-if="verificationBanner?.type === 'accreditation'"

@@ -85,7 +85,8 @@ export function useWalletActions(
       id: 'withdraw',
       label: 'Withdraw',
       variant: 'outlined',
-      disabled: !canWithdraw.value,
+      // Temporarily keep withdraw enabled while the new wallet flow is being integrated.
+      disabled: false,
       transactionType: EvmTransactionTypes.withdrawal,
     },
     {

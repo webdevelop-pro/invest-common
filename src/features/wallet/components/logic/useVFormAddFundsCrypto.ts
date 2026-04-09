@@ -49,12 +49,13 @@ export function useVFormAddFundsCrypto() {
   const evmRepository = useRepositoryEvm();
   const { getEvmWalletState } = storeToRefs(evmRepository);
   const profilesStore = useProfilesStore();
+  const defaultNetwork: Exclude<WalletChain, 'all'> = 'ethereum-sepolia';
 
   const evmData = computed(() => getEvmWalletState.value.data as IEvmWalletDataFormatted | undefined);
   const supportedChains = computed(() =>
     (evmRepository.depositWalletChains ?? ['ethereum', 'polygon', 'base', 'ethereum-sepolia']) as Exclude<WalletChain, 'all'>[]
   );
-  const selectedNetwork = ref<Exclude<WalletChain, 'all'>>('ethereum');
+  const selectedNetwork = ref<Exclude<WalletChain, 'all'>>(defaultNetwork);
   const fetchedNetworkAddresses = ref<Partial<Record<Exclude<WalletChain, 'all'>, string>>>({});
   const isNetworkAddressLoading = ref(false);
 
@@ -125,7 +126,7 @@ export function useVFormAddFundsCrypto() {
 
     const fallbackAddress = String(evmData.value?.address ?? '').trim();
     const hasChains = Array.isArray(evmData.value?.chains) && evmData.value.chains.length > 0;
-    if (!hasChains && selectedNetwork.value === 'ethereum' && fallbackAddress) {
+    if (!hasChains && selectedNetwork.value === defaultNetwork && fallbackAddress) {
       return fallbackAddress;
     }
 
@@ -205,7 +206,8 @@ export function useVFormAddFundsCrypto() {
     }
 
     if (!options.some((option) => option.value === selectedNetwork.value)) {
-      selectedNetwork.value = options[0].value as Exclude<WalletChain, 'all'>;
+      const preferredOption = options.find((option) => option.value === defaultNetwork);
+      selectedNetwork.value = (preferredOption?.value ?? options[0].value) as Exclude<WalletChain, 'all'>;
     }
   }, { immediate: true });
 

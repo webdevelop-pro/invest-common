@@ -9,9 +9,11 @@ import VImage from 'UiKit/components/Base/VImage/VImage.vue';
 import VLayoutDialogForm from 'InvestCommon/shared/layouts/VLayoutDialogForm.vue';
 
 defineProps<{
-  token?: string;
+  chain?: string;
+  asset?: string;
   amount?: number | string;
-  to?: string;
+  destinationAddress?: string;
+  chainOptions: { id: string; text: string }[];
   tokenOptions: { id: string; text: string; icon?: string; symbol?: string }[];
   availableText: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -26,9 +28,10 @@ defineProps<{
 }>();
 
 const emit = defineEmits<{
-  'update:token': [value: string];
+  'update:chain': [value: string];
+  'update:asset': [value: string];
   'update:amount': [value: number | undefined];
-  'update:to': [value: string];
+  'update:destinationAddress': [value: string];
   submit: [];
   cancel: [];
 }>();
@@ -51,20 +54,39 @@ const walletAddressHelperText = 'Send only to an Ethereum (ERC20) address. '
     <FormRow class="v-form-withdraw-crypto__row">
       <FormCol col2>
         <VFormGroup
+          label="Network"
+          required
+          helper-text="Choose the network that will be authorized for this withdrawal."
+          class="v-form-withdraw-crypto__input"
+        >
+          <VFormSelect
+            :model-value="chain || undefined"
+            :options="chainOptions"
+            item-label="text"
+            item-value="id"
+            placeholder="Select"
+            dropdown-absolute
+            data-testid="withdraw-chain"
+            @update:model-value="emit('update:chain', $event as string)"
+          />
+        </VFormGroup>
+      </FormCol>
+      <FormCol col2>
+        <VFormGroup
           label="Asset to Withdraw"
           required
           helper-text="Select the specific asset you wish to transfer out."
           class="v-form-withdraw-crypto__input"
         >
           <VFormSelect
-            :model-value="token || undefined"
+            :model-value="asset || undefined"
             :options="tokenOptions"
             item-label="text"
             item-value="id"
             placeholder="Select"
             dropdown-absolute
             data-testid="withdraw-asset"
-            @update:model-value="emit('update:token', $event as string)"
+            @update:model-value="emit('update:asset', $event as string)"
           >
             <template #item="slotProps">
               <div class="token-option">
@@ -117,11 +139,11 @@ const walletAddressHelperText = 'Send only to an Ethereum (ERC20) address. '
           <VFormInput
             :is-error="VFormGroupProps.isFieldError"
             placeholder="Address"
-            :model-value="to || undefined"
+            :model-value="destinationAddress || undefined"
             name="to"
             size="large"
             data-testid="withdraw-address"
-            @update:model-value="emit('update:to', $event as string)"
+            @update:model-value="emit('update:destinationAddress', $event as string)"
           />
         </VFormGroup>
       </FormCol>

@@ -154,10 +154,55 @@ export interface IEvmTransactionDataFormatted extends IEvmTransactionDataRespons
 }
 
 export interface IEvmWithdrawRequestBody {
-  amount: number;
-  token: string; // token address or symbol depending on backend contract
-  to: string; // destination wallet address
-  wallet_id: number;
+  chain: string;
+  asset: string;
+  amount: string;
+  destination_address: string;
+  idempotency_key: string;
+}
+
+export interface IEvmWalletAuthorizeStartRequestBody {
+  chain: string;
+  asset: string;
+  max_amount: string;
+  nonce: string;
+}
+
+export interface IEvmWalletAuthorizeSignatureRequest {
+  type: string;
+  data: unknown;
+}
+
+export interface IEvmWalletAuthorizeStartResponse {
+  profile_id: number;
+  wallet_address: string;
+  session_id: string;
+  chain: string;
+  asset: string;
+  max_amount: string;
+  remaining_amount: string;
+  issued_at: string;
+  expires_at: string;
+  signature_request: IEvmWalletAuthorizeSignatureRequest;
+  authorization_status: string;
+}
+
+export interface IEvmWalletAuthorizeConfirmRequestBody {
+  session_id: string;
+  owner_signature: string;
+}
+
+export interface IEvmWalletAuthorizeConfirmResponse {
+  profile_id: number;
+  session_id: string;
+  authorization_status: string;
+}
+
+export interface IEvmWithdrawResponse {
+  id: number;
+  status: string;
+  tx_hash?: string;
+  external_id?: string;
 }
 
 export interface IEvmExchangeRequestBody {
