@@ -9,6 +9,7 @@ import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
 import { useRepositoryEarn } from 'InvestCommon/data/earn/earn.repository';
 import { reportError } from 'InvestCommon/domain/error/errorReporting';
 import { currency } from 'UiKit/helpers/currency';
+import { useWalletNetwork } from './useWalletNetwork';
 import {
   canLoadWalletData as canLoadWalletDataRule,
   canLoadEvmWalletData as canLoadEvmWalletDataRule,
@@ -27,6 +28,10 @@ export function useWallet() {
   const evmRepository = useRepositoryEvm();
   const earnRepository = useRepositoryEarn();
   const { getEvmWalletState } = storeToRefs(evmRepository);
+  const {
+    selectedNetwork: selectedEvmNetwork,
+    networkOptions: evmNetworkOptions,
+  } = useWalletNetwork();
 
   const canLoadWalletData = computed(() => canLoadWalletDataRule(
     selectedUserProfileData.value,
@@ -126,6 +131,7 @@ export function useWallet() {
         await evmRepository.getEvmWalletByProfile(
           selectedUserProfileId.value,
           unref(earnRepository.positionsPools) ?? [],
+          selectedEvmNetwork.value,
         );
       } catch (e) {
         if (isWalletSetupRequiredError(e, {
@@ -153,7 +159,11 @@ export function useWallet() {
     walletEffectsScope = effectScope(true);
     walletEffectsScope.run(() => {
       watch(
-        () => [selectedUserProfileData.value?.id, selectedUserProfileData.value?.kyc_status],
+        () => [
+          selectedUserProfileData.value?.id,
+          selectedUserProfileData.value?.kyc_status,
+          selectedEvmNetwork.value,
+        ],
         () => {
           void nextTick(() => updateData());
         },
@@ -192,5 +202,7 @@ export function useWallet() {
     // Controls
     updateData,
     isWalletDataLoading,
+    selectedEvmNetwork,
+    evmNetworkOptions,
   };
 }

@@ -29,6 +29,10 @@ describe('evm.helpers', () => {
     const payload = {
       profile_id: 1124,
       wallet_status: 'created',
+      deposit_instructions: {
+        chain: 'ethereum-sepolia',
+        address: '0xdeposit',
+      },
       chains: [
         { chain: 'ethereum', wallet_address: '', chain_account_status: 'pending' },
         { chain: 'polygon', wallet_address: '', chain_account_status: 'pending' },
@@ -43,6 +47,10 @@ describe('evm.helpers', () => {
       inc_balance: 0,
       out_balance: 0,
       address: '',
+      deposit_instructions: {
+        chain: 'ethereum-sepolia',
+        address: '0xdeposit',
+      },
       chains: [
         { chain: 'ethereum', wallet_address: '', chain_account_status: 'pending' },
         { chain: 'polygon', wallet_address: '', chain_account_status: 'pending' },

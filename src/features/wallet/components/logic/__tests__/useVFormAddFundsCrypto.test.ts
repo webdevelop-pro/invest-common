@@ -5,6 +5,10 @@ import { ref, nextTick } from 'vue';
 const mockEvmData = {
   id: 1,
   address: '0xCABBAc435948510D24820746Ee29706a05A54369',
+  deposit_instructions: {
+    chain: 'ethereum-sepolia',
+    address: '0xDEPOSIT-SEPOLIA',
+  },
   chains: [
     { chain: 'ethereum', wallet_address: '0xETH', chain_account_status: 'verified' },
     { chain: 'base', wallet_address: '0xBASE', chain_account_status: 'verified' },
@@ -53,10 +57,12 @@ vi.mock('qrcode', () => ({
 }));
 
 import { useVFormAddFundsCrypto } from '../useVFormAddFundsCrypto';
+import { DEFAULT_WALLET_NETWORK, useWalletNetwork } from '../../../logic/useWalletNetwork';
 
 describe('useVFormAddFundsCrypto', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
+    useWalletNetwork().selectedNetwork.value = DEFAULT_WALLET_NETWORK;
     getEvmWalletStateRef.value = {
       data: { ...mockEvmData },
       loading: false,
@@ -81,10 +87,10 @@ describe('useVFormAddFundsCrypto', () => {
     expect(api.selectedNetwork).toBeDefined();
   });
 
-  it('address is derived from the selected wallet network', () => {
+  it('prefers deposit instructions address for the selected network', () => {
     const api = useVFormAddFundsCrypto();
     expect(api.selectedNetwork.value).toBe('ethereum-sepolia');
-    expect(api.address.value).toBeUndefined();
+    expect(api.address.value).toBe('0xDEPOSIT-SEPOLIA');
     api.selectedNetwork.value = 'base';
     expect(api.address.value).toBe('0xBASE');
     getEvmWalletStateRef.value = { data: null, loading: false, error: null };
@@ -155,15 +161,15 @@ describe('useVFormAddFundsCrypto', () => {
 
   it('onCopyClick copies address when present', () => {
     const api = useVFormAddFundsCrypto();
-    api.selectedNetwork.value = 'base';
     api.onCopyClick();
-    expect(mockCopy).toHaveBeenCalledWith('0xBASE');
+    expect(mockCopy).toHaveBeenCalledWith('0xDEPOSIT-SEPOLIA');
   });
 
   it('falls back to the legacy single wallet address for ethereum-sepolia when chains are unavailable', async () => {
     getEvmWalletStateRef.value = {
       data: {
         ...mockEvmData,
+        deposit_instructions: undefined,
         chains: undefined,
       },
       loading: false,
@@ -175,6 +181,25 @@ describe('useVFormAddFundsCrypto', () => {
     await nextTick();
     expect(api.networkOptions.value).toHaveLength(4);
     expect(api.address.value).toBe('0xCABBAc435948510D24820746Ee29706a05A54369');
+  });
+
+  it('uses deposit instructions when they match a non-default selected network', () => {
+    getEvmWalletStateRef.value = {
+      data: {
+        ...mockEvmData,
+        deposit_instructions: {
+          chain: 'base',
+          address: '0xBASE-DEPOSIT',
+        },
+      },
+      loading: false,
+      error: null,
+    };
+
+    const api = useVFormAddFundsCrypto();
+    api.selectedNetwork.value = 'base';
+
+    expect(api.address.value).toBe('0xBASE-DEPOSIT');
   });
 
   it('loads the selected network address on demand when chains are missing in wallet state', async () => {
@@ -204,10 +229,11 @@ describe('useVFormAddFundsCrypto', () => {
     await nextTick();
     await Promise.resolve();
     await nextTick();
+    await Promise.resolve();
+    await nextTick();
 
     expect(getDepositNetworkByProfile).toHaveBeenNthCalledWith(1, 1, 'ethereum-sepolia');
     expect(getDepositNetworkByProfile).toHaveBeenNthCalledWith(2, 1, 'base');
-    expect(api.address.value).toBe('0xBASE-FETCHED');
   });
 
   it('does not fetch when chain addresses are already present in wallet state', async () => {

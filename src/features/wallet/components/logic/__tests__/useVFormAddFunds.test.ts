@@ -63,12 +63,14 @@ vi.mock('@vueuse/core', () => ({
 }));
 
 import { useVFormAddFunds } from '../useVFormAddFunds';
+import { DEFAULT_WALLET_NETWORK, useWalletNetwork } from '../../../logic/useWalletNetwork';
 
 describe('useVFormAddFunds', () => {
   const onClose = vi.fn();
 
   beforeEach(() => {
     setActivePinia(createPinia());
+    useWalletNetwork().selectedNetwork.value = DEFAULT_WALLET_NETWORK;
     getEvmWalletStateRef.value = {
       data: {
         address: '0xCABBAc435948510D24820746Ee29706a05A54369',
@@ -145,7 +147,8 @@ describe('useVFormAddFunds', () => {
       'base',
       'ethereum-sepolia',
     ]);
-    expect(api.cryptoAddress.value).toBe('0xETH');
+    expect(api.selectedNetwork.value).toBe(DEFAULT_WALLET_NETWORK);
+    expect(api.cryptoAddress.value).toBeUndefined();
 
     api.selectedNetwork.value = 'base';
     expect(api.cryptoAddress.value).toBe('0xBASE');

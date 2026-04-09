@@ -113,6 +113,12 @@ export const normalizeEvmWalletInfoResponse = (
   const firstWalletAddress = chains
     .map((chain) => String(chain.wallet_address ?? '').trim())
     .find(Boolean) ?? '';
+  const depositInstructions = data.deposit_instructions
+    ? {
+      chain: String(data.deposit_instructions.chain ?? '').trim() || undefined,
+      address: String(data.deposit_instructions.address ?? '').trim() || undefined,
+    }
+    : undefined;
   const updatedAt = data.updated_at ?? data.created_at ?? new Date().toISOString();
 
   return {
@@ -122,6 +128,7 @@ export const normalizeEvmWalletInfoResponse = (
     inc_balance: 0,
     out_balance: 0,
     address: firstWalletAddress,
+    deposit_instructions: depositInstructions,
     chains: normalizedChains,
     balances: normalizeWalletInfoBalances(data.balances),
     transactions: [],

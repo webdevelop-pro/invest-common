@@ -99,6 +99,7 @@ vi.mock('InvestCommon/data/profiles/profiles.repository', () => ({
 }));
 
 import { useWallet } from '../useWallet';
+import { DEFAULT_WALLET_NETWORK } from '../useWalletNetwork';
 
 describe('useWallet', () => {
   beforeEach(() => {
@@ -110,6 +111,7 @@ describe('useWallet', () => {
     selectedUserProfileIdState.value = 1;
     getWalletStateRef.value = { data: { ...mockFiatWallet }, loading: false, error: null };
     getEvmWalletStateRef.value = { data: { ...mockEvmWallet }, loading: false, error: null };
+    useWallet().selectedEvmNetwork.value = DEFAULT_WALLET_NETWORK;
   });
 
   it('computes fiat balance from wallet state', () => {
@@ -140,6 +142,12 @@ describe('useWallet', () => {
   it('exposes updateData', () => {
     const api = useWallet();
     expect(typeof api.updateData).toBe('function');
+  });
+
+  it('uses ethereum sepolia as the default selected EVM network', () => {
+    const api = useWallet();
+    expect(api.selectedEvmNetwork.value).toBe(DEFAULT_WALLET_NETWORK);
+    expect(api.evmNetworkOptions.value.some((option) => option.value === DEFAULT_WALLET_NETWORK)).toBe(true);
   });
 
   it('exposes isWalletDataLoading that reflects combined wallet loading state', () => {
@@ -230,5 +238,14 @@ describe('useWallet', () => {
     await api.updateData();
 
     expect(reportErrorMock).not.toHaveBeenCalled();
+  });
+
+  it('passes the selected network when refreshing the EVM wallet', async () => {
+    const api = useWallet();
+    api.selectedEvmNetwork.value = 'base';
+
+    await api.updateData();
+
+    expect(getEvmWalletByProfileMock).toHaveBeenCalledWith(1, [], 'base');
   });
 });

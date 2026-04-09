@@ -91,5 +91,6 @@ const {
   &__method {
     margin-bottom: 20px;
   }
+
 }
 </style>

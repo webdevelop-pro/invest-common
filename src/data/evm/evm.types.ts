@@ -57,6 +57,11 @@ export interface IEvmWalletChainAccount {
   chain_account_status?: string;
 }
 
+export interface IEvmWalletDepositInstructions {
+  chain?: string;
+  address?: string;
+}
+
 export interface IEvmWalletDataResponse {
   id: number;
   status: EvmWalletStatusTypes;
@@ -64,6 +69,7 @@ export interface IEvmWalletDataResponse {
   inc_balance: number;
   out_balance: number;
   address: string;
+  deposit_instructions?: IEvmWalletDepositInstructions;
   chains?: IEvmWalletChainAccount[];
   balances: IEvmWalletBalancesMap;
   transactions: IEvmTransactionDataResponse[];
@@ -113,6 +119,7 @@ export interface IEvmTransactionDataResponse {
   network: string;
   status: EvmTransactionStatusTypes;
   transaction_tx: string;
+  scan_tx_url?: string;
   created_at: string;
   updated_at: string;
   address?: string;
@@ -121,6 +128,41 @@ export interface IEvmTransactionDataResponse {
   /** Optional description for UI (e.g. mock Earn transactions) */
   description?: string;
 }
+
+export interface IEvmWalletTransactionsApiItem {
+  id?: number | string;
+  user_id?: number | string | null;
+  dest_wallet_id?: number | string | null;
+  source_wallet_id?: number | string | null;
+  investment_id?: number | string | null;
+  type?: string | null;
+  amount?: number | string | null;
+  ticker?: string | null;
+  symbol?: string | null;
+  name?: string | null;
+  icon?: string | null;
+  image_link_id?: number | string | null;
+  network?: string | null;
+  status?: string | null;
+  transaction_tx?: string | null;
+  tx_hash?: string | null;
+  hash?: string | null;
+  scan_tx_url?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+  address?: string | null;
+  wallet_address?: string | null;
+  type_display?: string | null;
+  description?: string | null;
+}
+
+export type IEvmWalletTransactionsApiResponse =
+  | IEvmWalletTransactionsApiItem[]
+  | {
+      items?: IEvmWalletTransactionsApiItem[] | null;
+      transactions?: IEvmWalletTransactionsApiItem[] | null;
+      data?: IEvmWalletTransactionsApiItem[] | null;
+    };
 
 export interface IEvmTransactionDataFormatted extends IEvmTransactionDataResponse {
   isStatusPending: boolean;

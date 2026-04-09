@@ -5,57 +5,28 @@ import { useRepositoryEvm, type WalletChain } from 'InvestCommon/data/evm/evm.re
 import type { IEvmWalletDataFormatted } from 'InvestCommon/data/evm/evm.types';
 import { reportError } from 'InvestCommon/domain/error/errorReporting';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
+import {
+  useWalletNetwork,
+  getWalletNetworkPresentation,
+} from 'InvestCommon/features/wallet/logic/useWalletNetwork';
 
 type DepositNetworkOption = {
-  value: string;
+  value: Exclude<WalletChain, 'all'>;
   text: string;
   address: string;
   warningLabel: string;
-};
-
-const getNetworkPresentation = (chain: string) => {
-  const normalizedChain = chain.trim().toLowerCase();
-
-  switch (normalizedChain) {
-    case 'ethereum':
-      return {
-        selectLabel: 'ETH Ethereum (ERC20)',
-        warningLabel: 'Ethereum (ERC20)',
-      };
-    case 'ethereum-sepolia':
-      return {
-        selectLabel: 'ETH Ethereum Sepolia',
-        warningLabel: 'Ethereum Sepolia',
-      };
-    case 'polygon':
-      return {
-        selectLabel: 'POL Polygon',
-        warningLabel: 'Polygon',
-      };
-    case 'base':
-      return {
-        selectLabel: 'BASE Base',
-        warningLabel: 'Base',
-      };
-    default:
-      return {
-        selectLabel: chain,
-        warningLabel: chain,
-      };
-  }
 };
 
 export function useVFormAddFundsCrypto() {
   const evmRepository = useRepositoryEvm();
   const { getEvmWalletState } = storeToRefs(evmRepository);
   const profilesStore = useProfilesStore();
-  const defaultNetwork: Exclude<WalletChain, 'all'> = 'ethereum-sepolia';
+  const { defaultNetwork, selectedNetwork } = useWalletNetwork();
 
   const evmData = computed(() => getEvmWalletState.value.data as IEvmWalletDataFormatted | undefined);
   const supportedChains = computed(() =>
     (evmRepository.depositWalletChains ?? ['ethereum', 'polygon', 'base', 'ethereum-sepolia']) as Exclude<WalletChain, 'all'>[]
   );
-  const selectedNetwork = ref<Exclude<WalletChain, 'all'>>(defaultNetwork);
   const fetchedNetworkAddresses = ref<Partial<Record<Exclude<WalletChain, 'all'>, string>>>({});
   const isNetworkAddressLoading = ref(false);
 
@@ -74,7 +45,7 @@ export function useVFormAddFundsCrypto() {
 
   const networkOptions = computed<DepositNetworkOption[]>(() =>
     supportedChains.value.map((chain) => {
-      const presentation = getNetworkPresentation(chain);
+      const presentation = getWalletNetworkPresentation(chain);
       return {
         value: chain,
         text: presentation.selectLabel,
@@ -120,6 +91,19 @@ export function useVFormAddFundsCrypto() {
     networkOptions.value.find((option) => option.value === selectedNetwork.value)
   );
   const addressRef = computed(() => {
+    const depositInstructionChain = String(evmData.value?.deposit_instructions?.chain ?? '').trim().toLowerCase();
+    const depositInstructionAddress = String(evmData.value?.deposit_instructions?.address ?? '').trim();
+    const fetchedSelectedNetworkAddress = String(fetchedNetworkAddresses.value[selectedNetwork.value] ?? '').trim();
+
+    if (depositInstructionAddress
+      && (!depositInstructionChain || depositInstructionChain === selectedNetwork.value)) {
+      return depositInstructionAddress;
+    }
+
+    if (fetchedSelectedNetworkAddress) {
+      return fetchedSelectedNetworkAddress;
+    }
+
     if (selectedNetworkOption.value?.address) {
       return selectedNetworkOption.value.address;
     }
