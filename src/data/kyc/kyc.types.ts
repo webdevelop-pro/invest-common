@@ -37,6 +37,20 @@ export interface IKycProfile {
 
 export type KycAlertVariant = 'error' | 'info';
 
+export type KycThirdPartyStatus =
+  | 'idle'
+  | 'launching'
+  | 'success'
+  | 'incomplete'
+  | 'invalidToken'
+  | 'error';
+
+export type KycPlaidLaunchStatus = 'success' | 'exit';
+
+export interface KycPlaidLaunchResult {
+  status: KycPlaidLaunchStatus;
+}
+
 export interface KycAlertModel {
   show: boolean;
   variant: KycAlertVariant;
@@ -45,6 +59,11 @@ export interface KycAlertModel {
   buttonText?: string;
   isLoading: boolean;
   isDisabled: boolean;
+}
+
+export interface KycThirdPartyScreenModel {
+  title: string;
+  description: string;
 }
 
 interface ITextStatuses {

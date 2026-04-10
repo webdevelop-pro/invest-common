@@ -23,7 +23,7 @@ This document now describes the current implemented phase, not the original targ
 
 ## Important Files
 - KYC post-submit trigger:
-  [`invest-common/src/features/kyc/store/useFormFinancialInformationAndKyc.ts`](/Users/nelyaklyusa/Documents/work-code/dashboard.webdevelop.biz/invest-common/src/features/kyc/store/useFormFinancialInformationAndKyc.ts)
+  [`invest-common/src/features/kyc/logic/useFormFinancialInformationAndKyc.ts`](/Users/nelyaklyusa/Documents/work-code/dashboard.webdevelop.biz/invest-common/src/features/kyc/logic/useFormFinancialInformationAndKyc.ts)
 - Wallet auth store/state machine:
   [`invest-common/src/features/wallet/store/useWalletAuth.ts`](/Users/nelyaklyusa/Documents/work-code/dashboard.webdevelop.biz/invest-common/src/features/wallet/store/useWalletAuth.ts)
 - Wallet auth dialog:

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
-import { useFormFinancialInformationAndKyc } from './store/useFormFinancialInformationAndKyc';
+import { useFormFinancialInformationAndKyc } from './logic/useFormFinancialInformationAndKyc';
 import VLayoutForm from 'InvestCommon/shared/layouts/VLayoutForm.vue';
 import VFormPartialPersonalInformation from 'InvestCommon/shared/components/forms/VFormPartialPersonalInformation.vue';
 import VFormPartialFinancialSituation from 'InvestCommon/shared/components/forms/VFormPartialFinancialSituation.vue';

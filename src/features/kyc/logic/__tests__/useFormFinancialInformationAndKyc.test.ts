@@ -288,6 +288,21 @@ describe('useFormFinancialInformationAndKyc', () => {
       expect(composable.isLoading.value).toBe(false);
     });
 
+    it('should continue when a HubSpot submission fails', async () => {
+      mockSubmitFormToHubspot.mockRejectedValueOnce(new Error('hubspot fail'));
+      const { reportError } = await import('InvestCommon/domain/error/errorReporting');
+
+      await composable.handleSave();
+
+      expect(mockRepositoryProfiles.setProfileById).toHaveBeenCalled();
+      expect(mockKycRepository.handlePlaidKyc).toHaveBeenCalledWith('123');
+      expect(mockAccreditationRepository.createEscrow).toHaveBeenCalledWith('user123', 'profile123');
+      expect(mockRepositoryProfiles.getProfileById).toHaveBeenCalledWith('individual', '123');
+      expect(mockPush).toHaveBeenCalledWith(composable.backButtonRoute.value);
+      expect(mockMaybeOpenAfterKyc).toHaveBeenCalled();
+      expect(reportError).not.toHaveBeenCalledWith(expect.any(Error), expect.stringContaining('HubSpot'));
+    });
+
     it('should report Plaid KYC error with the correct message', async () => {
       mockKycRepository.handlePlaidKyc.mockRejectedValue(new Error('kyc fail'));
       const { reportError } = await import('InvestCommon/domain/error/errorReporting');
@@ -397,13 +412,9 @@ describe('useFormFinancialInformationAndKyc', () => {
       expect(composable.isLoading.value).toBe(false);
     });
 
-    it('should handle KYC and Escrow creation only if no errors', async () => {
-      mockRepositoryProfiles.setProfileByIdState.value.error = null;
-      mockKycRepository.tokenState = ref({ error: null });
-      mockProfilesStore.selectedUserProfileData.value = {
-        data: { id: 'profile123', type: 'individual' }, user_id: 'user123', id: 'profile123', escrow_id: null,
-      };
+    it('should continue to KYC and escrow after a successful profile save', async () => {
       await composable.handleSave();
+
       expect(mockKycRepository.handlePlaidKyc).toHaveBeenCalled();
       expect(mockAccreditationRepository.createEscrow).toHaveBeenCalledWith('user123', 'profile123');
     });
@@ -416,9 +427,11 @@ describe('useFormFinancialInformationAndKyc', () => {
       expect(mockAccreditationRepository.createEscrow).not.toHaveBeenCalled();
     });
 
-    it('should not call hubspotHandle if setProfileByIdState has error', async () => {
-      mockRepositoryProfiles.setProfileByIdState.value.error = { data: { responseJson: 'error' } } as any;
+    it('should not call hubspotHandle if saving the profile fails', async () => {
+      mockRepositoryProfiles.setProfileById.mockRejectedValueOnce(new Error('save failed'));
+
       await composable.handleSave();
+
       expect(mockSubmitFormToHubspot).not.toHaveBeenCalled();
     });
   });
