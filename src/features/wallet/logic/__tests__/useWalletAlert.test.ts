@@ -2,9 +2,12 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
 import { ref } from 'vue';
 
-const openDialogMock = vi.fn();
 const maybeOpenAfterKycMock = vi.fn();
 const startFlowForProfileMock = vi.fn();
+const onAddAccountClickMock = vi.fn();
+const openContactUsDialogMock = vi.fn();
+const toastMock = vi.fn();
+const isLinkBankAccountLoadingRef = ref(false);
 
 const getWalletStateRef = ref({
   data: {
@@ -66,6 +69,11 @@ vi.mock('InvestCommon/domain/session/store/useSession', () => ({
     userSessionTraits: ref({ email: 'wallet@example.com' }),
   }),
 }));
+vi.mock('InvestCommon/domain/dialogs/store/useDialogs', () => ({
+  useDialogs: () => ({
+    openContactUsDialog: openContactUsDialogMock,
+  }),
+}));
 vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
   useProfilesStore: () => ({
     selectedUserProfileData: selectedUserProfileDataRef,
@@ -73,11 +81,21 @@ vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
     selectedUserProfileType: ref('individual'),
   }),
 }));
+vi.mock('InvestCommon/features/settings/components/logic/useSettingsBankAccounts', () => ({
+  useSettingsBankAccounts: () => ({
+    onAddAccountClick: onAddAccountClickMock,
+    isLinkBankAccountLoading: isLinkBankAccountLoadingRef,
+  }),
+}));
 vi.mock('InvestCommon/features/wallet/store/useWalletAuth', () => ({
   useWalletAuth: () => ({
-    openDialog: openDialogMock,
     maybeOpenAfterKyc: maybeOpenAfterKycMock,
     startFlowForProfile: startFlowForProfileMock,
+  }),
+}));
+vi.mock('UiKit/components/Base/VToast/use-toast', () => ({
+  useToast: () => ({
+    toast: toastMock,
   }),
 }));
 const mockPush = vi.fn();
@@ -125,10 +143,13 @@ describe('useWalletAlert', () => {
     };
     selectedUserProfileIdRef.value = 1;
     getProfileByIdStateRef.value = { loading: false };
+    isLinkBankAccountLoadingRef.value = false;
     mockPush.mockClear();
-    openDialogMock.mockClear();
     maybeOpenAfterKycMock.mockClear();
     startFlowForProfileMock.mockClear();
+    onAddAccountClickMock.mockClear();
+    openContactUsDialogMock.mockClear();
+    toastMock.mockClear();
   });
 
   it('returns all alert API fields', () => {
@@ -141,6 +162,8 @@ describe('useWalletAlert', () => {
     expect(api.isTopTextShow).toBeDefined();
     expect(api.alertTitle).toBeDefined();
     expect(api.alertButtonText).toBeDefined();
+    expect(api.alertModel).toBeDefined();
+    expect(api.onDescriptionAction).toBeDefined();
     expect(api.onAlertButtonClick).toBeDefined();
   });
 
@@ -264,7 +287,6 @@ describe('useWalletAlert', () => {
     const api = useWalletAlert();
     api.onAlertButtonClick();
 
-    expect(openDialogMock).not.toHaveBeenCalled();
     expect(maybeOpenAfterKycMock).not.toHaveBeenCalled();
     expect(startFlowForProfileMock).toHaveBeenCalledWith({
       profileId: 1,
@@ -275,6 +297,83 @@ describe('useWalletAlert', () => {
       userEmail: 'wallet@example.com',
       walletStatus: undefined,
     });
+  });
+
+  it('maps alert state into a shared alert model', () => {
+    getEvmWalletStateRef.value = {
+      data: undefined,
+      loading: false,
+      error: new Error('User need to create wallet'),
+    };
+    selectedUserProfileDataRef.value!.isKycApproved = true;
+    isLinkBankAccountLoadingRef.value = true;
+
+    const api = useWalletAlert();
+
+    expect(api.alertModel.value).toEqual({
+      show: true,
+      variant: 'info',
+      title: 'Set up your wallet to continue.',
+      description: 'Your crypto wallet has not been created yet. Start wallet setup to continue.',
+      buttonText: 'Set Up Wallet',
+      isLoading: true,
+      isDisabled: true,
+    });
+  });
+
+  it('opens the bank-account flow from the description action', () => {
+    const api = useWalletAlert();
+    const preventDefault = vi.fn();
+    const stopPropagation = vi.fn();
+
+    api.onDescriptionAction({
+      target: {
+        closest: (selector: string) => (selector === 'a[href]' ? { href: '/settings/1/bank-accounts' } : null),
+      },
+      preventDefault,
+      stopPropagation,
+    } as unknown as Event);
+
+    expect(preventDefault).toHaveBeenCalled();
+    expect(stopPropagation).toHaveBeenCalled();
+    expect(onAddAccountClickMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('opens contact us from the description action', () => {
+    const api = useWalletAlert();
+    const preventDefault = vi.fn();
+    const stopPropagation = vi.fn();
+
+    api.onDescriptionAction({
+      target: {
+        closest: (selector: string) => (selector === '[data-action="contact-us"]' ? {} : null),
+      },
+      preventDefault,
+      stopPropagation,
+    } as unknown as Event);
+
+    expect(preventDefault).toHaveBeenCalled();
+    expect(stopPropagation).toHaveBeenCalled();
+    expect(openContactUsDialogMock).toHaveBeenCalledWith('wallet');
+  });
+
+  it('supports keyboard description actions from the rich-text wrapper', () => {
+    const api = useWalletAlert();
+    const preventDefault = vi.fn();
+    const stopPropagation = vi.fn();
+
+    api.onDescriptionAction({
+      target: {
+        closest: () => null,
+      },
+      currentTarget: {
+        querySelector: (selector: string) => (selector === '[data-action="contact-us"]' ? {} : null),
+      },
+      preventDefault,
+      stopPropagation,
+    } as unknown as Event);
+
+    expect(openContactUsDialogMock).toHaveBeenCalledWith('wallet');
   });
 
   it('sets isDataLoading only for real loading or initial load when wallets can load', () => {

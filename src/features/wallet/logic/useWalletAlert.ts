@@ -4,11 +4,14 @@ import { storeToRefs } from 'pinia';
 import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository';
 import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
+import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { hasRestrictedWalletBehavior } from 'InvestCommon/data/profiles/profiles.helpers';
 import type { IProfileFormatted } from 'InvestCommon/data/profiles/profiles.types';
+import { useSettingsBankAccounts } from 'InvestCommon/features/settings/components/logic/useSettingsBankAccounts';
 import { useWalletAuth } from 'InvestCommon/features/wallet/store/useWalletAuth';
+import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 import { isWalletSetupRequiredError } from './walletSetupError';
 
 const CONTACT_US_LINK =
@@ -47,9 +50,11 @@ export function useWalletAlert(options: UseWalletAlertOptions = {}) {
 
   const router = useRouter();
   const route = useRoute();
+  const dialogsStore = useDialogs();
   const profilesStore = useProfilesStore();
   const walletAuthStore = useWalletAuth();
   const sessionStore = useSessionStore();
+  const { toast } = useToast();
   const {
     selectedUserProfileData,
     selectedUserProfileId,
@@ -63,6 +68,19 @@ export function useWalletAlert(options: UseWalletAlertOptions = {}) {
     createLinkProcessState,
   } = storeToRefs(useRepositoryWallet());
   const { getEvmWalletState } = storeToRefs(useRepositoryEvm());
+
+  const handleBankAccountsUpdated = () => {
+    toast({
+      title: 'Bank account connected',
+      description: 'Your bank account was successfully linked.',
+      variant: 'success',
+    });
+  };
+
+  const { onAddAccountClick, isLinkBankAccountLoading } = useSettingsBankAccounts({
+    skipInitialUpdate: true,
+    onBankAccountsUpdated: handleBankAccountsUpdated,
+  });
 
   const profile = computed(
     () => (selectedUserProfileData.value ?? null) as IProfileFormatted | null,
@@ -193,16 +211,20 @@ export function useWalletAlert(options: UseWalletAlertOptions = {}) {
 
   /**
    * Wallet is considered "blocked" when we are showing an error-type alert
-   * (e.g. KYC required, declined, or any wallet error). This is used by the
-   * Wallet tab to visually dim/disable the main wallet UI while the problem
-   * alert is visible.
+   * (e.g. KYC required, declined, or a hard wallet error). Setup-required and
+   * informational states should remain actionable without dimming the wallet UI.
    */
   const isWalletBlocked = computed(
     () => isAlertShow.value && isAlertType.value === 'error',
   );
   const isAlertType = computed(() => {
-    if (isWalletCreated.value || shouldShowBankAccountMissing.value) return 'info';
-    if (isWalletCreationRequired.value || isError.value) return 'error';
+    if (
+      isWalletCreated.value
+      || shouldShowBankAccountMissing.value
+    ) {
+      return 'info';
+    }
+    if (isError.value || isWalletCreationRequired.value) return 'error';
     return 'error';
   });
   const isAlertText = computed(() => {
@@ -231,6 +253,15 @@ export function useWalletAlert(options: UseWalletAlertOptions = {}) {
         ? 'Set Up Wallet'
         : undefined,
   );
+  const alertModel = computed(() => ({
+    show: isAlertShow.value,
+    variant: isAlertType.value,
+    title: alertTitle.value,
+    description: isAlertText.value,
+    buttonText: alertButtonText.value,
+    isLoading: isLinkBankAccountLoading.value,
+    isDisabled: isLinkBankAccountLoading.value,
+  }));
 
   const showTable = computed(
     () =>
@@ -274,7 +305,32 @@ export function useWalletAlert(options: UseWalletAlertOptions = {}) {
     });
   };
 
+  const onDescriptionAction = (event: Event) => {
+    const target = event.target as HTMLElement | null;
+    const currentTarget = event.currentTarget as HTMLElement | null;
+    const bankAccountsLink = (target?.closest('a[href]') as HTMLAnchorElement | null)
+      || (currentTarget?.querySelector('a[href*="bank-accounts"]') as HTMLAnchorElement | null);
+
+    if (bankAccountsLink?.href?.includes('bank-accounts')) {
+      event.preventDefault();
+      event.stopPropagation();
+      void onAddAccountClick();
+      return;
+    }
+
+    const contactUsTarget = target?.closest('[data-action="contact-us"]')
+      || currentTarget?.querySelector('[data-action="contact-us"]');
+    if (!contactUsTarget) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    dialogsStore.openContactUsDialog('wallet');
+  };
+
   return {
+    alertModel,
     hasRestrictedWallet,
     isKYCNeedToPass,
     isKYCInProgress,
@@ -287,7 +343,9 @@ export function useWalletAlert(options: UseWalletAlertOptions = {}) {
     alertTitle,
     showTable,
     alertButtonText,
+    isLinkBankAccountLoading,
     onAlertButtonClick,
+    onDescriptionAction,
     isDataLoading,
   };
 }

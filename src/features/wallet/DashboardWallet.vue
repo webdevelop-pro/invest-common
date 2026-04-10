@@ -16,14 +16,10 @@ const {
   summaryEvmWalletState,
   isWalletDataLoading,
   isAlertDataLoading,
-  isAlertShow,
-  isAlertType,
-  isAlertText,
-  alertTitle,
+  walletAlertModel,
   isWalletBlocked,
-  alertButtonText,
-  onAlertButtonClick,
-  handleContactUsClick,
+  onWalletAlertAction,
+  onWalletAlertDescriptionAction,
   showTable,
   totalBalanceMainFormatted,
   totalBalanceCoins,
@@ -57,14 +53,15 @@ const {
       />
     </div>
     <DashboardWalletAlert
-      v-else-if="isAlertShow"
-      :show="true"
-      :variant="isAlertType"
-      :alert-text="isAlertText"
-      :alert-title="alertTitle"
-      :button-text="alertButtonText"
-      @click="onAlertButtonClick"
-      @contact-us-click="handleContactUsClick"
+      v-else-if="walletAlertModel.show"
+      :variant="walletAlertModel.variant"
+      :description="walletAlertModel.description"
+      :title="walletAlertModel.title"
+      :button-text="walletAlertModel.buttonText"
+      :is-loading="walletAlertModel.isLoading"
+      :is-disabled="walletAlertModel.isDisabled"
+      @action="onWalletAlertAction"
+      @description-action="onWalletAlertDescriptionAction"
     />
 
     <DashboardWalletHeader

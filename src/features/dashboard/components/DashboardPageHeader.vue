@@ -21,7 +21,7 @@ const {
   onKycBannerClick,
   onKycBannerDescriptionAction,
   onWalletBannerClick,
-  onWalletBannerContactUsClick,
+  onWalletBannerDescriptionAction,
   isWalletAlertLoading,
   showPerformanceCards,
   verificationBanner,
@@ -47,7 +47,7 @@ const {
       @kyc-banner-click="onKycBannerClick"
       @kyc-banner-description-action="onKycBannerDescriptionAction"
       @wallet-banner-click="onWalletBannerClick"
-      @wallet-banner-contact-us-click="onWalletBannerContactUsClick"
+      @wallet-banner-description-action="onWalletBannerDescriptionAction"
     />
   </section>
 </template>

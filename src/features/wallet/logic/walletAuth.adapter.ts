@@ -1,7 +1,19 @@
 import {
+  alchemy,
+  sepolia,
+} from '@account-kit/infra';
+import {
+  createSmartWalletClient,
+  type PrepareCallsResult,
+  type SendPreparedCallsResult,
+} from '@account-kit/wallet-client';
+import {
   AlchemySignerStatus,
   AlchemyWebSigner,
 } from '@account-kit/signer';
+import { vToYParity } from 'ox/Signature';
+import { createPublicClient, hexToBigInt, hexToNumber, serializeSignature, zeroAddress } from 'viem';
+import { getBytecode } from 'viem/actions';
 import env from 'InvestCommon/config/env';
 
 type SignerErrorInfo = {
@@ -12,6 +24,13 @@ type WalletSigner = {
   authenticate: (payload: unknown) => Promise<unknown>;
   validateMultiFactors: (payload: unknown) => Promise<unknown>;
   getAuthDetails: () => Promise<unknown>;
+  getAddress: () => Promise<string>;
+  signAuthorization?: (payload: unknown) => Promise<{
+    r: `0x${string}`;
+    s: `0x${string}`;
+    v?: number | bigint | string;
+    yParity?: number | bigint | string;
+  }>;
   signTypedData?: (payload: unknown) => Promise<string>;
   signMessage?: (payload: unknown) => Promise<string>;
   on: (event: string, listener: (...args: any[]) => void) => () => void;
@@ -35,6 +54,9 @@ let signerPromise: Promise<WalletSigner> | null = null;
 const pendingState: PendingState = {};
 const SIGNER_IFRAME_CONTAINER_ID = 'alchemy-signer-iframe-container';
 const SIGNER_IFRAME_WAIT_TIMEOUT_MS = 3000;
+const EIP_7702_DELEGATION_PREFIX = '0xef0100';
+const ALCHEMY_7702_POLICY_ID = 'e9f2620b-e800-4b5d-8d54-c738a5863483';
+let warmedSignerAddress = '';
 
 const toError = (error?: SignerErrorInfo | Error) => (
   error instanceof Error
@@ -125,6 +147,333 @@ const getSignableMessagePayload = (payload: unknown) => {
   }
 
   return undefined;
+};
+
+const createSignerSmartWalletClient = async (signer: WalletSigner) => {
+  const signerAddress = (await signer.getAddress()).trim();
+
+  if (!signerAddress) {
+    throw new Error('Wallet signer address is unavailable for Wallet APIs initialization.');
+  }
+
+  console.log('[walletAuthAdapter] createSignerSmartWalletClient:getSignerAddress', {
+    signerAddress,
+    hasApiKey: Boolean(env.ALCHEMY_WALLET_API_KEY),
+  });
+
+  return createSmartWalletClient({
+    transport: alchemy({ apiKey: env.ALCHEMY_WALLET_API_KEY }),
+    chain: sepolia,
+    signer: signer as any,
+    account: signerAddress,
+    policyId: ALCHEMY_7702_POLICY_ID,
+  });
+};
+
+const createSepoliaPublicClient = () => createPublicClient({
+  chain: sepolia,
+  transport: alchemy({
+    apiKey: env.ALCHEMY_WALLET_API_KEY,
+  }),
+});
+
+const is7702Enabled = async (eoaAddress: string) => {
+  const code = await getBytecode(createSepoliaPublicClient(), {
+    address: eoaAddress as `0x${string}`,
+  });
+
+  return code?.startsWith(EIP_7702_DELEGATION_PREFIX) ?? false;
+};
+
+const createZeroValueNoopCall = () => ({
+  to: zeroAddress,
+  data: '0x' as const,
+  value: '0x0' as const,
+});
+
+const summarizePreparedCalls = (preparedCalls: PrepareCallsResult) => {
+  if (preparedCalls.type !== 'array') {
+    return {
+      type: preparedCalls.type,
+      hasSignatureRequest: 'signatureRequest' in preparedCalls && Boolean(preparedCalls.signatureRequest),
+      chainId: 'chainId' in preparedCalls ? (preparedCalls as { chainId?: unknown }).chainId : undefined,
+      nonce: 'data' in preparedCalls
+        ? ((preparedCalls as { data?: { nonce?: unknown } }).data?.nonce)
+        : undefined,
+    };
+  }
+
+  return preparedCalls.data.map((call) => ({
+    type: call.type,
+    hasSignatureRequest: 'signatureRequest' in call && Boolean(call.signatureRequest),
+    chainId: 'chainId' in call ? (call as { chainId?: unknown }).chainId : undefined,
+    nonce: 'data' in call
+      ? ((call as { data?: { nonce?: unknown } }).data?.nonce)
+      : undefined,
+  }));
+};
+
+const summarizeSignedCalls = (signedCalls: Awaited<ReturnType<typeof signWalletApisPreparedCalls>>) => {
+  if (signedCalls.type !== 'array') {
+    return {
+      type: signedCalls.type,
+      chainId: 'chainId' in signedCalls ? (signedCalls as { chainId?: unknown }).chainId : undefined,
+      nonce: 'data' in signedCalls
+        ? ((signedCalls as { data?: { nonce?: unknown } }).data?.nonce)
+        : undefined,
+      signatureType: (signedCalls as { signature?: { type?: unknown } }).signature?.type,
+    };
+  }
+
+  return signedCalls.data.map((call) => ({
+    type: call.type,
+    chainId: 'chainId' in call ? (call as { chainId?: unknown }).chainId : undefined,
+    nonce: 'data' in call
+      ? ((call as { data?: { nonce?: unknown } }).data?.nonce)
+      : undefined,
+    signatureType: (call as { signature?: { type?: unknown } }).signature?.type,
+  }));
+};
+
+const signWalletApisPreparedCalls = async (
+  signer: WalletSigner,
+  preparedCalls: PrepareCallsResult,
+  client?: Awaited<ReturnType<typeof createSignerSmartWalletClient>>,
+) => {
+  console.log('[walletAuthAdapter] signWalletApisPreparedCalls:start', {
+    type: preparedCalls.type,
+  });
+
+  if (client?.signPreparedCalls) {
+    return client.signPreparedCalls(preparedCalls);
+  }
+
+  const signPreparedUserOperation = async (
+    call: Extract<PrepareCallsResult, { type: 'user-operation-v060' | 'user-operation-v070' }>
+      | Exclude<Extract<PrepareCallsResult, { type: 'array' }>['data'][number], { type: 'authorization' }>,
+  ) => {
+    const {
+      signatureRequest,
+      feePayment: _feePayment,
+      ...rest
+    } = call as typeof call & { feePayment?: unknown };
+
+    if (!signatureRequest) {
+      throw new Error('Wallet APIs did not return a signature request for the prepared calls.');
+    }
+
+    return {
+      ...rest,
+      signature: await signWalletSignatureRequest(signer, signatureRequest),
+    };
+  };
+
+  const signPreparedAuthorization = async (
+    call: Extract<PrepareCallsResult, { type: 'authorization' }>
+      | Extract<Extract<PrepareCallsResult, { type: 'array' }>['data'][number], { type: 'authorization' }>,
+  ) => {
+    const { signatureRequest: _signatureRequest, ...rest } = call;
+    console.log('[walletAuthAdapter] signPreparedAuthorization:start', {
+      chainId: call.chainId,
+      nonce: call.data?.nonce,
+      address: call.data?.address,
+    });
+
+    if (!signer.signAuthorization) {
+      throw new Error('Wallet signer does not support EIP-7702 authorization signing.');
+    }
+
+    const authorizationNonce = hexToBigInt(call.data.nonce);
+    const signedAuthorization = await signer.signAuthorization({
+      ...call.data,
+      chainId: hexToNumber(call.chainId),
+      nonce: authorizationNonce <= BigInt(Number.MAX_SAFE_INTEGER)
+        ? Number(authorizationNonce)
+        : authorizationNonce,
+    }) as {
+      r: `0x${string}`;
+      s: `0x${string}`;
+      v?: number | bigint | string;
+      yParity?: number | bigint | string;
+    };
+
+    const yParityValue = signedAuthorization.yParity;
+    const yParity = yParityValue != null
+      ? Number(yParityValue)
+      : vToYParity(Number(signedAuthorization.v));
+
+    return {
+      ...rest,
+      signature: {
+        type: 'secp256k1' as const,
+        data: serializeSignature({
+          r: signedAuthorization.r,
+          s: signedAuthorization.s,
+          yParity,
+        }),
+      },
+    };
+  };
+
+  if (preparedCalls.type === 'array') {
+    return {
+      type: 'array' as const,
+      data: await Promise.all(preparedCalls.data.map((call) => (
+        call.type === 'authorization'
+          ? signPreparedAuthorization(call)
+          : signPreparedUserOperation(call)
+      ))),
+    };
+  }
+
+  if (preparedCalls.type === 'authorization') {
+    return signPreparedAuthorization(preparedCalls);
+  }
+
+  return signPreparedUserOperation(preparedCalls);
+};
+
+const forceEnable7702 = async (signer: WalletSigner) => {
+  const eoaAddress = (await signer.getAddress()).trim();
+  if (!eoaAddress) {
+    throw new Error('Wallet signer address is unavailable for EIP-7702 enablement.');
+  }
+
+  const alreadyEnabled = await is7702Enabled(eoaAddress);
+  console.log('[walletAuthAdapter] forceEnable7702:delegationCheck', {
+    eoaAddress,
+    alreadyEnabled,
+  });
+
+  if (alreadyEnabled) {
+    return {
+      status: 'already_enabled' as const,
+      eoaAddress,
+    };
+  }
+
+  const client = await createSignerSmartWalletClient(signer);
+  console.log('[walletAuthAdapter] forceEnable7702:sendNoopZeroTx', {
+    eoaAddress,
+  });
+  const { response } = await sendZeroTransaction(signer, client);
+
+  return {
+    status: 'enabled' as const,
+    client,
+    eoaAddress,
+    response,
+  };
+};
+
+const sendZeroTransaction = async (
+  signer: WalletSigner,
+  existingClient?: Awaited<ReturnType<typeof createSignerSmartWalletClient>>,
+) => {
+  const eoaAddress = (await signer.getAddress()).trim();
+  if (!eoaAddress) {
+    throw new Error('Wallet signer address is unavailable for zero-value transaction sending.');
+  }
+
+  const client = existingClient ?? await createSignerSmartWalletClient(signer);
+  const zeroValueCall = createZeroValueNoopCall();
+  console.log('[walletAuthAdapter] sendZeroTransaction:start', {
+    eoaAddress,
+    account: eoaAddress,
+    call: {
+      ...zeroValueCall,
+      value: zeroValueCall.value,
+    },
+  });
+
+  try {
+    const preparedCalls = await client.prepareCalls({
+      account: eoaAddress as `0x${string}`,
+      calls: [zeroValueCall],
+    });
+    console.log('[walletAuthAdapter] sendZeroTransaction:prepared', {
+      eoaAddress,
+      type: preparedCalls.type,
+      account: eoaAddress,
+      preparedCalls,
+      preparedCallsSummary: summarizePreparedCalls(preparedCalls),
+    });
+
+    const signedCalls = await signWalletApisPreparedCalls(signer, preparedCalls, client);
+    console.log('[walletAuthAdapter] sendZeroTransaction:signed', {
+      eoaAddress,
+      type: signedCalls.type,
+      signedCalls,
+      signedCallsSummary: summarizeSignedCalls(signedCalls),
+    });
+    const response = await client.sendPreparedCalls(signedCalls) as SendPreparedCallsResult;
+    console.log('[walletAuthAdapter] sendZeroTransaction:response', {
+      eoaAddress,
+      response,
+    });
+
+    return {
+      client,
+      eoaAddress,
+      response,
+    };
+  } catch (error) {
+    console.log('[walletAuthAdapter] sendZeroTransaction:error', {
+      eoaAddress,
+      account: eoaAddress,
+      error,
+      message: (error as Error)?.message,
+      cause: (error as Error & { cause?: unknown })?.cause,
+    });
+    throw error;
+  }
+};
+
+const signWalletSignatureRequest = async (
+  signer: WalletSigner,
+  signatureRequest: AuthorizationSignatureRequest,
+) => {
+  const requestType = String(signatureRequest?.type ?? '').trim().toLowerCase();
+  const signableMessage = getSignableMessagePayload(signatureRequest?.data);
+  console.log('[walletAuthAdapter] signWalletSignatureRequest:start', {
+    requestType,
+    hasSignableMessage: Boolean(signableMessage),
+    hasData: signatureRequest?.data != null,
+  });
+
+  if (requestType === 'eth_signtypeddata_v4' || requestType === 'eth_signtypeddata') {
+    if (signableMessage) {
+      if (!signer.signMessage) {
+        throw new Error('Wallet signer does not support message signing.');
+      }
+
+      return signer.signMessage(signableMessage);
+    }
+
+    if (!signer.signTypedData) {
+      throw new Error('Wallet signer does not support typed-data signing.');
+    }
+
+    return signer.signTypedData(signatureRequest.data);
+  }
+
+  if (requestType === 'personal_sign' || requestType === 'eth_sign' || requestType === 'signmessage') {
+    if (!signer.signMessage) {
+      throw new Error('Wallet signer does not support message signing.');
+    }
+
+    return signer.signMessage(signableMessage ?? signatureRequest.data);
+  }
+
+  if (signer.signTypedData) {
+    return signer.signTypedData(signatureRequest.data);
+  }
+
+  if (signer.signMessage) {
+    return signer.signMessage(signatureRequest.data);
+  }
+
+  throw new Error('Wallet signer cannot sign the authorization request.');
 };
 
 export const walletAuthAdapter = {
@@ -258,43 +607,64 @@ export const walletAuthAdapter = {
     return stampedWhoamiRequest;
   },
 
+  async warmSignerWithZeroTransaction() {
+    const signer = await getSigner();
+    const signerAddress = (await signer.getAddress()).trim();
+    console.log('[walletAuthAdapter] warmSignerWithZeroTransaction:start', {
+      signerAddress,
+      warmedSignerAddress,
+    });
+
+    if (!signerAddress) {
+      console.log('[walletAuthAdapter] warmSignerWithZeroTransaction:missingSignerAddress');
+      throw new Error('Wallet signer address is unavailable for authorization warmup.');
+    }
+
+    if (warmedSignerAddress === signerAddress) {
+      console.log('[walletAuthAdapter] warmSignerWithZeroTransaction:skipAlreadyWarmed', {
+        signerAddress,
+      });
+      return;
+    }
+
+    try {
+      const result = await forceEnable7702(signer);
+      warmedSignerAddress = result.eoaAddress;
+      console.log('[walletAuthAdapter] warmSignerWithZeroTransaction:sent', {
+        signerAddress,
+        warmedSignerAddress,
+        status: result.status,
+        response: 'response' in result ? result.response : undefined,
+      });
+    } catch (error) {
+      console.log('[walletAuthAdapter] warmSignerWithZeroTransaction:error', {
+        signerAddress,
+        warmedSignerAddress,
+        error,
+      });
+      throw error;
+    }
+  },
+
+  async ensureAuthorizationSigningReady() {
+    await this.warmSignerWithZeroTransaction();
+  },
+
+  async sendZeroTransaction() {
+    const signer = await getSigner();
+    const result = await sendZeroTransaction(signer);
+    warmedSignerAddress = result.eoaAddress;
+    console.log('[walletAuthAdapter] sendZeroTransaction:sent', {
+      signerAddress: result.eoaAddress,
+      warmedSignerAddress,
+      response: result.response,
+    });
+    return result.response;
+  },
+
   async signAuthorizationRequest(signatureRequest: AuthorizationSignatureRequest) {
     const signer = await getSigner();
-    const requestType = String(signatureRequest?.type ?? '').trim().toLowerCase();
-    const signableMessage = getSignableMessagePayload(signatureRequest?.data);
-
-    if (requestType === 'eth_signtypeddata_v4' || requestType === 'eth_signtypeddata') {
-      if (signableMessage) {
-        if (!signer.signMessage) {
-          throw new Error('Wallet signer does not support message signing.');
-        }
-
-        return signer.signMessage(signableMessage);
-      }
-
-      if (!signer.signTypedData) {
-        throw new Error('Wallet signer does not support typed-data signing.');
-      }
-
-      return signer.signTypedData(signatureRequest.data);
-    }
-
-    if (requestType === 'personal_sign' || requestType === 'eth_sign' || requestType === 'signmessage') {
-      if (!signer.signMessage) {
-        throw new Error('Wallet signer does not support message signing.');
-      }
-
-      return signer.signMessage(signableMessage ?? signatureRequest.data);
-    }
-
-    if (signer.signTypedData) {
-      return signer.signTypedData(signatureRequest.data);
-    }
-
-    if (signer.signMessage) {
-      return signer.signMessage(signatureRequest.data);
-    }
-
-    throw new Error('Wallet signer cannot sign the authorization request.');
+    await this.ensureAuthorizationSigningReady();
+    return signWalletSignatureRequest(signer, signatureRequest);
   },
 };

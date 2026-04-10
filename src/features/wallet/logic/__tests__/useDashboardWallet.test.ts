@@ -2,6 +2,9 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
 import { ref } from 'vue';
 
+const toastMock = vi.fn();
+const triggerZeroTransactionWarmupMock = vi.fn().mockResolvedValue('completed');
+
 const mockEvmData = {
   id: 1,
   address: '0xCABBAc435948510D24820746Ee29706a05A54369',
@@ -64,6 +67,13 @@ vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
   useProfilesStore: () => ({
     selectedUserProfileData: ref({
       id: 1,
+      name: 'Primary profile',
+      data: {
+        full_account_name: 'Primary profile',
+      },
+      wallet: {
+        status: 'active',
+      },
       isKycApproved: true,
       isKycNone: false,
       isKycPending: false,
@@ -71,10 +81,26 @@ vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
       isKycDeclined: false,
     }),
     selectedUserProfileId: ref(1),
+    selectedUserProfileType: ref('individual'),
+  }),
+}));
+vi.mock('InvestCommon/features/wallet/store/useWalletAuth', () => ({
+  useWalletAuth: () => ({
+    triggerZeroTransactionWarmup: triggerZeroTransactionWarmupMock,
+  }),
+}));
+vi.mock('UiKit/components/Base/VToast/use-toast', () => ({
+  useToast: () => ({
+    toast: toastMock,
   }),
 }));
 vi.mock('InvestCommon/domain/session/store/useSession', () => ({
-  useSessionStore: () => ({ userLoggedIn: ref(true) }),
+  useSessionStore: () => ({
+    userLoggedIn: ref(true),
+    userSessionTraits: ref({
+      email: 'user@example.com',
+    }),
+  }),
 }));
 vi.mock('InvestCommon/domain/dialogs/store/useDialogs', () => ({
   useDialogs: () => ({ openContactUsDialog: vi.fn() }),
@@ -99,6 +125,8 @@ import { DEFAULT_WALLET_NETWORK } from '../useWalletNetwork';
 describe('useDashboardWallet', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
+    vi.clearAllMocks();
+    triggerZeroTransactionWarmupMock.mockResolvedValue('completed');
     getEvmWalletStateRef.value = { data: { ...mockEvmData }, loading: false, error: null };
     getWalletStateRef.value = { data: { ...mockWalletData }, loading: false, error: null };
     useDashboardWallet().selectedEvmNetwork.value = DEFAULT_WALLET_NETWORK;
@@ -119,7 +147,7 @@ describe('useDashboardWallet', () => {
     expect(api.handleWalletFilterApply).toBeDefined();
     expect(api.walletFilterItemsComputed).toBeDefined();
     expect(api.isWalletDataLoading).toBeDefined();
-    expect(api.isAlertShow).toBeDefined();
+    expect(api.walletAlertModel).toBeDefined();
     expect(api.showTable).toBeDefined();
     expect(api.totalBalanceMainFormatted).toBeDefined();
     expect(api.selectedEvmNetwork).toBeDefined();
@@ -190,6 +218,41 @@ describe('useDashboardWallet', () => {
     expect(ids).toContain('add-funds');
     expect(ids).toContain('withdraw');
     expect(ids).toContain('exchange');
+    expect(ids).toContain('manual-zero-tx');
+  });
+
+  it('triggers the manual zero transaction from the wallet tab header', async () => {
+    const api = useDashboardWallet();
+
+    api.handlePrimaryActionClick('manual-zero-tx');
+    await Promise.resolve();
+
+    expect(triggerZeroTransactionWarmupMock).toHaveBeenCalledTimes(1);
+    expect(triggerZeroTransactionWarmupMock).toHaveBeenCalledWith({
+      profileId: 1,
+      isKycApproved: true,
+      profileType: 'individual',
+      profileName: 'Primary profile',
+      fullAccountName: 'Primary profile',
+      userEmail: 'user@example.com',
+      walletStatus: 'active',
+    });
+    expect(toastMock).toHaveBeenCalledWith(expect.objectContaining({
+      title: 'Zero Transaction Sent',
+    }));
+  });
+
+  it('does not show the success toast while zero transaction warmup is deferred to wallet auth', async () => {
+    triggerZeroTransactionWarmupMock.mockResolvedValueOnce('deferred_to_wallet_auth');
+    const api = useDashboardWallet();
+
+    api.handlePrimaryActionClick('manual-zero-tx');
+    await Promise.resolve();
+
+    expect(triggerZeroTransactionWarmupMock).toHaveBeenCalledTimes(1);
+    expect(toastMock).not.toHaveBeenCalledWith(expect.objectContaining({
+      title: 'Zero Transaction Sent',
+    }));
   });
 
   it('moreButtons defaults to an empty array', () => {

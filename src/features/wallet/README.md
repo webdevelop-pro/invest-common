@@ -120,6 +120,11 @@ Payload:
 
 ## Wallet Alert Behavior
 
+### Architecture
+- `useWalletAlert.ts` is the single source of truth for wallet alert classification, CTA routing, bank-account link handling, contact-us actions, and loading state.
+- `DashboardWalletAlert.vue` is now presentation-only and consumes the shared view-model output the same way `VKycAlert.vue` does for KYC.
+- Dashboard wallet surfaces should reuse `useWalletAlert()` instead of rebuilding wallet alert actions locally.
+
 ### Setup required
 - If EVM wallet fetch fails with a wallet-setup-required backend case such as `not found` / `create wallet`, frontend treats it as a setup-required state, not a generic fatal wallet error.
 - This state shows wallet setup copy and a `Set Up Wallet` CTA.

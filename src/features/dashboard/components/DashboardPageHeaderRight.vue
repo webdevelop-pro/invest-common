@@ -26,7 +26,7 @@ const emit = defineEmits<{
   kycBannerClick: [];
   kycBannerDescriptionAction: [event: Event];
   walletBannerClick: [];
-  walletBannerContactUsClick: [event: Event];
+  walletBannerDescriptionAction: [event: Event];
 }>();
 </script>
 
@@ -66,13 +66,14 @@ const emit = defineEmits<{
       </div>
       <DashboardWalletAlert
         v-else-if="walletBanner?.type === 'wallet'"
-        :show="true"
         :variant="walletBanner.variant"
-        :alert-text="walletBanner.description"
-        :alert-title="walletBanner.title"
+        :description="walletBanner.description"
+        :title="walletBanner.title"
         :button-text="walletBanner.buttonText"
-        @click="emit('walletBannerClick')"
-        @contact-us-click="emit('walletBannerContactUsClick', $event)"
+        :is-loading="walletBanner.isLoading"
+        :is-disabled="walletBanner.isDisabled"
+        @action="emit('walletBannerClick')"
+        @description-action="emit('walletBannerDescriptionAction', $event)"
       />
     </div>
 

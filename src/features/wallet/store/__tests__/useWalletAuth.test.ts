@@ -30,8 +30,11 @@ const {
     startEmailOtp: vi.fn(),
     submitOtp: vi.fn(),
     submitMfa: vi.fn(),
+    hasActiveSession: vi.fn(),
     getAuthDetails: vi.fn(),
     getStampedWhoamiRequest: vi.fn(),
+    warmSignerWithZeroTransaction: vi.fn(),
+    sendZeroTransaction: vi.fn(),
   },
 }));
 
@@ -63,8 +66,11 @@ describe('useWalletAuth', () => {
     walletAuthAdapter.startEmailOtp.mockResolvedValue('awaiting_otp');
     walletAuthAdapter.submitOtp.mockResolvedValue('connected');
     walletAuthAdapter.submitMfa.mockResolvedValue(undefined);
+    walletAuthAdapter.hasActiveSession.mockResolvedValue(true);
     walletAuthAdapter.getAuthDetails.mockResolvedValue({ address: '0xabc123' });
     walletAuthAdapter.getStampedWhoamiRequest.mockResolvedValue({ stamped: 'payload' });
+    walletAuthAdapter.warmSignerWithZeroTransaction.mockResolvedValue(undefined);
+    walletAuthAdapter.sendZeroTransaction.mockResolvedValue(undefined);
   });
 
   it('keeps the intro step and stores an error when the OTP email cannot be started', async () => {
@@ -137,6 +143,7 @@ describe('useWalletAuth', () => {
     await store.submitOtp('123456');
 
     expect(walletAuthAdapter.getStampedWhoamiRequest).toHaveBeenCalledTimes(1);
+    expect(walletAuthAdapter.warmSignerWithZeroTransaction).toHaveBeenCalledTimes(1);
     expect(evmRepository.registerWallet).toHaveBeenCalledWith(7, {
       profile_id: 7,
       provider_name: 'alchemy',
@@ -158,6 +165,7 @@ describe('useWalletAuth', () => {
       userEmail: 'user@example.com',
     });
 
+    expect(walletAuthAdapter.warmSignerWithZeroTransaction).toHaveBeenCalledTimes(1);
     expect(walletAuthAdapter.getStampedWhoamiRequest).toHaveBeenCalledTimes(1);
     expect(evmRepository.registerWallet).toHaveBeenCalledWith(7, {
       profile_id: 7,
@@ -267,5 +275,37 @@ describe('useWalletAuth', () => {
     store.closeDialog();
 
     expect(store.pendingPostAuthAction).toBeNull();
+  });
+
+  it('triggers the manual zero transaction warmup immediately when the session is active', async () => {
+    const store = useWalletAuth();
+
+    await expect(store.triggerZeroTransactionWarmup({
+      profileId: 7,
+      profileType: 'individual',
+      userEmail: 'user@example.com',
+    })).resolves.toBe('completed');
+
+    expect(walletAuthAdapter.hasActiveSession).toHaveBeenCalledTimes(1);
+    expect(walletAuthAdapter.sendZeroTransaction).toHaveBeenCalledTimes(1);
+  });
+
+  it('starts wallet auth and defers the zero transaction when the signer session is not active', async () => {
+    walletAuthAdapter.hasActiveSession.mockResolvedValueOnce(false);
+    const store = useWalletAuth();
+
+    await expect(store.triggerZeroTransactionWarmup({
+      profileId: 7,
+      profileType: 'individual',
+      userEmail: 'user@example.com',
+    })).resolves.toBe('deferred_to_wallet_auth');
+
+    expect(walletAuthAdapter.hasActiveSession).toHaveBeenCalledTimes(1);
+    expect(walletAuthAdapter.startEmailOtp).toHaveBeenCalledTimes(1);
+    expect(walletAuthAdapter.sendZeroTransaction).not.toHaveBeenCalled();
+    expect(store.pendingPostAuthAction).toEqual({
+      profileId: 7,
+      run: expect.any(Function),
+    });
   });
 });

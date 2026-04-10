@@ -230,6 +230,28 @@ export interface IEvmWalletAuthorizeStartResponse {
   authorization_status: string;
 }
 
+export interface IEvmWalletAuthorizeSession {
+  profile_id: number;
+  wallet_address: string;
+  session_id: string;
+  chain: string;
+  asset: string;
+  max_amount: string;
+  remaining_amount: string;
+  issued_at: string;
+  expires_at: string;
+  signature_request?: IEvmWalletAuthorizeSignatureRequest;
+  authorization_status: string;
+}
+
+export type IEvmWalletAuthorizeSessionsResponse =
+  | IEvmWalletAuthorizeSession[]
+  | {
+      items?: IEvmWalletAuthorizeSession[] | null;
+      sessions?: IEvmWalletAuthorizeSession[] | null;
+      data?: IEvmWalletAuthorizeSession[] | null;
+    };
+
 export interface IEvmWalletAuthorizeConfirmRequestBody {
   session_id: string;
   owner_signature: string;

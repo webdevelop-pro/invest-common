@@ -1,61 +1,82 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import VAlert from 'UiKit/components/VAlert.vue';
+import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import VSpinner from 'UiKit/components/Base/VSpinner/VSpinner.vue';
-import { useDashboardWalletAlert, type DashboardWalletAlertEmit } from './logic/useDashboardWalletAlert';
 
-defineProps<{
-  show: boolean;
-  variant: string;
-  alertText?: string;
-  alertTitle?: string;
+const props = withDefaults(defineProps<{
+  variant: 'error' | 'info';
+  description: string;
+  title?: string;
   buttonText?: string;
-}>();
+  isLoading?: boolean;
+  isDisabled?: boolean;
+}>(), {
+  title: undefined,
+  buttonText: undefined,
+  isLoading: false,
+  isDisabled: false,
+});
 
 const emit = defineEmits<{
-  click: [];
-  contactUsClick: [event: Event];
+  action: [];
+  descriptionAction: [event: Event];
 }>();
 
-const { handleDescriptionClick, isLinkBankAccountLoading } = useDashboardWalletAlert(
-  emit as DashboardWalletAlertEmit,
-);
+const buttonColor = computed(() => (props.variant === 'info' ? 'primary' : 'red'));
+const hasDescriptionAction = computed(() => (
+  props.description.includes('data-action="contact-us"')
+  || props.description.includes('data-action=\'contact-us\'')
+  || props.description.includes('bank-accounts')
+));
+
+const handleDescriptionAction = (event: Event) => {
+  if (!hasDescriptionAction.value) {
+    return;
+  }
+
+  emit('descriptionAction', event);
+};
 </script>
 
 <template>
-  <div
-    v-if="show"
-    class="dashboard-wallet__alert-wrapper"
-  >
+  <div class="dashboard-wallet__alert-wrapper">
     <VAlert
       :variant="variant"
       data-testid="funding-alert"
       class="dashboard-wallet__alert"
-      :button-text="buttonText"
-      @click="emit('click')"
     >
       <template
-        v-if="alertTitle"
+        v-if="title"
         #title
       >
-        {{ alertTitle }}
+        {{ title }}
       </template>
-      <template
-        v-if="alertText"
-        #description
-      >
+      <template #description>
         <span
-          v-dompurify-html="alertText"
-          role="button"
-          tabindex="0"
-          @click="handleDescriptionClick"
-          @keydown.enter="handleDescriptionClick"
-          @keydown.space.prevent="handleDescriptionClick"
+          v-dompurify-html="description"
+          :role="hasDescriptionAction ? 'button' : undefined"
+          :tabindex="hasDescriptionAction ? 0 : undefined"
+          @click="handleDescriptionAction($event)"
+          @keydown.enter="handleDescriptionAction($event)"
+          @keydown.space.prevent="handleDescriptionAction($event)"
         />
       </template>
+      <VButton
+        v-if="buttonText"
+        size="small"
+        :color="buttonColor"
+        :loading="isLoading"
+        :disabled="isDisabled"
+        class="dashboard-wallet__alert-button is--margin-top-0"
+        @click="emit('action')"
+      >
+        {{ buttonText }}
+      </VButton>
     </VAlert>
 
     <VSpinner
-      :show="isLinkBankAccountLoading"
+      :show="isLoading"
     />
   </div>
 </template>

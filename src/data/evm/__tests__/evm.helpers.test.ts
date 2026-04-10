@@ -29,6 +29,9 @@ describe('evm.helpers', () => {
     const payload = {
       profile_id: 1124,
       wallet_status: 'created',
+      chain: 'ethereum-sepolia',
+      wallet_address: '0xwallet',
+      chain_account_status: 'verified',
       deposit_instructions: {
         chain: 'ethereum-sepolia',
         address: '0xdeposit',
@@ -46,7 +49,7 @@ describe('evm.helpers', () => {
       balance: '0',
       inc_balance: 0,
       out_balance: 0,
-      address: '',
+      address: '0xwallet',
       deposit_instructions: {
         chain: 'ethereum-sepolia',
         address: '0xdeposit',
@@ -54,11 +57,53 @@ describe('evm.helpers', () => {
       chains: [
         { chain: 'ethereum', wallet_address: '', chain_account_status: 'pending' },
         { chain: 'polygon', wallet_address: '', chain_account_status: 'pending' },
+        { chain: 'ethereum-sepolia', wallet_address: '0xwallet', chain_account_status: 'verified' },
       ],
       balances: {},
       transactions: [],
       created_at: '2026-04-08T17:35:45Z',
       updated_at: '2026-04-08T17:35:45Z',
+    });
+  });
+
+  it('keeps top-level chain wallet fields when backend returns an empty chains list', () => {
+    const payload = {
+      profile_id: 1129,
+      wallet_status: 'created',
+      chain: 'ethereum-sepolia',
+      wallet_address: '0x51da1389112a99a972b248c0510a77a9731a475b',
+      chain_account_status: 'verified',
+      balances: [],
+      deposit_instructions: {
+        chain: 'ethereum-sepolia',
+        address: '0x51da1389112a99a972b248c0510a77a9731a475b',
+      },
+      chains: [],
+      updated_at: '2026-04-10T09:59:58Z',
+    };
+
+    expect(normalizeEvmWalletInfoResponse(payload)).toEqual({
+      id: 1129,
+      status: EvmWalletStatusTypes.created,
+      balance: '0',
+      inc_balance: 0,
+      out_balance: 0,
+      address: '0x51da1389112a99a972b248c0510a77a9731a475b',
+      deposit_instructions: {
+        chain: 'ethereum-sepolia',
+        address: '0x51da1389112a99a972b248c0510a77a9731a475b',
+      },
+      chains: [
+        {
+          chain: 'ethereum-sepolia',
+          wallet_address: '0x51da1389112a99a972b248c0510a77a9731a475b',
+          chain_account_status: 'verified',
+        },
+      ],
+      balances: {},
+      transactions: [],
+      created_at: '2026-04-10T09:59:58Z',
+      updated_at: '2026-04-10T09:59:58Z',
     });
   });
 

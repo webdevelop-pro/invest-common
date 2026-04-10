@@ -5,6 +5,7 @@ import { useWalletOperationAuthorization } from '../useWalletOperationAuthorizat
 const hoisted = vi.hoisted(() => ({
   authorizeWithdrawStart: vi.fn(),
   authorizeWithdrawConfirm: vi.fn(),
+  getAuthorizeSessions: vi.fn(),
   startFlowForProfile: vi.fn(),
   setPendingPostAuthAction: vi.fn(),
   hasActiveSession: vi.fn(),
@@ -15,6 +16,7 @@ vi.mock('InvestCommon/data/evm/evm.repository', () => ({
   useRepositoryEvm: () => ({
     authorizeWithdrawStart: hoisted.authorizeWithdrawStart,
     authorizeWithdrawConfirm: hoisted.authorizeWithdrawConfirm,
+    getAuthorizeSessions: hoisted.getAuthorizeSessions,
   }),
 }));
 
@@ -67,6 +69,8 @@ describe('useWalletOperationAuthorization', () => {
       session_id: 'session_confirm_1',
       authorization_status: 'active',
     });
+    hoisted.getAuthorizeSessions.mockReset();
+    hoisted.getAuthorizeSessions.mockResolvedValue([]);
     hoisted.hasActiveSession.mockReset();
     hoisted.hasActiveSession.mockResolvedValue(true);
     hoisted.signAuthorizationRequest.mockReset();
@@ -93,6 +97,11 @@ describe('useWalletOperationAuthorization', () => {
         authorization_status: 'active',
       },
     });
+    expect(hoisted.getAuthorizeSessions).toHaveBeenCalledWith(7, {
+      assetAddress: '0xusdc',
+      chain: 'ethereum',
+      status: 'active',
+    });
     expect(hoisted.authorizeWithdrawStart).toHaveBeenCalledWith(7, request);
     expect(hoisted.signAuthorizationRequest).toHaveBeenCalledWith({
       type: 'eth_signTypedData_v4',
@@ -102,6 +111,48 @@ describe('useWalletOperationAuthorization', () => {
       session_id: 'session_confirm_1',
       owner_signature: '0xsigned',
     });
+  });
+
+  it('reuses an active backend authorization session for the same token', async () => {
+    hoisted.getAuthorizeSessions.mockResolvedValueOnce([
+      {
+        profile_id: 7,
+        wallet_address: '0xwallet',
+        session_id: 'session_reused_1',
+        chain: 'ethereum',
+        asset: '0xusdc',
+        max_amount: '10',
+        remaining_amount: '7',
+        issued_at: '2026-04-10T08:00:00.000Z',
+        expires_at: '2099-04-10T09:00:00.000Z',
+        authorization_status: 'active',
+      },
+    ]);
+    const { authorizeOperation } = useWalletOperationAuthorization();
+
+    const result = await authorizeOperation({
+      profileId: 7,
+      request,
+      walletAuthContext,
+    });
+
+    expect(result).toEqual({
+      status: 'authorized',
+      data: {
+        profile_id: 7,
+        session_id: 'session_reused_1',
+        authorization_status: 'active',
+      },
+    });
+    expect(hoisted.getAuthorizeSessions).toHaveBeenCalledWith(7, {
+      assetAddress: '0xusdc',
+      chain: 'ethereum',
+      status: 'active',
+    });
+    expect(hoisted.hasActiveSession).not.toHaveBeenCalled();
+    expect(hoisted.authorizeWithdrawStart).not.toHaveBeenCalled();
+    expect(hoisted.signAuthorizationRequest).not.toHaveBeenCalled();
+    expect(hoisted.authorizeWithdrawConfirm).not.toHaveBeenCalled();
   });
 
   it('defers to wallet auth when signing requires re-authentication', async () => {

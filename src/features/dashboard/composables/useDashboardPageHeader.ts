@@ -3,12 +3,9 @@ import { storeToRefs } from 'pinia';
 import { AccreditationTypes } from 'InvestCommon/data/accreditation/accreditation.types';
 import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
-import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { ACCREDITATION_HISTORY } from 'InvestCommon/features/investment/utils';
 import { useKycAlertViewModel } from 'InvestCommon/features/kyc/logic/useKycAlertViewModel';
-import { useWallet } from 'InvestCommon/features/wallet/logic/useWallet';
 import { useWalletAlert } from 'InvestCommon/features/wallet/logic/useWalletAlert';
-import { useWalletAuth } from 'InvestCommon/features/wallet/store/useWalletAuth';
 import { useBreakpoints } from 'UiKit/composables/useBreakpoints';
 
 type DashboardHeaderBanner = {
@@ -19,7 +16,6 @@ type DashboardHeaderBanner = {
   buttonText?: string;
   isLoading?: boolean;
   isDisabled?: boolean;
-  action?: 'kyc' | 'accreditation' | 'wallet';
 };
 
 const getAccreditationBanner = (status: AccreditationTypes): DashboardHeaderBanner => {
@@ -41,7 +37,6 @@ const getAccreditationBanner = (status: AccreditationTypes): DashboardHeaderBann
       title: history.title,
       description: history.text,
       buttonText: 'Verify Accreditation',
-      action: 'accreditation',
     };
   }
 
@@ -53,40 +48,32 @@ const getAccreditationBanner = (status: AccreditationTypes): DashboardHeaderBann
     buttonText: status === AccreditationTypes.expired
       ? 'Verify Accreditation'
       : history.buttonText,
-    action: 'accreditation',
   };
 };
 
 export function useDashboardPageHeader() {
   const profilesStore = useProfilesStore();
-  const sessionStore = useSessionStore();
   const {
     selectedUserProfileData,
-    selectedUserProfileId,
-    selectedUserProfileType,
   } = storeToRefs(profilesStore);
-  const { userSessionTraits } = storeToRefs(sessionStore);
   const dialogsStore = useDialogs();
-  const walletAuthStore = useWalletAuth();
   const { isDesktop } = useBreakpoints();
-  const { isWalletDataLoading } = useWallet();
   const {
     alertModel: kycAlertModel,
     onPrimaryAction: onKycBannerClick,
     onDescriptionAction: onKycBannerDescriptionAction,
   } = useKycAlertViewModel();
   const {
-    isAlertShow,
-    isAlertType,
-    isAlertText,
-    alertTitle,
-    alertButtonText,
+    alertModel: walletAlertModel,
+    isDataLoading: isWalletAlertDataLoading,
+    onAlertButtonClick: onWalletBannerClick,
+    onDescriptionAction: onWalletBannerDescriptionAction,
   } = useWalletAlert({
     hideBankAccountMissingInfo: true,
   });
 
   const isWalletAlertLoading = computed(() => (
-    Boolean(selectedUserProfileData.value?.isKycApproved) && isWalletDataLoading.value
+    Boolean(selectedUserProfileData.value?.isKycApproved) && isWalletAlertDataLoading.value
   ));
 
   const verificationBanner = computed<DashboardHeaderBanner | null>(() => {
@@ -104,7 +91,6 @@ export function useDashboardPageHeader() {
         buttonText: kycAlertModel.value.buttonText,
         isLoading: kycAlertModel.value.isLoading,
         isDisabled: kycAlertModel.value.isDisabled,
-        action: 'kyc',
       };
     }
 
@@ -126,17 +112,18 @@ export function useDashboardPageHeader() {
       return null;
     }
 
-    if (!isAlertShow.value || !isAlertText.value) {
+    if (!walletAlertModel.value.show || !walletAlertModel.value.description) {
       return null;
     }
 
     return {
       type: 'wallet',
-      variant: isAlertType.value as 'error' | 'info',
-      title: alertTitle.value || 'Wallet update',
-      description: isAlertText.value,
-      buttonText: alertButtonText.value,
-      action: 'wallet',
+      variant: walletAlertModel.value.variant,
+      title: walletAlertModel.value.title || 'Wallet update',
+      description: walletAlertModel.value.description,
+      buttonText: walletAlertModel.value.buttonText,
+      isLoading: walletAlertModel.value.isLoading,
+      isDisabled: walletAlertModel.value.isDisabled,
     };
   });
 
@@ -148,35 +135,12 @@ export function useDashboardPageHeader() {
     dialogsStore.openContactUsDialog('dashboard profile details');
   };
 
-  const onWalletBannerClick = () => {
-    const profileId = Number(selectedUserProfileId.value);
-    if (!profileId) {
-      return;
-    }
-
-    void walletAuthStore.startFlowForProfile({
-      profileId,
-      isKycApproved: selectedUserProfileData.value?.isKycApproved,
-      profileType: selectedUserProfileType.value,
-      profileName: selectedUserProfileData.value?.name,
-      fullAccountName: selectedUserProfileData.value?.data?.full_account_name,
-      userEmail: userSessionTraits.value?.email,
-      walletStatus: selectedUserProfileData.value?.wallet?.status,
-    });
-  };
-
-  const onWalletBannerContactUsClick = (event: Event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    dialogsStore.openContactUsDialog('wallet');
-  };
-
   return {
     onInfoCtaClick,
     onKycBannerClick,
     onKycBannerDescriptionAction,
     onWalletBannerClick,
-    onWalletBannerContactUsClick,
+    onWalletBannerDescriptionAction,
     showPerformanceCards,
     verificationBanner,
     walletBanner,

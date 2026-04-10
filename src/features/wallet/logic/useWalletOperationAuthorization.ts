@@ -1,5 +1,6 @@
 import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
 import type {
+  IEvmWalletAuthorizeSession,
   IEvmWalletAuthorizeConfirmResponse,
   IEvmWalletAuthorizeStartRequestBody,
 } from 'InvestCommon/data/evm/evm.types';
@@ -37,6 +38,23 @@ type AuthorizeWalletOperationParams = {
   onBeforeWalletAuth?: () => void | Promise<void>;
   onAuthRecovered?: () => Promise<void>;
 };
+
+const normalizeToken = (value: unknown) => String(value ?? '').trim().toLowerCase();
+
+const isSessionExpired = (session: Pick<IEvmWalletAuthorizeSession, 'expires_at'>) => {
+  const expiresAt = Date.parse(session.expires_at);
+  return Number.isFinite(expiresAt) && expiresAt <= Date.now();
+};
+
+const findReusableSession = (
+  sessions: IEvmWalletAuthorizeSession[],
+  request: WalletOperationAuthorizationRequest,
+) => sessions.find((session) => (
+  normalizeToken(session.authorization_status) === 'active'
+  && !isSessionExpired(session)
+  && normalizeToken(session.chain) === normalizeToken(request.chain)
+  && normalizeToken(session.asset) === normalizeToken(request.asset_address)
+));
 
 const toError = (error: unknown) => (
   (() => {
@@ -99,6 +117,29 @@ export function useWalletOperationAuthorization() {
     });
 
     try {
+      const existingSessions = await evmRepository.getAuthorizeSessions(profileId, {
+        assetAddress: request.asset_address,
+        chain: request.chain,
+        status: 'active',
+      });
+      const reusableSession = findReusableSession(existingSessions, request);
+      if (reusableSession) {
+        console.log('[wallet-withdraw] authorizeOperation:session-reused', {
+          profileId,
+          sessionId: reusableSession.session_id,
+          asset: reusableSession.asset,
+        });
+
+        return {
+          status: 'authorized',
+          data: {
+            profile_id: reusableSession.profile_id,
+            session_id: reusableSession.session_id,
+            authorization_status: reusableSession.authorization_status,
+          },
+        };
+      }
+
       const hasActiveSession = await walletAuthAdapter.hasActiveSession();
       console.log('[wallet-withdraw] authorizeOperation:session-check', {
         profileId,

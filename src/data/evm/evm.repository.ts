@@ -18,7 +18,7 @@ import {
   IEvmTransactionDataResponse, IEvmEarnPositionOverlay, IEvmWalletBalancesMap, IEvmWalletBalances,
   IEvmWalletAuthorizeStartRequestBody, IEvmWalletAuthorizeStartResponse, IEvmWalletAuthorizeConfirmRequestBody,
   IEvmWalletAuthorizeConfirmResponse, IEvmWithdrawResponse, IEvmWalletTransactionsApiItem,
-  IEvmWalletTransactionsApiResponse,
+  IEvmWalletTransactionsApiResponse, IEvmWalletAuthorizeSessionsResponse, IEvmWalletAuthorizeSession,
 } from './evm.types';
 import {
   extractDepositAddressFromWalletInfo,
@@ -64,6 +64,16 @@ const getTransactionsCollection = (
   if (Array.isArray(response)) return response;
   if (Array.isArray(response.items)) return response.items;
   if (Array.isArray(response.transactions)) return response.transactions;
+  if (Array.isArray(response.data)) return response.data;
+  return [];
+};
+
+const getAuthorizeSessionsCollection = (
+  response: IEvmWalletAuthorizeSessionsResponse,
+): IEvmWalletAuthorizeSession[] => {
+  if (Array.isArray(response)) return response;
+  if (Array.isArray(response.items)) return response.items;
+  if (Array.isArray(response.sessions)) return response.sessions;
   if (Array.isArray(response.data)) return response.data;
   return [];
 };
@@ -495,6 +505,28 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
       return response.data!;
     });
 
+  const getAuthorizeSessions = async (
+    profileId: number,
+    filters: {
+      assetAddress: string;
+      chain: string;
+      status?: string;
+    },
+  ) => {
+    const response = await apiClient.get<IEvmWalletAuthorizeSessionsResponse>(
+      `/auth/wallet/authorize/sessions/${profileId}`,
+      {
+        params: {
+          chain: filters.chain,
+          asset_address: filters.assetAddress,
+          status: filters.status ?? 'active',
+        },
+      },
+    );
+
+    return getAuthorizeSessionsCollection(response.data as IEvmWalletAuthorizeSessionsResponse);
+  };
+
   const authorizeWithdrawConfirm = async (
     profileId: number,
     body: IEvmWalletAuthorizeConfirmRequestBody,
@@ -721,6 +753,7 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
     getEvmWalletTransactions,
     getDepositNetworkByProfile,
     depositWalletChains: DEPOSIT_WALLET_CHAINS,
+    getAuthorizeSessions,
     authorizeWithdrawStart,
     authorizeWithdrawConfirm,
     withdrawFunds,

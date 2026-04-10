@@ -13,6 +13,9 @@ export interface IEvmWalletChainAccountResponse {
 export interface IEvmWalletInfoStatusResponse {
   profile_id?: number;
   wallet_status?: string;
+  chain?: string;
+  wallet_address?: string;
+  chain_account_status?: string;
   chains?: IEvmWalletChainAccountResponse[];
   deposit_instructions?: {
     chain?: string;
@@ -102,19 +105,40 @@ export const normalizeEvmWalletInfoResponse = (
   }
 
   const chains = Array.isArray(data.chains) ? data.chains : [];
-  const chainStatuses = chains
+  const rootChain = String(data.chain ?? '').trim();
+  const rootWalletAddress = String(data.wallet_address ?? '').trim();
+  const rootChainAccountStatus = String(data.chain_account_status ?? '').trim().toLowerCase();
+  const normalizedInputChains = [
+    ...chains,
+    ...((rootChain || rootWalletAddress || rootChainAccountStatus) && !chains.some((chain) => (
+      String(chain.chain ?? '').trim().toLowerCase() === rootChain.toLowerCase()
+    ))
+      ? [{
+        chain: rootChain,
+        wallet_address: rootWalletAddress,
+        chain_account_status: rootChainAccountStatus,
+      }]
+      : []),
+  ];
+  const chainStatuses = normalizedInputChains
     .map((chain) => String(chain.chain_account_status ?? '').trim().toLowerCase())
     .filter(Boolean);
-  const normalizedChains: IEvmWalletChainAccount[] = chains
+  const normalizedChains: IEvmWalletChainAccount[] = normalizedInputChains
     .map((chain) => ({
       chain: String(chain.chain ?? '').trim(),
       wallet_address: String(chain.wallet_address ?? '').trim(),
       chain_account_status: String(chain.chain_account_status ?? '').trim().toLowerCase() || undefined,
     }))
     .filter((chain) => Boolean(chain.chain));
-  const firstWalletAddress = chains
+  const firstWalletAddress = normalizedChains
     .map((chain) => String(chain.wallet_address ?? '').trim())
-    .find(Boolean) ?? '';
+    .find(Boolean)
+    ?? '';
+  const depositInstructionAddress = String(data.deposit_instructions?.address ?? '').trim();
+  const address = firstWalletAddress
+    || rootWalletAddress
+    || depositInstructionAddress
+    || '';
   const depositInstructions = data.deposit_instructions
     ? {
       chain: String(data.deposit_instructions.chain ?? '').trim() || undefined,
@@ -129,7 +153,7 @@ export const normalizeEvmWalletInfoResponse = (
     balance: '0',
     inc_balance: 0,
     out_balance: 0,
-    address: firstWalletAddress,
+    address,
     deposit_instructions: depositInstructions,
     chains: normalizedChains,
     balances: normalizeWalletInfoBalances(data.balances),

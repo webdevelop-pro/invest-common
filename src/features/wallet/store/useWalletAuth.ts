@@ -54,6 +54,10 @@ type PendingPostAuthAction = {
   run: () => Promise<void>;
 };
 
+export type TriggerZeroTransactionWarmupResult =
+  | 'completed'
+  | 'deferred_to_wallet_auth';
+
 const STORAGE_KEY = 'invest:wallet-auth:profiles';
 
 const createEmptyState = (): WalletAuthProfileState => ({
@@ -250,6 +254,7 @@ export const useWalletAuth = defineStore('wallet-auth', () => {
       wallet_address: walletAddress,
       stamped_whoami_request: stampedWhoamiRequest,
     });
+    await walletAuthAdapter.warmSignerWithZeroTransaction();
     await Promise.allSettled([
       profilesRepository.getProfileById(
         currentProfileState.value.profileType || PROFILE_TYPES.INDIVIDUAL,
@@ -471,6 +476,46 @@ export const useWalletAuth = defineStore('wallet-auth', () => {
     }
   };
 
+  const triggerZeroTransactionWarmup = async (
+    payload: OpenPayload,
+  ): Promise<TriggerZeroTransactionWarmupResult> => {
+    console.log('[walletAuthStore] triggerZeroTransactionWarmup:start', {
+      profileId: payload.profileId,
+      profileType: payload.profileType,
+      walletStatus: payload.walletStatus,
+      isKycApproved: payload.isKycApproved,
+    });
+    const hasActiveSession = await walletAuthAdapter.hasActiveSession();
+    console.log('[walletAuthStore] triggerZeroTransactionWarmup:session', {
+      profileId: payload.profileId,
+      hasActiveSession,
+    });
+
+    if (hasActiveSession) {
+      await walletAuthAdapter.sendZeroTransaction();
+      console.log('[walletAuthStore] triggerZeroTransactionWarmup:completedImmediately', {
+        profileId: payload.profileId,
+      });
+      return 'completed';
+    }
+
+    setPendingPostAuthAction({
+      profileId: payload.profileId,
+      run: async () => {
+        console.log('[walletAuthStore] triggerZeroTransactionWarmup:resumePendingAction', {
+          profileId: payload.profileId,
+        });
+        await walletAuthAdapter.sendZeroTransaction();
+      },
+    });
+    console.log('[walletAuthStore] triggerZeroTransactionWarmup:deferredToAuth', {
+      profileId: payload.profileId,
+    });
+    await startFlowForProfile(payload);
+
+    return 'deferred_to_wallet_auth';
+  };
+
   const maybeOpenAfterKyc = async (payload: OpenPayload) => {
     if (!shouldPromptWalletAuth(payload)) {
       return;
@@ -515,6 +560,7 @@ export const useWalletAuth = defineStore('wallet-auth', () => {
     submitOtp,
     submitMfa,
     retryCurrentStep,
+    triggerZeroTransactionWarmup,
     maybeOpenAfterKyc,
   };
 });
