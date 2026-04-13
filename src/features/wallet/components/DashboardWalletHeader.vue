@@ -67,6 +67,7 @@ const {
         :options="networkOptions"
         item-label="text"
         item-value="value"
+        size="small" 
         placeholder="Select network"
         class="dashboard-wallet-header__network"
         data-testid="wallet-network-select"
@@ -117,10 +118,12 @@ const {
     gap: 10px;
     flex-wrap: wrap;
     align-items: center;
+    width: 100%;
+    justify-content: flex-end;
   }
 
   &__network {
-    min-width: 230px;
+    max-width: 250px;
   }
 
   &__network :deep(.v-form-select) {

@@ -4,7 +4,7 @@ import type {
   IEvmWalletAuthorizeConfirmResponse,
   IEvmWalletAuthorizeStartRequestBody,
 } from 'InvestCommon/data/evm/evm.types';
-import { useWalletAuth, type WalletAuthOpenPayload } from 'InvestCommon/features/wallet/store/useWalletAuth';
+import { useWalletAuth, type WalletAuthOpenPayload } from 'InvestCommon/features/wallet/auth/store/useWalletAuth';
 import { walletAuthAdapter } from './walletAuth.adapter';
 import {
   isRecoverableWalletAuthError,
@@ -117,6 +117,16 @@ export function useWalletOperationAuthorization() {
     });
 
     try {
+      const hasActiveSession = await walletAuthAdapter.hasActiveSession();
+      console.log('[wallet-withdraw] authorizeOperation:session-check', {
+        profileId,
+        hasActiveSession,
+      });
+
+      if (!hasActiveSession) {
+        return deferToWalletAuth(profileId, walletAuthContext, onBeforeWalletAuth, onAuthRecovered);
+      }
+
       const existingSessions = await evmRepository.getAuthorizeSessions(profileId, {
         assetAddress: request.asset_address,
         chain: request.chain,
@@ -138,16 +148,6 @@ export function useWalletOperationAuthorization() {
             authorization_status: reusableSession.authorization_status,
           },
         };
-      }
-
-      const hasActiveSession = await walletAuthAdapter.hasActiveSession();
-      console.log('[wallet-withdraw] authorizeOperation:session-check', {
-        profileId,
-        hasActiveSession,
-      });
-
-      if (!hasActiveSession) {
-        return deferToWalletAuth(profileId, walletAuthContext, onBeforeWalletAuth, onAuthRecovered);
       }
 
       const authorizeStart = await evmRepository.authorizeWithdrawStart(profileId, request);

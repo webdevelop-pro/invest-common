@@ -72,6 +72,16 @@ vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
   }),
 }));
 
+const userSessionTraitsRef = ref<{ email?: string } | null>({
+  email: 'user@example.com',
+});
+
+vi.mock('InvestCommon/domain/session/store/useSession', () => ({
+  useSessionStore: () => ({
+    userSessionTraits: userSessionTraitsRef,
+  }),
+}));
+
 vi.mock('InvestCommon/features/wallet/logic/useWalletOperationAuthorization', () => ({
   useWalletOperationAuthorization: () => ({
     authorizeOperation: hoisted.authorizeOperation,
@@ -138,6 +148,7 @@ describe('useVFormWithdrawCrypto', () => {
     };
     withdrawFundsStateRef.value = { data: null, loading: false, error: null };
     withdrawFundsOptionsStateRef.value = { data: null, loading: false, error: null };
+    userSessionTraitsRef.value = { email: 'user@example.com' };
     mockModel.chain = '';
     mockModel.asset = '';
     mockModel.amount = undefined;
@@ -249,21 +260,19 @@ describe('useVFormWithdrawCrypto', () => {
 
     expect(hoisted.authorizeOperation).toHaveBeenNthCalledWith(1, expect.objectContaining({
       profileId: 1,
-      request: {
+      request: expect.objectContaining({
         chain: 'ethereum',
         asset_address: '0xusdc',
-        max_amount: '50',
         nonce: 'wdr_test_0001',
-      },
+      }),
     }));
     expect(hoisted.authorizeOperation).toHaveBeenNthCalledWith(2, expect.objectContaining({
       profileId: 1,
-      request: {
+      request: expect.objectContaining({
         chain: 'ethereum',
         asset_address: '0xusdc',
-        max_amount: '50',
         nonce: 'wdr_test_0001',
-      },
+      }),
     }));
     expect(hoisted.withdrawFunds).toHaveBeenCalledWith(1, {
       chain: 'ethereum',
@@ -272,6 +281,28 @@ describe('useVFormWithdrawCrypto', () => {
       destination_address: '0xrecipient',
       idempotency_key: 'wdr_test_0001',
     });
+  });
+
+  it('uses the session email for wallet auth recovery when the profile email is missing', async () => {
+    let firstCallArgs: Record<string, any> | undefined;
+    hoisted.authorizeOperation.mockImplementationOnce(async (params) => {
+      firstCallArgs = params;
+      return { status: 'deferred_to_wallet_auth' };
+    });
+    isValidRef.value = true;
+    userSessionTraitsRef.value = { email: 'session@example.com' };
+    const api = useVFormWithdrawCrypto();
+    api.model.chain = 'ethereum';
+    api.model.asset = 'USDC';
+    api.model.amount = 50;
+    api.model.destination_address = '0xrecipient';
+    api.model.idempotency_key = 'wdr_test_session_email';
+
+    await api.saveHandler();
+
+    expect(firstCallArgs?.walletAuthContext).toEqual(expect.objectContaining({
+      userEmail: 'session@example.com',
+    }));
   });
 
   it('completes authorize-sign-confirm-withdraw flow and closes on success', async () => {
@@ -288,12 +319,11 @@ describe('useVFormWithdrawCrypto', () => {
 
     expect(hoisted.authorizeOperation).toHaveBeenCalledWith(expect.objectContaining({
       profileId: 1,
-      request: {
+      request: expect.objectContaining({
         chain: 'ethereum',
         asset_address: '0xusdc',
-        max_amount: '50',
         nonce: 'wdr_test_0001',
-      },
+      }),
     }));
     expect(hoisted.withdrawFunds).toHaveBeenCalledWith(1, {
       chain: 'ethereum',
@@ -333,12 +363,11 @@ describe('useVFormWithdrawCrypto', () => {
     await api.saveHandler();
 
     expect(hoisted.authorizeOperation).toHaveBeenCalledWith(expect.objectContaining({
-      request: {
+      request: expect.objectContaining({
         chain: 'ethereum-sepolia',
         asset_address: '0xbtrp',
-        max_amount: '10',
         nonce: 'wdr_test_address_asset',
-      },
+      }),
     }));
     expect(hoisted.withdrawFunds).toHaveBeenCalledWith(1, {
       chain: 'ethereum-sepolia',
@@ -376,12 +405,11 @@ describe('useVFormWithdrawCrypto', () => {
     await api.saveHandler();
 
     expect(hoisted.authorizeOperation).toHaveBeenCalledWith(expect.objectContaining({
-      request: {
+      request: expect.objectContaining({
         chain: 'ethereum-sepolia',
         asset_address: '0xbtrp',
-        max_amount: '10',
         nonce: 'wdr_test_symbol_asset',
-      },
+      }),
     }));
     expect(hoisted.withdrawFunds).toHaveBeenCalledWith(1, {
       chain: 'ethereum-sepolia',

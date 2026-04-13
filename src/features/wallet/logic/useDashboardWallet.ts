@@ -1,7 +1,6 @@
 import { computed, ref, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
-import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 import { useWallet } from 'InvestCommon/features/wallet/logic/useWallet';
 import { useWalletAlert } from 'InvestCommon/features/wallet/logic/useWalletAlert';
 import { useWalletTokens } from 'InvestCommon/features/wallet/logic/useWalletTokens';
@@ -11,9 +10,7 @@ import { EvmTransactionTypes } from 'InvestCommon/data/evm/evm.types';
 import type { WalletFilterApplyPayload } from './walletLogic.types';
 import env from 'InvestCommon/config/env';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
-import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { urlSettingsBankAccounts } from 'InvestCommon/domain/config/links';
-import { useWalletAuth } from 'InvestCommon/features/wallet/store/useWalletAuth';
 import externalLink from 'UiKit/assets/images/external-link.svg';
 import bank from 'UiKit/assets/images/bank.svg';
 import { useBreakpoints } from 'UiKit/composables/useBreakpoints';
@@ -49,12 +46,9 @@ export function useDashboardWallet() {
   const route = useRoute();
   const activeTab = ref(initialWalletTabFromRoute(route.query as Record<string, unknown>));
   const { isTablet } = useBreakpoints();
-  const { toast } = useToast();
-  const walletAuthStore = useWalletAuth();
 
   const isDialogTransactionOpen = ref(false);
   const transactionType = ref<EvmTransactionTypes>(EvmTransactionTypes.deposit);
-  const isManualZeroTransactionLoading = ref(false);
   const transactionQueryFromUrl =
     typeof window !== 'undefined'
       ? new URLSearchParams(window.location.search).get(ADD_TRANSACTION_QUERY_KEY) ?? undefined
@@ -101,13 +95,9 @@ export function useDashboardWallet() {
   });
 
   const profilesStore = useProfilesStore();
-  const sessionStore = useSessionStore();
   const {
-    selectedUserProfileData,
     selectedUserProfileId,
-    selectedUserProfileType,
   } = storeToRefs(profilesStore);
-  const { userSessionTraits } = storeToRefs(sessionStore);
 
   const {
     alertModel: walletAlertModel,
@@ -162,79 +152,13 @@ export function useDashboardWallet() {
     }
   };
 
-  const primaryButtons = computed(() => [
-    ...buttonConfigs.value,
-    {
-      id: 'manual-zero-tx',
-      label: 'Send 0 Tx',
-      variant: 'outlined',
-      loading: isManualZeroTransactionLoading.value,
-    },
-  ]);
+  const primaryButtons = computed(() => buttonConfigs.value);
   // const moreButtons = computed(() =>
   //   buttonConfigs.value.filter((b) => ['earn', 'buy', 'bank-accounts'].includes(String(b.id))),
   // );
   const moreButtons = [];
-
-  const handleManualZeroTransactionClick = async () => {
-    isManualZeroTransactionLoading.value = true;
-
-    try {
-      const profileId = Number(selectedUserProfileId.value ?? 0);
-      if (!profileId) {
-        throw new Error('A profile is required before sending the zero-value transaction.');
-      }
-
-      console.log('[useDashboardWallet] handleManualZeroTransactionClick:start', {
-        profileId,
-        profileType: selectedUserProfileType.value,
-        walletStatus: selectedUserProfileData.value?.wallet?.status,
-        isKycApproved: selectedUserProfileData.value?.isKycApproved,
-      });
-      const result = await walletAuthStore.triggerZeroTransactionWarmup({
-        profileId,
-        isKycApproved: selectedUserProfileData.value?.isKycApproved,
-        profileType: selectedUserProfileType.value,
-        profileName: selectedUserProfileData.value?.name,
-        fullAccountName: selectedUserProfileData.value?.data?.full_account_name,
-        userEmail: userSessionTraits.value?.email,
-        walletStatus: selectedUserProfileData.value?.wallet?.status,
-      });
-      console.log('[useDashboardWallet] handleManualZeroTransactionClick:result', {
-        profileId,
-        result,
-      });
-
-      if (result === 'completed') {
-        toast({
-          title: 'Zero Transaction Sent',
-          description: 'The manual zero-value transaction was triggered from the wallet tab.',
-        });
-      }
-    } catch (error) {
-      console.log('[useDashboardWallet] handleManualZeroTransactionClick:error', {
-        error,
-        message: (error as Error)?.message,
-        cause: (error as Error & { cause?: unknown })?.cause,
-      });
-      toast({
-        title: 'Zero Transaction Failed',
-        description: (error as Error)?.message || 'We could not send the manual zero-value transaction.',
-        variant: 'error',
-      });
-    } finally {
-      isManualZeroTransactionLoading.value = false;
-    }
-  };
-
-  const handlePrimaryActionClick = (id: string | number, transactionType?: unknown) => {
-    if (id === 'manual-zero-tx') {
-      void handleManualZeroTransactionClick();
-      return;
-    }
-
+  const handlePrimaryActionClick = (id: string | number, transactionType?: unknown) =>
     handleButtonClick({ id, transactionType });
-  };
 
   const scanUrl = env.CRYPTO_WALLET_SCAN_URL as string;
   const balanceCards = computed(() => {
@@ -325,7 +249,6 @@ export function useDashboardWallet() {
     primaryButtons,
     moreButtons,
     handlePrimaryActionClick,
-    isManualZeroTransactionLoading,
     balanceCards,
     holdingsTable,
     transactionsTable,

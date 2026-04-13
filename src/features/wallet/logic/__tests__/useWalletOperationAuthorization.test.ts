@@ -20,8 +20,8 @@ vi.mock('InvestCommon/data/evm/evm.repository', () => ({
   }),
 }));
 
-vi.mock('InvestCommon/features/wallet/store/useWalletAuth', async () => {
-  const actual = await vi.importActual('InvestCommon/features/wallet/store/useWalletAuth');
+vi.mock('InvestCommon/features/wallet/auth/store/useWalletAuth', async () => {
+  const actual = await vi.importActual('InvestCommon/features/wallet/auth/store/useWalletAuth');
 
   return {
     ...actual,
@@ -33,6 +33,13 @@ vi.mock('InvestCommon/features/wallet/store/useWalletAuth', async () => {
 });
 
 vi.mock('InvestCommon/features/wallet/logic/walletAuth.adapter', () => ({
+  walletAuthAdapter: {
+    hasActiveSession: hoisted.hasActiveSession,
+    signAuthorizationRequest: hoisted.signAuthorizationRequest,
+  },
+}));
+
+vi.mock('InvestCommon/data/wallet/walletAuth.adapter', () => ({
   walletAuthAdapter: {
     hasActiveSession: hoisted.hasActiveSession,
     signAuthorizationRequest: hoisted.signAuthorizationRequest,
@@ -149,7 +156,51 @@ describe('useWalletOperationAuthorization', () => {
       chain: 'ethereum',
       status: 'active',
     });
-    expect(hoisted.hasActiveSession).not.toHaveBeenCalled();
+    expect(hoisted.hasActiveSession).toHaveBeenCalledTimes(1);
+    expect(hoisted.authorizeWithdrawStart).not.toHaveBeenCalled();
+    expect(hoisted.signAuthorizationRequest).not.toHaveBeenCalled();
+    expect(hoisted.authorizeWithdrawConfirm).not.toHaveBeenCalled();
+  });
+
+  it('starts wallet auth immediately when the signer session is inactive even if a backend authorization session exists', async () => {
+    const onAuthRecovered = vi.fn().mockResolvedValue(undefined);
+    const onBeforeWalletAuth = vi.fn();
+    hoisted.hasActiveSession.mockResolvedValueOnce(false);
+    hoisted.getAuthorizeSessions.mockResolvedValueOnce([
+      {
+        profile_id: 7,
+        wallet_address: '0xwallet',
+        session_id: 'session_reused_1',
+        chain: 'ethereum',
+        asset: '0xusdc',
+        max_amount: '10',
+        remaining_amount: '7',
+        issued_at: '2026-04-10T08:00:00.000Z',
+        expires_at: '2099-04-10T09:00:00.000Z',
+        authorization_status: 'active',
+      },
+    ]);
+    const { authorizeOperation } = useWalletOperationAuthorization();
+
+    const result = await authorizeOperation({
+      profileId: 7,
+      request,
+      walletAuthContext,
+      onBeforeWalletAuth,
+      onAuthRecovered,
+    });
+
+    expect(result).toEqual({
+      status: 'deferred_to_wallet_auth',
+    });
+    expect(hoisted.hasActiveSession).toHaveBeenCalledTimes(1);
+    expect(hoisted.getAuthorizeSessions).not.toHaveBeenCalled();
+    expect(hoisted.setPendingPostAuthAction).toHaveBeenCalledWith({
+      profileId: 7,
+      run: onAuthRecovered,
+    });
+    expect(onBeforeWalletAuth).toHaveBeenCalledTimes(1);
+    expect(hoisted.startFlowForProfile).toHaveBeenCalledWith(walletAuthContext);
     expect(hoisted.authorizeWithdrawStart).not.toHaveBeenCalled();
     expect(hoisted.signAuthorizationRequest).not.toHaveBeenCalled();
     expect(hoisted.authorizeWithdrawConfirm).not.toHaveBeenCalled();

@@ -76,44 +76,7 @@ describe('VKycAlert', () => {
     expect(wrapper.emitted('descriptionAction')).toHaveLength(1);
   });
 
-  it('emits description-action when the rich text wrapper is activated from the keyboard', async () => {
-    const wrapper = mount(VKycAlert, {
-      props: {
-        variant: 'error',
-        title: 'Verification Declined',
-        description: '<a data-action="contact-us">Contact support</a>',
-      },
-      global: {
-        directives: {
-          dompurifyHtml: (element, binding) => {
-            element.innerHTML = binding.value;
-          },
-        },
-        stubs: {
-          VAlert: {
-            template: `
-              <div class="alert-stub">
-                <slot name="title" />
-                <slot name="description" />
-                <slot />
-              </div>
-            `,
-          },
-          VButton: true,
-        },
-      },
-    });
-
-    const description = wrapper.find('span');
-
-    await description.trigger('keydown.enter');
-    expect(wrapper.emitted('descriptionAction')).toHaveLength(1);
-
-    await description.trigger('keydown.space');
-    expect(wrapper.emitted('descriptionAction')).toHaveLength(2);
-  });
-
-  it('does not expose button semantics when the description is plain text', async () => {
+  it('does not emit description-action when the description is plain text', async () => {
     const wrapper = mount(VKycAlert, {
       props: {
         variant: 'info',
@@ -142,9 +105,6 @@ describe('VKycAlert', () => {
     });
 
     const description = wrapper.find('span');
-    expect(description.attributes('role')).toBeUndefined();
-    expect(description.attributes('tabindex')).toBeUndefined();
-
     await description.trigger('click');
     expect(wrapper.emitted('descriptionAction')).toBeUndefined();
   });

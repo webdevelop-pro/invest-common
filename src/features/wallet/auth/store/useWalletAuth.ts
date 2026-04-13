@@ -1,18 +1,18 @@
 import {
   computed,
   ref,
-  watch,
 } from 'vue';
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
 import { PROFILE_TYPES } from 'InvestCommon/domain/config/enums/profileTypes';
 import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
-import { walletAuthAdapter } from 'InvestCommon/features/wallet/logic/walletAuth.adapter';
+import { walletAuthAdapter } from 'InvestCommon/data/wallet/walletAuth.adapter';
 import {
   deriveWalletAuthEmail,
+  resolveWalletAuthErrorMessage,
   shouldPromptWalletAuth,
-} from 'InvestCommon/features/wallet/logic/walletAuth.helpers';
+} from 'InvestCommon/features/wallet/auth/logic/walletAuth.helpers';
 
 export type WalletAuthStep =
   | 'intro'
@@ -29,7 +29,6 @@ type WalletAuthProfileState = {
   errorMessage: string;
   lastOpenedAt: number | null;
   profileType: string;
-  retryAction: 'start' | 'bind' | 'finalize_after_mfa';
 };
 
 const getWalletAddressFromAuthDetails = (authDetails: unknown) => {
@@ -49,16 +48,22 @@ type OpenPayload = {
 
 export type WalletAuthOpenPayload = OpenPayload;
 
+type StartFlowOptions = {
+  openDialog?: boolean;
+};
+
 type PendingPostAuthAction = {
   profileId: number;
   run: () => Promise<void>;
+  successMarker?: CompletedPostAuthAction;
 };
 
 export type TriggerZeroTransactionWarmupResult =
   | 'completed'
   | 'deferred_to_wallet_auth';
 
-const STORAGE_KEY = 'invest:wallet-auth:profiles';
+export type CompletedPostAuthAction =
+  | 'zero_transaction_warmup';
 
 const createEmptyState = (): WalletAuthProfileState => ({
   step: 'intro',
@@ -66,55 +71,28 @@ const createEmptyState = (): WalletAuthProfileState => ({
   errorMessage: '',
   lastOpenedAt: null,
   profileType: '',
-  retryAction: 'start',
 });
 
-const readStorage = () => {
-  if (typeof window === 'undefined') {
-    return {};
-  }
-
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      return {};
-    }
-
-    return JSON.parse(raw) as Record<string, WalletAuthProfileState>;
-  } catch {
-    return {};
-  }
-};
-
-const writeStorage = (data: Record<string, WalletAuthProfileState>) => {
-  if (typeof window === 'undefined') {
-    return;
-  }
-
-  try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  } catch {
-    // Ignore storage failures and keep in-memory flow working.
-  }
-};
+const resolveWalletAuthEmail = (payload: OpenPayload) => deriveWalletAuthEmail(
+  payload.userEmail,
+  payload.profileName || payload.fullAccountName,
+  payload.profileType === PROFILE_TYPES.INDIVIDUAL,
+);
 
 export const useWalletAuth = defineStore('wallet-auth', () => {
   const isDialogWalletAuthOpen = ref(false);
   const currentProfileId = ref<number | null>(null);
-  const profileStates = ref<Record<string, WalletAuthProfileState>>(readStorage());
+  const profileStates = ref<Record<string, WalletAuthProfileState>>({});
   const pendingPostAuthAction = ref<PendingPostAuthAction | null>(null);
+  const completedPostAuthAction = ref<CompletedPostAuthAction | null>(null);
 
   const profilesRepository = useRepositoryProfiles();
   const evmRepository = useRepositoryEvm();
   const dialogsStore = useDialogs();
 
-  watch(profileStates, (value) => {
-    writeStorage(value);
-  }, { deep: true });
-
   const currentProfileState = computed<WalletAuthProfileState>(() => {
     const profileId = currentProfileId.value;
-    if (!profileId) {
+    if (profileId === null) {
       return createEmptyState();
     }
 
@@ -146,17 +124,44 @@ export const useWalletAuth = defineStore('wallet-auth', () => {
     };
   };
 
-  const setRetryableError = (
+  const patchStep = (
+    profileId: number,
+    step: WalletAuthStep,
+    patch: Partial<WalletAuthProfileState> = {},
+  ) => {
+    patchProfileState(profileId, {
+      step,
+      ...patch,
+    });
+  };
+
+  const clearProfileError = (profileId: number) => {
+    if (!ensureProfileState(profileId).errorMessage) {
+      return;
+    }
+
+    patchProfileState(profileId, {
+      errorMessage: '',
+    });
+  };
+
+  const setErrorStep = (
     profileId: number,
     error: unknown,
-    retryAction: WalletAuthProfileState['retryAction'],
     fallbackMessage: string,
   ) => {
     patchProfileState(profileId, {
       step: 'error',
-      errorMessage: (error as Error)?.message || fallbackMessage,
-      retryAction,
+      errorMessage: resolveWalletAuthErrorMessage(error, fallbackMessage),
     });
+  };
+
+  const setBindingError = (profileId: number, error: unknown) => {
+    setErrorStep(
+      profileId,
+      error,
+      'Wallet auth succeeded, but we could not finish wallet setup.',
+    );
   };
 
   const openDialog = (profileId: number) => {
@@ -170,7 +175,7 @@ export const useWalletAuth = defineStore('wallet-auth', () => {
 
   const clearCurrentError = () => {
     const profileId = currentProfileId.value;
-    if (!profileId || !currentProfileState.value.errorMessage) {
+    if (profileId === null || !currentProfileState.value.errorMessage) {
       return;
     }
 
@@ -184,7 +189,7 @@ export const useWalletAuth = defineStore('wallet-auth', () => {
       return;
     }
 
-    if (profileId && pendingPostAuthAction.value.profileId !== profileId) {
+    if (profileId !== undefined && pendingPostAuthAction.value.profileId !== profileId) {
       return;
     }
 
@@ -200,7 +205,12 @@ export const useWalletAuth = defineStore('wallet-auth', () => {
     dialogsStore.closeWalletAuthDialog();
   };
 
+  const setCurrentProfile = (profileId: number | null) => {
+    currentProfileId.value = profileId;
+  };
+
   const setPendingPostAuthAction = (action: PendingPostAuthAction) => {
+    completedPostAuthAction.value = null;
     pendingPostAuthAction.value = action;
   };
 
@@ -214,9 +224,14 @@ export const useWalletAuth = defineStore('wallet-auth', () => {
 
     try {
       await action.run();
+      completedPostAuthAction.value = action.successMarker ?? null;
     } catch {
-      // The resumed feature flow is responsible for exposing its own errors.
+      // The caller that deferred the action is responsible for exposing its own errors.
     }
+  };
+
+  const clearCompletedPostAuthAction = () => {
+    completedPostAuthAction.value = null;
   };
 
   const clearProfileState = (profileId: number) => {
@@ -229,16 +244,24 @@ export const useWalletAuth = defineStore('wallet-auth', () => {
     profileStates.value[String(profileId)] ?? createEmptyState()
   );
 
-  const hasResumableState = (profileId: number) => {
-    const state = getProfileState(profileId);
-    return ['awaiting_otp', 'awaiting_mfa', 'error'].includes(state.step);
+  const prepareFlowForProfile = (payload: OpenPayload) => {
+    const {
+      profileId,
+      profileType,
+    } = payload;
+
+    setCurrentProfile(profileId);
+    clearProfileError(profileId);
+    patchProfileState(profileId, {
+      email: resolveWalletAuthEmail(payload),
+      errorMessage: '',
+      profileType: profileType || '',
+    });
   };
 
   const completeWalletBind = async (profileId: number) => {
-    patchProfileState(profileId, {
-      step: 'binding',
+    patchStep(profileId, 'binding', {
       errorMessage: '',
-      retryAction: 'bind',
     });
 
     const authDetails = await walletAuthAdapter.getAuthDetails();
@@ -263,10 +286,8 @@ export const useWalletAuth = defineStore('wallet-auth', () => {
       evmRepository.getEvmWalletByProfile(profileId, []),
     ]);
 
-    patchProfileState(profileId, {
-      step: 'success',
+    patchStep(profileId, 'success', {
       errorMessage: '',
-      retryAction: 'start',
     });
 
     const shouldResumePendingAction = pendingPostAuthAction.value?.profileId === profileId;
@@ -279,10 +300,8 @@ export const useWalletAuth = defineStore('wallet-auth', () => {
   };
 
   const finalizeAfterMfa = async (profileId: number) => {
-    patchProfileState(profileId, {
-      step: 'binding',
+    patchStep(profileId, 'binding', {
       errorMessage: '',
-      retryAction: 'finalize_after_mfa',
     });
 
     await evmRepository.updateWalletMfa(profileId, {
@@ -297,13 +316,10 @@ export const useWalletAuth = defineStore('wallet-auth', () => {
     email: string,
     profileType: string,
   ) => {
-    openDialog(profileId);
-    patchProfileState(profileId, {
-      step: 'sending_otp',
+    patchStep(profileId, 'sending_otp', {
       email,
       errorMessage: '',
       profileType,
-      retryAction: 'start',
     });
 
     const nextStep = await walletAuthAdapter.startEmailOtp(email);
@@ -312,78 +328,91 @@ export const useWalletAuth = defineStore('wallet-auth', () => {
       try {
         await completeWalletBind(profileId);
       } catch (error) {
-        setRetryableError(
-          profileId,
-          error,
-          'bind',
-          'Wallet auth succeeded, but we could not finish wallet setup.',
-        );
+        setBindingError(profileId, error);
       }
       return;
     }
 
-    patchProfileState(profileId, {
-      step: nextStep,
+    patchStep(profileId, nextStep, {
       errorMessage: '',
-      retryAction: 'start',
     });
   };
 
-  const startFlowForProfile = async (payload: OpenPayload) => {
+  const resolveRetryEmail = (
+    state: WalletAuthProfileState,
+    payload?: Partial<OpenPayload>,
+  ) => {
+    if (!payload) {
+      return state.email;
+    }
+
+    return resolveWalletAuthEmail({
+      profileId: currentProfileId.value ?? 0,
+      profileType: payload.profileType ?? state.profileType,
+      profileName: payload.profileName,
+      fullAccountName: payload.fullAccountName,
+      userEmail: payload.userEmail,
+    }) || state.email;
+  };
+
+  const startFlowForProfile = async (
+    payload: OpenPayload,
+    options: StartFlowOptions = {},
+  ) => {
     const {
       profileId,
       profileType,
-      profileName,
-      fullAccountName,
-      userEmail,
     } = payload;
+    const email = resolveWalletAuthEmail(payload);
+    const shouldOpenDialog = options.openDialog !== false;
 
-    const isIndividual = profileType === PROFILE_TYPES.INDIVIDUAL;
-    const email = deriveWalletAuthEmail(
-      userEmail,
-      profileName || fullAccountName,
-      isIndividual,
-    );
+    patchProfileState(profileId, {
+      ...createEmptyState(),
+      email,
+      profileType: profileType || '',
+    });
+    setCurrentProfile(profileId);
+
+    if (shouldOpenDialog) {
+      openDialog(profileId);
+    }
 
     if (!email) {
-      patchProfileState(profileId, {
-        step: 'intro',
+      patchStep(profileId, 'intro', {
         errorMessage: 'Wallet auth email is missing for this profile.',
       });
-      openDialog(profileId);
       return;
     }
 
     try {
       await startEmailOtpFlow(profileId, email, profileType || '');
     } catch (error) {
-      patchProfileState(profileId, {
-        step: 'intro',
+      patchStep(profileId, 'intro', {
         email,
-        errorMessage: (error as Error)?.message || 'Failed to send wallet verification code.',
-        retryAction: 'start',
+        errorMessage: resolveWalletAuthErrorMessage(
+          error,
+          'Failed to send wallet verification code.',
+        ),
       });
     }
   };
 
   const submitOtp = async (otpCode: string) => {
     const profileId = currentProfileId.value;
-    if (!profileId) {
+    if (profileId === null) {
       return;
     }
 
-    patchProfileState(profileId, {
-      step: 'sending_otp',
+    clearProfileError(profileId);
+    patchStep(profileId, 'sending_otp', {
       errorMessage: '',
     });
 
     try {
       const result = await walletAuthAdapter.submitOtp(otpCode);
       if (result === 'awaiting_mfa') {
-        patchProfileState(profileId, {
-          step: 'awaiting_mfa',
+        patchStep(profileId, 'awaiting_mfa', {
           errorMessage: '',
-          retryAction: 'start',
         });
         return;
       }
@@ -391,36 +420,34 @@ export const useWalletAuth = defineStore('wallet-auth', () => {
       try {
         await completeWalletBind(profileId);
       } catch (error) {
-        setRetryableError(
-          profileId,
-          error,
-          'bind',
-          'Wallet auth succeeded, but we could not finish wallet setup.',
-        );
+        setBindingError(profileId, error);
       }
     } catch (error) {
-      const message = (error as Error)?.message || 'Failed to verify the wallet code.';
-      patchProfileState(profileId, {
-        step: 'awaiting_otp',
+      const message = resolveWalletAuthErrorMessage(
+        error,
+        'Failed to verify the wallet code.',
+      );
+      patchStep(profileId, 'awaiting_otp', {
         errorMessage: message,
-        retryAction: 'start',
       });
     }
   };
 
   const submitMfa = async (code: string) => {
     const profileId = currentProfileId.value;
-    if (!profileId) {
+    if (profileId === null) {
       return;
     }
 
+    clearProfileError(profileId);
     try {
       await walletAuthAdapter.submitMfa(code);
     } catch (error) {
-      patchProfileState(profileId, {
-        step: 'awaiting_mfa',
-        errorMessage: (error as Error)?.message || 'Failed to verify the authenticator code.',
-        retryAction: 'start',
+      patchStep(profileId, 'awaiting_mfa', {
+        errorMessage: resolveWalletAuthErrorMessage(
+          error,
+          'Failed to verify the authenticator code.',
+        ),
       });
       return;
     }
@@ -428,52 +455,39 @@ export const useWalletAuth = defineStore('wallet-auth', () => {
     try {
       await finalizeAfterMfa(profileId);
     } catch (error) {
-      setRetryableError(
+      setErrorStep(
         profileId,
         error,
-        'finalize_after_mfa',
         'Wallet auth succeeded, but we could not finish wallet setup.',
       );
     }
   };
 
-  const retryCurrentStep = async () => {
+  const retryCurrentStep = async (payload?: Partial<OpenPayload>) => {
     const profileId = currentProfileId.value;
-    if (!profileId) {
+    if (profileId === null) {
       return;
     }
 
     const state = currentProfileState.value;
+    const email = resolveRetryEmail(state, payload);
 
-    try {
-      if (state.retryAction === 'bind') {
-        await completeWalletBind(profileId);
-        return;
-      }
-
-      if (state.retryAction === 'finalize_after_mfa') {
-        await finalizeAfterMfa(profileId);
-        return;
-      }
-
-      if (!state.email) {
-        patchProfileState(profileId, {
-          step: 'intro',
-          errorMessage: 'Wallet auth email is missing for this profile.',
-          retryAction: 'start',
-        });
-        return;
-      }
-
-      await startEmailOtpFlow(profileId, state.email, state.profileType || '');
-    } catch (error) {
-      setRetryableError(
-        profileId,
-        error,
-        state.retryAction,
-        'Wallet setup could not be completed.',
-      );
+    if (!email) {
+      patchStep(profileId, 'intro', {
+        errorMessage: 'Wallet auth email is missing for this profile.',
+      });
+      return;
     }
+
+    await startFlowForProfile({
+      profileId,
+      profileType: payload?.profileType ?? state.profileType,
+      profileName: payload?.profileName,
+      fullAccountName: payload?.fullAccountName,
+      userEmail: payload?.userEmail ?? email,
+    }, {
+      openDialog: isDialogWalletAuthOpen.value,
+    });
   };
 
   const triggerZeroTransactionWarmup = async (
@@ -501,6 +515,7 @@ export const useWalletAuth = defineStore('wallet-auth', () => {
 
     setPendingPostAuthAction({
       profileId: payload.profileId,
+      successMarker: 'zero_transaction_warmup',
       run: async () => {
         console.log('[walletAuthStore] triggerZeroTransactionWarmup:resumePendingAction', {
           profileId: payload.profileId,
@@ -521,47 +536,48 @@ export const useWalletAuth = defineStore('wallet-auth', () => {
       return;
     }
 
-    const existingState = getProfileState(payload.profileId);
     openDialog(payload.profileId);
-
-    if (existingState.step === 'awaiting_otp'
-      || existingState.step === 'awaiting_mfa'
-      || existingState.step === 'error') {
-      return;
-    }
-
+    prepareFlowForProfile(payload);
     patchProfileState(payload.profileId, {
       step: 'intro',
-      email: deriveWalletAuthEmail(
-        payload.userEmail,
-        payload.profileName || payload.fullAccountName,
-        payload.profileType === PROFILE_TYPES.INDIVIDUAL,
-      ),
+      email: resolveWalletAuthEmail(payload),
       errorMessage: '',
       profileType: payload.profileType || '',
-      retryAction: 'start',
     });
+  };
+
+  const resetAll = async () => {
+    closeDialog();
+    currentProfileId.value = null;
+    profileStates.value = {};
+    pendingPostAuthAction.value = null;
+    completedPostAuthAction.value = null;
+    await walletAuthAdapter.resetSession();
   };
 
   return {
     isDialogWalletAuthOpen,
     currentProfileId,
     currentProfileState,
+    setCurrentProfile,
     openDialog,
     closeDialog,
     pendingPostAuthAction,
+    completedPostAuthAction,
     setPendingPostAuthAction,
     clearPendingPostAuthAction,
+    clearCompletedPostAuthAction,
     getProfileState,
-    hasResumableState,
     clearProfileState,
     clearCurrentError,
+    prepareFlowForProfile,
     startFlowForProfile,
     submitOtp,
     submitMfa,
     retryCurrentStep,
     triggerZeroTransactionWarmup,
     maybeOpenAfterKyc,
+    resetAll,
   };
 });
 

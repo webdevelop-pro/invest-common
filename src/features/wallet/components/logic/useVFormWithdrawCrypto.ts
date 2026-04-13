@@ -8,6 +8,7 @@ import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { useRepositoryEvm, type WalletChain } from 'InvestCommon/data/evm/evm.repository';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { IEvmWithdrawRequestBody, IEvmWalletBalances } from 'InvestCommon/data/evm/evm.types';
 import { useWalletOperationAuthorization } from 'InvestCommon/features/wallet/logic/useWalletOperationAuthorization';
 import {
@@ -53,10 +54,12 @@ export function useVFormWithdrawCrypto(
 ) {
   const evmRepository = useRepositoryEvm();
   const profilesStore = useProfilesStore();
+  const sessionStore = useSessionStore();
   const { authorizeOperation } = useWalletOperationAuthorization();
   const { defaultNetwork, selectedNetwork, networkOptions } = useWalletNetwork();
   const { getEvmWalletState, withdrawFundsState } = storeToRefs(evmRepository);
   const { selectedUserProfileId, selectedUserProfileData } = storeToRefs(profilesStore);
+  const { userSessionTraits } = storeToRefs(sessionStore);
 
   const errorData = computed(() => (withdrawFundsState.value.error as any)?.data?.responseJson);
   const schemaBackend = computed(() => undefined);
@@ -161,7 +164,7 @@ export function useVFormWithdrawCrypto(
     profileType: selectedUserProfileData.value?.type,
     profileName: selectedUserProfileData.value?.name,
     fullAccountName: selectedUserProfileData.value?.data?.full_account_name,
-    userEmail: selectedUserProfileData.value?.data?.email,
+    userEmail: userSessionTraits.value?.email || selectedUserProfileData.value?.data?.email,
     walletStatus: selectedUserProfileData.value?.wallet?.status,
     isKycApproved: selectedUserProfileData.value?.isKycApproved,
   });

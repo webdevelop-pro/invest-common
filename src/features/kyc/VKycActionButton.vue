@@ -3,7 +3,7 @@ import { computed } from 'vue';
 import { useKycAlertViewModel } from './logic/useKycAlertViewModel';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 
-const props = withDefaults(defineProps<{
+withDefaults(defineProps<{
   size?: 'small' | 'large';
 }>(), {
   size: 'small',

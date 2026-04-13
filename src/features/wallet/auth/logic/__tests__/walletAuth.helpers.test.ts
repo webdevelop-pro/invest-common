@@ -5,6 +5,7 @@ import {
   isWalletBackendError,
   isWalletBackendReady,
   isUserRejectedWalletSignatureError,
+  resolveWalletAuthErrorMessage,
   shouldPromptWalletAuth,
 } from '../walletAuth.helpers';
 
@@ -51,5 +52,11 @@ describe('walletAuth.helpers', () => {
   it('detects explicit user-rejected signing errors', () => {
     expect(isUserRejectedWalletSignatureError(new Error('User rejected the request.'))).toBe(true);
     expect(isUserRejectedWalletSignatureError(new Error('Request rejected by backend.'))).toBe(false);
+  });
+
+  it('extracts the nested SDK message from structured wallet-auth errors', () => {
+    expect(resolveWalletAuthErrorMessage({
+      error: '{"code":3,"message":"Max number of OTPs have been initiated please wait and try again","details":[{"@type":"type.googleapis.com/errors.v1.TurnkeyErrorDetail","turnkeyErrorCode":"MAX_OTP_INITIATED"}],"turnkeyErrorCode":"MAX_OTP_INITIATED"}',
+    }, 'Fallback')).toBe('Max number of OTPs have been initiated please wait and try again');
   });
 });

@@ -11,7 +11,6 @@ import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import type { FormChild } from 'InvestCommon/types/form';
 import { useRepositoryAccreditation } from 'InvestCommon/data/accreditation/accreditation.repository';
 import { useRepositoryKyc } from 'InvestCommon/data/kyc/kyc.repository';
-import { useWalletAuth } from 'InvestCommon/features/wallet/store/useWalletAuth';
 import { useKycFormValidation } from './useKycFormValidation';
 import { useKycPostSubmitNavigation } from './useKycPostSubmitNavigation';
 import { useKycSubmission } from './useKycSubmission';
@@ -48,7 +47,6 @@ export const useFormFinancialInformationAndKyc = () => {
   const { userSessionTraits } = storeToRefs(userSessionStore);
   const repositoryKyc = useRepositoryKyc();
   const accreditationRepository = useRepositoryAccreditation();
-  const walletAuthStore = useWalletAuth();
 
   const backButtonText = ref('Go Back');
   const backButtonRoute = computed<RouteLocationRaw>(() => resolveBackButtonRoute(
@@ -106,15 +104,6 @@ export const useFormFinancialInformationAndKyc = () => {
       selectedUserProfileType.value,
       selectedUserProfileId.value,
     ),
-    maybeOpenAfterKyc: () => walletAuthStore.maybeOpenAfterKyc({
-      profileId: Number(selectedUserProfileId.value),
-      isKycApproved: selectedUserProfileData.value?.isKycApproved,
-      profileType: selectedUserProfileType.value,
-      profileName: selectedUserProfileData.value?.name,
-      fullAccountName: selectedUserProfileData.value?.data?.full_account_name,
-      userEmail: userSessionTraits.value?.email,
-      walletStatus: selectedUserProfileData.value?.wallet?.status,
-    }),
   });
 
   const handleSave = async () => {

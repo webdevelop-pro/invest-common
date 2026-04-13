@@ -86,7 +86,7 @@ describe('useRepositoryEvm', () => {
       });
 
     const store = useRepositoryEvm();
-    await store.getEvmWalletByProfile(1124, []);
+    await store.getEvmWalletByProfile(1124, [], 'all');
 
     expect(apiGetMock).toHaveBeenCalledTimes(3);
     expect(apiGetMock).toHaveBeenNthCalledWith(1, '/auth/wallet/1124', {

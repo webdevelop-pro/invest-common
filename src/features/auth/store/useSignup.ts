@@ -3,7 +3,10 @@ import {
 } from 'vue';
 import { acceptHMRUpdate, defineStore, storeToRefs } from 'pinia';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
-import { urlSignin, urlProfile } from 'InvestCommon/domain/config/links';
+import {
+  urlSignin,
+  urlProfileWalletOtp,
+} from 'InvestCommon/domain/config/links';
 import { useRepositoryAuth } from 'InvestCommon/data/auth/auth.repository';
 import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
@@ -141,9 +144,15 @@ export const useSignupStore = defineStore('signup', () => {
     return navigateWithQueryParams(urlSignin, params);
   };
 
-  const navigateToProfile = () => {
-    const redirectUrl = getQueryParam('redirect') || urlProfile();
-    return navigateWithQueryParams(redirectUrl);
+  const navigateToSignupWalletOtp = () => {
+    const redirect = getQueryParam('redirect');
+    return navigateWithQueryParams(
+      urlProfileWalletOtp(0),
+      {
+        next: 'kyc',
+        ...(redirect ? { redirect } : {}),
+      },
+    );
   };
 
   // Form validation
@@ -184,7 +193,7 @@ export const useSignupStore = defineStore('signup', () => {
         lastname: model.last_name,
       });
     }
-    navigateToProfile();
+    navigateToSignupWalletOtp();
   };
 
   const signupPasswordHandler = async () => {

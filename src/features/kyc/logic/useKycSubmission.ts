@@ -53,7 +53,9 @@ const submitHubspotForms = async (
 ) => {
   await useHubspotForm(env.HUBSPOT_FORM_ID_FINANCIAL_SITUATION).submitFormToHubspot({
     email,
-    is_accredited: (sectionModels.financial.accredited_investor as { is_accredited?: boolean } | undefined)?.is_accredited,
+    is_accredited: (
+      sectionModels.financial.accredited_investor as { is_accredited?: boolean } | undefined
+    )?.is_accredited,
   });
   await useHubspotForm(env.HUBSPOT_FORM_ID_RISKS).submitFormToHubspot({
     email,

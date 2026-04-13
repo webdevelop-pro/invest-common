@@ -87,7 +87,7 @@ vi.mock('InvestCommon/features/settings/components/logic/useSettingsBankAccounts
     isLinkBankAccountLoading: isLinkBankAccountLoadingRef,
   }),
 }));
-vi.mock('InvestCommon/features/wallet/store/useWalletAuth', () => ({
+vi.mock('InvestCommon/features/wallet/auth/store/useWalletAuth', () => ({
   useWalletAuth: () => ({
     maybeOpenAfterKyc: maybeOpenAfterKycMock,
     startFlowForProfile: startFlowForProfileMock,

@@ -16,7 +16,7 @@ const VDialogContactUs = defineAsyncComponent({
 });
 
 const VDialogWalletAuth = defineAsyncComponent({
-  loader: () => import('InvestCommon/features/wallet/components/VDialogWalletAuth.vue'),
+  loader: () => import('InvestCommon/features/wallet/auth/VDialogWalletAuth.vue'),
 });
 
 const useDialogsStore = useDialogs();

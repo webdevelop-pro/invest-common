@@ -15,6 +15,7 @@ import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
 import { useRepositoryDistributions } from 'InvestCommon/data/distributions/distributions.repository';
 import { useRepositoryEsign } from 'InvestCommon/data/esign/esign.repository';
 import { useRepositoryEarn } from 'InvestCommon/data/earn/earn.repository';
+import { useWalletAuth } from 'InvestCommon/features/wallet/auth/store/useWalletAuth';
 
 import { cookiesOptions } from 'InvestCommon/domain/config/cookies';
 import { clearPrivatePwaData } from 'InvestCommon/domain/pwa/pwaOfflineStore';
@@ -53,6 +54,7 @@ export const resetAllData = async () => {
   clearAllCookies();
   useSessionStore().resetAll();
   useRepositoryAuth().resetAll();
+  await useWalletAuth().resetAll();
   resetAllProfileData({ clearPrivatePwa: false });
   useRepositoryOffer().resetAll();
   useRepositoryNotifications().resetAll();

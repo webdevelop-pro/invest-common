@@ -353,7 +353,24 @@ describe('DashboardPageHeader', () => {
     expect(onWalletBannerClick).toHaveBeenCalledTimes(1);
   });
 
-  it('shows the wallet banner even when the KYC banner is visible', async () => {
+  it('shows the accreditation banner after KYC approval when wallet setup is clear', async () => {
+    selectedUserProfileData.value = {
+      isKycApproved: true,
+      isAccreditationApproved: false,
+      kyc_status: InvestKycTypes.approved,
+      accreditation_status: AccreditationTypes.pending,
+    };
+
+    const wrapper = mountHeader(DashboardTabTypes.summary);
+    await nextTick();
+
+    const alert = wrapper.find('.alert-stub');
+    expect(alert.exists()).toBe(true);
+    expect(alert.text()).toContain('Your accreditation information has been submitted');
+    expect(wrapper.find('.wallet-alert-stub').exists()).toBe(false);
+  });
+
+  it('hides the wallet banner when the KYC banner is visible', async () => {
     selectedUserProfileData.value = {
       isKycApproved: false,
       isAccreditationApproved: true,
@@ -376,10 +393,10 @@ describe('DashboardPageHeader', () => {
     await nextTick();
 
     expect(wrapper.find('.alert-stub').exists()).toBe(true);
-    expect(wrapper.find('.wallet-alert-stub').exists()).toBe(true);
+    expect(wrapper.find('.wallet-alert-stub').exists()).toBe(false);
   });
 
-  it('shows wallet and accreditation alerts together when KYC is hidden', async () => {
+  it('prioritizes the wallet banner over accreditation after KYC approval', async () => {
     selectedUserProfileData.value = {
       isKycApproved: true,
       isAccreditationApproved: false,
@@ -399,7 +416,7 @@ describe('DashboardPageHeader', () => {
     const wrapper = mountHeader(DashboardTabTypes.summary);
     await nextTick();
 
-    expect(wrapper.findAll('.alert-stub')).toHaveLength(1);
+    expect(wrapper.find('.alert-stub').exists()).toBe(false);
     expect(wrapper.find('.wallet-alert-stub').exists()).toBe(true);
   });
 
@@ -444,7 +461,7 @@ describe('DashboardPageHeader', () => {
     const wrapper = mountHeader(DashboardTabTypes.summary);
     await nextTick();
 
-    expect(wrapper.find('.alert-stub').exists()).toBe(true);
+    expect(wrapper.find('.alert-stub').exists()).toBe(false);
     expect(wrapper.find('[data-testid="wallet-alert-skeleton"]').exists()).toBe(true);
     expect(wrapper.find('.wallet-alert-stub').exists()).toBe(false);
   });

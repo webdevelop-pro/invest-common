@@ -10,7 +10,7 @@ import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { hasRestrictedWalletBehavior } from 'InvestCommon/data/profiles/profiles.helpers';
 import type { IProfileFormatted } from 'InvestCommon/data/profiles/profiles.types';
 import { useSettingsBankAccounts } from 'InvestCommon/features/settings/components/logic/useSettingsBankAccounts';
-import { useWalletAuth } from 'InvestCommon/features/wallet/store/useWalletAuth';
+import { useWalletAuth } from 'InvestCommon/features/wallet/auth/store/useWalletAuth';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 import { isWalletSetupRequiredError } from './walletSetupError';
 

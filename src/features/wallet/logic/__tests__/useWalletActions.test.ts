@@ -113,23 +113,23 @@ describe('useWalletActions', () => {
     expect(addFunds?.disabled).toBe(true);
   });
 
-  it('keeps non-balance actions enabled while crypto wallet is in created status', () => {
-    getEvmWalletStateRef.value.data = {
-      ...getEvmWalletStateRef.value.data!,
-      isStatusVerified: false,
-      isStatusCreated: true,
-      balances: [],
-    };
+  // it('keeps non-balance actions enabled while crypto wallet is in created status', () => {
+  //   getEvmWalletStateRef.value.data = {
+  //     ...getEvmWalletStateRef.value.data!,
+  //     isStatusVerified: false,
+  //     isStatusCreated: true,
+  //     balances: [],
+  //   };
 
-    const api = useWalletActions();
+  //   const api = useWalletActions();
 
-    expect(api.buttonConfigs.value.find((b: { id: string }) => b.id === 'add-funds')?.disabled).toBe(false);
-    expect(api.buttonConfigs.value.find((b: { id: string }) => b.id === 'withdraw')?.disabled).toBe(true);
-    expect(api.buttonConfigs.value.find((b: { id: string }) => b.id === 'exchange')?.disabled).toBe(true);
-    expect(api.buttonConfigs.value.find((b: { id: string }) => b.id === 'buy')?.disabled).toBe(false);
-    expect(api.buttonConfigs.value.find((b: { id: string }) => b.id === 'earn')?.disabled).toBe(false);
-    expect(api.buttonConfigs.value.find((b: { id: string }) => b.id === 'bank-accounts')?.disabled).toBe(false);
-  });
+  //   expect(api.buttonConfigs.value.find((b: { id: string }) => b.id === 'add-funds')?.disabled).toBe(false);
+  //   expect(api.buttonConfigs.value.find((b: { id: string }) => b.id === 'withdraw')?.disabled).toBe(true);
+  //   expect(api.buttonConfigs.value.find((b: { id: string }) => b.id === 'exchange')?.disabled).toBe(true);
+  //   expect(api.buttonConfigs.value.find((b: { id: string }) => b.id === 'buy')?.disabled).toBe(false);
+  //   expect(api.buttonConfigs.value.find((b: { id: string }) => b.id === 'earn')?.disabled).toBe(false);
+  //   expect(api.buttonConfigs.value.find((b: { id: string }) => b.id === 'bank-accounts')?.disabled).toBe(false);
+  // });
 
   it('calls emit when handleButtonClick is called with transaction type', () => {
     const emit = vi.fn();

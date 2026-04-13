@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 const resetAllMock = vi.fn();
 const makeRepoMock = () => ({ resetAll: vi.fn(), resetProfileData: vi.fn() });
 const clearPrivatePwaDataMock = vi.hoisted(() => vi.fn().mockResolvedValue(undefined));
+const walletAuthResetAllMock = vi.hoisted(() => vi.fn().mockResolvedValue(undefined));
 
 const authRepo = makeRepoMock();
 const kycRepo = makeRepoMock();
@@ -32,6 +33,9 @@ vi.mock('InvestCommon/domain/session/store/useSession', () => ({
 }));
 vi.mock('InvestCommon/domain/pwa/pwaOfflineStore', () => ({
   clearPrivatePwaData: clearPrivatePwaDataMock,
+}));
+vi.mock('InvestCommon/features/wallet/auth/store/useWalletAuth', () => ({
+  useWalletAuth: () => ({ resetAll: walletAuthResetAllMock }),
 }));
 
 vi.mock('InvestCommon/data/auth/auth.repository', () => ({
@@ -83,6 +87,7 @@ describe('resetAllData & resetAllProfileData', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     clearPrivatePwaDataMock.mockResolvedValue(undefined);
+    walletAuthResetAllMock.mockResolvedValue(undefined);
   });
 
   it('resetAllProfileData resets only profile-dependent repositories', () => {
@@ -115,6 +120,7 @@ describe('resetAllData & resetAllProfileData', () => {
 
     // Auth + profile-dependent repos
     expect(authRepo.resetAll).toHaveBeenCalledTimes(1);
+    expect(walletAuthResetAllMock).toHaveBeenCalledTimes(1);
     expect(profilesRepo.resetProfileData).toHaveBeenCalledTimes(1);
     expect(accreditationRepo.resetAll).toHaveBeenCalledTimes(1);
     expect(kycRepo.resetAll).toHaveBeenCalledTimes(1);

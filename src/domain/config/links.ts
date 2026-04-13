@@ -46,6 +46,7 @@ export const urlEarnRisk = (profileId: number, poolId: string | number) => (
   `${env.FRONTEND_URL_DASHBOARD}/profile/${profileId}/earn/${poolId}/risk`
 );
 export const urlProfileKYC = (profileId: number) => `${env.FRONTEND_URL_DASHBOARD}/profile/${profileId}/kyc`;
+export const urlProfileWalletOtp = (profileId: number) => `${env.FRONTEND_URL_DASHBOARD}/profile/${profileId}/wallet-otp`;
 export const urlProfilePortfolio = (profileId: number) => `${env.FRONTEND_URL_DASHBOARD}/profile/${profileId}/portfolio`;
 export const urlProfileSummary = (profileId: number) => (
   `${env.FRONTEND_URL_DASHBOARD}/profile/${profileId}/summary`

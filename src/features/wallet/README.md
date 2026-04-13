@@ -25,11 +25,11 @@ This document now describes the current implemented phase, not the original targ
 - KYC post-submit trigger:
   [`invest-common/src/features/kyc/logic/useFormFinancialInformationAndKyc.ts`](/Users/nelyaklyusa/Documents/work-code/dashboard.webdevelop.biz/invest-common/src/features/kyc/logic/useFormFinancialInformationAndKyc.ts)
 - Wallet auth store/state machine:
-  [`invest-common/src/features/wallet/store/useWalletAuth.ts`](/Users/nelyaklyusa/Documents/work-code/dashboard.webdevelop.biz/invest-common/src/features/wallet/store/useWalletAuth.ts)
+  [`invest-common/src/features/wallet/auth/store/useWalletAuth.ts`](/Users/nelyaklyusa/Documents/work-code/dashboard.webdevelop.biz/invest-common/src/features/wallet/auth/store/useWalletAuth.ts)
 - Wallet auth dialog:
   [`invest-common/src/features/wallet/components/VDialogWalletAuth.vue`](/Users/nelyaklyusa/Documents/work-code/dashboard.webdevelop.biz/invest-common/src/features/wallet/components/VDialogWalletAuth.vue)
 - Alchemy adapter:
-  [`invest-common/src/features/wallet/logic/walletAuth.adapter.ts`](/Users/nelyaklyusa/Documents/work-code/dashboard.webdevelop.biz/invest-common/src/features/wallet/logic/walletAuth.adapter.ts)
+  [`invest-common/src/data/wallet/walletAuth.adapter.ts`](/Users/nelyaklyusa/Documents/work-code/dashboard.webdevelop.biz/invest-common/src/data/wallet/walletAuth.adapter.ts)
 - Wallet alert classification:
   [`invest-common/src/features/wallet/logic/useWalletAlert.ts`](/Users/nelyaklyusa/Documents/work-code/dashboard.webdevelop.biz/invest-common/src/features/wallet/logic/useWalletAlert.ts)
 - Wallet setup-required error helper:

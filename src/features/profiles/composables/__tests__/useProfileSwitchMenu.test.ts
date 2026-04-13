@@ -6,6 +6,14 @@ const mockRouterPush = vi.fn();
 const mockSetSelectedUserProfileById = vi.fn();
 const mockUpdateSelectedAccount = vi.fn();
 const mockNavigateWithQueryParams = vi.fn();
+const routeState = {
+  name: 'ROUTE_DASHBOARD_ACCOUNT',
+  params: { profileId: '2' },
+  query: { tab: 'overview' },
+  meta: {
+    checkProfileIdInUrl: true,
+  },
+};
 const envState = {
   IS_STATIC_SITE: '0',
 };
@@ -42,6 +50,7 @@ vi.mock('vue-router', () => ({
   useRouter: () => ({
     push: mockRouterPush,
   }),
+  useRoute: () => routeState,
 }));
 
 vi.mock('pinia', async () => {
@@ -78,6 +87,10 @@ const loadComposable = async () => {
 describe('useProfileSwitchMenu', () => {
   beforeEach(() => {
     envState.IS_STATIC_SITE = '0';
+    routeState.name = 'ROUTE_DASHBOARD_ACCOUNT';
+    routeState.params = { profileId: '2' };
+    routeState.query = { tab: 'overview' };
+    routeState.meta = { checkProfileIdInUrl: true };
     selectedUserProfileId.value = 2;
     userProfiles.value = [
       {
@@ -144,6 +157,23 @@ describe('useProfileSwitchMenu', () => {
 
     expect(mockSetSelectedUserProfileById).toHaveBeenCalledWith(1);
     expect(mockUpdateSelectedAccount).toHaveBeenCalledTimes(1);
+    expect(mockRouterPush).toHaveBeenCalledWith({
+      name: 'ROUTE_DASHBOARD_ACCOUNT',
+      params: { profileId: 1 },
+      query: { tab: 'overview' },
+    });
+  });
+
+  it('does not navigate when current route is not profile-scoped', async () => {
+    routeState.meta = {};
+    const useProfileSwitchMenu = await loadComposable();
+    const composable = useProfileSwitchMenu();
+
+    await composable.onSelectProfile('1');
+
+    expect(mockSetSelectedUserProfileById).toHaveBeenCalledWith(1);
+    expect(mockUpdateSelectedAccount).toHaveBeenCalledTimes(1);
+    expect(mockRouterPush).not.toHaveBeenCalled();
   });
 
   it('does not update the active profile again', async () => {

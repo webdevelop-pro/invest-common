@@ -7,14 +7,12 @@ type NavigationDependencies = {
   router: Router;
   getBackButtonRoute: () => RouteLocationRaw;
   getProfileById: () => Promise<unknown>;
-  maybeOpenAfterKyc: () => Promise<unknown>;
 };
 
 export function useKycPostSubmitNavigation({
   router,
   getBackButtonRoute,
   getProfileById,
-  maybeOpenAfterKyc,
 }: NavigationDependencies) {
   const finishSubmission = async (hubspotPromise: Promise<void> | null) => {
     await getProfileById();
@@ -24,7 +22,6 @@ export function useKycPostSubmitNavigation({
     }
 
     await router.push(getBackButtonRoute());
-    await maybeOpenAfterKyc();
   };
 
   return {

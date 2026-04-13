@@ -76,6 +76,10 @@ export function useDashboardPageHeader() {
     Boolean(selectedUserProfileData.value?.isKycApproved) && isWalletAlertDataLoading.value
   ));
 
+  const hasWalletPriorityBanner = computed(() => (
+    isWalletAlertLoading.value || walletAlertModel.value.show
+  ));
+
   const verificationBanner = computed<DashboardHeaderBanner | null>(() => {
     const selectedProfile = selectedUserProfileData.value;
     if (!selectedProfile) {
@@ -92,6 +96,10 @@ export function useDashboardPageHeader() {
         isLoading: kycAlertModel.value.isLoading,
         isDisabled: kycAlertModel.value.isDisabled,
       };
+    }
+
+    if (selectedProfile.isKycApproved && hasWalletPriorityBanner.value) {
+      return null;
     }
 
     const accreditationStatus = selectedProfile.accreditation_status;

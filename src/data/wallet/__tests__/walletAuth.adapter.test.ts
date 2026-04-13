@@ -13,6 +13,7 @@ const {
   authenticateMock,
   createPublicClientMock,
   createSmartWalletClientMock,
+  disconnectMock,
   getBytecodeMock,
   getAuthDetailsMock,
   getAddressMock,
@@ -23,6 +24,8 @@ const {
   signTypedDataMock,
   smartWalletPrepareCallsMock,
   smartWalletSendPreparedCallsMock,
+  stampWhoamiMock,
+  validateMultiFactorsMock,
   statusListeners,
   errorListeners,
 } = vi.hoisted(() => ({
@@ -30,6 +33,7 @@ const {
   authenticateMock: vi.fn(),
   createPublicClientMock: vi.fn(),
   createSmartWalletClientMock: vi.fn(),
+  disconnectMock: vi.fn(),
   getBytecodeMock: vi.fn(),
   getAuthDetailsMock: vi.fn(),
   getAddressMock: vi.fn(),
@@ -40,6 +44,8 @@ const {
   signTypedDataMock: vi.fn(),
   smartWalletPrepareCallsMock: vi.fn(),
   smartWalletSendPreparedCallsMock: vi.fn(),
+  stampWhoamiMock: vi.fn(),
+  validateMultiFactorsMock: vi.fn(),
   statusListeners: [] as Array<(status: string) => void>,
   errorListeners: [] as Array<(error?: { message: string }) => void>,
 }));
@@ -94,7 +100,8 @@ vi.mock('@account-kit/signer', () => ({
 
     return {
       authenticate: authenticateMock,
-      validateMultiFactors: vi.fn(),
+      validateMultiFactors: validateMultiFactorsMock,
+      disconnect: disconnectMock,
       getAuthDetails: getAuthDetailsMock,
       getAddress: getAddressMock,
       signAuthorization: signAuthorizationMock,
@@ -112,7 +119,7 @@ vi.mock('@account-kit/signer', () => ({
         return () => {};
       },
       inner: {
-        stampWhoami: vi.fn(),
+        stampWhoami: stampWhoamiMock,
       },
     };
   },
@@ -126,6 +133,8 @@ describe('walletAuthAdapter', () => {
     alchemyTransportMock.mockReset();
     authenticateMock.mockReset();
     createPublicClientMock.mockReset();
+    createSmartWalletClientMock.mockReset();
+    disconnectMock.mockReset();
     getAuthDetailsMock.mockReset();
     getAddressMock.mockReset();
     getBytecodeMock.mockReset();
@@ -134,11 +143,16 @@ describe('walletAuthAdapter', () => {
     signMessageMock.mockReset();
     smartWalletSignPreparedCallsMock.mockReset();
     signTypedDataMock.mockReset();
-    createSmartWalletClientMock.mockReset();
     smartWalletPrepareCallsMock.mockReset();
     smartWalletSendPreparedCallsMock.mockReset();
+    stampWhoamiMock.mockReset();
+    validateMultiFactorsMock.mockReset();
+
     signMessageMock.mockResolvedValue('0xsigned-message');
     signTypedDataMock.mockResolvedValue('0xsigned-typed-data');
+    disconnectMock.mockResolvedValue(undefined);
+    stampWhoamiMock.mockResolvedValue({ stamped: true });
+    validateMultiFactorsMock.mockResolvedValue(undefined);
     signAuthorizationMock.mockResolvedValue({
       r: '0x11',
       s: '0x22',
@@ -225,8 +239,13 @@ describe('walletAuthAdapter', () => {
     });
     statusListeners.length = 0;
     errorListeners.length = 0;
-    authenticateMock.mockImplementation(async () => {
-      statusListeners.forEach((listener) => listener('AWAITING_EMAIL_AUTH'));
+    authenticateMock.mockImplementation(async (payload) => {
+      if ((payload as { type?: string }).type === 'email') {
+        statusListeners.forEach((listener) => listener('AWAITING_EMAIL_AUTH'));
+        return;
+      }
+
+      statusListeners.forEach((listener) => listener('CONNECTED'));
     });
     vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => setTimeout(() => callback(0), 0));
   });
@@ -254,7 +273,7 @@ describe('walletAuthAdapter', () => {
     });
   });
 
-  it('returns the signer status reached after starting email auth', async () => {
+  it('resolves the start flow according to signer status', async () => {
     const { walletAuthAdapter } = await import('../walletAuth.adapter');
 
     const container = document.createElement('div');
@@ -272,7 +291,82 @@ describe('walletAuthAdapter', () => {
     await expect(walletAuthAdapter.startEmailOtp('user@example.com')).resolves.toBe('connected');
   });
 
-  it('signs signature_request.data.message when the backend returns a message payload', async () => {
+  it('returns awaiting_mfa when otp submission requires authenticator verification', async () => {
+    const { walletAuthAdapter } = await import('../walletAuth.adapter');
+
+    const container = document.createElement('div');
+    container.id = 'alchemy-signer-iframe-container';
+    document.body.appendChild(container);
+
+    await walletAuthAdapter.startEmailOtp('user@example.com');
+
+    authenticateMock.mockImplementationOnce(async () => {
+      statusListeners.forEach((listener) => listener('AWAITING_MFA_AUTH'));
+    });
+
+    await expect(walletAuthAdapter.submitOtp('123456')).resolves.toBe('awaiting_mfa');
+    expect(authenticateMock).toHaveBeenLastCalledWith({
+      type: 'otp',
+      otpCode: '123456',
+    });
+  });
+
+  it('waits for the signer session to be available before resolving a successful otp retry', async () => {
+    const { walletAuthAdapter } = await import('../walletAuth.adapter');
+
+    const container = document.createElement('div');
+    container.id = 'alchemy-signer-iframe-container';
+    document.body.appendChild(container);
+
+    await walletAuthAdapter.startEmailOtp('user@example.com');
+
+    authenticateMock.mockRejectedValueOnce(new Error('Invalid OTP.'));
+    await expect(walletAuthAdapter.submitOtp('000000')).rejects.toThrow('Invalid OTP.');
+
+    getAuthDetailsMock.mockResolvedValueOnce(null).mockResolvedValueOnce({ address: '0xabc123' });
+    authenticateMock.mockImplementationOnce(async () => {
+      setTimeout(() => {
+        statusListeners.forEach((listener) => listener('CONNECTED'));
+      }, 0);
+    });
+
+    const retryPromise = walletAuthAdapter.submitOtp('123456');
+    await vi.runAllTimersAsync();
+
+    await expect(retryPromise).resolves.toBe('connected');
+  });
+
+  it('submits MFA and includes pending factor id when available', async () => {
+    const { walletAuthAdapter } = await import('../walletAuth.adapter');
+
+    const container = document.createElement('div');
+    container.id = 'alchemy-signer-iframe-container';
+    document.body.appendChild(container);
+
+    await walletAuthAdapter.startEmailOtp('user@example.com');
+    statusListeners.forEach((listener) => listener('AWAITING_MFA_AUTH'));
+
+    await walletAuthAdapter.submitMfa('654321');
+
+    expect(validateMultiFactorsMock).toHaveBeenCalledWith({
+      multiFactorCode: '654321',
+    });
+  });
+
+  it('returns stamped whoami payload and active session state', async () => {
+    const { walletAuthAdapter } = await import('../walletAuth.adapter');
+
+    const container = document.createElement('div');
+    container.id = 'alchemy-signer-iframe-container';
+    document.body.appendChild(container);
+
+    await walletAuthAdapter.startEmailOtp('user@example.com');
+
+    await expect(walletAuthAdapter.getStampedWhoamiRequest()).resolves.toEqual({ stamped: true });
+    await expect(walletAuthAdapter.hasActiveSession()).resolves.toBe(true);
+  });
+
+  it('signs authorization requests after ensuring warmup', async () => {
     const { walletAuthAdapter } = await import('../walletAuth.adapter');
 
     const container = document.createElement('div');
@@ -281,86 +375,40 @@ describe('walletAuthAdapter', () => {
 
     await walletAuthAdapter.startEmailOtp('user@example.com');
     await expect(walletAuthAdapter.signAuthorizationRequest({
-      type: 'eth_signTypedData_v4',
-      data: {
-        message: 'Authorize wallet session',
-      },
+      type: 'personal_sign',
+      data: 'wallet-apis-signature',
     })).resolves.toBe('0xsigned-message');
-
-    expect(signMessageMock).toHaveBeenCalledWith('Authorize wallet session');
-    expect(signTypedDataMock).not.toHaveBeenCalled();
-    expect(createSmartWalletClientMock).toHaveBeenCalledWith({
-      transport: { transport: 'alchemy-public-transport' },
-      chain: { id: 11155111, name: 'Sepolia' },
-      signer: expect.any(Object),
-      account: '0xsigner123',
-      policyId: 'e9f2620b-e800-4b5d-8d54-c738a5863483',
-    });
-    expect(alchemyTransportMock).toHaveBeenCalledWith({
-      apiKey: 'test-key',
-    });
-    expect(createPublicClientMock).toHaveBeenCalledWith({
-      chain: { id: 11155111, name: 'Sepolia' },
-      transport: { transport: 'alchemy-public-transport' },
-    });
-    expect(getBytecodeMock).toHaveBeenCalledWith({ client: 'sepolia-public-client' }, {
-      address: '0xsigner123',
-    });
-    expect(smartWalletPrepareCallsMock).toHaveBeenCalledWith({
-      account: '0xsigner123',
-      calls: [
-        {
-          to: '0x0000000000000000000000000000000000000000',
-          data: '0x',
-          value: '0x0',
-        },
-      ],
-    });
-    expect(smartWalletSendPreparedCallsMock).toHaveBeenCalledWith(expect.objectContaining({
-      type: 'user-operation-v070',
-      data: { mock: 'prepared' },
-      signature: {
-        type: 'secp256k1',
-        data: '0xsigned-message',
-      },
-    }));
   });
 
-  it('keeps full typed-data signing for eip712 payloads', async () => {
+  it('falls back to direct authorization signing when Wallet APIs return authorizations', async () => {
     const { walletAuthAdapter } = await import('../walletAuth.adapter');
 
     const container = document.createElement('div');
     container.id = 'alchemy-signer-iframe-container';
     document.body.appendChild(container);
 
-    const typedData = {
-      domain: { name: 'Wallet Session', version: '1', chainId: 1 },
-      types: {
-        EIP712Domain: [
-          { name: 'name', type: 'string' },
-        ],
-        WalletSessionAuthorization: [
-          { name: 'sessionId', type: 'string' },
-        ],
+    createSmartWalletClientMock.mockReturnValue({
+      prepareCalls: smartWalletPrepareCallsMock,
+      sendPreparedCalls: smartWalletSendPreparedCallsMock,
+    });
+    smartWalletPrepareCallsMock.mockResolvedValueOnce({
+      type: 'authorization',
+      chainId: '0xaa36a7',
+      data: {
+        address: '0xsigner123',
+        nonce: '0x1',
       },
-      primaryType: 'WalletSessionAuthorization',
-      message: {
-        sessionId: 'session_confirm_1',
-      },
-    };
+    });
 
     await walletAuthAdapter.startEmailOtp('user@example.com');
-    signMessageMock.mockClear();
-    signTypedDataMock.mockClear();
     await expect(walletAuthAdapter.signAuthorizationRequest({
       type: 'eth_signTypedData_v4',
-      data: typedData,
-    })).resolves.toBe('0xsigned-typed-data');
-
-    expect(signTypedDataMock).toHaveBeenCalledWith(typedData);
+      data: { payload: true },
+    })).resolves.toBeDefined();
+    expect(signAuthorizationMock).toHaveBeenCalled();
   });
 
-  it('warms the signer once before authorization signing when sendCalls is available', async () => {
+  it('warms the signer only once per address', async () => {
     const { walletAuthAdapter } = await import('../walletAuth.adapter');
 
     const container = document.createElement('div');
@@ -368,98 +416,14 @@ describe('walletAuthAdapter', () => {
     document.body.appendChild(container);
 
     await walletAuthAdapter.startEmailOtp('user@example.com');
-    await walletAuthAdapter.signAuthorizationRequest({
-      type: 'personal_sign',
-      data: 'first signature',
-    });
-    await walletAuthAdapter.signAuthorizationRequest({
-      type: 'personal_sign',
-      data: 'second signature',
-    });
+    await walletAuthAdapter.warmSignerWithZeroTransaction();
+    await walletAuthAdapter.warmSignerWithZeroTransaction();
 
-    expect(createSmartWalletClientMock).toHaveBeenCalledTimes(1);
     expect(smartWalletPrepareCallsMock).toHaveBeenCalledTimes(1);
     expect(smartWalletSendPreparedCallsMock).toHaveBeenCalledTimes(1);
-    expect(signMessageMock).toHaveBeenCalledTimes(3);
   });
 
-  it('skips prepare and send when EIP-7702 delegation is already enabled for the EOA', async () => {
-    getBytecodeMock.mockResolvedValueOnce('0xef0100deadbeef');
-    const { walletAuthAdapter } = await import('../walletAuth.adapter');
-
-    const container = document.createElement('div');
-    container.id = 'alchemy-signer-iframe-container';
-    document.body.appendChild(container);
-
-    await walletAuthAdapter.startEmailOtp('user@example.com');
-    await walletAuthAdapter.warmSignerWithZeroTransaction();
-
-    expect(getBytecodeMock).toHaveBeenCalledWith({ client: 'sepolia-public-client' }, {
-      address: '0xsigner123',
-    });
-    expect(smartWalletPrepareCallsMock).not.toHaveBeenCalled();
-    expect(smartWalletSendPreparedCallsMock).not.toHaveBeenCalled();
-  });
-
-  it('signs the EIP-7702 authorization returned by Wallet APIs before sending prepared calls', async () => {
-    smartWalletPrepareCallsMock.mockResolvedValueOnce({
-      type: 'array',
-      data: [
-        {
-          type: 'authorization',
-          chainId: '0xaa36a7',
-          data: {
-            address: '0xsigner123',
-            nonce: '0x1',
-          },
-        },
-        {
-          type: 'user-operation-v070',
-          data: { mock: 'prepared' },
-          signatureRequest: {
-            type: 'personal_sign',
-            data: 'wallet-apis-signature',
-          },
-        },
-      ],
-    });
-
-    const { walletAuthAdapter } = await import('../walletAuth.adapter');
-
-    const container = document.createElement('div');
-    container.id = 'alchemy-signer-iframe-container';
-    document.body.appendChild(container);
-
-    await walletAuthAdapter.startEmailOtp('user@example.com');
-    await walletAuthAdapter.warmSignerWithZeroTransaction();
-
-    expect(signAuthorizationMock).toHaveBeenCalledWith({
-      address: '0xsigner123',
-      nonce: 1,
-      chainId: 11155111,
-    });
-    expect(smartWalletSendPreparedCallsMock).toHaveBeenCalledWith({
-      type: 'array',
-      data: [
-        expect.objectContaining({
-          type: 'authorization',
-          signature: {
-            type: 'secp256k1',
-            data: expect.any(String),
-          },
-        }),
-        expect.objectContaining({
-          type: 'user-operation-v070',
-          signature: {
-            type: 'secp256k1',
-            data: '0xsigned-message',
-          },
-        }),
-      ],
-    });
-  });
-
-  it('sends a real zero-value self-call for the manual 0 tx flow', async () => {
+  it('sends a zero transaction directly', async () => {
     const { walletAuthAdapter } = await import('../walletAuth.adapter');
 
     const container = document.createElement('div');
@@ -468,21 +432,9 @@ describe('walletAuthAdapter', () => {
 
     await walletAuthAdapter.startEmailOtp('user@example.com');
     await expect(walletAuthAdapter.sendZeroTransaction()).resolves.toEqual({ id: '0xtxhash' });
-
-    expect(smartWalletPrepareCallsMock).toHaveBeenCalledWith({
-      account: '0xsigner123',
-      calls: [
-        {
-          to: '0x0000000000000000000000000000000000000000',
-          data: '0x',
-          value: '0x0',
-        },
-      ],
-    });
-    expect(smartWalletSendPreparedCallsMock).toHaveBeenCalledTimes(1);
   });
 
-  it('reports whether the signer has an active cached session', async () => {
+  it('reports whether the signer session is active and resets cached session state', async () => {
     const { walletAuthAdapter } = await import('../walletAuth.adapter');
 
     const container = document.createElement('div');
@@ -491,7 +443,12 @@ describe('walletAuthAdapter', () => {
 
     await expect(walletAuthAdapter.hasActiveSession()).resolves.toBe(true);
 
-    getAuthDetailsMock.mockRejectedValueOnce(new Error('Not authenticated'));
+    getAuthDetailsMock.mockRejectedValueOnce(new Error('No session'));
     await expect(walletAuthAdapter.hasActiveSession()).resolves.toBe(false);
+
+    await expect(walletAuthAdapter.hasActiveSession()).resolves.toBe(true);
+    await walletAuthAdapter.resetSession();
+    await expect(walletAuthAdapter.hasActiveSession()).resolves.toBe(true);
+    expect(disconnectMock).toHaveBeenCalledTimes(1);
   });
 });

@@ -1,6 +1,6 @@
 import { computed } from 'vue';
 import { storeToRefs } from 'pinia';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { capitalizeFirstLetter } from 'UiKit/helpers/text';
 import type { IProfileFormatted } from 'InvestCommon/data/profiles/profiles.types';
 import env from 'InvestCommon/config/env';
@@ -61,6 +61,7 @@ const getProfileEligibility = (profile?: IProfileFormatted | null) => ({
 
 export function useProfileSwitchMenu() {
   const router = isStaticSite ? null : useRouter();
+  const route = isStaticSite ? null : useRoute();
   const profilesStore = useProfilesStore();
   const { selectedUserProfileId, userProfiles } = storeToRefs(profilesStore);
   const currentProfileId = computed(() => Number(selectedUserProfileId.value));
@@ -117,6 +118,17 @@ export function useProfileSwitchMenu() {
 
     profilesStore.setSelectedUserProfileById(nextProfileId);
     profilesStore.updateSelectedAccount();
+
+    if (router && route?.meta?.checkProfileIdInUrl && route.name) {
+      await router.push({
+        name: route.name as string,
+        params: {
+          ...route.params,
+          profileId: nextProfileId,
+        },
+        query: route.query,
+      });
+    }
   };
 
   return {

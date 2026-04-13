@@ -21,6 +21,9 @@ const mockSetSignup = vi.fn().mockResolvedValue(undefined);
 const mockGetSignup = vi.fn().mockResolvedValue(undefined);
 const sendEventMock = vi.fn().mockResolvedValue(undefined);
 const mockUpdateSession = vi.fn();
+const { mockNavigateWithQueryParams } = vi.hoisted(() => ({
+  mockNavigateWithQueryParams: vi.fn(),
+}));
 
 // Mock the dependencies
 vi.mock('InvestCommon/data/auth/auth.repository', () => ({
@@ -41,6 +44,10 @@ vi.mock('InvestCommon/domain/session/store/useSession', () => ({
   useSessionStore: vi.fn(() => ({
     updateSession: mockUpdateSession,
   })),
+}));
+
+vi.mock('UiKit/helpers/general', () => ({
+  navigateWithQueryParams: mockNavigateWithQueryParams,
 }));
 
 // no mock for useFormValidation – use the real implementation
@@ -89,6 +96,7 @@ describe('useSignup Store', () => {
     authRepository.getSignup.mockReset().mockResolvedValue(undefined);
     sendEventMock.mockReset().mockResolvedValue(undefined);
     mockUpdateSession.mockReset();
+    mockNavigateWithQueryParams.mockReset();
     mockDemoAccountAuthenticate.mockReset().mockResolvedValue(true);
     mockIsDemoAccountAvailable.value = true;
     mockIsDemoAccountLoading.value = false;
@@ -169,6 +177,10 @@ describe('useSignup Store', () => {
       expect(sendEventMock).toHaveBeenCalledWith(expect.objectContaining({
         status_code: 200,
       }));
+      expect(mockNavigateWithQueryParams).toHaveBeenCalledWith(
+        expect.stringContaining('/profile/0/wallet-otp'),
+        { next: 'kyc' },
+      );
       expect(mockUpdateSession.mock.invocationCallOrder[0]).toBeLessThan(
         sendEventMock.mock.invocationCallOrder[0],
       );
@@ -274,6 +286,50 @@ describe('useSignup Store', () => {
       // Test the query parameters
       expect(store.queryFlow).toBe('test-flow');
       expect(store.title).toBe('Finish Registration');
+    });
+
+    it('preserves the redirect query when sending signup users to wallet otp', async () => {
+      Object.defineProperty(window, 'location', {
+        value: {
+          search: '?redirect=/profile/123/wallet',
+          origin: 'http://localhost',
+        },
+        writable: true,
+      });
+
+      const pinia = createPinia();
+      setActivePinia(pinia);
+
+      const store = useSignupStore();
+      store.checkbox = true;
+      store.model.email = 'test@example.com';
+      store.model.first_name = 'John';
+      store.model.last_name = 'Doe';
+      store.model.create_password = 'password123';
+      store.model.repeat_password = 'password123';
+
+      const authRepository = useRepositoryAuth() as any;
+      const mockSession: any = {
+        id: 'test-session',
+        identity: { id: 'identity-456', traits: { email: 'test@example.com' } },
+      };
+      authRepository.getAuthFlow.mockImplementationOnce(async () => {
+        authRepository.csrfToken.value = 'fresh-signup-csrf-token';
+      });
+      authRepository.setSignupState.value = {
+        error: null,
+        data: { session: mockSession, session_token: 'token' },
+      };
+
+      await store.signupPasswordHandler();
+
+      expect(mockNavigateWithQueryParams).toHaveBeenCalledWith(
+        expect.stringContaining('/profile/0/wallet-otp'),
+        {
+          next: 'kyc',
+          redirect: '/profile/123/wallet',
+        },
+      );
     });
   });
 });

@@ -67,6 +67,7 @@ export function useWalletActions(
   );
   const hasFiatAvailable = computed(() => fiatMaxWithdrawable.value > 0);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const canWithdraw = computed(
     () => isWalletOperational.value && (hasAvailableBalances.value || hasFiatAvailable.value),
   );

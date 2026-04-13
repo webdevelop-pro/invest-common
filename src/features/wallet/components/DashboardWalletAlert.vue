@@ -45,6 +45,7 @@ const handleDescriptionAction = (event: Event) => {
       :variant="variant"
       data-testid="funding-alert"
       class="dashboard-wallet__alert"
+      @click="handleDescriptionAction($event)"
     >
       <template
         v-if="title"
@@ -55,11 +56,6 @@ const handleDescriptionAction = (event: Event) => {
       <template #description>
         <span
           v-dompurify-html="description"
-          :role="hasDescriptionAction ? 'button' : undefined"
-          :tabindex="hasDescriptionAction ? 0 : undefined"
-          @click="handleDescriptionAction($event)"
-          @keydown.enter="handleDescriptionAction($event)"
-          @keydown.space.prevent="handleDescriptionAction($event)"
         />
       </template>
       <VButton

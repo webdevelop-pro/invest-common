@@ -40,6 +40,7 @@ const handleDescriptionAction = (event: Event) => {
   <VAlert
     :variant="variant"
     class="VKycAlert v-kyc-alert"
+    @click="handleDescriptionAction($event)"
   >
     <template #title>
       {{ title }}
@@ -47,11 +48,6 @@ const handleDescriptionAction = (event: Event) => {
     <template #description>
       <span
         v-dompurify-html="description"
-        :role="hasDescriptionAction ? 'button' : undefined"
-        :tabindex="hasDescriptionAction ? 0 : undefined"
-        @click="handleDescriptionAction($event)"
-        @keydown.enter="handleDescriptionAction($event)"
-        @keydown.space.prevent="handleDescriptionAction($event)"
       />
     </template>
     <VButton
