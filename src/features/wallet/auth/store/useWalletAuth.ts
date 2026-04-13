@@ -234,6 +234,10 @@ export const useWalletAuth = defineStore('wallet-auth', () => {
     completedPostAuthAction.value = null;
   };
 
+  const hasPendingPostAuthActionForProfile = (profileId: number) => (
+    pendingPostAuthAction.value?.profileId === profileId
+  );
+
   const clearProfileState = (profileId: number) => {
     const nextState = { ...profileStates.value };
     delete nextState[String(profileId)];
@@ -289,17 +293,22 @@ export const useWalletAuth = defineStore('wallet-auth', () => {
     patchStep(profileId, 'success', {
       errorMessage: '',
     });
+  };
 
-    const shouldResumePendingAction = pendingPostAuthAction.value?.profileId === profileId;
-    if (!shouldResumePendingAction) {
-      return;
-    }
-
+  const resumePendingPostAuthAction = async (profileId: number) => {
+    patchStep(profileId, 'success', {
+      errorMessage: '',
+    });
     closeDialog({ clearPendingAction: false });
     await runPendingPostAuthAction(profileId);
   };
 
   const finalizeAfterMfa = async (profileId: number) => {
+    if (hasPendingPostAuthActionForProfile(profileId)) {
+      await resumePendingPostAuthAction(profileId);
+      return;
+    }
+
     patchStep(profileId, 'binding', {
       errorMessage: '',
     });
@@ -326,7 +335,11 @@ export const useWalletAuth = defineStore('wallet-auth', () => {
 
     if (nextStep === 'connected') {
       try {
-        await completeWalletBind(profileId);
+        if (hasPendingPostAuthActionForProfile(profileId)) {
+          await resumePendingPostAuthAction(profileId);
+        } else {
+          await completeWalletBind(profileId);
+        }
       } catch (error) {
         setBindingError(profileId, error);
       }
@@ -418,7 +431,11 @@ export const useWalletAuth = defineStore('wallet-auth', () => {
       }
 
       try {
-        await completeWalletBind(profileId);
+        if (hasPendingPostAuthActionForProfile(profileId)) {
+          await resumePendingPostAuthAction(profileId);
+        } else {
+          await completeWalletBind(profileId);
+        }
       } catch (error) {
         setBindingError(profileId, error);
       }

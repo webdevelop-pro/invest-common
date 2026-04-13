@@ -46,6 +46,9 @@ const isSessionExpired = (session: Pick<IEvmWalletAuthorizeSession, 'expires_at'
   return Number.isFinite(expiresAt) && expiresAt <= Date.now();
 };
 
+const getSessionDestinationAsset = (session: IEvmWalletAuthorizeSession) =>
+  session.to_asset ?? session.to_asset_address;
+
 const findReusableSession = (
   sessions: IEvmWalletAuthorizeSession[],
   request: WalletOperationAuthorizationRequest,
@@ -54,6 +57,10 @@ const findReusableSession = (
   && !isSessionExpired(session)
   && normalizeToken(session.chain) === normalizeToken(request.chain)
   && normalizeToken(session.asset) === normalizeToken(request.asset_address)
+  && (
+    !request.to_asset_address
+    || normalizeToken(getSessionDestinationAsset(session)) === normalizeToken(request.to_asset_address)
+  )
 ));
 
 const toError = (error: unknown) => (

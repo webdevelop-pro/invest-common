@@ -388,7 +388,7 @@ describe('useWalletAuth', () => {
     expect(store.currentProfileState.errorMessage).toBe('');
   });
 
-  it('runs the pending post-auth action after wallet bind succeeds', async () => {
+  it('runs the pending post-auth action after dialog auth succeeds without registering the wallet', async () => {
     const pendingAction = vi.fn().mockResolvedValue(undefined);
     const store = useWalletAuth();
 
@@ -406,6 +406,9 @@ describe('useWalletAuth', () => {
 
     expect(dialogsStore.closeWalletAuthDialog).toHaveBeenCalledTimes(1);
     expect(pendingAction).toHaveBeenCalledTimes(1);
+    expect(evmRepository.registerWallet).not.toHaveBeenCalled();
+    expect(walletAuthAdapter.getStampedWhoamiRequest).not.toHaveBeenCalled();
+    expect(walletAuthAdapter.warmSignerWithZeroTransaction).not.toHaveBeenCalled();
     expect(store.pendingPostAuthAction).toBeNull();
   });
 
@@ -439,6 +442,37 @@ describe('useWalletAuth', () => {
 
     expect(dialogsStore.closeWalletAuthDialog).toHaveBeenCalledTimes(1);
     expect(pendingAction).toHaveBeenCalledTimes(1);
+    expect(evmRepository.registerWallet).not.toHaveBeenCalled();
+    expect(walletAuthAdapter.getStampedWhoamiRequest).not.toHaveBeenCalled();
+    expect(walletAuthAdapter.warmSignerWithZeroTransaction).not.toHaveBeenCalled();
+    expect(store.pendingPostAuthAction).toBeNull();
+  });
+
+  it('resumes the deferred dialog action after MFA without updating wallet setup state', async () => {
+    const pendingAction = vi.fn().mockResolvedValue(undefined);
+    walletAuthAdapter.submitOtp.mockResolvedValueOnce('awaiting_mfa');
+    const store = useWalletAuth();
+
+    store.setPendingPostAuthAction({
+      profileId: 7,
+      run: pendingAction,
+    });
+
+    await store.startFlowForProfile({
+      profileId: 7,
+      profileType: 'individual',
+      userEmail: 'user@example.com',
+    });
+    await store.submitOtp('123456');
+    await store.submitMfa('654321');
+
+    expect(store.currentProfileState.step).toBe('success');
+    expect(dialogsStore.closeWalletAuthDialog).toHaveBeenCalledTimes(1);
+    expect(pendingAction).toHaveBeenCalledTimes(1);
+    expect(evmRepository.updateWalletMfa).not.toHaveBeenCalled();
+    expect(evmRepository.registerWallet).not.toHaveBeenCalled();
+    expect(walletAuthAdapter.getStampedWhoamiRequest).not.toHaveBeenCalled();
+    expect(walletAuthAdapter.warmSignerWithZeroTransaction).not.toHaveBeenCalled();
     expect(store.pendingPostAuthAction).toBeNull();
   });
 

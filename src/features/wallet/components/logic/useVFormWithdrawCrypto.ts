@@ -6,6 +6,7 @@ import { numberFormatter } from 'UiKit/helpers/numberFormatter';
 import { JSONSchemaType } from 'ajv/dist/types/json-schema';
 import { errorMessageRule } from 'UiKit/helpers/validation/rules';
 import { useFormValidation } from 'UiKit/helpers/validation/useFormValidation';
+import { useToast } from 'UiKit/components/Base/VToast/use-toast';
 import { useRepositoryEvm, type WalletChain } from 'InvestCommon/data/evm/evm.repository';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
@@ -55,6 +56,7 @@ export function useVFormWithdrawCrypto(
   const evmRepository = useRepositoryEvm();
   const profilesStore = useProfilesStore();
   const sessionStore = useSessionStore();
+  const { toast } = useToast();
   const { authorizeOperation } = useWalletOperationAuthorization();
   const { defaultNetwork, selectedNetwork, networkOptions } = useWalletNetwork();
   const { getEvmWalletState, withdrawFundsState } = storeToRefs(evmRepository);
@@ -212,6 +214,11 @@ export function useVFormWithdrawCrypto(
 
     await evmRepository.getEvmWalletByProfile(profileId);
     console.log('[wallet-withdraw] executeWithdrawal:wallet-refresh:done', { profileId });
+    toast({
+      title: 'Withdrawal submitted',
+      description: `${submission.amount} ${selectedAssetLabel.value} withdrawal submitted successfully.`,
+      variant: 'success',
+    });
     if (emitClose) emitClose();
   };
 
@@ -332,6 +339,12 @@ export function useVFormWithdrawCrypto(
     ).trim()
   ));
   const maxWithdraw = computed((): number | undefined => selectedToken.value?.amount);
+  const selectedAssetLabel = computed(() => (
+    selectedToken.value?.symbol
+    || selectedToken.value?.name
+    || resolvedAssetIdentifier.value
+    || 'asset'
+  ));
   const availableAmountText = computed(() => {
     if (!selectedToken.value || maxWithdraw.value == null) {
       return 'Select an asset to view availability';

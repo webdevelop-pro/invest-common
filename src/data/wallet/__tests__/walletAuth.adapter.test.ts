@@ -28,6 +28,7 @@ const {
   validateMultiFactorsMock,
   statusListeners,
   errorListeners,
+  signerState,
 } = vi.hoisted(() => ({
   alchemyTransportMock: vi.fn(),
   authenticateMock: vi.fn(),
@@ -48,11 +49,26 @@ const {
   validateMultiFactorsMock: vi.fn(),
   statusListeners: [] as Array<(status: string) => void>,
   errorListeners: [] as Array<(error?: { message: string }) => void>,
+  signerState: {
+    status: undefined as string | undefined,
+    error: undefined as { message: string } | undefined,
+  },
 }));
+
+const emitStatus = (status: string) => {
+  signerState.status = status;
+  statusListeners.forEach((listener) => listener(status));
+};
+
+const emitError = (error?: { message: string }) => {
+  signerState.error = error;
+  errorListeners.forEach((listener) => listener(error));
+};
 
 vi.mock('InvestCommon/config/env', () => ({
   default: {
     ALCHEMY_WALLET_API_KEY: 'test-key',
+    ALCHEMY_7702_POLICY_ID: 'test-policy-id',
   },
 }));
 
@@ -109,11 +125,23 @@ vi.mock('@account-kit/signer', () => ({
       signTypedData: signTypedDataMock,
       on: (event: string, listener: (...args: any[]) => void) => {
         if (event === 'statusChanged') {
-          statusListeners.push(listener as (status: string) => void);
+          const statusListener = listener as (status: string) => void;
+          statusListeners.push(statusListener);
+
+          if (signerState.status) {
+            const currentStatus = signerState.status;
+            queueMicrotask(() => statusListener(currentStatus));
+          }
         }
 
         if (event === 'errorChanged') {
-          errorListeners.push(listener as (error?: { message: string }) => void);
+          const errorListener = listener as (error?: { message: string }) => void;
+          errorListeners.push(errorListener);
+
+          if (signerState.error) {
+            const currentError = signerState.error;
+            queueMicrotask(() => errorListener(currentError));
+          }
         }
 
         return () => {};
@@ -153,6 +181,8 @@ describe('walletAuthAdapter', () => {
     disconnectMock.mockResolvedValue(undefined);
     stampWhoamiMock.mockResolvedValue({ stamped: true });
     validateMultiFactorsMock.mockResolvedValue(undefined);
+    signerState.status = undefined;
+    signerState.error = undefined;
     signAuthorizationMock.mockResolvedValue({
       r: '0x11',
       s: '0x22',
@@ -240,12 +270,14 @@ describe('walletAuthAdapter', () => {
     statusListeners.length = 0;
     errorListeners.length = 0;
     authenticateMock.mockImplementation(async (payload) => {
+      emitError(undefined);
+
       if ((payload as { type?: string }).type === 'email') {
-        statusListeners.forEach((listener) => listener('AWAITING_EMAIL_AUTH'));
+        emitStatus('AWAITING_EMAIL_AUTH');
         return;
       }
 
-      statusListeners.forEach((listener) => listener('CONNECTED'));
+      emitStatus('CONNECTED');
     });
     vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => setTimeout(() => callback(0), 0));
   });
@@ -281,12 +313,14 @@ describe('walletAuthAdapter', () => {
     document.body.appendChild(container);
 
     authenticateMock.mockImplementationOnce(async () => {
-      statusListeners.forEach((listener) => listener('AWAITING_MFA_AUTH'));
+      emitError(undefined);
+      emitStatus('AWAITING_MFA_AUTH');
     });
     await expect(walletAuthAdapter.startEmailOtp('user@example.com')).resolves.toBe('awaiting_mfa');
 
     authenticateMock.mockImplementationOnce(async () => {
-      statusListeners.forEach((listener) => listener('CONNECTED'));
+      emitError(undefined);
+      emitStatus('CONNECTED');
     });
     await expect(walletAuthAdapter.startEmailOtp('user@example.com')).resolves.toBe('connected');
   });
@@ -301,7 +335,8 @@ describe('walletAuthAdapter', () => {
     await walletAuthAdapter.startEmailOtp('user@example.com');
 
     authenticateMock.mockImplementationOnce(async () => {
-      statusListeners.forEach((listener) => listener('AWAITING_MFA_AUTH'));
+      emitError(undefined);
+      emitStatus('AWAITING_MFA_AUTH');
     });
 
     await expect(walletAuthAdapter.submitOtp('123456')).resolves.toBe('awaiting_mfa');
@@ -322,11 +357,13 @@ describe('walletAuthAdapter', () => {
 
     authenticateMock.mockRejectedValueOnce(new Error('Invalid OTP.'));
     await expect(walletAuthAdapter.submitOtp('000000')).rejects.toThrow('Invalid OTP.');
+    emitError({ message: 'Invalid OTP.' });
 
     getAuthDetailsMock.mockResolvedValueOnce(null).mockResolvedValueOnce({ address: '0xabc123' });
     authenticateMock.mockImplementationOnce(async () => {
+      emitError(undefined);
       setTimeout(() => {
-        statusListeners.forEach((listener) => listener('CONNECTED'));
+        emitStatus('CONNECTED');
       }, 0);
     });
 
@@ -344,7 +381,7 @@ describe('walletAuthAdapter', () => {
     document.body.appendChild(container);
 
     await walletAuthAdapter.startEmailOtp('user@example.com');
-    statusListeners.forEach((listener) => listener('AWAITING_MFA_AUTH'));
+    emitStatus('AWAITING_MFA_AUTH');
 
     await walletAuthAdapter.submitMfa('654321');
 
@@ -432,6 +469,9 @@ describe('walletAuthAdapter', () => {
 
     await walletAuthAdapter.startEmailOtp('user@example.com');
     await expect(walletAuthAdapter.sendZeroTransaction()).resolves.toEqual({ id: '0xtxhash' });
+    expect(createSmartWalletClientMock).toHaveBeenCalledWith(expect.objectContaining({
+      policyId: 'test-policy-id',
+    }));
   });
 
   it('reports whether the signer session is active and resets cached session state', async () => {

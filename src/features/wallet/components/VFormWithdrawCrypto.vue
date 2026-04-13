@@ -52,7 +52,7 @@ const emit = defineEmits<{
     @cancel="emit('cancel')"
   >
     <FormRow class="v-form-withdraw-crypto__row">
-      <FormCol col2>
+      <FormCol>
         <VFormGroup
           v-slot="VFormGroupProps"
           label="Network"
@@ -74,6 +74,8 @@ const emit = defineEmits<{
           />
         </VFormGroup>
       </FormCol>
+    </FormRow>
+    <FormRow class="v-form-withdraw-crypto__row">
       <FormCol col2>
         <VFormGroup
           v-slot="VFormGroupProps"

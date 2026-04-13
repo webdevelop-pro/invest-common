@@ -10,7 +10,18 @@ import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
 import { useRepositoryEarn } from 'InvestCommon/data/earn/earn.repository';
 import { IEvmExchangeRequestBody, IEvmWalletBalances } from 'InvestCommon/data/evm/evm.types';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { reportError } from 'InvestCommon/domain/error/errorReporting';
+import { useWalletOperationAuthorization } from 'InvestCommon/features/wallet/logic/useWalletOperationAuthorization';
+import { useWalletNetwork } from 'InvestCommon/features/wallet/logic/useWalletNetwork';
+
+type ExchangeFormModel = {
+  from?: string;
+  to?: string;
+  amount?: number;
+};
+
+type ExchangeSubmission = IEvmExchangeRequestBody;
 
 export function useVFormExchange(
   emitClose?: () => void,
@@ -22,7 +33,11 @@ export function useVFormExchange(
   const { getEvmWalletState, exchangeTokensState, exchangeTokensOptionsState } = storeToRefs(evmRepository);
   const earnRepository = useRepositoryEarn();
   const profilesStore = useProfilesStore();
-  const { selectedUserProfileId } = storeToRefs(profilesStore);
+  const sessionStore = useSessionStore();
+  const { authorizeOperation } = useWalletOperationAuthorization();
+  const { defaultNetwork, selectedNetwork } = useWalletNetwork();
+  const { selectedUserProfileId, selectedUserProfileData } = storeToRefs(profilesStore);
+  const { userSessionTraits } = storeToRefs(sessionStore);
 
   onMounted(() => {
     evmRepository.exchangeTokensOptions();
@@ -57,7 +72,7 @@ export function useVFormExchange(
 
   const errorData = computed(() => (exchangeTokensState.value.error as any)?.data?.responseJson);
   const schemaBackend = computed(() => exchangeTokensOptionsState.value.data);
-  const fieldsPaths = ['from', 'to', 'amount', 'wallet_id'];
+  const fieldsPaths = ['from', 'to', 'amount'];
 
   const selectedToken = computed(() => (
     getEvmWalletState.value.data?.balances?.find((item: IEvmWalletBalances) => item.address === model.from)));
@@ -76,7 +91,6 @@ export function useVFormExchange(
             maximum: maxExchange.value,
             errorMessage: { maximum: `Maximum available is $${maxExchange.value}` },
           },
-          wallet_id: { type: 'number' },
         },
         type: 'object',
         required: fieldsPaths,
@@ -84,20 +98,19 @@ export function useVFormExchange(
       },
     },
     $ref: '#/definitions/WalletExchange',
-  } as unknown as JSONSchemaType<IEvmExchangeRequestBody>));
+  } as unknown as JSONSchemaType<ExchangeFormModel>));
 
   const {
     model,
     isValid,
     onValidate,
     scrollToError, isFieldRequired, getErrorText,
-  } = useFormValidation<IEvmExchangeRequestBody>(
+  } = useFormValidation<ExchangeFormModel>(
     schemaExchangeTransaction,
     schemaBackend,
     reactive({
-      wallet_id: getEvmWalletState.value.data?.id,
       to: tokenToFormatted.value[0]?.id,
-    } as IEvmExchangeRequestBody),
+    } as ExchangeFormModel),
     fieldsPaths
   );
 
@@ -128,24 +141,112 @@ export function useVFormExchange(
     return `1 ${fromTokenSymbol.value} = ${exchangeRate.value.toFixed(6)} ${destinationTokenSymbol.value}`;
   });
 
-  const handleEarnExchange = async (fromAmount: number) => {
-    if (!defaultBuySymbol || !poolId || !profileId) return;
-    const data: IEvmExchangeRequestBody = {
-      from: String(model.from),
-      to: String(model.to),
-      amount: fromAmount,
-      wallet_id: Number(model.wallet_id),
-    };
+  const createIdempotencyKey = () => {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+      return `exc_${crypto.randomUUID()}`;
+    }
+
+    return `exc_${Date.now()}`;
+  };
+
+  const resolvedProfileId = computed(() => Number(profileId ?? selectedUserProfileId.value ?? 0));
+  const authorizationChain = computed(() => String(selectedNetwork.value || defaultNetwork));
+  const isEarnContext = computed(() => Boolean(defaultBuySymbol && poolId != null && profileId != null));
+  const destinationAddress = computed(() => {
+    const normalizedChain = authorizationChain.value.trim().toLowerCase();
+    const chains = Array.isArray(getEvmWalletState.value.data?.chains) ? getEvmWalletState.value.data.chains : [];
+    const matchingChainAddress = chains.find((chain) =>
+      String(chain.chain ?? '').trim().toLowerCase() === normalizedChain
+    )?.wallet_address;
+    const normalizedMatchingChainAddress = String(matchingChainAddress ?? '').trim();
+
+    if (normalizedMatchingChainAddress) {
+      return normalizedMatchingChainAddress;
+    }
+
+    const depositInstructionChain = String(
+      getEvmWalletState.value.data?.deposit_instructions?.chain ?? '',
+    ).trim().toLowerCase();
+    const depositInstructionAddress = String(
+      getEvmWalletState.value.data?.deposit_instructions?.address ?? '',
+    ).trim();
+
+    if (depositInstructionAddress && (!depositInstructionChain || depositInstructionChain === normalizedChain)) {
+      return depositInstructionAddress;
+    }
+
+    const fallbackAddress = String(getEvmWalletState.value.data?.address ?? '').trim();
+    const hasChains = chains.length > 0;
+    if (!hasChains && normalizedChain === defaultNetwork && fallbackAddress) {
+      return fallbackAddress;
+    }
+
+    return undefined;
+  });
+
+  const getWalletAuthContext = (currentProfileId: number) => ({
+    profileId: currentProfileId,
+    profileType: selectedUserProfileData.value?.type,
+    profileName: selectedUserProfileData.value?.name,
+    fullAccountName: selectedUserProfileData.value?.data?.full_account_name,
+    userEmail: userSessionTraits.value?.email || selectedUserProfileData.value?.data?.email,
+    walletStatus: selectedUserProfileData.value?.wallet?.status,
+    isKycApproved: selectedUserProfileData.value?.isKycApproved,
+  });
+
+  const submitExchange = async (
+    currentProfileId: number,
+    data: ExchangeSubmission,
+  ) => {
+    await evmRepository.exchangeTokens(currentProfileId, data);
+
+    if (exchangeTokensState.value.error) {
+      return false;
+    }
+
+    if (isEarnContext.value) {
+      await evmRepository.getEvmWalletByProfile(currentProfileId);
+      await earnRepository.getPositions(String(poolId), profileId as string | number);
+      return true;
+    }
+
+    await evmRepository.getEvmWalletByProfile(currentProfileId);
+    return true;
+  };
+
+  const executeExchange = async (
+    currentProfileId: number,
+    data: ExchangeSubmission,
+  ) => {
     try {
-      await evmRepository.exchangeTokens(data);
-      if (!getEvmWalletState.value.error) {
-        // Refresh wallet and Earn positions for this pool/profile to reflect backend state
-        await evmRepository.getEvmWalletByProfile(Number(profileId));
-        await earnRepository.getPositions(poolId, profileId);
+      const authorizationResult = await authorizeOperation({
+        profileId: currentProfileId,
+        request: {
+          chain: data.chain,
+          asset_address: data.asset_address,
+          to_asset_address: data.to_asset_address,
+          max_amount: data.amount,
+          nonce: data.idempotency_key,
+        },
+        walletAuthContext: getWalletAuthContext(currentProfileId),
+        onBeforeWalletAuth: () => {
+          if (emitClose) {
+            emitClose();
+          }
+        },
+        onAuthRecovered: async () => {
+          await executeExchange(currentProfileId, data);
+        },
+      });
+
+      if (authorizationResult.status !== 'authorized') {
+        return;
       }
+
+      const isSubmitted = await submitExchange(currentProfileId, data);
+      if (isSubmitted && emitClose) emitClose();
     } catch (error) {
       reportError(error, 'Failed to exchange tokens');
-      throw error;
     }
   };
 
@@ -155,29 +256,28 @@ export function useVFormExchange(
       nextTick(() => scrollToError('VFormExchange'));
       return;
     }
-    const fromAmount = Number(model.amount);
-    const isEarnContext = defaultBuySymbol && poolId != null && profileId != null;
-    try {
-      if (isEarnContext) {
-        await handleEarnExchange(fromAmount);
-        if (emitClose) emitClose();
-        return;
-      }
-      const data: IEvmExchangeRequestBody = {
-        from: String(model.from),
-        to: String(model.to),
-        amount: fromAmount,
-        wallet_id: Number(model.wallet_id),
-      };
-      await evmRepository.exchangeTokens(data);
-      if (!getEvmWalletState.value.error && selectedUserProfileId.value) {
-        // Global wallet context: refresh wallet data after successful exchange.
-        await evmRepository.getEvmWalletByProfile(Number(selectedUserProfileId.value));
-      }
-      if (emitClose) emitClose();
-    } catch (error) {
-      reportError(error, 'Failed to exchange tokens');
+
+    const currentProfileId = resolvedProfileId.value;
+    if (!currentProfileId) {
+      return;
     }
+
+    const nextDestinationAddress = destinationAddress.value;
+    if (!nextDestinationAddress) {
+      return;
+    }
+
+    const idempotencyKey = createIdempotencyKey();
+    const data: ExchangeSubmission = {
+      chain: authorizationChain.value,
+      asset_address: String(model.from),
+      to_asset_address: String(model.to),
+      amount: String(model.amount),
+      destination_address: nextDestinationAddress,
+      idempotency_key: idempotencyKey,
+    };
+
+    await executeExchange(currentProfileId, data);
   };
 
   const cancelHandler = () => {
@@ -187,12 +287,6 @@ export function useVFormExchange(
   watch(() => model.amount, () => {
     if (Number(model.amount) === 0) delete (model as any).amount;
   });
-
-  watch(() => getEvmWalletState.value.data, () => {
-    if (model.wallet_id && getEvmWalletState.value.data?.id) {
-      model.wallet_id = getEvmWalletState.value.data.id;
-    }
-  }, { immediate: true });
 
   const getUniqueTokens = (balances: any[], filterFn?: (item: any) => boolean) => {
     const uniqueTokens = new Map();

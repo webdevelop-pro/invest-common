@@ -551,9 +551,9 @@ export const useRepositoryEvm = defineStore('repository-evm', () => {
       return response.data;
     });
 
-  const exchangeTokens = async (body: IEvmExchangeRequestBody) =>
+  const exchangeTokens = async (profileId: number, body: IEvmExchangeRequestBody) =>
     withActionState(exchangeTokensState, async () => {
-      const response = await apiClient.post<IEvmExchangeResponse>(`/auth/exchange`, body);
+      const response = await apiClient.post<IEvmExchangeResponse>(`/auth/exchange/${profileId}`, body);
       return response.data!;
     });
 

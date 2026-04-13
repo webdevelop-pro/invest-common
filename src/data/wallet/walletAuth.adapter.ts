@@ -29,7 +29,6 @@ const pendingState: PendingState = {};
 const SIGNER_IFRAME_CONTAINER_ID = 'alchemy-signer-iframe-container';
 const SIGNER_IFRAME_WAIT_TIMEOUT_MS = 3000;
 const EIP_7702_DELEGATION_PREFIX = '0xef0100';
-const ALCHEMY_7702_POLICY_ID = 'e9f2620b-e800-4b5d-8d54-c738a5863483';
 let warmedSignerAddress = '';
 
 const clearCachedSignerState = () => {
@@ -136,6 +135,10 @@ const createSignerSmartWalletClient = async (signer: WalletSigner) => {
     throw new Error('Wallet signer address is unavailable for Wallet APIs initialization.');
   }
 
+  if (!env.ALCHEMY_7702_POLICY_ID) {
+    throw new Error('Wallet auth is not configured. Missing Alchemy 7702 policy ID.');
+  }
+
   console.log('[walletAuthAdapter] createSignerSmartWalletClient:getSignerAddress', {
     signerAddress,
     hasApiKey: Boolean(env.ALCHEMY_WALLET_API_KEY),
@@ -146,7 +149,7 @@ const createSignerSmartWalletClient = async (signer: WalletSigner) => {
     chain: sepolia,
     signer: signer as any,
     account: signerAddress,
-    policyId: ALCHEMY_7702_POLICY_ID,
+    policyId: env.ALCHEMY_7702_POLICY_ID,
   });
 };
 
@@ -460,6 +463,14 @@ export const walletAuthAdapter = {
   async startEmailOtp(email: string) {
     const signer = await getSigner();
     return new Promise<StartEmailOtpResult>((resolve, reject) => {
+      // The signer replays its current status and error to new listeners.
+      // Start the auth attempt first so stale state from a previous attempt is cleared
+      // before we subscribe to this attempt's events.
+      const authenticateRequest = signer.authenticate({
+        type: 'email',
+        emailMode: 'otp',
+        email,
+      });
       let settled = false;
       const cleanups: Array<() => void> = [];
       const settle = (callback: () => void) => {
@@ -497,11 +508,7 @@ export const walletAuthAdapter = {
         }),
       );
 
-      signer.authenticate({
-        type: 'email',
-        emailMode: 'otp',
-        email,
-      }).catch((error) => {
+      authenticateRequest.catch((error) => {
         settle(() => reject(toError(error as Error)));
       });
     });
@@ -510,6 +517,12 @@ export const walletAuthAdapter = {
   async submitOtp(otpCode: string) {
     const signer = await getSigner();
     return new Promise<OtpSubmissionResult>((resolve, reject) => {
+      // See startEmailOtp: listeners receive the signer's current error immediately,
+      // so the fresh auth request must clear any stale error before we subscribe.
+      const authenticateRequest = signer.authenticate({
+        type: 'otp',
+        otpCode,
+      });
       let settled = false;
       const cleanups: Array<() => void> = [];
       const settle = (callback: () => void) => {
@@ -542,10 +555,7 @@ export const walletAuthAdapter = {
         }),
       );
 
-      signer.authenticate({
-        type: 'otp',
-        otpCode,
-      }).then(async () => {
+      authenticateRequest.then(async () => {
         const authDetails = await signer.getAuthDetails().catch(() => null);
         if (authDetails) {
           settle(() => resolve('connected'));

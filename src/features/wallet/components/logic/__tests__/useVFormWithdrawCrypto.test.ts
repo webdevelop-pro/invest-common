@@ -12,6 +12,8 @@ const hoisted = vi.hoisted(() => ({
   },
 }));
 
+const toastMock = vi.fn();
+
 const mockBalances = [
   { id: 1, asset: 'USDC', address: '0xusdc', symbol: 'USDC', name: 'USD Coin', amount: 1000 },
   { id: 2, asset: 'ETH', address: '0xeth', symbol: 'ETH', name: 'Ether', amount: 0.5 },
@@ -102,6 +104,12 @@ vi.mock('InvestCommon/features/wallet/logic/useWalletNetwork', () => ({
   }),
 }));
 
+vi.mock('UiKit/components/Base/VToast/use-toast', () => ({
+  useToast: () => ({
+    toast: toastMock,
+  }),
+}));
+
 const mockModel = reactive({
   chain: '',
   asset: '',
@@ -169,6 +177,7 @@ describe('useVFormWithdrawCrypto', () => {
     hoisted.withdrawFunds.mockResolvedValue(undefined);
     hoisted.getEvmWalletByProfile.mockReset();
     hoisted.getEvmWalletByProfile.mockResolvedValue(undefined);
+    toastMock.mockReset();
   });
 
   it('returns chain options, asset options, handlers, and form helpers', () => {
@@ -333,6 +342,11 @@ describe('useVFormWithdrawCrypto', () => {
       idempotency_key: 'wdr_test_0001',
     });
     expect(hoisted.getEvmWalletByProfile).toHaveBeenCalledWith(1);
+    expect(toastMock).toHaveBeenCalledWith({
+      title: 'Withdrawal submitted',
+      description: '50 USDC withdrawal submitted successfully.',
+      variant: 'success',
+    });
     expect(emitClose).toHaveBeenCalled();
   });
 

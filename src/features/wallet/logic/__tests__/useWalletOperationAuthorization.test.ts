@@ -54,6 +54,14 @@ describe('useWalletOperationAuthorization', () => {
     nonce: 'wdr_test_0001',
   };
 
+  const exchangeRequest = {
+    chain: 'ethereum',
+    asset_address: '0xeth',
+    to_asset_address: '0xusdc',
+    max_amount: '1.5',
+    nonce: 'exc_test_0001',
+  };
+
   const walletAuthContext = {
     profileId: 7,
     profileType: 'individual',
@@ -160,6 +168,50 @@ describe('useWalletOperationAuthorization', () => {
     expect(hoisted.authorizeWithdrawStart).not.toHaveBeenCalled();
     expect(hoisted.signAuthorizationRequest).not.toHaveBeenCalled();
     expect(hoisted.authorizeWithdrawConfirm).not.toHaveBeenCalled();
+  });
+
+  it('does not reuse an active authorization session for a different exchange destination asset', async () => {
+    hoisted.getAuthorizeSessions.mockResolvedValueOnce([
+      {
+        profile_id: 7,
+        wallet_address: '0xwallet',
+        session_id: 'session_reused_1',
+        chain: 'ethereum',
+        asset: '0xeth',
+        to_asset: '0xdai',
+        max_amount: '10',
+        remaining_amount: '7',
+        issued_at: '2026-04-10T08:00:00.000Z',
+        expires_at: '2099-04-10T09:00:00.000Z',
+        authorization_status: 'active',
+      },
+    ]);
+    const { authorizeOperation } = useWalletOperationAuthorization();
+
+    const result = await authorizeOperation({
+      profileId: 7,
+      request: exchangeRequest,
+      walletAuthContext,
+    });
+
+    expect(result).toEqual({
+      status: 'authorized',
+      data: {
+        profile_id: 7,
+        session_id: 'session_confirm_1',
+        authorization_status: 'active',
+      },
+    });
+    expect(hoisted.getAuthorizeSessions).toHaveBeenCalledWith(7, {
+      assetAddress: '0xeth',
+      chain: 'ethereum',
+      status: 'active',
+    });
+    expect(hoisted.authorizeWithdrawStart).toHaveBeenCalledWith(7, exchangeRequest);
+    expect(hoisted.authorizeWithdrawConfirm).toHaveBeenCalledWith(7, {
+      session_id: 'session_confirm_1',
+      owner_signature: '0xsigned',
+    });
   });
 
   it('starts wallet auth immediately when the signer session is inactive even if a backend authorization session exists', async () => {

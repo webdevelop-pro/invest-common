@@ -30,6 +30,8 @@ interface ImportMetaEnv {
   VITE_HUBSPOT_FORM_ID_BACKGROUND_INFORMATION: string;
   VITE_HUBSPOT_FORM_ID_KYC: string;
   VITE_HUBSPOT_FORM_ID_BENEFICIAL_OWNERS: string;
+  VITE_ALCHEMY_WALLET_API_KEY: string;
+  VITE_ALCHEMY_7702_POLICY_ID: string;
   readonly VITE_GIT_HASH?: string;
   readonly VITE_BUILD_TIMESTAMP?: string;
 }

@@ -207,6 +207,7 @@ export interface IEvmWithdrawRequestBody {
 export interface IEvmWalletAuthorizeStartRequestBody {
   chain: string;
   asset_address: string;
+  to_asset_address?: string;
   max_amount: string;
   nonce: string;
 }
@@ -222,6 +223,8 @@ export interface IEvmWalletAuthorizeStartResponse {
   session_id: string;
   chain: string;
   asset: string;
+  to_asset?: string;
+  to_asset_address?: string;
   max_amount: string;
   remaining_amount: string;
   issued_at: string;
@@ -236,6 +239,8 @@ export interface IEvmWalletAuthorizeSession {
   session_id: string;
   chain: string;
   asset: string;
+  to_asset?: string;
+  to_asset_address?: string;
   max_amount: string;
   remaining_amount: string;
   issued_at: string;
@@ -271,10 +276,12 @@ export interface IEvmWithdrawResponse {
 }
 
 export interface IEvmExchangeRequestBody {
-  from: string; // source token address or symbol
-  to: string; // destination token address or symbol
-  amount: number; // amount to exchange
-  wallet_id: number;
+  chain: string;
+  asset_address: string;
+  to_asset_address: string;
+  amount: string;
+  destination_address: string;
+  idempotency_key: string;
 }
 
 export interface IEvmExchangeResponse {
