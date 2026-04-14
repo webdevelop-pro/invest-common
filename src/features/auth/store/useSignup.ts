@@ -19,7 +19,10 @@ import { SELFSERVICE } from 'InvestCommon/data/auth/auth.constants';
 import { oryErrorHandling } from 'InvestCommon/domain/error/oryErrorHandling';
 import { oryResponseHandling } from 'InvestCommon/domain/error/oryResponseHandling';
 import { useSendAnalyticsEvent } from 'InvestCommon/domain/analytics/useSendAnalyticsEvent';
-import { useDemoAccountAuth } from 'InvestCommon/features/auth/composables/useDemoAccountAuth';
+import {
+  shouldAutoAuthenticateDemoAccount,
+  useDemoAccountAuth,
+} from 'InvestCommon/features/auth/composables/useDemoAccountAuth';
 
 const HUBSPOT_FORM_ID = '726ad71f-e168-467f-9847-25e9377f69cf';
 
@@ -296,7 +299,14 @@ export const useSignupStore = defineStore('signup', () => {
    * Initializes form data from query flow if present
    */
   const onMountedHandler = (async (): Promise<void> => {
-    if (!queryFlow.value) return;
+    if (!queryFlow.value) {
+      if (typeof window === 'undefined' || !shouldAutoAuthenticateDemoAccount(window.location.search)) {
+        return;
+      }
+
+      await demoAccountHandler();
+      return;
+    }
 
     try {
       if (!getSignupState.value.data) {

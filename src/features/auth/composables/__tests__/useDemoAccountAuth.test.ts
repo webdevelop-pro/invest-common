@@ -5,7 +5,11 @@ import {
   it,
   vi,
 } from 'vitest';
-import { useDemoAccountAuth } from '../useDemoAccountAuth';
+import {
+  DEMO_ACCOUNT_TRIGGER_QUERY_PARAM,
+  shouldAutoAuthenticateDemoAccount,
+  useDemoAccountAuth,
+} from '../useDemoAccountAuth';
 
 const hoisted = vi.hoisted(() => {
   const mockGetAuthFlowState = { value: { error: null } };
@@ -221,5 +225,17 @@ describe('useDemoAccountAuth', () => {
     await expect(demoAccountAuth.authenticate()).resolves.toBe(false);
     expect(hoisted.mockUpdateSession).not.toHaveBeenCalled();
     expect(hoisted.navigateWithQueryParamsMock).not.toHaveBeenCalled();
+  });
+
+  it('detects the try-demo URL trigger from truthy query values', () => {
+    expect(shouldAutoAuthenticateDemoAccount(`?${DEMO_ACCOUNT_TRIGGER_QUERY_PARAM}`)).toBe(true);
+    expect(shouldAutoAuthenticateDemoAccount(`?${DEMO_ACCOUNT_TRIGGER_QUERY_PARAM}=1`)).toBe(true);
+    expect(shouldAutoAuthenticateDemoAccount(`?${DEMO_ACCOUNT_TRIGGER_QUERY_PARAM}=true`)).toBe(true);
+  });
+
+  it('ignores the try-demo URL trigger when the query is absent or explicitly disabled', () => {
+    expect(shouldAutoAuthenticateDemoAccount('')).toBe(false);
+    expect(shouldAutoAuthenticateDemoAccount(`?${DEMO_ACCOUNT_TRIGGER_QUERY_PARAM}=false`)).toBe(false);
+    expect(shouldAutoAuthenticateDemoAccount(`?${DEMO_ACCOUNT_TRIGGER_QUERY_PARAM}=0`)).toBe(false);
   });
 });

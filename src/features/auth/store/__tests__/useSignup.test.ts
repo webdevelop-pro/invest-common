@@ -10,6 +10,9 @@ import { useSignupStore } from '../useSignup';
 const mockDemoAccountAuthenticate = vi.fn().mockResolvedValue(true);
 const mockIsDemoAccountAvailable = ref(true);
 const mockIsDemoAccountLoading = ref(false);
+const { mockShouldAutoAuthenticateDemoAccount } = vi.hoisted(() => ({
+  mockShouldAutoAuthenticateDemoAccount: vi.fn().mockReturnValue(false),
+}));
 const mockGetSchemaState = ref({ data: {} });
 const mockSetSignupState = ref({ error: null, data: null });
 const mockGetSignupState = ref({ data: null });
@@ -78,6 +81,7 @@ vi.mock('InvestCommon/features/auth/composables/useDemoAccountAuth', () => ({
     isAvailable: mockIsDemoAccountAvailable,
     isLoading: mockIsDemoAccountLoading,
   }),
+  shouldAutoAuthenticateDemoAccount: mockShouldAutoAuthenticateDemoAccount,
 }));
 
 describe('useSignup Store', () => {
@@ -98,8 +102,10 @@ describe('useSignup Store', () => {
     mockUpdateSession.mockReset();
     mockNavigateWithQueryParams.mockReset();
     mockDemoAccountAuthenticate.mockReset().mockResolvedValue(true);
+    mockShouldAutoAuthenticateDemoAccount.mockReset().mockReturnValue(false);
     mockIsDemoAccountAvailable.value = true;
     mockIsDemoAccountLoading.value = false;
+    window.history.replaceState({}, '', '/signup');
   });
 
   describe('Initial State', () => {
@@ -268,13 +274,7 @@ describe('useSignup Store', () => {
 
   describe('Query Parameters', () => {
     it('should handle query parameters correctly', () => {
-      // Mock window.location.search
-      Object.defineProperty(window, 'location', {
-        value: {
-          search: '?flow=test-flow&redirect=/profile',
-        },
-        writable: true,
-      });
+      window.history.replaceState({}, '', '/signup?flow=test-flow&redirect=/profile');
 
       // Create a new pinia instance for this test
       const pinia = createPinia();
@@ -289,13 +289,7 @@ describe('useSignup Store', () => {
     });
 
     it('preserves the redirect query when sending signup users to wallet otp', async () => {
-      Object.defineProperty(window, 'location', {
-        value: {
-          search: '?redirect=/profile/123/wallet',
-          origin: 'http://localhost',
-        },
-        writable: true,
-      });
+      window.history.replaceState({}, '', '/signup?redirect=/profile/123/wallet');
 
       const pinia = createPinia();
       setActivePinia(pinia);
@@ -330,6 +324,33 @@ describe('useSignup Store', () => {
           redirect: '/profile/123/wallet',
         },
       );
+    });
+  });
+
+  describe('onMountedHandler', () => {
+    it('auto-logins the demo account when tryDemo is present without a registration flow', async () => {
+      window.history.replaceState({}, '', '/signup?tryDemo=1');
+
+      const store = useSignupStore();
+      mockShouldAutoAuthenticateDemoAccount.mockReturnValue(true);
+
+      await store.onMountedHandler();
+
+      expect(mockShouldAutoAuthenticateDemoAccount).toHaveBeenCalledWith(window.location.search);
+      expect(mockDemoAccountAuthenticate).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not auto-login the demo account while continuing an existing registration flow', async () => {
+      window.history.replaceState({}, '', '/signup?flow=test-flow-id&tryDemo=1');
+
+      const store = useSignupStore();
+      mockShouldAutoAuthenticateDemoAccount.mockReturnValue(true);
+
+      await store.onMountedHandler();
+
+      expect(mockGetSignup).toHaveBeenCalledWith('test-flow-id');
+      expect(mockShouldAutoAuthenticateDemoAccount).not.toHaveBeenCalled();
+      expect(mockDemoAccountAuthenticate).not.toHaveBeenCalled();
     });
   });
 });

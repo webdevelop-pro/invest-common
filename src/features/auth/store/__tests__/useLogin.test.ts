@@ -28,6 +28,9 @@ const mockGetSchemaState = ref<any>({ data: undefined, loading: false, error: nu
 const mockDemoAccountAuthenticate = vi.fn().mockResolvedValue(true);
 const mockIsDemoAccountAvailable = ref(true);
 const mockIsDemoAccountLoading = ref(false);
+const { mockShouldAutoAuthenticateDemoAccount } = vi.hoisted(() => ({
+  mockShouldAutoAuthenticateDemoAccount: vi.fn().mockReturnValue(false),
+}));
 
 vi.mock('InvestCommon/data/auth/auth.repository', () => ({
   useRepositoryAuth: () => ({
@@ -91,6 +94,7 @@ vi.mock('InvestCommon/features/auth/composables/useDemoAccountAuth', () => ({
     isAvailable: mockIsDemoAccountAvailable,
     isLoading: mockIsDemoAccountLoading,
   }),
+  shouldAutoAuthenticateDemoAccount: mockShouldAutoAuthenticateDemoAccount,
 }));
 
 describe('useLogin Store', () => {
@@ -111,8 +115,10 @@ describe('useLogin Store', () => {
     mockSetLogin.mockReset().mockResolvedValue(undefined);
     sendEventMock.mockReset().mockResolvedValue(undefined);
     mockDemoAccountAuthenticate.mockReset().mockResolvedValue(true);
+    mockShouldAutoAuthenticateDemoAccount.mockReset().mockReturnValue(false);
     mockIsDemoAccountAvailable.value = true;
     mockIsDemoAccountLoading.value = false;
+    window.history.replaceState({}, '', '/signin');
     
     store = useLoginStore();
   });
@@ -272,14 +278,10 @@ describe('useLogin Store', () => {
 
   describe('onMountedHandler', () => {
     it('should handle flow parameter and navigate to authenticator when aal2 is requested', async () => {
+      window.history.replaceState({}, '', '/signin?flow=test-flow-id');
       setActivePinia(createPinia());
       const testStore = useLoginStore();
-      
-      // Mock getQueryParam to return flow ID
-      vi.spyOn(testStore, 'getQueryParam').mockImplementation((key: string) => {
-        return key === 'flow' ? 'test-flow-id' : undefined;
-      });
-      
+
       mockGetLoginState.value = { data: { requested_aal: 'aal2' }, error: null };
 
       await testStore.onMountedHandler();
@@ -290,31 +292,48 @@ describe('useLogin Store', () => {
     it('should not navigate when flow parameter is not present', async () => {
       setActivePinia(createPinia());
       const testStore = useLoginStore();
-      
-      // Mock getQueryParam to return undefined
-      vi.spyOn(testStore, 'getQueryParam').mockImplementation(() => {
-        return undefined;
-      });
 
       await testStore.onMountedHandler();
 
-      expect(testStore.getQueryParam('flow')).toBeUndefined();
+      expect(window.location.search).toBe('');
+      expect(mockDemoAccountAuthenticate).not.toHaveBeenCalled();
     });
 
     it('should not navigate when aal2 is not requested', async () => {
+      window.history.replaceState({}, '', '/signin?flow=test-flow-id');
       setActivePinia(createPinia());
       const testStore = useLoginStore();
-      
-      // Mock getQueryParam to return flow ID
-      vi.spyOn(testStore, 'getQueryParam').mockImplementation((key: string) => {
-        return key === 'flow' ? 'test-flow-id' : undefined;
-      });
-      
+
       mockGetLoginState.value = { data: { requested_aal: 'aal1' }, error: null };
 
       await testStore.onMountedHandler();
 
       expect(mockGetLoginState.value.data?.requested_aal).toBe('aal1');
+      expect(mockDemoAccountAuthenticate).not.toHaveBeenCalled();
+    });
+
+    it('should auto-login the demo account when tryDemo is present without an existing flow', async () => {
+      window.history.replaceState({}, '', '/signin?tryDemo=1');
+      setActivePinia(createPinia());
+      const testStore = useLoginStore();
+      mockShouldAutoAuthenticateDemoAccount.mockReturnValue(true);
+
+      await testStore.onMountedHandler();
+
+      expect(mockShouldAutoAuthenticateDemoAccount).toHaveBeenCalledWith(window.location.search);
+      expect(mockDemoAccountAuthenticate).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not auto-login the demo account when a flow continuation is already in progress', async () => {
+      window.history.replaceState({}, '', '/signin?flow=test-flow-id&tryDemo=1');
+      setActivePinia(createPinia());
+      const testStore = useLoginStore();
+      mockShouldAutoAuthenticateDemoAccount.mockReturnValue(true);
+
+      await testStore.onMountedHandler();
+
+      expect(mockShouldAutoAuthenticateDemoAccount).not.toHaveBeenCalled();
+      expect(mockDemoAccountAuthenticate).not.toHaveBeenCalled();
     });
   });
 });

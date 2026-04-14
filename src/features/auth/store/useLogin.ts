@@ -14,7 +14,10 @@ import { SELFSERVICE } from 'InvestCommon/data/auth/auth.constants';
 import { oryErrorHandling } from 'InvestCommon/domain/error/oryErrorHandling';
 import { oryResponseHandling } from 'InvestCommon/domain/error/oryResponseHandling';
 import { useSendAnalyticsEvent } from 'InvestCommon/domain/analytics/useSendAnalyticsEvent';
-import { useDemoAccountAuth } from 'InvestCommon/features/auth/composables/useDemoAccountAuth';
+import {
+  shouldAutoAuthenticateDemoAccount,
+  useDemoAccountAuth,
+} from 'InvestCommon/features/auth/composables/useDemoAccountAuth';
 
 type FormModelSignIn = {
   email: string;
@@ -202,9 +205,11 @@ export const useLoginStore = defineStore('login', () => {
   const demoAccountHandler = async () => demoAccountAuth.authenticate();
 
   const onMountedHandler = async () => {
-    if (getQueryParam('flow')) {
+    const currentFlowId = getQueryParam('flow');
+
+    if (currentFlowId) {
       try {
-        const data = await authRepository.getLogin(getQueryParam('flow')!);
+        const data = await authRepository.getLogin(currentFlowId);
         oryResponseHandling(data);
         if (getLoginState.value.data?.requested_aal === 'aal2') {
           navigateWithQueryParams(urlAuthenticator);
@@ -217,7 +222,15 @@ export const useLoginStore = defineStore('login', () => {
           'Failed to get login data',
         );
       }
+
+      return;
     }
+
+    if (typeof window === 'undefined' || !shouldAutoAuthenticateDemoAccount(window.location.search)) {
+      return;
+    }
+
+    await demoAccountHandler();
   };
 
   return {

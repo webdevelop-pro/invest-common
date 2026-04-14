@@ -13,6 +13,9 @@ type DemoAccountCredentialsConfig = {
   password: string;
 };
 
+const DEMO_ACCOUNT_DISABLED_TRIGGER_VALUES = new Set(['0', 'false', 'no', 'off']);
+export const DEMO_ACCOUNT_TRIGGER_QUERY_PARAM = 'tryDemo';
+
 export type DemoAccountAuthProvider = {
   authenticate: () => Promise<boolean>;
   isAvailable: ComputedRef<boolean>;
@@ -38,6 +41,18 @@ export const resolveDemoAccountCredentialsConfig = (
 export const resolveDemoAccountRedirect = (search: string) => {
   const params = new URLSearchParams(search);
   return params.get('redirect') || urlProfile();
+};
+
+export const shouldAutoAuthenticateDemoAccount = (search: string) => {
+  const params = new URLSearchParams(search);
+  const rawTrigger = params.get(DEMO_ACCOUNT_TRIGGER_QUERY_PARAM);
+
+  if (rawTrigger === null) {
+    return false;
+  }
+
+  const triggerValue = rawTrigger.trim().toLowerCase();
+  return !DEMO_ACCOUNT_DISABLED_TRIGGER_VALUES.has(triggerValue);
 };
 
 export const createPasswordDemoAccountProvider = (): DemoAccountAuthProvider => {
