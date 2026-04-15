@@ -19,6 +19,7 @@ import { useWalletAuth } from 'InvestCommon/features/wallet/auth/store/useWallet
 
 import { cookiesOptions } from 'InvestCommon/domain/config/cookies';
 import { clearPrivatePwaData } from 'InvestCommon/domain/pwa/pwaOfflineStore';
+import { cleanupAndroidNativePushBridgeOnLogout } from 'InvestCommon/domain/nativePush/nativePushBridge';
 
 function clearAllCookies() {
   const cookies = useCookies();
@@ -51,6 +52,7 @@ export const resetAllProfileData = (options: { clearPrivatePwa?: boolean } = {})
 };
 
 export const resetAllData = async () => {
+  await cleanupAndroidNativePushBridgeOnLogout();
   clearAllCookies();
   useSessionStore().resetAll();
   useRepositoryAuth().resetAll();
