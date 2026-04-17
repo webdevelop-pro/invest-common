@@ -3,8 +3,8 @@ import DashboardTabsTopInfo from 'InvestCommon/features/dashboard/components/Das
 
 const INFO = {
   title: 'Your Total Assets',
-  subTitle: undefined,
-  text: undefined,
+  subTitle: '',
+  text: 'Dividends, interest, and rewards',
 } as const;
 </script>
 

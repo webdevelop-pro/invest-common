@@ -8,10 +8,6 @@ const INFO = {
   subTitle: 'Your holdings and belongings',
   text: `
     One of the most important things to consider when creating a portfolio is your personal risk tolerance.
-    Your risk tolerance is your ability to accept investment losses in exchange for the possibility of
-    earning higher investment returns. Learn more about
-    <a href="${urlBlogSingle(PostLinkTypes.investorsDueDiligence)}" class="is--link-2">due diligence</a>
-    process in our blog post.
   `,
 };
 </script>

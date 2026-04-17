@@ -4,7 +4,7 @@ import DashboardTabsTopInfo from 'InvestCommon/features/dashboard/components/Das
 const INFO = {
   title: 'Earn',
   subTitle: 'Yield opportunities',
-  text: 'Discover earning opportunities and explore ways to grow your wealth and maximize returns. Explore Aave lending pools with the highest yields. Data provided by DefiLlama.',
+  text: 'Discover earning opportunities and explore ways to grow your wealth and maximize returns.',
 } as const;
 </script>
 

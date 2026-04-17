@@ -10,7 +10,7 @@ const handleContactUsClick = () => {
 
 const ACCOUNT_TAB_INFO = {
   title: 'Profile Details',
-  description: 'To help the government fight the funding of terrorism and money laundering activities, federal law requires all financial institutions to obtain, verify, and record information that identifies each person who opens an account. If you have any questions, feel free to',
+  description: 'If you have any questions, feel free to',
   ctaLabel: 'chat with us.',
 };
 </script>
