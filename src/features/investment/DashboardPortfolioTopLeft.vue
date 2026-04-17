@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import { urlBlogSingle } from 'InvestCommon/domain/config/links';
 import DashboardTabsTopInfo from 'InvestCommon/features/dashboard/components/DashboardTabsTopInfo.vue';
-import { PostLinkTypes } from 'InvestCommon/data/blog/blog.types';
 
 const INFO = {
   title: 'Portfolio',
