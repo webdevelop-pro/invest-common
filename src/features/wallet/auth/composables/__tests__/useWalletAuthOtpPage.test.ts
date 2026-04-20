@@ -15,7 +15,6 @@ import {
 } from 'vue';
 import {
   ROUTE_DASHBOARD_ACCOUNT,
-  ROUTE_SUBMIT_KYC,
 } from 'InvestCommon/domain/config/enums/routes';
 import { useWalletAuthOtpPage } from '../useWalletAuthOtpPage';
 
@@ -184,8 +183,7 @@ describe('useWalletAuthOtpPage', () => {
     wrapper.unmount();
   });
 
-  it('shows a success toast and redirects to KYC after deferred zero-transaction warmup succeeds', async () => {
-    route.query = { next: 'kyc' };
+  it('shows a success toast and redirects to dashboard after deferred zero-transaction warmup succeeds', async () => {
     completedPostAuthAction.value = 'zero_transaction_warmup';
     const { wrapper } = await mountComposable();
 
@@ -194,20 +192,19 @@ describe('useWalletAuthOtpPage', () => {
 
     expect(toast).toHaveBeenCalledWith({
       title: 'Zero Transaction Sent',
-      description: 'Your wallet is ready. You can continue with the KYC form now.',
+      description: 'Your wallet is ready.',
     });
     expect(clearCompletedPostAuthAction).toHaveBeenCalledTimes(1);
     expect(mockPush).toHaveBeenCalledWith({
-      name: ROUTE_SUBMIT_KYC,
+      name: ROUTE_DASHBOARD_ACCOUNT,
       params: { profileId: 7 },
     });
 
     wrapper.unmount();
   });
 
-  it('redirects to the selected KYC profile when the wallet otp route uses profile 0', async () => {
+  it('redirects to the selected profile dashboard when the wallet otp route uses profile 0', async () => {
     route.params.profileId = '0';
-    route.query = { next: 'kyc' };
     selectedUserProfileId.value = 11;
     completedPostAuthAction.value = 'zero_transaction_warmup';
     const { wrapper } = await mountComposable();
@@ -216,29 +213,29 @@ describe('useWalletAuthOtpPage', () => {
     await nextTick();
 
     expect(mockPush).toHaveBeenCalledWith({
-      name: ROUTE_SUBMIT_KYC,
+      name: ROUTE_DASHBOARD_ACCOUNT,
       params: { profileId: 11 },
     });
 
     wrapper.unmount();
   });
 
-  it('does not redirect to KYC when success is unrelated to zero-transaction warmup', async () => {
+  it('redirects to dashboard on success regardless of query params', async () => {
     route.query = {};
     const { wrapper } = await mountComposable();
 
     isSuccessStep.value = true;
     await nextTick();
 
-    expect(toast).not.toHaveBeenCalled();
-    expect(clearCompletedPostAuthAction).not.toHaveBeenCalled();
-    expect(mockPush).not.toHaveBeenCalled();
+    expect(mockPush).toHaveBeenCalledWith({
+      name: ROUTE_DASHBOARD_ACCOUNT,
+      params: { profileId: 7 },
+    });
 
     wrapper.unmount();
   });
 
-  it('shows a success toast and redirects to KYC after regular wallet auth succeeds', async () => {
-    route.query = { next: 'kyc' };
+  it('shows a success toast', async () => {
     const { wrapper } = await mountComposable();
 
     isSuccessStep.value = true;
@@ -246,21 +243,14 @@ describe('useWalletAuthOtpPage', () => {
 
     expect(toast).toHaveBeenCalledWith({
       title: 'Wallet Connected',
-      description: 'Your wallet authentication is complete. You can continue with the KYC form now.',
+      description: 'Your wallet authentication is complete.',
       variant: 'success',
-    });
-    expect(clearCompletedPostAuthAction).not.toHaveBeenCalled();
-    expect(mockPush).toHaveBeenCalledWith({
-      name: ROUTE_SUBMIT_KYC,
-      params: { profileId: 7 },
     });
 
     wrapper.unmount();
   });
 
-  it('redirects non-individual profiles to the account page after wallet auth succeeds', async () => {
-    route.query = { next: 'kyc' };
-    selectedUserProfileType.value = 'entity';
+  it('redirects to the account dashboard after wallet auth succeeds', async () => {
     const { wrapper } = await mountComposable();
 
     isSuccessStep.value = true;

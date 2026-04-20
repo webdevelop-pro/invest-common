@@ -12,9 +12,7 @@ import { useWalletAuth } from 'InvestCommon/features/wallet/auth/store/useWallet
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 import {
   ROUTE_DASHBOARD_ACCOUNT,
-  ROUTE_SUBMIT_KYC,
 } from 'InvestCommon/domain/config/enums/routes';
-import { PROFILE_TYPES } from 'InvestCommon/domain/config/enums/profileTypes';
 
 export function useWalletAuthOtpPage() {
   useGlobalLoader().hide();
@@ -26,7 +24,7 @@ export function useWalletAuthOtpPage() {
   const { toast, dismiss } = useToast();
   const sharedFlow = useWalletAuthSharedFlow();
   const { currentProfileState } = storeToRefs(walletAuthStore);
-  const { selectedUserProfileId, selectedUserProfileType } = storeToRefs(profilesStore);
+  const { selectedUserProfileId } = storeToRefs(profilesStore);
   const { completedPostAuthAction } = storeToRefs(walletAuthStore);
   const walletAuthErrorToastId = shallowRef<string | null>(null);
 
@@ -42,9 +40,7 @@ export function useWalletAuthOtpPage() {
   ));
 
   const postWalletAuthSuccessRoute = computed(() => ({
-    name: selectedUserProfileType.value === PROFILE_TYPES.INDIVIDUAL
-      ? ROUTE_SUBMIT_KYC
-      : ROUTE_DASHBOARD_ACCOUNT,
+    name: ROUTE_DASHBOARD_ACCOUNT,
     params: {
       profileId: profileId.value,
     },
@@ -81,20 +77,20 @@ export function useWalletAuthOtpPage() {
   }, { immediate: true });
 
   watch(sharedFlow.isSuccessStep, async (isSuccess) => {
-    if (!isSuccess || route.query.next !== 'kyc') {
+    if (!isSuccess) {
       return;
     }
 
     if (completedPostAuthAction.value === 'zero_transaction_warmup') {
       toast({
         title: 'Zero Transaction Sent',
-        description: 'Your wallet is ready. You can continue with the KYC form now.',
+        description: 'Your wallet is ready.',
       });
       walletAuthStore.clearCompletedPostAuthAction();
     } else {
       toast({
         title: 'Wallet Connected',
-        description: 'Your wallet authentication is complete. You can continue with the KYC form now.',
+        description: 'Your wallet authentication is complete.',
         variant: 'success',
       });
     }
