@@ -4,23 +4,16 @@ import {
   HOLDINGS_TAB,
   TRANSACTIONS_TAB,
 } from 'InvestCommon/features/wallet/logic/useDashboardWallet';
-import DashboardWalletAlert from 'InvestCommon/features/wallet/components/DashboardWalletAlert.vue';
 import DashboardWalletHeader from 'InvestCommon/features/wallet/components/DashboardWalletHeader.vue';
 import DashboardWalletBalanceCards from 'InvestCommon/features/wallet/components/DashboardWalletBalanceCards.vue';
 import DashboardWalletTabs from 'InvestCommon/features/wallet/components/DashboardWalletTabs.vue';
 import VDialogWallet from 'InvestCommon/features/wallet/components/VDialogWallet.vue';
-import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 
 const {
   activeTab,
   summaryEvmWalletState,
   isWalletDataLoading,
-  isAlertDataLoading,
-  walletAlertModel,
   isWalletBlocked,
-  onWalletAlertAction,
-  onWalletAlertDescriptionAction,
-  showTable,
   totalBalanceMainFormatted,
   totalBalanceCoins,
   selectedEvmNetwork,
@@ -41,31 +34,7 @@ const {
 
 <template>
   <div class="DashboardWallet dashboard-wallet">
-    <div
-      v-if="isAlertDataLoading"
-      class="dashboard-wallet__alert dashboard-wallet__alert-skeleton"
-      data-testid="funding-alert-skeleton"
-    >
-      <VSkeleton
-        height="50px"
-        width="100%"
-        class="dashboard-wallet__alert-skeleton-line"
-      />
-    </div>
-    <DashboardWalletAlert
-      v-else-if="walletAlertModel.show"
-      :variant="walletAlertModel.variant"
-      :description="walletAlertModel.description"
-      :title="walletAlertModel.title"
-      :button-text="walletAlertModel.buttonText"
-      :is-loading="walletAlertModel.isLoading"
-      :is-disabled="walletAlertModel.isDisabled"
-      @action="onWalletAlertAction"
-      @description-action="onWalletAlertDescriptionAction"
-    />
-
     <DashboardWalletHeader
-      v-if="showTable"
       :amount="totalBalanceMainFormatted"
       :coin="totalBalanceCoins"
       :loading="isWalletDataLoading"
@@ -82,11 +51,9 @@ const {
     />
 
     <div
-      v-if="showTable"
       class="dashboard-wallet__wrap"
       :class="[
         'dashboard-wallet__content',
-        { 'dashboard-wallet__content--blocked': isWalletBlocked },
       ]"
     >
       <DashboardWalletBalanceCards

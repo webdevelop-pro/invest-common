@@ -102,7 +102,6 @@ export function useDashboardWallet() {
   const {
     alertModel: walletAlertModel,
     isWalletBlocked,
-    showTable,
     isDataLoading,
     onAlertButtonClick: onWalletAlertAction,
     onDescriptionAction: onWalletAlertDescriptionAction,
@@ -198,7 +197,7 @@ export function useDashboardWallet() {
         secondaryValue: hasCrypto24hChange ? crypto24hChange.value : undefined,
         action: {
           label: 'View on Etherscan',
-          href: `${scanUrl}/address/${walletAddress}`,
+          href: walletAddress ? `${scanUrl}/address/${walletAddress}` : null,
           iconPost: externalLink as unknown as string,
           iconPostClass: 'dashboard-wallet--icon-external-link',
         },
@@ -212,7 +211,7 @@ export function useDashboardWallet() {
         secondaryValue: hasRwa24hChange ? rwa24hChange.value : undefined,
         action: {
           label: 'View on Etherscan',
-          href: `${scanUrl}/address/${walletAddress}`,
+          href: walletAddress ? `${scanUrl}/address/${walletAddress}` : null,
           iconPost: externalLink as unknown as string,
           iconPostClass: 'dashboard-wallet--icon-external-link',
         },
@@ -241,7 +240,6 @@ export function useDashboardWallet() {
     walletAlertModel,
     onWalletAlertAction,
     onWalletAlertDescriptionAction,
-    showTable,
     totalBalanceMainFormatted,
     totalBalanceCoins,
     selectedEvmNetwork,

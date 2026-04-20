@@ -120,7 +120,7 @@ export function useVDialogWalletAuth(options: UseVDialogWalletAuthOptions) {
     isMfaStep: sharedFlow.isMfaStep,
     isSuccessStep: sharedFlow.isSuccessStep,
     isErrorStep: sharedFlow.isErrorStep,
-    dialogTitle: sharedFlow.title,
+    dialogTitle: 'Confirm Transaction',
     stepDescription: sharedFlow.description,
     inputLabel: sharedFlow.inputLabel,
     inputPlaceholder: sharedFlow.inputPlaceholder,

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import VFormGroup from 'UiKit/components/Base/VForm/VFormGroup.vue';
-import VFormInput from 'UiKit/components/Base/VForm/VFormInput.vue';
+import VFormInputOtp from 'UiKit/components/Base/VForm/VInputOtp/VFormInputOtp.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 
 type WalletAuthOtpFormProps = {
@@ -72,17 +72,12 @@ const showCodeField = computed(() => isCodeStep.value);
         class="wallet-auth-otp-form__input"
         data-testid="wallet-auth-otp-group"
       >
-        <VFormInput
-          :model-value="codeValue"
+        <VFormInputOtp
+          v-model="codeValue"
           :is-error="VFormGroupProps.isFieldError"
-          :placeholder="inputPlaceholder"
-          name="otp_code"
-          size="large"
-          type="text"
-          allow-integer-only
           :data-testid="inputTestId"
-          @update:model-value="codeValue = $event"
-          @enter="emit('submit')"
+          class="wallet-auth-otp-form__input-otp"
+          @complete="emit('submit')"
         />
       </VFormGroup>
 

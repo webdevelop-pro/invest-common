@@ -152,7 +152,6 @@ export const useSignupStore = defineStore('signup', () => {
     return navigateWithQueryParams(
       urlProfileWalletOtp(0),
       {
-        next: 'kyc',
         ...(redirect ? { redirect } : {}),
       },
     );

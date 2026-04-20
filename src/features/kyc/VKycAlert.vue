@@ -2,15 +2,19 @@
 import { computed } from 'vue';
 import VAlert from 'UiKit/components/VAlert.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
+import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 
 const props = withDefaults(defineProps<{
-  variant: 'error' | 'info';
-  title: string;
-  description: string;
+  variant?: 'error' | 'info';
+  title?: string;
+  description?: string;
   buttonText?: string;
   isLoading?: boolean;
   isDisabled?: boolean;
 }>(), {
+  variant: 'info',
+  title: undefined,
+  description: undefined,
   buttonText: undefined,
   isLoading: false,
   isDisabled: false,
@@ -23,8 +27,8 @@ const emit = defineEmits<{
 
 const buttonColor = computed(() => (props.variant === 'info' ? 'primary' : 'red'));
 const hasDescriptionAction = computed(() => (
-  props.description.includes('data-action="contact-us"')
-  || props.description.includes('data-action=\'contact-us\'')
+  !!props.description?.includes('data-action="contact-us"')
+  || !!props.description?.includes('data-action=\'contact-us\'')
 ));
 
 const handleDescriptionAction = (event: Event) => {
@@ -37,7 +41,13 @@ const handleDescriptionAction = (event: Event) => {
 </script>
 
 <template>
+  <VSkeleton
+    v-if="isLoading && !title"
+    height="72px"
+    width="100%"
+  />
   <VAlert
+    v-else
     :variant="variant"
     class="VKycAlert v-kyc-alert"
     @click="handleDescriptionAction($event)"

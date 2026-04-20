@@ -20,12 +20,16 @@ const {
   onInfoCtaClick,
   onKycBannerClick,
   onKycBannerDescriptionAction,
+  onAccreditationBannerClick,
+  onAccreditationBannerDescriptionAction,
   onWalletBannerClick,
   onWalletBannerDescriptionAction,
-  isWalletAlertLoading,
   showPerformanceCards,
-  verificationBanner,
-  walletBanner,
+  kycAlertModel,
+  isKycDataLoading,
+  accreditationAlertModel,
+  isAccreditationDataLoading,
+  walletAlertModel,
 } = useDashboardPageHeader();
 </script>
 
@@ -39,13 +43,17 @@ const {
     />
 
     <DashboardPageHeaderRight
-      :wallet-banner="walletBanner"
-      :is-wallet-alert-loading="isWalletAlertLoading"
+      :kyc-alert-model="kycAlertModel"
+      :is-kyc-data-loading="isKycDataLoading"
+      :accreditation-alert-model="accreditationAlertModel"
+      :is-accreditation-data-loading="isAccreditationDataLoading"
+      :wallet-alert-model="walletAlertModel"
       :show-performance-cards="showPerformanceCards"
-      :verification-banner="verificationBanner"
       class="dashboard-page-header__aside"
       @kyc-banner-click="onKycBannerClick"
       @kyc-banner-description-action="onKycBannerDescriptionAction"
+      @accreditation-banner-click="onAccreditationBannerClick"
+      @accreditation-banner-description-action="onAccreditationBannerDescriptionAction"
       @wallet-banner-click="onWalletBannerClick"
       @wallet-banner-description-action="onWalletBannerDescriptionAction"
     />

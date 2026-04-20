@@ -185,7 +185,7 @@ describe('useSignup Store', () => {
       }));
       expect(mockNavigateWithQueryParams).toHaveBeenCalledWith(
         expect.stringContaining('/profile/0/wallet-otp'),
-        { next: 'kyc' },
+        {},
       );
       expect(mockUpdateSession.mock.invocationCallOrder[0]).toBeLessThan(
         sendEventMock.mock.invocationCallOrder[0],
@@ -320,7 +320,6 @@ describe('useSignup Store', () => {
       expect(mockNavigateWithQueryParams).toHaveBeenCalledWith(
         expect.stringContaining('/profile/0/wallet-otp'),
         {
-          next: 'kyc',
           redirect: '/profile/123/wallet',
         },
       );

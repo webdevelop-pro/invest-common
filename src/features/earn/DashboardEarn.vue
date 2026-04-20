@@ -1,19 +1,12 @@
 <script setup lang="ts">
-import { computed, defineAsyncComponent, onMounted } from 'vue';
+import { computed, onMounted } from 'vue';
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import VTableDefault from 'InvestCommon/shared/components/VTableDefault.vue';
 import VTableToolbar from 'InvestCommon/shared/components/VTableToolbar.vue';
 import VTableYieldItem from './components/VTableYieldItem.vue';
 import { useWallet } from 'InvestCommon/features/wallet/logic/useWallet';
 import { useEarnTable } from './composables/useEarnTable';
-import { useWalletAlert } from 'InvestCommon/features/wallet/logic/useWalletAlert';
-import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
-import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 import VTableResponsiveLoadingRow from 'InvestCommon/shared/components/VTableResponsiveLoadingRow.vue';
-
-const VAlert = defineAsyncComponent({
-  loader: () => import('UiKit/components/VAlert.vue'),
-});
 
 interface TableHeader {
   text: string;
@@ -40,20 +33,8 @@ const {
   totalResults,
   filterResults,
   hasMore,
-  sentinel,
   onRowClick,
 } = useEarnTable();
-
-const {
-  isAlertShow,
-  showTable,
-  isAlertType,
-  isAlertText,
-  alertTitle,
-  alertButtonText,
-  onAlertButtonClick,
-  isDataLoading,
-} = useWalletAlert({ hideFiatAlerts: true });
 
 // Ensure wallet data is fetched when landing directly on Earn (no prior wallet view)
 const {
@@ -61,17 +42,6 @@ const {
   getEvmWalletState,
   updateData: updateWalletData,
 } = useWallet();
-
-const dialogsStore = useDialogs();
-
-const handleContactUsClick = (event: Event) => {
-  const target = (event.target as HTMLElement)?.closest('[data-action="contact-us"]');
-  if (target) {
-    event.preventDefault();
-    event.stopPropagation();
-    dialogsStore.openContactUsDialog('earn');
-  }
-};
 
 const showEmptyMessage = computed(() => filterResults.value === 0 && search.value.trim().length > 0);
 
@@ -88,46 +58,6 @@ onMounted(() => {
 <template>
   <div class="DashboardEarn dashboard-earn">
     <div
-      v-if="isDataLoading"
-      class="dashboard-earn__alert dashboard-earn__alert-skeleton"
-      data-testid="earn-alert-skeleton"
-    >
-      <VSkeleton
-        height="50px"
-        width="100%"
-        class="dashboard-earn__alert-skeleton-line"
-      />
-    </div>
-    <VAlert
-      v-else-if="isAlertShow"
-      :variant="isAlertType"
-      data-testid="earn-alert"
-      class="dashboard-earn__alert"
-      :button-text="alertButtonText"
-      @click="onAlertButtonClick"
-    >
-      <template
-        v-if="alertTitle"
-        #title
-      >
-        {{ alertTitle }}
-      </template>
-      <template 
-        v-if="isAlertText"
-        #description
-      >
-        <span
-          v-dompurify-html="isAlertText"
-          role="button"
-          tabindex="0"
-          @click="handleContactUsClick"
-          @keydown.enter="handleContactUsClick"
-          @keydown.space.prevent="handleContactUsClick"
-        />
-      </template>
-    </VAlert>
-    <div
-      v-if="showTable"
       class="dashboard-earn__tablet"
     >
       <h3 class="dashboard-earn__title is--h3__title">

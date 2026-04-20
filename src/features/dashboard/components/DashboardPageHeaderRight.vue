@@ -2,14 +2,13 @@
 import VAccreditationAlert from 'InvestCommon/features/accreditation/VAccreditationAlert.vue';
 import VKycAlert from 'InvestCommon/features/kyc/VKycAlert.vue';
 import DashboardWalletAlert from 'InvestCommon/features/wallet/components/DashboardWalletAlert.vue';
-import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 import DashboardTopInfoRight from './DashboardTopInfoRight.vue';
 
-type DashboardPageHeaderBanner = {
-  type: 'kyc' | 'accreditation' | 'wallet';
+type AlertModel = {
+  show: boolean;
   variant: 'error' | 'info';
-  title: string;
-  description: string;
+  title?: string;
+  description?: string;
   buttonText?: string;
   isLoading?: boolean;
   isDisabled?: boolean;
@@ -17,14 +16,18 @@ type DashboardPageHeaderBanner = {
 
 defineProps<{
   showPerformanceCards: boolean;
-  verificationBanner: DashboardPageHeaderBanner | null;
-  walletBanner: DashboardPageHeaderBanner | null;
-  isWalletAlertLoading: boolean;
+  kycAlertModel: AlertModel;
+  isKycDataLoading: boolean;
+  accreditationAlertModel: AlertModel;
+  isAccreditationDataLoading: boolean;
+  walletAlertModel: AlertModel;
 }>();
 
 const emit = defineEmits<{
   kycBannerClick: [];
   kycBannerDescriptionAction: [event: Event];
+  accreditationBannerClick: [];
+  accreditationBannerDescriptionAction: [event: Event];
   walletBannerClick: [];
   walletBannerDescriptionAction: [event: Event];
 }>();
@@ -33,47 +36,41 @@ const emit = defineEmits<{
 <template>
   <div class="dashboard-page-header-right">
     <div
-      v-if="verificationBanner || walletBanner || isWalletAlertLoading"
+      v-if="isKycDataLoading || isAccreditationDataLoading || kycAlertModel.show || accreditationAlertModel.show || walletAlertModel.show"
       class="dashboard-page-header-right__alerts"
     >
       <VKycAlert
-        v-if="verificationBanner?.type === 'kyc'"
-        :variant="verificationBanner.variant"
-        :title="verificationBanner.title"
-        :description="verificationBanner.description"
-        :button-text="verificationBanner.buttonText"
-        :is-loading="verificationBanner.isLoading"
-        :is-disabled="verificationBanner.isDisabled"
+        v-if="isKycDataLoading || kycAlertModel.show"
+        :variant="kycAlertModel.variant"
+        :title="kycAlertModel.title"
+        :description="kycAlertModel.description"
+        :button-text="kycAlertModel.buttonText"
+        :is-loading="isKycDataLoading"
+        :is-disabled="kycAlertModel.isDisabled"
         @action="emit('kycBannerClick')"
         @description-action="emit('kycBannerDescriptionAction', $event)"
       />
-      <VAccreditationAlert
-        v-if="verificationBanner?.type === 'accreditation'"
-        :variant="verificationBanner.variant"
-        :title="verificationBanner.title"
-        :description="verificationBanner.description"
-        :button-text="verificationBanner.buttonText"
-      />
-      <div
-        v-if="isWalletAlertLoading"
-        class="dashboard-page-header-right__wallet-skeleton"
-        data-testid="wallet-alert-skeleton"
-      >
-        <VSkeleton
-          height="72px"
-          width="100%"
-        />
-      </div>
       <DashboardWalletAlert
-        v-else-if="walletBanner?.type === 'wallet'"
-        :variant="walletBanner.variant"
-        :description="walletBanner.description"
-        :title="walletBanner.title"
-        :button-text="walletBanner.buttonText"
-        :is-loading="walletBanner.isLoading"
-        :is-disabled="walletBanner.isDisabled"
+        v-if="walletAlertModel.show"
+        :variant="walletAlertModel.variant"
+        :title="walletAlertModel.title"
+        :description="walletAlertModel.description"
+        :button-text="walletAlertModel.buttonText"
+        :is-loading="walletAlertModel.isLoading"
+        :is-disabled="walletAlertModel.isDisabled"
         @action="emit('walletBannerClick')"
         @description-action="emit('walletBannerDescriptionAction', $event)"
+      />
+      <VAccreditationAlert
+        v-if="(accreditationAlertModel.show || isAccreditationDataLoading) && (!walletAlertModel.show && !kycAlertModel.show)"
+        :variant="accreditationAlertModel.variant"
+        :title="accreditationAlertModel.title"
+        :description="accreditationAlertModel.description"
+        :button-text="accreditationAlertModel.buttonText"
+        :is-loading="isAccreditationDataLoading"
+        :is-disabled="accreditationAlertModel.isDisabled"
+        @action="emit('accreditationBannerClick')"
+        @description-action="emit('accreditationBannerDescriptionAction', $event)"
       />
     </div>
 
@@ -102,10 +99,6 @@ const emit = defineEmits<{
   }
 
   &__stats {
-    width: 100%;
-  }
-
-  &__wallet-skeleton {
     width: 100%;
   }
 

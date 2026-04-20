@@ -32,7 +32,6 @@ export function canLoadEvmWalletData(
     !hasRestrictedWalletBehavior(profile)
     && (profile?.id === selectedProfileId)
     && userLoggedIn
-    && !!profile?.isKycApproved
     && selectedProfileId > 0
     && !isEvmLoading
   );
@@ -62,7 +61,6 @@ export function canLoadEvmWalletDataNotSelected(
     profile !== undefined
     && !hasRestrictedWalletBehavior(profile)
     && userLoggedIn
-    && !!profile.isKycApproved
     && profile.id > 0
     && !isEvmLoading
   );

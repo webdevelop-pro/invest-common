@@ -3,18 +3,23 @@ import { computed } from 'vue';
 import VAlert from 'UiKit/components/VAlert.vue';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import VSpinner from 'UiKit/components/Base/VSpinner/VSpinner.vue';
+import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 
 const props = withDefaults(defineProps<{
-  variant: 'error' | 'info';
-  description: string;
+  variant?: 'error' | 'info';
+  description?: string;
   title?: string;
   buttonText?: string;
   isLoading?: boolean;
+  isDataLoading?: boolean;
   isDisabled?: boolean;
 }>(), {
+  variant: 'info',
+  description: undefined,
   title: undefined,
   buttonText: undefined,
   isLoading: false,
+  isDataLoading: false,
   isDisabled: false,
 });
 
@@ -25,9 +30,9 @@ const emit = defineEmits<{
 
 const buttonColor = computed(() => (props.variant === 'info' ? 'primary' : 'red'));
 const hasDescriptionAction = computed(() => (
-  props.description.includes('data-action="contact-us"')
-  || props.description.includes('data-action=\'contact-us\'')
-  || props.description.includes('bank-accounts')
+  !!props.description?.includes('data-action="contact-us"')
+  || !!props.description?.includes('data-action=\'contact-us\'')
+  || !!props.description?.includes('bank-accounts')
 ));
 
 const handleDescriptionAction = (event: Event) => {
@@ -40,12 +45,20 @@ const handleDescriptionAction = (event: Event) => {
 </script>
 
 <template>
-  <div class="dashboard-wallet__alert-wrapper">
+  <VSkeleton
+    v-if="isDataLoading"
+    height="72px"
+    width="100%"
+  />
+  <div
+    v-else
+    class="dashboard-wallet__alert-wrapper"
+  >
     <VAlert
       :variant="variant"
       data-testid="funding-alert"
       class="dashboard-wallet__alert"
-      @click="handleDescriptionAction($event)"
+      @click="handleDescriptionAction"
     >
       <template
         v-if="title"
@@ -56,6 +69,7 @@ const handleDescriptionAction = (event: Event) => {
       <template #description>
         <span
           v-dompurify-html="description"
+          class="dashboard-wallet__alert-description"
         />
       </template>
       <VButton

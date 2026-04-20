@@ -1,17 +1,16 @@
 import { computed } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useRepositoryWallet } from 'InvestCommon/data/wallet/wallet.repository';
 import { useRepositoryEvm } from 'InvestCommon/data/evm/evm.repository';
 import { useRepositoryProfiles } from 'InvestCommon/data/profiles/profiles.repository';
 import { useDialogs } from 'InvestCommon/domain/dialogs/store/useDialogs';
 import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
-import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { hasRestrictedWalletBehavior } from 'InvestCommon/data/profiles/profiles.helpers';
 import type { IProfileFormatted } from 'InvestCommon/data/profiles/profiles.types';
 import { useSettingsBankAccounts } from 'InvestCommon/features/settings/components/logic/useSettingsBankAccounts';
-import { useWalletAuth } from 'InvestCommon/features/wallet/auth/store/useWalletAuth';
 import { useToast } from 'UiKit/components/Base/VToast/use-toast';
+import { ROUTE_WALLET_OTP } from 'InvestCommon/domain/config/enums/routes';
 import { isWalletSetupRequiredError } from './walletSetupError';
 
 const CONTACT_US_LINK =
@@ -20,16 +19,7 @@ const CONTACT_US_MSG = `Unfortunately, we were not able to create a wallet for y
 const WALLET_CREATING_MSG = `This usually takes a few moments. If it takes longer than expected, ${CONTACT_US_LINK} for assistance.`;
 const WALLET_SETUP_REQUIRED_TITLE = 'Set up your wallet to continue.';
 const WALLET_SETUP_REQUIRED_MSG = 'Your crypto wallet has not been created yet. Start wallet setup to continue.';
-const KYC_NEED_MSG = (profileId: string | number, redirect?: string) => {
-  const baseHref = `/profile/${profileId}/kyc`;
-  const href =
-    typeof redirect === 'string' && redirect
-      ? `${baseHref}?redirect=${encodeURIComponent(redirect)}`
-      : baseHref;
-  return `You need to <a href="${href}">pass KYC </a> before you can make a transfer`;
-};
-const KYC_IN_PROGRESS_MSG =
-  'Your KYC is in progress. You need to pass KYC before you can make a transfer';
+
 const BANK_ACCOUNTS_NEED_MSG = (profileId: string | number) =>
   `You need to <a href="/settings/${profileId}/bank-accounts">connect a bank account</a> before you can add funds.`;
 export interface UseWalletAlertOptions {
@@ -49,18 +39,13 @@ export function useWalletAlert(options: UseWalletAlertOptions = {}) {
   const { hideFiatAlerts = false, hideBankAccountMissingInfo = false } = options;
 
   const router = useRouter();
-  const route = useRoute();
   const dialogsStore = useDialogs();
   const profilesStore = useProfilesStore();
-  const walletAuthStore = useWalletAuth();
-  const sessionStore = useSessionStore();
   const { toast } = useToast();
   const {
     selectedUserProfileData,
     selectedUserProfileId,
-    selectedUserProfileType,
   } = storeToRefs(profilesStore);
-  const { userSessionTraits } = storeToRefs(sessionStore);
   const { getProfileByIdState } = storeToRefs(useRepositoryProfiles());
   const {
     getWalletState,
@@ -120,14 +105,6 @@ export function useWalletAlert(options: UseWalletAlertOptions = {}) {
     return fiatCreated && !isWalletError.value && !isWalletCreationRequired.value;
   });
 
-  const isKYCNeedToPass = computed(
-    () =>
-      (profile.value?.isKycNone || profile.value?.isKycNew || profile.value?.isKycPending) &&
-      !isWalletError.value,
-  );
-  const isKYCInProgress = computed(
-    () => (profile.value?.isKycInProgress ?? false) && !isWalletError.value,
-  );
   const isError = computed(
     () =>
       !isWalletCreationRequired.value && (
@@ -135,14 +112,6 @@ export function useWalletAlert(options: UseWalletAlertOptions = {}) {
         isWalletError.value ||
         hasRestrictedWallet.value
       ),
-  );
-
-  const isKycPassed = computed(
-    () =>
-      (profile.value?.isKycApproved ?? false) ||
-      (!isKYCNeedToPass.value &&
-        !isKYCInProgress.value &&
-        !(profile.value?.isKycDeclined ?? false)),
   );
 
   const hasWallet = computed(
@@ -153,7 +122,6 @@ export function useWalletAlert(options: UseWalletAlertOptions = {}) {
     () =>
       !hideFiatAlerts &&
       hasWallet.value &&
-      isKycPassed.value &&
       !hasLinkedBankAccount.value &&
       !isWalletError.value,
   );
@@ -201,8 +169,6 @@ export function useWalletAlert(options: UseWalletAlertOptions = {}) {
   const isAlertShow = computed(
     () =>
       (hasRestrictedWallet.value ||
-        isKYCNeedToPass.value ||
-        isKYCInProgress.value ||
         isWalletCreationRequired.value ||
         isWalletCreated.value ||
         shouldShowBankAccountMissing.value ||
@@ -231,25 +197,18 @@ export function useWalletAlert(options: UseWalletAlertOptions = {}) {
     if (isError.value) return CONTACT_US_MSG;
     if (isWalletCreationRequired.value) return WALLET_SETUP_REQUIRED_MSG;
     if (isWalletCreated.value) return WALLET_CREATING_MSG;
-    if (isKYCNeedToPass.value) {
-      return KYC_NEED_MSG(selectedUserProfileId.value, route.fullPath);
-    }
-    if (isKYCInProgress.value) return KYC_IN_PROGRESS_MSG;
     if (shouldShowBankAccountMissing.value) {
       return BANK_ACCOUNTS_NEED_MSG(selectedUserProfileId.value);
     }
     return CONTACT_US_MSG;
   });
   const alertTitle = computed(() => {
-    if (isKYCNeedToPass.value) return 'Identity verification is needed. ';
     if (isWalletCreationRequired.value) return WALLET_SETUP_REQUIRED_TITLE;
     if (isWalletCreated.value) return 'Your wallet is being created and verified.';
     return undefined;
   });
   const alertButtonText = computed(() =>
-    isKYCNeedToPass.value
-      ? 'Verify Identity'
-      : isWalletCreationRequired.value
+    isWalletCreationRequired.value
         ? 'Set Up Wallet'
         : undefined,
   );
@@ -275,16 +234,6 @@ export function useWalletAlert(options: UseWalletAlertOptions = {}) {
   );
 
   const onAlertButtonClick = () => {
-    if (isKYCNeedToPass.value) {
-      const redirect = route.fullPath;
-      router.push({
-        name: 'ROUTE_SUBMIT_KYC',
-        params: { profileId: selectedUserProfileId.value },
-        query: { redirect },
-      });
-      return;
-    }
-
     if (!isWalletCreationRequired.value) {
       return;
     }
@@ -294,14 +243,9 @@ export function useWalletAlert(options: UseWalletAlertOptions = {}) {
       return;
     }
 
-    void walletAuthStore.startFlowForProfile({
-      profileId,
-      isKycApproved: selectedUserProfileData.value?.isKycApproved,
-      profileType: selectedUserProfileType.value,
-      profileName: selectedUserProfileData.value?.name,
-      fullAccountName: selectedUserProfileData.value?.data?.full_account_name,
-      userEmail: userSessionTraits.value?.email,
-      walletStatus: selectedUserProfileData.value?.wallet?.status,
+    void router.push({
+      name: ROUTE_WALLET_OTP,
+      params: { profileId },
     });
   };
 
@@ -332,8 +276,6 @@ export function useWalletAlert(options: UseWalletAlertOptions = {}) {
   return {
     alertModel,
     hasRestrictedWallet,
-    isKYCNeedToPass,
-    isKYCInProgress,
     isError,
     isAlertShow,
     isAlertType,

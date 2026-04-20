@@ -134,7 +134,10 @@ describe('useDashboardWallet', () => {
     expect(api.walletFilterItemsComputed).toBeDefined();
     expect(api.isWalletDataLoading).toBeDefined();
     expect(api.walletAlertModel).toBeDefined();
-    expect(api.showTable).toBeDefined();
+    expect(api.isAlertDataLoading).toBeDefined();
+    expect(api.onWalletAlertAction).toBeDefined();
+    expect(api.onWalletAlertDescriptionAction).toBeDefined();
+    expect(api.isWalletBlocked).toBeDefined();
     expect(api.totalBalanceMainFormatted).toBeDefined();
     expect(api.selectedEvmNetwork).toBeDefined();
     expect(api.evmNetworkOptions).toBeDefined();

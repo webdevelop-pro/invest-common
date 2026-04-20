@@ -218,26 +218,22 @@ describe('useWalletAlert', () => {
     expect(api.alertTitle.value).toBeUndefined();
   });
 
-  it('shows KYC needed alert when profile is KYC pending', () => {
+  it('keeps the bank-account info alert when KYC is pending but wallet setup is otherwise available', () => {
     selectedUserProfileDataRef.value!.isKycPending = true;
     const api = useWalletAlert();
     expect(api.isAlertShow.value).toBe(true);
-    expect(api.isAlertType.value).toBe('error');
-    expect(api.isWalletBlocked.value).toBe(true);
-    expect(api.isAlertText.value).toContain('pass KYC');
-    expect(api.alertTitle.value).toContain('Identity verification');
-    expect(api.alertButtonText.value).toBe('Verify Identity');
+    expect(api.isAlertType.value).toBe('info');
+    expect(api.isWalletBlocked.value).toBe(false);
+    expect(api.isAlertText.value).toContain('connect a bank account');
+    expect(api.alertTitle.value).toBeUndefined();
+    expect(api.alertButtonText.value).toBeUndefined();
   });
 
-  it('onAlertButtonClick navigates to KYC when KYC needed', () => {
+  it('does not navigate anywhere when the current alert has no CTA', () => {
     selectedUserProfileDataRef.value!.isKycPending = true;
     const api = useWalletAlert();
     api.onAlertButtonClick();
-    expect(mockPush).toHaveBeenCalledWith({
-      name: 'ROUTE_SUBMIT_KYC',
-      params: { profileId: 1 },
-      query: { redirect: '/profile/1/wallet' },
-    });
+    expect(mockPush).not.toHaveBeenCalled();
   });
 
   it('shows error alert when wallet has error', () => {
@@ -266,7 +262,7 @@ describe('useWalletAlert', () => {
     expect(api.isWalletBlocked.value).toBe(false);
   });
 
-  it('opens wallet auth when the wallet setup alert CTA is clicked', () => {
+  it('navigates to the wallet OTP route when the wallet setup alert CTA is clicked', () => {
     getEvmWalletStateRef.value = {
       data: undefined,
       loading: false,
@@ -288,14 +284,10 @@ describe('useWalletAlert', () => {
     api.onAlertButtonClick();
 
     expect(maybeOpenAfterKycMock).not.toHaveBeenCalled();
-    expect(startFlowForProfileMock).toHaveBeenCalledWith({
-      profileId: 1,
-      isKycApproved: true,
-      profileType: 'individual',
-      profileName: 'Primary Profile',
-      fullAccountName: 'Primary Profile LLC',
-      userEmail: 'wallet@example.com',
-      walletStatus: undefined,
+    expect(startFlowForProfileMock).not.toHaveBeenCalled();
+    expect(mockPush).toHaveBeenCalledWith({
+      name: 'ROUTE_WALLET_OTP',
+      params: { profileId: 1 },
     });
   });
 

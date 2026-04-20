@@ -33,6 +33,7 @@ export function useKycAlertViewModel() {
     selectedUserProfileShowKycInitForm,
     selectedUserProfileType,
     selectedUserIndividualProfile,
+    isSelectedProfileLoading,
   } = storeToRefs(profilesStore);
   const sessionStore = useSessionStore();
   const { userLoggedIn } = storeToRefs(sessionStore);
@@ -51,6 +52,10 @@ export function useKycAlertViewModel() {
 
     return selectedUserProfileId.value;
   });
+
+  const isDataLoading = computed(() => (
+    isSelectedProfileLoading.value && !selectedUserProfileData.value?.id
+  ));
 
   const alertModel = computed(() => {
     const profile = selectedUserProfileData.value;
@@ -126,6 +131,7 @@ export function useKycAlertViewModel() {
 
   return {
     alertModel,
+    isDataLoading,
     onPrimaryAction,
     onDescriptionAction,
   };

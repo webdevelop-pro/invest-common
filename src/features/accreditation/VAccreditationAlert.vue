@@ -1,44 +1,68 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { storeToRefs } from 'pinia';
 import VAlert from 'UiKit/components/VAlert.vue';
-import { useAccreditationStatus } from './store/useAccreditationStatus';
+import VButton from 'UiKit/components/Base/VButton/VButton.vue';
+import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
 
-const props = defineProps<{
-  variant: 'error' | 'info';
-  title: string;
-  description: string;
+const props = withDefaults(defineProps<{
+  variant?: 'error' | 'info';
+  title?: string;
+  description?: string;
   buttonText?: string;
+  isLoading?: boolean;
+  isDisabled?: boolean;
+}>(), {
+  variant: 'info',
+  title: undefined,
+  description: undefined,
+  buttonText: undefined,
+  isLoading: false,
+  isDisabled: false,
+});
+
+const emit = defineEmits<{
+  action: [];
+  descriptionAction: [event: Event];
 }>();
 
-const accreditationButtonStore = useAccreditationStatus();
-const { dataAlert } = storeToRefs(accreditationButtonStore);
+const buttonColor = computed(() => (props.variant === 'info' ? 'primary' : 'red'));
+const hasDescriptionAction = computed(() => !!props.description?.includes('data-action="contact-us"'));
 
-const resolvedTitle = computed(() => dataAlert.value.title || props.title);
-const resolvedDescription = computed(() => dataAlert.value.description || props.description);
-const resolvedButtonText = computed(() => props.buttonText);
+const handleDescriptionAction = (event: Event) => {
+  if (!hasDescriptionAction.value) return;
+  emit('descriptionAction', event);
+};
 </script>
 
 <template>
+  <VSkeleton
+    v-if="isLoading && !title"
+    height="72px"
+    width="100%"
+  />
   <VAlert
+    v-else
     :variant="variant"
-    :button-text="resolvedButtonText"
     class="VAccreditationAlert v-accreditation-alert"
-    @click="accreditationButtonStore.onClick"
+    @click="handleDescriptionAction($event)"
   >
     <template #title>
-      {{ resolvedTitle }}
+      {{ title }}
     </template>
     <template #description>
-      <span
-        v-dompurify-html="resolvedDescription"
-        role="button"
-        tabindex="0"
-        @click="accreditationButtonStore.onAlertDescriptionClick($event)"
-        @keydown.enter="accreditationButtonStore.onAlertDescriptionClick($event)"
-        @keydown.space.prevent="accreditationButtonStore.onAlertDescriptionClick($event)"
-      />
+      <span v-dompurify-html="description" />
     </template>
+    <VButton
+      v-if="buttonText"
+      size="small"
+      :color="buttonColor"
+      :loading="isLoading"
+      :disabled="isDisabled"
+      class="v-accreditation-alert__button is--margin-top-0"
+      @click="emit('action')"
+    >
+      {{ buttonText }}
+    </VButton>
   </VAlert>
 </template>
 

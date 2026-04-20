@@ -46,6 +46,7 @@ export function useWalletActions(
     );
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const canAccessKycFeatures = computed(
     () =>
       isWalletOperational.value &&
@@ -67,7 +68,15 @@ export function useWalletActions(
   );
   const hasFiatAvailable = computed(() => fiatMaxWithdrawable.value > 0);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const isCryptoWalletCreated = computed(
+    () => !!getEvmWalletState.value.data?.isStatusCreated || !!getEvmWalletState.value.data?.isStatusVerified,
+  );
+  const isFiatWalletVerified = computed(
+    () => getWalletState.value.data?.isWalletStatusVerified,
+  );
+  const canAddFunds = computed(
+    () => isCryptoWalletCreated.value || isFiatWalletVerified.value,
+  );
   const canWithdraw = computed(
     () => isWalletOperational.value && (hasAvailableBalances.value || hasFiatAvailable.value),
   );
@@ -79,15 +88,14 @@ export function useWalletActions(
       label: 'Add Funds',
       variant: 'default',
       icon: plus,
-      disabled: !canAccessKycFeatures.value,
+      disabled: !canAddFunds.value,
       transactionType: EvmTransactionTypes.deposit,
     },
     {
       id: 'withdraw',
       label: 'Withdraw',
       variant: 'outlined',
-      // Temporarily keep withdraw enabled while the new wallet flow is being integrated.
-      disabled: false,
+      disabled: !canWithdraw.value,
       transactionType: EvmTransactionTypes.withdrawal,
     },
     {
@@ -101,21 +109,21 @@ export function useWalletActions(
       id: 'buy',
       label: 'Buy',
       variant: 'outlined',
-      disabled: !canAccessKycFeatures.value,
+      disabled: !isCryptoWalletCreated.value,
       transactionType: null,
     },
     {
       id: 'earn',
       label: 'Earn',
       variant: 'outlined',
-      disabled: !canAccessKycFeatures.value,
+      disabled: !isCryptoWalletCreated.value,
       transactionType: null,
     },
     {
       id: 'bank-accounts',
       label: 'Bank Accounts',
       variant: 'outlined',
-      disabled: false,
+      disabled: !isFiatWalletVerified.value,
       transactionType: null,
     },
   ]);

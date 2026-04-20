@@ -9,6 +9,7 @@ import DashboardPageHeader from '../DashboardPageHeader.vue';
 const selectedUserProfileData = ref<any>(null);
 const selectedUserProfileId = ref(7);
 const selectedUserProfileType = ref('individual');
+const isSelectedProfileLoading = ref(false);
 const userSessionTraits = ref({ email: 'header@example.com' });
 const openContactUsDialog = vi.fn();
 const onKycBannerClick = vi.fn();
@@ -27,6 +28,7 @@ const walletAlertIsLoading = ref(false);
 const walletAlertIsDisabled = ref(false);
 const onWalletBannerClick = vi.fn();
 const onWalletBannerDescriptionAction = vi.fn();
+const isKycDataLoading = ref(false);
 const kycAlertModel = ref<KycAlertModel>({
   show: false,
   variant: 'error',
@@ -41,6 +43,7 @@ const accreditationDataAlert = ref({
   description: '',
   buttonText: '',
 });
+const isAccreditationLoading = ref(false);
 
 vi.mock('pinia', async () => {
   const actual = await vi.importActual<typeof import('pinia')>('pinia');
@@ -52,6 +55,7 @@ vi.mock('pinia', async () => {
           selectedUserProfileData,
           selectedUserProfileId,
           selectedUserProfileType,
+          isSelectedProfileLoading,
         };
       }
 
@@ -60,7 +64,10 @@ vi.mock('pinia', async () => {
       }
 
       if ('dataAlert' in store) {
-        return { dataAlert: accreditationDataAlert };
+        return {
+          dataAlert: accreditationDataAlert,
+          isLoading: isAccreditationLoading,
+        };
       }
 
       return {};
@@ -73,6 +80,7 @@ vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
     selectedUserProfileData,
     selectedUserProfileId,
     selectedUserProfileType,
+    isSelectedProfileLoading,
   }),
 }));
 
@@ -91,6 +99,7 @@ vi.mock('InvestCommon/domain/dialogs/store/useDialogs', () => ({
 vi.mock('InvestCommon/features/kyc/logic/useKycAlertViewModel', () => ({
   useKycAlertViewModel: () => ({
     alertModel: kycAlertModel,
+    isDataLoading: isKycDataLoading,
     onPrimaryAction: onKycBannerClick,
     onDescriptionAction: onKycBannerDescriptionAction,
   }),
@@ -99,6 +108,7 @@ vi.mock('InvestCommon/features/kyc/logic/useKycAlertViewModel', () => ({
 vi.mock('InvestCommon/features/accreditation/store/useAccreditationStatus', () => ({
   useAccreditationStatus: () => ({
     dataAlert: accreditationDataAlert,
+    isLoading: isAccreditationLoading,
     onClick: onAccreditationClick,
     onAlertDescriptionClick: onAccreditationAlertDescriptionClick,
   }),
@@ -113,27 +123,25 @@ vi.mock('InvestCommon/features/wallet/logic/useWallet', () => ({
 }));
 
 vi.mock('InvestCommon/features/wallet/logic/useWalletAlert', () => ({
-  useWalletAlert: (options?: { hideBankAccountMissingInfo?: boolean }) => ({
-    alertModel: computed(() => {
-      const shouldHideBankAccountMissing =
-        options?.hideBankAccountMissingInfo
-        && isWalletAlertType.value === 'info'
-        && walletAlertTitle.value === undefined
-        && walletAlertText.value.includes('bank account');
-
-      return {
-        show: shouldHideBankAccountMissing ? false : isWalletAlertShow.value,
-        variant: isWalletAlertType.value,
-        title: walletAlertTitle.value,
-        description: walletAlertText.value,
-        buttonText: walletAlertButtonText.value,
-        isLoading: walletAlertIsLoading.value,
-        isDisabled: walletAlertIsDisabled.value,
-      };
-    }),
+  useWalletAlert: () => ({
+    alertModel: computed(() => ({
+      show: isWalletAlertShow.value,
+      variant: isWalletAlertType.value,
+      title: walletAlertTitle.value,
+      description: walletAlertText.value,
+      buttonText: walletAlertButtonText.value,
+      isLoading: walletAlertIsLoading.value,
+      isDisabled: walletAlertIsDisabled.value,
+    })),
     isDataLoading: computed(() => isWalletDataLoading.value),
     onAlertButtonClick: onWalletBannerClick,
     onDescriptionAction: onWalletBannerDescriptionAction,
+  }),
+}));
+
+vi.mock('UiKit/composables/useBreakpoints', () => ({
+  useBreakpoints: () => ({
+    isDesktop: computed(() => true),
   }),
 }));
 
@@ -239,6 +247,9 @@ describe('DashboardPageHeader', () => {
       isDisabled: false,
     };
     accreditationDataAlert.value = { title: '', description: '', buttonText: '' };
+    isSelectedProfileLoading.value = false;
+    isKycDataLoading.value = false;
+    isAccreditationLoading.value = false;
     openContactUsDialog.mockClear();
     onKycBannerClick.mockClear();
     onKycBannerDescriptionAction.mockClear();
@@ -303,13 +314,14 @@ describe('DashboardPageHeader', () => {
       kyc_status: InvestKycTypes.pending,
       accreditation_status: AccreditationTypes.new,
     };
+    isKycDataLoading.value = true;
     kycAlertModel.value = {
       show: true,
       variant: 'error',
       title: 'Finish Your KYC',
       description: 'Complete the remaining identity verification steps.',
       buttonText: 'Continue',
-      isLoading: true,
+      isLoading: false,
       isDisabled: true,
     };
 
@@ -366,11 +378,11 @@ describe('DashboardPageHeader', () => {
 
     const alert = wrapper.find('.alert-stub');
     expect(alert.exists()).toBe(true);
-    expect(alert.text()).toContain('Your accreditation information has been submitted');
+    expect(alert.text()).toContain('Verification In Progress');
     expect(wrapper.find('.wallet-alert-stub').exists()).toBe(false);
   });
 
-  it('hides the wallet banner when the KYC banner is visible', async () => {
+  it('shows the wallet banner alongside the KYC banner when both are active', async () => {
     selectedUserProfileData.value = {
       isKycApproved: false,
       isAccreditationApproved: true,
@@ -393,7 +405,7 @@ describe('DashboardPageHeader', () => {
     await nextTick();
 
     expect(wrapper.find('.alert-stub').exists()).toBe(true);
-    expect(wrapper.find('.wallet-alert-stub').exists()).toBe(false);
+    expect(wrapper.find('.wallet-alert-stub').exists()).toBe(true);
   });
 
   it('prioritizes the wallet banner over accreditation after KYC approval', async () => {
@@ -420,7 +432,7 @@ describe('DashboardPageHeader', () => {
     expect(wrapper.find('.wallet-alert-stub').exists()).toBe(true);
   });
 
-  it('keeps bank-account wallet alerts out of the wallet-auth banner', async () => {
+  it('shows bank-account wallet alerts in the dashboard header', async () => {
     selectedUserProfileData.value = {
       isKycApproved: true,
       isAccreditationApproved: true,
@@ -437,11 +449,12 @@ describe('DashboardPageHeader', () => {
     const wrapper = mountHeader(DashboardTabTypes.summary);
     await nextTick();
 
-    expect(wrapper.find('.wallet-alert-stub').exists()).toBe(false);
-    expect(wrapper.find('[data-testid="performance-cards"]').exists()).toBe(true);
+    expect(wrapper.find('.wallet-alert-stub').exists()).toBe(true);
+    expect(wrapper.find('.wallet-alert-stub__description').text()).toContain('bank account');
+    expect(wrapper.find('[data-testid="performance-cards"]').exists()).toBe(false);
   });
 
-  it('always shows the wallet skeleton while wallet alerts are loading', async () => {
+  it('keeps showing the wallet banner while wallet data is refreshing', async () => {
     selectedUserProfileData.value = {
       isKycApproved: true,
       isAccreditationApproved: false,
@@ -462,8 +475,8 @@ describe('DashboardPageHeader', () => {
     await nextTick();
 
     expect(wrapper.find('.alert-stub').exists()).toBe(false);
-    expect(wrapper.find('[data-testid="wallet-alert-skeleton"]').exists()).toBe(true);
-    expect(wrapper.find('.wallet-alert-stub').exists()).toBe(false);
+    expect(wrapper.find('[data-testid="wallet-alert-skeleton"]').exists()).toBe(false);
+    expect(wrapper.find('.wallet-alert-stub').exists()).toBe(true);
   });
 
   it('does not show the wallet skeleton when wallet data is idle on a non-KYC-approved profile', async () => {
