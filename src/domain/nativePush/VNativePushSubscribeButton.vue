@@ -1,11 +1,20 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import {
+  onMounted,
+  ref,
+  watch,
+} from 'vue';
+import { storeToRefs } from 'pinia';
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import type {
   ButtonSize,
   ButtonVariant,
 } from 'UiKit/components/Base/VButton/types';
-import { requestAndroidNativePushPermissionConsent } from './nativePushBridge';
+import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
+import {
+  requestAndroidNativePushPermissionConsent,
+  shouldShowAndroidNativePushPermissionButton,
+} from './nativePushBridge';
 
 const props = withDefaults(defineProps<{
   label?: string;
@@ -21,7 +30,36 @@ const props = withDefaults(defineProps<{
   showExplainer: false,
 });
 
+const sessionStore = useSessionStore();
+const { isSessionHydrated, userLoggedIn } = storeToRefs(sessionStore);
+
+const showButton = ref(false);
 const isLoading = ref(false);
+let visibilityRequestId = 0;
+
+const refreshVisibility = async () => {
+  const requestId = ++visibilityRequestId;
+
+  if (
+    typeof window === 'undefined'
+    || !isSessionHydrated.value
+    || !userLoggedIn.value
+  ) {
+    showButton.value = false;
+    return;
+  }
+
+  try {
+    const shouldShow = await shouldShowAndroidNativePushPermissionButton();
+    if (requestId === visibilityRequestId) {
+      showButton.value = shouldShow;
+    }
+  } catch {
+    if (requestId === visibilityRequestId) {
+      showButton.value = false;
+    }
+  }
+};
 
 const requestPermission = async () => {
   if (isLoading.value) {
@@ -33,15 +71,28 @@ const requestPermission = async () => {
     await requestAndroidNativePushPermissionConsent();
   } finally {
     isLoading.value = false;
+    void refreshVisibility();
   }
 };
+
+watch(
+  [isSessionHydrated, userLoggedIn],
+  () => {
+    void refreshVisibility();
+  },
+  { immediate: true },
+);
+
+onMounted(() => {
+  void refreshVisibility();
+});
 </script>
 
 <template>
   <div
+    v-if="showButton"
     class="VNativePushSubscribeButton native-push-subscribe-button"
   >
-  <h1>Native Push Subscribe Button</h1>
     <VButton
       type="button"
       :size="props.size"

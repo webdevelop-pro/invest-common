@@ -73,12 +73,6 @@ const topInfoSliderOptions = {
 <template>
   <div class="DashboardSummary dashboard-summary">
     <div class="dashboard-summary__content">
-      <VNativePushSubscribeButton
-        size="large"
-        variant="outlined"
-        show-explainer
-        class="dashboard-summary__native-push"
-      />
       <CryptoPricesTicker
         :items="cryptoItems"
         :loading="getPricesState.loading"
@@ -203,6 +197,12 @@ const topInfoSliderOptions = {
         />
       </div>
     </div>
+    <VNativePushSubscribeButton
+        size="large"
+        variant="outlined"
+        show-explainer
+        class="dashboard-summary__native-push"
+      />
   </div>
 </template>
 
