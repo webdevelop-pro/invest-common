@@ -20,8 +20,9 @@ const WALLET_CREATING_MSG = `This usually takes a few moments. If it takes longe
 const WALLET_SETUP_REQUIRED_TITLE = 'Set up your wallet to continue.';
 const WALLET_SETUP_REQUIRED_MSG = 'Your crypto wallet has not been created yet. Start wallet setup to continue.';
 
-const BANK_ACCOUNTS_NEED_MSG = (profileId: string | number) =>
-  `You need to <a href="/settings/${profileId}/bank-accounts">connect a bank account</a> before you can add funds.`;
+const CONNECT_BANK_ACCOUNT_ACTION = 'connect-bank-account';
+const BANK_ACCOUNTS_NEED_MSG = () =>
+  `You need to <a href="#${CONNECT_BANK_ACCOUNT_ACTION}" class="is--link-1" data-action="${CONNECT_BANK_ACCOUNT_ACTION}">connect a bank account</a> before you can add funds.`;
 export interface UseWalletAlertOptions {
   /** When true, do not show alerts related to fiat wallet (e.g. bank account, fiat wallet status). Use for crypto-only contexts like Earn. */
   hideFiatAlerts?: boolean;
@@ -198,7 +199,7 @@ export function useWalletAlert(options: UseWalletAlertOptions = {}) {
     if (isWalletCreationRequired.value) return WALLET_SETUP_REQUIRED_MSG;
     if (isWalletCreated.value) return WALLET_CREATING_MSG;
     if (shouldShowBankAccountMissing.value) {
-      return BANK_ACCOUNTS_NEED_MSG(selectedUserProfileId.value);
+      return BANK_ACCOUNTS_NEED_MSG();
     }
     return CONTACT_US_MSG;
   });
@@ -252,10 +253,10 @@ export function useWalletAlert(options: UseWalletAlertOptions = {}) {
   const onDescriptionAction = (event: Event) => {
     const target = event.target as HTMLElement | null;
     const currentTarget = event.currentTarget as HTMLElement | null;
-    const bankAccountsLink = (target?.closest('a[href]') as HTMLAnchorElement | null)
-      || (currentTarget?.querySelector('a[href*="bank-accounts"]') as HTMLAnchorElement | null);
+    const connectBankAccountTarget = target?.closest(`[data-action="${CONNECT_BANK_ACCOUNT_ACTION}"]`)
+      || currentTarget?.querySelector(`[data-action="${CONNECT_BANK_ACCOUNT_ACTION}"]`);
 
-    if (bankAccountsLink?.href?.includes('bank-accounts')) {
+    if (connectBankAccountTarget) {
       event.preventDefault();
       event.stopPropagation();
       void onAddAccountClick();

@@ -21,6 +21,7 @@ const {
 // except the "connect a bank account" info alert (redundant on this page).
 const {
   isAlertShow,
+  isDataLoading,
   isAlertType,
   isAlertText,
   alertTitle,
@@ -36,7 +37,7 @@ const {
     </h2>
 
     <VAlert
-      v-if="isAlertShow"
+      v-if="!isDataLoading && isAlertShow"
       :variant="isAlertType"
       class="settings-bank-accounts__alert"
       :button-text="alertButtonText"

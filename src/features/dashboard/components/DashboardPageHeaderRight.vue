@@ -21,6 +21,7 @@ defineProps<{
   accreditationAlertModel: AlertModel;
   isAccreditationDataLoading: boolean;
   walletAlertModel: AlertModel;
+  isWalletAlertLoading: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -51,18 +52,18 @@ const emit = defineEmits<{
         @description-action="emit('kycBannerDescriptionAction', $event)"
       />
       <DashboardWalletAlert
-        v-if="walletAlertModel.show"
+        v-if="walletAlertModel.show || isWalletAlertLoading"
         :variant="walletAlertModel.variant"
         :title="walletAlertModel.title"
         :description="walletAlertModel.description"
         :button-text="walletAlertModel.buttonText"
-        :is-loading="walletAlertModel.isLoading"
+        :is-loading="walletAlertModel.isLoading || isWalletAlertLoading"
         :is-disabled="walletAlertModel.isDisabled"
         @action="emit('walletBannerClick')"
         @description-action="emit('walletBannerDescriptionAction', $event)"
       />
       <VAccreditationAlert
-        v-if="(accreditationAlertModel.show || isAccreditationDataLoading) && (!walletAlertModel.show && !kycAlertModel.show)"
+        v-if="(accreditationAlertModel.show || isAccreditationDataLoading) && (!walletAlertModel.show && !kycAlertModel.show && !isWalletAlertLoading)"
         :variant="accreditationAlertModel.variant"
         :title="accreditationAlertModel.title"
         :description="accreditationAlertModel.description"

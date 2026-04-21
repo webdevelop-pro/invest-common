@@ -30,6 +30,7 @@ const {
   accreditationAlertModel,
   isAccreditationDataLoading,
   walletAlertModel,
+  isWalletAlertLoading,
 } = useDashboardPageHeader();
 </script>
 
@@ -48,6 +49,7 @@ const {
       :accreditation-alert-model="accreditationAlertModel"
       :is-accreditation-data-loading="isAccreditationDataLoading"
       :wallet-alert-model="walletAlertModel"
+      :is-wallet-alert-loading="isWalletAlertLoading"
       :show-performance-cards="showPerformanceCards"
       class="dashboard-page-header__aside"
       @kyc-banner-click="onKycBannerClick"

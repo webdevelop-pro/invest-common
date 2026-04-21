@@ -32,7 +32,8 @@ const buttonColor = computed(() => (props.variant === 'info' ? 'primary' : 'red'
 const hasDescriptionAction = computed(() => (
   !!props.description?.includes('data-action="contact-us"')
   || !!props.description?.includes('data-action=\'contact-us\'')
-  || !!props.description?.includes('bank-accounts')
+  || !!props.description?.includes('data-action="connect-bank-account"')
+  || !!props.description?.includes('data-action=\'connect-bank-account\'')
 ));
 
 const handleDescriptionAction = (event: Event) => {
@@ -58,7 +59,6 @@ const handleDescriptionAction = (event: Event) => {
       :variant="variant"
       data-testid="funding-alert"
       class="dashboard-wallet__alert"
-      @click="handleDescriptionAction"
     >
       <template
         v-if="title"
@@ -67,9 +67,11 @@ const handleDescriptionAction = (event: Event) => {
         {{ title }}
       </template>
       <template #description>
+        <!-- eslint-disable-next-line vuejs-accessibility/no-static-element-interactions, vuejs-accessibility/click-events-have-key-events -->
         <span
           v-dompurify-html="description"
           class="dashboard-wallet__alert-description"
+          @click="handleDescriptionAction"
         />
       </template>
       <VButton

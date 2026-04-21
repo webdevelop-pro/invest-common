@@ -479,6 +479,28 @@ describe('DashboardPageHeader', () => {
     expect(wrapper.find('.wallet-alert-stub').exists()).toBe(true);
   });
 
+  it('does not flash the accreditation banner while wallet alert data is still loading', async () => {
+    selectedUserProfileData.value = {
+      isKycApproved: true,
+      isAccreditationApproved: false,
+      kyc_status: InvestKycTypes.approved,
+      accreditation_status: AccreditationTypes.pending,
+    };
+    accreditationDataAlert.value = {
+      title: 'Accreditation pending',
+      description: 'We are reviewing your accreditation documents.',
+      buttonText: '',
+    };
+    isWalletDataLoading.value = true;
+    isWalletAlertShow.value = false;
+
+    const wrapper = mountHeader(DashboardTabTypes.summary);
+    await nextTick();
+
+    expect(wrapper.find('.alert-stub').exists()).toBe(false);
+    expect(wrapper.find('.wallet-alert-stub').exists()).toBe(false);
+  });
+
   it('does not show the wallet skeleton when wallet data is idle on a non-KYC-approved profile', async () => {
     selectedUserProfileData.value = {
       isKycApproved: false,

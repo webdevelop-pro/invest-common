@@ -184,7 +184,7 @@ describe('useWalletAlert', () => {
     const api = useWalletAlert();
     expect(api.isAlertShow.value).toBe(true);
     expect(api.isAlertType.value).toBe('info');
-    expect(api.isAlertText.value).toContain('connect a bank account');
+    expect(api.isAlertText.value).toContain('data-action="connect-bank-account"');
     expect(api.showTable.value).toBe(true);
     expect(api.isTopTextShow.value).toBe(true);
   });
@@ -224,7 +224,7 @@ describe('useWalletAlert', () => {
     expect(api.isAlertShow.value).toBe(true);
     expect(api.isAlertType.value).toBe('info');
     expect(api.isWalletBlocked.value).toBe(false);
-    expect(api.isAlertText.value).toContain('connect a bank account');
+    expect(api.isAlertText.value).toContain('data-action="connect-bank-account"');
     expect(api.alertTitle.value).toBeUndefined();
     expect(api.alertButtonText.value).toBeUndefined();
   });
@@ -320,7 +320,7 @@ describe('useWalletAlert', () => {
 
     api.onDescriptionAction({
       target: {
-        closest: (selector: string) => (selector === 'a[href]' ? { href: '/settings/1/bank-accounts' } : null),
+        closest: (selector: string) => (selector === '[data-action="connect-bank-account"]' ? {} : null),
       },
       preventDefault,
       stopPropagation,

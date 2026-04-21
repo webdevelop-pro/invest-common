@@ -6,7 +6,7 @@ describe('DashboardWalletAlert', () => {
   it('emits descriptionAction when the bank-account link is clicked', async () => {
     const wrapper = mount(DashboardWalletAlert, {
       props: {
-        description: 'You need to <a href="/settings/7/bank-accounts">connect a bank account</a> before you can add funds.',
+        description: 'You need to <a href="#connect-bank-account" data-action="connect-bank-account">connect a bank account</a> before you can add funds.',
       },
       global: {
         directives: {
@@ -31,7 +31,7 @@ describe('DashboardWalletAlert', () => {
       },
     });
 
-    await wrapper.get('a[href*="bank-accounts"]').trigger('click');
+    await wrapper.get('[data-action="connect-bank-account"]').trigger('click');
 
     expect(wrapper.emitted('descriptionAction')).toHaveLength(1);
   });
