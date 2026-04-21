@@ -10,7 +10,10 @@ import {
 } from 'vue';
 import { useData } from 'vitepress';
 import VSectionTopVideo from 'UiKit/components/VSectionTop/VSectionTopVideo.vue';
+import VButton from 'UiKit/components/Base/VButton/VButton.vue';
+import ArrowRight from 'UiKit/assets/images/arrow-right.svg';
 import { storeToRefs } from 'pinia';
+import VNativePushSubscribeButton from 'InvestCommon/domain/nativePush/VNativePushSubscribeButton.vue';
 import { data as allPages } from '@/store/all.data';
 import { filterPages } from 'UiKit/helpers/allData';
 import { IFrontmatter } from 'UiKit/types/types';
@@ -128,8 +131,35 @@ onBeforeUnmount(() => {
         full-height
         video-cover-image="/images/main-header-banner.svg"
       >
-        <template #buttonText>
-          {{ topData.frontmatter.buttonText }}
+        <template #default>
+          <div class="v-section-top-video__content view-home__hero-content">
+            <h1 class="is--margin-top-15">
+              {{ topData.frontmatter.title }}
+            </h1>
+            <p
+              v-if="topData.frontmatter.subTitle"
+              v-dompurify-html="topData.frontmatter.subTitle"
+              class="is--subheading-1 is--margin-top-15 is--color-black"
+            />
+            <div class="view-home__hero-actions">
+              <VButton
+                v-if="explore[0]?.url"
+                as="a"
+                :href="encodeURI(explore[0].url)"
+                size="large"
+              >
+                {{ topData.frontmatter.buttonText }}
+                <component :is="ArrowRight" />
+              </VButton>
+              <VNativePushSubscribeButton
+                label="Subscribe to notifications"
+                size="large"
+                variant="outlined"
+                show-explainer
+                class="view-home__native-push"
+              />
+            </div>
+          </div>
         </template>
       </VSectionTopVideo>
       <VSectionPartners
@@ -211,6 +241,23 @@ onBeforeUnmount(() => {
         margin: 20px 0 40px;
       }
     }
+  }
+
+  &__hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 40px;
+
+    @include media-lte(tablet) {
+      margin: 20px 0 40px;
+    }
+  }
+
+  &__native-push {
+    align-items: center;
+    text-align: center;
   }
 }
 </style>

@@ -35,13 +35,33 @@ type NativePushModules = {
   PushNotifications: PushNotificationsPlugin;
 };
 
+type NativePushRegistrationMode = 'silent' | 'user-consent';
+
+type NativePushRegistrationResult =
+  | 'registered'
+  | 'already-in-flight'
+  | 'not-eligible'
+  | 'not-authenticated'
+  | 'no-storage'
+  | 'explainer-not-accepted'
+  | 'permission-not-granted';
+
+type NativePushWindow = Window & {
+  InvestNativePush?: {
+    requestPermission: () => Promise<NativePushRegistrationResult>;
+    shouldShowPermissionButton: () => Promise<boolean>;
+  };
+};
+
 const subscriptionClient = new ApiClient(env.USER_URL || 'https://api.webdevelop.biz/user-api/v1.0');
+const REQUEST_ANDROID_NATIVE_PUSH_PERMISSION_EVENT = 'invest:native-push:request-permission';
 
 let isBridgeInstalled = false;
 let isRegistrationInFlight = false;
 let stopSessionWatch: WatchStopHandle | null = null;
 let listenerHandles: PluginListenerHandle[] = [];
 let registeredUserId = '';
+let isWindowEntrypointInstalled = false;
 
 function getBrowserStorage(): Storage | null {
   if (typeof window === 'undefined') {
@@ -127,6 +147,17 @@ async function createDefaultChannel(PushNotifications: PushNotificationsPlugin) 
   }
 }
 
+function getAuthenticatedUserId(): string {
+  const sessionStore = useSessionStore();
+  const session = sessionStore.userSession;
+
+  if (!sessionStore.isSessionHydrated || !sessionStore.userLoggedIn) {
+    return '';
+  }
+
+  return session?.identity?.id || session?.id || '';
+}
+
 async function handleForegroundPush(notification: PushNotificationSchema) {
   const parseResult = parseNativePushNotificationPayload(notification);
   const notificationsRepository = useRepositoryNotifications();
@@ -196,11 +227,22 @@ async function ensureNativePushListeners(PushNotifications: PushNotificationsPlu
   ]);
 }
 
-async function ensureNativePushRegistration(userId: string) {
+async function ensureNativePushRegistration(
+  userId: string,
+  mode: NativePushRegistrationMode,
+): Promise<NativePushRegistrationResult> {
   const storage = getBrowserStorage();
 
-  if (!storage || isRegistrationInFlight) {
-    return;
+  if (!userId) {
+    return 'not-authenticated';
+  }
+
+  if (!storage) {
+    return 'no-storage';
+  }
+
+  if (isRegistrationInFlight) {
+    return 'already-in-flight';
   }
 
   isRegistrationInFlight = true;
@@ -209,38 +251,43 @@ async function ensureNativePushRegistration(userId: string) {
     const nativeModules = await loadNativePushModules();
 
     if (!nativeModules) {
-      return;
+      return 'not-eligible';
     }
 
     let explainerDecision = readExplainerDecision(storage);
 
-    if (!explainerDecision) {
-      const accepted = window.confirm(
-        'Enable push notifications for account, offering, wallet, and platform updates?',
-      );
-      explainerDecision = accepted ? 'accepted' : 'rejected';
+    if (!explainerDecision && mode === 'user-consent') {
+      explainerDecision = 'accepted';
       persistExplainerDecision(storage, explainerDecision);
     }
 
     if (explainerDecision !== 'accepted') {
-      return;
+      return 'explainer-not-accepted';
     }
 
     const { PushNotifications } = nativeModules;
     const storedPermissionDecision = readPermissionDecision(storage);
     let permissionStatus = await PushNotifications.checkPermissions();
 
-    if (storedPermissionDecision === 'denied' && permissionStatus.receive !== 'granted') {
-      return;
+    if (
+      storedPermissionDecision === 'denied'
+      && permissionStatus.receive !== 'granted'
+      && mode === 'silent'
+    ) {
+      return 'permission-not-granted';
     }
 
     if (permissionStatus.receive !== 'granted') {
+      if (mode === 'silent') {
+        return 'permission-not-granted';
+      }
+
       permissionStatus = await PushNotifications.requestPermissions();
     }
 
     if (permissionStatus.receive !== 'granted') {
       persistPermissionDecision(storage, 'denied');
-      return;
+      return 'permission-not-granted';
     }
 
     persistPermissionDecision(storage, 'granted');
@@ -248,11 +295,50 @@ async function ensureNativePushRegistration(userId: string) {
     await createDefaultChannel(PushNotifications);
     await ensureNativePushListeners(PushNotifications);
     await PushNotifications.register();
+    return 'registered';
   } catch (error) {
     reportError(error, 'Failed to enable push notifications', { source: 'nativePush' });
+    return 'permission-not-granted';
   } finally {
     isRegistrationInFlight = false;
   }
+}
+
+export async function requestAndroidNativePushPermissionConsent(): Promise<NativePushRegistrationResult> {
+  return ensureNativePushRegistration(getAuthenticatedUserId(), 'user-consent');
+}
+
+export async function shouldShowAndroidNativePushPermissionButton(): Promise<boolean> {
+  if (!getAuthenticatedUserId()) {
+    return false;
+  }
+
+  const nativeModules = await loadNativePushModules();
+
+  if (!nativeModules) {
+    return false;
+  }
+
+  const permissionStatus = await nativeModules.PushNotifications.checkPermissions();
+  return permissionStatus.receive !== 'granted';
+}
+
+function handleNativePushPermissionEvent() {
+  void requestAndroidNativePushPermissionConsent();
+}
+
+function installNativePushWindowEntrypoint() {
+  if (isWindowEntrypointInstalled || typeof window === 'undefined') {
+    return;
+  }
+
+  isWindowEntrypointInstalled = true;
+
+  (window as NativePushWindow).InvestNativePush = {
+    requestPermission: requestAndroidNativePushPermissionConsent,
+    shouldShowPermissionButton: shouldShowAndroidNativePushPermissionButton,
+  };
+  window.addEventListener(REQUEST_ANDROID_NATIVE_PUSH_PERMISSION_EVENT, handleNativePushPermissionEvent);
 }
 
 export function installAndroidNativePushBridge() {
@@ -261,6 +347,7 @@ export function installAndroidNativePushBridge() {
   }
 
   isBridgeInstalled = true;
+  installNativePushWindowEntrypoint();
 
   const sessionStore = useSessionStore();
   const { isSessionHydrated, userLoggedIn, userSession } = storeToRefs(sessionStore);
@@ -273,7 +360,7 @@ export function installAndroidNativePushBridge() {
     ],
     ([isHydrated, isLoggedIn, userId]) => {
       if (isHydrated && isLoggedIn && userId) {
-        void ensureNativePushRegistration(userId);
+        void ensureNativePushRegistration(userId, 'silent');
       }
     },
     { immediate: true },
@@ -311,5 +398,9 @@ export async function cleanupAndroidNativePushBridgeOnLogout() {
 export function uninstallAndroidNativePushBridge() {
   stopSessionWatch?.();
   stopSessionWatch = null;
+  if (typeof window !== 'undefined' && isWindowEntrypointInstalled) {
+    window.removeEventListener(REQUEST_ANDROID_NATIVE_PUSH_PERMISSION_EVENT, handleNativePushPermissionEvent);
+  }
+  isWindowEntrypointInstalled = false;
   isBridgeInstalled = false;
 }
