@@ -23,6 +23,7 @@ import {
   shouldAutoAuthenticateDemoAccount,
   useDemoAccountAuth,
 } from 'InvestCommon/features/auth/composables/useDemoAccountAuth';
+import { notifyAndroidNativePushAuthSuccess } from 'InvestCommon/domain/nativePush/nativePushBridge';
 
 const HUBSPOT_FORM_ID = '726ad71f-e168-467f-9847-25e9377f69cf';
 
@@ -231,6 +232,7 @@ export const useSignupStore = defineStore('signup', () => {
     if (setSignupState.value.data?.session && signupRequestBody) {
       const session = setSignupState.value.data.session;
       userSessionStore.updateSession(session);
+      notifyAndroidNativePushAuthSuccess();
       await trackSignupEvent(200, signupRequestBody);
       await handleSignupSuccess();
     }

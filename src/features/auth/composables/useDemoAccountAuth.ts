@@ -7,6 +7,7 @@ import { oryErrorHandling } from 'InvestCommon/domain/error/oryErrorHandling';
 import { oryResponseHandling } from 'InvestCommon/domain/error/oryResponseHandling';
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { navigateWithQueryParams } from 'UiKit/helpers/general';
+import { notifyAndroidNativePushAuthSuccess } from 'InvestCommon/domain/nativePush/nativePushBridge';
 
 type DemoAccountCredentialsConfig = {
   email: string;
@@ -99,6 +100,7 @@ export const createPasswordDemoAccountProvider = (): DemoAccountAuthProvider => 
       }
 
       sessionStore.updateSession(session);
+      notifyAndroidNativePushAuthSuccess();
       navigateWithQueryParams(resolveDemoAccountRedirect(window.location.search));
 
       return true;

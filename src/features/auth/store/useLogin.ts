@@ -18,6 +18,7 @@ import {
   shouldAutoAuthenticateDemoAccount,
   useDemoAccountAuth,
 } from 'InvestCommon/features/auth/composables/useDemoAccountAuth';
+import { notifyAndroidNativePushAuthSuccess } from 'InvestCommon/domain/nativePush/nativePushBridge';
 
 type FormModelSignIn = {
   email: string;
@@ -173,6 +174,7 @@ export const useLoginStore = defineStore('login', () => {
     if (setLoginState.value.data?.session && loginRequestBody) {
       const session = setLoginState.value.data.session;
       userSessionStore.updateSession(session);
+      notifyAndroidNativePushAuthSuccess();
       await trackLoginEvent(200, loginRequestBody);
       await handleLoginSuccess();
     }

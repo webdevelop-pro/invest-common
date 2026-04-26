@@ -15,8 +15,10 @@ import { useRepositoryNotifications } from 'InvestCommon/data/notifications/noti
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import { reportError } from 'InvestCommon/domain/error/errorReporting';
 import { urlNotifications } from 'InvestCommon/domain/config/links';
+import { useGlobalAlert } from 'UiKit/store/useGlobalAlert';
 import {
   clearNativePushTokenSyncState,
+  createNativePushTokenSyncKey,
   getForegroundPushHandling,
   isAndroidCapacitorRuntime,
   markNativePushTokenSynced,
@@ -55,6 +57,8 @@ type NativePushWindow = Window & {
 
 const subscriptionClient = new ApiClient(env.USER_URL || 'https://api.webdevelop.biz/user-api/v1.0');
 const REQUEST_ANDROID_NATIVE_PUSH_PERMISSION_EVENT = 'invest:native-push:request-permission';
+export const NATIVE_PUSH_AUTH_SUCCESS_EVENT = 'invest:native-push:auth-success';
+const NATIVE_PUSH_REGISTRATION_TIMEOUT_MS = 15000;
 
 let isBridgeInstalled = false;
 let isRegistrationInFlight = false;
@@ -62,6 +66,7 @@ let stopSessionWatch: WatchStopHandle | null = null;
 let listenerHandles: PluginListenerHandle[] = [];
 let registeredUserId = '';
 let isWindowEntrypointInstalled = false;
+const tokenSyncRequests = new Map<string, Promise<void>>();
 
 function getBrowserStorage(): Storage | null {
   if (typeof window === 'undefined') {
@@ -129,8 +134,44 @@ async function syncNativePushToken(token: string) {
     return;
   }
 
-  await subscribeFcmTokenWithPwaSession(token);
-  markNativePushTokenSynced(storage, registeredUserId, token);
+  const syncKey = createNativePushTokenSyncKey(registeredUserId, token);
+  const existingRequest = tokenSyncRequests.get(syncKey);
+
+  if (existingRequest) {
+    await existingRequest;
+    return;
+  }
+
+  const syncRequest = subscribeFcmTokenWithPwaSession(token)
+    .then(() => {
+      markNativePushTokenSynced(storage, registeredUserId, token);
+    })
+    .finally(() => {
+      tokenSyncRequests.delete(syncKey);
+    });
+
+  tokenSyncRequests.set(syncKey, syncRequest);
+  await syncRequest;
+}
+
+function showNativePushSetupError(message: string) {
+  try {
+    const globalAlert = useGlobalAlert();
+    globalAlert.show({
+      variant: 'error',
+      title: 'Push notifications unavailable',
+      message,
+    });
+  } catch {
+    // Error reporting already records the failure; the alert store may be unavailable in tests.
+  }
+}
+
+function reportNativePushSetupError(error: unknown, fallbackMessage: string) {
+  reportError(error, fallbackMessage, { source: 'nativePush', silent: true });
+  showNativePushSetupError(
+    `${fallbackMessage}. Please check the Firebase configuration and try enabling notifications again.`,
+  );
 }
 
 async function createDefaultChannel(PushNotifications: PushNotificationsPlugin) {
@@ -227,6 +268,59 @@ async function ensureNativePushListeners(PushNotifications: PushNotificationsPlu
   ]);
 }
 
+async function registerForFcmToken(PushNotifications: PushNotificationsPlugin): Promise<string> {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  let handles: PluginListenerHandle[] = [];
+
+  const cleanup = async () => {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+      timeoutId = undefined;
+    }
+
+    const currentHandles = handles;
+    handles = [];
+    await Promise.all(currentHandles.map((handle) => handle.remove()));
+  };
+
+  return new Promise<string>((resolve, reject) => {
+    let settled = false;
+
+    const settle = (callback: () => void) => {
+      if (settled) {
+        return;
+      }
+
+      settled = true;
+      void cleanup().finally(callback);
+    };
+
+    timeoutId = setTimeout(() => {
+      settle(() => reject(new Error('Timed out while waiting for an FCM registration token.')));
+    }, NATIVE_PUSH_REGISTRATION_TIMEOUT_MS);
+
+    void (async () => {
+      handles = await Promise.all([
+        PushNotifications.addListener('registration', (token: Token) => {
+          if (!token.value) {
+            settle(() => reject(new Error('FCM registration completed without a device token.')));
+            return;
+          }
+
+          settle(() => resolve(token.value));
+        }),
+        PushNotifications.addListener('registrationError', (error: RegistrationError) => {
+          settle(() => reject(new Error(error.error || 'FCM registration failed.')));
+        }),
+      ]);
+
+      await PushNotifications.register();
+    })().catch((error) => {
+      settle(() => reject(error));
+    });
+  });
+}
+
 async function ensureNativePushRegistration(
   userId: string,
   mode: NativePushRegistrationMode,
@@ -294,10 +388,15 @@ async function ensureNativePushRegistration(
     registeredUserId = userId;
     await createDefaultChannel(PushNotifications);
     await ensureNativePushListeners(PushNotifications);
-    await PushNotifications.register();
+    const token = await registerForFcmToken(PushNotifications);
+    try {
+      await syncNativePushToken(token);
+    } catch (error) {
+      reportError(error, 'Failed to subscribe this device for push notifications', { source: 'nativePush' });
+    }
     return 'registered';
   } catch (error) {
-    reportError(error, 'Failed to enable push notifications', { source: 'nativePush' });
+    reportNativePushSetupError(error, 'Failed to enable push notifications');
     return 'permission-not-granted';
   } finally {
     isRegistrationInFlight = false;
@@ -306,6 +405,37 @@ async function ensureNativePushRegistration(
 
 export async function requestAndroidNativePushPermissionConsent(): Promise<NativePushRegistrationResult> {
   return ensureNativePushRegistration(getAuthenticatedUserId(), 'user-consent');
+}
+
+export async function shouldShowAndroidNativePushExplainer(): Promise<boolean> {
+  if (!getAuthenticatedUserId()) {
+    return false;
+  }
+
+  const storage = getBrowserStorage();
+
+  if (!storage || readExplainerDecision(storage)) {
+    return false;
+  }
+
+  const nativeModules = await loadNativePushModules();
+
+  if (!nativeModules) {
+    return false;
+  }
+
+  const permissionStatus = await nativeModules.PushNotifications.checkPermissions();
+  return permissionStatus.receive !== 'granted';
+}
+
+export function rejectAndroidNativePushExplainer() {
+  const storage = getBrowserStorage();
+
+  if (!storage) {
+    return;
+  }
+
+  persistExplainerDecision(storage, 'rejected');
 }
 
 export async function shouldShowAndroidNativePushPermissionButton(): Promise<boolean> {
@@ -319,8 +449,24 @@ export async function shouldShowAndroidNativePushPermissionButton(): Promise<boo
     return false;
   }
 
+  const storage = getBrowserStorage();
+
+  if (storage && readExplainerDecision(storage) === 'rejected') {
+    return false;
+  }
+
   const permissionStatus = await nativeModules.PushNotifications.checkPermissions();
   return permissionStatus.receive !== 'granted';
+}
+
+export function notifyAndroidNativePushAuthSuccess() {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  window.setTimeout(() => {
+    window.dispatchEvent(new CustomEvent(NATIVE_PUSH_AUTH_SUCCESS_EVENT));
+  }, 0);
 }
 
 function handleNativePushPermissionEvent() {

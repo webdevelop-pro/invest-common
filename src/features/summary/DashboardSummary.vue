@@ -12,7 +12,6 @@ import { useBreakpoints } from 'UiKit/composables/useBreakpoints';
 import { useDashboardWallet } from 'InvestCommon/features/wallet/logic/useDashboardWallet';
 import DashboardWalletBalanceCards from 'InvestCommon/features/wallet/components/DashboardWalletBalanceCards.vue';
 import DashboardWalletTablePanel from 'InvestCommon/features/wallet/components/DashboardWalletTablePanel.vue';
-import VNativePushSubscribeButton from 'InvestCommon/domain/nativePush/VNativePushSubscribeButton.vue';
 
 const CardDonutUnified = defineAsyncComponent(
   () => import('InvestCommon/features/summary/components/CardDonutUnified.vue'),
@@ -197,12 +196,6 @@ const topInfoSliderOptions = {
         />
       </div>
     </div>
-    <VNativePushSubscribeButton
-        size="large"
-        variant="outlined"
-        show-explainer
-        class="dashboard-summary__native-push"
-      />
   </div>
 </template>
 
@@ -212,17 +205,6 @@ const topInfoSliderOptions = {
     &__content {
         display: flex;
         flex-direction: column;
-    }
-
-    &__native-push {
-      width: 100%;
-      margin-bottom: 20px;
-
-      @media screen and (width < $tablet) {
-        .v-button {
-          width: 100%;
-        }
-      }
     }
 
     &__top-info-card {
