@@ -4,6 +4,7 @@ export const NATIVE_PUSH_EXPLAINER_STATE_KEY = 'invest-pro:native-push:explainer
 export const NATIVE_PUSH_PERMISSION_STATE_KEY = 'invest-pro:native-push:permission-decision';
 export const NATIVE_PUSH_TOKEN_SYNC_STATE_KEY = 'invest-pro:native-push:token-sync-v1';
 export const NATIVE_PUSH_NOTIFICATIONS_FALLBACK_PATH = '/dashboard/notifications';
+export const NATIVE_PUSH_DEFAULT_CHANNEL_ID = 'invest-pro-default';
 export const NATIVE_PUSH_PROVIDER = 'fcm';
 
 export type NativePushExplainerDecision = 'accepted' | 'rejected';
@@ -62,10 +63,36 @@ function toNonEmptyString(value: unknown): string | null {
   return typeof value === 'string' && value.trim() ? value : null;
 }
 
+function normalizeNotificationData(value: unknown): Record<string, unknown> | null {
+  const parsedData = parseObjectCandidate(value);
+
+  if (!isRecord(parsedData)) {
+    return null;
+  }
+
+  const fields = parseObjectCandidate(parsedData.fields);
+
+  if (!isRecord(fields)) {
+    return null;
+  }
+
+  return {
+    ...parsedData,
+    fields,
+  };
+}
+
 function normalizeNotificationCandidate(candidate: unknown): INotification | null {
   const parsedCandidate = parseObjectCandidate(candidate);
 
-  if (!isRecord(parsedCandidate) || !isRecord(parsedCandidate.data)) {
+  if (!isRecord(parsedCandidate)) {
+    return null;
+  }
+
+  const notificationData = normalizeNotificationData(parsedCandidate.data)
+    ?? normalizeNotificationData(parsedCandidate);
+
+  if (!notificationData) {
     return null;
   }
 
@@ -76,8 +103,8 @@ function normalizeNotificationCandidate(candidate: unknown): INotification | nul
   const type = toNonEmptyString(parsedCandidate.type);
   const createdAt = toNonEmptyString(parsedCandidate.created_at);
   const updatedAt = toNonEmptyString(parsedCandidate.updated_at);
-  const objectName = toNonEmptyString(parsedCandidate.data.obj);
-  const objectId = toFiniteNumber(parsedCandidate.data.object_id);
+  const objectName = toNonEmptyString(notificationData.obj);
+  const objectId = toFiniteNumber(notificationData.object_id);
 
   if (
     id === null
@@ -89,12 +116,12 @@ function normalizeNotificationCandidate(candidate: unknown): INotification | nul
     || !updatedAt
     || !objectName
     || objectId === null
-    || !isRecord(parsedCandidate.data.fields)
   ) {
     return null;
   }
 
-  const fieldsType = toNonEmptyString(parsedCandidate.data.fields.type) ?? type;
+  const fields = notificationData.fields as Record<string, unknown>;
+  const fieldsType = toNonEmptyString(fields.type) ?? type;
 
   return {
     id,
@@ -108,7 +135,7 @@ function normalizeNotificationCandidate(candidate: unknown): INotification | nul
       obj: objectName,
       object_id: objectId,
       fields: {
-        ...parsedCandidate.data.fields,
+        ...fields,
         type: fieldsType,
       },
     },
@@ -138,9 +165,12 @@ function collectPayloadCandidates(payload: unknown): unknown[] {
   if (isRecord(data)) {
     candidates.push(
       parseObjectCandidate(data.notification),
+      parseObjectCandidate(data.notificationPayload),
       parseObjectCandidate(data.payload),
       parseObjectCandidate(data.raw),
       parseObjectCandidate(data.notification_payload),
+      parseObjectCandidate(data.notification_payload_json),
+      parseObjectCandidate(data.native_push_notification),
     );
   }
 

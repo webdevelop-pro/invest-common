@@ -22,6 +22,7 @@ import {
   getForegroundPushHandling,
   isAndroidCapacitorRuntime,
   markNativePushTokenSynced,
+  NATIVE_PUSH_DEFAULT_CHANNEL_ID,
   NATIVE_PUSH_NOTIFICATIONS_FALLBACK_PATH,
   NATIVE_PUSH_PROVIDER,
   parseNativePushNotificationPayload,
@@ -55,7 +56,7 @@ type NativePushWindow = Window & {
   };
 };
 
-const subscriptionClient = new ApiClient(env.USER_URL || 'https://api.webdevelop.biz/user-api/v1.0');
+const subscriptionClient = new ApiClient(env.USER_URL || '');
 const REQUEST_ANDROID_NATIVE_PUSH_PERMISSION_EVENT = 'invest:native-push:request-permission';
 export const NATIVE_PUSH_AUTH_SUCCESS_EVENT = 'invest:native-push:auth-success';
 const NATIVE_PUSH_REGISTRATION_TIMEOUT_MS = 15000;
@@ -115,6 +116,10 @@ async function loadNativePushModules(): Promise<NativePushModules | null> {
 }
 
 async function subscribeFcmTokenWithPwaSession(token: string) {
+  if (!env.USER_URL) {
+    throw new Error('USER_URL is not configured for native push subscription.');
+  }
+
   await subscriptionClient.post('/auth/subscribe', {
     provider: NATIVE_PUSH_PROVIDER,
     device_token: token,
@@ -123,18 +128,18 @@ async function subscribeFcmTokenWithPwaSession(token: string) {
   });
 }
 
-async function syncNativePushToken(token: string) {
+async function syncNativePushToken(token: string, userId = registeredUserId) {
   const storage = getBrowserStorage();
 
-  if (!storage || !registeredUserId || !token) {
+  if (!storage || !userId || !token) {
     return;
   }
 
-  if (!shouldSubscribeNativePushToken(storage, registeredUserId, token)) {
+  if (!shouldSubscribeNativePushToken(storage, userId, token)) {
     return;
   }
 
-  const syncKey = createNativePushTokenSyncKey(registeredUserId, token);
+  const syncKey = createNativePushTokenSyncKey(userId, token);
   const existingRequest = tokenSyncRequests.get(syncKey);
 
   if (existingRequest) {
@@ -144,7 +149,7 @@ async function syncNativePushToken(token: string) {
 
   const syncRequest = subscribeFcmTokenWithPwaSession(token)
     .then(() => {
-      markNativePushTokenSynced(storage, registeredUserId, token);
+      markNativePushTokenSynced(storage, userId, token);
     })
     .finally(() => {
       tokenSyncRequests.delete(syncKey);
@@ -177,7 +182,7 @@ function reportNativePushSetupError(error: unknown, fallbackMessage: string) {
 async function createDefaultChannel(PushNotifications: PushNotificationsPlugin) {
   try {
     await PushNotifications.createChannel({
-      id: 'invest-pro-default',
+      id: NATIVE_PUSH_DEFAULT_CHANNEL_ID,
       name: 'Invest PRO',
       description: 'Account, offering, wallet, and platform updates',
       importance: 4,
@@ -252,7 +257,7 @@ async function ensureNativePushListeners(PushNotifications: PushNotificationsPlu
 
   listenerHandles = await Promise.all([
     PushNotifications.addListener('registration', (token: Token) => {
-      void syncNativePushToken(token.value).catch((error) => {
+      void syncNativePushToken(token.value, registeredUserId).catch((error) => {
         reportError(error, 'Failed to subscribe this device for push notifications', { source: 'nativePush' });
       });
     }),
@@ -390,7 +395,7 @@ async function ensureNativePushRegistration(
     await ensureNativePushListeners(PushNotifications);
     const token = await registerForFcmToken(PushNotifications);
     try {
-      await syncNativePushToken(token);
+      await syncNativePushToken(token, userId);
     } catch (error) {
       reportError(error, 'Failed to subscribe this device for push notifications', { source: 'nativePush' });
     }

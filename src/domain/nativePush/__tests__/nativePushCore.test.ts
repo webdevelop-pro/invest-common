@@ -189,6 +189,59 @@ describe('nativePushCore', () => {
     expect(result.ok).toBe(true);
   });
 
+  it('parses a notification with stringified nested data from FCM data values', () => {
+    const result = parseNativePushNotificationPayload({
+      data: {
+        notificationPayload: JSON.stringify({
+          ...validNotification,
+          data: JSON.stringify(validNotification.data),
+        }),
+      },
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.notification.data.fields).toMatchObject({
+        object_id: 55,
+        type: 'wallet',
+      });
+    }
+  });
+
+  it('parses a flattened full notification object from FCM data values', () => {
+    const result = parseNativePushNotificationPayload({
+      data: {
+        id: '101',
+        user_id: '55',
+        content: 'Wallet balance changed',
+        status: 'unread',
+        type: 'wallet',
+        created_at: '2026-03-31T14:03:32.739576+00:00',
+        updated_at: '2026-03-31T14:03:32.739576+00:00',
+        obj: 'wallet',
+        object_id: '55',
+        fields: JSON.stringify({
+          object_id: 55,
+          profile: {
+            id: 55,
+          },
+        }),
+      },
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.notification).toMatchObject({
+        id: 101,
+        user_id: 55,
+        data: {
+          obj: 'wallet',
+          object_id: 55,
+        },
+      });
+    }
+  });
+
   it('rejects partial payloads and selects foreground refresh behavior', () => {
     const result = parseNativePushNotificationPayload({
       data: {
