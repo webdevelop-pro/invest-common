@@ -13,7 +13,6 @@ import VSectionTopVideo from 'UiKit/components/VSectionTop/VSectionTopVideo.vue'
 import VButton from 'UiKit/components/Base/VButton/VButton.vue';
 import ArrowRight from 'UiKit/assets/images/arrow-right.svg';
 import { storeToRefs } from 'pinia';
-import VNativePushSubscribeButton from 'InvestCommon/domain/nativePush/VNativePushSubscribeButton.vue';
 import { data as allPages } from '@/store/all.data';
 import { filterPages } from 'UiKit/helpers/allData';
 import { IFrontmatter } from 'UiKit/types/types';
@@ -151,13 +150,6 @@ onBeforeUnmount(() => {
                 {{ topData.frontmatter.buttonText }}
                 <component :is="ArrowRight" />
               </VButton>
-              <VNativePushSubscribeButton
-                label="Subscribe to notifications"
-                size="large"
-                variant="outlined"
-                show-explainer
-                class="view-home__native-push"
-              />
             </div>
           </div>
         </template>
@@ -253,11 +245,6 @@ onBeforeUnmount(() => {
     @include media-lte(tablet) {
       margin: 20px 0 40px;
     }
-  }
-
-  &__native-push {
-    align-items: center;
-    text-align: center;
   }
 }
 </style>

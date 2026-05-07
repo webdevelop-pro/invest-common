@@ -12,6 +12,7 @@ import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
 import { SELFSERVICE, AAL2_QUERY } from 'InvestCommon/data/auth/auth.constants';
 import { oryErrorHandling } from 'InvestCommon/domain/error/oryErrorHandling';
 import { oryResponseHandling } from 'InvestCommon/domain/error/oryResponseHandling';
+import { notifyAndroidNativePushAuthSuccess } from 'InvestCommon/domain/nativePush/nativePushBridge';
 
 type FormModelTOTP = {
     totp_code: number;
@@ -87,6 +88,7 @@ export const useAuthenticatorStore = defineStore('authenticator', () => {
       await submitFormToHubspot({ email: (model as any).email });
     }
     userSessionStore.updateSession(session);
+    notifyAndroidNativePushAuthSuccess();
     navigateToProfile();
   };
 

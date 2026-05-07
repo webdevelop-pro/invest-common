@@ -13,7 +13,7 @@ import type {
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 import {
   requestAndroidNativePushPermissionConsent,
-  shouldShowAndroidNativePushPermissionButton,
+  shouldShowAndroidNativePushExplainer,
 } from './nativePushBridge';
 
 const props = withDefaults(defineProps<{
@@ -50,7 +50,7 @@ const refreshVisibility = async () => {
   }
 
   try {
-    const shouldShow = await shouldShowAndroidNativePushPermissionButton();
+    const shouldShow = await shouldShowAndroidNativePushExplainer();
     if (requestId === visibilityRequestId) {
       showButton.value = shouldShow;
     }
