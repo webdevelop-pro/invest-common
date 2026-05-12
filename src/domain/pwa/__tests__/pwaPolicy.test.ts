@@ -10,6 +10,7 @@ import {
   matchOfflineDomainPolicy,
   matchesPathPattern,
   matchesPathPrefix,
+  PWA_CACHE_NAMES,
   type RuntimeCacheRule,
   resolveOfflineDomainPolicies,
 } from '../pwaPolicy';
@@ -263,7 +264,7 @@ describe('buildWorkboxRuntimeCaching', () => {
 
   it('creates network matchers that still work after service worker serialization', () => {
     const runtimeRules = buildWorkboxRuntimeCaching(TEST_ENV);
-    const filerPublicRule = runtimeRules.find((rule) => rule.options.cacheName === 'filer-public-api-cache');
+    const filerPublicRule = runtimeRules.find((rule) => rule.options.cacheName === PWA_CACHE_NAMES.filerPublicApi);
     const matcher = evaluateSerializedMatcher(filerPublicRule?.urlPattern);
 
     expect(matcher({
@@ -288,7 +289,7 @@ describe('buildWorkboxRuntimeCaching', () => {
     });
 
     const runtimeRules = buildWorkboxRuntimeCaching(TEST_ENV);
-    const navigationRule = runtimeRules.find((rule) => rule.options.cacheName === 'frontend-shell-cache');
+    const navigationRule = runtimeRules.find((rule) => rule.options.cacheName === PWA_CACHE_NAMES.frontendShell);
     const navigationMatcher = getUrlPatternMatcher(navigationRule?.urlPattern);
     const createMatcherContext = (
       mode: RequestMode,

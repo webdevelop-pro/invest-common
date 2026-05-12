@@ -59,17 +59,22 @@ export type ResolvedOfflineDomainPolicy = OfflineDomainDefinition & {
   normalizedPathname: string;
 };
 
+// Bumped to v2 to abandon legacy caches that captured 4xx/5xx responses
+// before the evict-stale plugin was added. Bump again whenever the cache
+// shape or eviction logic changes incompatibly.
+export const PWA_CACHE_VERSION = 'v2';
+
 export const PWA_CACHE_NAMES = {
-  frontendShell: 'frontend-shell-cache',
-  offerApi: 'offer-api-cache',
-  userApi: 'user-api-cache',
-  investmentApi: 'investment-api-cache',
-  walletApi: 'wallet-api-cache',
-  evmApi: 'evm-api-cache',
-  filerPublicApi: 'filer-public-api-cache',
-  filerPrivateApi: 'filer-private-api-cache',
-  distributionsApi: 'distributions-api-cache',
-  accreditationApi: 'accreditation-api-cache',
+  frontendShell: `frontend-shell-cache-${PWA_CACHE_VERSION}`,
+  offerApi: `offer-api-cache-${PWA_CACHE_VERSION}`,
+  userApi: `user-api-cache-${PWA_CACHE_VERSION}`,
+  investmentApi: `investment-api-cache-${PWA_CACHE_VERSION}`,
+  walletApi: `wallet-api-cache-${PWA_CACHE_VERSION}`,
+  evmApi: `evm-api-cache-${PWA_CACHE_VERSION}`,
+  filerPublicApi: `filer-public-api-cache-${PWA_CACHE_VERSION}`,
+  filerPrivateApi: `filer-private-api-cache-${PWA_CACHE_VERSION}`,
+  distributionsApi: `distributions-api-cache-${PWA_CACHE_VERSION}`,
+  accreditationApi: `accreditation-api-cache-${PWA_CACHE_VERSION}`,
 } as const;
 
 export const PWA_PUBLIC_CACHE_NAMES = [
@@ -350,6 +355,26 @@ const createUrlMatcher = (policy: ResolvedOfflineDomainPolicy) => {
   `)() as (context: { request: Request; url: URL }) => boolean;
 };
 
+// Evicts any cached entry for a request when the network responds with a
+// non-2xx status. Without this, a stale 200 left over from an earlier
+// successful fetch can keep serving even after the resource has moved or
+// been deleted (e.g. /auth/files/{id} returning 404 after the row is gone).
+// Pair with `cacheableResponse: { statuses: [200] }` so the same response
+// is never re-added to cache on the same request.
+const createEvictStalePlugin = (cacheName: string) => ({
+  fetchDidSucceed: async ({ request, response }: { request: Request; response: Response }) => {
+    if (!response.ok && typeof caches !== 'undefined') {
+      try {
+        const cache = await caches.open(cacheName);
+        await cache.delete(request);
+      } catch {
+        // best-effort cleanup; never let cache errors break the response path
+      }
+    }
+    return response;
+  },
+});
+
 const createNetworkFirstRule = (policy: ResolvedOfflineDomainPolicy): RuntimeCacheRule => ({
   urlPattern: createUrlMatcher(policy),
   handler: 'NetworkFirst',
@@ -363,6 +388,9 @@ const createNetworkFirstRule = (policy: ResolvedOfflineDomainPolicy): RuntimeCac
       statuses: [200],
     },
     networkTimeoutSeconds: policy.networkTimeoutSeconds ?? 5,
+    plugins: [
+      createEvictStalePlugin(policy.cacheName),
+    ],
   },
 });
 
@@ -453,6 +481,7 @@ const createNavigationRule = (policy: ResolvedOfflineDomainPolicy): RuntimeCache
           return Response.error();
         },
       },
+      createEvictStalePlugin(policy.cacheName),
     ],
   },
 });
