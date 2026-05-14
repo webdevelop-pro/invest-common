@@ -21,10 +21,10 @@ const getLinkToken = () => {
 export function useKycThirdParty() {
   const repositoryKyc = useRepositoryKyc();
   const status = shallowRef<KycThirdPartyStatus>('idle');
-  const linkToken = getLinkToken();
   const screen = computed(() => formatKycThirdPartyScreen(status.value));
 
   const launch = async () => {
+    const linkToken = getLinkToken();
     if (!linkToken) {
       status.value = 'invalidToken';
       return;

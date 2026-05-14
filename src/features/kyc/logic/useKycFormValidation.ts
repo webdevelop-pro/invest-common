@@ -2,7 +2,7 @@ import { computed, nextTick } from 'vue';
 import { scrollToError } from 'UiKit/helpers/validation/general';
 import type { KycFormSections } from './useKycFormWorkflow';
 
-export function useKycFormValidation(formSections: KycFormSections) {
+export function useKycFormValidation(formSections: KycFormSections, scrollTargetClass = 'ViewKYC') {
   const isValid = computed(() => formSections.every((section) => section.value?.isValid));
 
   const validateSections = () => {
@@ -12,7 +12,7 @@ export function useKycFormValidation(formSections: KycFormSections) {
       return true;
     }
 
-    nextTick(() => scrollToError('ViewKYC'));
+    nextTick(() => scrollToError(scrollTargetClass));
     return false;
   };
 

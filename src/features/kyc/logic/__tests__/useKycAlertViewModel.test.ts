@@ -112,7 +112,8 @@ describe('useKycAlertViewModel', () => {
     await viewModel.onPrimaryAction();
 
     expect(mockPush).toHaveBeenCalledWith({
-      path: '/profile/123/kyc',
+      name: 'ROUTE_SUBMIT_KYC',
+      params: { profileId: 123 },
       query: {
         tab: 'wallet',
         redirect: '/dashboard?tab=wallet',

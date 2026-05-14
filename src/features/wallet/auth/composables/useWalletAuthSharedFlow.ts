@@ -156,7 +156,7 @@ export function useWalletAuthSharedFlow() {
   const resolveWalletAuthPayload = (profileId?: number | null): WalletAuthOpenPayload | null => {
     const resolvedProfileId = profileId ?? currentProfileId.value;
 
-    if (resolvedProfileId === null || Number.isNaN(Number(resolvedProfileId))) {
+    if (resolvedProfileId === null || resolvedProfileId <= 0) {
       return null;
     }
 

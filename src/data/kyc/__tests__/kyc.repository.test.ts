@@ -32,12 +32,7 @@ vi.mock('InvestCommon/data/plaid/loadPlaidScriptOnce', () => ({
 
 import { useRepositoryKyc } from '../kyc.repository';
 
-const flushAsyncWork = async () => {
-  await Promise.resolve();
-  await Promise.resolve();
-  await Promise.resolve();
-  await Promise.resolve();
-};
+const flushAsyncWork = () => new Promise<void>(resolve => setTimeout(resolve, 0));
 
 describe('useRepositoryKyc', () => {
   const plaidCreateMock = vi.fn();
@@ -45,7 +40,6 @@ describe('useRepositoryKyc', () => {
 
   beforeEach(() => {
     setActivePinia(createPinia());
-    vi.useFakeTimers();
     vi.clearAllMocks();
     apiPostMock.mockReset();
     loadPlaidScriptOnceMock.mockReset();
@@ -62,10 +56,9 @@ describe('useRepositoryKyc', () => {
 
   afterEach(() => {
     window.Plaid = originalPlaid;
-    vi.useRealTimers();
   });
 
-  it('launches Plaid from a provided token and opens the handler after the delay', async () => {
+  it('launches Plaid from a provided token and opens the handler via onLoad', async () => {
     const store = useRepositoryKyc();
     const resultPromise = store.handlePlaidKycToken('direct-token');
 
@@ -78,12 +71,12 @@ describe('useRepositoryKyc', () => {
     }));
 
     const plaidHandler = plaidCreateMock.mock.results[0]?.value;
+    const plaidConfig = plaidCreateMock.mock.calls[0]?.[0];
     expect(plaidHandler.open).not.toHaveBeenCalled();
 
-    vi.advanceTimersByTime(1000);
+    plaidConfig.onLoad();
     expect(plaidHandler.open).toHaveBeenCalledTimes(1);
 
-    const plaidConfig = plaidCreateMock.mock.calls[0]?.[0];
     plaidConfig.onSuccess('public-token', { link_session_id: 'session-1' });
 
     await expect(resultPromise).resolves.toEqual({ status: 'success' });
@@ -91,28 +84,19 @@ describe('useRepositoryKyc', () => {
     expect(store.isPlaidDone).toBe(true);
   });
 
-  it('keeps the Plaid promise pending when success metadata does not match the current link session id', async () => {
+  it('settles with exit when success metadata does not match the current link session id', async () => {
     const store = useRepositoryKyc();
     const resultPromise = store.handlePlaidKycToken('direct-token');
 
     await flushAsyncWork();
 
     const plaidConfig = plaidCreateMock.mock.calls[0]?.[0];
-    let resolvedValue: { status: 'success' | 'exit' } | null | undefined;
-    void resultPromise.then((value) => {
-      resolvedValue = value;
-    });
 
     plaidConfig.onEvent('OPEN', { link_session_id: 'expected-session' });
     plaidConfig.onSuccess('public-token', { link_session_id: 'other-session' });
-    await flushAsyncWork();
 
-    expect(resolvedValue).toBeUndefined();
-    expect(store.isPlaidLoading).toBe(true);
-
-    plaidConfig.onSuccess('public-token', { link_session_id: 'expected-session' });
-
-    await expect(resultPromise).resolves.toEqual({ status: 'success' });
+    await expect(resultPromise).resolves.toEqual({ status: 'exit' });
+    expect(store.isPlaidLoading).toBe(false);
   });
 
   it('resolves an unsuccessful result when the Plaid flow exits', async () => {
@@ -164,6 +148,21 @@ describe('useRepositoryKyc', () => {
     plaidConfig.onSuccess('public-token', { link_session_id: 'profile-session' });
 
     await expect(resultPromise).resolves.toEqual({ status: 'success' });
-    expect(store.kycToken?.link_token).toBe('profile-token');
+    expect(store.tokenState.data?.link_token).toBe('profile-token');
+  });
+
+  it('resetAll clears all Plaid and token state', async () => {
+    const store = useRepositoryKyc();
+    void store.handlePlaidKycToken('any-token');
+
+    await flushAsyncWork();
+
+    expect(store.isPlaidLoading).toBe(true);
+
+    store.resetAll();
+
+    expect(store.tokenState.data).toBeUndefined();
+    expect(store.isPlaidLoading).toBe(false);
+    expect(store.isPlaidDone).toBe(false);
   });
 });

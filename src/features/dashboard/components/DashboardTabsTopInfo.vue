@@ -33,6 +33,7 @@ defineProps({
   align-items: flex-start;
   gap: 4px;
   flex: 1 0 0;
+  min-height: 84px;
 
   &__text {
     color: $gray-80;

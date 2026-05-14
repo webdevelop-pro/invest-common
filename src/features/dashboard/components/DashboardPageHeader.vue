@@ -14,6 +14,10 @@ defineProps({
     type: Object as PropType<Record<DashboardTabTypes, Component>>,
     required: true,
   },
+  loadedTopLeftTabs: {
+    type: Array as PropType<DashboardTabTypes[]>,
+    required: true,
+  },
 });
 
 const {
@@ -39,6 +43,7 @@ const {
     <DashboardPageHeaderLeft
       :active-tab="activeTab"
       :tab-top-left-components="tabTopLeftComponents"
+      :loaded-top-left-tabs="loadedTopLeftTabs"
       class="dashboard-page-header__info"
       @info-cta-click="onInfoCtaClick"
     />

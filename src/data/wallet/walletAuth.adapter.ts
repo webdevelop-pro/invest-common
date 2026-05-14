@@ -24,17 +24,33 @@ import type {
   WalletSigner,
 } from './walletAuth.types';
 
+// eslint-disable-next-line no-console
+const debug = import.meta.env.DEV ? console.log.bind(console) : () => {};
+
 let signerPromise: Promise<WalletSigner> | null = null;
 const pendingState: PendingState = {};
+let signerCleanups: Array<() => void> = [];
 const SIGNER_IFRAME_CONTAINER_ID = 'alchemy-signer-iframe-container';
-const SIGNER_IFRAME_WAIT_TIMEOUT_MS = 3000;
+const SIGNER_IFRAME_WAIT_TIMEOUT_MS = 10_000;
+const OPERATION_TIMEOUT_MS = 30_000;
 const EIP_7702_DELEGATION_PREFIX = '0xef0100';
+
+const withTimeout = <T>(promise: Promise<T>, ms: number, message: string): Promise<T> => {
+  let id: ReturnType<typeof setTimeout>;
+  return Promise.race([
+    promise,
+    new Promise<never>((_, reject) => {
+      id = setTimeout(() => reject(new Error(message)), ms);
+    }),
+  ]).finally(() => clearTimeout(id));
+};
 let warmedSignerAddress = '';
 
 const clearCachedSignerState = () => {
   signerPromise = null;
   pendingState.pendingMfaFactorId = undefined;
   warmedSignerAddress = '';
+  signerCleanups.splice(0).forEach((cleanup) => cleanup());
 };
 
 const toError = (error?: SignerErrorInfo | Error) => (
@@ -74,12 +90,28 @@ const waitForIframeContainer = async () => {
   });
 };
 
+// Remove any stale iframes injected by a previous signer instance so the new
+// signer gets a clean container. Without this, a second AlchemyWebSigner created
+// after resetSession() would append its iframe alongside the old one, breaking
+// postMessage communication and causing startEmailOtp to hang indefinitely.
+const clearSignerIframeContainer = () => {
+  if (typeof document === 'undefined') {
+    return;
+  }
+
+  const container = document.getElementById(SIGNER_IFRAME_CONTAINER_ID);
+  if (container && container.hasChildNodes()) {
+    container.innerHTML = '';
+  }
+};
+
 const createSigner = async () => {
   if (!env.ALCHEMY_WALLET_API_KEY) {
     throw new Error('Wallet auth is not configured. Missing Alchemy API key.');
   }
 
   await waitForIframeContainer();
+  clearSignerIframeContainer();
 
   const signer = new AlchemyWebSigner({
     client: {
@@ -92,13 +124,14 @@ const createSigner = async () => {
     },
   });
 
-  signer.on('mfaStatusChanged', (mfaStatus) => {
-    pendingState.pendingMfaFactorId = mfaStatus?.mfaFactorId;
-  });
-
-  signer.on('connected', () => {
-    pendingState.pendingMfaFactorId = undefined;
-  });
+  signerCleanups = [
+    signer.on('mfaStatusChanged', (mfaStatus) => {
+      pendingState.pendingMfaFactorId = mfaStatus?.mfaFactorId;
+    }),
+    signer.on('connected', () => {
+      pendingState.pendingMfaFactorId = undefined;
+    }),
+  ];
 
   return signer;
 };
@@ -139,7 +172,7 @@ const createSignerSmartWalletClient = async (signer: WalletSigner) => {
     throw new Error('Wallet auth is not configured. Missing Alchemy 7702 policy ID.');
   }
 
-  console.log('[walletAuthAdapter] createSignerSmartWalletClient:getSignerAddress', {
+  debug('[walletAuthAdapter] createSignerSmartWalletClient:getSignerAddress', {
     signerAddress,
     hasApiKey: Boolean(env.ALCHEMY_WALLET_API_KEY),
   });
@@ -223,7 +256,7 @@ const signWalletApisPreparedCalls = async (
   preparedCalls: PrepareCallsResult,
   client?: Awaited<ReturnType<typeof createSignerSmartWalletClient>>,
 ) => {
-  console.log('[walletAuthAdapter] signWalletApisPreparedCalls:start', {
+  debug('[walletAuthAdapter] signWalletApisPreparedCalls:start', {
     type: preparedCalls.type,
   });
 
@@ -256,7 +289,7 @@ const signWalletApisPreparedCalls = async (
       | Extract<Extract<PrepareCallsResult, { type: 'array' }>['data'][number], { type: 'authorization' }>,
   ) => {
     const { signatureRequest: _signatureRequest, ...rest } = call;
-    console.log('[walletAuthAdapter] signPreparedAuthorization:start', {
+    debug('[walletAuthAdapter] signPreparedAuthorization:start', {
       chainId: call.chainId,
       nonce: call.data?.nonce,
       address: call.data?.address,
@@ -323,7 +356,7 @@ const forceEnable7702 = async (signer: WalletSigner) => {
   }
 
   const alreadyEnabled = await is7702Enabled(eoaAddress);
-  console.log('[walletAuthAdapter] forceEnable7702:delegationCheck', {
+  debug('[walletAuthAdapter] forceEnable7702:delegationCheck', {
     eoaAddress,
     alreadyEnabled,
   });
@@ -336,7 +369,7 @@ const forceEnable7702 = async (signer: WalletSigner) => {
   }
 
   const client = await createSignerSmartWalletClient(signer);
-  console.log('[walletAuthAdapter] forceEnable7702:sendNoopZeroTx', {
+  debug('[walletAuthAdapter] forceEnable7702:sendNoopZeroTx', {
     eoaAddress,
   });
   const { response } = await sendZeroTransaction(signer, client);
@@ -360,7 +393,7 @@ const sendZeroTransaction = async (
 
   const client = existingClient ?? await createSignerSmartWalletClient(signer);
   const zeroValueCall = createZeroValueNoopCall();
-  console.log('[walletAuthAdapter] sendZeroTransaction:start', {
+  debug('[walletAuthAdapter] sendZeroTransaction:start', {
     eoaAddress,
     account: eoaAddress,
     call: {
@@ -374,7 +407,7 @@ const sendZeroTransaction = async (
       account: eoaAddress as `0x${string}`,
       calls: [zeroValueCall],
     });
-    console.log('[walletAuthAdapter] sendZeroTransaction:prepared', {
+    debug('[walletAuthAdapter] sendZeroTransaction:prepared', {
       eoaAddress,
       type: preparedCalls.type,
       account: eoaAddress,
@@ -383,14 +416,14 @@ const sendZeroTransaction = async (
     });
 
     const signedCalls = await signWalletApisPreparedCalls(signer, preparedCalls, client);
-    console.log('[walletAuthAdapter] sendZeroTransaction:signed', {
+    debug('[walletAuthAdapter] sendZeroTransaction:signed', {
       eoaAddress,
       type: signedCalls.type,
       signedCalls,
       signedCallsSummary: summarizeSignedCalls(signedCalls),
     });
     const response = await client.sendPreparedCalls(signedCalls) as SendPreparedCallsResult;
-    console.log('[walletAuthAdapter] sendZeroTransaction:response', {
+    debug('[walletAuthAdapter] sendZeroTransaction:response', {
       eoaAddress,
       response,
     });
@@ -401,7 +434,7 @@ const sendZeroTransaction = async (
       response,
     };
   } catch (error) {
-    console.log('[walletAuthAdapter] sendZeroTransaction:error', {
+    debug('[walletAuthAdapter] sendZeroTransaction:error', {
       eoaAddress,
       account: eoaAddress,
       error,
@@ -418,7 +451,7 @@ const signWalletSignatureRequest = async (
 ) => {
   const requestType = String(signatureRequest?.type ?? '').trim().toLowerCase();
   const signableMessage = getSignableMessagePayload(signatureRequest?.data);
-  console.log('[walletAuthAdapter] signWalletSignatureRequest:start', {
+  debug('[walletAuthAdapter] signWalletSignatureRequest:start', {
     requestType,
     hasSignableMessage: Boolean(signableMessage),
     hasData: signatureRequest?.data != null,
@@ -483,6 +516,12 @@ export const walletAuthAdapter = {
         callback();
       };
 
+      const timeoutId = setTimeout(
+        () => settle(() => reject(new Error('Wallet authentication timed out. Please try again.'))),
+        OPERATION_TIMEOUT_MS,
+      );
+      cleanups.push(() => clearTimeout(timeoutId));
+
       cleanups.push(
         signer.on('statusChanged', (status: AlchemySignerStatus) => {
           if (status === AlchemySignerStatus.AWAITING_EMAIL_AUTH
@@ -535,6 +574,12 @@ export const walletAuthAdapter = {
         callback();
       };
 
+      const timeoutId = setTimeout(
+        () => settle(() => reject(new Error('OTP verification timed out. Please try again.'))),
+        OPERATION_TIMEOUT_MS,
+      );
+      cleanups.push(() => clearTimeout(timeoutId));
+
       cleanups.push(
         signer.on('statusChanged', (status: AlchemySignerStatus) => {
           if (status === AlchemySignerStatus.AWAITING_MFA_AUTH) {
@@ -568,12 +613,16 @@ export const walletAuthAdapter = {
 
   async submitMfa(multiFactorCode: string) {
     const signer = await getSigner();
-    await signer.validateMultiFactors({
-      multiFactorCode,
-      ...(pendingState.pendingMfaFactorId
-        ? { multiFactorId: pendingState.pendingMfaFactorId }
-        : {}),
-    });
+    await withTimeout(
+      signer.validateMultiFactors({
+        multiFactorCode,
+        ...(pendingState.pendingMfaFactorId
+          ? { multiFactorId: pendingState.pendingMfaFactorId }
+          : {}),
+      }),
+      OPERATION_TIMEOUT_MS,
+      'MFA verification timed out. Please try again.',
+    );
     pendingState.pendingMfaFactorId = undefined;
   },
 
@@ -603,18 +652,18 @@ export const walletAuthAdapter = {
   async warmSignerWithZeroTransaction() {
     const signer = await getSigner();
     const signerAddress = (await signer.getAddress()).trim();
-    console.log('[walletAuthAdapter] warmSignerWithZeroTransaction:start', {
+    debug('[walletAuthAdapter] warmSignerWithZeroTransaction:start', {
       signerAddress,
       warmedSignerAddress,
     });
 
     if (!signerAddress) {
-      console.log('[walletAuthAdapter] warmSignerWithZeroTransaction:missingSignerAddress');
+      debug('[walletAuthAdapter] warmSignerWithZeroTransaction:missingSignerAddress');
       throw new Error('Wallet signer address is unavailable for authorization warmup.');
     }
 
     if (warmedSignerAddress === signerAddress) {
-      console.log('[walletAuthAdapter] warmSignerWithZeroTransaction:skipAlreadyWarmed', {
+      debug('[walletAuthAdapter] warmSignerWithZeroTransaction:skipAlreadyWarmed', {
         signerAddress,
       });
       return;
@@ -623,14 +672,14 @@ export const walletAuthAdapter = {
     try {
       const result = await forceEnable7702(signer);
       warmedSignerAddress = result.eoaAddress;
-      console.log('[walletAuthAdapter] warmSignerWithZeroTransaction:sent', {
+      debug('[walletAuthAdapter] warmSignerWithZeroTransaction:sent', {
         signerAddress,
         warmedSignerAddress,
         status: result.status,
         response: 'response' in result ? result.response : undefined,
       });
     } catch (error) {
-      console.log('[walletAuthAdapter] warmSignerWithZeroTransaction:error', {
+      debug('[walletAuthAdapter] warmSignerWithZeroTransaction:error', {
         signerAddress,
         warmedSignerAddress,
         error,
@@ -647,7 +696,7 @@ export const walletAuthAdapter = {
     const signer = await getSigner();
     const result = await sendZeroTransaction(signer);
     warmedSignerAddress = result.eoaAddress;
-    console.log('[walletAuthAdapter] sendZeroTransaction:sent', {
+    debug('[walletAuthAdapter] sendZeroTransaction:sent', {
       signerAddress: result.eoaAddress,
       warmedSignerAddress,
       response: result.response,

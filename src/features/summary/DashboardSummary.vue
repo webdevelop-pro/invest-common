@@ -196,6 +196,12 @@ const topInfoSliderOptions = {
         />
       </div>
     </div>
+    <VNativePushSubscribeButton
+      size="large"
+      variant="outlined"
+      show-explainer
+      class="dashboard-summary__native-push"
+    />
   </div>
 </template>
 

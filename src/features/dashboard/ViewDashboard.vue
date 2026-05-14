@@ -2,6 +2,7 @@
 import { useGlobalLoader } from 'UiKit/store/useGlobalLoader';
 import { DashboardTabTypes } from './utils';
 import DashboardTabSkeleton from './components/DashboardTabSkeleton.vue';
+import DashboardTabTopLeftSkeleton from './components/DashboardTabTopLeftSkeleton.vue';
 import DashboardPageHeaderSkeleton from './components/DashboardPageHeaderSkeleton.vue';
 import VPageTopInfoAndTabs from 'InvestCommon/shared/components/VPageTopInfoAndTabs.vue';
 import {
@@ -154,6 +155,13 @@ const createTabComponent = (loader: () => Promise<Component>) =>
     delay: 0,
   });
 
+const createTabTopLeftComponent = (loader: () => Promise<Component>) =>
+  defineAsyncComponent({
+    loader,
+    loadingComponent: DashboardTabTopLeftSkeleton,
+    delay: 0,
+  });
+
 const DashboardPageHeader = defineAsyncComponent({
   loader: () => import('./components/DashboardPageHeader.vue'),
   loadingComponent: DashboardPageHeaderSkeleton,
@@ -171,13 +179,13 @@ const tabComponents: Record<DashboardTabTypes, Component> = {
 };
 
 const tabTopLeftComponents: Record<DashboardTabTypes, Component> = {
-  [DashboardTabTypes.portfolio]: createTabComponent(tabTopLeftLoaders[DashboardTabTypes.portfolio]),
-  [DashboardTabTypes.summary]: createTabComponent(tabTopLeftLoaders[DashboardTabTypes.summary]),
-  [DashboardTabTypes.acount]: createTabComponent(tabTopLeftLoaders[DashboardTabTypes.acount]),
-  [DashboardTabTypes.wallet]: createTabComponent(tabTopLeftLoaders[DashboardTabTypes.wallet]),
-  [DashboardTabTypes.evmwallet]: createTabComponent(tabTopLeftLoaders[DashboardTabTypes.evmwallet]),
-  [DashboardTabTypes.distributions]: createTabComponent(tabTopLeftLoaders[DashboardTabTypes.distributions]),
-  [DashboardTabTypes.earn]: createTabComponent(tabTopLeftLoaders[DashboardTabTypes.earn]),
+  [DashboardTabTypes.portfolio]: createTabTopLeftComponent(tabTopLeftLoaders[DashboardTabTypes.portfolio]),
+  [DashboardTabTypes.summary]: createTabTopLeftComponent(tabTopLeftLoaders[DashboardTabTypes.summary]),
+  [DashboardTabTypes.acount]: createTabTopLeftComponent(tabTopLeftLoaders[DashboardTabTypes.acount]),
+  [DashboardTabTypes.wallet]: createTabTopLeftComponent(tabTopLeftLoaders[DashboardTabTypes.wallet]),
+  [DashboardTabTypes.evmwallet]: createTabTopLeftComponent(tabTopLeftLoaders[DashboardTabTypes.evmwallet]),
+  [DashboardTabTypes.distributions]: createTabTopLeftComponent(tabTopLeftLoaders[DashboardTabTypes.distributions]),
+  [DashboardTabTypes.earn]: createTabTopLeftComponent(tabTopLeftLoaders[DashboardTabTypes.earn]),
 };
 
 // VTabs controls the active tab via URL query param `tab`.
@@ -197,12 +205,16 @@ const activeTab = computed<DashboardTabTypes>(() => {
 });
 
 const loadedTabs = ref<DashboardTabTypes[]>([]);
+const loadedTopLeftTabs = ref<DashboardTabTypes[]>([]);
 
 watch(
   () => activeTab.value,
   (tab) => {
     if (!loadedTabs.value.includes(tab)) {
       loadedTabs.value = [...loadedTabs.value, tab];
+    }
+    if (!loadedTopLeftTabs.value.includes(tab)) {
+      loadedTopLeftTabs.value = [...loadedTopLeftTabs.value, tab];
     }
     // Warm the active tab chunk; component mount will also load if needed.
     void tabLoaders[tab]?.();
@@ -231,6 +243,7 @@ const {
       <DashboardPageHeader
         :active-tab="activeTab"
         :tab-top-left-components="tabTopLeftComponents"
+        :loaded-top-left-tabs="loadedTopLeftTabs"
       />
     </template>
     <template #tabs-content>

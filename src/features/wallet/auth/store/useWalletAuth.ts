@@ -14,6 +14,9 @@ import {
   shouldPromptWalletAuth,
 } from 'InvestCommon/features/wallet/auth/logic/walletAuth.helpers';
 
+// eslint-disable-next-line no-console
+const debug = import.meta.env.DEV ? console.log.bind(console) : () => {};
+
 export type WalletAuthStep =
   | 'intro'
   | 'sending_otp'
@@ -29,6 +32,7 @@ type WalletAuthProfileState = {
   errorMessage: string;
   lastOpenedAt: number | null;
   profileType: string;
+  mfaRegistered: boolean;
 };
 
 const getWalletAddressFromAuthDetails = (authDetails: unknown) => {
@@ -71,6 +75,7 @@ const createEmptyState = (): WalletAuthProfileState => ({
   errorMessage: '',
   lastOpenedAt: null,
   profileType: '',
+  mfaRegistered: false,
 });
 
 const resolveWalletAuthEmail = (payload: OpenPayload) => deriveWalletAuthEmail(
@@ -264,6 +269,8 @@ export const useWalletAuth = defineStore('wallet-auth', () => {
   };
 
   const completeWalletBind = async (profileId: number) => {
+    const profileType = getProfileState(profileId).profileType || PROFILE_TYPES.INDIVIDUAL;
+
     patchStep(profileId, 'binding', {
       errorMessage: '',
     });
@@ -283,10 +290,7 @@ export const useWalletAuth = defineStore('wallet-auth', () => {
     });
     await walletAuthAdapter.warmSignerWithZeroTransaction();
     await Promise.allSettled([
-      profilesRepository.getProfileById(
-        currentProfileState.value.profileType || PROFILE_TYPES.INDIVIDUAL,
-        profileId,
-      ),
+      profilesRepository.getProfileById(profileType, profileId),
       evmRepository.getEvmWalletByProfile(profileId, []),
     ]);
 
@@ -309,14 +313,14 @@ export const useWalletAuth = defineStore('wallet-auth', () => {
       return;
     }
 
-    patchStep(profileId, 'binding', {
-      errorMessage: '',
-    });
+    if (!getProfileState(profileId).mfaRegistered) {
+      await evmRepository.updateWalletMfa(profileId, {
+        provider_name: 'alchemy',
+        mfa_enabled: true,
+      });
+      patchProfileState(profileId, { mfaRegistered: true });
+    }
 
-    await evmRepository.updateWalletMfa(profileId, {
-      provider_name: 'alchemy',
-      mfa_enabled: true,
-    });
     await completeWalletBind(profileId);
   };
 
@@ -330,6 +334,10 @@ export const useWalletAuth = defineStore('wallet-auth', () => {
       errorMessage: '',
       profileType,
     });
+
+    // Disconnect any stale signer session (e.g. from a previous user after
+    // logout) so a fresh signer is created with clean browser-storage state.
+    await walletAuthAdapter.resetSession();
 
     const nextStep = await walletAuthAdapter.startEmailOtp(email);
 
@@ -383,6 +391,7 @@ export const useWalletAuth = defineStore('wallet-auth', () => {
       ...createEmptyState(),
       email,
       profileType: profileType || '',
+      mfaRegistered: getProfileState(profileId).mfaRegistered,
     });
     setCurrentProfile(profileId);
 
@@ -412,7 +421,7 @@ export const useWalletAuth = defineStore('wallet-auth', () => {
 
   const submitOtp = async (otpCode: string) => {
     const profileId = currentProfileId.value;
-    if (profileId === null) {
+    if (profileId === null || currentProfileState.value.step !== 'awaiting_otp') {
       return;
     }
 
@@ -452,11 +461,12 @@ export const useWalletAuth = defineStore('wallet-auth', () => {
 
   const submitMfa = async (code: string) => {
     const profileId = currentProfileId.value;
-    if (profileId === null) {
+    if (profileId === null || currentProfileState.value.step !== 'awaiting_mfa') {
       return;
     }
 
     clearProfileError(profileId);
+    patchStep(profileId, 'binding', { errorMessage: '' });
     try {
       await walletAuthAdapter.submitMfa(code);
     } catch (error) {
@@ -510,21 +520,21 @@ export const useWalletAuth = defineStore('wallet-auth', () => {
   const triggerZeroTransactionWarmup = async (
     payload: OpenPayload,
   ): Promise<TriggerZeroTransactionWarmupResult> => {
-    console.log('[walletAuthStore] triggerZeroTransactionWarmup:start', {
+    debug('[walletAuthStore] triggerZeroTransactionWarmup:start', {
       profileId: payload.profileId,
       profileType: payload.profileType,
       walletStatus: payload.walletStatus,
       isKycApproved: payload.isKycApproved,
     });
     const hasActiveSession = await walletAuthAdapter.hasActiveSession();
-    console.log('[walletAuthStore] triggerZeroTransactionWarmup:session', {
+    debug('[walletAuthStore] triggerZeroTransactionWarmup:session', {
       profileId: payload.profileId,
       hasActiveSession,
     });
 
     if (hasActiveSession) {
       await walletAuthAdapter.sendZeroTransaction();
-      console.log('[walletAuthStore] triggerZeroTransactionWarmup:completedImmediately', {
+      debug('[walletAuthStore] triggerZeroTransactionWarmup:completedImmediately', {
         profileId: payload.profileId,
       });
       return 'completed';
@@ -534,13 +544,13 @@ export const useWalletAuth = defineStore('wallet-auth', () => {
       profileId: payload.profileId,
       successMarker: 'zero_transaction_warmup',
       run: async () => {
-        console.log('[walletAuthStore] triggerZeroTransactionWarmup:resumePendingAction', {
+        debug('[walletAuthStore] triggerZeroTransactionWarmup:resumePendingAction', {
           profileId: payload.profileId,
         });
         await walletAuthAdapter.sendZeroTransaction();
       },
     });
-    console.log('[walletAuthStore] triggerZeroTransactionWarmup:deferredToAuth', {
+    debug('[walletAuthStore] triggerZeroTransactionWarmup:deferredToAuth', {
       profileId: payload.profileId,
     });
     await startFlowForProfile(payload);

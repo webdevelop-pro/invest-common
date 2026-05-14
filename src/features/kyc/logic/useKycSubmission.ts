@@ -2,7 +2,7 @@ import type { IProfileData } from 'InvestCommon/data/profiles/profiles.types';
 import { useHubspotForm } from 'UiKit/composables/useHubspotForm';
 import env from 'InvestCommon/config/env';
 import { reportError } from 'InvestCommon/domain/error/errorReporting';
-import type { KycSectionModels } from './useKycFormWorkflow';
+import type { KycSectionModels, KycSubmissionFields } from './useKycFormWorkflow';
 
 export const KYC_STEP_ERROR_MESSAGES = {
   saveProfile: 'Failed to save KYC and financial information',
@@ -84,7 +84,7 @@ export function useKycSubmission({
   createEscrow,
 }: SubmissionDependencies) {
   const startBackgroundTasks = (
-    fields: IProfileData & { phone?: string },
+    fields: KycSubmissionFields,
     sectionModels: KycSectionModels,
   ) => {
     void (async () => {
@@ -124,7 +124,7 @@ export function useKycSubmission({
   };
 
   const submit = async (
-    fields: IProfileData,
+    fields: KycSubmissionFields,
     sectionModels: KycSectionModels,
   ): Promise<KycSubmissionResult> => {
     let hubspotPromise: Promise<void> | null = null;

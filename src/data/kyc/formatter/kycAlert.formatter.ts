@@ -26,18 +26,20 @@ export const formatKycAlertModel = ({
   isPlaidLoading = false,
   status = InvestKycTypes.none,
 }: KycAlertFormatterInput): KycAlertModel => {
-  if (isKycApproved || status === InvestKycTypes.approved) {
+  const resolvedStatus = status ?? InvestKycTypes.none;
+
+  if (isKycApproved || resolvedStatus === InvestKycTypes.approved) {
     return createHiddenKycAlertModel();
   }
 
-  const alert = KycAlerts[status];
-  const statusText = KycTextStatuses[status];
+  const alert = KycAlerts[resolvedStatus];
+  const statusText = KycTextStatuses[resolvedStatus];
 
   return {
     show: true,
-    variant: status === InvestKycTypes.in_progress ? 'info' : 'error',
+    variant: resolvedStatus === InvestKycTypes.in_progress ? 'info' : 'error',
     title: alert.title,
-    description: alert.description || '',
+    description: alert.description,
     buttonText: statusText.button ? statusText.text : undefined,
     isLoading: isPlaidLoading,
     isDisabled: isPlaidLoading,

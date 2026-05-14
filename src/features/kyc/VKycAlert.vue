@@ -26,18 +26,8 @@ const emit = defineEmits<{
 }>();
 
 const buttonColor = computed(() => (props.variant === 'info' ? 'primary' : 'red'));
-const hasDescriptionAction = computed(() => (
-  !!props.description?.includes('data-action="contact-us"')
-  || !!props.description?.includes('data-action=\'contact-us\'')
-));
 
-const handleDescriptionAction = (event: Event) => {
-  if (!hasDescriptionAction.value) {
-    return;
-  }
-
-  emit('descriptionAction', event);
-};
+const handleDescriptionAction = (event: Event) => emit('descriptionAction', event);
 </script>
 
 <template>

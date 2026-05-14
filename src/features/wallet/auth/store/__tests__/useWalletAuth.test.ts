@@ -271,7 +271,7 @@ describe('useWalletAuth', () => {
 
     const retryPromise = store.submitMfa('123456');
 
-    expect(store.currentProfileState.step).toBe('awaiting_mfa');
+    expect(store.currentProfileState.step).toBe('binding');
     expect(store.currentProfileState.errorMessage).toBe('');
 
     deferredSubmitMfa.resolve();
@@ -559,6 +559,81 @@ describe('useWalletAuth', () => {
     expect(store.currentProfileState.email).toBe('new@example.com');
   });
 
+  it('ignores a duplicate submitOtp call while one is already in flight', async () => {
+    const deferredSubmitOtp = createDeferred<'connected'>();
+    walletAuthAdapter.submitOtp.mockImplementationOnce(() => deferredSubmitOtp.promise);
+    const store = useWalletAuth();
+
+    await store.startFlowForProfile({
+      profileId: 7,
+      profileType: 'individual',
+      userEmail: 'user@example.com',
+    });
+
+    const firstCall = store.submitOtp('123456');
+    const secondCall = store.submitOtp('123456');
+
+    expect(walletAuthAdapter.submitOtp).toHaveBeenCalledTimes(1);
+    expect(store.currentProfileState.step).toBe('sending_otp');
+
+    deferredSubmitOtp.resolve('connected');
+    await Promise.all([firstCall, secondCall]);
+
+    expect(store.currentProfileState.step).toBe('success');
+  });
+
+  it('ignores a duplicate submitMfa call while one is already in flight', async () => {
+    const deferredSubmitMfa = createDeferred<void>();
+    walletAuthAdapter.submitOtp.mockResolvedValueOnce('awaiting_mfa');
+    walletAuthAdapter.submitMfa.mockImplementationOnce(() => deferredSubmitMfa.promise);
+    const store = useWalletAuth();
+
+    await store.startFlowForProfile({
+      profileId: 7,
+      profileType: 'individual',
+      userEmail: 'user@example.com',
+    });
+    await store.submitOtp('123456');
+
+    const firstCall = store.submitMfa('654321');
+    const secondCall = store.submitMfa('654321');
+
+    expect(walletAuthAdapter.submitMfa).toHaveBeenCalledTimes(1);
+    expect(store.currentProfileState.step).toBe('binding');
+
+    deferredSubmitMfa.resolve();
+    await Promise.all([firstCall, secondCall]);
+
+    expect(store.currentProfileState.step).toBe('success');
+  });
+
+  it('skips updateWalletMfa on retry when it already succeeded before bind failed', async () => {
+    walletAuthAdapter.submitOtp.mockResolvedValue('awaiting_mfa');
+    evmRepository.registerWallet
+      .mockRejectedValueOnce(new Error('Backend error'))
+      .mockResolvedValueOnce(undefined);
+    const store = useWalletAuth();
+
+    await store.startFlowForProfile({
+      profileId: 7,
+      profileType: 'individual',
+      userEmail: 'user@example.com',
+    });
+    await store.submitOtp('123456');
+    await store.submitMfa('654321');
+
+    expect(store.currentProfileState.step).toBe('error');
+    expect(evmRepository.updateWalletMfa).toHaveBeenCalledTimes(1);
+
+    await store.retryCurrentStep();
+    await store.submitOtp('123456');
+    await store.submitMfa('654321');
+
+    expect(store.currentProfileState.step).toBe('success');
+    expect(evmRepository.updateWalletMfa).toHaveBeenCalledTimes(1);
+    expect(evmRepository.registerWallet).toHaveBeenCalledTimes(2);
+  });
+
   it('resets wallet-auth state to intro when reopening after KYC', async () => {
     const store = useWalletAuth();
 
@@ -603,7 +678,8 @@ describe('useWalletAuth', () => {
       errorMessage: '',
       lastOpenedAt: null,
       profileType: '',
+      mfaRegistered: false,
     });
-    expect(walletAuthAdapter.resetSession).toHaveBeenCalledTimes(1);
+    expect(walletAuthAdapter.resetSession).toHaveBeenCalledTimes(2);
   });
 });

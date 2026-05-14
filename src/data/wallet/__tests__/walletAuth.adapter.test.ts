@@ -287,7 +287,7 @@ describe('walletAuthAdapter', () => {
 
     const firstAttempt = walletAuthAdapter.startEmailOtp('user@example.com');
     const firstAttemptExpectation = expect(firstAttempt).rejects.toThrow('Iframe container cannot be found');
-    await vi.advanceTimersByTimeAsync(3000);
+    await vi.advanceTimersByTimeAsync(10_000);
 
     await firstAttemptExpectation;
     expect(signerConstructorMock).not.toHaveBeenCalled();
@@ -490,5 +490,54 @@ describe('walletAuthAdapter', () => {
     await walletAuthAdapter.resetSession();
     await expect(walletAuthAdapter.hasActiveSession()).resolves.toBe(true);
     expect(disconnectMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('rejects startEmailOtp with a timeout error after 30 seconds with no signer response', async () => {
+    const { walletAuthAdapter } = await import('../walletAuth.adapter');
+
+    const container = document.createElement('div');
+    container.id = 'alchemy-signer-iframe-container';
+    document.body.appendChild(container);
+
+    authenticateMock.mockImplementation(() => new Promise(() => {}));
+
+    const promise = walletAuthAdapter.startEmailOtp('user@example.com');
+    const assertion = expect(promise).rejects.toThrow('Wallet authentication timed out. Please try again.');
+    await vi.advanceTimersByTimeAsync(30_000);
+    await assertion;
+  });
+
+  it('rejects submitOtp with a timeout error after 30 seconds with no signer response', async () => {
+    const { walletAuthAdapter } = await import('../walletAuth.adapter');
+
+    const container = document.createElement('div');
+    container.id = 'alchemy-signer-iframe-container';
+    document.body.appendChild(container);
+
+    await walletAuthAdapter.startEmailOtp('user@example.com');
+
+    authenticateMock.mockImplementation(() => new Promise(() => {}));
+
+    const promise = walletAuthAdapter.submitOtp('123456');
+    const assertion = expect(promise).rejects.toThrow('OTP verification timed out. Please try again.');
+    await vi.advanceTimersByTimeAsync(30_000);
+    await assertion;
+  });
+
+  it('rejects submitMfa with a timeout error after 30 seconds with no signer response', async () => {
+    const { walletAuthAdapter } = await import('../walletAuth.adapter');
+
+    const container = document.createElement('div');
+    container.id = 'alchemy-signer-iframe-container';
+    document.body.appendChild(container);
+
+    await walletAuthAdapter.startEmailOtp('user@example.com');
+
+    validateMultiFactorsMock.mockImplementation(() => new Promise(() => {}));
+
+    const promise = walletAuthAdapter.submitMfa('654321');
+    const assertion = expect(promise).rejects.toThrow('MFA verification timed out. Please try again.');
+    await vi.advanceTimersByTimeAsync(30_000);
+    await assertion;
   });
 });

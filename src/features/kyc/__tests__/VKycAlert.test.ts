@@ -76,7 +76,7 @@ describe('VKycAlert', () => {
     expect(wrapper.emitted('descriptionAction')).toHaveLength(1);
   });
 
-  it('does not emit description-action when the description is plain text', async () => {
+  it('emits description-action for any click, leaving filtering to the parent', async () => {
     const wrapper = mount(VKycAlert, {
       props: {
         variant: 'info',
@@ -106,6 +106,6 @@ describe('VKycAlert', () => {
 
     const description = wrapper.find('span');
     await description.trigger('click');
-    expect(wrapper.emitted('descriptionAction')).toBeUndefined();
+    expect(wrapper.emitted('descriptionAction')).toHaveLength(1);
   });
 });

@@ -11,6 +11,11 @@ import {
   isUserRejectedWalletSignatureError,
 } from './walletAuth.helpers';
 
+// eslint-disable-next-line no-console
+const debug = import.meta.env.DEV ? console.log.bind(console) : () => {};
+// eslint-disable-next-line no-console
+const debugError = import.meta.env.DEV ? console.error.bind(console) : () => {};
+
 export type WalletOperationAuthorizationRequest = IEvmWalletAuthorizeStartRequestBody;
 export type WalletOperationAuthorizationContext = WalletAuthOpenPayload;
 
@@ -118,14 +123,14 @@ export function useWalletOperationAuthorization() {
     onBeforeWalletAuth,
     onAuthRecovered,
   }: AuthorizeWalletOperationParams): Promise<WalletOperationAuthorizationResult> => {
-    console.log('[wallet-withdraw] authorizeOperation:start', {
+    debug('[wallet-withdraw] authorizeOperation:start', {
       profileId,
       request,
     });
 
     try {
       const hasActiveSession = await walletAuthAdapter.hasActiveSession();
-      console.log('[wallet-withdraw] authorizeOperation:session-check', {
+      debug('[wallet-withdraw] authorizeOperation:session-check', {
         profileId,
         hasActiveSession,
       });
@@ -141,7 +146,7 @@ export function useWalletOperationAuthorization() {
       });
       const reusableSession = findReusableSession(existingSessions, request);
       if (reusableSession) {
-        console.log('[wallet-withdraw] authorizeOperation:session-reused', {
+        debug('[wallet-withdraw] authorizeOperation:session-reused', {
           profileId,
           sessionId: reusableSession.session_id,
           asset: reusableSession.asset,
@@ -158,18 +163,18 @@ export function useWalletOperationAuthorization() {
       }
 
       const authorizeStart = await evmRepository.authorizeWithdrawStart(profileId, request);
-      console.log('[wallet-withdraw] authorizeOperation:authorize-start:success', authorizeStart);
+      debug('[wallet-withdraw] authorizeOperation:authorize-start:success', authorizeStart);
 
       let ownerSignature = '';
       try {
         ownerSignature = await walletAuthAdapter.signAuthorizationRequest(authorizeStart.signature_request);
-        console.log('[wallet-withdraw] authorizeOperation:sign:success', {
+        debug('[wallet-withdraw] authorizeOperation:sign:success', {
           sessionId: authorizeStart.session_id,
           signaturePreview: `${ownerSignature.slice(0, 10)}...${ownerSignature.slice(-6)}`,
         });
       } catch (error) {
         const signerError = toError(error);
-        console.error('[wallet-withdraw] authorizeOperation:sign:error', signerError);
+        debugError('[wallet-withdraw] authorizeOperation:sign:error', signerError);
 
         if (isUserRejectedWalletSignatureError(signerError)) {
           return {
@@ -192,14 +197,14 @@ export function useWalletOperationAuthorization() {
         session_id: authorizeStart.session_id,
         owner_signature: ownerSignature,
       });
-      console.log('[wallet-withdraw] authorizeOperation:authorize-confirm:success', authorization);
+      debug('[wallet-withdraw] authorizeOperation:authorize-confirm:success', authorization);
 
       return {
         status: 'authorized',
         data: authorization,
       };
     } catch (error) {
-      console.error('[wallet-withdraw] authorizeOperation:error', error);
+      debugError('[wallet-withdraw] authorizeOperation:error', error);
       return {
         status: 'error',
         error: toError(error),

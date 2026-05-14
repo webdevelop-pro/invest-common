@@ -90,7 +90,7 @@ vi.mock('InvestCommon/domain/error/errorReporting', () => ({
 const mockPersonalFormRef = {
   value: {
     isValid: true,
-    model: { dob: '1990-01-01', name: 'John Doe' },
+    model: { dob: '1990-01-01', first_name: 'John', last_name: 'Doe' },
     onValidate: vi.fn(),
   },
 };
@@ -104,7 +104,7 @@ const mockFinancialInfoFormRef = {
 const mockInvestmentObjectivesFormRef = {
   value: {
     isValid: true,
-    model: { duration: '1 to 3 years', objectives: 'Growth' },
+    model: { investment_objectives: 'Growth' },
     onValidate: vi.fn(),
   },
 };

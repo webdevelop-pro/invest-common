@@ -17,6 +17,9 @@ import {
   useWalletNetwork,
 } from 'InvestCommon/features/wallet/logic/useWalletNetwork';
 
+// eslint-disable-next-line no-console
+const debug = import.meta.env.DEV ? console.log.bind(console) : () => {};
+
 type WithdrawChain = Exclude<WalletChain, 'all'>;
 type WithdrawChainOption = {
   id: WithdrawChain;
@@ -175,7 +178,7 @@ export function useVFormWithdrawCrypto(
     profileId: number,
     submission: WithdrawCryptoSubmission,
   ) => {
-    console.log('[wallet-withdraw] executeWithdrawal:start', {
+    debug('[wallet-withdraw] executeWithdrawal:start', {
       profileId,
       submission,
     });
@@ -198,22 +201,22 @@ export function useVFormWithdrawCrypto(
         await executeWithdrawal(profileId, submission);
       },
     });
-    console.log('[wallet-withdraw] executeWithdrawal:authorization-result', authorizationResult);
+    debug('[wallet-withdraw] executeWithdrawal:authorization-result', authorizationResult);
 
     if (authorizationResult.status !== 'authorized') {
       return;
     }
 
-    console.log('[wallet-withdraw] executeWithdrawal:withdraw-request', {
+    debug('[wallet-withdraw] executeWithdrawal:withdraw-request', {
       profileId,
       submission,
     });
     await evmRepository.withdrawFunds(profileId, submission);
-    console.log('[wallet-withdraw] executeWithdrawal:withdraw-state', withdrawFundsState.value);
+    debug('[wallet-withdraw] executeWithdrawal:withdraw-state', withdrawFundsState.value);
     if (withdrawFundsState.value.error) return;
 
     await evmRepository.getEvmWalletByProfile(profileId);
-    console.log('[wallet-withdraw] executeWithdrawal:wallet-refresh:done', { profileId });
+    debug('[wallet-withdraw] executeWithdrawal:wallet-refresh:done', { profileId });
     toast({
       title: 'Withdrawal submitted',
       description: `${submission.amount} ${selectedAssetLabel.value} withdrawal submitted successfully.`,
@@ -244,7 +247,7 @@ export function useVFormWithdrawCrypto(
       destination_address: String(model.destination_address),
       idempotency_key: idempotencyKey,
     };
-    console.log('[wallet-withdraw] saveHandler:validated-submit', {
+    debug('[wallet-withdraw] saveHandler:validated-submit', {
       profileId,
       data,
     });

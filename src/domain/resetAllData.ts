@@ -16,6 +16,7 @@ import { useRepositoryDistributions } from 'InvestCommon/data/distributions/dist
 import { useRepositoryEsign } from 'InvestCommon/data/esign/esign.repository';
 import { useRepositoryEarn } from 'InvestCommon/data/earn/earn.repository';
 import { useWalletAuth } from 'InvestCommon/features/wallet/auth/store/useWalletAuth';
+import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles';
 
 import { cookiesOptions } from 'InvestCommon/domain/config/cookies';
 import { clearPrivatePwaData } from 'InvestCommon/domain/pwa/pwaOfflineStore';
@@ -33,7 +34,10 @@ export const resetAllProfileData = (options: { clearPrivatePwa?: boolean } = {})
   const { clearPrivatePwa = true } = options;
   // Reset profile-specific data (NOT the profiles list)
   useRepositoryProfiles().resetProfileData();
-  
+  // Clear any pending post-auth action so a stale deferred operation
+  // (e.g. a previous withdraw) doesn't re-execute after a profile switch.
+  useWalletAuth().clearPendingPostAuthAction();
+
   // Reset all other profile-dependent repositories
   useRepositoryAccreditation().resetAll();
   useRepositoryKyc().resetAll();
@@ -55,6 +59,9 @@ export const resetAllData = async () => {
   await cleanupAndroidNativePushBridgeOnLogout();
   clearAllCookies();
   useSessionStore().resetAll();
+  // Reset selectedUserProfileId ref to 0 so the auto-select watcher fires
+  // for the next user's profile list (the cookie was just cleared above).
+  useProfilesStore().resetSelectedProfile();
   useRepositoryAuth().resetAll();
   await useWalletAuth().resetAll();
   resetAllProfileData({ clearPrivatePwa: false });

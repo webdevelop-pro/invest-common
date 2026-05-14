@@ -43,6 +43,16 @@ const emit = defineEmits<{
 const isCodeStep = computed(() => props.isOtpStep || props.isMfaStep);
 const resolvedSubmitDisabled = computed(() => props.isSubmitDisabled ?? (isCodeStep.value && !codeValue.value));
 const showCodeField = computed(() => isCodeStep.value);
+
+const handleFormSubmit = () => {
+  if (props.isBusy || resolvedSubmitDisabled.value) return;
+  emit('submit');
+};
+
+const handleComplete = () => {
+  if (props.isBusy || resolvedSubmitDisabled.value) return;
+  emit('submit');
+};
 </script>
 
 <template>
@@ -50,7 +60,7 @@ const showCodeField = computed(() => isCodeStep.value);
     class="VFormWalletAuthOtp wallet-auth-otp-form"
     novalidate
     data-testid="wallet-auth-otp-form"
-    @submit.prevent="emit('submit')"
+    @submit.prevent="handleFormSubmit"
   >
     <div
       class="wallet-auth-otp-form__wrap"
@@ -77,7 +87,7 @@ const showCodeField = computed(() => isCodeStep.value);
           :is-error="VFormGroupProps.isFieldError"
           :data-testid="inputTestId"
           class="wallet-auth-otp-form__input-otp"
-          @complete="emit('submit')"
+          @complete="handleComplete"
         />
       </VFormGroup>
 

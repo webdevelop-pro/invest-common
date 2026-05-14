@@ -77,24 +77,28 @@ interface ITextStatuses {
 interface IAlerts {
   title: string;
   class: string;
+  description: string;
   button?: boolean;
   tooltip?: string;
-  description?: string;
 }
 
+const VERIFY_IDENTITY_TEXT: ITextStatuses = {
+  text: 'Verify Identity',
+  mobileText: 'Verify',
+  class: 'none',
+  button: true,
+};
+
+const VERIFY_IDENTITY_ALERT: IAlerts = {
+  title: 'Verify Identity',
+  description: 'Complete identity verification to unlock investing access for this profile.',
+  class: 'none',
+  button: true,
+};
+
 export const KycTextStatuses: Record<InvestKycTypes, ITextStatuses> = {
-  [InvestKycTypes.none]: {
-    text: 'Verify Identity',
-    mobileText: 'Verify',
-    class: 'none',
-    button: true,
-  },
-  [InvestKycTypes.new]: {
-    text: 'Verify Identity',
-    mobileText: 'Verify',
-    class: 'none',
-    button: true,
-  },
+  [InvestKycTypes.none]: VERIFY_IDENTITY_TEXT,
+  [InvestKycTypes.new]: VERIFY_IDENTITY_TEXT,
   [InvestKycTypes.declined]: {
     text: 'Declined',
     class: 'failed',
@@ -117,18 +121,8 @@ export const KycTextStatuses: Record<InvestKycTypes, ITextStatuses> = {
 };
 
 export const KycAlerts: Record<InvestKycTypes, IAlerts> = {
-  [InvestKycTypes.none]: {
-    title: 'Verify Identity',
-    description: 'Complete identity verification to unlock investing access for this profile.',
-    class: 'none',
-    button: true,
-  },
-  [InvestKycTypes.new]: {
-    title: 'Verify Identity',
-    description: 'Complete identity verification to unlock investing access for this profile.',
-    class: 'none',
-    button: true,
-  },
+  [InvestKycTypes.none]: VERIFY_IDENTITY_ALERT,
+  [InvestKycTypes.new]: VERIFY_IDENTITY_ALERT,
   [InvestKycTypes.pending]: {
     title: 'Finish Your KYC',
     description: 'Complete the remaining identity verification steps so we can continue reviewing your submission.',

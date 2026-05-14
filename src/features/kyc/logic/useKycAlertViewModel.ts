@@ -7,6 +7,7 @@ import {
   routerKey,
 } from 'vue-router';
 import { PROFILE_TYPES } from 'InvestCommon/domain/config/enums/profileTypes';
+import { ROUTE_SUBMIT_KYC } from 'InvestCommon/domain/config/enums/routes';
 import {
   createHiddenKycAlertModel,
   formatKycAlertModel,
@@ -19,6 +20,8 @@ import { useProfilesStore } from 'InvestCommon/domain/profiles/store/useProfiles
 import { useSessionStore } from 'InvestCommon/domain/session/store/useSession';
 
 export function useKycAlertViewModel() {
+  // Supports use outside component setup (e.g. from a non-router host app);
+  // onPrimaryAction falls back to window.location when router is unavailable.
   const route = hasInjectionContext()
     ? inject(routeLocationKey, null)
     : null;
@@ -47,7 +50,7 @@ export function useKycAlertViewModel() {
 
   const kycProfileId = computed(() => {
     if (isProfileActingAsIndividual.value) {
-      return selectedUserIndividualProfile.value?.id || selectedUserProfileId.value;
+      return selectedUserIndividualProfile.value?.id ?? selectedUserProfileId.value;
     }
 
     return selectedUserProfileId.value;
@@ -72,12 +75,13 @@ export function useKycAlertViewModel() {
   });
 
   const onPrimaryAction = async () => {
-    if (!userLoggedIn.value || !selectedUserProfileId.value || !alertModel.value.show || !alertModel.value.buttonText) {
+    const numericProfileId = Number(kycProfileId.value);
+    if (!userLoggedIn.value || !selectedUserProfileId.value || !Number.isFinite(numericProfileId) || !alertModel.value.show || !alertModel.value.buttonText) {
       return;
     }
 
     if (selectedUserProfileShowKycInitForm.value) {
-      const profileId = Number(kycProfileId.value);
+      const profileId = numericProfileId;
       const redirect = route?.fullPath;
 
       if (!router) {
@@ -94,24 +98,18 @@ export function useKycAlertViewModel() {
         return;
       }
 
-      try {
-        await router.push({
-          path: `/profile/${profileId}/kyc`,
-          query: {
-            ...(route?.query ?? {}),
-            ...(redirect ? { redirect } : {}),
-          },
-        });
-        return;
-      } catch {
-        await router.push({
-          path: `/profile/${profileId}/kyc`,
-        });
-        return;
-      }
+      await router.push({
+        name: ROUTE_SUBMIT_KYC,
+        params: { profileId },
+        query: {
+          ...(route?.query ?? {}),
+          ...(redirect ? { redirect } : {}),
+        },
+      });
+      return;
     }
 
-    await repositoryKyc.handlePlaidKyc(Number(kycProfileId.value));
+    await repositoryKyc.handlePlaidKyc(numericProfileId);
   };
 
   const onDescriptionAction = (event: Event) => {

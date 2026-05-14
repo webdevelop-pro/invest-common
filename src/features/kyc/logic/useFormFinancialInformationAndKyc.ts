@@ -14,9 +14,6 @@ import { useRepositoryKyc } from 'InvestCommon/data/kyc/kyc.repository';
 import { useKycFormValidation } from './useKycFormValidation';
 import { useKycPostSubmitNavigation } from './useKycPostSubmitNavigation';
 import { useKycSubmission } from './useKycSubmission';
-import type {
-  KycFormSectionRef,
-} from './useKycFormWorkflow';
 import {
   collectKycSectionModels,
   collectKycSubmissionFields,
@@ -63,10 +60,10 @@ export const useFormFinancialInformationAndKyc = () => {
     },
   ]);
 
-  const personalFormRef = useTemplateRef<FormChild>('personalFormChild') as KycFormSectionRef;
-  const financialInfoFormRef = useTemplateRef<FormChild>('financialInfoFormChild') as KycFormSectionRef;
-  const investmentObjectivesFormRef = useTemplateRef<FormChild>('investmentObjectivesFormChild') as KycFormSectionRef;
-  const understandingRisksFormRef = useTemplateRef<FormChild>('understandingRisksFormChild') as KycFormSectionRef;
+  const personalFormRef = useTemplateRef<FormChild>('personalFormChild');
+  const financialInfoFormRef = useTemplateRef<FormChild>('financialInfoFormChild');
+  const investmentObjectivesFormRef = useTemplateRef<FormChild>('investmentObjectivesFormChild');
+  const understandingRisksFormRef = useTemplateRef<FormChild>('understandingRisksFormChild');
   const formSections = [
     personalFormRef,
     financialInfoFormRef,
@@ -75,12 +72,14 @@ export const useFormFinancialInformationAndKyc = () => {
   ] as const;
 
   const isLoading = ref(false);
-  const isLoadingFields = computed(() => getProfileByIdOptionsState.value.loading);
   const validation = useKycFormValidation(formSections);
   const { isValid } = validation;
   const isDisabledButton = computed(() => !isValid.value);
   const modelData = computed(() => selectedUserProfileData?.value?.data);
-  const errorData = computed(() => setProfileByIdState.value.error?.data?.responseJson);
+  const errorData = computed(() => (
+    setProfileByIdState.value.error?.data?.responseJson
+    ?? getProfileByIdOptionsState.value.error?.data?.responseJson
+  ));
   const schemaBackend = computed(() => (
     getProfileByIdOptionsState.value.data ? structuredClone(toRaw(getProfileByIdOptionsState.value.data)) : {}
   ));
@@ -111,12 +110,7 @@ export const useFormFinancialInformationAndKyc = () => {
       return;
     }
 
-    const sectionModels = collectKycSectionModels(
-      personalFormRef,
-      financialInfoFormRef,
-      investmentObjectivesFormRef,
-      understandingRisksFormRef,
-    );
+    const sectionModels = collectKycSectionModels(formSections);
     const fields = collectKycSubmissionFields(sectionModels);
 
     let hubspotPromise: Promise<void> | null = null;
@@ -137,7 +131,6 @@ export const useFormFinancialInformationAndKyc = () => {
     breadcrumbs,
     isDisabledButton,
     isLoading,
-    isLoadingFields,
     handleSave,
     modelData,
     schemaBackend,

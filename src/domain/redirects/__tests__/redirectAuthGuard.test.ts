@@ -97,6 +97,7 @@ vi.mock('vue-router', () => ({
 vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
   useProfilesStore: () => ({
     init: initProfilesMock,
+    resetSelectedProfile: vi.fn(),
   }),
 }))
 

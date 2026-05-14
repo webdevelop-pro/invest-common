@@ -4,6 +4,9 @@ const resetAllMock = vi.fn();
 const makeRepoMock = () => ({ resetAll: vi.fn(), resetProfileData: vi.fn() });
 const clearPrivatePwaDataMock = vi.hoisted(() => vi.fn().mockResolvedValue(undefined));
 const walletAuthResetAllMock = vi.hoisted(() => vi.fn().mockResolvedValue(undefined));
+const walletAuthClearPendingMock = vi.hoisted(() => vi.fn());
+const cleanupAndroidNativePushMock = vi.hoisted(() => vi.fn().mockResolvedValue(undefined));
+const resetSelectedProfileMock = vi.hoisted(() => vi.fn());
 
 const authRepo = makeRepoMock();
 const kycRepo = makeRepoMock();
@@ -35,7 +38,16 @@ vi.mock('InvestCommon/domain/pwa/pwaOfflineStore', () => ({
   clearPrivatePwaData: clearPrivatePwaDataMock,
 }));
 vi.mock('InvestCommon/features/wallet/auth/store/useWalletAuth', () => ({
-  useWalletAuth: () => ({ resetAll: walletAuthResetAllMock }),
+  useWalletAuth: () => ({
+    resetAll: walletAuthResetAllMock,
+    clearPendingPostAuthAction: walletAuthClearPendingMock,
+  }),
+}));
+vi.mock('InvestCommon/domain/profiles/store/useProfiles', () => ({
+  useProfilesStore: () => ({ resetSelectedProfile: resetSelectedProfileMock }),
+}));
+vi.mock('InvestCommon/domain/nativePush/nativePushBridge', () => ({
+  cleanupAndroidNativePushBridgeOnLogout: cleanupAndroidNativePushMock,
 }));
 
 vi.mock('InvestCommon/data/auth/auth.repository', () => ({
@@ -88,6 +100,7 @@ describe('resetAllData & resetAllProfileData', () => {
     vi.clearAllMocks();
     clearPrivatePwaDataMock.mockResolvedValue(undefined);
     walletAuthResetAllMock.mockResolvedValue(undefined);
+    cleanupAndroidNativePushMock.mockResolvedValue(undefined);
   });
 
   it('resetAllProfileData resets only profile-dependent repositories', () => {

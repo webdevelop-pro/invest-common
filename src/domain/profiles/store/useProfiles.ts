@@ -236,6 +236,7 @@ export const useProfilesStore = defineStore('profiles', () => {
     updateDataInProfile,
     updateData,
     init,
+    resetSelectedProfile: () => { selectedUserProfileId.value = 0; },
   };
 });
 
