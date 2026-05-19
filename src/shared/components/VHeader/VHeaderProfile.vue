@@ -40,7 +40,7 @@ defineProps({
 });
 
 const { userEmail, userDisplayName } = useHeaderUser();
-const { selectedProfileLabel } = useProfileSwitchMenu();
+const { selectedProfileLabel, profileItems, onSelectProfile } = useProfileSwitchMenu();
 
 const useDialogsStore = useDialogs();
 const { isDialogLogoutOpen } = storeToRefs(useDialogsStore);
@@ -50,6 +50,11 @@ const isMenuOpen = ref(false);
 
 const closeMenu = () => {
   isMenuOpen.value = false;
+};
+
+const handleProfileSelect = async (id: string) => {
+  await onSelectProfile(id);
+  closeMenu();
 };
 
 const onLogout = () => {
@@ -101,7 +106,10 @@ const onLogout = () => {
               side="left"
               :side-offset="2"
             >
-              <ProfileSwitchMenuList @select="closeMenu" />
+              <ProfileSwitchMenuList
+                :items="profileItems"
+                @select="handleProfileSelect"
+              />
             </VDropdownMenuSubContent>
           </DropdownMenuPortal>
         </VDropdownMenuSub>

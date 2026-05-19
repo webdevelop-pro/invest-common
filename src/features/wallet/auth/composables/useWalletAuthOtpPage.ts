@@ -55,11 +55,6 @@ export function useWalletAuthOtpPage() {
     walletAuthErrorToastId.value = null;
   };
 
-  const retry = async () => {
-    dismissWalletAuthErrorToast();
-    await sharedFlow.retry();
-  };
-
   const submitCurrentStep = async () => {
     dismissWalletAuthErrorToast();
     await sharedFlow.submitCurrentStep();
@@ -129,9 +124,6 @@ export function useWalletAuthOtpPage() {
     isBusy: sharedFlow.isBusy,
     isOtpStep: sharedFlow.isOtpStep,
     isMfaStep: sharedFlow.isMfaStep,
-    isErrorStep: sharedFlow.isErrorStep,
-    isSubmitDisabled: sharedFlow.isSubmitDisabled,
-    retry,
     submitCurrentStep,
   };
 }

@@ -79,7 +79,6 @@ describe('useWalletAuth', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
     vi.clearAllMocks();
-    window.localStorage.clear();
     profilesRepository.getProfileById.mockResolvedValue(undefined);
     evmRepository.registerWallet.mockResolvedValue(undefined);
     evmRepository.getEvmWalletByProfile.mockResolvedValue(undefined);

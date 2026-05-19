@@ -60,8 +60,8 @@ const getProfileEligibility = (profile?: IProfileFormatted | null) => ({
 });
 
 export function useProfileSwitchMenu() {
-  const router = isStaticSite ? null : useRouter();
-  const route = isStaticSite ? null : useRoute();
+  const router = useRouter();
+  const route = useRoute();
   const profilesStore = useProfilesStore();
   const { selectedUserProfileId, userProfiles } = storeToRefs(profilesStore);
   const currentProfileId = computed(() => Number(selectedUserProfileId.value));

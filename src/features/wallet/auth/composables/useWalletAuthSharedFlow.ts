@@ -122,7 +122,7 @@ export function useWalletAuthSharedFlow() {
       return {
         title: 'Verify Your Email',
         description: `We sent a 6-digit verification code to ${currentEmail.value}.`,
-        submitButtonText: 'Verify Email',
+        submitButtonText: 'Send Code',
       };
     }
 
@@ -151,7 +151,7 @@ export function useWalletAuthSharedFlow() {
     },
   });
 
-  const isSubmitDisabled = computed(() => isCodeStep.value && !codeValue.value);
+  const isSubmitDisabled = computed(() => isMfaStep.value && !codeValue.value);
 
   const resolveWalletAuthPayload = (profileId?: number | null): WalletAuthOpenPayload | null => {
     const resolvedProfileId = profileId ?? currentProfileId.value;
@@ -219,7 +219,11 @@ export function useWalletAuthSharedFlow() {
         await retry();
         return;
       case 'awaiting_otp':
-        await walletAuthStore.submitOtp(otpCode.value);
+        if (otpCode.value) {
+          await walletAuthStore.submitOtp(otpCode.value);
+        } else {
+          await retry();
+        }
         return;
       case 'awaiting_mfa':
         await walletAuthStore.submitMfa(mfaCode.value);
@@ -261,7 +265,6 @@ export function useWalletAuthSharedFlow() {
     isSubmitDisabled,
     buildWalletAuthPayload: resolveWalletAuthPayload,
     ensureWalletAuthFlow,
-    retry,
     submitCurrentStep,
   };
 }

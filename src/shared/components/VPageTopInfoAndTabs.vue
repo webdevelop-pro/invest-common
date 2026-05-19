@@ -132,6 +132,10 @@ const handleTabChange = (nextTab: string) => {
     @media screen and (width < $tablet) {
       padding-top: 24px;
     }
+
+    @media screen and (width > $tablet){
+      min-height: 1000px;
+    }
   }
 
   .v-tabs-content {

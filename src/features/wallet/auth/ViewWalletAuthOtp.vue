@@ -13,9 +13,6 @@ const {
   isBusy,
   isOtpStep,
   isMfaStep,
-  isErrorStep,
-  isSubmitDisabled,
-  retry,
   submitCurrentStep,
 } = useWalletAuthOtpPage();
 </script>
@@ -38,10 +35,6 @@ const {
         :is-busy="isBusy"
         :is-otp-step="isOtpStep"
         :is-mfa-step="isMfaStep"
-        :is-error-step="isErrorStep"
-        :is-submit-disabled="isSubmitDisabled"
-        :show-retry-button="isErrorStep"
-        @retry="retry"
         @submit="submitCurrentStep"
       />
     </div>

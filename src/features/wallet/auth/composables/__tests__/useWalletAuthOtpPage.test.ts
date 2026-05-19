@@ -21,7 +21,6 @@ import { useWalletAuthOtpPage } from '../useWalletAuthOtpPage';
 const hideGlobalLoader = vi.fn();
 const mockPush = vi.fn(() => Promise.resolve());
 const ensureWalletAuthFlow = vi.fn(() => Promise.resolve());
-const retry = vi.fn(() => Promise.resolve());
 const submitCurrentStep = vi.fn(() => Promise.resolve());
 const clearCurrentError = vi.fn();
 const clearCompletedPostAuthAction = vi.fn();
@@ -106,7 +105,6 @@ vi.mock('../useWalletAuthSharedFlow', () => ({
     isSubmitDisabled: computed(() => false),
     isSuccessStep,
     ensureWalletAuthFlow,
-    retry,
     submitCurrentStep,
   }),
 }));
@@ -302,7 +300,7 @@ describe('useWalletAuthOtpPage', () => {
     wrapper.unmount();
   });
 
-  it('dismisses the previous wallet-auth toast before retrying the flow', async () => {
+  it('dismisses the previous wallet-auth toast before submitting from error state', async () => {
     const { api, wrapper } = await mountComposable();
 
     currentProfileState.value = {
@@ -311,10 +309,10 @@ describe('useWalletAuthOtpPage', () => {
     };
     await nextTick();
 
-    await api.retry();
+    await api.submitCurrentStep();
 
     expect(dismiss).toHaveBeenCalledWith('toast-1');
-    expect(retry).toHaveBeenCalledTimes(1);
+    expect(submitCurrentStep).toHaveBeenCalledTimes(1);
 
     wrapper.unmount();
   });

@@ -13,10 +13,7 @@ type WalletAuthOtpFormProps = {
   isBusy: boolean;
   isOtpStep: boolean;
   isMfaStep?: boolean;
-  isErrorStep: boolean;
-  isSubmitDisabled?: boolean;
   mode?: 'page' | 'dialog';
-  showRetryButton?: boolean;
   submitButtonText?: string;
 };
 
@@ -27,30 +24,27 @@ const props = withDefaults(defineProps<WalletAuthOtpFormProps>(), {
   inputHelperText: 'Enter the 6-digit code we sent to your email.',
   inputTestId: 'wallet-auth-page-otp',
   isMfaStep: false,
-  isSubmitDisabled: undefined,
   mode: 'page',
-  showRetryButton: false,
   submitButtonText: 'Continue',
 });
 
 const codeValue = defineModel<string>('codeValue', { required: true });
 
 const emit = defineEmits<{
-  retry: [];
   submit: [];
 }>();
 
 const isCodeStep = computed(() => props.isOtpStep || props.isMfaStep);
-const resolvedSubmitDisabled = computed(() => props.isSubmitDisabled ?? (isCodeStep.value && !codeValue.value));
+const isSubmitDisabled = computed(() => !!props.isMfaStep && !codeValue.value);
 const showCodeField = computed(() => isCodeStep.value);
 
 const handleFormSubmit = () => {
-  if (props.isBusy || resolvedSubmitDisabled.value) return;
+  if (props.isBusy || isSubmitDisabled.value) return;
   emit('submit');
 };
 
 const handleComplete = () => {
-  if (props.isBusy || resolvedSubmitDisabled.value) return;
+  if (props.isBusy || isSubmitDisabled.value) return;
   emit('submit');
 };
 </script>
@@ -92,22 +86,11 @@ const handleComplete = () => {
       </VFormGroup>
 
       <VButton
-        v-if="isErrorStep && showRetryButton"
-        variant="outlined"
-        size="large"
-        block
-        class="wallet-auth-otp-form__retry"
-        @click.prevent="emit('retry')"
-      >
-        Send New Code
-      </VButton>
-
-      <VButton
         type="submit"
         size="large"
         block
         :loading="isBusy"
-        :disabled="resolvedSubmitDisabled"
+        :disabled="isSubmitDisabled"
         class="wallet-auth-otp-form__submit"
       >
         {{ submitButtonText }}
@@ -143,10 +126,6 @@ const handleComplete = () => {
 
   &__submit {
     margin-top: 40px;
-  }
-
-  &__retry {
-    margin-top: 24px;
   }
 }
 </style>

@@ -6,6 +6,7 @@ import type { DashboardWalletTableConfig } from 'InvestCommon/features/wallet/lo
 
 const props = defineProps<{
   table: DashboardWalletTableConfig | null;
+  loading?: boolean;
 }>();
 
 const isHoldingsTable = computed(
@@ -24,7 +25,7 @@ const isTransactionsTable = computed(
     size="small"
     :header="table.header"
     :data="table.data || []"
-    :loading="!!table.loading"
+    :loading="props.loading || !!table.loading"
     :loading-row-length="table.rowLength ?? 5"
     :colspan="table.colspan ?? table.header.length"
     :infinite-scroll="table.infiniteScroll"

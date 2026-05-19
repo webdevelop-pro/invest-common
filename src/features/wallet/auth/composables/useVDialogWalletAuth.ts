@@ -88,7 +88,7 @@ export function useVDialogWalletAuth(options: UseVDialogWalletAuthOptions) {
   }, { immediate: true });
 
   watch(shouldKeepWalletAuthPrompt, (shouldKeepPrompt) => {
-    if (shouldKeepPrompt || route.query.popup !== 'wallet-auth') {
+    if (shouldKeepPrompt || !options.open.value) {
       return;
     }
 
@@ -119,7 +119,6 @@ export function useVDialogWalletAuth(options: UseVDialogWalletAuthOptions) {
     isOtpStep: sharedFlow.isOtpStep,
     isMfaStep: sharedFlow.isMfaStep,
     isSuccessStep: sharedFlow.isSuccessStep,
-    isErrorStep: sharedFlow.isErrorStep,
     dialogTitle: 'Confirm Transaction',
     stepDescription: sharedFlow.description,
     inputLabel: sharedFlow.inputLabel,

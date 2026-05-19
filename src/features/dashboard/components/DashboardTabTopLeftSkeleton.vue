@@ -6,12 +6,11 @@ import VSkeleton from 'UiKit/components/Base/VSkeleton/VSkeleton.vue';
   <div class="DashboardTabTopLeftSkeleton dashboard-tab-top-left-skeleton">
     <VSkeleton
       class="dashboard-tab-top-left-skeleton__title"
-      height="36px"
+      height="54px"
       width="180px"
     />
     <div class="dashboard-tab-top-left-skeleton__text">
-      <VSkeleton height="16px" />
-      <VSkeleton height="16px" width="80%" />
+      <VSkeleton height="36px" />
     </div>
   </div>
 </template>

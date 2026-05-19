@@ -62,8 +62,6 @@ const {
           :is-busy="isBusy"
           :is-otp-step="isOtpStep"
           :is-mfa-step="isMfaStep"
-          :is-error-step="false"
-          :is-submit-disabled="isPrimaryDisabled"
           mode="dialog"
           @submit="handlePrimaryClick"
         />

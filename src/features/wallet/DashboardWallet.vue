@@ -90,10 +90,6 @@ const {
   flex-direction: column;
   gap: 40px;
 
-  &__alert {
-    margin-bottom: 0 !important;
-  }
-
   &__alert-wrapper {
     position: relative;
   }

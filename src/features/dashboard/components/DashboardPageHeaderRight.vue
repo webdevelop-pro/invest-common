@@ -36,16 +36,19 @@ const emit = defineEmits<{
 
 const showAlertSection = computed(() => (
   props.isWalletAlertLoading
+  || props.isKycDataLoading
+  || props.isAccreditationDataLoading
   || props.kycAlertModel.show
   || props.walletAlertModel.show
   || props.accreditationAlertModel.show
 ));
 
 const showAccreditationAlert = computed(() => (
-  props.accreditationAlertModel.show
+  (props.accreditationAlertModel.show || props.isAccreditationDataLoading)
   && !props.walletAlertModel.show
-  && !props.kycAlertModel.show
   && !props.isWalletAlertLoading
+  && !props.kycAlertModel.show
+  && !props.isKycDataLoading
 ));
 </script>
 
@@ -56,7 +59,7 @@ const showAccreditationAlert = computed(() => (
       class="dashboard-page-header-right__alerts"
     >
       <VKycAlert
-        v-if="kycAlertModel.show"
+        v-if="kycAlertModel.show || isKycDataLoading"
         :variant="kycAlertModel.variant"
         :title="kycAlertModel.title"
         :description="kycAlertModel.description"
@@ -67,12 +70,13 @@ const showAccreditationAlert = computed(() => (
         @description-action="emit('kycBannerDescriptionAction', $event)"
       />
       <DashboardWalletAlert
-        v-if="walletAlertModel.show"
+        v-if="walletAlertModel.show || isWalletAlertLoading"
         :variant="walletAlertModel.variant"
         :title="walletAlertModel.title"
         :description="walletAlertModel.description"
         :button-text="walletAlertModel.buttonText"
         :is-loading="walletAlertModel.isLoading"
+        :is-data-loading="isWalletAlertLoading && !walletAlertModel.show"
         :is-disabled="walletAlertModel.isDisabled"
         @action="emit('walletBannerClick')"
         @description-action="emit('walletBannerDescriptionAction', $event)"
@@ -83,6 +87,7 @@ const showAccreditationAlert = computed(() => (
         :title="accreditationAlertModel.title"
         :description="accreditationAlertModel.description"
         :button-text="accreditationAlertModel.buttonText"
+        :is-loading="isAccreditationDataLoading"
         :is-disabled="accreditationAlertModel.isDisabled"
         @action="emit('accreditationBannerClick')"
         @description-action="emit('accreditationBannerDescriptionAction', $event)"
@@ -100,6 +105,14 @@ const showAccreditationAlert = computed(() => (
 .dashboard-page-header-right {
   width: 100%;
   min-width: 0;
+
+
+  @media screen and (width > $tablet) {
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
 
   &__actions {
     display: flex;
@@ -121,6 +134,10 @@ const showAccreditationAlert = computed(() => (
     &__actions {
       justify-content: flex-start;
     }
+  }
+
+  .v-alert {
+    margin: 3px 0;
   }
 }
 </style>
